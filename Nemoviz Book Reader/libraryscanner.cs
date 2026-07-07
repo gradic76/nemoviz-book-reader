@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.IO.Compression;
+using System.Linq;
+using SharpCompress.Archives;
+using SharpCompress.Common;
 
 namespace Nemoviz_Book_Reader
 {
@@ -14,6 +16,8 @@ namespace Nemoviz_Book_Reader
               ".wma", ".ape", ".mka", ".spx", ".oga", ".dsf", ".dff", ".caf" };
         public static readonly string[] TextExtensions =
             { ".epub", ".txt", ".pdf", ".djvu", ".fb2", ".mobi", ".azw", ".azw3", ".cbz", ".cbr" };
+        public static readonly string[] ArchiveExtensions =
+            { ".zip", ".rar", ".7z" };
 
         private string libraryPath;
         private bool createBookIni;
@@ -38,8 +42,8 @@ namespace Nemoviz_Book_Reader
             foreach (string file in Directory.GetFiles(folderPath))
             {
                 string ext = Path.GetExtension(file).ToLower();
-                if (ext == ".zip")
-                    ExtractZip(file, folderPath, books);
+                if (IsArchive(ext))
+                    ExtractAndScan(file, folderPath, books);
             }
 
             bool hasMediaFiles = false;
@@ -79,7 +83,7 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        private string DetectFormat(string folderPath)
+        public static string DetectFormat(string folderPath)
         {
             // Quick, extension-only detection so that scanning a large
             // library stays fast. The detailed audio format string
@@ -95,22 +99,80 @@ namespace Nemoviz_Book_Reader
             return "Unknown";
         }
 
-        private void ExtractZip(string zipPath, string destinationFolder, List<BookData> books)
+        /// <summary>Background-scan extraction: a loose archive found sitting
+        /// inside a folder being scanned (e.g. dropped into the library via
+        /// Explorer). Extracts next to itself, recurses into the result, then
+        /// deletes the original — the archive is fully owned by the library
+        /// at this point, so nothing is left to keep. Corrupt or
+        /// password-protected archives are skipped silently so one bad file
+        /// doesn't stop the whole scan.</summary>
+        private void ExtractAndScan(string archivePath, string destinationFolder, List<BookData> books)
         {
             try
             {
-                string zipName = Path.GetFileNameWithoutExtension(zipPath);
-                string extractPath = Path.Combine(destinationFolder, zipName);
+                string name = Path.GetFileNameWithoutExtension(archivePath);
+                string extractPath = Path.Combine(destinationFolder, name);
                 if (Directory.Exists(extractPath))
                     return;
-                ZipFile.ExtractToDirectory(zipPath, extractPath);
+                Directory.CreateDirectory(extractPath);
+                ExtractArchive(archivePath, extractPath);
                 ScanFolder(extractPath, books);
-                File.Delete(zipPath);
+                File.Delete(archivePath);
             }
             catch
             {
-                // If extraction fails, silently skip
+                // Corrupt, password-protected, or otherwise unreadable — skip.
             }
+        }
+
+        public static bool IsArchive(string ext)
+        {
+            return Array.IndexOf(ArchiveExtensions, ext) >= 0;
+        }
+
+        /// <summary>Extracts every entry of a zip/rar/7z archive into
+        /// destFolder (must already exist). Lets exceptions propagate —
+        /// callers driven directly by a user action (Add File, Ctrl+O) should
+        /// catch and report; the background scan above wraps its own call.</summary>
+        public static void ExtractArchive(string archivePath, string destFolder)
+        {
+            ArchiveFactory.WriteToDirectory(archivePath, destFolder, new ExtractionOptions
+            {
+                ExtractFullPath = true,
+                Overwrite = true
+            });
+        }
+
+        /// <summary>If destFolder has no media directly in it but exactly one
+        /// subfolder, moves that subfolder's contents up and removes it —
+        /// handles the common archive layout where everything sits inside a
+        /// single wrapper folder, so the book still lands exactly at
+        /// destFolder regardless of how the archive was packed.</summary>
+        public static void FlattenSingleWrapperFolder(string destFolder)
+        {
+            bool hasMediaDirectly = Directory.GetFiles(destFolder)
+                .Any(f => IsAudioOrText(Path.GetExtension(f).ToLower()));
+            if (hasMediaDirectly) return;
+
+            string[] subDirs = Directory.GetDirectories(destFolder);
+            if (subDirs.Length != 1) return;
+
+            string wrapper = subDirs[0];
+            foreach (string entry in Directory.GetFileSystemEntries(wrapper))
+            {
+                string name = Path.GetFileName(entry);
+                string target = Path.Combine(destFolder, name);
+                if (Directory.Exists(entry))
+                    Directory.Move(entry, target);
+                else
+                    File.Move(entry, target);
+            }
+            Directory.Delete(wrapper);
+        }
+
+        private static bool IsAudioOrText(string ext)
+        {
+            return Array.IndexOf(AudioExtensions, ext) >= 0 || Array.IndexOf(TextExtensions, ext) >= 0;
         }
 
         private bool IsAudio(string ext)

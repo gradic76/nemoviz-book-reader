@@ -127,6 +127,8 @@ Approximate roles — read the actual files for detail:
 - **SleepTimerForm.cs** — the Sleep Timer modal dialog (added Session 8).
 - **GoToForm.cs** — the Go To (named navigation) modal dialog (Session 7).
 - **ManageBookmarksForm.cs** — the Manage Bookmarks modal dialog (Session 9).
+- **SettingsForm.cs** — the Settings dialog (Session 9, UI shell only — see
+  section 8b).
 - **LibraryForm.cs** — the Library window (book shelf, search, filter, sort,
   context actions).
 - **BookData.cs** — a single book: metadata, progress, the virtual timeline
@@ -365,6 +367,56 @@ virtual-position seek.
 
 ---
 
+## 8a. Archive import — .zip/.rar/.7z (Session 9)
+
+`LibraryScanner.cs` now recognizes all three formats (`ArchiveExtensions`),
+via **SharpCompress** (NuGet, manually vendored into `packages/` — no
+`nuget.exe` on this machine, so the `.nupkg`s were downloaded and unpacked by
+hand and wired into the `.csproj`/`packages.config` the same way the other
+hand-added packages already were). Extraction is one call,
+`ArchiveFactory.WriteToDirectory(archivePath, destFolder, options)` —
+auto-detects the format, no per-format branching needed.
+
+- **Background scan** (`LibraryScanner.ExtractAndScan`, private): a loose
+  archive sitting inside a folder being scanned (library root on
+  startup/refresh, or a source folder for "Add Folder") is extracted next to
+  itself, recursed into, and the **original archive is deleted** — it's
+  already inside library-owned space, nothing left to keep. Corrupt or
+  password-protected archives are skipped silently so one bad file doesn't
+  stop the whole scan. This already existed for `.zip` pre-Session-9; now
+  generalized to all three formats.
+- **Direct user action** (Library "Add File" → `ImportFile`, Player Ctrl+O →
+  `OpenArchiveFile`): extracts straight into the book's permanent library
+  folder (named from the archive's own file name — no temp staging anywhere).
+  `LibraryScanner.FlattenSingleWrapperFolder` moves content up one level if
+  the archive wrapped everything in a single subfolder, so the book still
+  lands exactly at the expected folder regardless of packaging. The **source
+  archive is left untouched** here (picked from an arbitrary external
+  location via file dialog — only the background-scan case, where the
+  archive already lives inside the library, deletes it). Failures surface as
+  an error dialog (`Dialog.Error.General`/`Common.Error`) instead of the
+  silent skip used for background scanning, since the user is watching.
+- Password-protected archives are an explicit **no-go** for now (Gordan's
+  call) — no password-prompt dialog. Worth a line in the eventual Help doc.
+
+---
+
+## 8b. Settings dialog (Session 9 — UI shell only)
+
+`SettingsForm.cs`. Classic dialog, `chkShowHints` checkbox at the top
+(planned global switch for the hint-box pattern — not yet wired to anything,
+since no per-control hints exist yet), then a `TabControl`: **General**
+(multimedia-key checkboxes), **Audio Books** (WIP placeholder), **Text
+Books** (language/engine/voice combos + speed/volume/pitch sliders + a
+"coming soon" note for low-vision/dyslexic reader options), **Device** (sound
+card combo), **Misc** (WIP placeholder). OK/Cancel/Apply at the bottom —
+**nothing in this dialog is wired to `AppSettings` or any real subsystem
+yet**; it's scaffolding to fill in as each subsystem gets built (sound
+processing was explicitly deferred by Gordan as "a bit complicated, for
+later"). See TODO for the next concrete addition (Library location field).
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf migrated from ListBox to **ListView with native
@@ -395,25 +447,31 @@ folder is gone, or the last book was already finished.
 1. **Sleep Timer** — done (Session 8), pending final edge-case test.
 2. **Bookmarks** — done (Session 9): Set Bookmark, Manage Bookmarks dialog,
    Bookmark seek step.
-3. **Settings window** — next. Will use a "hint system": a read-only textbox
-   beside most controls with a short explanation, plus a global "Show help
-   hints" toggle that flips hint `Visible`/`TabStop` live without closing the
-   window (the pattern already lives in the Go To dialog's hint box).
-   Settings will also hold: media-keys mode (Off / Only when focused /
-   Always-global via RegisterHotKey) and language selection.
-4. **Properties dialogs** (player + library) and library tooltips.
-5. **Audio filters** (not yet scheduled): dynaudnorm/speechnorm
+3. **Archive import (.zip/.rar/.7z)** — done (Session 9): see section 8a.
+4. **Settings window** — UI shell in place (Session 9, see section 8b);
+   General/Text Books/Device tabs still need to be wired to AppSettings and
+   real subsystems. Will use a "hint system": a read-only textbox beside most
+   controls with a short explanation, plus a global "Show help hints" toggle
+   that flips hint `Visible`/`TabStop` live without closing the window (the
+   pattern already lives in the Go To dialog's hint box). Settings will also
+   hold: media-keys mode and language selection.
+5. **Properties dialogs** (player + library) and library tooltips.
+6. **Audio filters** (not yet scheduled): dynaudnorm/speechnorm
    (normalization), scaletempo2 (already active, pitch-preserved speed),
    acompressor (dynamic range), highpass+EQ (voice clarity), afftdn/arnndn
    (noise reduction). Actual availability depends on the specific
    `libmpv-2.dll` build.
-6. **DAISY / text-book structure** — a large separate subsystem; plugs into
+7. **DAISY / text-book structure** — a large separate subsystem; plugs into
    the Go To level and the seek dropdown's structural levels.
 
 ---
 
 ## 11. TODO (open items)
 
+- **Settings → General: add a "Library location" field** — read-only textbox
+  showing `AppSettings.LibraryPath` plus a Browse button (FolderBrowserDialog)
+  to change it via `AppSettings.SetLibraryPath`. Flagged for "start of next
+  session" — not yet built.
 - **Verify Sleep Timer expiry (close/shutdown) in the modal-Library edge
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal
@@ -424,6 +482,9 @@ folder is gone, or the last book was already finished.
   polish (options: shortcut in AccessibleDescription, or a naming tweak).
 - Seek-step selection is session-only; per-book memory in `Book.ini` is a
   possible later refinement.
+- SharpCompress-based extraction has been runtime-tested with .zip and .7z
+  (Gordan confirmed both work). .rar untested for lack of a sample file on
+  hand — same code path, should behave the same, but hasn't been observed.
 
 ---
 

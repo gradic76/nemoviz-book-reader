@@ -881,7 +881,8 @@ namespace Nemoviz_Book_Reader
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf|" +
                 Localization.T("Filter.TextBooks") + "|*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
+                Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 
@@ -912,28 +913,62 @@ namespace Nemoviz_Book_Reader
             {
                 string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
                 string destFolder = System.IO.Path.Combine(appSettings.LibraryPath, fileName);
+                string ext = System.IO.Path.GetExtension(filePath).ToLower();
 
                 if (!System.IO.Directory.Exists(destFolder))
                     System.IO.Directory.CreateDirectory(destFolder);
 
-                string destFile = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(filePath));
-                if (!System.IO.File.Exists(destFile))
-                    System.IO.File.Copy(filePath, destFile);
-
-                // Build duration/chapters right away, so the book doesn't show
-                // 00:00:00 until first played. BuildChaptersFromFolder also
-                // stores the detailed format string for audio files; for text
-                // files it gets the plain name from the extension map.
                 BookData imported = new BookData(destFolder);
-                string ext = System.IO.Path.GetExtension(destFile).ToLower();
-                if (Array.IndexOf(LibraryScanner.AudioExtensions, ext) >= 0)
+
+                if (LibraryScanner.IsArchive(ext))
                 {
-                    imported.BuildChaptersFromFolder(new string[] { destFile });
+                    // Extract straight into the book's permanent library
+                    // folder — no temp staging. Archives commonly wrap their
+                    // content in a single subfolder; flatten that up so the
+                    // book still lands exactly at destFolder regardless of
+                    // how it was packed. The source archive itself is left
+                    // untouched (it usually lives outside the library).
+                    LibraryScanner.ExtractArchive(filePath, destFolder);
+                    LibraryScanner.FlattenSingleWrapperFolder(destFolder);
+
+                    List<string> audioFiles = new List<string>();
+                    foreach (string f in System.IO.Directory.GetFiles(destFolder))
+                    {
+                        if (Array.IndexOf(LibraryScanner.AudioExtensions, System.IO.Path.GetExtension(f).ToLower()) >= 0)
+                            audioFiles.Add(f);
+                    }
+
+                    if (audioFiles.Count > 0)
+                    {
+                        audioFiles.Sort(StringComparer.OrdinalIgnoreCase);
+                        imported.BuildChaptersFromFolder(audioFiles.ToArray());
+                    }
+                    else
+                    {
+                        imported.Format = LibraryScanner.DetectFormat(destFolder);
+                    }
                 }
                 else
                 {
-                    imported.Format = BookData.FriendlyFormatName(ext);
+                    string destFile = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(filePath));
+                    if (!System.IO.File.Exists(destFile))
+                        System.IO.File.Copy(filePath, destFile);
+
+                    // Build duration/chapters right away, so the book doesn't
+                    // show 00:00:00 until first played. BuildChaptersFromFolder
+                    // also stores the detailed format string for audio files;
+                    // for text files it gets the plain name from the
+                    // extension map.
+                    if (Array.IndexOf(LibraryScanner.AudioExtensions, ext) >= 0)
+                    {
+                        imported.BuildChaptersFromFolder(new string[] { destFile });
+                    }
+                    else
+                    {
+                        imported.Format = BookData.FriendlyFormatName(ext);
+                    }
                 }
+
                 imported.Save();
 
                 LoadBooks();

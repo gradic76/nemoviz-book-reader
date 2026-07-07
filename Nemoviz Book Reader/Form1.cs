@@ -1703,7 +1703,10 @@ namespace Nemoviz_Book_Reader
 
         private void BtnSettings_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(Localization.T("Dialog.Settings.ComingSoon"), Localization.T("Dialog.Settings.Title"));
+            using (SettingsForm dlg = new SettingsForm())
+            {
+                dlg.ShowDialog(this);
+            }
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)
@@ -1940,7 +1943,8 @@ namespace Nemoviz_Book_Reader
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf|" +
                 Localization.T("Filter.TextBooks") + "|*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
+                Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 
@@ -1952,6 +1956,13 @@ namespace Nemoviz_Book_Reader
                 ofd.Title = Localization.T("Player.OpenFile.Title");
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
+                    string ext = System.IO.Path.GetExtension(ofd.FileName).ToLower();
+                    if (LibraryScanner.IsArchive(ext))
+                    {
+                        OpenArchiveFile(ofd.FileName);
+                        return;
+                    }
+
                     // Same rule as a library pick: a new file ends the
                     // previous listening session, so an active timer goes.
                     if (sleepTimerActive)
@@ -1964,6 +1975,55 @@ namespace Nemoviz_Book_Reader
                     LoadPlaylist(new string[] { ofd.FileName });
                     UpdateTitleBar();
                 }
+            }
+        }
+
+        /// <summary>Ctrl+O given an archive: extracting it in place and
+        /// trying to "play" it makes no sense, so instead it gets extracted
+        /// straight into its own permanent library folder (named from the
+        /// archive's file name — no temp staging) and loaded like any other
+        /// book. The source archive is left untouched, since it was picked
+        /// from an arbitrary external location via the file dialog.
+        /// LoadBook already cancels an active Sleep Timer, same as any other
+        /// change of book.</summary>
+        private void OpenArchiveFile(string archivePath)
+        {
+            try
+            {
+                string fileName = System.IO.Path.GetFileNameWithoutExtension(archivePath);
+                string destFolder = System.IO.Path.Combine(appSettings.LibraryPath, fileName);
+
+                if (!System.IO.Directory.Exists(destFolder))
+                    System.IO.Directory.CreateDirectory(destFolder);
+
+                LibraryScanner.ExtractArchive(archivePath, destFolder);
+                LibraryScanner.FlattenSingleWrapperFolder(destFolder);
+
+                List<string> audioFiles = new List<string>();
+                foreach (string f in System.IO.Directory.GetFiles(destFolder))
+                {
+                    if (Array.IndexOf(LibraryScanner.AudioExtensions, System.IO.Path.GetExtension(f).ToLower()) >= 0)
+                        audioFiles.Add(f);
+                }
+
+                BookData book = new BookData(destFolder);
+                if (audioFiles.Count > 0)
+                {
+                    audioFiles.Sort(StringComparer.OrdinalIgnoreCase);
+                    book.BuildChaptersFromFolder(audioFiles.ToArray());
+                }
+                else
+                {
+                    book.Format = LibraryScanner.DetectFormat(destFolder);
+                }
+                book.DateAdded = DateTime.Now;
+                book.Save();
+
+                LoadBook(book, true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(Localization.T("Dialog.Error.General", ex.Message), Localization.T("Dialog.Error.Title"));
             }
         }
 
