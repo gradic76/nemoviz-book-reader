@@ -50,6 +50,16 @@ namespace Nemoviz_Book_Reader
             data[section][key] = value;
             Save();
         }
+        /// <summary>Empties a section (e.g. before rewriting a list that may
+        /// have shrunk) so stale keys don't linger past the new count.</summary>
+        public void DeleteSection(string section)
+        {
+            if (data.ContainsKey(section))
+            {
+                data[section].Clear();
+                Save();
+            }
+        }
         private void Save()
         {
             try

@@ -23,14 +23,15 @@ Btn.Library=Library
 Btn.Settings=Settings
 Btn.Timer=Sleep Timer
 Btn.Help=Help
-Btn.Back.Accessible=Back, Z
-Btn.Forward.Accessible=Forward, B
+Btn.Back.Accessible=Back, Ctrl+Left
+Btn.Forward.Accessible=Forward, Ctrl+Right
 Btn.Play.Accessible=Play, Space or X
 Btn.Pause.Accessible=Pause, Space or X
 Btn.Properties=Properties
 Btn.GoTo=Go To...
 Btn.GoTo.Accessible=Go To, Ctrl+G
 Btn.SetBookmark=Set Bookmark
+Btn.SetBookmark.Accessible=Set Bookmark, Ctrl+B
 Btn.ManageBookmarks=Manage Bookmarks
 
 ; Player - sleep timer button
@@ -41,7 +42,7 @@ Btn.ManageBookmarks=Manage Bookmarks
 ; activating the button then stops playback and cancels the timer.
 Btn.Timer.Accessible=Sleep Timer, Ctrl+T
 Btn.Timer.Countdown=Sleep Timer {0}
-Btn.Timer.Accessible.Active=Sleep Timer, {0} minutes remaining, activate to stop playback and cancel the timer
+Btn.Timer.Accessible.Active=Sleep Timer, {0} remaining, activate to stop playback and cancel the timer
 Btn.Timer.Accessible.LessThanMinute=Sleep Timer, less than a minute remaining
 
 ; Sleep Timer dialog
@@ -74,6 +75,7 @@ Seek.Item.30s=30 seconds
 Seek.Item.1min=1 minute
 Seek.Item.5min=5 minutes
 Seek.Item.Part=Part
+Seek.Item.Bookmark=Bookmark
 
 ; Player - Go To dialog
 GoTo.List.Accessible=Book parts
@@ -84,14 +86,27 @@ GoTo.AutoPlay=Start playing after jump
 GoTo.AutoPlay.Hint=When checked, playback starts right after the jump. When unchecked, the current state is kept: paused stays paused, playing keeps playing.
 GoTo.Hint.Accessible=Hint
 
+; Player - bookmarks
+; Bookmark.Item.Format is used both by the Manage Bookmarks list and nowhere
+; else — numbering/time are always computed live, never stored as text.
+Bookmark.Announce.Set=Bookmark set
+Bookmark.Item.Format=Bookmark {0} ({1})
+ManageBookmarks.List.Accessible=Bookmarks
+ManageBookmarks.Delete=Delete
+ManageBookmarks.Delete.Accessible=Delete
+ManageBookmarks.OK.Accessible=OK
+ManageBookmarks.Cancel.Accessible=Cancel
+ManageBookmarks.Selected=Selected
+ManageBookmarks.NotSelected=Not selected
+
 ; Player - tooltips (mouse hover hints)
 ; Convention: buttons with graphic labels get "Name (shortcut)", buttons
 ; with text labels get the shortcut only. Tip.Seek is a functional hint
 ; (the combo has no shortcut). Keys must stay present even if emptied.
-Tip.Back=Back (Z)
+Tip.Back=Back (Ctrl+Left)
 Tip.PlayPause=Play/Pause (Space, X)
-Tip.Forward=Forward (B)
-Tip.Seek=Applies to Back/Forward, B and Z
+Tip.Forward=Forward (Ctrl+Right)
+Tip.Seek=Applies to Back/Forward, Ctrl+Right and Ctrl+Left
 Tip.GoTo=Ctrl+G
 Tip.Timer=Ctrl+T
 Tip.Volume=Up and Down arrows
@@ -114,9 +129,6 @@ Dialog.Help.ComingSoon=Help – coming soon.
 Dialog.Help.Title=Help
 Dialog.Timer.Title=Sleep Timer
 Dialog.GoTo.Title=Go To
-Dialog.SetBookmark.ComingSoon=Set bookmark – coming soon.
-Dialog.SetBookmark.Title=Set Bookmark
-Dialog.ManageBookmarks.ComingSoon=Manage bookmarks – coming soon.
 Dialog.ManageBookmarks.Title=Manage Bookmarks
 Dialog.Error.Title=Error
 Dialog.Error.General=Error: {0}

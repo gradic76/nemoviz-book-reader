@@ -289,9 +289,9 @@ namespace Nemoviz_Book_Reader
         // Navigation is layered in four levels:
         //   1. Left/Right arrows  — plain 5 s seek, like any other player.
         //   2. Ctrl+1..9          — percentage jumps across the whole book.
-        //   3. B / Z keys, media Next/Prev, and the on-screen Back/Forward
-        //      buttons — jump by the step selected in the seek dropdown
-        //      (time steps or whole Part).
+        //   3. Ctrl+Right / Ctrl+Left, media Next/Prev, and the on-screen
+        //      Back/Forward buttons — jump by the step selected in the seek
+        //      dropdown (time steps or whole Part).
         //   4. Go To... (Ctrl+G)  — pick a named target from a list; for
         //      plain audio that's the book's parts.
         /// <summary>Seconds for the currently selected time step (indices 0–3).</summary>
@@ -313,10 +313,20 @@ namespace Nemoviz_Book_Reader
             return cmbSeek.SelectedIndex == 4;
         }
 
+        /// <summary>True when the "Bookmark" step is selected. That option
+        /// only exists in the dropdown while the current book has at least
+        /// one bookmark — see UpdateSeekStepBookmarkOption.</summary>
+        private bool IsSeekStepBookmark()
+        {
+            return cmbSeek.SelectedIndex == 5;
+        }
+
         private void SeekStepForward()
         {
             if (IsSeekStepPart())
                 PartForward();
+            else if (IsSeekStepBookmark())
+                BookmarkForward();
             else
                 SeekRelative(+GetSeekStepSeconds());
         }
@@ -325,8 +335,31 @@ namespace Nemoviz_Book_Reader
         {
             if (IsSeekStepPart())
                 PartBack();
+            else if (IsSeekStepBookmark())
+                BookmarkBack();
             else
                 SeekRelative(-GetSeekStepSeconds());
+        }
+
+        /// <summary>Adds or removes the "Bookmark" seek-step option (always
+        /// the last item, right after "Part") to match whether the current
+        /// book has any bookmarks. Called whenever the book or its bookmark
+        /// list changes.</summary>
+        private void UpdateSeekStepBookmarkOption()
+        {
+            bool shouldShow = currentBook != null && currentBook.Bookmarks.Count > 0;
+            bool isShown = cmbSeek.Items.Count > 5;
+
+            if (shouldShow && !isShown)
+            {
+                cmbSeek.Items.Add(Localization.T("Seek.Item.Bookmark"));
+            }
+            else if (!shouldShow && isShown)
+            {
+                if (cmbSeek.SelectedIndex == 5)
+                    cmbSeek.SelectedIndex = 0;
+                cmbSeek.Items.RemoveAt(5);
+            }
         }
 
         // ──────────────────────────────────────────────
@@ -380,11 +413,11 @@ namespace Nemoviz_Book_Reader
                     AnnounceToScreenReader(lblAnnounceInfo, BuildCurrentInfoText());
                     return true;
 
-                case Keys.B:
+                case Keys.Control | Keys.Right:
                     SeekStepForward();
                     return true;
 
-                case Keys.Z:
+                case Keys.Control | Keys.Left:
                     SeekStepBackward();
                     return true;
 
@@ -398,6 +431,10 @@ namespace Nemoviz_Book_Reader
 
                 case Keys.Control | Keys.T:
                     BtnTimer_Click(null, EventArgs.Empty);
+                    return true;
+
+                case Keys.Control | Keys.B:
+                    BtnSetBookmark_Click(null, EventArgs.Empty);
                     return true;
 
                 case Keys.Enter:
@@ -856,7 +893,7 @@ namespace Nemoviz_Book_Reader
             btnSetBookmark.Text = Localization.T("Btn.SetBookmark");
             btnSetBookmark.Size = new Size(140, 40);
             btnSetBookmark.Location = new Point(490, 114);
-            btnSetBookmark.AccessibleName = Localization.T("Btn.SetBookmark");
+            btnSetBookmark.AccessibleName = Localization.T("Btn.SetBookmark.Accessible");
             btnSetBookmark.TabIndex = 13;
             btnSetBookmark.Click += BtnSetBookmark_Click;
 
@@ -1075,10 +1112,28 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
+            // Opening the dialog itself pauses playback, if it was running,
+            // so the dialog is never modal-over-audible-playback. Confirming
+            // always resumes via StartSleepTimer; cancelling resumes only if
+            // playback was actually running before the dialog opened.
+            bool wasPlaying = isPlaying;
+            if (wasPlaying)
+            {
+                mpv_set_property_string(mpvHandle, "pause", "yes");
+                SetPlayPauseState(false);
+            }
+
             using (SleepTimerForm dlg = new SleepTimerForm())
             {
                 if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
                     StartSleepTimer(dlg.SelectedMinutes, dlg.SelectedAction);
+                }
+                else if (wasPlaying)
+                {
+                    mpv_set_property_string(mpvHandle, "pause", "no");
+                    SetPlayPauseState(true);
+                }
             }
         }
 
@@ -1193,9 +1248,8 @@ namespace Nemoviz_Book_Reader
 
             btnTimer.Text = Localization.T("Btn.Timer.Countdown", FormatCountdown(remaining));
 
-            int minutesUp = (int)Math.Ceiling(remaining.TotalMinutes);
-            btnTimer.AccessibleName = minutesUp >= 1
-                ? Localization.T("Btn.Timer.Accessible.Active", minutesUp)
+            btnTimer.AccessibleName = remaining.TotalSeconds >= 60
+                ? Localization.T("Btn.Timer.Accessible.Active", FormatCountdown(remaining))
                 : Localization.T("Btn.Timer.Accessible.LessThanMinute");
         }
 
@@ -1439,6 +1493,7 @@ namespace Nemoviz_Book_Reader
             // overwrite the saved 100% with a stale position.
             currentBook = null;
             currentFile = null;
+            UpdateSeekStepBookmarkOption();
             tbInfo.Text = BuildInfoBoxPlaceholder();
             UpdateTitleBar();
 
@@ -1518,8 +1573,9 @@ namespace Nemoviz_Book_Reader
         }
 
         // On-screen Back/Forward buttons are the mouse/visual-mode
-        // equivalent of B/Z and the media keys — all of them are navigation
-        // level 3 and follow the step selected in the seek dropdown.
+        // equivalent of Ctrl+Right/Ctrl+Left and the media keys — all of
+        // them are navigation level 3 and follow the step selected in the
+        // seek dropdown.
         private void BtnBack_Click(object sender, EventArgs e)
         {
             SeekStepBackward();
@@ -1556,6 +1612,68 @@ namespace Nemoviz_Book_Reader
             MpvCommand("playlist-next", "weak");
             if (!isPlaying)
                 mpv_set_property_string(mpvHandle, "pause", "yes");
+        }
+
+        /// <summary>
+        /// Bookmark navigation used by the "Bookmark" seek step. Forward
+        /// jumps to the next bookmark after the current position. Back
+        /// mirrors PartBack's 3-second grace: more than 3 s past the
+        /// preceding bookmark rewinds to it, otherwise jumps to the one
+        /// before it (or re-seeks to the first bookmark if there is none
+        /// earlier). Both preserve the current play/pause state, same as
+        /// any other virtual-position seek.
+        /// </summary>
+        private void BookmarkBack()
+        {
+            if (currentBook == null || currentBook.Bookmarks.Count == 0)
+            {
+                Console.Beep(300, 150);
+                return;
+            }
+
+            double pos = GetVirtualPosition();
+            int currentIndex = -1;
+            for (int i = currentBook.Bookmarks.Count - 1; i >= 0; i--)
+            {
+                if (currentBook.Bookmarks[i] <= pos)
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            if (currentIndex < 0)
+            {
+                Console.Beep(300, 150);
+                return;
+            }
+
+            if (currentIndex == 0 || pos - currentBook.Bookmarks[currentIndex] > 3.0)
+                SeekToVirtualPosition(currentBook.Bookmarks[currentIndex]);
+            else
+                SeekToVirtualPosition(currentBook.Bookmarks[currentIndex - 1]);
+        }
+
+        private void BookmarkForward()
+        {
+            if (currentBook == null || currentBook.Bookmarks.Count == 0)
+            {
+                Console.Beep(300, 150);
+                return;
+            }
+
+            double pos = GetVirtualPosition();
+            foreach (double bookmark in currentBook.Bookmarks)
+            {
+                if (bookmark > pos)
+                {
+                    SeekToVirtualPosition(bookmark);
+                    return;
+                }
+            }
+
+            // Already past the last bookmark.
+            Console.Beep(300, 150);
         }
 
         private void BtnLibrary_Click(object sender, EventArgs e)
@@ -1645,12 +1763,81 @@ namespace Nemoviz_Book_Reader
 
         private void BtnSetBookmark_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(Localization.T("Dialog.SetBookmark.ComingSoon"), Localization.T("Dialog.SetBookmark.Title"));
+            // Same "no go" feedback as Go To / Sleep Timer with nothing loaded.
+            if (currentBook == null)
+            {
+                Console.Beep(300, 150);
+                return;
+            }
+
+            currentBook.AddBookmark(GetVirtualPosition());
+            UpdateSeekStepBookmarkOption();
+
+            // Ascending series of five short beeps (~1 second total) — a
+            // bit more attention-grabbing than the plain "no go" beep, since
+            // this confirms a successful action rather than a blocked one.
+            int[] freqs = { 500, 650, 800, 950, 1100 };
+            foreach (int freq in freqs)
+                Console.Beep(freq, 200);
+
+            // Deliberately no position/percent details here — TMI for a
+            // one-key command; the Manage Bookmarks list is where that
+            // detail belongs.
+            AnnounceToScreenReader(lblAnnounceInfo, Localization.T("Bookmark.Announce.Set"));
         }
 
         private void BtnManageBookmarks_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(Localization.T("Dialog.ManageBookmarks.ComingSoon"), Localization.T("Dialog.ManageBookmarks.Title"));
+            if (currentBook == null || currentBook.Bookmarks.Count == 0)
+            {
+                Console.Beep(300, 150);
+                return;
+            }
+
+            // Opening the dialog pauses playback (if running), same coupling
+            // as the Sleep Timer dialog — a direct mpv call, so it does not
+            // touch an active Sleep Timer.
+            bool wasPlaying = isPlaying;
+            if (wasPlaying)
+            {
+                mpv_set_property_string(mpvHandle, "pause", "yes");
+                SetPlayPauseState(false);
+            }
+
+            using (ManageBookmarksForm dlg = new ManageBookmarksForm(currentBook.Bookmarks))
+            {
+                DialogResult result = dlg.ShowDialog(this);
+
+                if (result == DialogResult.OK)
+                {
+                    currentBook.SetBookmarks(dlg.ResultBookmarks);
+                    UpdateSeekStepBookmarkOption();
+
+                    if (dlg.PlayIndex >= 0)
+                    {
+                        // OK confirmed with a bookmark selected: jump there
+                        // and make sure playback continues from there.
+                        double pos = dlg.ResultBookmarks[dlg.PlayIndex];
+                        SeekToVirtualPosition(pos, () =>
+                        {
+                            if (!isPlaying)
+                            {
+                                mpv_set_property_string(mpvHandle, "pause", "no");
+                                SetPlayPauseState(true);
+                            }
+                        });
+                        return;
+                    }
+                }
+
+                // Plain OK (edits only, no jump) or Cancel: restore exactly
+                // the playback state from before the dialog opened.
+                if (wasPlaying)
+                {
+                    mpv_set_property_string(mpvHandle, "pause", "no");
+                    SetPlayPauseState(true);
+                }
+            }
         }
 
         // ──────────────────────────────────────────────
@@ -1666,6 +1853,7 @@ namespace Nemoviz_Book_Reader
                 CancelSleepTimer(true);
 
             currentBook = book;
+            UpdateSeekStepBookmarkOption();
 
             currentVolume = Math.Min(100, Math.Max(0, currentBook.Volume));
             currentSpeed = Math.Min(300, Math.Max(50, currentBook.Speed));
@@ -1771,6 +1959,7 @@ namespace Nemoviz_Book_Reader
 
                     currentFile = ofd.FileName;
                     currentBook = null;
+                    UpdateSeekStepBookmarkOption();
                     currentPlaylistIndex = 0;
                     LoadPlaylist(new string[] { ofd.FileName });
                     UpdateTitleBar();

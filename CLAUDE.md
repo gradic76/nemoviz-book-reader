@@ -126,13 +126,15 @@ Approximate roles — read the actual files for detail:
   layout and navigation sections below.
 - **SleepTimerForm.cs** — the Sleep Timer modal dialog (added Session 8).
 - **GoToForm.cs** — the Go To (named navigation) modal dialog (Session 7).
+- **ManageBookmarksForm.cs** — the Manage Bookmarks modal dialog (Session 9).
 - **LibraryForm.cs** — the Library window (book shelf, search, filter, sort,
   context actions).
-- **BookData.cs** — a single book: metadata, progress, and the virtual
-  timeline data (`Chapters`, `Offsets`, `TotalDuration`,
-  `BuildChaptersFromFolder`, `LoadChapters`, `SaveChapters`). Persists to
-  `Book.ini` inside each book folder, including a `[Chapters]` section in the
-  form `File0=name.mp3|614.5` (filename|duration-seconds).
+- **BookData.cs** — a single book: metadata, progress, the virtual timeline
+  data (`Chapters`, `Offsets`, `TotalDuration`, `BuildChaptersFromFolder`,
+  `LoadChapters`, `SaveChapters`), and bookmarks (`Bookmarks`, `AddBookmark`,
+  `SetBookmarks`, `SaveBookmarks`). Persists to `Book.ini` inside each book
+  folder: `[Chapters]` as `File0=name.mp3|614.5` (filename|duration-seconds),
+  `[Bookmarks]` as `Bookmark0=<virtual-seconds>`.
 - **AppSettings.cs** — global app settings and paths (library folder, lang
   folder, `Settings.ini`). Builds paths relative to the app location. Holds
   things like `LastOpenedBookPath`, `GoToAutoPlay`.
@@ -167,7 +169,8 @@ The player's bottom panel is a 3-column × 4-row proportional grid inside a
 - **Tab order is column-major**: A (app) → B (playback) → C (book tools).
 - Above the grid sits the top panel with the read-only info box (`tbInfo`).
 - Placeholder "coming soon" dialogs still exist for: Settings, Properties,
-  Set Bookmark, Manage Bookmarks, Help.
+  Help. Set Bookmark and Manage Bookmarks are implemented (Session 9, see
+  section 8).
 
 ---
 
@@ -180,11 +183,16 @@ Documented in a comment above the seek-step methods in Form1. All four coexist:
    Up/Down are left to the dropdown while it is focused.
 2. **Ctrl+1..9** — percentage jumps to 10%–90% of the whole book's virtual
    duration.
-3. **B / Z keys, media Next/Prev, and the on-screen Back/Forward buttons** —
-   jump by the step currently selected in the seek dropdown. Steps: 15 s /
-   30 s / 1 min / 5 min / **Part**. "Part" uses `PartForward()` / `PartBack()`
-   (Back logic: more than 3 s into the current part rewinds to that part's
-   start, otherwise jumps to the previous part).
+3. **Ctrl+Right / Ctrl+Left, media Next/Prev, and the on-screen Back/Forward
+   buttons** — jump by the step currently selected in the seek dropdown.
+   Steps: 15 s / 30 s / 1 min / 5 min / **Part** / **Bookmark** (Session 9
+   — freed from B/Z, which are unused). "Part" uses `PartForward()` /
+   `PartBack()` (Back logic: more than 3 s into the current part rewinds to
+   that part's start, otherwise jumps to the previous part). "Bookmark" only
+   appears in the dropdown while the current book has at least one bookmark
+   (`UpdateSeekStepBookmarkOption`); `BookmarkForward()` jumps to the next
+   bookmark after the current position, `BookmarkBack()` mirrors Part's
+   3-second grace against the preceding bookmark.
 4. **Go To... (Ctrl+G)** — named navigation. For plain audio this is a list
    of the book's parts. DAISY/text structure (headings, pages) will plug in
    here later as a separate subsystem.
@@ -217,11 +225,20 @@ and an off switch.
 - **Ctrl+O** — Open File.
 - **Ctrl+G** — Go To.
 - **Ctrl+T** — Sleep Timer.
+- **Ctrl+B** — Set Bookmark.
 - **Enter** — activates the focused button.
 
 ---
 
-## 7. Sleep Timer (Session 8 — current feature)
+## 7. Sleep Timer (Session 8)
+
+Playback-coupling bugs found in Session 9 testing are fixed: opening the
+`SleepTimerForm` dialog now pauses playback first if it was running (and
+resumes on Cancel only if it had been playing before the dialog opened;
+paused stays paused either way), and the countdown's spoken `AccessibleName`
+now carries the same min:sec / h:min:sec format as the visible button text
+(`FormatCountdown`) instead of a bare rounded-up minute count. Otherwise
+unchanged from the description below.
 
 Lives in Form1 (`sleepTimer` + state fields) plus the `SleepTimerForm` dialog.
 Nothing about the timer is persisted — it is a one-shot, session-only thing.
@@ -296,7 +313,59 @@ if fragile, the fix is to close any open dialogs before `Close()`.
 
 ---
 
-## 8. Library window
+## 8. Bookmarks (Session 9)
+
+Storage in `Book.ini`, `BookData.Bookmarks` (`List<double>`, virtual-timeline
+seconds only — no stored label; always kept sorted ascending).
+`[Bookmarks]` section, keys `Bookmark0=<seconds>`, `Bookmark1=...`. Display
+name ("Bookmark 01 (H:MM)") is always computed live from sorted position,
+never persisted as text — padding goes to 3 digits past 99 bookmarks.
+`IniFile.DeleteSection` was added to support rewriting a shrunk list.
+
+**Set Bookmark (Ctrl+B).** No book loaded → the same low "no go" beep as
+Go To/Sleep Timer. With a book: adds the bookmark at the current virtual
+position, plays an ascending series of five short beeps (~1 s total), and
+announces only **"Bookmark set"** via the off-screen label — deliberately no
+position/percent, that level of detail belongs to the Manage dialog. Does
+not touch playback or the Sleep Timer.
+
+**Manage Bookmarks** (`ManageBookmarksForm.cs`, modeled on `GoToForm`).
+Single-select `ListBox`; no multi-select/multi-delete by design (a failsafe
+Gordan asked for explicitly). Buttons: **Delete**, **OK**, **Cancel** — no
+separate "Play" button (dropped after review; duplicated OK's job).
+- **Delete** (button, context menu, or Del key) stages a removal in a working
+  copy and **clears the selection** — nothing is written to `Book.ini` until
+  OK, and the user must deliberately pick a bookmark again before OK will
+  jump anywhere.
+- **OK** (button, double-click, or Enter on the list) commits the working
+  copy and, if a bookmark is currently selected, jumps to it and resumes
+  playback there. If nothing is selected, it just persists and restores
+  whatever playback state was in effect before the dialog opened.
+- **Cancel** discards the working copy entirely and restores the pre-dialog
+  playback state.
+- **Ctrl+Space** on the list toggles the current row's selection off/on
+  (deselect so OK won't jump anywhere, or re-select the last one) with an
+  off-screen-label announcement of **"Selected"/"Not selected"** — lets the
+  user "arm/disarm" the jump without invoking Delete. The dialog has its own
+  off-screen announce label + focus-restore timer, same pattern as Form1's
+  `AnnounceToScreenReader`.
+- Opening the dialog pauses playback first if it was running (same coupling
+  as the Sleep Timer dialog — a direct mpv call, so an active Sleep Timer is
+  untouched).
+
+**Bookmark seek step.** A "Bookmark" option is appended to the seek dropdown
+(after "Part") only while the current book has ≥1 bookmark
+(`UpdateSeekStepBookmarkOption`, called after every bookmark add/delete/book
+load/unload). `BookmarkForward()` jumps to the next bookmark after the
+current position. `BookmarkBack()` mirrors Part's 3-second grace: more than
+3 s past the preceding bookmark rewinds to it, otherwise jumps to the one
+before it; at the very first bookmark it always rewinds to itself (nothing
+earlier to fall back to). Both preserve play/pause state like any other
+virtual-position seek.
+
+---
+
+## 9. Library window
 
 `LibraryForm.cs`. Book shelf migrated from ListBox to **ListView with native
 groups** (four groups: **Now Reading / Reading / Unread / Read**, empty groups
@@ -321,18 +390,17 @@ folder is gone, or the last book was already finished.
 
 ---
 
-## 9. Roadmap / suggested order
+## 10. Roadmap / suggested order
 
 1. **Sleep Timer** — done (Session 8), pending final edge-case test.
-2. **Bookmarks** — next. Saving (likely a new block in `Book.ini`) plus a
-   Manage UI. Design to be settled at implementation time. Buttons already
-   exist as placeholders (Set Bookmark, Manage Bookmarks in column C).
-3. **Settings window** — will use a "hint system": a read-only textbox beside
-   most controls with a short explanation, plus a global "Show help hints"
-   toggle that flips hint `Visible`/`TabStop` live without closing the window
-   (the pattern already lives in the Go To dialog's hint box). Settings will
-   also hold: media-keys mode (Off / Only when focused / Always-global via
-   RegisterHotKey) and language selection.
+2. **Bookmarks** — done (Session 9): Set Bookmark, Manage Bookmarks dialog,
+   Bookmark seek step.
+3. **Settings window** — next. Will use a "hint system": a read-only textbox
+   beside most controls with a short explanation, plus a global "Show help
+   hints" toggle that flips hint `Visible`/`TabStop` live without closing the
+   window (the pattern already lives in the Go To dialog's hint box).
+   Settings will also hold: media-keys mode (Off / Only when focused /
+   Always-global via RegisterHotKey) and language selection.
 4. **Properties dialogs** (player + library) and library tooltips.
 5. **Audio filters** (not yet scheduled): dynaudnorm/speechnorm
    (normalization), scaletempo2 (already active, pitch-preserved speed),
@@ -344,12 +412,12 @@ folder is gone, or the last book was already finished.
 
 ---
 
-## 10. TODO (open items)
+## 11. TODO (open items)
 
 - **Verify Sleep Timer expiry (close/shutdown) in the modal-Library edge
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal
-  dialog. (Custom-duration select-all and Ctrl+T were resolved in Session 8.)
+  dialog.
 - A cosmetic JAWS note on the info box: it announces "i edit read only" rather
   than "read only edit" order — this is JAWS's internal handling of
   multiline vs singleline EDIT controls, not our code. Deferred to final
@@ -359,7 +427,7 @@ folder is gone, or the last book was already finished.
 
 ---
 
-## 11. How to start a session on this project
+## 12. How to start a session on this project
 
 1. Read this file and skim the actual source of the files you'll touch (the
    disk is the source of truth; this brief can lag).

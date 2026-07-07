@@ -23,6 +23,10 @@ namespace Nemoviz_Book_Reader
         public List<double> Offsets { get; private set; }
         public double TotalDuration { get; private set; }
 
+        // Bookmarks: virtual-timeline positions only. Display names ("Bookmark
+        // 01 (H:MM)") are computed live from sorted position, never stored.
+        public List<double> Bookmarks { get; private set; }
+
         public BookData(string folderPath)
         {
             FolderPath = folderPath;
@@ -30,6 +34,7 @@ namespace Nemoviz_Book_Reader
             ini = new IniFile(iniPath);
             Chapters = new List<(string, double)>();
             Offsets = new List<double>();
+            Bookmarks = new List<double>();
             Load();
         }
 
@@ -49,6 +54,7 @@ namespace Nemoviz_Book_Reader
             DateTime.TryParse(ini.Read("Book", "DateAdded", DateTime.Now.ToString()), out DateTime dt);
             DateAdded = dt;
             LoadChapters();
+            LoadBookmarks();
         }
 
         private void LoadChapters()
@@ -122,6 +128,54 @@ namespace Nemoviz_Book_Reader
                 Format = DetectAudioFormatString(audioFiles[0]);
                 ini.Write("Book", "Format", Format);
             }
+        }
+
+        // ──────────────────────────────────────────────
+        // Bookmarks
+        // ──────────────────────────────────────────────
+
+        private void LoadBookmarks()
+        {
+            Bookmarks.Clear();
+
+            int i = 0;
+            while (true)
+            {
+                string val = ini.Read("Bookmarks", "Bookmark" + i, null);
+                if (val == null) break;
+
+                if (double.TryParse(val, System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out double pos))
+                    Bookmarks.Add(pos);
+                i++;
+            }
+            Bookmarks.Sort();
+        }
+
+        /// <summary>Adds a bookmark at the given virtual-timeline position and
+        /// saves immediately. Used by the simple "Set Bookmark" command.</summary>
+        public void AddBookmark(double virtualPositionSeconds)
+        {
+            Bookmarks.Add(virtualPositionSeconds);
+            Bookmarks.Sort();
+            SaveBookmarks();
+        }
+
+        /// <summary>Replaces the whole bookmark list (e.g. after removals made
+        /// in the Manage Bookmarks dialog) and saves.</summary>
+        public void SetBookmarks(List<double> positions)
+        {
+            Bookmarks = new List<double>(positions);
+            Bookmarks.Sort();
+            SaveBookmarks();
+        }
+
+        public void SaveBookmarks()
+        {
+            ini.DeleteSection("Bookmarks");
+            for (int i = 0; i < Bookmarks.Count; i++)
+                ini.Write("Bookmarks", "Bookmark" + i,
+                    Bookmarks[i].ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
         // ──────────────────────────────────────────────
