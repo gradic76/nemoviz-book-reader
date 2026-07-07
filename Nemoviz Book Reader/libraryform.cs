@@ -1,0 +1,1001 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
+using System.Text;
+using System.Windows.Forms;
+
+namespace Nemoviz_Book_Reader
+{
+    public class LibraryForm : Form
+    {
+        private MenuStrip menuStrip;
+        private ToolStripMenuItem menuFile;
+        private ToolStripMenuItem menuFileOpenFile;
+        private ToolStripMenuItem menuFileOpenFolder;
+        private ToolStripMenuItem menuView;
+        private ToolStripMenuItem menuViewAlphaAsc;
+        private ToolStripMenuItem menuViewAlphaDesc;
+        private ToolStripMenuItem menuViewDateAsc;
+        private ToolStripMenuItem menuViewDateDesc;
+        private ToolStripMenuItem menuViewFormatAsc;
+        private ToolStripMenuItem menuViewFormatDesc;
+
+        private Panel panelSearch;
+        private TextBox tbSearch;
+        private ComboBox cbFilter;
+
+        private SplitContainer splitContainer;
+
+        // The shelf is a ListView with native groups (like Explorer's grouped
+        // view): group headers are NOT list items, so a screen reader counts
+        // only the books ("3 of 5") and announces the group name as context
+        // when arrowing into a new group.
+        private ListView listBooks;
+
+        private Panel panelDetails;
+        private ListView listViewDetails;
+
+        private Panel panelBottom;
+        private Button btnRefresh;
+        private Button btnOK;
+        private Button btnCancel;
+
+        private List<BookData> books;          // all scanned books
+        private string currentSortMode = "alpha_asc";
+
+        private AppSettings appSettings;
+        private string activeBookFolderPath;
+
+        // Shelf categories
+        private const int CatReading = 0;
+        private const int CatUnread = 1;
+        private const int CatRead = 2;
+
+        // Filter combo indices (must match the order items are added)
+        private const int FilterAll = 0;
+        private const int FilterReading = 1;
+        private const int FilterUnread = 2;
+        private const int FilterRead = 3;
+
+        // Row indices in the details ListView (single merged "Title"/"Naziv"
+        // field — the old "Author" row is gone, "Speed" was added).
+        private const int DetailRowTitle = 0;
+        private const int DetailRowFormat = 1;
+        private const int DetailRowDuration = 2;
+        private const int DetailRowListened = 3;
+        private const int DetailRowSpeed = 4;
+        private const int DetailRowAdded = 5;
+
+        public BookData SelectedBook { get; private set; }
+
+        public LibraryForm(AppSettings settings, string activeBookFolderPath = null)
+        {
+            appSettings = settings;
+            this.activeBookFolderPath = activeBookFolderPath;
+            books = new List<BookData>();
+            BuildUI();
+            LoadBooks();
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            // Default tab order would land on the search box first;
+            // the shelf is the natural starting point.
+            listBooks.Focus();
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            // Ctrl+F — jump to the search box from anywhere in the library
+            if (keyData == (Keys.Control | Keys.F))
+            {
+                tbSearch.Focus();
+                return true;
+            }
+
+            // Alt+Enter — properties of the selected book (shelf only)
+            if (listBooks.Focused && keyData == (Keys.Alt | Keys.Enter))
+            {
+                ShowProperties();
+                return true;
+            }
+
+            if (listBooks.Focused && keyData == Keys.Tab)
+            {
+                listViewDetails.Focus();
+                if (listViewDetails.Items.Count > 0)
+                    listViewDetails.Items[0].Selected = true;
+                return true;
+            }
+
+            if (listViewDetails.Focused)
+            {
+                if (keyData == (Keys.Tab | Keys.Shift))
+                {
+                    listBooks.Focus();
+                    return true;
+                }
+                if (keyData == Keys.Tab)
+                {
+                    btnRefresh.Focus();
+                    return true;
+                }
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void BuildUI()
+        {
+            this.Text = Localization.T("Library.Title");
+            this.ClientSize = new Size(800, 600);
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.MinimizeBox = false;
+            this.MaximizeBox = false;
+
+            BuildMenuStrip();
+            BuildSearchRow();
+            BuildSplitContainer();
+            BuildBottomPanel();
+        }
+
+        private void BuildMenuStrip()
+        {
+            menuStrip = new MenuStrip();
+
+            menuFile = new ToolStripMenuItem(Localization.T("Menu.File"));
+
+            menuFileOpenFile = new ToolStripMenuItem(Localization.T("Menu.File.OpenFile"));
+            menuFileOpenFile.ShortcutKeys = Keys.Control | Keys.O;
+            menuFileOpenFile.Click += MenuFileOpenFile_Click;
+
+            menuFileOpenFolder = new ToolStripMenuItem(Localization.T("Menu.File.OpenFolder"));
+            menuFileOpenFolder.ShortcutKeys = Keys.Control | Keys.Shift | Keys.O;
+            menuFileOpenFolder.Click += MenuFileOpenFolder_Click;
+
+            menuFile.DropDownItems.Add(menuFileOpenFile);
+            menuFile.DropDownItems.Add(menuFileOpenFolder);
+            menuFile.DropDownItems.Add(new ToolStripSeparator());
+            menuFile.DropDownItems.Add(new ToolStripMenuItem(Localization.T("Menu.File.Exit")) { ShortcutKeys = Keys.Alt | Keys.F4 });
+            ((ToolStripMenuItem)menuFile.DropDownItems[3]).Click += (s, e) => this.Close();
+
+            menuView = new ToolStripMenuItem(Localization.T("Menu.View"));
+
+            menuViewAlphaAsc = new ToolStripMenuItem(Localization.T("Menu.View.AlphaAsc"));
+            menuViewAlphaAsc.Click += (s, e) => SortBooks("alpha_asc");
+
+            menuViewAlphaDesc = new ToolStripMenuItem(Localization.T("Menu.View.AlphaDesc"));
+            menuViewAlphaDesc.Click += (s, e) => SortBooks("alpha_desc");
+
+            menuViewDateAsc = new ToolStripMenuItem(Localization.T("Menu.View.DateAsc"));
+            menuViewDateAsc.Click += (s, e) => SortBooks("date_asc");
+
+            menuViewDateDesc = new ToolStripMenuItem(Localization.T("Menu.View.DateDesc"));
+            menuViewDateDesc.Click += (s, e) => SortBooks("date_desc");
+
+            menuViewFormatAsc = new ToolStripMenuItem(Localization.T("Menu.View.FormatAsc"));
+            menuViewFormatAsc.Click += (s, e) => SortBooks("format_asc");
+
+            menuViewFormatDesc = new ToolStripMenuItem(Localization.T("Menu.View.FormatDesc"));
+            menuViewFormatDesc.Click += (s, e) => SortBooks("format_desc");
+
+            menuView.DropDownItems.Add(menuViewAlphaAsc);
+            menuView.DropDownItems.Add(menuViewAlphaDesc);
+            menuView.DropDownItems.Add(new ToolStripSeparator());
+            menuView.DropDownItems.Add(menuViewDateAsc);
+            menuView.DropDownItems.Add(menuViewDateDesc);
+            menuView.DropDownItems.Add(new ToolStripSeparator());
+            menuView.DropDownItems.Add(menuViewFormatAsc);
+            menuView.DropDownItems.Add(menuViewFormatDesc);
+
+            menuStrip.Items.Add(menuFile);
+            menuStrip.Items.Add(menuView);
+
+            this.MainMenuStrip = menuStrip;
+            this.Controls.Add(menuStrip);
+
+            UpdateSortMenuChecks();
+        }
+
+        /// <summary>
+        /// Marks the active sort mode in the View menu: a visual checkmark
+        /// plus a localized text suffix (e.g. "(active)"). The suffix is
+        /// there because screen readers don't reliably announce the check
+        /// state of MenuStrip items — text is always read. If the suffix
+        /// is unwanted, empty the "Menu.View.ActiveMark" value in the
+        /// .lang file and only the checkmark remains.
+        /// </summary>
+        private void UpdateSortMenuChecks()
+        {
+            ApplySortMark(menuViewAlphaAsc, "Menu.View.AlphaAsc", "alpha_asc");
+            ApplySortMark(menuViewAlphaDesc, "Menu.View.AlphaDesc", "alpha_desc");
+            ApplySortMark(menuViewDateAsc, "Menu.View.DateAsc", "date_asc");
+            ApplySortMark(menuViewDateDesc, "Menu.View.DateDesc", "date_desc");
+            ApplySortMark(menuViewFormatAsc, "Menu.View.FormatAsc", "format_asc");
+            ApplySortMark(menuViewFormatDesc, "Menu.View.FormatDesc", "format_desc");
+        }
+
+        private void ApplySortMark(ToolStripMenuItem item, string langKey, string mode)
+        {
+            bool active = currentSortMode == mode;
+            item.Checked = active;
+
+            string mark = Localization.T("Menu.View.ActiveMark");
+            item.Text = active && mark.Length > 0 && mark != "Menu.View.ActiveMark"
+                ? Localization.T(langKey) + " " + mark
+                : Localization.T(langKey);
+        }
+
+        private void BuildSearchRow()
+        {
+            panelSearch = new Panel();
+            panelSearch.Location = new Point(0, menuStrip.Height);
+            panelSearch.Size = new Size(800, 32);
+
+            tbSearch = new TextBox();
+            tbSearch.Location = new Point(10, 4);
+            tbSearch.Size = new Size(380, 24);
+            tbSearch.AccessibleName = Localization.T("Library.Search.Accessible");
+            tbSearch.TextChanged += (s, e) => RebuildShelf(GetSelectedBook());
+            // Select the existing text whenever the box gains focus (Tab,
+            // Ctrl+F, mouse), so a new entry or Del replaces the old query
+            // instead of appending to it. BeginInvoke survives the mouse
+            // click that would otherwise reset the selection to a caret.
+            tbSearch.Enter += (s, e) => BeginInvoke((Action)(() => tbSearch.SelectAll()));
+
+            cbFilter = new ComboBox();
+            cbFilter.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbFilter.Location = new Point(400, 4);
+            cbFilter.Size = new Size(390, 24);
+            cbFilter.AccessibleName = Localization.T("Library.Filter.Accessible");
+            cbFilter.Items.Add(Localization.T("Shelf.Filter.All"));
+            cbFilter.Items.Add(Localization.T("Shelf.Filter.Reading"));
+            cbFilter.Items.Add(Localization.T("Shelf.Filter.Unread"));
+            cbFilter.Items.Add(Localization.T("Shelf.Filter.Read"));
+            cbFilter.SelectedIndex = FilterAll;
+            // Subscribe only after the initial SelectedIndex is set,
+            // so building the UI doesn't trigger a premature rebuild.
+            cbFilter.SelectedIndexChanged += (s, e) => RebuildShelf(GetSelectedBook());
+
+            panelSearch.Controls.Add(tbSearch);
+            panelSearch.Controls.Add(cbFilter);
+            this.Controls.Add(panelSearch);
+        }
+
+        private void BuildSplitContainer()
+        {
+            splitContainer = new SplitContainer();
+            splitContainer.Location = new Point(0, menuStrip.Height + panelSearch.Height);
+            splitContainer.Size = new Size(800, 540 - panelSearch.Height);
+            splitContainer.SplitterDistance = 350;
+            splitContainer.Panel1MinSize = 200;
+            splitContainer.Panel2MinSize = 200;
+            splitContainer.TabStop = false;
+
+            listBooks = new ListView();
+            listBooks.Dock = DockStyle.Fill;
+            listBooks.View = View.Details;
+            listBooks.HeaderStyle = ColumnHeaderStyle.None;
+            listBooks.FullRowSelect = true;
+            listBooks.MultiSelect = false;
+            listBooks.HideSelection = false;
+            listBooks.ShowGroups = true;
+            listBooks.Font = new Font("Segoe UI", 11);
+            listBooks.AccessibleName = Localization.T("Library.List.Accessible");
+            listBooks.Columns.Add("", 320);
+            // Keep the single column matched to the shelf width (the splitter
+            // can be moved), so there's no horizontal scrollbar.
+            listBooks.SizeChanged += (s, e) =>
+            {
+                if (listBooks.Columns.Count > 0)
+                    listBooks.Columns[0].Width = Math.Max(50, listBooks.ClientSize.Width - 4);
+            };
+            listBooks.SelectedIndexChanged += ListBooks_SelectedIndexChanged;
+            listBooks.DoubleClick += ListBooks_DoubleClick;
+            listBooks.KeyDown += ListBooks_KeyDown;
+
+            ContextMenuStrip ctx = new ContextMenuStrip();
+
+            ToolStripMenuItem ctxOpen = new ToolStripMenuItem(Localization.T("Context.Open"));
+            ctxOpen.ShortcutKeyDisplayString = "Enter";
+            ctxOpen.Click += (s, e) => OpenSelectedBook();
+
+            ToolStripMenuItem ctxRestart = new ToolStripMenuItem(Localization.T("Context.Restart"));
+            ctxRestart.Click += (s, e) => RestartSelectedBook();
+
+            ToolStripMenuItem ctxRename = new ToolStripMenuItem(Localization.T("Context.Rename"));
+            ctxRename.ShortcutKeyDisplayString = "F2";
+            ctxRename.Click += (s, e) => RenameSelectedBook();
+
+            ToolStripMenuItem ctxDelete = new ToolStripMenuItem(Localization.T("Context.Delete"));
+            ctxDelete.ShortcutKeyDisplayString = "Del";
+            ctxDelete.Click += (s, e) => DeleteSelectedBook();
+
+            ToolStripMenuItem ctxProperties = new ToolStripMenuItem(Localization.T("Context.Properties"));
+            ctxProperties.ShortcutKeyDisplayString = "Alt+Enter";
+            ctxProperties.Click += (s, e) => ShowProperties();
+
+            ctx.Items.Add(ctxOpen);
+            ctx.Items.Add(ctxRestart);
+            ctx.Items.Add(new ToolStripSeparator());
+            ctx.Items.Add(ctxRename);
+            ctx.Items.Add(ctxDelete);
+            ctx.Items.Add(new ToolStripSeparator());
+            ctx.Items.Add(ctxProperties);
+
+            // No book selected (empty shelf) — nothing for the menu to act on.
+            ctx.Opening += (s, e) =>
+            {
+                if (GetSelectedBook() == null)
+                    e.Cancel = true;
+            };
+
+            listBooks.ContextMenuStrip = ctx;
+
+            splitContainer.Panel1.Controls.Add(listBooks);
+
+            panelDetails = new Panel();
+            panelDetails.Dock = DockStyle.Fill;
+            panelDetails.Padding = new Padding(10);
+
+            listViewDetails = new ListView();
+            listViewDetails.Dock = DockStyle.Fill;
+            listViewDetails.View = View.Details;
+            listViewDetails.FullRowSelect = true;
+            listViewDetails.HeaderStyle = ColumnHeaderStyle.None;
+            listViewDetails.MultiSelect = false;
+            listViewDetails.Font = new Font("Segoe UI", 10);
+            listViewDetails.AccessibleName = Localization.T("Library.Details.Accessible");
+            listViewDetails.TabStop = true;
+            listViewDetails.GridLines = false;
+            listViewDetails.BorderStyle = BorderStyle.None;
+
+            listViewDetails.Columns.Add("Field", 120);
+            listViewDetails.Columns.Add("Value", 280);
+
+            string dash = Localization.T("Common.Dash");
+            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Title"), dash }));
+            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Format"), dash }));
+            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Duration"), dash }));
+            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Listened"), dash }));
+            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Speed"), dash }));
+            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Added"), dash }));
+
+            panelDetails.Controls.Add(listViewDetails);
+
+            splitContainer.Panel2.Controls.Add(panelDetails);
+            this.Controls.Add(splitContainer);
+        }
+
+        private void BuildBottomPanel()
+        {
+            panelBottom = new Panel();
+            panelBottom.Location = new Point(0, 540);
+            panelBottom.Size = new Size(800, 60);
+            panelBottom.BorderStyle = BorderStyle.FixedSingle;
+
+            btnRefresh = new Button();
+            btnRefresh.Text = Localization.T("Btn.Refresh");
+            btnRefresh.Size = new Size(100, 35);
+            btnRefresh.Location = new Point(10, 12);
+            btnRefresh.AccessibleName = Localization.T("Btn.Refresh.Accessible");
+            btnRefresh.Click += (s, e) => LoadBooks();
+
+            btnOK = new Button();
+            btnOK.Text = Localization.T("Btn.OK");
+            btnOK.Size = new Size(100, 35);
+            btnOK.Location = new Point(580, 12);
+            btnOK.AccessibleName = Localization.T("Btn.OK.Accessible");
+            btnOK.Click += (s, e) => OpenSelectedBook();
+
+            btnCancel = new Button();
+            btnCancel.Text = Localization.T("Btn.Cancel");
+            btnCancel.Size = new Size(100, 35);
+            btnCancel.Location = new Point(690, 12);
+            btnCancel.AccessibleName = Localization.T("Btn.Cancel.Accessible");
+            btnCancel.Click += (s, e) => this.Close();
+
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
+
+            panelBottom.Controls.Add(btnRefresh);
+            panelBottom.Controls.Add(btnOK);
+            panelBottom.Controls.Add(btnCancel);
+
+            this.Controls.Add(panelBottom);
+        }
+
+        // ──────────────────────────────────────────────
+        // Loading and rebuilding the shelf
+        // ──────────────────────────────────────────────
+        private void LoadBooks()
+        {
+            LibraryScanner scanner = new LibraryScanner(appSettings.LibraryPath, true);
+            books = scanner.Scan();
+            RebuildShelf(null);
+        }
+
+        /// <summary>
+        /// Rebuilds the shelf from `books`, applying search text, the status
+        /// filter, group headers (Now Reading / Reading / Unread / Read) and
+        /// the current sort. Tries to keep `keepSelected` selected; otherwise
+        /// selects the first book.
+        /// </summary>
+        private void RebuildShelf(BookData keepSelected)
+        {
+            string query = NormalizeForSearch(tbSearch.Text.Trim());
+            int filter = cbFilter.SelectedIndex;
+            if (filter < 0) filter = FilterAll;
+
+            var reading = new List<BookData>();
+            var unread = new List<BookData>();
+            var read = new List<BookData>();
+
+            foreach (BookData b in books)
+            {
+                if (query.Length > 0 && !NormalizeForSearch(b.Title).Contains(query))
+                    continue;
+
+                switch (GetCategory(b))
+                {
+                    case CatReading: reading.Add(b); break;
+                    case CatUnread: unread.Add(b); break;
+                    default: read.Add(b); break;
+                }
+            }
+
+            Comparison<BookData> cmp = GetComparer();
+            reading.Sort(cmp);
+            unread.Sort(cmp);
+            read.Sort(cmp);
+
+            // The last-listened book gets its own "Now Reading" group at the
+            // top — but only while it's actually being read. Once finished
+            // (or rewound to zero), it sits in its natural group.
+            BookData nowReading = null;
+            string lastPath = appSettings.LastOpenedBookPath;
+            if (!string.IsNullOrEmpty(lastPath))
+            {
+                for (int i = 0; i < reading.Count; i++)
+                {
+                    if (PathsEqual(reading[i].FolderPath, lastPath))
+                    {
+                        nowReading = reading[i];
+                        reading.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            bool showAll = filter == FilterAll;
+
+            listBooks.BeginUpdate();
+            listBooks.Items.Clear();
+            listBooks.Groups.Clear();
+            listBooks.ShowGroups = showAll;
+
+            if (showAll)
+            {
+                if (nowReading != null)
+                    AddGroup(new List<BookData> { nowReading }, Localization.T("Shelf.Group.NowReading"));
+                AddGroup(reading, Localization.T("Shelf.Group.Reading"));
+                AddGroup(unread, Localization.T("Shelf.Group.Unread"));
+                AddGroup(read, Localization.T("Shelf.Group.Read"));
+            }
+            else if (filter == FilterReading)
+            {
+                // The now-reading book belongs to this category — pinned first.
+                if (nowReading != null)
+                    reading.Insert(0, nowReading);
+                AddGroup(reading, null);
+            }
+            else if (filter == FilterUnread)
+            {
+                AddGroup(unread, null);
+            }
+            else
+            {
+                AddGroup(read, null);
+            }
+
+            listBooks.EndUpdate();
+
+            ListViewItem toSelect = null;
+            if (keepSelected != null)
+            {
+                foreach (ListViewItem item in listBooks.Items)
+                    if (item.Tag == keepSelected) { toSelect = item; break; }
+            }
+            if (toSelect == null && listBooks.Items.Count > 0)
+                toSelect = listBooks.Items[0];
+
+            if (toSelect != null)
+            {
+                toSelect.Selected = true;
+                toSelect.Focused = true;
+                toSelect.EnsureVisible();
+            }
+            else
+            {
+                ClearDetails();
+            }
+        }
+
+        private void AddGroup(List<BookData> group, string headerText)
+        {
+            if (group.Count == 0) return;
+
+            ListViewGroup lvg = null;
+            if (headerText != null)
+            {
+                lvg = new ListViewGroup(headerText);
+                listBooks.Groups.Add(lvg);
+            }
+
+            foreach (BookData b in group)
+            {
+                ListViewItem item = new ListViewItem(b.Title);
+                item.Tag = b;
+                if (lvg != null)
+                    item.Group = lvg;
+                listBooks.Items.Add(item);
+            }
+        }
+
+        /// <summary>Returns the selected book, or null if nothing is selected.</summary>
+        private BookData GetSelectedBook()
+        {
+            if (listBooks == null || listBooks.SelectedItems.Count == 0)
+                return null;
+            return listBooks.SelectedItems[0].Tag as BookData;
+        }
+
+        // ──────────────────────────────────────────────
+        // Categories, sorting, search normalization
+        // ──────────────────────────────────────────────
+        private int GetCategory(BookData b)
+        {
+            if (b.PercentListened >= 100) return CatRead;
+
+            double seconds = 0;
+            TimeSpan t;
+            if (TimeSpan.TryParse(b.LastPosition, out t))
+                seconds = t.TotalSeconds;
+
+            if (b.PercentListened <= 0 && seconds < 0.5) return CatUnread;
+            return CatReading;
+        }
+
+        private Comparison<BookData> GetComparer()
+        {
+            switch (currentSortMode)
+            {
+                case "alpha_desc":
+                    return (a, b) => string.Compare(b.Title, a.Title, StringComparison.CurrentCultureIgnoreCase);
+                case "date_asc":
+                    return (a, b) => a.DateAdded.CompareTo(b.DateAdded);
+                case "date_desc":
+                    return (a, b) => b.DateAdded.CompareTo(a.DateAdded);
+                case "format_asc":
+                    return (a, b) =>
+                    {
+                        int c = string.Compare(a.Format, b.Format, StringComparison.CurrentCultureIgnoreCase);
+                        return c != 0 ? c : string.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
+                    };
+                case "format_desc":
+                    return (a, b) =>
+                    {
+                        int c = string.Compare(b.Format, a.Format, StringComparison.CurrentCultureIgnoreCase);
+                        return c != 0 ? c : string.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
+                    };
+                default: // alpha_asc
+                    return (a, b) => string.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
+            }
+        }
+
+        private void SortBooks(string mode)
+        {
+            currentSortMode = mode;
+            UpdateSortMenuChecks();
+            RebuildShelf(GetSelectedBook());
+        }
+
+        /// <summary>
+        /// Case-insensitive, diacritics-insensitive normalization for search.
+        /// Both the query and the titles pass through it, so matching works
+        /// in both directions: "c" finds "č"/"ć" and "č" finds "c"/"ć".
+        /// Uses Unicode decomposition, so it also covers non-Croatian
+        /// accents (ü→u, é→e, ...); "đ" is special-cased since it doesn't
+        /// decompose to "d".
+        /// </summary>
+        private static string NormalizeForSearch(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+
+            s = s.ToLowerInvariant().Replace('đ', 'd');
+            string formD = s.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder(formD.Length);
+            foreach (char c in formD)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+            return sb.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        private static bool PathsEqual(string pathA, string pathB)
+        {
+            if (string.IsNullOrEmpty(pathA) || string.IsNullOrEmpty(pathB))
+                return false;
+            try
+            {
+                string a = System.IO.Path.GetFullPath(pathA).TrimEnd('\\', '/');
+                string b = System.IO.Path.GetFullPath(pathB).TrimEnd('\\', '/');
+                return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // Selection and details
+        // ──────────────────────────────────────────────
+        private void ListBooks_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BookData book = GetSelectedBook();
+            if (book == null)
+            {
+                ClearDetails();
+                return;
+            }
+            ShowDetails(book);
+        }
+
+        private void ShowDetails(BookData book)
+        {
+            // Lazy one-time upgrade of old plain format labels ("MP3 Audio")
+            // to the detailed ones ("MP3 Audio, 44.1 kHz, 128 kbps, stereo").
+            // Persists in Book.ini, so it's a no-op on every later selection.
+            book.EnsureFormatDetails();
+
+            string speedStr = (book.Speed / 100.0).ToString("0.0");
+
+            listViewDetails.Items[DetailRowTitle].SubItems[1].Text = book.Title;
+            listViewDetails.Items[DetailRowFormat].SubItems[1].Text = book.Format;
+            listViewDetails.Items[DetailRowDuration].SubItems[1].Text = book.Duration;
+            listViewDetails.Items[DetailRowListened].SubItems[1].Text = book.PercentListened + "%";
+            listViewDetails.Items[DetailRowSpeed].SubItems[1].Text = Localization.T("Details.Speed.Value", speedStr);
+            listViewDetails.Items[DetailRowAdded].SubItems[1].Text = book.DateAdded.ToString(Localization.T("Common.DateFormat"));
+        }
+
+        private void ClearDetails()
+        {
+            string dash = Localization.T("Common.Dash");
+            foreach (ListViewItem item in listViewDetails.Items)
+                item.SubItems[1].Text = dash;
+        }
+
+        // ──────────────────────────────────────────────
+        // Shelf input
+        // ──────────────────────────────────────────────
+        private void ListBooks_DoubleClick(object sender, EventArgs e)
+        {
+            OpenSelectedBook();
+        }
+
+        private void ListBooks_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Return && !e.Alt)
+            {
+                OpenSelectedBook();
+            }
+            else if (e.KeyCode == Keys.F2)
+            {
+                RenameSelectedBook();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Delete)
+            {
+                DeleteSelectedBook();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Apps || (e.KeyCode == Keys.F10 && e.Shift))
+            {
+                if (GetSelectedBook() != null)
+                    listBooks.ContextMenuStrip.Show(listBooks, new Point(0, 0));
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // Actions on the selected book
+        // ──────────────────────────────────────────────
+        private void OpenSelectedBook()
+        {
+            BookData book = GetSelectedBook();
+            if (book == null) return;
+            SelectedBook = book;
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
+        private void RestartSelectedBook()
+        {
+            BookData book = GetSelectedBook();
+            if (book == null) return;
+            book.LastPosition = "00:00:00";
+            book.PercentListened = 0;
+            book.Save();
+            // The book just moved to the "Unread" group — rebuild and follow it.
+            RebuildShelf(book);
+            MessageBox.Show(Localization.T("Dialog.Restart.Message"), Localization.T("Dialog.Restart.Title"));
+        }
+
+        private void RenameSelectedBook()
+        {
+            BookData book = GetSelectedBook();
+            if (book == null) return;
+
+            string newTitle = ShowRenameDialog(book.Title);
+            if (newTitle == null) return; // cancelled
+
+            newTitle = newTitle.Trim();
+            if (newTitle.Length == 0 || newTitle == book.Title) return;
+
+            // Rename changes only the display name in Book.ini —
+            // the folder on disk is untouched by design.
+            book.Title = newTitle;
+            book.Save();
+            RebuildShelf(book);
+        }
+
+        private string ShowRenameDialog(string currentTitle)
+        {
+            using (Form dlg = new Form())
+            {
+                dlg.Text = Localization.T("Dialog.Rename.Title");
+                dlg.ClientSize = new Size(420, 110);
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MinimizeBox = false;
+                dlg.MaximizeBox = false;
+                dlg.ShowInTaskbar = false;
+
+                Label lbl = new Label();
+                lbl.Text = Localization.T("Dialog.Rename.Prompt");
+                lbl.Location = new Point(10, 10);
+                lbl.Size = new Size(400, 18);
+
+                TextBox tb = new TextBox();
+                tb.Location = new Point(10, 32);
+                tb.Size = new Size(400, 24);
+                tb.Text = currentTitle;
+                tb.AccessibleName = Localization.T("Dialog.Rename.Prompt");
+                tb.SelectAll();
+
+                Button ok = new Button();
+                ok.Text = Localization.T("Btn.OK");
+                ok.Size = new Size(100, 30);
+                ok.Location = new Point(200, 68);
+                ok.DialogResult = DialogResult.OK;
+
+                Button cancel = new Button();
+                cancel.Text = Localization.T("Btn.Cancel");
+                cancel.Size = new Size(100, 30);
+                cancel.Location = new Point(310, 68);
+                cancel.DialogResult = DialogResult.Cancel;
+
+                dlg.Controls.Add(lbl);
+                dlg.Controls.Add(tb);
+                dlg.Controls.Add(ok);
+                dlg.Controls.Add(cancel);
+                dlg.AcceptButton = ok;
+                dlg.CancelButton = cancel;
+
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                    return tb.Text;
+                return null;
+            }
+        }
+
+        private void DeleteSelectedBook()
+        {
+            BookData book = GetSelectedBook();
+            if (book == null) return;
+
+            string title = book.Title;
+            string folderPath = book.FolderPath;
+
+            if (PathsEqual(folderPath, activeBookFolderPath))
+            {
+                MessageBox.Show(
+                    Localization.T("Dialog.ActiveBook.Message", title),
+                    Localization.T("Dialog.ActiveBook.Title"),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(
+                Localization.T("Dialog.ConfirmDelete.Message", title),
+                Localization.T("Dialog.ConfirmDelete.Title"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result != DialogResult.Yes)
+                return;
+
+            int oldIdx = listBooks.SelectedItems.Count > 0 ? listBooks.SelectedItems[0].Index : 0;
+
+            try
+            {
+                if (System.IO.Directory.Exists(folderPath))
+                    System.IO.Directory.Delete(folderPath, true);
+
+                books.Remove(book);
+                RebuildShelf(null);
+                SelectNearestBook(oldIdx);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(Localization.T("Dialog.DeleteError.Message", ex.Message), Localization.T("Common.Error"));
+            }
+        }
+
+        /// <summary>
+        /// Selects the book nearest to the given index. Used after deleting,
+        /// so focus stays in place instead of jumping back to the top.
+        /// </summary>
+        private void SelectNearestBook(int preferredIdx)
+        {
+            if (listBooks.Items.Count == 0)
+            {
+                ClearDetails();
+                return;
+            }
+
+            if (preferredIdx < 0) preferredIdx = 0;
+            if (preferredIdx >= listBooks.Items.Count) preferredIdx = listBooks.Items.Count - 1;
+
+            ListViewItem item = listBooks.Items[preferredIdx];
+            item.Selected = true;
+            item.Focused = true;
+            item.EnsureVisible();
+        }
+
+        private void ShowProperties()
+        {
+            BookData book = GetSelectedBook();
+            if (book == null) return;
+            MessageBox.Show(Localization.T("Dialog.Properties.ComingSoon"), Localization.T("Dialog.Properties.Title"));
+        }
+
+        // ──────────────────────────────────────────────
+        // Import
+        // ──────────────────────────────────────────────
+        private string BuildFileFilter()
+        {
+            return
+                Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf|" +
+                Localization.T("Filter.TextBooks") + "|*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
+                Localization.T("Filter.AllFiles") + "|*.*";
+        }
+
+        private void MenuFileOpenFile_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Filter = BuildFileFilter();
+                ofd.Title = Localization.T("Library.ImportFile.Title");
+                if (ofd.ShowDialog() == DialogResult.OK)
+                    ImportFile(ofd.FileName);
+            }
+        }
+
+        private void MenuFileOpenFolder_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+            {
+                fbd.Description = Localization.T("Library.ImportFolder.Description");
+                if (fbd.ShowDialog() == DialogResult.OK)
+                    ImportFolder(fbd.SelectedPath);
+            }
+        }
+
+        private void ImportFile(string filePath)
+        {
+            try
+            {
+                string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                string destFolder = System.IO.Path.Combine(appSettings.LibraryPath, fileName);
+
+                if (!System.IO.Directory.Exists(destFolder))
+                    System.IO.Directory.CreateDirectory(destFolder);
+
+                string destFile = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(filePath));
+                if (!System.IO.File.Exists(destFile))
+                    System.IO.File.Copy(filePath, destFile);
+
+                // Build duration/chapters right away, so the book doesn't show
+                // 00:00:00 until first played. BuildChaptersFromFolder also
+                // stores the detailed format string for audio files; for text
+                // files it gets the plain name from the extension map.
+                BookData imported = new BookData(destFolder);
+                string ext = System.IO.Path.GetExtension(destFile).ToLower();
+                if (Array.IndexOf(LibraryScanner.AudioExtensions, ext) >= 0)
+                {
+                    imported.BuildChaptersFromFolder(new string[] { destFile });
+                }
+                else
+                {
+                    imported.Format = BookData.FriendlyFormatName(ext);
+                }
+                imported.Save();
+
+                LoadBooks();
+                MessageBox.Show(Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
+            }
+        }
+
+        private void ImportFolder(string folderPath)
+        {
+            try
+            {
+                LibraryScanner scanner = new LibraryScanner(folderPath, false);
+                List<BookData> found = scanner.Scan();
+
+                if (found.Count == 0)
+                {
+                    MessageBox.Show(Localization.T("Dialog.NoBooksFound.Message"), Localization.T("Dialog.NoBooksFound.Title"));
+                    return;
+                }
+
+                if (found.Count > 50)
+                {
+                    DialogResult result = MessageBox.Show(
+                        Localization.T("Dialog.ConfirmManyBooks.Message", found.Count),
+                        Localization.T("Dialog.ConfirmManyBooks.Title"),
+                        MessageBoxButtons.YesNo);
+                    if (result == DialogResult.No) return;
+                }
+
+                int imported = 0;
+                foreach (BookData book in found)
+                {
+                    string destFolder = System.IO.Path.Combine(
+                        appSettings.LibraryPath,
+                        System.IO.Path.GetFileName(book.FolderPath));
+
+                    if (!System.IO.Directory.Exists(destFolder))
+                        System.IO.Directory.CreateDirectory(destFolder);
+
+                    foreach (string file in System.IO.Directory.GetFiles(book.FolderPath))
+                    {
+                        if (System.IO.Path.GetFileName(file).ToLower() == "book.ini")
+                            continue;
+
+                        string destFile = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(file));
+                        if (!System.IO.File.Exists(destFile))
+                            System.IO.File.Copy(file, destFile);
+                    }
+                    imported++;
+                }
+
+                LoadBooks();
+                MessageBox.Show(Localization.T("Dialog.ImportFolderSuccess.Message", imported), Localization.T("Dialog.ImportFolderSuccess.Title"));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
+            }
+        }
+    }
+}

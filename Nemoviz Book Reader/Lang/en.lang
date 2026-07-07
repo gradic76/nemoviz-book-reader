@@ -1,0 +1,204 @@
+; Nemoviz Book Reader - English
+LanguageName=English
+
+; App
+App.Name=Nemoviz Book Reader
+
+; Player - info box
+Player.Info.TitleLabel=Title:
+Player.Info.ChapterLabel=Part:
+Player.Info.ElapsedSegmentLabel=Elapsed part time:
+Player.Info.ElapsedTotalLabel=Elapsed total time:
+Player.Info.RemainingSegmentLabel=Remaining part time:
+Player.Info.RemainingTotalLabel=Remaining total time:
+Player.Info.AccessibleName=Playback information, I
+
+; Player - title bar
+Player.TitleBar.Chapter= — Part {0}/{1}
+Player.TitleBar.Playing= — playing
+Player.TitleBar.Paused= — paused
+
+; Player - buttons
+Btn.Library=Library
+Btn.Settings=Settings
+Btn.Timer=Sleep Timer
+Btn.Help=Help
+Btn.Back.Accessible=Back, Z
+Btn.Forward.Accessible=Forward, B
+Btn.Play.Accessible=Play, Space or X
+Btn.Pause.Accessible=Pause, Space or X
+Btn.Properties=Properties
+Btn.GoTo=Go To...
+Btn.GoTo.Accessible=Go To, Ctrl+G
+Btn.SetBookmark=Set Bookmark
+Btn.ManageBookmarks=Manage Bookmarks
+
+; Player - sleep timer button
+; Btn.Timer.Accessible is the idle-state screen reader announcement
+; (with the shortcut, per convention). Btn.Timer.Countdown is the visible
+; button text while a timer runs ({0} = mm:ss, or h:mm:ss above 60 min).
+; The Accessible.Active variant is announced on focus during a countdown;
+; activating the button then stops playback and cancels the timer.
+Btn.Timer.Accessible=Sleep Timer, Ctrl+T
+Btn.Timer.Countdown=Sleep Timer {0}
+Btn.Timer.Accessible.Active=Sleep Timer, {0} minutes remaining, activate to stop playback and cancel the timer
+Btn.Timer.Accessible.LessThanMinute=Sleep Timer, less than a minute remaining
+
+; Sleep Timer dialog
+SleepTimer.Duration.Group=Duration
+SleepTimer.Duration.15=15 minutes
+SleepTimer.Duration.30=30 minutes
+SleepTimer.Duration.45=45 minutes
+SleepTimer.Duration.60=60 minutes
+SleepTimer.Duration.Custom=Custom:
+SleepTimer.Custom.Accessible=Custom duration in minutes
+SleepTimer.Action.Group=When the time expires
+SleepTimer.Action.Stop=Stop playback
+SleepTimer.Action.StopClose=Stop playback and close the program
+SleepTimer.Action.StopShutdown=Stop playback, close the program and shut down the computer
+SleepTimer.Start=Start
+SleepTimer.Start.Accessible=Start sleep timer
+SleepTimer.CancelBtn=Cancel
+SleepTimer.CancelBtn.Accessible=Close without starting a timer
+
+; Sleep Timer announcements (via the off-screen label)
+SleepTimer.Announce.Set=Sleep timer set: {0} minutes
+SleepTimer.Announce.Cancelled=Sleep timer cancelled
+SleepTimer.Announce.Finished=Sleep timer finished, playback stopped
+
+; Player - seek dropdown
+Player.Seek.Label=Seek step:
+Player.Seek.Accessible=Seek step
+Seek.Item.15s=15 seconds
+Seek.Item.30s=30 seconds
+Seek.Item.1min=1 minute
+Seek.Item.5min=5 minutes
+Seek.Item.Part=Part
+
+; Player - Go To dialog
+GoTo.List.Accessible=Book parts
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=OK
+GoTo.Cancel.Accessible=Cancel
+GoTo.AutoPlay=Start playing after jump
+GoTo.AutoPlay.Hint=When checked, playback starts right after the jump. When unchecked, the current state is kept: paused stays paused, playing keeps playing.
+GoTo.Hint.Accessible=Hint
+
+; Player - tooltips (mouse hover hints)
+; Convention: buttons with graphic labels get "Name (shortcut)", buttons
+; with text labels get the shortcut only. Tip.Seek is a functional hint
+; (the combo has no shortcut). Keys must stay present even if emptied.
+Tip.Back=Back (Z)
+Tip.PlayPause=Play/Pause (Space, X)
+Tip.Forward=Forward (B)
+Tip.Seek=Applies to Back/Forward, B and Z
+Tip.GoTo=Ctrl+G
+Tip.Timer=Ctrl+T
+Tip.Volume=Up and Down arrows
+Tip.Speed=Page Up and Page Down
+Tip.Progress=Ctrl+1–9: jump to 10–90%
+
+; Player - volume / speed / position
+Player.Volume.Text=Volume: {0}%
+Player.Volume.Accessible=Volume {0} percent
+Player.Speed.Text=Speed: {0}x
+Player.Speed.Accessible=Speed {0} times
+Player.Position.Label=Position
+Player.Position.Text=Position: {0} / {1}
+Player.Position.Accessible=Position {0} percent
+
+; Player - dialogs
+Dialog.Settings.ComingSoon=Settings – coming soon.
+Dialog.Settings.Title=Settings
+Dialog.Help.ComingSoon=Help – coming soon.
+Dialog.Help.Title=Help
+Dialog.Timer.Title=Sleep Timer
+Dialog.GoTo.Title=Go To
+Dialog.SetBookmark.ComingSoon=Set bookmark – coming soon.
+Dialog.SetBookmark.Title=Set Bookmark
+Dialog.ManageBookmarks.ComingSoon=Manage bookmarks – coming soon.
+Dialog.ManageBookmarks.Title=Manage Bookmarks
+Dialog.Error.Title=Error
+Dialog.Error.General=Error: {0}
+Player.OpenFile.Title=Select a book
+
+; Shared file filters
+Filter.Audiobooks=Audiobooks
+Filter.TextBooks=Text books
+Filter.AllSupported=All supported files
+Filter.AllFiles=All files
+
+; Library window
+Library.Title=Library
+Menu.File=File
+Menu.File.OpenFile=Open file...
+Menu.File.OpenFolder=Open folder...
+Menu.File.Exit=Exit
+Menu.View=View
+Menu.View.AlphaAsc=Alphabetical ascending
+Menu.View.AlphaDesc=Alphabetical descending
+Menu.View.DateAsc=Date added ascending
+Menu.View.DateDesc=Date added descending
+Menu.View.FormatAsc=Format ascending
+Menu.View.FormatDesc=Format descending
+Menu.View.ActiveMark=(active)
+Library.List.Accessible=Book shelf
+Library.Search.Accessible=Search books
+Library.Filter.Accessible=Filter by status
+Shelf.Filter.All=All books
+Shelf.Filter.Reading=Reading
+Shelf.Filter.Unread=Unread
+Shelf.Filter.Read=Read
+Shelf.Group.NowReading=Now Reading
+Shelf.Group.Reading=Reading
+Shelf.Group.Unread=Unread
+Shelf.Group.Read=Read
+Context.Open=Open
+Context.Restart=Rewind to Start
+Context.Rename=Rename
+Context.Delete=Delete
+Context.Properties=Properties
+Library.Details.Accessible=Book details
+Details.Field.Title=Title
+Details.Field.Format=Format
+Details.Field.Duration=Duration
+Details.Field.Listened=Elapsed
+Details.Field.Speed=Speed
+Details.Field.Added=Added
+Details.Speed.Value={0}×
+Btn.Refresh=Refresh
+Btn.Refresh.Accessible=Refresh library
+Btn.OK=OK
+Btn.OK.Accessible=Open selected book
+Btn.Cancel=Cancel
+Btn.Cancel.Accessible=Close library
+
+; Library - dialogs
+Dialog.Restart.Message=Book has been rewound to the start.
+Dialog.Restart.Title=Rewind to Start
+Dialog.Rename.Title=Rename book
+Dialog.Rename.Prompt=New name:
+Dialog.ActiveBook.Message="{0}" is currently loaded in the player and cannot be deleted. Close the library, open another book, or stop playback, then try again.
+Dialog.ActiveBook.Title=Book is active
+Dialog.ConfirmDelete.Message=Are you sure you want to permanently delete "{0}" from disk? This action cannot be undone.
+Dialog.ConfirmDelete.Title=Delete book
+Dialog.DeleteError.Message=Error deleting book from disk: {0}
+Dialog.Properties.ComingSoon=Properties – coming soon.
+Dialog.Properties.Title=Properties
+Library.ImportFile.Title=Add book to library
+Library.ImportFolder.Description=Select a folder with books
+Dialog.ImportSuccess.Message=Book added to library.
+Dialog.ImportSuccess.Title=Add book
+Dialog.ImportError.Message=Error adding book: {0}
+Dialog.NoBooksFound.Message=No supported books were found in the selected folder.
+Dialog.NoBooksFound.Title=Add folder
+Dialog.ConfirmManyBooks.Message=Found {0} books. Continue with import?
+Dialog.ConfirmManyBooks.Title=Add folder
+Dialog.ImportFolderSuccess.Message=Imported {0} books.
+Dialog.ImportFolderSuccess.Title=Add folder
+Dialog.ImportFolderError.Message=Error importing folder: {0}
+
+; Common
+Common.Dash=-
+Common.Error=Error
+Common.DateFormat=MM/dd/yyyy
