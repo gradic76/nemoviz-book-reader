@@ -130,6 +130,7 @@
     </Compile>
     <Compile Include="libraryscanner.cs" />
     <Compile Include="Localization.cs" />
+    <Compile Include="NvdaController.cs" />
     <Compile Include="ManageBookmarksForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -174,6 +175,12 @@
   <ItemGroup>
     <Content Include="libmpv-2.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="nvdaControllerClient.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="nvdaControllerClient-license.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

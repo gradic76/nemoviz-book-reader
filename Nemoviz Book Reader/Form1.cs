@@ -286,7 +286,40 @@ namespace Nemoviz_Book_Reader
         // vestigial and can be removed in a later cleanup.
         private void AnnounceToScreenReader(Label announceLabel, string text)
         {
+            // Two channels, each picked up by exactly one reader: JAWS hears
+            // the UIA notification (and ignores the NVDA client); NVDA hears
+            // the NVDA client (and ignores our UIA notification). Both degrade
+            // to no-ops when their reader isn't present, so calling both is
+            // safe and never double-speaks.
             RaiseUiaNotification(text);
+            NvdaController.Speak(text);
+        }
+
+        // Focus echo guard for the volume/speed fields: they are not updated
+        // while focused (that would make JAWS re-read them on every step), so
+        // they are resynced to the current value when focus lands on them, so
+        // the value announced on focus is correct. Only touches the control
+        // when it has actually drifted, to avoid an extra name-change utterance
+        // on a normal focus-in.
+        private void SyncVolumeField()
+        {
+            string acc = Localization.T("Player.Volume.Accessible", currentVolume);
+            if (tbVolume.AccessibleName != acc)
+            {
+                tbVolume.Text = Localization.T("Player.Volume.Text", currentVolume);
+                tbVolume.AccessibleName = acc;
+            }
+        }
+
+        private void SyncSpeedField()
+        {
+            string speedStr = (currentSpeed / 100.0).ToString("0.0");
+            string acc = Localization.T("Player.Speed.Accessible", speedStr);
+            if (tbSpeed.AccessibleName != acc)
+            {
+                tbSpeed.Text = Localization.T("Player.Speed.Text", speedStr);
+                tbSpeed.AccessibleName = acc;
+            }
         }
 
         private object uiaHostProvider;      // cached IRawElementProviderSimple for this HWND
@@ -581,10 +614,21 @@ namespace Nemoviz_Book_Reader
 
             string text = Localization.T("Player.Volume.Text", currentVolume);
             lblVolume.Text = text;
+            // Volume uses the Up/Down arrows, which a reader treats as edit
+            // caret navigation and so speaks the focused field's current line
+            // on every press — regardless of the field's accessible role
+            // (JAWS keys off the underlying Edit window class). We can't stop
+            // that read, so we make it the SINGLE feedback: keep the field's
+            // Text current (so the line spoken is the right value) and, while
+            // it has focus, do NOT also fire our own announcement (that would
+            // be a second utterance) and do NOT touch AccessibleName (its
+            // change re-triggers the name announcement).
             tbVolume.Text = text;
-            tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", currentVolume);
-
-            AnnounceToScreenReader(lblAnnounceVolume, text);
+            if (!tbVolume.Focused)
+            {
+                tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", currentVolume);
+                AnnounceToScreenReader(lblAnnounceVolume, text);
+            }
 
             if (currentVolume == 0)
                 Console.Beep(300, 150);
@@ -610,8 +654,12 @@ namespace Nemoviz_Book_Reader
             string speedStr = (currentSpeed / 100.0).ToString("0.0");
             string text = Localization.T("Player.Speed.Text", speedStr);
             lblSpeed.Text = text;
-            tbSpeed.Text = text;
-            tbSpeed.AccessibleName = Localization.T("Player.Speed.Accessible", speedStr);
+            // Focus echo guard — see ChangeVolume.
+            if (!tbSpeed.Focused)
+            {
+                tbSpeed.Text = text;
+                tbSpeed.AccessibleName = Localization.T("Player.Speed.Accessible", speedStr);
+            }
 
             AnnounceToScreenReader(lblAnnounceSpeed, text);
 
@@ -920,6 +968,14 @@ namespace Nemoviz_Book_Reader
             tbVolume.Text = Localization.T("Player.Volume.Text", 100);
             tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", 100);
             tbVolume.BackColor = SystemColors.Window;
+            // Present as static text, not an edit: volume is changed with the
+            // Up/Down arrows, which a reader otherwise treats as edit caret
+            // navigation and speaks the field's current line on every press
+            // (on top of our announcement). As static text the arrows are
+            // inert here and the announcement is the single feedback — the
+            // same clean behaviour Speed already gets from Page Up/Down.
+            tbVolume.AccessibleRole = AccessibleRole.StaticText;
+            tbVolume.Enter += (s, e) => SyncVolumeField();
 
             lblSpeed = new Label();
             lblSpeed.Text = Localization.T("Player.Speed.Text", "1.0");
@@ -936,6 +992,10 @@ namespace Nemoviz_Book_Reader
             tbSpeed.Text = Localization.T("Player.Speed.Text", "1.0");
             tbSpeed.AccessibleName = Localization.T("Player.Speed.Accessible", "1.0");
             tbSpeed.BackColor = SystemColors.Window;
+            // Static text for the same reason as tbVolume (harmless for Speed,
+            // which uses Page Up/Down, but keeps the two fields consistent).
+            tbSpeed.AccessibleRole = AccessibleRole.StaticText;
+            tbSpeed.Enter += (s, e) => SyncSpeedField();
 
             // Row 4: progress / position
             lblProgress = new Label();

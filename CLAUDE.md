@@ -49,22 +49,39 @@ non-obvious code choices exist because of it.
   "Sleep Timer, Ctrl+T". Tooltips are separate and for sighted/mouse use.
 - **Screen-reader announcements** of transient changes (volume, speed, timer
   set/cancelled, info-on-demand, bookmark set) go through
-  `AnnounceToScreenReader(label, text)`. **As of Session 10 this raises a UIA
-  notification event** (`UiaRaiseNotificationEvent` on a host provider from
-  the form's HWND, `NotificationProcessing.MostRecent`) — it speaks the text
-  **without moving focus**. This replaced the old approach of briefly focusing
-  an off-screen `Label` and restoring focus after ~150 ms, which stole focus
-  (rapid key-repeat overlapped the focus shuffles and choked the reader) and
-  which NVDA largely ignored. `MostRecent` also makes the reader drop stale
-  queued values during fast repeats. The `label` parameter and the off-screen
-  `lblAnnounce*` controls are now **vestigial** (kept only so call sites
-  didn't change; safe to remove in a cleanup).
-  - **JAWS: works great** (it registers as a global UIA client). **NVDA:
-    still only announces when focus is on the value control itself** — NVDA
-    drives WinForms via MSAA, not UIA, so it doesn't pick up the UIA
-    notification. Closing that gap needs a separate mechanism (NVDA Controller
-    Client `nvdaControllerClient64.dll`, or Tolk); planned, see roadmap. This
-    is a known NVDA/WinForms limitation, not a bug in our code.
+  `AnnounceToScreenReader(label, text)`. **As of Session 10 this speaks the
+  text WITHOUT moving focus, via two channels, each picked up by exactly one
+  reader:**
+  - **JAWS** — a UIA notification event (`UiaRaiseNotificationEvent` on a host
+    provider from the form's HWND, `NotificationProcessing.MostRecent` so the
+    reader drops stale queued values during fast key-repeat).
+  - **NVDA** — the NVDA Controller Client (`NvdaController.Speak` →
+    `nvdaControllerClient.dll`, x64, vendored; `cancelSpeech` before
+    `speakText` gives the same drop-stale behaviour). NVDA drives WinForms via
+    MSAA and **ignores** the UIA notification, so it needs its own channel;
+    JAWS in turn ignores the NVDA client, so calling both never double-speaks,
+    and each call is a silent no-op when its reader isn't running.
+
+  This replaced the old approach of briefly focusing an off-screen `Label` and
+  restoring focus after ~150 ms, which stole focus (rapid key-repeat overlapped
+  the focus shuffles and choked the reader) and which NVDA largely ignored. The
+  `label` parameter and the off-screen `lblAnnounce*` controls are now
+  **vestigial** (kept only so call sites didn't change; safe to remove).
+
+- **The volume/speed value fields (`tbVolume`, `tbSpeed`) and the arrow-key
+  read.** These are read-only display fields you can Tab to. Volume changes
+  with **Up/Down**, which a screen reader treats as edit caret-navigation and
+  so speaks the focused field's current line on every press — a second
+  utterance on top of the announcement. `AccessibleRole = StaticText`
+  cleans up the focus announcement (drops "read only edit") but does **not**
+  stop that read (JAWS keys off the underlying Edit window class). The fix:
+  when such a field is focused, let that arrow read BE the feedback — keep the
+  field's `Text` current so the spoken line is correct, and **skip** both our
+  own announcement and any `AccessibleName` change (whose change re-triggers
+  the name announcement). See `ChangeVolume`. Speed is unaffected (Page
+  Up/Down aren't caret keys) but shares the same pattern for consistency. If
+  this ever regresses, the fallback is making the fields non-focusable
+  (`TabStop = false`) and relying solely on the announcement.
 
 ### The info box lesson (do not regress this)
 
@@ -138,8 +155,12 @@ Approximate roles — read the actual files for detail:
 - **SleepTimerForm.cs** — the Sleep Timer modal dialog (added Session 8).
 - **GoToForm.cs** — the Go To (named navigation) modal dialog (Session 7).
 - **ManageBookmarksForm.cs** — the Manage Bookmarks modal dialog (Session 9).
-- **SettingsForm.cs** — the Settings dialog (Session 9, UI shell only — see
-  section 8b).
+- **SettingsForm.cs** — the Settings dialog (Session 9 shell, wiring started
+  Session 10 — see section 8b).
+- **NvdaController.cs** — thin P/Invoke wrapper over the vendored
+  `nvdaControllerClient.dll` (x64, LGPL 2.1, in the project root next to
+  `libmpv-2.dll`; `nvdaControllerClient-license.txt` beside it). Speaks
+  through NVDA without focus change; see section 2.
 - **LibraryForm.cs** — the Library window (book shelf, search, filter, sort,
   context actions).
 - **BookData.cs** — a single book: metadata, progress, the virtual timeline
@@ -479,13 +500,9 @@ folder is gone, or the last book was already finished.
    global "Show help hints" toggle that flips hint `Visible`/`TabStop` live
    without closing the window (the pattern already lives in the Go To dialog's
    hint box).
-5. **NVDA announcement parity** — the UIA notification (Session 10) fixed
-   JAWS; NVDA still only speaks transient values when focus is on the value
-   control. Add the **NVDA Controller Client** (`nvdaControllerClient64.dll`,
-   x64 — the app is x64) or **Tolk** so NVDA announces from anywhere too.
-   Clean re: double-speak — NVDA ignores our UIA notification and JAWS ignores
-   the NVDA client, so each reader hears only its own channel. Guard for NVDA
-   not running.
+5. **Screen-reader announcements** — done (Session 10): UIA notification for
+   JAWS + NVDA Controller Client for NVDA, both without moving focus; see
+   section 2.
 6. **Properties dialogs** (player + library) and library tooltips.
 7. **Audio filters** (not yet scheduled): dynaudnorm/speechnorm
    (normalization), scaletempo2 (already active, pitch-preserved speed),
@@ -499,10 +516,6 @@ folder is gone, or the last book was already finished.
 
 ## 11. TODO (open items)
 
-- **NVDA announcement parity** (roadmap item 5) — transient-value
-  announcements only reach NVDA when focus is on the value control; add the
-  NVDA Controller Client / Tolk. This is the current showstopper for further
-  NVDA-tested work.
 - **Verify Sleep Timer expiry (close/shutdown) in the modal-Library edge
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal
