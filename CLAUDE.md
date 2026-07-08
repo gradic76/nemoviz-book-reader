@@ -48,12 +48,23 @@ non-obvious code choices exist because of it.
   e.g. "Back, Z", "Forward, B", "Play, Space or X", "Go To, Ctrl+G",
   "Sleep Timer, Ctrl+T". Tooltips are separate and for sighted/mouse use.
 - **Screen-reader announcements** of transient changes (volume, speed, timer
-  set/cancelled, info-on-demand) go through **off-screen `Label` controls**
-  placed at negative coordinates (e.g. `new Point(-600, -600)`), with
-  `TabStop = false`. The helper `AnnounceToScreenReader(label, text)` sets the
-  label's text, briefly focuses it, then restores focus after ~150 ms via a
-  one-shot timer. This makes the reader speak the text without disturbing the
-  real control the user is on.
+  set/cancelled, info-on-demand, bookmark set) go through
+  `AnnounceToScreenReader(label, text)`. **As of Session 10 this raises a UIA
+  notification event** (`UiaRaiseNotificationEvent` on a host provider from
+  the form's HWND, `NotificationProcessing.MostRecent`) — it speaks the text
+  **without moving focus**. This replaced the old approach of briefly focusing
+  an off-screen `Label` and restoring focus after ~150 ms, which stole focus
+  (rapid key-repeat overlapped the focus shuffles and choked the reader) and
+  which NVDA largely ignored. `MostRecent` also makes the reader drop stale
+  queued values during fast repeats. The `label` parameter and the off-screen
+  `lblAnnounce*` controls are now **vestigial** (kept only so call sites
+  didn't change; safe to remove in a cleanup).
+  - **JAWS: works great** (it registers as a global UIA client). **NVDA:
+    still only announces when focus is on the value control itself** — NVDA
+    drives WinForms via MSAA, not UIA, so it doesn't pick up the UIA
+    notification. Closing that gap needs a separate mechanism (NVDA Controller
+    Client `nvdaControllerClient64.dll`, or Tolk); planned, see roadmap. This
+    is a known NVDA/WinForms limitation, not a bug in our code.
 
 ### The info box lesson (do not regress this)
 
@@ -401,19 +412,31 @@ auto-detects the format, no per-format branching needed.
 
 ---
 
-## 8b. Settings dialog (Session 9 — UI shell only)
+## 8b. Settings dialog (Session 9 shell; wiring started Session 10)
 
-`SettingsForm.cs`. Classic dialog, `chkShowHints` checkbox at the top
-(planned global switch for the hint-box pattern — not yet wired to anything,
-since no per-control hints exist yet), then a `TabControl`: **General**
-(multimedia-key checkboxes), **Audio Books** (WIP placeholder), **Text
-Books** (language/engine/voice combos + speed/volume/pitch sliders + a
-"coming soon" note for low-vision/dyslexic reader options), **Device** (sound
-card combo), **Misc** (WIP placeholder). OK/Cancel/Apply at the bottom —
-**nothing in this dialog is wired to `AppSettings` or any real subsystem
-yet**; it's scaffolding to fill in as each subsystem gets built (sound
-processing was explicitly deferred by Gordan as "a bit complicated, for
-later"). See TODO for the next concrete addition (Library location field).
+`SettingsForm.cs` (takes an `AppSettings`). Classic dialog, `chkShowHints`
+checkbox at the top (planned global switch for the hint-box pattern — not yet
+wired), then a `TabControl`: **General**, **Audio Books** (WIP placeholder),
+**Text Books** (language/engine/voice combos + speed/volume/pitch sliders +
+a "coming soon" note for low-vision/dyslexic reader options), **Device**
+(sound card combo), **Misc** (WIP placeholder). OK / Cancel / **Apply** at the
+bottom; OK and Apply both call `SaveSettings()` (OK also closes), Cancel
+discards.
+
+**General tab** is where real wiring began:
+- **Library location** — read-only textbox showing the path + **Browse...**
+  (`FolderBrowserDialog`). Browse only *stages* the choice; `SaveSettings`
+  persists via `AppSettings.SetLibraryPath` + `EnsureLibraryExists`, and only
+  if it actually changed. This is the first genuinely functional control.
+- **Language** combo — app UI language. Lists only English for now
+  (`LanguageName`); **not wired** to `AppSettings.SetLanguage` yet because
+  there's nothing to switch to until `hr.lang` exists (end-of-project
+  translation pass).
+- The two multimedia-key checkboxes are still unwired placeholders.
+
+Everything else (Text Books, Device, sliders, hints toggle) is still
+scaffolding to fill in as each subsystem is built. Sound processing was
+explicitly deferred by Gordan ("a bit complicated, for later").
 
 ---
 
@@ -448,30 +471,38 @@ folder is gone, or the last book was already finished.
 2. **Bookmarks** — done (Session 9): Set Bookmark, Manage Bookmarks dialog,
    Bookmark seek step.
 3. **Archive import (.zip/.rar/.7z)** — done (Session 9): see section 8a.
-4. **Settings window** — UI shell in place (Session 9, see section 8b);
-   General/Text Books/Device tabs still need to be wired to AppSettings and
-   real subsystems. Will use a "hint system": a read-only textbox beside most
-   controls with a short explanation, plus a global "Show help hints" toggle
-   that flips hint `Visible`/`TabStop` live without closing the window (the
-   pattern already lives in the Go To dialog's hint box). Settings will also
-   hold: media-keys mode and language selection.
-5. **Properties dialogs** (player + library) and library tooltips.
-6. **Audio filters** (not yet scheduled): dynaudnorm/speechnorm
+4. **Settings window** — shell + first wiring done (Sessions 9–10, section
+   8b): Library location and a (single-option) Language combo are in the
+   General tab. Text Books/Device tabs and the media-keys checkboxes still
+   need wiring to AppSettings and real subsystems. Will use a "hint system":
+   a read-only textbox beside most controls with a short explanation, plus a
+   global "Show help hints" toggle that flips hint `Visible`/`TabStop` live
+   without closing the window (the pattern already lives in the Go To dialog's
+   hint box).
+5. **NVDA announcement parity** — the UIA notification (Session 10) fixed
+   JAWS; NVDA still only speaks transient values when focus is on the value
+   control. Add the **NVDA Controller Client** (`nvdaControllerClient64.dll`,
+   x64 — the app is x64) or **Tolk** so NVDA announces from anywhere too.
+   Clean re: double-speak — NVDA ignores our UIA notification and JAWS ignores
+   the NVDA client, so each reader hears only its own channel. Guard for NVDA
+   not running.
+6. **Properties dialogs** (player + library) and library tooltips.
+7. **Audio filters** (not yet scheduled): dynaudnorm/speechnorm
    (normalization), scaletempo2 (already active, pitch-preserved speed),
    acompressor (dynamic range), highpass+EQ (voice clarity), afftdn/arnndn
    (noise reduction). Actual availability depends on the specific
    `libmpv-2.dll` build.
-7. **DAISY / text-book structure** — a large separate subsystem; plugs into
+8. **DAISY / text-book structure** — a large separate subsystem; plugs into
    the Go To level and the seek dropdown's structural levels.
 
 ---
 
 ## 11. TODO (open items)
 
-- **Settings → General: add a "Library location" field** — read-only textbox
-  showing `AppSettings.LibraryPath` plus a Browse button (FolderBrowserDialog)
-  to change it via `AppSettings.SetLibraryPath`. Flagged for "start of next
-  session" — not yet built.
+- **NVDA announcement parity** (roadmap item 5) — transient-value
+  announcements only reach NVDA when focus is on the value control; add the
+  NVDA Controller Client / Tolk. This is the current showstopper for further
+  NVDA-tested work.
 - **Verify Sleep Timer expiry (close/shutdown) in the modal-Library edge
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal

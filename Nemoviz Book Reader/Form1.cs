@@ -265,23 +265,105 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // Screen reader announcement
         // ──────────────────────────────────────────────
+        //
+        // Transient values (volume, speed, timer, info-on-demand, bookmark
+        // set, seek step...) are announced through a UIA *notification event*
+        // raised on the player window itself. This speaks the text WITHOUT
+        // moving focus, which fixes the two problems the old off-screen-label
+        // approach had:
+        //   * it briefly stole focus to a hidden label and restored it 150 ms
+        //     later — rapid key repeats overlapped those focus shuffles and
+        //     choked the reader, and
+        //   * NVDA (unlike JAWS) largely ignored the programmatic focus to an
+        //     off-screen label, so pressing volume/speed keys while focus was
+        //     on a button produced no feedback at all.
+        // NotificationProcessing.MostRecent tells the reader to drop pending
+        // older notifications and speak only the latest, so holding/​repeating
+        // a key no longer backs up a queue of stale values.
+        //
+        // The announceLabel parameter is kept so the many call sites don't
+        // change; it is no longer used. The off-screen label controls are now
+        // vestigial and can be removed in a later cleanup.
         private void AnnounceToScreenReader(Label announceLabel, string text)
         {
-            Control focusBefore = this.ActiveControl;
-            announceLabel.Text = text;
-            announceLabel.Focus();
-
-            System.Windows.Forms.Timer restoreFocus = new System.Windows.Forms.Timer();
-            restoreFocus.Interval = 150;
-            restoreFocus.Tick += (s, ev) =>
-            {
-                restoreFocus.Stop();
-                restoreFocus.Dispose();
-                if (focusBefore != null && !focusBefore.IsDisposed)
-                    focusBefore.Focus();
-            };
-            restoreFocus.Start();
+            RaiseUiaNotification(text);
         }
+
+        private object uiaHostProvider;      // cached IRawElementProviderSimple for this HWND
+        private bool uiaNotifyUnavailable;   // set if the API is missing (pre-Win10-1709)
+
+        private void RaiseUiaNotification(string text)
+        {
+            if (uiaNotifyUnavailable || string.IsNullOrEmpty(text) || !IsHandleCreated)
+                return;
+
+            try
+            {
+                if (uiaHostProvider == null)
+                {
+                    IRawElementProviderSimple provider;
+                    int hr = UiaHostProviderFromHwnd(this.Handle, out provider);
+                    if (hr != 0 || provider == null)
+                    {
+                        uiaNotifyUnavailable = true;
+                        return;
+                    }
+                    uiaHostProvider = provider;
+                }
+
+                UiaRaiseNotificationEvent(
+                    (IRawElementProviderSimple)uiaHostProvider,
+                    NotificationKind.Other,
+                    NotificationProcessing.MostRecent,
+                    text,
+                    string.Empty);
+            }
+            catch
+            {
+                // UiaRaiseNotificationEvent needs Windows 10 1709+. On older
+                // systems the export is missing and the first call throws —
+                // stop trying so we don't throw on every keystroke.
+                uiaNotifyUnavailable = true;
+            }
+        }
+
+        [ComImport, Guid("d6dd68d1-86fd-4332-8666-9abedea2d24c"),
+         InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IRawElementProviderSimple
+        {
+            // Never called from managed code — we only obtain the provider
+            // from the OS and hand it back to UiaRaiseNotificationEvent, so no
+            // members need to be declared for the pointer to marshal.
+        }
+
+        private enum NotificationKind
+        {
+            ItemAdded = 0,
+            ItemRemoved = 1,
+            ActionCompleted = 2,
+            ActionAborted = 3,
+            Other = 4
+        }
+
+        private enum NotificationProcessing
+        {
+            ImportantAll = 0,
+            ImportantMostRecent = 1,
+            All = 2,
+            MostRecent = 3,
+            CurrentThenMostRecent = 4
+        }
+
+        [DllImport("UIAutomationCore.dll")]
+        private static extern int UiaHostProviderFromHwnd(IntPtr hwnd, out IRawElementProviderSimple provider);
+
+        [DllImport("UIAutomationCore.dll", CharSet = CharSet.Unicode)]
+        private static extern int UiaRaiseNotificationEvent(
+            IRawElementProviderSimple provider,
+            NotificationKind notificationKind,
+            NotificationProcessing notificationProcessing,
+            [MarshalAs(UnmanagedType.BStr)] string displayString,
+            [MarshalAs(UnmanagedType.BStr)] string activityId);
 
         // ──────────────────────────────────────────────
         // Seek step (from the seek dropdown)
@@ -1703,7 +1785,7 @@ namespace Nemoviz_Book_Reader
 
         private void BtnSettings_Click(object sender, EventArgs e)
         {
-            using (SettingsForm dlg = new SettingsForm())
+            using (SettingsForm dlg = new SettingsForm(appSettings))
             {
                 dlg.ShowDialog(this);
             }

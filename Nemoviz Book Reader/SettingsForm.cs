@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -15,14 +16,25 @@ namespace Nemoviz_Book_Reader
     /// </summary>
     public class SettingsForm : Form
     {
+        private readonly AppSettings appSettings;
+
         private CheckBox chkShowHints;
         private TabControl tabSettings;
         private Button btnOK;
         private Button btnCancel;
         private Button btnApply;
 
-        public SettingsForm()
+        // Library location (General tab) — the first genuinely wired control
+        // in this dialog. The textbox is read-only and shows the staged path;
+        // Browse changes it; OK/Apply persist it via AppSettings.
+        private TextBox tbLibraryLocation;
+        private string stagedLibraryPath;
+
+        public SettingsForm(AppSettings appSettings)
         {
+            this.appSettings = appSettings;
+            this.stagedLibraryPath = appSettings.LibraryPath;
+
             this.Text = Localization.T("Dialog.Settings.Title");
             this.ClientSize = new Size(480, 460);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -56,6 +68,8 @@ namespace Nemoviz_Book_Reader
             btnOK.Location = new Point(180, 420);
             btnOK.TabIndex = 2;
             btnOK.DialogResult = DialogResult.OK;
+            // Click fires before the dialog closes, so this persists on OK too.
+            btnOK.Click += (s, e) => SaveSettings();
 
             btnCancel = new Button();
             btnCancel.Text = Localization.T("Btn.Cancel");
@@ -65,14 +79,14 @@ namespace Nemoviz_Book_Reader
             btnCancel.TabIndex = 3;
             btnCancel.DialogResult = DialogResult.Cancel;
 
-            // No DialogResult — Apply does not close the dialog. Currently a
-            // placeholder with nothing to apply yet (see class remarks).
+            // No DialogResult — Apply persists without closing the dialog.
             btnApply = new Button();
             btnApply.Text = Localization.T("Settings.Apply");
             btnApply.AccessibleName = Localization.T("Settings.Apply.Accessible");
             btnApply.Size = new Size(90, 32);
             btnApply.Location = new Point(380, 420);
             btnApply.TabIndex = 4;
+            btnApply.Click += (s, e) => SaveSettings();
 
             this.Controls.Add(chkShowHints);
             this.Controls.Add(tabSettings);
@@ -118,9 +132,89 @@ namespace Nemoviz_Book_Reader
             chkUseMultimediaKeysGlobally.Size = new Size(420, 24);
             chkUseMultimediaKeysGlobally.TabIndex = 1;
 
+            Label lblLibraryLocation = new Label();
+            lblLibraryLocation.Text = Localization.T("Settings.General.LibraryLocation");
+            lblLibraryLocation.Location = new Point(10, 88);
+            lblLibraryLocation.Size = new Size(420, 18);
+            lblLibraryLocation.TabStop = false;
+
+            // Read-only so the path can only be changed via Browse, but
+            // tabbable + carrying the folder as its value so a screen reader
+            // reads the current location.
+            tbLibraryLocation = new TextBox();
+            tbLibraryLocation.ReadOnly = true;
+            tbLibraryLocation.TabStop = true;
+            tbLibraryLocation.Location = new Point(10, 108);
+            tbLibraryLocation.Size = new Size(330, 23);
+            tbLibraryLocation.Text = stagedLibraryPath;
+            tbLibraryLocation.AccessibleName = Localization.T("Settings.General.LibraryLocation");
+            tbLibraryLocation.TabIndex = 2;
+
+            Button btnBrowse = new Button();
+            btnBrowse.Text = Localization.T("Settings.General.Browse");
+            btnBrowse.AccessibleName = Localization.T("Settings.General.Browse.Accessible");
+            btnBrowse.Location = new Point(348, 107);
+            btnBrowse.Size = new Size(90, 26);
+            btnBrowse.TabIndex = 3;
+            btnBrowse.Click += (s, e) => BrowseLibraryLocation();
+
+            Label lblLanguage = new Label();
+            lblLanguage.Text = Localization.T("Settings.General.Language");
+            lblLanguage.Location = new Point(10, 148);
+            lblLanguage.Size = new Size(160, 20);
+            lblLanguage.TabStop = false;
+
+            // App UI language. Only English exists until the app is
+            // feature-complete (hr.lang is a final translation pass), so the
+            // combo currently lists just the one language; not yet wired to
+            // AppSettings.SetLanguage since there is nothing to switch to.
+            ComboBox cmbLanguage = new ComboBox();
+            cmbLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbLanguage.Location = new Point(180, 145);
+            cmbLanguage.Size = new Size(240, 24);
+            cmbLanguage.AccessibleName = Localization.T("Settings.General.Language");
+            cmbLanguage.TabIndex = 4;
+            cmbLanguage.Items.Add(Localization.T("LanguageName"));
+            cmbLanguage.SelectedIndex = 0;
+
             page.Controls.Add(chkUseMultimediaKeys);
             page.Controls.Add(chkUseMultimediaKeysGlobally);
+            page.Controls.Add(lblLibraryLocation);
+            page.Controls.Add(tbLibraryLocation);
+            page.Controls.Add(btnBrowse);
+            page.Controls.Add(lblLanguage);
+            page.Controls.Add(cmbLanguage);
             return page;
+        }
+
+        /// <summary>Browse for a new library folder; only stages the choice
+        /// (updates the read-only textbox) — it isn't persisted until OK or
+        /// Apply.</summary>
+        private void BrowseLibraryLocation()
+        {
+            using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+            {
+                fbd.Description = Localization.T("Settings.General.LibraryLocation.Browse");
+                if (Directory.Exists(stagedLibraryPath))
+                    fbd.SelectedPath = stagedLibraryPath;
+                if (fbd.ShowDialog(this) == DialogResult.OK)
+                {
+                    stagedLibraryPath = fbd.SelectedPath;
+                    tbLibraryLocation.Text = stagedLibraryPath;
+                }
+            }
+        }
+
+        /// <summary>Persists the staged settings (currently just the library
+        /// path). Called by both OK and Apply. Only writes when the path
+        /// actually changed, and makes sure the target folder exists.</summary>
+        private void SaveSettings()
+        {
+            if (stagedLibraryPath != appSettings.LibraryPath)
+            {
+                appSettings.SetLibraryPath(stagedLibraryPath);
+                appSettings.EnsureLibraryExists();
+            }
         }
 
         private TabPage BuildAudioBooksTab()
