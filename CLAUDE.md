@@ -45,8 +45,9 @@ non-obvious code choices exist because of it.
   top, never a substitute.
 - **`AccessibleName` carries keyboard shortcuts**, because JAWS does not read
   tooltips on tab focus. Convention: the accessible name embeds the shortcut,
-  e.g. "Back, Z", "Forward, B", "Play, Space or X", "Go To, Ctrl+G",
-  "Sleep Timer, Ctrl+T". Tooltips are separate and for sighted/mouse use.
+  e.g. "Back, Shift+Left", "Forward, Shift+Right", "Play, Space",
+  "Go To, Ctrl+G", "Sleep Timer, Ctrl+T". Tooltips are separate and for
+  sighted/mouse use.
 - **Screen-reader announcements** of transient changes (volume, speed, timer
   set/cancelled, info-on-demand, bookmark set) go through
   `AnnounceToScreenReader(label, text)`. **As of Session 10 this speaks the
@@ -213,23 +214,40 @@ The player's bottom panel is a 3-column × 4-row proportional grid inside a
 Documented in a comment above the seek-step methods in Form1. All four coexist:
 
 1. **Left/Right arrows** — plain 5-second seek, like any player. Intercepted
-   even when the seek dropdown has focus (so Left/Right always means seek);
-   Up/Down are left to the dropdown while it is focused.
+   even when the seek dropdown has focus (so Left/Right always means seek).
 2. **Ctrl+1..9** — percentage jumps to 10%–90% of the whole book's virtual
    duration.
-3. **Ctrl+Right / Ctrl+Left, media Next/Prev, and the on-screen Back/Forward
+3. **Shift+Left / Shift+Right, media Next/Prev, and the on-screen Back/Forward
    buttons** — jump by the step currently selected in the seek dropdown.
-   Steps: 15 s / 30 s / 1 min / 5 min / **Part** / **Bookmark** (Session 9
-   — freed from B/Z, which are unused). "Part" uses `PartForward()` /
-   `PartBack()` (Back logic: more than 3 s into the current part rewinds to
-   that part's start, otherwise jumps to the previous part). "Bookmark" only
-   appears in the dropdown while the current book has at least one bookmark
-   (`UpdateSeekStepBookmarkOption`); `BookmarkForward()` jumps to the next
-   bookmark after the current position, `BookmarkBack()` mirrors Part's
-   3-second grace against the preceding bookmark.
+   Steps: 15 s / 30 s / 1 min / 5 min / **Part** / **Bookmark**. **Shift+Up /
+   Shift+Down change which step is selected** (`ChangeSeekStep`, announced).
+   "Part" uses `PartForward()` / `PartBack()` (Back logic: more than 3 s into
+   the current part rewinds to that part's start, otherwise jumps to the
+   previous part). "Bookmark" only appears in the dropdown while the current
+   book has at least one bookmark (`UpdateSeekStepBookmarkOption`);
+   `BookmarkForward()` jumps to the next bookmark after the current position,
+   `BookmarkBack()` mirrors Part's 3-second grace against the preceding
+   bookmark. The selected step is **remembered per book** in `Book.ini`
+   (`[Settings] SeekStep`, clamped on load).
 4. **Go To... (Ctrl+G)** — named navigation. For plain audio this is a list
    of the book's parts. DAISY/text structure (headings, pages) will plug in
    here later as a separate subsystem.
+
+**Why Shift, not Ctrl, for the seek cluster (Session 10).** Ctrl+Up/Down are
+unusable as app shortcuts: when focus is on a non-edit control (a button) the
+shell/reader eats the Ctrl and even sends focus off to the desktop; the app
+only ever receives a bare "Up"/"Down" (confirmed by a keyData diagnostic).
+Ctrl+**Left/Right** are fine (the shell doesn't grab horizontal arrows), so
+**speed** lives there. Shift+arrows reach the app on buttons in both readers,
+so the whole seek cluster is on Shift. Cosmetic JAWS-only side effects remain
+and are accepted: Shift+arrow makes JAWS say "selected", and Ctrl+Left/Right
+(word-nav keys) make it re-read the focused control — both are the reader's
+built-in arrow semantics, not fixable from the app (AccessibleRole.Application
+on the form did not change JAWS here).
+
+**The seek dropdown is keyboard-inert** (`cmbSeek.KeyDown` swallowed): it is a
+display, changed only via Shift+Up/Down or the mouse. So plain Up/Down are
+volume even when it has focus.
 
 ### Virtual timeline
 
@@ -252,15 +270,19 @@ and an off switch.
 
 ### Other player keys
 
-- **Space / X** — Play/Pause.
+- **Space** — Play/Pause (the only key for it; X was removed in Session 10).
 - **Up/Down** — volume ±5 (announced; beep at 0 and at 100).
-- **PageUp/PageDown** — speed ±10% (range 50–300%; double beep at 100%).
-- **I** — announce fresh playback info (off-screen label).
+- **Ctrl+Left/Right** — speed ±10% (range 50–300%; double beep at 100%).
+  Replaced PageUp/PageDown in Session 10.
+- **I** — announce fresh playback info.
 - **Ctrl+O** — Open File.
 - **Ctrl+G** — Go To.
 - **Ctrl+T** — Sleep Timer.
 - **Ctrl+B** — Set Bookmark.
-- **Enter** — activates the focused button.
+- **Enter** — activates the focused button. (Note: Space does NOT activate a
+  focused button — it is globally Play/Pause — so JAWS's generic "press
+  spacebar to activate" hint on buttons is misleading; most users have that
+  hint off. Buttons activate with Enter.)
 
 ---
 
@@ -524,8 +546,6 @@ folder is gone, or the last book was already finished.
   than "read only edit" order — this is JAWS's internal handling of
   multiline vs singleline EDIT controls, not our code. Deferred to final
   polish (options: shortcut in AccessibleDescription, or a naming tweak).
-- Seek-step selection is session-only; per-book memory in `Book.ini` is a
-  possible later refinement.
 - SharpCompress-based extraction has been runtime-tested with .zip and .7z
   (Gordan confirmed both work). .rar untested for lack of a sample file on
   hand — same code path, should behave the same, but hasn't been observed.

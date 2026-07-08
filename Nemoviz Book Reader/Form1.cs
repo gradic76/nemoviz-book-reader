@@ -404,9 +404,10 @@ namespace Nemoviz_Book_Reader
         // Navigation is layered in four levels:
         //   1. Left/Right arrows  — plain 5 s seek, like any other player.
         //   2. Ctrl+1..9          — percentage jumps across the whole book.
-        //   3. Ctrl+Right / Ctrl+Left, media Next/Prev, and the on-screen
+        //   3. Shift+Left / Shift+Right, media Next/Prev, and the on-screen
         //      Back/Forward buttons — jump by the step selected in the seek
-        //      dropdown (time steps or whole Part).
+        //      dropdown (time steps / whole Part / Bookmark). Shift+Up/Down
+        //      change which step is selected.
         //   4. Go To... (Ctrl+G)  — pick a named target from a list; for
         //      plain audio that's the book's parts.
         /// <summary>Seconds for the currently selected time step (indices 0–3).</summary>
@@ -456,6 +457,16 @@ namespace Nemoviz_Book_Reader
                 SeekRelative(-GetSeekStepSeconds());
         }
 
+        /// <summary>Shift+Up / Shift+Down: cycles the seek dropdown's selected
+        /// step and announces the new value, from anywhere in the window. The
+        /// dropdown can still be changed directly when it has focus.</summary>
+        private void ChangeSeekStep(int delta)
+        {
+            int newIndex = Math.Max(0, Math.Min(cmbSeek.Items.Count - 1, cmbSeek.SelectedIndex + delta));
+            cmbSeek.SelectedIndex = newIndex;
+            AnnounceToScreenReader(lblAnnounceInfo, Localization.T("Player.Seek.Announce", cmbSeek.Text));
+        }
+
         /// <summary>Adds or removes the "Bookmark" seek-step option (always
         /// the last item, right after "Part") to match whether the current
         /// book has any bookmarks. Called whenever the book or its bookmark
@@ -483,21 +494,15 @@ namespace Nemoviz_Book_Reader
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             bool infoBoxHasFocus = this.ActiveControl == tbInfo;
-            // The seek dropdown changes its selection with Up/Down while it
-            // has focus, so those two keys are left to it. Left/Right are
-            // intercepted even then — a ComboBox would otherwise also change
-            // its selection with them, and we want Left/Right to always mean
-            // plain seeking (navigation level 1), regardless of focus.
-            bool seekComboHasFocus = this.ActiveControl == cmbSeek;
 
             switch (keyData)
             {
                 case Keys.Up:
-                    if (!infoBoxHasFocus && !seekComboHasFocus) { ChangeVolume(+5); return true; }
+                    if (!infoBoxHasFocus) { ChangeVolume(+5); return true; }
                     break;
 
                 case Keys.Down:
-                    if (!infoBoxHasFocus && !seekComboHasFocus) { ChangeVolume(-5); return true; }
+                    if (!infoBoxHasFocus) { ChangeVolume(-5); return true; }
                     break;
 
                 case Keys.Right:
@@ -508,18 +513,6 @@ namespace Nemoviz_Book_Reader
                     if (!infoBoxHasFocus) { SeekRelative(-5); return true; }
                     break;
 
-                case Keys.PageUp:
-                    ChangeSpeed(+10);
-                    return true;
-
-                case Keys.PageDown:
-                    ChangeSpeed(-10);
-                    return true;
-
-                case Keys.X:
-                    BtnPlayPause_Click(null, EventArgs.Empty);
-                    return true;
-
                 case Keys.I:
                     // Read out fresh playback info from anywhere in the
                     // player, via the off-screen announcement label. The
@@ -528,12 +521,33 @@ namespace Nemoviz_Book_Reader
                     AnnounceToScreenReader(lblAnnounceInfo, BuildCurrentInfoText());
                     return true;
 
+                // Speed — Ctrl+Left/Right (replaced Page Up/Down). Ctrl is
+                // fine on Left/Right (unlike Up/Down, which the shell/JAWS grab
+                // for vertical navigation).
+                case Keys.Control | Keys.Left:
+                    ChangeSpeed(-10);
+                    return true;
+
                 case Keys.Control | Keys.Right:
+                    ChangeSpeed(+10);
+                    return true;
+
+                // Seek jump by the selected step — Shift+Left/Right.
+                case Keys.Shift | Keys.Left:
+                    SeekStepBackward();
+                    return true;
+
+                case Keys.Shift | Keys.Right:
                     SeekStepForward();
                     return true;
 
-                case Keys.Control | Keys.Left:
-                    SeekStepBackward();
+                // Change the seek step (the dropdown value) — Shift+Up/Down.
+                case Keys.Shift | Keys.Up:
+                    ChangeSeekStep(+1);
+                    return true;
+
+                case Keys.Shift | Keys.Down:
+                    ChangeSeekStep(-1);
                     return true;
 
                 case Keys.Control | Keys.O:
@@ -923,6 +937,12 @@ namespace Nemoviz_Book_Reader
             cmbSeek.Items.Add(Localization.T("Seek.Item.5min"));
             cmbSeek.Items.Add(Localization.T("Seek.Item.Part"));
             cmbSeek.SelectedIndex = 0;
+            // Keyboard-inert display: the step is changed only with
+            // Shift+Up/Down (from anywhere) or the mouse. Swallowing KeyDown
+            // (and the resulting KeyPress) stops the combo from reacting to
+            // arrows, type-ahead letters, Home/End, or opening its dropdown
+            // from the keyboard, so focusing it never steals those keys.
+            cmbSeek.KeyDown += (s, e) => { e.Handled = true; e.SuppressKeyPress = true; };
 
             // Row 2: transport buttons
             btnBack = new Button();
@@ -1596,6 +1616,7 @@ namespace Nemoviz_Book_Reader
 
                 currentBook.Volume = currentVolume;
                 currentBook.Speed = currentSpeed;
+                currentBook.SeekStep = cmbSeek.SelectedIndex;
                 currentBook.Save();
             }
             catch (Exception)
@@ -1715,7 +1736,7 @@ namespace Nemoviz_Book_Reader
         }
 
         // On-screen Back/Forward buttons are the mouse/visual-mode
-        // equivalent of Ctrl+Right/Ctrl+Left and the media keys — all of
+        // equivalent of Shift+Left/Shift+Right and the media keys — all of
         // them are navigation level 3 and follow the step selected in the
         // seek dropdown.
         private void BtnBack_Click(object sender, EventArgs e)
@@ -1999,6 +2020,10 @@ namespace Nemoviz_Book_Reader
 
             currentBook = book;
             UpdateSeekStepBookmarkOption();
+            // Restore the book's saved seek step, clamped in case the range
+            // shrank since it was saved (e.g. the Bookmark option is gone
+            // because this book has no bookmarks).
+            cmbSeek.SelectedIndex = Math.Max(0, Math.Min(cmbSeek.Items.Count - 1, currentBook.SeekStep));
 
             currentVolume = Math.Min(100, Math.Max(0, currentBook.Volume));
             currentSpeed = Math.Min(300, Math.Max(50, currentBook.Speed));

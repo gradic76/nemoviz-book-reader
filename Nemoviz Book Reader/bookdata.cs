@@ -16,6 +16,11 @@ namespace Nemoviz_Book_Reader
         public int PercentListened { get; set; }
         public int Volume { get; set; }
         public int Speed { get; set; }
+        // Index of the selected seek step in the player's dropdown
+        // (0=15s, 1=30s, 2=1min, 3=5min, 4=Part, 5=Bookmark). Remembered
+        // per book; the player clamps it on load in case the range shrank
+        // (e.g. the book has no bookmarks so there is no Bookmark option).
+        public int SeekStep { get; set; }
         public DateTime DateAdded { get; set; }
 
         // Virtual timeline
@@ -51,6 +56,8 @@ namespace Nemoviz_Book_Reader
             PercentListened = int.Parse(ini.Read("Progress", "PercentListened", "0"));
             Volume = int.Parse(ini.Read("Settings", "Volume", "100"));
             Speed = int.Parse(ini.Read("Settings", "Speed", "100"));
+            int.TryParse(ini.Read("Settings", "SeekStep", "0"), out int seekStep);
+            SeekStep = seekStep;
             DateTime.TryParse(ini.Read("Book", "DateAdded", DateTime.Now.ToString()), out DateTime dt);
             DateAdded = dt;
             LoadChapters();
@@ -325,6 +332,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Progress", "PercentListened", PercentListened.ToString());
             ini.Write("Settings", "Volume", Volume.ToString());
             ini.Write("Settings", "Speed", Speed.ToString());
+            ini.Write("Settings", "SeekStep", SeekStep.ToString());
         }
     }
 }

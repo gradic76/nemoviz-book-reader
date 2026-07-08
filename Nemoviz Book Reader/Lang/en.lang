@@ -23,10 +23,10 @@ Btn.Library=Library
 Btn.Settings=Settings
 Btn.Timer=Sleep Timer
 Btn.Help=Help
-Btn.Back.Accessible=Back, Ctrl+Left
-Btn.Forward.Accessible=Forward, Ctrl+Right
-Btn.Play.Accessible=Play, Space or X
-Btn.Pause.Accessible=Pause, Space or X
+Btn.Back.Accessible=Back, Shift+Left
+Btn.Forward.Accessible=Forward, Shift+Right
+Btn.Play.Accessible=Play, Space
+Btn.Pause.Accessible=Pause, Space
 Btn.Properties=Properties
 Btn.GoTo=Go To...
 Btn.GoTo.Accessible=Go To, Ctrl+G
@@ -69,7 +69,8 @@ SleepTimer.Announce.Finished=Sleep timer finished, playback stopped
 
 ; Player - seek dropdown
 Player.Seek.Label=Seek step:
-Player.Seek.Accessible=Seek step
+Player.Seek.Accessible=Seek step, Shift+Up or Shift+Down
+Player.Seek.Announce=Seek step: {0}
 Seek.Item.15s=15 seconds
 Seek.Item.30s=30 seconds
 Seek.Item.1min=1 minute
@@ -101,16 +102,16 @@ ManageBookmarks.NotSelected=Not selected
 
 ; Player - tooltips (mouse hover hints)
 ; Convention: buttons with graphic labels get "Name (shortcut)", buttons
-; with text labels get the shortcut only. Tip.Seek is a functional hint
-; (the combo has no shortcut). Keys must stay present even if emptied.
-Tip.Back=Back (Ctrl+Left)
-Tip.PlayPause=Play/Pause (Space, X)
-Tip.Forward=Forward (Ctrl+Right)
-Tip.Seek=Applies to Back/Forward, Ctrl+Right and Ctrl+Left
+; with text labels get the shortcut only. Tip.Seek is a functional hint.
+; Keys must stay present even if emptied.
+Tip.Back=Back (Shift+Left)
+Tip.PlayPause=Play/Pause (Space)
+Tip.Forward=Forward (Shift+Right)
+Tip.Seek=Change with Shift+Up and Shift+Down; jump with Shift+Left and Shift+Right (also Back/Forward)
 Tip.GoTo=Ctrl+G
 Tip.Timer=Ctrl+T
 Tip.Volume=Up and Down arrows
-Tip.Speed=Page Up and Page Down
+Tip.Speed=Ctrl+Left and Ctrl+Right
 Tip.Progress=Ctrl+1–9: jump to 10–90%
 
 ; Player - volume / speed / position
