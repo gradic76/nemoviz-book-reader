@@ -162,6 +162,11 @@ Approximate roles — read the actual files for detail:
   `nvdaControllerClient.dll` (x64, LGPL 2.1, in the project root next to
   `libmpv-2.dll`; `nvdaControllerClient-license.txt` beside it). Speaks
   through NVDA without focus change; see section 2.
+- **DaisyParser.cs** — parses a DAISY audio book folder into a `DaisyBook`
+  (title/author from metadata, `AudioPlayOrder`, `Headings`, `Pages`; each nav
+  point resolved to an audio file + clip-begin seconds). Standalone, not yet
+  wired into playback — see section 8c. `DaisyParser.TryParse(folder)` returns
+  null for non-DAISY and never throws.
 - **LibraryForm.cs** — the Library window (book shelf, search, filter, sort,
   context actions).
 - **BookData.cs** — a single book: metadata, progress, the virtual timeline
@@ -483,6 +488,46 @@ explicitly deferred by Gordan ("a bit complicated, for later").
 
 ---
 
+## 8c. DAISY audio books — parser (Session 11, Phase 1)
+
+`DaisyParser.cs`. A DAISY audio book is just a folder of audio (MP3) plus a
+navigation layer, so it overlays cleanly on the existing concatenated-audio
+virtual timeline: **audio playback is unchanged**; DAISY only adds headings +
+pages, each at a known audio position. Two formats, both handled:
+
+- **DAISY 2.02** — `ncc.html` (headings `h1`–`h6`, pages `span.page-*`, each an
+  `<a href="file.smil#fragment">`) + per-section SMIL (`<audio src=... clip-begin="npt=12.5s">`).
+- **DAISY 3 / Z39.86** — `.opf` (spine = SMIL play order, `dc:Title` etc.) +
+  `.ncx` (navMap navPoints → headings, level = nesting depth; pageList → pages)
+  + SMIL (`clipBegin="00:00:12.500"`). A book may ship both (hybrid) — NCC wins.
+
+Model: `DaisyBook` { Version, Title, Author, TotalTime, `AudioPlayOrder`
+(distinct audio files in reading order, from master.smil / NCC order / OPF
+spine), `Headings`, `Pages` }. Each `DaisyNavPoint` = (Level, Label, AudioFile,
+ClipBegin-seconds). `TryParse(folder)` finds the nav file **recursively** (it
+may sit in a wrapper subfolder), never throws, returns null if not DAISY.
+
+Hard-won parsing details (verified against 7 real books from different
+libraries — see `D:\Test naslovi\Daisy Audio`):
+- **Fragment → audio** is resolved by position: id → the first `<audio>` at or
+  after it. DAISY 3 puts the nav id on the enclosing `<seq>`, DAISY 2.02 on the
+  `<text>`; a par-only scan misses the seq case (all headings collapsed to the
+  first clip). Position-based scan handles both.
+- **Encoding**: Croatian/CE books from Windows producers routinely declare
+  `iso-8859-1` but the bytes are **windows-1250** (iso-8859-1 has no č/ć/š/ž).
+  Heuristic: if the declared charset is latin-1/ascii family AND `dc:language`
+  is Central-European (hr/sr/cs/…), decode as 1250. Honors real UTF-8/declared
+  charsets otherwise.
+- Producers lie: e.g. one sample's author is literally "Creator name". Parse
+  faithfully; don't invent.
+
+**Not yet wired into playback** — Phase 2 is: detect DAISY on import/scan,
+build the virtual timeline from `AudioPlayOrder`, feed `Headings` into Go To
+(hierarchical), and add dynamic **Heading**/**Page** seek-step levels (pages in
+the seek step only, per Gordan — and, like Bookmark, only shown when present).
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf migrated from ListBox to **ListView with native
@@ -509,6 +554,24 @@ folder is gone, or the last book was already finished.
 ---
 
 ## 10. Roadmap / suggested order
+
+**Intended sequence going forward (Gordan, Session 10):**
+
+1. **Support for all planned file types** — the remaining audio formats and
+   the text-book formats (`.epub`, `.txt`, `.pdf`, `.fb2`, `.mobi`, …) plus
+   DAISY. This is the next major thrust and a prerequisite for Properties.
+   **DAISY audio is underway:** the parser (Phase 1) is done and verified —
+   see section 8c; Phase 2 wires it into import + playback + Go To + seek step.
+2. **Properties dialogs** (player + library) — deliberately **on hold until
+   file-type support lands**, because what a book's properties show depends
+   heavily on its type.
+3. **Finish the Settings window** — wire up the still-placeholder tabs
+   (Text Books / Device / media-keys), now that more subsystems exist.
+4. **Help + user documentation** — write the in-app Help and related docs.
+5. Ongoing: ad-hoc tweaks and additions as they come up.
+
+The numbered list below is the older feature backlog (kept for reference; the
+sequence above supersedes its ordering).
 
 1. **Sleep Timer** — done (Session 8), pending final edge-case test.
 2. **Bookmarks** — done (Session 9): Set Bookmark, Manage Bookmarks dialog,

@@ -115,6 +115,7 @@
   <ItemGroup>
     <Compile Include="appsettings.cs" />
     <Compile Include="bookdata.cs" />
+    <Compile Include="DaisyParser.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
