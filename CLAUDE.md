@@ -164,9 +164,9 @@ Approximate roles — read the actual files for detail:
   through NVDA without focus change; see section 2.
 - **DaisyParser.cs** — parses a DAISY audio book folder into a `DaisyBook`
   (title/author from metadata, `AudioPlayOrder`, `Headings`, `Pages`; each nav
-  point resolved to an audio file + clip-begin seconds). Standalone, not yet
-  wired into playback — see section 8c. `DaisyParser.TryParse(folder)` returns
-  null for non-DAISY and never throws.
+  point resolved to an audio file + clip-begin seconds). Wired into import,
+  playback, Go To, metadata, and the seek step — see section 8c.
+  `DaisyParser.TryParse(folder)` returns null for non-DAISY and never throws.
 - **LibraryForm.cs** — the Library window (book shelf, search, filter, sort,
   context actions).
 - **BookData.cs** — a single book: metadata, progress, the virtual timeline
@@ -224,16 +224,27 @@ Documented in a comment above the seek-step methods in Form1. All four coexist:
    duration.
 3. **Shift+Left / Shift+Right, media Next/Prev, and the on-screen Back/Forward
    buttons** — jump by the step currently selected in the seek dropdown.
-   Steps: 15 s / 30 s / 1 min / 5 min / **Part** / **Bookmark**. **Shift+Up /
-   Shift+Down change which step is selected** (`ChangeSeekStep`, announced).
-   "Part" uses `PartForward()` / `PartBack()` (Back logic: more than 3 s into
-   the current part rewinds to that part's start, otherwise jumps to the
-   previous part). "Bookmark" only appears in the dropdown while the current
-   book has at least one bookmark (`UpdateSeekStepBookmarkOption`);
-   `BookmarkForward()` jumps to the next bookmark after the current position,
-   `BookmarkBack()` mirrors Part's 3-second grace against the preceding
-   bookmark. The selected step is **remembered per book** in `Book.ini`
-   (`[Settings] SeekStep`, clamped on load).
+   **Shift+Up / Shift+Down change which step is selected** (`ChangeSeekStep`,
+   announced); Down moves *down* the list, Up back up, matching its order.
+   The dropdown is **dynamic and ordered coarsest → finest** (largest jump
+   first, so the default first row is the biggest unit), rebuilt per book by
+   `RebuildSeekSteps()`:
+   - **plain audio:** Part, [Bookmark], 5 min, 1 min, 30 s, 15 s
+   - **DAISY:** Heading 1, Heading 2, … , Page, [Bookmark], 5 min, 1 min,
+     30 s, 15 s
+   "Part" (plain audio only) uses `PartForward()` / `PartBack()` (Back logic:
+   more than 3 s into the current part rewinds to its start, otherwise the
+   previous part). **DAISY headings follow the talking-book level model** —
+   one step per heading depth present, where "Heading N" navigates every
+   heading of depth ≤ N (H1 = only top-level, larger N = finer). "Page"
+   appears only for a DAISY book that has a pageList. Headings/pages jump via
+   the generic `StructForward`/`StructBack` (same 3-second Back grace as Part).
+   "Bookmark" appears only while the book has ≥1 bookmark; `BookmarkForward()`
+   jumps to the next bookmark, `BookmarkBack()` mirrors the 3-second grace.
+   Each row is a `SeekStep` (kind + heading depth) held in a list parallel to
+   the combo — no fixed indices. The selected step is **remembered per book**
+   in `Book.ini` (`[Settings] SeekStep`, encoded: heading depth L → 100+L,
+   else the kind ordinal; `-1` = never chosen → defaults to the first row).
 4. **Go To... (Ctrl+G)** — named navigation. For plain audio this is a list
    of the book's parts. DAISY/text structure (headings, pages) will plug in
    here later as a separate subsystem.
@@ -521,10 +532,23 @@ libraries — see `D:\Test naslovi\Daisy Audio`):
 - Producers lie: e.g. one sample's author is literally "Creator name". Parse
   faithfully; don't invent.
 
-**Not yet wired into playback** — Phase 2 is: detect DAISY on import/scan,
-build the virtual timeline from `AudioPlayOrder`, feed `Headings` into Go To
-(hierarchical), and add dynamic **Heading**/**Page** seek-step levels (pages in
-the seek step only, per Gordan — and, like Bookmark, only shown when present).
+**Phase 2 — wired into the app (Session 11).** On import a DAISY book is
+detected (`DaisyParser.TryParse`) and its content flattened to the book root
+(`FlattenDaisyToRoot`); `BuildChaptersFromDaisy` builds the virtual timeline in
+`AudioPlayOrder` (reading order, *not* the alphabetical sort plain audio uses —
+so nav positions line up), and `BuildDaisyNav` resolves each heading/page to an
+absolute virtual position (`offset(audioFile) + clipBegin`), stored on
+`BookData` (`IsDaisy`, `DaisyHeadings`, `DaisyPages`). Playback follows the
+`Chapters` order first (see Form1 `LoadBook`) so files play in reading order.
+DAISY carries real metadata, so a book shows a separate **Author** + **Title**
+(both drive the shelf's "Author — Title" line and the player title bar/info
+box), and Format becomes `"Daisy <version>, <sample rate>, <bitrate>,
+<channels>"`. **Go To** lists the headings by their bare tagline in reading
+order (no numbering — the label self-describes); the **info box** shows the
+current heading's tagline. The **seek step** gains per-depth **Heading** levels
+and, when present, **Page** — see section 6. Producers who leave metadata blank
+(e.g. Obi's "Untitled Obi Project") are shown as-is; the user fixes them with
+F2 rename (which offers Author + Title for DAISY, one field for plain audio).
 
 ---
 
@@ -560,8 +584,9 @@ folder is gone, or the last book was already finished.
 1. **Support for all planned file types** — the remaining audio formats and
    the text-book formats (`.epub`, `.txt`, `.pdf`, `.fb2`, `.mobi`, …) plus
    DAISY. This is the next major thrust and a prerequisite for Properties.
-   **DAISY audio is underway:** the parser (Phase 1) is done and verified —
-   see section 8c; Phase 2 wires it into import + playback + Go To + seek step.
+   **DAISY audio is done:** parser (Phase 1) + full integration (Phase 2) —
+   import, playback in reading order, Author/Title metadata, Go To, and the
+   per-depth Heading / Page seek steps. See sections 8c and 6.
 2. **Properties dialogs** (player + library) — deliberately **on hold until
    file-type support lands**, because what a book's properties show depends
    heavily on its type.

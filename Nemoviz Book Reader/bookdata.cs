@@ -72,7 +72,10 @@ namespace Nemoviz_Book_Reader
             PercentListened = int.Parse(ini.Read("Progress", "PercentListened", "0"));
             Volume = int.Parse(ini.Read("Settings", "Volume", "100"));
             Speed = int.Parse(ini.Read("Settings", "Speed", "100"));
-            int.TryParse(ini.Read("Settings", "SeekStep", "0"), out int seekStep);
+            // -1 = never chosen for this book yet → the player defaults to the
+            // first (largest) step. Once the user picks/plays, the real encoded
+            // value is written back.
+            int.TryParse(ini.Read("Settings", "SeekStep", "-1"), out int seekStep);
             SeekStep = seekStep;
             DateTime.TryParse(ini.Read("Book", "DateAdded", DateTime.Now.ToString()), out DateTime dt);
             DateAdded = dt;

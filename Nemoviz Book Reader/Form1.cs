@@ -124,6 +124,22 @@ namespace Nemoviz_Book_Reader
         // Column B
         private Label lblSeek;
         private ComboBox cmbSeek;
+        // The seek dropdown is dynamic: time steps are always there, Part only
+        // for plain audio, Heading/Page only for a DAISY book that has them,
+        // Bookmark only while the book has ≥1 bookmark. DAISY headings follow
+        // the standard talking-book model — one step per heading depth present
+        // ("Heading 1", "Heading 2", …), where level N stops at every heading
+        // of depth ≤ N. This list runs parallel to cmbSeek.Items (one entry
+        // per row) so the selected step is known without fixed indices.
+        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark }
+        private struct SeekStep
+        {
+            public SeekStepKind Kind;
+            public int Level; // heading depth threshold (Heading only); else 0
+            public SeekStep(SeekStepKind kind, int level = 0) { Kind = kind; Level = level; }
+        }
+        private readonly System.Collections.Generic.List<SeekStep> seekSteps =
+            new System.Collections.Generic.List<SeekStep>();
         private Button btnBack;
         private Button btnPlayPause;
         private Button btnForward;
@@ -410,51 +426,64 @@ namespace Nemoviz_Book_Reader
         //      change which step is selected.
         //   4. Go To... (Ctrl+G)  — pick a named target from a list; for
         //      plain audio that's the book's parts.
-        /// <summary>Seconds for the currently selected time step (indices 0–3).</summary>
+        /// <summary>The step currently selected in the seek dropdown.</summary>
+        private SeekStep CurrentSeekStep()
+        {
+            int i = cmbSeek.SelectedIndex;
+            return (i >= 0 && i < seekSteps.Count) ? seekSteps[i] : new SeekStep(SeekStepKind.Sec15);
+        }
+
+        // Persist a step to Book.ini as a single int: heading depth L → 100+L,
+        // any other kind → its enum ordinal. Kept compact so [Settings] SeekStep
+        // stays a plain number across sessions.
+        private int EncodeSeekStep(SeekStep step)
+        {
+            return step.Kind == SeekStepKind.Heading ? 100 + step.Level : (int)step.Kind;
+        }
+
+        private SeekStep DecodeSeekStep(int value)
+        {
+            if (value >= 100) return new SeekStep(SeekStepKind.Heading, value - 100);
+            return new SeekStep((SeekStepKind)value);
+        }
+
+        /// <summary>Seconds for the currently selected time step.</summary>
         private int GetSeekStepSeconds()
         {
-            switch (cmbSeek.SelectedIndex)
+            switch (CurrentSeekStep().Kind)
             {
-                case 0: return 15;
-                case 1: return 30;
-                case 2: return 60;
-                case 3: return 300;
+                case SeekStepKind.Sec15: return 15;
+                case SeekStepKind.Sec30: return 30;
+                case SeekStepKind.Min1: return 60;
+                case SeekStepKind.Min5: return 300;
                 default: return 15;
             }
         }
 
-        /// <summary>True when the "Part" step is selected in the seek dropdown.</summary>
-        private bool IsSeekStepPart()
-        {
-            return cmbSeek.SelectedIndex == 4;
-        }
-
-        /// <summary>True when the "Bookmark" step is selected. That option
-        /// only exists in the dropdown while the current book has at least
-        /// one bookmark — see UpdateSeekStepBookmarkOption.</summary>
-        private bool IsSeekStepBookmark()
-        {
-            return cmbSeek.SelectedIndex == 5;
-        }
-
         private void SeekStepForward()
         {
-            if (IsSeekStepPart())
-                PartForward();
-            else if (IsSeekStepBookmark())
-                BookmarkForward();
-            else
-                SeekRelative(+GetSeekStepSeconds());
+            SeekStep step = CurrentSeekStep();
+            switch (step.Kind)
+            {
+                case SeekStepKind.Part: PartForward(); break;
+                case SeekStepKind.Heading: StructForward(HeadingPositions(step.Level)); break;
+                case SeekStepKind.Page: StructForward(PagePositions()); break;
+                case SeekStepKind.Bookmark: BookmarkForward(); break;
+                default: SeekRelative(+GetSeekStepSeconds()); break;
+            }
         }
 
         private void SeekStepBackward()
         {
-            if (IsSeekStepPart())
-                PartBack();
-            else if (IsSeekStepBookmark())
-                BookmarkBack();
-            else
-                SeekRelative(-GetSeekStepSeconds());
+            SeekStep step = CurrentSeekStep();
+            switch (step.Kind)
+            {
+                case SeekStepKind.Part: PartBack(); break;
+                case SeekStepKind.Heading: StructBack(HeadingPositions(step.Level)); break;
+                case SeekStepKind.Page: StructBack(PagePositions()); break;
+                case SeekStepKind.Bookmark: BookmarkBack(); break;
+                default: SeekRelative(-GetSeekStepSeconds()); break;
+            }
         }
 
         /// <summary>Shift+Up / Shift+Down: cycles the seek dropdown's selected
@@ -467,25 +496,124 @@ namespace Nemoviz_Book_Reader
             AnnounceToScreenReader(lblAnnounceInfo, Localization.T("Player.Seek.Announce", cmbSeek.Text));
         }
 
-        /// <summary>Adds or removes the "Bookmark" seek-step option (always
-        /// the last item, right after "Part") to match whether the current
-        /// book has any bookmarks. Called whenever the book or its bookmark
-        /// list changes.</summary>
-        private void UpdateSeekStepBookmarkOption()
+        /// <summary>Rebuilds the seek dropdown to show exactly the steps the
+        /// current book supports: the four time steps and Part are always
+        /// present; Heading and Page appear only for a DAISY book that has
+        /// them; Bookmark appears only while the book has ≥1 bookmark. The
+        /// previously selected kind is preserved across the rebuild when it
+        /// still exists, otherwise selection falls back to the first step.
+        /// Called whenever the book, its bookmarks, or its structure change.</summary>
+        private void RebuildSeekSteps()
         {
-            bool shouldShow = currentBook != null && currentBook.Bookmarks.Count > 0;
-            bool isShown = cmbSeek.Items.Count > 5;
+            SeekStep previous = CurrentSeekStep();
 
-            if (shouldShow && !isShown)
+            cmbSeek.BeginUpdate();
+            cmbSeek.Items.Clear();
+            seekSteps.Clear();
+
+            // Ordered coarsest → finest (largest jump first, smallest last), so
+            // the default for a new book (the first row) is the biggest unit:
+            //   DAISY:   Heading 1, Heading 2, …, Page, [Bookmark], 5m,1m,30s,15s
+            //   plain:   Part, [Bookmark], 5m, 1m, 30s, 15s
+            // Bookmark sits between the structural units and the time steps.
+            bool isDaisy = currentBook != null && currentBook.IsDaisy;
+
+            if (isDaisy)
             {
-                cmbSeek.Items.Add(Localization.T("Seek.Item.Bookmark"));
+                // One Heading step per depth present ("Heading 1", "Heading 2",
+                // …), coarsest first. Level N navigates every heading of depth
+                // ≤ N (talking-book model).
+                foreach (int level in HeadingLevelsPresent())
+                    AddSeekStep(new SeekStep(SeekStepKind.Heading, level),
+                        Localization.T("Seek.Item.HeadingLevel", level));
+                if (currentBook.DaisyPages.Count > 0)
+                    AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
             }
-            else if (!shouldShow && isShown)
+            else
             {
-                if (cmbSeek.SelectedIndex == 5)
-                    cmbSeek.SelectedIndex = 0;
-                cmbSeek.Items.RemoveAt(5);
+                // "Part" (by audio file) is only meaningful for plain audio.
+                AddSeekStep(new SeekStep(SeekStepKind.Part), Localization.T("Seek.Item.Part"));
             }
+
+            if (currentBook != null && currentBook.Bookmarks.Count > 0)
+                AddSeekStep(new SeekStep(SeekStepKind.Bookmark), Localization.T("Seek.Item.Bookmark"));
+
+            AddSeekStep(new SeekStep(SeekStepKind.Min5), Localization.T("Seek.Item.5min"));
+            AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
+            AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
+            AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
+
+            int idx = seekSteps.FindIndex(s => s.Kind == previous.Kind && s.Level == previous.Level);
+            cmbSeek.SelectedIndex = idx >= 0 ? idx : 0;
+            cmbSeek.EndUpdate();
+        }
+
+        private void AddSeekStep(SeekStep step, string label)
+        {
+            seekSteps.Add(step);
+            cmbSeek.Items.Add(label);
+        }
+
+        /// <summary>Distinct DAISY heading depths present, ascending — one seek
+        /// step is offered per depth.</summary>
+        private System.Collections.Generic.List<int> HeadingLevelsPresent()
+        {
+            var levels = new System.Collections.Generic.List<int>();
+            if (currentBook != null)
+                foreach (var h in currentBook.DaisyHeadings)
+                    if (!levels.Contains(h.Level)) levels.Add(h.Level);
+            levels.Sort();
+            return levels;
+        }
+
+        // Absolute virtual-timeline positions of the DAISY headings (down to a
+        // given depth) / pages, in reading order, for the Heading / Page steps.
+        private System.Collections.Generic.List<double> HeadingPositions(int maxLevel)
+        {
+            var list = new System.Collections.Generic.List<double>();
+            if (currentBook != null)
+                foreach (var h in currentBook.DaisyHeadings)
+                    if (h.Level <= maxLevel) list.Add(h.Position);
+            return list;
+        }
+
+        private System.Collections.Generic.List<double> PagePositions()
+        {
+            var list = new System.Collections.Generic.List<double>();
+            if (currentBook != null)
+                foreach (var p in currentBook.DaisyPages) list.Add(p.Position);
+            return list;
+        }
+
+        /// <summary>Generic "next structural mark" jump (headings or pages),
+        /// mirroring BookmarkForward: seeks to the first mark past the current
+        /// position, low beep if already past the last. Positions are assumed
+        /// ascending (reading order).</summary>
+        private void StructForward(System.Collections.Generic.List<double> positions)
+        {
+            if (positions == null || positions.Count == 0) { Console.Beep(300, 150); return; }
+            double pos = GetVirtualPosition();
+            foreach (double p in positions)
+                if (p > pos + 0.05) { SeekToVirtualPosition(p); return; }
+            Console.Beep(300, 150);
+        }
+
+        /// <summary>Generic "previous structural mark" jump, mirroring
+        /// BookmarkBack's 3-second grace: more than 3 s past the current mark
+        /// rewinds to it, otherwise jumps to the one before.</summary>
+        private void StructBack(System.Collections.Generic.List<double> positions)
+        {
+            if (positions == null || positions.Count == 0) { Console.Beep(300, 150); return; }
+            double pos = GetVirtualPosition();
+            int cur = -1;
+            for (int i = positions.Count - 1; i >= 0; i--)
+                if (positions[i] <= pos + 0.05) { cur = i; break; }
+            if (cur < 0) { Console.Beep(300, 150); return; }
+
+            if (cur == 0 || pos - positions[cur] > 3.0)
+                SeekToVirtualPosition(positions[cur]);
+            else
+                SeekToVirtualPosition(positions[cur - 1]);
         }
 
         // ──────────────────────────────────────────────
@@ -542,12 +670,14 @@ namespace Nemoviz_Book_Reader
                     return true;
 
                 // Change the seek step (the dropdown value) — Shift+Up/Down.
+                // Down moves down the list (H1 → … → 15 sec), Up back toward H1,
+                // matching the visual order and arrow direction.
                 case Keys.Shift | Keys.Up:
-                    ChangeSeekStep(+1);
+                    ChangeSeekStep(-1);
                     return true;
 
                 case Keys.Shift | Keys.Down:
-                    ChangeSeekStep(-1);
+                    ChangeSeekStep(+1);
                     return true;
 
                 case Keys.Control | Keys.O:
@@ -751,10 +881,14 @@ namespace Nemoviz_Book_Reader
             }
             else
             {
-                // Different file — playlist-play-index + seek after it loads
+                // Different file — playlist-play-index, then seek once it loads.
+                // Pause *through* the switch even when playing: a freshly loaded
+                // file starts at position 0 and would be audible for the ~300 ms
+                // until the seek lands (the "blip" — you hear the file's opening
+                // before it jumps to the heading). Resume only after the seek.
+                bool wasPlaying = isPlaying;
                 MpvCommand("playlist-play-index", targetIndex.ToString());
-                if (!isPlaying)
-                    mpv_set_property_string(mpvHandle, "pause", "yes");
+                mpv_set_property_string(mpvHandle, "pause", "yes");
 
                 System.Windows.Forms.Timer seekTimer = new System.Windows.Forms.Timer();
                 seekTimer.Interval = 300;
@@ -763,6 +897,8 @@ namespace Nemoviz_Book_Reader
                     seekTimer.Stop();
                     seekTimer.Dispose();
                     MpvCommand("seek", seekPos.ToString(System.Globalization.CultureInfo.InvariantCulture), "absolute");
+                    if (wasPlaying)
+                        mpv_set_property_string(mpvHandle, "pause", "no");
                     onComplete?.Invoke();
                 };
                 seekTimer.Start();
@@ -931,12 +1067,8 @@ namespace Nemoviz_Book_Reader
             cmbSeek.Size = new Size(300, 24);
             cmbSeek.TabIndex = 4;
             cmbSeek.AccessibleName = Localization.T("Player.Seek.Accessible");
-            cmbSeek.Items.Add(Localization.T("Seek.Item.15s"));
-            cmbSeek.Items.Add(Localization.T("Seek.Item.30s"));
-            cmbSeek.Items.Add(Localization.T("Seek.Item.1min"));
-            cmbSeek.Items.Add(Localization.T("Seek.Item.5min"));
-            cmbSeek.Items.Add(Localization.T("Seek.Item.Part"));
-            cmbSeek.SelectedIndex = 0;
+            // Populate the steps for the current (no) book — time steps + Part.
+            RebuildSeekSteps();
             // Keyboard-inert display: the step is changed only with
             // Shift+Up/Down (from anywhere) or the mouse. Swallowing KeyDown
             // (and the resulting KeyPress) stops the combo from reacting to
@@ -1655,7 +1787,10 @@ namespace Nemoviz_Book_Reader
 
                 currentBook.Volume = currentVolume;
                 currentBook.Speed = currentSpeed;
-                currentBook.SeekStep = cmbSeek.SelectedIndex;
+                // Persist the step *kind* (and heading depth), not the row
+                // index — the row layout varies per book (Part vs Heading/Page/
+                // Bookmark come and go).
+                currentBook.SeekStep = EncodeSeekStep(CurrentSeekStep());
                 currentBook.Save();
             }
             catch (Exception)
@@ -1695,7 +1830,7 @@ namespace Nemoviz_Book_Reader
             // overwrite the saved 100% with a stale position.
             currentBook = null;
             currentFile = null;
-            UpdateSeekStepBookmarkOption();
+            RebuildSeekSteps();
             tbInfo.Text = BuildInfoBoxPlaceholder();
             UpdateTitleBar();
 
@@ -1998,7 +2133,7 @@ namespace Nemoviz_Book_Reader
             }
 
             currentBook.AddBookmark(GetVirtualPosition());
-            UpdateSeekStepBookmarkOption();
+            RebuildSeekSteps();
 
             // Ascending series of five short beeps (~1 second total) — a
             // bit more attention-grabbing than the plain "no go" beep, since
@@ -2038,7 +2173,7 @@ namespace Nemoviz_Book_Reader
                 if (result == DialogResult.OK)
                 {
                     currentBook.SetBookmarks(dlg.ResultBookmarks);
-                    UpdateSeekStepBookmarkOption();
+                    RebuildSeekSteps();
 
                     if (dlg.PlayIndex >= 0)
                     {
@@ -2080,11 +2215,18 @@ namespace Nemoviz_Book_Reader
                 CancelSleepTimer(true);
 
             currentBook = book;
-            UpdateSeekStepBookmarkOption();
-            // Restore the book's saved seek step, clamped in case the range
-            // shrank since it was saved (e.g. the Bookmark option is gone
-            // because this book has no bookmarks).
-            cmbSeek.SelectedIndex = Math.Max(0, Math.Min(cmbSeek.Items.Count - 1, currentBook.SeekStep));
+            RebuildSeekSteps();
+            // Restore the book's saved seek step by kind (and heading depth).
+            // A never-chosen book (SeekStep < 0) or one whose saved step no
+            // longer exists (e.g. Bookmark, but the book now has none) falls
+            // back to the first — and largest — step (H1 / Part).
+            int savedIdx = -1;
+            if (currentBook.SeekStep >= 0)
+            {
+                SeekStep saved = DecodeSeekStep(currentBook.SeekStep);
+                savedIdx = seekSteps.FindIndex(s => s.Kind == saved.Kind && s.Level == saved.Level);
+            }
+            cmbSeek.SelectedIndex = savedIdx >= 0 ? savedIdx : 0;
 
             currentVolume = Math.Min(100, Math.Max(0, currentBook.Volume));
             currentSpeed = Math.Min(300, Math.Max(50, currentBook.Speed));
@@ -2216,7 +2358,7 @@ namespace Nemoviz_Book_Reader
 
                     currentFile = ofd.FileName;
                     currentBook = null;
-                    UpdateSeekStepBookmarkOption();
+                    RebuildSeekSteps();
                     currentPlaylistIndex = 0;
                     LoadPlaylist(new string[] { ofd.FileName });
                     UpdateTitleBar();
