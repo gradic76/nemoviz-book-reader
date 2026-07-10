@@ -170,6 +170,30 @@ namespace Nemoviz_Book_Reader
             Directory.Delete(wrapper);
         }
 
+        /// <summary>Moves a DAISY book's content (nav + audio) up to the book
+        /// root when the archive nested it deeper than a single wrapper (e.g.
+        /// "Title/DAISY 2.02 export/…", or a producer id subfolder), so the
+        /// rest of the app can treat the book as one flat folder. Given the
+        /// parsed content root (the directory holding ncc.html/.ncx).</summary>
+        public static void FlattenDaisyToRoot(string root, string contentRoot)
+        {
+            if (string.IsNullOrEmpty(contentRoot)) return;
+            string a = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar);
+            string b = Path.GetFullPath(contentRoot).TrimEnd(Path.DirectorySeparatorChar);
+            if (a.Equals(b, StringComparison.OrdinalIgnoreCase)) return;
+
+            foreach (string entry in Directory.GetFileSystemEntries(contentRoot))
+            {
+                string target = Path.Combine(root, Path.GetFileName(entry));
+                try
+                {
+                    if (Directory.Exists(entry)) { if (!Directory.Exists(target)) Directory.Move(entry, target); }
+                    else { if (!File.Exists(target)) File.Move(entry, target); }
+                }
+                catch { }
+            }
+        }
+
         private static bool IsAudioOrText(string ext)
         {
             return Array.IndexOf(AudioExtensions, ext) >= 0 || Array.IndexOf(TextExtensions, ext) >= 0;

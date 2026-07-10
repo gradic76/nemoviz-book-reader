@@ -33,7 +33,7 @@ namespace Nemoviz_Book_Reader
             get { return chkAutoPlay.Checked; }
         }
 
-        public GoToForm(string[] partNames, int currentIndex, bool autoPlayDefault)
+        public GoToForm(string[] partNames, int currentIndex, bool autoPlayDefault, bool plainItems = false)
         {
             this.Text = Localization.T("Dialog.GoTo.Title");
             this.ClientSize = new Size(420, 380);
@@ -48,9 +48,13 @@ namespace Nemoviz_Book_Reader
             lstParts.Size = new Size(400, 240);
             lstParts.TabIndex = 0;
             lstParts.AccessibleName = Localization.T("GoTo.List.Accessible");
+            // Plain mode (DAISY headings): show the names as-is — each heading
+            // name already carries its own numbering/description, so the
+            // "N/M — " prefix would just be noise. Parts use the numbered format.
             for (int i = 0; i < partNames.Length; i++)
-                lstParts.Items.Add(Localization.T("GoTo.Item.Format",
-                    i + 1, partNames.Length, partNames[i]));
+                lstParts.Items.Add(plainItems
+                    ? partNames[i]
+                    : Localization.T("GoTo.Item.Format", i + 1, partNames.Length, partNames[i]));
             if (partNames.Length > 0)
                 lstParts.SelectedIndex = Math.Max(0, Math.Min(currentIndex, partNames.Length - 1));
             // Double-click = same as OK (mouse/visual mode).

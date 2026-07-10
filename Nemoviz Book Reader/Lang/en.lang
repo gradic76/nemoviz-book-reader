@@ -6,7 +6,9 @@ App.Name=Nemoviz Book Reader
 
 ; Player - info box
 Player.Info.TitleLabel=Title:
+Player.Info.AuthorLabel=Author:
 Player.Info.ChapterLabel=Part:
+Player.Info.HeadingLabel=Heading:
 Player.Info.ElapsedSegmentLabel=Elapsed part time:
 Player.Info.ElapsedTotalLabel=Elapsed total time:
 Player.Info.RemainingSegmentLabel=Remaining part time:
@@ -14,7 +16,7 @@ Player.Info.RemainingTotalLabel=Remaining total time:
 Player.Info.AccessibleName=Playback information, I
 
 ; Player - title bar
-Player.TitleBar.Chapter= — Part {0}/{1}
+Player.TitleBar.Chapter= — {0}/{1}
 Player.TitleBar.Playing= — playing
 Player.TitleBar.Paused= — paused
 
@@ -173,6 +175,7 @@ Context.Delete=Delete
 Context.Properties=Properties
 Library.Details.Accessible=Book details
 Details.Field.Title=Title
+Details.Field.Author=Author
 Details.Field.Format=Format
 Details.Field.Duration=Duration
 Details.Field.Listened=Elapsed
@@ -191,6 +194,8 @@ Dialog.Restart.Message=Book has been rewound to the start.
 Dialog.Restart.Title=Rewind to Start
 Dialog.Rename.Title=Rename book
 Dialog.Rename.Prompt=New name:
+Dialog.Rename.AuthorLabel=Author:
+Dialog.Rename.TitleLabel=Title:
 Dialog.ActiveBook.Message="{0}" is currently loaded in the player and cannot be deleted. Close the library, open another book, or stop playback, then try again.
 Dialog.ActiveBook.Title=Book is active
 Dialog.ConfirmDelete.Message=Are you sure you want to permanently delete "{0}" from disk? This action cannot be undone.

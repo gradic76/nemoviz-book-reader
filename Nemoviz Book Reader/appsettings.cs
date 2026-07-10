@@ -18,6 +18,9 @@ namespace Nemoviz_Book_Reader
 
         public string LibraryPath { get; private set; }
         public string LastOpenedBookPath { get; private set; }
+        /// <summary>Folder last picked in the "Open folder" import dialog, so
+        /// it reopens there instead of at some default each time.</summary>
+        public string LastImportFolder { get; private set; }
         public string LangPath { get; private set; }
         public string LanguageCode { get; private set; }
 
@@ -33,6 +36,7 @@ namespace Nemoviz_Book_Reader
             ini = new IniFile(SettingsPath);
             LibraryPath = ini.Read("Library", "Path", DefaultLibraryPath);
             LastOpenedBookPath = ini.Read("Library", "LastBook", "");
+            LastImportFolder = ini.Read("Library", "LastImportFolder", "");
             LangPath = ini.Read("App", "LangPath", DefaultLangPath);
             LanguageCode = ini.Read("App", "Language", "en");
             GoToAutoPlay = ini.Read("Player", "GoToAutoPlay", "0") == "1";
@@ -48,6 +52,12 @@ namespace Nemoviz_Book_Reader
         {
             LastOpenedBookPath = folderPath;
             ini.Write("Library", "LastBook", folderPath);
+        }
+
+        public void SetLastImportFolder(string folderPath)
+        {
+            LastImportFolder = folderPath;
+            ini.Write("Library", "LastImportFolder", folderPath);
         }
 
         public void SetLanguage(string code)

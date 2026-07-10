@@ -1496,31 +1496,59 @@ namespace Nemoviz_Book_Reader
             string titleText = currentBook != null ? currentBook.Title :
                 (currentFile != null ? System.IO.Path.GetFileNameWithoutExtension(currentFile) : dash);
 
-            string chapterText = dash;
-            if (currentBook != null && currentBook.Chapters.Count > 0
-                && currentPlaylistIndex < currentBook.Chapters.Count)
-            {
-                chapterText = (currentPlaylistIndex + 1) + "/" + currentBook.Chapters.Count;
+            // Header: Title, plus a separate Author line for produced formats
+            // (DAISY) that carry it.
+            string header = Localization.T("Player.Info.TitleLabel") + " " + titleText + "\r\n";
+            if (currentBook != null && !string.IsNullOrWhiteSpace(currentBook.Author))
+                header += Localization.T("Player.Info.AuthorLabel") + " " + currentBook.Author + "\r\n";
 
-                // For classic multi-file audio, also show the current file
-                // name (without extension) — info box only, the title bar
-                // would get too crowded.
-                if (currentBook.Chapters.Count > 1)
+            // Position line. DAISY navigates by headings: show just the current
+            // heading's name (the tagline already carries its own numbering/
+            // description — no "Heading:" label, no X/Y). Plain audio keeps
+            // "Part: X/Y — <file>".
+            string posLine;
+            if (currentBook != null && currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
+            {
+                int hi = DaisyHeadingIndexAt(virtualPos);
+                posLine = currentBook.DaisyHeadings[hi].Label;
+            }
+            else
+            {
+                // Plain audio: no "Part:" label — just the position value
+                // (X/Y, plus the file name when the book has several parts).
+                posLine = dash;
+                if (currentBook != null && currentBook.Chapters.Count > 0
+                    && currentPlaylistIndex < currentBook.Chapters.Count)
                 {
-                    string partName = System.IO.Path.GetFileNameWithoutExtension(
-                        currentBook.Chapters[currentPlaylistIndex].FileName);
-                    chapterText += " — " + partName;
+                    posLine = (currentPlaylistIndex + 1) + "/" + currentBook.Chapters.Count;
+                    if (currentBook.Chapters.Count > 1)
+                        posLine += " — " + System.IO.Path.GetFileNameWithoutExtension(
+                            currentBook.Chapters[currentPlaylistIndex].FileName);
                 }
             }
 
             return
-                Localization.T("Player.Info.TitleLabel") + " " + titleText + "\r\n" +
-                Localization.T("Player.Info.ChapterLabel") + " " + chapterText + "\r\n" +
+                header +
+                posLine + "\r\n" +
                 "\r\n" +
                 Localization.T("Player.Info.ElapsedSegmentLabel") + " " + FormatTime(segPosition) + "\r\n" +
                 Localization.T("Player.Info.ElapsedTotalLabel") + " " + FormatTime(virtualPos) + "\r\n" +
                 Localization.T("Player.Info.RemainingSegmentLabel") + " -" + FormatTime(segRemaining) + "\r\n" +
                 Localization.T("Player.Info.RemainingTotalLabel") + " -" + FormatTime(virtualRemaining);
+        }
+
+        /// <summary>Index of the DAISY heading covering the given virtual
+        /// position (the last heading at or before it). -1 when the current
+        /// book has no DAISY headings.</summary>
+        private int DaisyHeadingIndexAt(double virtualPos)
+        {
+            if (currentBook == null || !currentBook.IsDaisy || currentBook.DaisyHeadings.Count == 0)
+                return -1;
+            var hs = currentBook.DaisyHeadings;
+            int idx = 0;
+            for (int i = hs.Count - 1; i >= 0; i--)
+                if (hs[i].Position <= virtualPos + 0.05) { idx = i; break; }
+            return idx;
         }
 
         /// <summary>
@@ -1574,13 +1602,24 @@ namespace Nemoviz_Book_Reader
 
             if (currentBook != null)
             {
-                string chapterText = "";
-                if (currentBook.Chapters.Count > 0 && currentPlaylistIndex < currentBook.Chapters.Count)
-                    chapterText = Localization.T("Player.TitleBar.Chapter", currentPlaylistIndex + 1, currentBook.Chapters.Count);
-
                 string stateText = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
 
-                this.Text = appName + " — " + currentBook.Title + chapterText + stateText;
+                if (currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
+                {
+                    // DAISY: Author — Title — X/Y (heading position), no "Part".
+                    int hi = DaisyHeadingIndexAt(GetVirtualPosition());
+                    string authorPart = string.IsNullOrWhiteSpace(currentBook.Author)
+                        ? "" : currentBook.Author + " — ";
+                    string posPart = " — " + (hi + 1) + "/" + currentBook.DaisyHeadings.Count;
+                    this.Text = appName + " — " + authorPart + currentBook.Title + posPart + stateText;
+                }
+                else
+                {
+                    string chapterText = "";
+                    if (currentBook.Chapters.Count > 0 && currentPlaylistIndex < currentBook.Chapters.Count)
+                        chapterText = Localization.T("Player.TitleBar.Chapter", currentPlaylistIndex + 1, currentBook.Chapters.Count);
+                    this.Text = appName + " — " + currentBook.Title + chapterText + stateText;
+                }
             }
             else if (currentFile != null)
             {
@@ -1884,8 +1923,6 @@ namespace Nemoviz_Book_Reader
 
         private void BtnGoTo_Click(object sender, EventArgs e)
         {
-            // Plain audio: a list of the book's parts. DAISY/text structure
-            // (headings, pages) will plug in here as a separate subsystem.
             if (currentBook == null || currentBook.Chapters.Count == 0)
             {
                 // No book loaded — a short low beep as audible feedback.
@@ -1893,29 +1930,53 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
-            string[] names = new string[currentBook.Chapters.Count];
-            for (int i = 0; i < names.Length; i++)
-                names[i] = System.IO.Path.GetFileNameWithoutExtension(
-                    currentBook.Chapters[i].FileName);
+            // DAISY: navigate by the book's headings (indented by depth). Plain
+            // audio: navigate by the book's parts (files). Either way the list
+            // maps 1:1 to virtual-timeline target positions.
+            string[] names;
+            double[] targets;
+            int preselect;
+            bool daisyNav = currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0;
 
-            using (GoToForm dlg = new GoToForm(names, currentPlaylistIndex, appSettings.GoToAutoPlay))
+            if (daisyNav)
             {
-                if (dlg.ShowDialog(this) == DialogResult.OK && dlg.SelectedPartIndex >= 0)
+                var hs = currentBook.DaisyHeadings;
+                names = new string[hs.Count];
+                targets = new double[hs.Count];
+                for (int i = 0; i < hs.Count; i++)
                 {
-                    // Jump to the start of the selected part. Default:
-                    // playback state is preserved (paused stays paused,
-                    // playing keeps playing). With the auto-play checkbox
-                    // checked, playback starts after the jump. Starting is
-                    // done in the onComplete callback — after the delayed
-                    // cross-file seek — to avoid an audible blip of the
-                    // part's beginning before the seek lands.
-                    bool autoPlay = dlg.AutoPlayChecked;
+                    names[i] = new string(' ', 2 * Math.Max(0, hs[i].Level - 1)) + hs[i].Label;
+                    targets[i] = hs[i].Position;
+                }
+                double pos = GetVirtualPosition();
+                preselect = 0;
+                for (int i = hs.Count - 1; i >= 0; i--)
+                    if (hs[i].Position <= pos + 0.05) { preselect = i; break; }
+            }
+            else
+            {
+                names = new string[currentBook.Chapters.Count];
+                for (int i = 0; i < names.Length; i++)
+                    names[i] = System.IO.Path.GetFileNameWithoutExtension(currentBook.Chapters[i].FileName);
+                targets = currentBook.Offsets.ToArray();
+                preselect = currentPlaylistIndex;
+            }
 
-                    // Remembered globally (Settings.ini): if auto-play suits
-                    // the user on book A, it'll suit them on B and C too.
-                    // Saved on confirm only — Cancel discards the change.
+            // Both DAISY headings and plain-audio parts list as bare names now
+            // (no "N/M —" prefix — the name/file already self-numbers).
+            using (GoToForm dlg = new GoToForm(names, preselect, appSettings.GoToAutoPlay, true))
+            {
+                if (dlg.ShowDialog(this) == DialogResult.OK &&
+                    dlg.SelectedPartIndex >= 0 && dlg.SelectedPartIndex < targets.Length)
+                {
+                    // Jump to the selected target. Default: playback state is
+                    // preserved (paused stays paused, playing keeps playing);
+                    // with the auto-play checkbox, playback starts after the
+                    // jump (in the onComplete callback, after the delayed
+                    // cross-file seek, to avoid an audible blip).
+                    bool autoPlay = dlg.AutoPlayChecked;
                     appSettings.SetGoToAutoPlay(autoPlay);
-                    SeekToVirtualPosition(currentBook.Offsets[dlg.SelectedPartIndex], () =>
+                    SeekToVirtualPosition(targets[dlg.SelectedPartIndex], () =>
                     {
                         if (autoPlay && !isPlaying)
                         {
@@ -2046,13 +2107,30 @@ namespace Nemoviz_Book_Reader
 
             string[] audioExts = { ".mp3", ".ogg", ".flac", ".m4a", ".m4b", ".wav", ".opus", ".aac", ".wma" };
             var playlist = new List<string>();
-            string[] allFiles = System.IO.Directory.GetFiles(currentBook.FolderPath);
-            Array.Sort(allFiles, StringComparer.OrdinalIgnoreCase);
-            foreach (string f in allFiles)
+
+            // Play in the book's chapter order, not a fresh alphabetical sort:
+            // for plain audiobooks the two match, but DAISY audio is ordered by
+            // its navigation (BuildChaptersFromDaisy), which is not always the
+            // filename order — and playback must match the virtual timeline the
+            // headings/pages are positioned against.
+            if (currentBook.Chapters.Count > 0)
             {
-                string ext = System.IO.Path.GetExtension(f).ToLower();
-                if (Array.IndexOf(audioExts, ext) >= 0)
-                    playlist.Add(f);
+                foreach (var ch in currentBook.Chapters)
+                {
+                    string p = System.IO.Path.Combine(currentBook.FolderPath, ch.FileName);
+                    if (System.IO.File.Exists(p)) playlist.Add(p);
+                }
+            }
+            if (playlist.Count == 0)
+            {
+                string[] allFiles = System.IO.Directory.GetFiles(currentBook.FolderPath);
+                Array.Sort(allFiles, StringComparer.OrdinalIgnoreCase);
+                foreach (string f in allFiles)
+                {
+                    string ext = System.IO.Path.GetExtension(f).ToLower();
+                    if (Array.IndexOf(audioExts, ext) >= 0)
+                        playlist.Add(f);
+                }
             }
 
             if (playlist.Count == 0) return;
@@ -2120,6 +2198,7 @@ namespace Nemoviz_Book_Reader
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = BuildFileFilter();
+                ofd.FilterIndex = 4; // default to "All supported files"
                 ofd.Title = Localization.T("Player.OpenFile.Title");
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
@@ -2166,22 +2245,31 @@ namespace Nemoviz_Book_Reader
                 LibraryScanner.ExtractArchive(archivePath, destFolder);
                 LibraryScanner.FlattenSingleWrapperFolder(destFolder);
 
-                List<string> audioFiles = new List<string>();
-                foreach (string f in System.IO.Directory.GetFiles(destFolder))
-                {
-                    if (Array.IndexOf(LibraryScanner.AudioExtensions, System.IO.Path.GetExtension(f).ToLower()) >= 0)
-                        audioFiles.Add(f);
-                }
-
                 BookData book = new BookData(destFolder);
-                if (audioFiles.Count > 0)
+
+                DaisyBook daisy = DaisyParser.TryParse(destFolder);
+                if (daisy != null)
                 {
-                    audioFiles.Sort(StringComparer.OrdinalIgnoreCase);
-                    book.BuildChaptersFromFolder(audioFiles.ToArray());
+                    LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
+                    book.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
                 }
                 else
                 {
-                    book.Format = LibraryScanner.DetectFormat(destFolder);
+                    List<string> audioFiles = new List<string>();
+                    foreach (string f in System.IO.Directory.GetFiles(destFolder))
+                    {
+                        if (Array.IndexOf(LibraryScanner.AudioExtensions, System.IO.Path.GetExtension(f).ToLower()) >= 0)
+                            audioFiles.Add(f);
+                    }
+                    if (audioFiles.Count > 0)
+                    {
+                        audioFiles.Sort(StringComparer.OrdinalIgnoreCase);
+                        book.BuildChaptersFromFolder(audioFiles.ToArray());
+                    }
+                    else
+                    {
+                        book.Format = LibraryScanner.DetectFormat(destFolder);
+                    }
                 }
                 book.DateAdded = DateTime.Now;
                 book.Save();

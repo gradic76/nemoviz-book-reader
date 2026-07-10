@@ -57,20 +57,39 @@ namespace Nemoviz_Book_Reader
         {
             try
             {
+                DaisyBook book = null;
                 string ncc = FindFile(folder, n => n.Equals("ncc.html", StringComparison.OrdinalIgnoreCase));
                 if (ncc != null)
-                    return Parse202(ncc);
-
-                string ncx = FindFile(folder, n => n.EndsWith(".ncx", StringComparison.OrdinalIgnoreCase));
-                string opf = FindFile(folder, n => n.EndsWith(".opf", StringComparison.OrdinalIgnoreCase));
-                if (ncx != null || opf != null)
-                    return Parse3(ncx, opf);
+                    book = Parse202(ncc);
+                else
+                {
+                    string ncx = FindFile(folder, n => n.EndsWith(".ncx", StringComparison.OrdinalIgnoreCase));
+                    string opf = FindFile(folder, n => n.EndsWith(".opf", StringComparison.OrdinalIgnoreCase));
+                    if (ncx != null || opf != null)
+                        book = Parse3(ncx, opf);
+                }
+                if (book != null)
+                    book.Title = PrettifyTitle(book.Title);
+                return book;
             }
             catch
             {
                 // Defensive: a broken book must not crash import/scan.
             }
             return null;
+        }
+
+        /// <summary>Shows the producer's title as-is (per Gordan: for produced
+        /// formats like DAISY we surface the real metadata rather than guessing
+        /// — a bad producer's "Untitled Obi Project" is shown, not rescued).
+        /// The only touch-up is prettifying a purely underscore-separated
+        /// string ("Trop_de_chefs…") into spaces for readability.</summary>
+        private static string PrettifyTitle(string title)
+        {
+            string t = (title ?? "").Trim();
+            if (t.IndexOf(' ') < 0 && t.IndexOf('_') >= 0)
+                t = t.Replace('_', ' ').Trim();
+            return t;
         }
 
         /// <summary>True if the folder looks like a DAISY book (cheap check).</summary>

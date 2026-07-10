@@ -10,6 +10,11 @@ namespace Nemoviz_Book_Reader
 
         public string FolderPath { get; private set; }
         public string Title { get; set; }
+        // Separate author, populated from metadata for produced formats (DAISY:
+        // dc:creator). Empty for plain audiobooks, where a single merged Title
+        // taken from the folder name is the convention (we can't reliably split
+        // author from title there). Shown alongside Title only when non-empty.
+        public string Author { get; set; }
         public string Format { get; set; }
         public string Duration { get; set; }
         public string LastPosition { get; set; }
@@ -32,6 +37,14 @@ namespace Nemoviz_Book_Reader
         // 01 (H:MM)") are computed live from sorted position, never stored.
         public List<double> Bookmarks { get; private set; }
 
+        // DAISY navigation overlay — headings (with depth) and pages, each at
+        // an absolute virtual-timeline position. Empty for non-DAISY books.
+        // Recomputed at load from DaisyParser (parse is cheap, always correct),
+        // mapped onto the audio timeline; never persisted.
+        public bool IsDaisy { get; private set; }
+        public List<(int Level, string Label, double Position)> DaisyHeadings { get; private set; }
+        public List<(int Level, string Label, double Position)> DaisyPages { get; private set; }
+
         public BookData(string folderPath)
         {
             FolderPath = folderPath;
@@ -40,6 +53,8 @@ namespace Nemoviz_Book_Reader
             Chapters = new List<(string, double)>();
             Offsets = new List<double>();
             Bookmarks = new List<double>();
+            DaisyHeadings = new List<(int, string, double)>();
+            DaisyPages = new List<(int, string, double)>();
             Load();
         }
 
@@ -50,6 +65,7 @@ namespace Nemoviz_Book_Reader
             // because import always creates a folder named after the file.
             // The legacy "Author" key in old Book.ini files is simply ignored.
             Title = ini.Read("Book", "Title", Path.GetFileName(FolderPath));
+            Author = ini.Read("Book", "Author", "");
             Format = ini.Read("Book", "Format", "Unknown");
             Duration = ini.Read("Book", "Duration", "00:00:00");
             LastPosition = ini.Read("Progress", "LastPosition", "00:00:00");
@@ -62,6 +78,88 @@ namespace Nemoviz_Book_Reader
             DateAdded = dt;
             LoadChapters();
             LoadBookmarks();
+            BuildDaisyNav();
+        }
+
+        /// <summary>Detects a DAISY book and overlays its headings/pages onto
+        /// the (already-loaded) audio timeline: each nav point's absolute
+        /// position = the offset of its audio file + the clip-begin within it.
+        /// Relies on Chapters being in DAISY reading order (import builds them
+        /// via BuildChaptersFromDaisy). Never throws.</summary>
+        private void BuildDaisyNav()
+        {
+            DaisyHeadings.Clear();
+            DaisyPages.Clear();
+            IsDaisy = false;
+            try
+            {
+                if (!DaisyParser.IsDaisy(FolderPath)) return;
+                DaisyBook db = DaisyParser.TryParse(FolderPath);
+                if (db == null) return;
+                IsDaisy = true;
+
+                var offset = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < Chapters.Count; i++) offset[Chapters[i].FileName] = Offsets[i];
+
+                foreach (var h in db.Headings)
+                    if (h.AudioFile != null && offset.TryGetValue(h.AudioFile, out double o))
+                        DaisyHeadings.Add((h.Level, h.Label, o + h.ClipBegin));
+                foreach (var p in db.Pages)
+                    if (p.AudioFile != null && offset.TryGetValue(p.AudioFile, out double o))
+                        DaisyPages.Add((0, p.Label, o + p.ClipBegin));
+            }
+            catch
+            {
+                // Malformed DAISY must never break loading a book.
+            }
+        }
+
+        /// <summary>Builds the virtual timeline for a DAISY book in reading
+        /// order (from the parsed AudioPlayOrder) rather than the alphabetical
+        /// file sort used for plain audiobooks — DAISY audio files are not
+        /// always named in play order. Falls back to the folder's audio files
+        /// if the order can't be resolved.</summary>
+        public void BuildChaptersFromDaisy(DaisyBook db)
+        {
+            var byName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string p in Directory.GetFiles(FolderPath))
+                byName[Path.GetFileName(p)] = p;
+
+            var ordered = new List<string>();
+            foreach (string name in db.AudioPlayOrder)
+                if (byName.TryGetValue(name, out string full)) ordered.Add(full);
+
+            if (ordered.Count == 0)
+            {
+                foreach (string p in byName.Values)
+                    if (Array.IndexOf(LibraryScanner.AudioExtensions, Path.GetExtension(p).ToLower()) >= 0)
+                        ordered.Add(p);
+                ordered.Sort(StringComparer.OrdinalIgnoreCase);
+            }
+
+            BuildChaptersFromFolder(ordered.ToArray());
+
+            // DAISY carries real metadata — surface it as-is (no folder-name
+            // guessing): title and a separate author. Format becomes
+            // "Daisy <version>, <sample rate>, <bitrate>, <channels>".
+            Title = db.Title ?? "";
+            Author = db.Author ?? "";
+            ini.Write("Book", "Title", Title);
+            ini.Write("Book", "Author", Author);
+
+            string audioDetails = ordered.Count > 0 ? DetectAudioFormatString(ordered[0]) : null;
+            // Drop the leading codec name ("MP3 Audio, ...") and prefix the
+            // DAISY version instead.
+            string tail = null;
+            if (!string.IsNullOrEmpty(audioDetails))
+            {
+                int comma = audioDetails.IndexOf(',');
+                tail = comma >= 0 ? audioDetails.Substring(comma + 1).Trim() : null;
+            }
+            Format = "Daisy " + db.Version + (string.IsNullOrEmpty(tail) ? "" : ", " + tail);
+            ini.Write("Book", "Format", Format);
+
+            BuildDaisyNav();
         }
 
         private void LoadChapters()
@@ -135,6 +233,32 @@ namespace Nemoviz_Book_Reader
                 Format = DetectAudioFormatString(audioFiles[0]);
                 ini.Write("Book", "Format", Format);
             }
+        }
+
+        /// <summary>Lazily builds the chapter list + total duration for a plain
+        /// audio book that entered the library via a background scan (which
+        /// skips this to keep scanning a big library fast). Mirrors
+        /// EnsureFormatDetails: one-time — once [Chapters] is written to
+        /// Book.ini this is a no-op — and called when the book is first shown
+        /// in the library details, so the duration is there before playback,
+        /// consistent with DAISY (whose timeline is built at import).</summary>
+        public void EnsureDurationDetails()
+        {
+            if (IsDaisy) return;            // DAISY already built its timeline at import
+            if (Chapters.Count > 0) return; // already built (import or a prior call)
+
+            var audioFiles = new List<string>();
+            try
+            {
+                foreach (string f in Directory.GetFiles(FolderPath))
+                    if (Array.IndexOf(LibraryScanner.AudioExtensions, Path.GetExtension(f).ToLower()) >= 0)
+                        audioFiles.Add(f);
+            }
+            catch { return; }
+
+            if (audioFiles.Count == 0) return;
+            audioFiles.Sort(StringComparer.OrdinalIgnoreCase);
+            BuildChaptersFromFolder(audioFiles.ToArray());
         }
 
         // ──────────────────────────────────────────────
@@ -325,6 +449,7 @@ namespace Nemoviz_Book_Reader
         public void Save()
         {
             ini.Write("Book", "Title", Title);
+            ini.Write("Book", "Author", Author ?? "");
             ini.Write("Book", "Format", Format);
             ini.Write("Book", "Duration", Duration);
             ini.Write("Book", "DateAdded", DateAdded.ToString());

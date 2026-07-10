@@ -58,14 +58,9 @@ namespace Nemoviz_Book_Reader
         private const int FilterUnread = 2;
         private const int FilterRead = 3;
 
-        // Row indices in the details ListView (single merged "Title"/"Naziv"
-        // field — the old "Author" row is gone, "Speed" was added).
-        private const int DetailRowTitle = 0;
-        private const int DetailRowFormat = 1;
-        private const int DetailRowDuration = 2;
-        private const int DetailRowListened = 3;
-        private const int DetailRowSpeed = 4;
-        private const int DetailRowAdded = 5;
+        // The details ListView rows are built fresh per selection (see
+        // ShowDetails): the Author row only appears for books that carry an
+        // author (DAISY), so plain audio isn't cluttered with an empty field.
 
         public BookData SelectedBook { get; private set; }
 
@@ -355,13 +350,8 @@ namespace Nemoviz_Book_Reader
             listViewDetails.Columns.Add("Field", 120);
             listViewDetails.Columns.Add("Value", 280);
 
-            string dash = Localization.T("Common.Dash");
-            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Title"), dash }));
-            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Format"), dash }));
-            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Duration"), dash }));
-            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Listened"), dash }));
-            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Speed"), dash }));
-            listViewDetails.Items.Add(new ListViewItem(new string[] { Localization.T("Details.Field.Added"), dash }));
+            // Rows are populated per selection in ShowDetails (nothing selected
+            // yet at construction, so the panel starts empty).
 
             panelDetails.Controls.Add(listViewDetails);
 
@@ -536,7 +526,12 @@ namespace Nemoviz_Book_Reader
 
             foreach (BookData b in group)
             {
-                ListViewItem item = new ListViewItem(b.Title);
+                // Show "Author — Title" when the book carries a separate author
+                // (produced formats like DAISY); plain audiobooks show the
+                // single merged Title.
+                string shelfText = string.IsNullOrWhiteSpace(b.Author)
+                    ? b.Title : b.Author + " — " + b.Title;
+                ListViewItem item = new ListViewItem(shelfText);
                 item.Tag = b;
                 if (lvg != null)
                     item.Group = lvg;
@@ -661,22 +656,41 @@ namespace Nemoviz_Book_Reader
             // to the detailed ones ("MP3 Audio, 44.1 kHz, 128 kbps, stereo").
             // Persists in Book.ini, so it's a no-op on every later selection.
             book.EnsureFormatDetails();
+            // Build the duration up front for scan-added plain audio books, so
+            // the details show a real length before first playback (DAISY books
+            // already have theirs from import). One-time, cached in Book.ini.
+            book.EnsureDurationDetails();
 
             string speedStr = (book.Speed / 100.0).ToString("0.0");
+            string dash = Localization.T("Common.Dash");
 
-            listViewDetails.Items[DetailRowTitle].SubItems[1].Text = book.Title;
-            listViewDetails.Items[DetailRowFormat].SubItems[1].Text = book.Format;
-            listViewDetails.Items[DetailRowDuration].SubItems[1].Text = book.Duration;
-            listViewDetails.Items[DetailRowListened].SubItems[1].Text = book.PercentListened + "%";
-            listViewDetails.Items[DetailRowSpeed].SubItems[1].Text = Localization.T("Details.Speed.Value", speedStr);
-            listViewDetails.Items[DetailRowAdded].SubItems[1].Text = book.DateAdded.ToString(Localization.T("Common.DateFormat"));
+            listViewDetails.BeginUpdate();
+            listViewDetails.Items.Clear();
+            AddDetailRow(Localization.T("Details.Field.Title"), book.Title);
+            // Author row only for books that carry one (DAISY) — shown even if
+            // empty (a dash), a cue to fill it in via F2. Plain audio has no
+            // author, so the row is omitted entirely.
+            if (book.IsDaisy)
+                AddDetailRow(Localization.T("Details.Field.Author"),
+                    string.IsNullOrWhiteSpace(book.Author) ? dash : book.Author);
+            AddDetailRow(Localization.T("Details.Field.Format"), book.Format);
+            AddDetailRow(Localization.T("Details.Field.Duration"), book.Duration);
+            AddDetailRow(Localization.T("Details.Field.Listened"), book.PercentListened + "%");
+            AddDetailRow(Localization.T("Details.Field.Speed"), Localization.T("Details.Speed.Value", speedStr));
+            AddDetailRow(Localization.T("Details.Field.Added"), book.DateAdded.ToString(Localization.T("Common.DateFormat")));
+            listViewDetails.EndUpdate();
+        }
+
+        private void AddDetailRow(string field, string value)
+        {
+            string dash = Localization.T("Common.Dash");
+            listViewDetails.Items.Add(new ListViewItem(
+                new string[] { field, string.IsNullOrEmpty(value) ? dash : value }));
         }
 
         private void ClearDetails()
         {
-            string dash = Localization.T("Common.Dash");
-            foreach (ListViewItem item in listViewDetails.Items)
-                item.SubItems[1].Text = dash;
+            listViewDetails.Items.Clear();
         }
 
         // ──────────────────────────────────────────────
@@ -739,65 +753,106 @@ namespace Nemoviz_Book_Reader
             BookData book = GetSelectedBook();
             if (book == null) return;
 
-            string newTitle = ShowRenameDialog(book.Title);
-            if (newTitle == null) return; // cancelled
+            // DAISY carries a separate author + title (both drive the shelf
+            // "Author — Title" line), so it gets two edit boxes. Plain audio
+            // has only a single display name — one box, as before.
+            string newAuthor = book.Author ?? "";
+            string newTitle = book.Title ?? "";
+            if (!ShowRenameDialog(book.IsDaisy, ref newAuthor, ref newTitle))
+                return; // cancelled
 
+            newAuthor = newAuthor.Trim();
             newTitle = newTitle.Trim();
-            if (newTitle.Length == 0 || newTitle == book.Title) return;
+            if (newTitle.Length == 0) return; // a title is required
 
-            // Rename changes only the display name in Book.ini —
+            if (newTitle == (book.Title ?? "") && newAuthor == (book.Author ?? ""))
+                return; // nothing changed
+
+            // Rename changes only the metadata in Book.ini —
             // the folder on disk is untouched by design.
             book.Title = newTitle;
+            if (book.IsDaisy) book.Author = newAuthor;
             book.Save();
             RebuildShelf(book);
         }
 
-        private string ShowRenameDialog(string currentTitle)
+        /// <summary>Rename editor. With includeAuthor (DAISY) it shows Author +
+        /// Title boxes; otherwise a single name box. Returns false if cancelled;
+        /// on OK writes the edited values back through the ref parameters.</summary>
+        private bool ShowRenameDialog(bool includeAuthor, ref string author, ref string title)
         {
             using (Form dlg = new Form())
             {
                 dlg.Text = Localization.T("Dialog.Rename.Title");
-                dlg.ClientSize = new Size(420, 110);
                 dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.MinimizeBox = false;
                 dlg.MaximizeBox = false;
                 dlg.ShowInTaskbar = false;
 
-                Label lbl = new Label();
-                lbl.Text = Localization.T("Dialog.Rename.Prompt");
-                lbl.Location = new Point(10, 10);
-                lbl.Size = new Size(400, 18);
+                int y = 10;
+                TextBox tbAuthor = null;
 
-                TextBox tb = new TextBox();
-                tb.Location = new Point(10, 32);
-                tb.Size = new Size(400, 24);
-                tb.Text = currentTitle;
-                tb.AccessibleName = Localization.T("Dialog.Rename.Prompt");
-                tb.SelectAll();
+                if (includeAuthor)
+                {
+                    Label lblAuthor = new Label();
+                    lblAuthor.Text = Localization.T("Dialog.Rename.AuthorLabel");
+                    lblAuthor.Location = new Point(10, y);
+                    lblAuthor.Size = new Size(400, 18);
+                    y += 22;
+
+                    tbAuthor = new TextBox();
+                    tbAuthor.Location = new Point(10, y);
+                    tbAuthor.Size = new Size(400, 24);
+                    tbAuthor.Text = author;
+                    tbAuthor.AccessibleName = Localization.T("Dialog.Rename.AuthorLabel");
+                    y += 34;
+
+                    dlg.Controls.Add(lblAuthor);
+                    dlg.Controls.Add(tbAuthor);
+                }
+
+                Label lblTitle = new Label();
+                lblTitle.Text = Localization.T(includeAuthor ? "Dialog.Rename.TitleLabel" : "Dialog.Rename.Prompt");
+                lblTitle.Location = new Point(10, y);
+                lblTitle.Size = new Size(400, 18);
+                y += 22;
+
+                TextBox tbTitle = new TextBox();
+                tbTitle.Location = new Point(10, y);
+                tbTitle.Size = new Size(400, 24);
+                tbTitle.Text = title;
+                tbTitle.AccessibleName = Localization.T(includeAuthor ? "Dialog.Rename.TitleLabel" : "Dialog.Rename.Prompt");
+                tbTitle.SelectAll();
+                y += 36;
 
                 Button ok = new Button();
                 ok.Text = Localization.T("Btn.OK");
                 ok.Size = new Size(100, 30);
-                ok.Location = new Point(200, 68);
+                ok.Location = new Point(200, y);
                 ok.DialogResult = DialogResult.OK;
 
                 Button cancel = new Button();
                 cancel.Text = Localization.T("Btn.Cancel");
                 cancel.Size = new Size(100, 30);
-                cancel.Location = new Point(310, 68);
+                cancel.Location = new Point(310, y);
                 cancel.DialogResult = DialogResult.Cancel;
+                y += 40;
 
-                dlg.Controls.Add(lbl);
-                dlg.Controls.Add(tb);
+                dlg.Controls.Add(lblTitle);
+                dlg.Controls.Add(tbTitle);
                 dlg.Controls.Add(ok);
                 dlg.Controls.Add(cancel);
+                dlg.ClientSize = new Size(420, y);
                 dlg.AcceptButton = ok;
                 dlg.CancelButton = cancel;
 
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                    return tb.Text;
-                return null;
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                    return false;
+
+                if (tbAuthor != null) author = tbAuthor.Text;
+                title = tbTitle.Text;
+                return true;
             }
         }
 
@@ -891,6 +946,7 @@ namespace Nemoviz_Book_Reader
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = BuildFileFilter();
+                ofd.FilterIndex = 4; // default to "All supported files"
                 ofd.Title = Localization.T("Library.ImportFile.Title");
                 if (ofd.ShowDialog() == DialogResult.OK)
                     ImportFile(ofd.FileName);
@@ -902,8 +958,15 @@ namespace Nemoviz_Book_Reader
             using (FolderBrowserDialog fbd = new FolderBrowserDialog())
             {
                 fbd.Description = Localization.T("Library.ImportFolder.Description");
+                // Reopen where the user last browsed.
+                if (!string.IsNullOrEmpty(appSettings.LastImportFolder)
+                    && System.IO.Directory.Exists(appSettings.LastImportFolder))
+                    fbd.SelectedPath = appSettings.LastImportFolder;
                 if (fbd.ShowDialog() == DialogResult.OK)
+                {
+                    appSettings.SetLastImportFolder(fbd.SelectedPath);
                     ImportFolder(fbd.SelectedPath);
+                }
             }
         }
 
@@ -931,21 +994,33 @@ namespace Nemoviz_Book_Reader
                     LibraryScanner.ExtractArchive(filePath, destFolder);
                     LibraryScanner.FlattenSingleWrapperFolder(destFolder);
 
-                    List<string> audioFiles = new List<string>();
-                    foreach (string f in System.IO.Directory.GetFiles(destFolder))
+                    // DAISY book? Build the timeline in reading order (from the
+                    // navigation), flattening any nested export folder to root
+                    // first, and take the title from the DAISY metadata.
+                    DaisyBook daisy = DaisyParser.TryParse(destFolder);
+                    if (daisy != null)
                     {
-                        if (Array.IndexOf(LibraryScanner.AudioExtensions, System.IO.Path.GetExtension(f).ToLower()) >= 0)
-                            audioFiles.Add(f);
-                    }
-
-                    if (audioFiles.Count > 0)
-                    {
-                        audioFiles.Sort(StringComparer.OrdinalIgnoreCase);
-                        imported.BuildChaptersFromFolder(audioFiles.ToArray());
+                        LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
+                        imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
                     }
                     else
                     {
-                        imported.Format = LibraryScanner.DetectFormat(destFolder);
+                        List<string> audioFiles = new List<string>();
+                        foreach (string f in System.IO.Directory.GetFiles(destFolder))
+                        {
+                            if (Array.IndexOf(LibraryScanner.AudioExtensions, System.IO.Path.GetExtension(f).ToLower()) >= 0)
+                                audioFiles.Add(f);
+                        }
+
+                        if (audioFiles.Count > 0)
+                        {
+                            audioFiles.Sort(StringComparer.OrdinalIgnoreCase);
+                            imported.BuildChaptersFromFolder(audioFiles.ToArray());
+                        }
+                        else
+                        {
+                            imported.Format = LibraryScanner.DetectFormat(destFolder);
+                        }
                     }
                 }
                 else
