@@ -114,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="appsettings.cs" />
+    <Compile Include="ArchivePasswordPrompt.cs" />
     <Compile Include="bookdata.cs" />
     <Compile Include="DaisyParser.cs" />
     <Compile Include="Form1.cs">

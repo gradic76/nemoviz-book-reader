@@ -936,8 +936,8 @@ namespace Nemoviz_Book_Reader
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf|" +
                 Localization.T("Filter.TextBooks") + "|*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
-                Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z|" +
+                Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 
@@ -972,27 +972,46 @@ namespace Nemoviz_Book_Reader
 
         private void ImportFile(string filePath)
         {
+            string destFolder = null;
+            bool createdFolder = false;
             try
             {
-                string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
-                string destFolder = System.IO.Path.Combine(appSettings.LibraryPath, fileName);
+                string sourceName = System.IO.Path.GetFileName(filePath);
                 string ext = System.IO.Path.GetExtension(filePath).ToLower();
+                bool isArchive = LibraryScanner.IsExtractableArchive(sourceName);
 
-                if (!System.IO.Directory.Exists(destFolder))
+                // Multi-volume sets fold to one clean folder name (name.7z.001
+                // → name, name.part1.rar → name).
+                string bookName = isArchive
+                    ? LibraryScanner.BaseArchiveName(filePath)
+                    : System.IO.Path.GetFileNameWithoutExtension(filePath);
+                destFolder = System.IO.Path.Combine(appSettings.LibraryPath, bookName);
+
+                createdFolder = !System.IO.Directory.Exists(destFolder);
+                if (createdFolder)
                     System.IO.Directory.CreateDirectory(destFolder);
 
                 BookData imported = new BookData(destFolder);
 
-                if (LibraryScanner.IsArchive(ext))
+                if (isArchive)
                 {
                     // Extract straight into the book's permanent library
-                    // folder — no temp staging. Archives commonly wrap their
-                    // content in a single subfolder; flatten that up so the
-                    // book still lands exactly at destFolder regardless of
-                    // how it was packed. The source archive itself is left
-                    // untouched (it usually lives outside the library).
-                    LibraryScanner.ExtractArchive(filePath, destFolder);
-                    LibraryScanner.FlattenSingleWrapperFolder(destFolder);
+                    // folder — no temp staging. Multi-volume sets are pulled
+                    // together from the first part; if the archive is encrypted
+                    // the user is prompted for a password (held in memory only).
+                    // Archives commonly wrap their content in a single
+                    // subfolder; flatten that up so the book still lands exactly
+                    // at destFolder regardless of how it was packed. The source
+                    // archive itself is left untouched (it usually lives outside
+                    // the library).
+                    int pwAttempts = 0;
+                    LibraryScanner.ExtractArchive(filePath, destFolder,
+                        () => ArchivePasswordPrompt.Show(this, sourceName, pwAttempts++ > 0));
+                    // Name the book after the folder closest to the files (the
+                    // wrapper the archive packed everything into), not the
+                    // archive file itself.
+                    destFolder = LibraryScanner.ResolveBookFolder(destFolder, appSettings.LibraryPath);
+                    imported = new BookData(destFolder);
 
                     // DAISY book? Build the timeline in reading order (from the
                     // navigation), flattening any nested export folder to root
@@ -1019,6 +1038,13 @@ namespace Nemoviz_Book_Reader
                         }
                         else
                         {
+                            // Reserved slot for other archived formats. Downloads
+                            // often arrive zipped and may hold formats we don't
+                            // fully handle yet (text books — .epub/.pdf/… ). The
+                            // content is already extracted; for now the book
+                            // still lands in the library with a detected format
+                            // label. Future format handlers (e.g. a text-book
+                            // branch) plug in here.
                             imported.Format = LibraryScanner.DetectFormat(destFolder);
                         }
                     }
@@ -1049,14 +1075,43 @@ namespace Nemoviz_Book_Reader
                 LoadBooks();
                 MessageBox.Show(Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
             }
+            catch (OperationCanceledException)
+            {
+                // User cancelled the archive password prompt — quietly undo the
+                // empty folder we just made, no error dialog.
+                if (createdFolder) TryDeleteFolder(destFolder);
+            }
             catch (Exception ex)
             {
+                if (createdFolder) TryDeleteFolder(destFolder);
                 MessageBox.Show(Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
             }
         }
 
+        private static void TryDeleteFolder(string path)
+        {
+            try
+            {
+                if (path != null && System.IO.Directory.Exists(path))
+                    System.IO.Directory.Delete(path, true);
+            }
+            catch { }
+        }
+
         private void ImportFolder(string folderPath)
         {
+            // Archives (especially multi-volume) are unreliable through folder
+            // import — steer the user to Open File, which handles them properly.
+            if (LibraryScanner.ContainsArchiveFiles(folderPath))
+            {
+                MessageBox.Show(
+                    Localization.T("Dialog.ArchiveInFolder.Message"),
+                    Localization.T("Dialog.ArchiveInFolder.Title"),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
             try
             {
                 LibraryScanner scanner = new LibraryScanner(folderPath, false);

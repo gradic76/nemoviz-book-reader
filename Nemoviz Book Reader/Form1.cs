@@ -2330,8 +2330,8 @@ namespace Nemoviz_Book_Reader
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf|" +
                 Localization.T("Filter.TextBooks") + "|*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
-                Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z|" +
+                Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 
@@ -2345,7 +2345,7 @@ namespace Nemoviz_Book_Reader
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     string ext = System.IO.Path.GetExtension(ofd.FileName).ToLower();
-                    if (LibraryScanner.IsArchive(ext))
+                    if (LibraryScanner.IsExtractableArchive(System.IO.Path.GetFileName(ofd.FileName)))
                     {
                         OpenArchiveFile(ofd.FileName);
                         return;
@@ -2376,16 +2376,26 @@ namespace Nemoviz_Book_Reader
         /// change of book.</summary>
         private void OpenArchiveFile(string archivePath)
         {
+            string destFolder = null;
+            bool createdFolder = false;
             try
             {
-                string fileName = System.IO.Path.GetFileNameWithoutExtension(archivePath);
-                string destFolder = System.IO.Path.Combine(appSettings.LibraryPath, fileName);
+                string sourceName = System.IO.Path.GetFileName(archivePath);
+                destFolder = System.IO.Path.Combine(appSettings.LibraryPath,
+                    LibraryScanner.BaseArchiveName(archivePath));
 
-                if (!System.IO.Directory.Exists(destFolder))
+                createdFolder = !System.IO.Directory.Exists(destFolder);
+                if (createdFolder)
                     System.IO.Directory.CreateDirectory(destFolder);
 
-                LibraryScanner.ExtractArchive(archivePath, destFolder);
-                LibraryScanner.FlattenSingleWrapperFolder(destFolder);
+                // Multi-volume sets are gathered from the first part; encrypted
+                // archives prompt for a password (kept in memory only).
+                int pwAttempts = 0;
+                LibraryScanner.ExtractArchive(archivePath, destFolder,
+                    () => ArchivePasswordPrompt.Show(this, sourceName, pwAttempts++ > 0));
+                // Name the book after the folder closest to the files (the
+                // wrapper), not the archive file itself.
+                destFolder = LibraryScanner.ResolveBookFolder(destFolder, appSettings.LibraryPath);
 
                 BookData book = new BookData(destFolder);
 
@@ -2418,10 +2428,27 @@ namespace Nemoviz_Book_Reader
 
                 LoadBook(book, true);
             }
+            catch (OperationCanceledException)
+            {
+                // User cancelled the archive password prompt — undo the empty
+                // folder, no error dialog.
+                if (createdFolder) TryDeleteFolder(destFolder);
+            }
             catch (Exception ex)
             {
+                if (createdFolder) TryDeleteFolder(destFolder);
                 MessageBox.Show(Localization.T("Dialog.Error.General", ex.Message), Localization.T("Dialog.Error.Title"));
             }
+        }
+
+        private static void TryDeleteFolder(string path)
+        {
+            try
+            {
+                if (path != null && System.IO.Directory.Exists(path))
+                    System.IO.Directory.Delete(path, true);
+            }
+            catch { }
         }
 
         private void LoadPlaylist(string[] files, bool startPlaying = true)

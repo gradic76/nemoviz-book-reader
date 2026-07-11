@@ -210,6 +210,16 @@ Library.ImportFolder.Description=Select a folder with books
 Dialog.ImportSuccess.Message=Book added to library.
 Dialog.ImportSuccess.Title=Add book
 Dialog.ImportError.Message=Error adding book: {0}
+
+; Archive password prompt (encrypted .zip/.rar/.7z on import)
+Dialog.ArchivePassword.Title=Password required
+Dialog.ArchivePassword.Prompt=The archive "{0}" is password-protected. Enter the password to open it:
+Dialog.ArchivePassword.Retry=That password didn't work. Try again for "{0}":
+Dialog.ArchivePassword.Field=Archive password
+
+; Steer folder-import away from archives (use Open file instead)
+Dialog.ArchiveInFolder.Title=Archive detected
+Dialog.ArchiveInFolder.Message=This folder contains archive files (.zip / .rar / .7z or split volumes). To add an archive — including multi-volume and password-protected ones — use File, Open file... instead, which handles them reliably.
 Dialog.NoBooksFound.Message=No supported books were found in the selected folder.
 Dialog.NoBooksFound.Title=Add folder
 Dialog.ConfirmManyBooks.Message=Found {0} books. Continue with import?

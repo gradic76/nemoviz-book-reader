@@ -437,15 +437,37 @@ virtual-position seek.
 
 ---
 
-## 8a. Archive import — .zip/.rar/.7z (Session 9)
+## 8a. Archive import — .zip/.rar/.7z (Session 9; multi-volume + password Session 11)
 
-`LibraryScanner.cs` now recognizes all three formats (`ArchiveExtensions`),
-via **SharpCompress** (NuGet, manually vendored into `packages/` — no
-`nuget.exe` on this machine, so the `.nupkg`s were downloaded and unpacked by
-hand and wired into the `.csproj`/`packages.config` the same way the other
-hand-added packages already were). Extraction is one call,
-`ArchiveFactory.WriteToDirectory(archivePath, destFolder, options)` —
-auto-detects the format, no per-format branching needed.
+`LibraryScanner.cs` recognizes all three formats via **SharpCompress** (NuGet,
+manually vendored into `packages/` — no `nuget.exe` on this machine, so the
+`.nupkg`s were downloaded and unpacked by hand and wired into the
+`.csproj`/`packages.config` the same way the other hand-added packages already
+were).
+
+**Extraction engine** (`ExtractArchive(path, destFolder, passwordProvider)`):
+- **Multi-volume** sets are discovered from the first part via
+  `ArchiveFactory.GetFileParts` and opened together
+  (`OpenArchive(IReadOnlyList<FileInfo>, …)`). Supports RAR (`.partN.rar`, or
+  old `.rar`+`.rNN`), numeric split (`.7z.001/.002`, `.zip.001`), and spanned
+  ZIP (`.z01…`+`.zip`). `IsExtractableArchive` picks the entry-point part;
+  `IsVolumeContinuation` skips the rest; `BaseArchiveName` strips volume
+  suffixes for the folder name.
+- **RAR is streamed** with the dedicated `RarReader.OpenReader(volumes, …)`,
+  not the random-access Archive API: a file spanning a volume boundary breaks
+  per-entry extraction ("unpacked file size does not match header"), and
+  `archive.ExtractAllEntries()` refuses a non-solid RAR. **ZIP/7z** use the
+  random-access per-entry path (7z has no streaming reader; its numeric split
+  is reassembled at the stream level, so entries never span). RAR-vs-other is
+  told by extension, or by header-sniff (`ArchiveFactory.IsArchive`) for `.001`.
+- **Password**: `ReaderOptions.Password`. `ExtractArchive` tries with no
+  password first; if that hits a crypto/"password"/"encrypt" error
+  (`IsPasswordError`), it calls the `passwordProvider` (the UI shows
+  `ArchivePasswordPrompt`, an accessible masked-textbox modal) and retries,
+  re-prompting on a wrong password. The password is held **in memory only** —
+  never stored or logged. A null provider (background scan) throws
+  `ArchivePasswordRequiredException`; a user cancel throws
+  `OperationCanceledException`.
 
 - **Background scan** (`LibraryScanner.ExtractAndScan`, private): a loose
   archive sitting inside a folder being scanned (library root on
@@ -457,17 +479,22 @@ auto-detects the format, no per-format branching needed.
   generalized to all three formats.
 - **Direct user action** (Library "Add File" → `ImportFile`, Player Ctrl+O →
   `OpenArchiveFile`): extracts straight into the book's permanent library
-  folder (named from the archive's own file name — no temp staging anywhere).
-  `LibraryScanner.FlattenSingleWrapperFolder` moves content up one level if
-  the archive wrapped everything in a single subfolder, so the book still
-  lands exactly at the expected folder regardless of packaging. The **source
-  archive is left untouched** here (picked from an arbitrary external
-  location via file dialog — only the background-scan case, where the
-  archive already lives inside the library, deletes it). Failures surface as
-  an error dialog (`Dialog.Error.General`/`Common.Error`) instead of the
-  silent skip used for background scanning, since the user is watching.
-- Password-protected archives are an explicit **no-go** for now (Gordan's
-  call) — no password-prompt dialog. Worth a line in the eventual Help doc.
+  folder (no temp staging). After extraction, `ResolveBookFolder` names the
+  book after the **innermost wrapper folder** (the one closest to the files,
+  e.g. "Author - Title") rather than the archive file — descending pure
+  single-subfolder chains; it keeps the archive name only when content sits at
+  the root, and won't clobber an existing book of that name (falls back to
+  `FlattenSingleWrapperFolder`). This matches what the background scan already
+  does by recursing to the media folder. The **source archive is left
+  untouched** (only the background-scan case deletes it). Failures surface as
+  an error dialog; a cancelled password prompt just removes the empty folder.
+- **"Open folder" refuses archives**: `ImportFolder` shows an info dialog
+  (`Dialog.ArchiveInFolder.*`) pointing the user to "Open file" when the
+  chosen folder holds archive/volume files (`ContainsArchiveFiles`) — the
+  folder path for multi-volume archives is unreliable.
+- `ArchivePasswordPrompt.cs` is the accessible password modal. Runtime-verified
+  against real samples (Session 11): single & multi-volume, with/without
+  password, all three formats — RAR multi-volume needed the streaming reader.
 
 ---
 
@@ -634,9 +661,11 @@ sequence above supersedes its ordering).
   than "read only edit" order — this is JAWS's internal handling of
   multiline vs singleline EDIT controls, not our code. Deferred to final
   polish (options: shortcut in AccessibleDescription, or a naming tweak).
-- SharpCompress-based extraction has been runtime-tested with .zip and .7z
-  (Gordan confirmed both work). .rar untested for lack of a sample file on
-  hand — same code path, should behave the same, but hasn't been observed.
+- Archive import is runtime-verified across all three formats (.zip/.rar/.7z),
+  single- and multi-volume, with and without a password (Session 11). Only the
+  default volume naming was exercised (7z/zip `.001/.002`, RAR `.partN.rar`);
+  old-style RAR `.rNN` and spanned ZIP `.zNN` are handled in code but weren't
+  sampled.
 
 ---
 
