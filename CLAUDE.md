@@ -579,6 +579,49 @@ F2 rename (which offers Author + Title for DAISY, one field for plain audio).
 
 ---
 
+## 8d. Sound processing — Properties dialog (Session 12)
+
+Per-book audio processing, opened from the library (Alt+Enter / right-click
+Properties) or the player (Properties button / **Alt+Enter**, beep when nothing
+is loaded). `PropertiesForm.cs` + `SoundSettings.cs` (settings model, persisted
+in Book.ini `[Sound]`).
+
+**Chain** (`SoundSettings.BuildAf` → mpv `af` as one `lavfi=[…]` graph, applied
+by `Form1.ApplySoundProcessing`): highpass → afftdn (denoise) → deesser →
+acompressor → EQ (bass/equalizer/treble) → speechnorm|dynaudnorm → alimiter.
+Verified working against the vendored libmpv (statically-linked ffmpeg, Lavf62;
+all needed filters confirmed present by grepping the DLL). All numbers formatted
+`InvariantCulture` (ffmpeg needs `.`); friendly dB units convert to ffmpeg's
+linear amplitudes (threshold/makeup/limit via `10^(dB/20)`).
+
+**UX / accessibility:**
+- Stages are **named presets** (a level), not raw DSP knobs — the preset tables
+  (the real values) live in `SoundSettings` and feed both the dialog and the
+  live technical read-out. Rumble/denoise/deesser/compressor/loudness are
+  5-level (Minimal…Maximum); EQ is free-form (three dB bands, ±15); the safety
+  limiter is fixed (−0.1 dB, always on, not shown).
+- Boxy 3-column grid like the player: column A = full-height info + **live
+  technical read-out**; B/C = the six stage cells (left→right, top→bottom);
+  merged bottom cell = master switch, Reset all, Bypass, OK, Cancel.
+- **Master switch gates everything** (off = cells dimmed and out of Tab order);
+  each stage's own switch gates its parameters. NumericUpDown/ComboBox (not
+  track bars) so the value is announced. NVDA doesn't auto-read a DropDownList
+  on arrow the way JAWS does, so combo changes are spoken via `NvdaController`
+  (no-op under JAWS → no double-speak).
+- **Live preview**: opening Properties from the player passes a callback so
+  every edit (and Bypass) is heard on the fly; on close the persisted state is
+  re-applied (OK saved new, Cancel kept old). From the library there's no audio,
+  so no preview.
+
+**Open items** (Session 12, deferred until "critical" sample recordings exist):
+tune the preset values by ear; finalize the normalization method (the
+speechnorm/dynaudnorm chooser is temporary — likely lock to speechnorm and drop
+it); English-name review for the stage titles (flagged in `en.lang`). Objective
+analysis of user-supplied samples (LUFS/peak/noise-floor/spectral via a static
+ffmpeg — "option A") will guide the tuning; **I measure, Gordan judges by ear.**
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf migrated from ListBox to **ListView with native

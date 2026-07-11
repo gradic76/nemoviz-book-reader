@@ -45,6 +45,10 @@ namespace Nemoviz_Book_Reader
         public List<(int Level, string Label, double Position)> DaisyHeadings { get; private set; }
         public List<(int Level, string Label, double Position)> DaisyPages { get; private set; }
 
+        // Per-book sound-processing settings (Properties dialog). Inert while
+        // Sound.Enabled is false. Persisted in Book.ini's [Sound] section.
+        public SoundSettings Sound { get; private set; }
+
         public BookData(string folderPath)
         {
             FolderPath = folderPath;
@@ -55,6 +59,7 @@ namespace Nemoviz_Book_Reader
             Bookmarks = new List<double>();
             DaisyHeadings = new List<(int, string, double)>();
             DaisyPages = new List<(int, string, double)>();
+            Sound = new SoundSettings();
             Load();
         }
 
@@ -82,6 +87,7 @@ namespace Nemoviz_Book_Reader
             LoadChapters();
             LoadBookmarks();
             BuildDaisyNav();
+            Sound.Load(ini);
         }
 
         /// <summary>Detects a DAISY book and overlays its headings/pages onto
@@ -461,6 +467,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "Volume", Volume.ToString());
             ini.Write("Settings", "Speed", Speed.ToString());
             ini.Write("Settings", "SeekStep", SeekStep.ToString());
+            Sound.Save(ini);
         }
     }
 }

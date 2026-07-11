@@ -696,6 +696,10 @@ namespace Nemoviz_Book_Reader
                     BtnSetBookmark_Click(null, EventArgs.Empty);
                     return true;
 
+                case Keys.Alt | Keys.Enter:
+                    BtnProperties_Click(null, EventArgs.Empty);
+                    return true;
+
                 case Keys.Enter:
                     if (this.ActiveControl is Button btn)
                         btn.PerformClick();
@@ -1171,7 +1175,7 @@ namespace Nemoviz_Book_Reader
             btnProperties.Text = Localization.T("Btn.Properties");
             btnProperties.Size = new Size(140, 40);
             btnProperties.Location = new Point(490, 8);
-            btnProperties.AccessibleName = Localization.T("Btn.Properties");
+            btnProperties.AccessibleName = Localization.T("Btn.Properties.Accessible");
             btnProperties.TabIndex = 11;
             btnProperties.Click += BtnProperties_Click;
 
@@ -1262,6 +1266,7 @@ namespace Nemoviz_Book_Reader
             toolTip.SetToolTip(cmbSeek, Localization.T("Tip.Seek"));
             toolTip.SetToolTip(btnGoTo, Localization.T("Tip.GoTo"));
             toolTip.SetToolTip(btnTimer, Localization.T("Tip.Timer"));
+            toolTip.SetToolTip(btnProperties, Localization.T("Tip.Properties"));
             toolTip.SetToolTip(tbVolume, Localization.T("Tip.Volume"));
             toolTip.SetToolTip(tbSpeed, Localization.T("Tip.Speed"));
             toolTip.SetToolTip(tbProgress, Localization.T("Tip.Progress"));
@@ -2053,7 +2058,33 @@ namespace Nemoviz_Book_Reader
 
         private void BtnProperties_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(Localization.T("Dialog.Properties.ComingSoon"), Localization.T("Dialog.Properties.Title"));
+            // Same "no go" feedback as Go To / bookmarks with nothing loaded.
+            if (currentBook == null)
+            {
+                Console.Beep(300, 150);
+                return;
+            }
+            // Pass a live-preview hook so edits are heard on the fly while the
+            // dialog is open.
+            using (PropertiesForm dlg = new PropertiesForm(currentBook, ApplySoundProcessing))
+            {
+                dlg.ShowDialog(this);
+            }
+            // Settle on the persisted state (OK saved the new values; Cancel
+            // kept the old ones) — either way re-apply the book's settings.
+            if (currentBook != null)
+                ApplySoundProcessing(currentBook.Sound, false);
+        }
+
+        /// <summary>Builds the book's sound-processing filter chain and applies
+        /// it to mpv's audio output (empty string = no filters). Safe to call
+        /// any time; a no-op with no engine. Used on book load, for the live
+        /// preview while the Properties dialog is open, and after it closes.</summary>
+        private void ApplySoundProcessing(SoundSettings s, bool bypass)
+        {
+            if (mpvHandle == IntPtr.Zero) return;
+            string af = SoundSettings.BuildAf(s, bypass);
+            mpv_set_property_string(mpvHandle, "af", af ?? "");
         }
 
         private void BtnGoTo_Click(object sender, EventArgs e)
@@ -2288,6 +2319,8 @@ namespace Nemoviz_Book_Reader
             // Always start paused — prevents an audible "plays then jumps"
             // while we look for the remembered position.
             LoadPlaylist(playlist.ToArray(), false);
+            // Apply this book's saved sound processing (no-op when it's off).
+            ApplySoundProcessing(currentBook.Sound, false);
 
             double resumeSeconds = ParseTimeToSeconds(currentBook.LastPosition);
             System.Windows.Forms.Timer resumeTimer = new System.Windows.Forms.Timer();

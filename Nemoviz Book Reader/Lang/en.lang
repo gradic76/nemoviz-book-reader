@@ -30,6 +30,7 @@ Btn.Forward.Accessible=Forward, Shift+Right
 Btn.Play.Accessible=Play, Space
 Btn.Pause.Accessible=Pause, Space
 Btn.Properties=Properties
+Btn.Properties.Accessible=Properties, Alt+Enter
 Btn.GoTo=Go To...
 Btn.GoTo.Accessible=Go To, Ctrl+G
 Btn.SetBookmark=Set Bookmark
@@ -113,6 +114,7 @@ Tip.PlayPause=Play/Pause (Space)
 Tip.Forward=Forward (Shift+Right)
 Tip.Seek=Change with Shift+Up and Shift+Down; jump with Shift+Left and Shift+Right (also Back/Forward)
 Tip.GoTo=Ctrl+G
+Tip.Properties=Alt+Enter
 Tip.Timer=Ctrl+T
 Tip.Volume=Up and Down arrows
 Tip.Speed=Ctrl+Left and Ctrl+Right
@@ -220,6 +222,42 @@ Dialog.ArchivePassword.Field=Archive password
 ; Steer folder-import away from archives (use Open file instead)
 Dialog.ArchiveInFolder.Title=Archive detected
 Dialog.ArchiveInFolder.Message=This folder contains archive files (.zip / .rar / .7z or split volumes). To add an archive — including multi-volume and password-protected ones — use File, Open file... instead, which handles them reliably.
+
+; Properties dialog — per-book sound processing
+; NOTE (for later English review): the stage titles below are the plain,
+; friendly names. Some technical terms may read fine to native speakers
+; (e.g. "Normalization", "Equalizer", "Compressor", "De-esser") — revisit
+; before the final English pass.
+Prop.Info.Accessible=Book information
+Prop.UseSoundProcessing=Use sound processing
+Prop.Stage.Use=Use
+Prop.Stage.Level=Level
+Prop.Highpass.Title=Remove rumble
+Prop.Denoise.Title=Noise removal
+Prop.Deesser.Title=Soften sibilance
+Prop.Compressor.Title=Even out speech
+Prop.Eq.Title=Tone
+Prop.Eq.Bass=Bass
+Prop.Eq.Voice=Voice
+Prop.Eq.Treble=Treble
+Prop.Normalize.Title=Automatic loudness
+Prop.Normalize.Method=Method
+Prop.Normalize.Type.Speech=Speech (speechnorm)
+Prop.Normalize.Type.Dynamic=Music-safe (dynaudnorm)
+; Preset level names — every stage uses Minimal/Light/Medium/Strong/Maximum.
+Prop.Level.Minimal=Minimal
+Prop.Level.Light=Light
+Prop.Level.Medium=Medium
+Prop.Level.Strong=Strong
+Prop.Level.Maximum=Maximum
+Prop.ResetAll=Reset all
+Prop.Bypass=Bypass
+; Info column read-out
+Prop.Info.ProcessingOff=Sound processing: off
+Prop.Info.ProcessingOn=Sound processing: on
+Prop.Info.Bypassed=(bypass active)
+Prop.Info.Off=off
+Prop.Info.Protection=Distortion protection
 Dialog.NoBooksFound.Message=No supported books were found in the selected folder.
 Dialog.NoBooksFound.Title=Add folder
 Dialog.ConfirmManyBooks.Message=Found {0} books. Continue with import?

@@ -133,6 +133,8 @@
     <Compile Include="libraryscanner.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="NvdaController.cs" />
+    <Compile Include="PropertiesForm.cs" />
+    <Compile Include="SoundSettings.cs" />
     <Compile Include="ManageBookmarksForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -925,7 +925,11 @@ namespace Nemoviz_Book_Reader
         {
             BookData book = GetSelectedBook();
             if (book == null) return;
-            MessageBox.Show(Localization.T("Dialog.Properties.ComingSoon"), Localization.T("Dialog.Properties.Title"));
+            using (PropertiesForm dlg = new PropertiesForm(book))
+            {
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                    RebuildShelf(book); // title/author may have changed elsewhere; keep selection
+            }
         }
 
         // ──────────────────────────────────────────────
