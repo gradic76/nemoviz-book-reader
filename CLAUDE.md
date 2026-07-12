@@ -673,11 +673,26 @@ This becomes the core of Phase 2's cleaning.
   estimated reading time. Single-file audio books now use the same plain
   Elapsed/Remaining/Time labels (no part/total split).
 
+**Phase 2 — import parsers (Session 13).** `TextExtractor.cs` extracts documents
+to text at import (Library "Add File"), writing `content.txt` into the book
+folder (which the reader then treats as a plain text book). Two groups:
+- **Editable → flat** (`TextCleaner`, no reliable structure): `txt`, `rtf`
+  (WinForms RichTextBox), `docx`/`odt` (System.IO.Compression + XmlReader).
+- **Read-only → structured**: `html`/`fb2`/`epub` return a `TextDoc` (text +
+  headings + title/author). Headings (`<hN>`; fb2 `<section>/<title>`; epub =
+  per spine-item `<hN>`) are captured as (level, title, **character offset**),
+  cleaned per block so offsets stay exact, and stored in Book.ini `[TextNav]`
+  (`BookData.TextHeadings`). They drive **DAISY-style navigation for text**:
+  Heading seek-step levels + Go To (`TextHeadingSeek`/`TextGoTo`, char-based via
+  `tts.SeekToChar`); no headings → falls back to flat. Metadata sets the shelf
+  Author/Title. Only "Add File" for now (not folder-scan / archived docs); epub
+  headings come from in-content `<hN>`, not NAV/NCX.
+
 **Open items:** per-book Properties for text (TTS override UI); OneCore (WinRT)
-+ 32-bit satellite backends; text bookmarks; Phase 2 parsers; a promised
-personal `.lit` converter (see memory). eSpeak: the user's is 32-bit-only
-(invisible to x64 System.Speech) — install eSpeak NG (64-bit) or add the
-satellite backend.
++ 32-bit satellite backends; text bookmarks; Layer-2/3 parsers (pdf/mobi/…); a
+promised personal `.lit` converter (see memory). Test feedback still to apply is
+in memory. eSpeak: the user's is 32-bit-only (invisible to x64 System.Speech) —
+install eSpeak NG (64-bit) or add the satellite backend.
 
 ---
 

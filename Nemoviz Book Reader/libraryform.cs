@@ -952,9 +952,9 @@ namespace Nemoviz_Book_Reader
         {
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf|" +
-                Localization.T("Filter.TextBooks") + "|*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
+                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
                 Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 
@@ -1066,25 +1066,35 @@ namespace Nemoviz_Book_Reader
                         }
                     }
                 }
+                else if (Array.IndexOf(LibraryScanner.AudioExtensions, ext) >= 0)
+                {
+                    string destFile = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(filePath));
+                    if (!System.IO.File.Exists(destFile))
+                        System.IO.File.Copy(filePath, destFile);
+                    // Build duration/chapters up front so it isn't 00:00:00 until
+                    // first played; also stores the detailed format string.
+                    imported.BuildChaptersFromFolder(new string[] { destFile });
+                }
+                else if (TextExtractor.IsTextFormat(ext))
+                {
+                    // Document → extract to content.txt (the reader's input;
+                    // TtsReader cleans it on load). Structured formats also carry
+                    // a heading list + metadata. Editable formats stay flat.
+                    TextDoc doc = TextExtractor.Extract(filePath);
+                    System.IO.File.WriteAllText(
+                        System.IO.Path.Combine(destFolder, "content.txt"),
+                        doc.Text ?? "", new System.Text.UTF8Encoding(false));
+                    if (!string.IsNullOrWhiteSpace(doc.Title)) imported.Title = doc.Title;
+                    if (!string.IsNullOrWhiteSpace(doc.Author)) imported.Author = doc.Author;
+                    imported.SetTextHeadings(doc.Headings);
+                    imported.Format = Localization.T("Details.Format.PlainText");
+                }
                 else
                 {
                     string destFile = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(filePath));
                     if (!System.IO.File.Exists(destFile))
                         System.IO.File.Copy(filePath, destFile);
-
-                    // Build duration/chapters right away, so the book doesn't
-                    // show 00:00:00 until first played. BuildChaptersFromFolder
-                    // also stores the detailed format string for audio files;
-                    // for text files it gets the plain name from the
-                    // extension map.
-                    if (Array.IndexOf(LibraryScanner.AudioExtensions, ext) >= 0)
-                    {
-                        imported.BuildChaptersFromFolder(new string[] { destFile });
-                    }
-                    else
-                    {
-                        imported.Format = BookData.FriendlyFormatName(ext);
-                    }
+                    imported.Format = BookData.FriendlyFormatName(ext);
                 }
 
                 imported.Save();

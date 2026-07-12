@@ -135,7 +135,7 @@ namespace Nemoviz_Book_Reader
         // ("Heading 1", "Heading 2", …), where level N stops at every heading
         // of depth ≤ N. This list runs parallel to cmbSeek.Items (one entry
         // per row) so the selected step is known without fixed indices.
-        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark, Sentence, Paragraph, StandardPage }
+        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark, Sentence, Paragraph, StandardPage, Min10 }
         private struct SeekStep
         {
             public SeekStepKind Kind;
@@ -460,6 +460,7 @@ namespace Nemoviz_Book_Reader
                 case SeekStepKind.Sec30: return 30;
                 case SeekStepKind.Min1: return 60;
                 case SeekStepKind.Min5: return 300;
+                case SeekStepKind.Min10: return 600;
                 default: return 15;
             }
         }
@@ -498,14 +499,97 @@ namespace Nemoviz_Book_Reader
             if (tts == null) return;
             switch (step.Kind)
             {
+                case SeekStepKind.Heading:
+                    TextHeadingSeek(step.Level, dir); break;
                 case SeekStepKind.Sentence:
                     if (dir > 0) tts.NextSentence(); else tts.PrevSentence(); break;
                 case SeekStepKind.Paragraph:
                     if (dir > 0) tts.NextParagraph(); else tts.PrevParagraph(); break;
                 case SeekStepKind.StandardPage:
                     tts.SeekChars(dir * TtsReader.StandardPageChars); break;
-                default: // time steps (15/30/60 s)
+                default: // time steps (15/30/60 s / 5 / 10 min)
                     tts.SeekSeconds(dir * GetSeekStepSeconds()); break;
+            }
+        }
+
+        // Distinct heading depths present in the current text book, ascending.
+        private System.Collections.Generic.List<int> TextHeadingLevelsPresent()
+        {
+            var levels = new System.Collections.Generic.List<int>();
+            if (currentBook != null)
+                foreach (var h in currentBook.TextHeadings)
+                    if (!levels.Contains(h.Level)) levels.Add(h.Level);
+            levels.Sort();
+            return levels;
+        }
+
+        // Character offsets of the text headings at depth ≤ maxLevel, ascending.
+        private System.Collections.Generic.List<int> TextHeadingOffsets(int maxLevel)
+        {
+            var list = new System.Collections.Generic.List<int>();
+            if (currentBook != null)
+                foreach (var h in currentBook.TextHeadings)
+                    if (h.Level <= maxLevel) list.Add(h.Offset);
+            list.Sort();
+            return list;
+        }
+
+        /// <summary>Heading navigation for a structured text book: jump to the
+        /// next/previous heading of depth ≤ maxLevel, with a small grace so Back
+        /// from just inside a heading rewinds to its start.</summary>
+        private void TextHeadingSeek(int maxLevel, int dir)
+        {
+            var offs = TextHeadingOffsets(maxLevel);
+            if (tts == null || offs.Count == 0) { Console.Beep(300, 150); return; }
+            int cur = tts.CharPosition;
+            if (dir > 0)
+            {
+                foreach (int o in offs)
+                    if (o > cur + 1) { tts.SeekToChar(o); return; }
+                Console.Beep(300, 150);
+            }
+            else
+            {
+                int idx = -1;
+                for (int i = offs.Count - 1; i >= 0; i--)
+                    if (offs[i] <= cur) { idx = i; break; }
+                if (idx < 0) { Console.Beep(300, 150); return; }
+                // >~50 chars into the heading rewinds to its start, else previous.
+                tts.SeekToChar((idx == 0 || cur - offs[idx] > 50) ? offs[idx] : offs[idx - 1]);
+            }
+        }
+
+        /// <summary>Go To for a structured text book — pick a heading from the
+        /// list (indented by depth) and jump the reader there.</summary>
+        private void TextGoTo()
+        {
+            var hs = currentBook.TextHeadings;
+            string[] names = new string[hs.Count];
+            int[] targets = new int[hs.Count];
+            for (int i = 0; i < hs.Count; i++)
+            {
+                names[i] = new string(' ', 2 * Math.Max(0, hs[i].Level - 1)) + hs[i].Label;
+                targets[i] = hs[i].Offset;
+            }
+
+            int cur = tts != null ? tts.CharPosition : 0;
+            int preselect = 0;
+            for (int i = hs.Count - 1; i >= 0; i--)
+                if (hs[i].Offset <= cur) { preselect = i; break; }
+
+            using (GoToForm dlg = new GoToForm(names, preselect, appSettings.GoToAutoPlay, true))
+            {
+                if (dlg.ShowDialog(this) == DialogResult.OK &&
+                    dlg.SelectedPartIndex >= 0 && dlg.SelectedPartIndex < targets.Length)
+                {
+                    appSettings.SetGoToAutoPlay(dlg.AutoPlayChecked);
+                    tts.SeekToChar(targets[dlg.SelectedPartIndex]);
+                    if (dlg.AutoPlayChecked && !isPlaying)
+                    {
+                        tts.Play();
+                        SetPlayPauseState(true);
+                    }
+                }
             }
         }
 
@@ -538,12 +622,22 @@ namespace Nemoviz_Book_Reader
             // paragraph / standard page). No audio "Part"/DAISY here.
             if (currentBook != null && currentBook.IsTextBook)
             {
-                AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
-                AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
-                AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
-                AddSeekStep(new SeekStep(SeekStepKind.Sentence), Localization.T("Seek.Item.Sentence"));
-                AddSeekStep(new SeekStep(SeekStepKind.Paragraph), Localization.T("Seek.Item.Paragraph"));
+                // Structured text (epub/fb2/html with headings) gets DAISY-style
+                // Heading levels (coarsest first); flat text drops them and adds
+                // bigger time steps. Both are ordered coarsest → finest. No
+                // Paragraph — in a single-blob txt it can span most of the book.
+                if (currentBook.TextHeadings.Count > 0)
+                    foreach (int level in TextHeadingLevelsPresent())
+                        AddSeekStep(new SeekStep(SeekStepKind.Heading, level),
+                            Localization.T("Seek.Item.HeadingLevel", level));
+
                 AddSeekStep(new SeekStep(SeekStepKind.StandardPage), Localization.T("Seek.Item.StandardPage"));
+                AddSeekStep(new SeekStep(SeekStepKind.Min10), Localization.T("Seek.Item.10min"));
+                AddSeekStep(new SeekStep(SeekStepKind.Min5), Localization.T("Seek.Item.5min"));
+                AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
+                AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
+                AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
+                AddSeekStep(new SeekStep(SeekStepKind.Sentence), Localization.T("Seek.Item.Sentence"));
 
                 int ti = seekSteps.FindIndex(s => s.Kind == previous.Kind && s.Level == previous.Level);
                 cmbSeek.SelectedIndex = ti >= 0 ? ti : 0;
@@ -2246,9 +2340,24 @@ namespace Nemoviz_Book_Reader
 
         private void BtnGoTo_Click(object sender, EventArgs e)
         {
-            if (currentBook == null || currentBook.Chapters.Count == 0)
+            if (currentBook == null)
             {
-                // No book loaded — a short low beep as audible feedback.
+                Console.Beep(300, 150);
+                return;
+            }
+
+            // Text book → navigate by headings (structured) or a low beep (flat,
+            // nothing to jump to).
+            if (currentBook.IsTextBook)
+            {
+                if (currentBook.TextHeadings.Count > 0) TextGoTo();
+                else Console.Beep(300, 150);
+                return;
+            }
+
+            if (currentBook.Chapters.Count == 0)
+            {
+                // No playable content — a short low beep as audible feedback.
                 Console.Beep(300, 150);
                 return;
             }
@@ -2643,9 +2752,9 @@ namespace Nemoviz_Book_Reader
         {
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf|" +
-                Localization.T("Filter.TextBooks") + "|*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
+                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
                 Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.epub;*.txt;*.pdf;*.djvu;*.fb2;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 

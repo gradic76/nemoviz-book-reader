@@ -59,6 +59,9 @@ namespace Nemoviz_Book_Reader
         public int TextWpm { get; set; }
         // Character count of the text, cached for the reading-time estimate.
         public int TextChars { get; set; }
+        // Heading structure of a produced text book (epub/fb2/html): level +
+        // title + character offset into content.txt. Empty for flat text.
+        public List<(int Level, string Label, int Offset)> TextHeadings { get; private set; }
 
         public BookData(string folderPath)
         {
@@ -70,6 +73,7 @@ namespace Nemoviz_Book_Reader
             Bookmarks = new List<double>();
             DaisyHeadings = new List<(int, string, double)>();
             DaisyPages = new List<(int, string, double)>();
+            TextHeadings = new List<(int, string, int)>();
             Sound = new SoundSettings();
             Load();
         }
@@ -106,6 +110,27 @@ namespace Nemoviz_Book_Reader
             TextWpm = tw;
             int.TryParse(ini.Read("Book", "TextChars", "0"), out int tc);
             TextChars = tc;
+            LoadTextNav();
+        }
+
+        private void LoadTextNav()
+        {
+            TextHeadings.Clear();
+            if (!IsTextBook) return;
+            int.TryParse(ini.Read("TextNav", "Count", "0"), out int n);
+            for (int i = 0; i < n; i++)
+            {
+                string[] p = ini.Read("TextNav", "H" + i, "").Split(new[] { '|' }, 3);
+                if (p.Length == 3 && int.TryParse(p[0], out int lvl) && int.TryParse(p[1], out int off))
+                    TextHeadings.Add((lvl, p[2], off));
+            }
+        }
+
+        /// <summary>Sets the heading structure (from the import extractor) so the
+        /// next Save persists it to [TextNav].</summary>
+        public void SetTextHeadings(List<(int Level, string Label, int Offset)> headings)
+        {
+            TextHeadings = headings ?? new List<(int, string, int)>();
         }
 
         /// <summary>A text book is a folder that has a readable text document
@@ -533,6 +558,10 @@ namespace Nemoviz_Book_Reader
             ini.Write("Progress", "TextPosition", TextPosition.ToString());
             ini.Write("Settings", "TextWpm", TextWpm.ToString());
             ini.Write("Book", "TextChars", TextChars.ToString());
+            ini.Write("TextNav", "Count", TextHeadings.Count.ToString());
+            for (int i = 0; i < TextHeadings.Count; i++)
+                ini.Write("TextNav", "H" + i,
+                    TextHeadings[i].Level + "|" + TextHeadings[i].Offset + "|" + TextHeadings[i].Label);
             Sound.Save(ini);
         }
     }

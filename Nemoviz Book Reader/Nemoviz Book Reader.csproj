@@ -131,6 +131,7 @@
     <Compile Include="ISpeechBackend.cs" />
     <Compile Include="Sapi5Backend.cs" />
     <Compile Include="TextCleaner.cs" />
+    <Compile Include="TextExtractor.cs" />
     <Compile Include="libraryform.cs">
       <SubType>Form</SubType>
     </Compile>

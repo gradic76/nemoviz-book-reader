@@ -85,6 +85,7 @@ Seek.Item.15s=15 seconds
 Seek.Item.30s=30 seconds
 Seek.Item.1min=1 minute
 Seek.Item.5min=5 minutes
+Seek.Item.10min=10 minutes
 Seek.Item.Part=Part
 Seek.Item.HeadingLevel=Heading {0}
 Seek.Item.Page=Page
