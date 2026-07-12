@@ -31,6 +31,14 @@ namespace Nemoviz_Book_Reader
         /// </summary>
         public bool GoToAutoPlay { get; private set; }
 
+        // Global text-to-speech defaults for text books (per-book overrides live
+        // in Book.ini). Speed is a nominal words-per-minute; pitch is SAPI-style
+        // (-10..10); volume 0..100.
+        public string TtsVoice { get; private set; }
+        public int TtsWpm { get; private set; }
+        public int TtsPitch { get; private set; }
+        public int TtsVolume { get; private set; }
+
         public AppSettings()
         {
             ini = new IniFile(SettingsPath);
@@ -40,6 +48,25 @@ namespace Nemoviz_Book_Reader
             LangPath = ini.Read("App", "LangPath", DefaultLangPath);
             LanguageCode = ini.Read("App", "Language", "en");
             GoToAutoPlay = ini.Read("Player", "GoToAutoPlay", "0") == "1";
+            TtsVoice = ini.Read("TextToSpeech", "Voice", "");
+            int.TryParse(ini.Read("TextToSpeech", "Wpm", "175"), out int ttsWpm);
+            TtsWpm = ttsWpm;
+            int.TryParse(ini.Read("TextToSpeech", "Pitch", "0"), out int ttsPitch);
+            TtsPitch = ttsPitch;
+            int.TryParse(ini.Read("TextToSpeech", "Volume", "100"), out int ttsVol);
+            TtsVolume = ttsVol;
+        }
+
+        public void SetTtsDefaults(string voice, int wpm, int pitch, int volume)
+        {
+            TtsVoice = voice ?? "";
+            TtsWpm = wpm;
+            TtsPitch = pitch;
+            TtsVolume = volume;
+            ini.Write("TextToSpeech", "Voice", TtsVoice);
+            ini.Write("TextToSpeech", "Wpm", TtsWpm.ToString());
+            ini.Write("TextToSpeech", "Pitch", TtsPitch.ToString());
+            ini.Write("TextToSpeech", "Volume", TtsVolume.ToString());
         }
 
         public void SetLibraryPath(string newPath)

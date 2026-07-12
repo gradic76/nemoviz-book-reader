@@ -49,6 +49,17 @@ namespace Nemoviz_Book_Reader
         // Sound.Enabled is false. Persisted in Book.ini's [Sound] section.
         public SoundSettings Sound { get; private set; }
 
+        // Text book (read aloud by TTS): a folder with a text document and no
+        // audio. TextPosition is the resume point as a character offset.
+        public bool IsTextBook { get; private set; }
+        public string TextFilePath { get; private set; }
+        public int TextPosition { get; set; }
+        // Per-book reading speed override (words per minute); -1 = use the
+        // global default from Settings. Set from the text book's Properties.
+        public int TextWpm { get; set; }
+        // Character count of the text, cached for the reading-time estimate.
+        public int TextChars { get; set; }
+
         public BookData(string folderPath)
         {
             FolderPath = folderPath;
@@ -88,6 +99,34 @@ namespace Nemoviz_Book_Reader
             LoadBookmarks();
             BuildDaisyNav();
             Sound.Load(ini);
+            DetectTextBook();
+            int.TryParse(ini.Read("Progress", "TextPosition", "0"), out int tp);
+            TextPosition = tp;
+            int.TryParse(ini.Read("Settings", "TextWpm", "-1"), out int tw);
+            TextWpm = tw;
+            int.TryParse(ini.Read("Book", "TextChars", "0"), out int tc);
+            TextChars = tc;
+        }
+
+        /// <summary>A text book is a folder that has a readable text document
+        /// (Phase 1: a .txt) and no audio. The player then reads it via TTS
+        /// instead of mpv.</summary>
+        private void DetectTextBook()
+        {
+            IsTextBook = false;
+            TextFilePath = null;
+            if (IsDaisy || Chapters.Count > 0) return;
+            try
+            {
+                foreach (string f in Directory.GetFiles(FolderPath))
+                    if (Path.GetExtension(f).ToLower() == ".txt")
+                    {
+                        IsTextBook = true;
+                        TextFilePath = f;
+                        return;
+                    }
+            }
+            catch { }
         }
 
         /// <summary>Detects a DAISY book and overlays its headings/pages onto
@@ -270,6 +309,30 @@ namespace Nemoviz_Book_Reader
             BuildChaptersFromFolder(audioFiles.ToArray());
         }
 
+        /// <summary>Caches the text book's character count (read once) so the
+        /// reading-time estimate can be computed without re-reading the file.</summary>
+        public void EnsureTextInfo()
+        {
+            if (!IsTextBook || TextChars > 0) return;
+            try
+            {
+                TextChars = TextCleaner.Clean(TtsReader.ReadFile(TextFilePath)).Length;
+                ini.Write("Book", "TextChars", TextChars.ToString());
+            }
+            catch { }
+        }
+
+        /// <summary>Estimated reading time (as "H:MM:SS") for the given nominal
+        /// words-per-minute. Empty for non-text books.</summary>
+        public string EstimatedReadingTime(int wpm)
+        {
+            if (!IsTextBook) return Duration;
+            EnsureTextInfo();
+            int cpm = wpm * 6;
+            if (TextChars <= 0 || cpm <= 0) return FormatTime(0);
+            return FormatTime(TextChars * 60.0 / cpm);
+        }
+
         // ──────────────────────────────────────────────
         // Bookmarks
         // ──────────────────────────────────────────────
@@ -435,7 +498,7 @@ namespace Nemoviz_Book_Reader
                 case ".dff": return "DFF Audio";
                 case ".caf": return "CAF Audio";
                 case ".epub": return "EPUB";
-                case ".txt": return "Text";
+                case ".txt": return "Plain text";
                 case ".pdf": return "PDF";
                 case ".djvu": return "DjVu";
                 case ".fb2": return "FB2";
@@ -467,6 +530,9 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "Volume", Volume.ToString());
             ini.Write("Settings", "Speed", Speed.ToString());
             ini.Write("Settings", "SeekStep", SeekStep.ToString());
+            ini.Write("Progress", "TextPosition", TextPosition.ToString());
+            ini.Write("Settings", "TextWpm", TextWpm.ToString());
+            ini.Write("Book", "TextChars", TextChars.ToString());
             Sound.Save(ini);
         }
     }

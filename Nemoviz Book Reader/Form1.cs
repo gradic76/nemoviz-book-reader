@@ -48,12 +48,16 @@ namespace Nemoviz_Book_Reader
         private bool isPlaying = false;
         private string currentFile = null;
         private BookData currentBook = null;
+        // Text-book playback engine (TTS). Created lazily on the first text book.
+        private TtsReader tts = null;
         private AppSettings appSettings;
         private System.Windows.Forms.Timer eventTimer;
         private System.Windows.Forms.Timer progressTimer;
 
         private int currentVolume = 100;
         private int currentSpeed = 100;
+        // Reading speed for the current text book (words per minute).
+        private int currentWpm = 175;
         private int currentProgress = 0;
         private int currentPlaylistIndex = 0;
         private bool isLoadingBook = false;
@@ -131,7 +135,7 @@ namespace Nemoviz_Book_Reader
         // ("Heading 1", "Heading 2", …), where level N stops at every heading
         // of depth ≤ N. This list runs parallel to cmbSeek.Items (one entry
         // per row) so the selected step is known without fixed indices.
-        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark }
+        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark, Sentence, Paragraph, StandardPage }
         private struct SeekStep
         {
             public SeekStepKind Kind;
@@ -463,6 +467,7 @@ namespace Nemoviz_Book_Reader
         private void SeekStepForward()
         {
             SeekStep step = CurrentSeekStep();
+            if (currentBook != null && currentBook.IsTextBook) { TextSeek(step, +1); return; }
             switch (step.Kind)
             {
                 case SeekStepKind.Part: PartForward(); break;
@@ -476,6 +481,7 @@ namespace Nemoviz_Book_Reader
         private void SeekStepBackward()
         {
             SeekStep step = CurrentSeekStep();
+            if (currentBook != null && currentBook.IsTextBook) { TextSeek(step, -1); return; }
             switch (step.Kind)
             {
                 case SeekStepKind.Part: PartBack(); break;
@@ -483,6 +489,23 @@ namespace Nemoviz_Book_Reader
                 case SeekStepKind.Page: StructBack(PagePositions()); break;
                 case SeekStepKind.Bookmark: BookmarkBack(); break;
                 default: SeekRelative(-GetSeekStepSeconds()); break;
+            }
+        }
+
+        /// <summary>Seek in a text book by the selected step (dir +1/-1).</summary>
+        private void TextSeek(SeekStep step, int dir)
+        {
+            if (tts == null) return;
+            switch (step.Kind)
+            {
+                case SeekStepKind.Sentence:
+                    if (dir > 0) tts.NextSentence(); else tts.PrevSentence(); break;
+                case SeekStepKind.Paragraph:
+                    if (dir > 0) tts.NextParagraph(); else tts.PrevParagraph(); break;
+                case SeekStepKind.StandardPage:
+                    tts.SeekChars(dir * TtsReader.StandardPageChars); break;
+                default: // time steps (15/30/60 s)
+                    tts.SeekSeconds(dir * GetSeekStepSeconds()); break;
             }
         }
 
@@ -510,6 +533,23 @@ namespace Nemoviz_Book_Reader
             cmbSeek.BeginUpdate();
             cmbSeek.Items.Clear();
             seekSteps.Clear();
+
+            // Text book: time steps + structural reading units (sentence /
+            // paragraph / standard page). No audio "Part"/DAISY here.
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
+                AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
+                AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
+                AddSeekStep(new SeekStep(SeekStepKind.Sentence), Localization.T("Seek.Item.Sentence"));
+                AddSeekStep(new SeekStep(SeekStepKind.Paragraph), Localization.T("Seek.Item.Paragraph"));
+                AddSeekStep(new SeekStep(SeekStepKind.StandardPage), Localization.T("Seek.Item.StandardPage"));
+
+                int ti = seekSteps.FindIndex(s => s.Kind == previous.Kind && s.Level == previous.Level);
+                cmbSeek.SelectedIndex = ti >= 0 ? ti : 0;
+                cmbSeek.EndUpdate();
+                return;
+            }
 
             // Ordered coarsest → finest (largest jump first, smallest last), so
             // the default for a new book (the first row) is the biggest unit:
@@ -757,7 +797,11 @@ namespace Nemoviz_Book_Reader
             int newVol = Math.Max(0, Math.Min(100, currentVolume + delta));
             currentVolume = newVol;
 
-            if (mpvHandle != IntPtr.Zero)
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                if (tts != null) tts.SetVolume(currentVolume);
+            }
+            else if (mpvHandle != IntPtr.Zero)
                 mpv_set_property_string(mpvHandle, "volume", currentVolume.ToString());
 
             string text = Localization.T("Player.Volume.Text", currentVolume);
@@ -789,6 +833,22 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         private void ChangeSpeed(int delta)
         {
+            // Text book: the speed control is words-per-minute, not an mpv
+            // multiplier. Step ±10 WPM, beep when passing the Settings default.
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                int step = delta > 0 ? 10 : -10;
+                int newWpm = Math.Max(80, Math.Min(400, currentWpm + step));
+                int def = appSettings.TtsWpm;
+                bool crossedDefault = (currentWpm - def) * (newWpm - def) <= 0 && currentWpm != newWpm;
+                currentWpm = newWpm;
+                if (tts != null) tts.SetRate(TtsReader.WpmToRate(currentWpm));
+                UpdateSpeedDisplay();
+                AnnounceToScreenReader(lblAnnounceSpeed, Localization.T("Player.Speed.WpmAccessible", currentWpm));
+                if (crossedDefault) { Console.Beep(880, 70); Console.Beep(880, 70); }
+                return;
+            }
+
             int newSpeed = Math.Max(50, Math.Min(300, currentSpeed + delta));
             currentSpeed = newSpeed;
 
@@ -1288,6 +1348,12 @@ namespace Nemoviz_Book_Reader
                 int eventId = Marshal.ReadInt32(eventPtr);
                 if (eventId == 0) break;
 
+                // Text book → mpv is not the engine. Drain its events (idle,
+                // end-of-file from a previous audio book, …) but ignore them:
+                // acting on IDLE would flip isPlaying off (killing the autoplay)
+                // or wrongly "finish" the book. TTS drives text playback.
+                if (currentBook != null && currentBook.IsTextBook) continue;
+
                 if (eventId == 6) // MPV_EVENT_START_FILE
                 {
                     // Get the current playlist index
@@ -1341,6 +1407,8 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         private void ProgressTimer_Tick(object sender, EventArgs e)
         {
+            // Text books update their position from the TTS reader's events.
+            if (currentBook != null && currentBook.IsTextBook) return;
             if (mpvHandle == IntPtr.Zero || !isPlaying) return;
 
             double duration = 0;
@@ -1664,14 +1732,27 @@ namespace Nemoviz_Book_Reader
                 }
             }
 
-            return
-                header +
-                posLine + "\r\n" +
-                "\r\n" +
-                Localization.T("Player.Info.ElapsedSegmentLabel") + " " + FormatTime(segPosition) + "\r\n" +
-                Localization.T("Player.Info.ElapsedTotalLabel") + " " + FormatTime(virtualPos) + "\r\n" +
-                Localization.T("Player.Info.RemainingSegmentLabel") + " -" + FormatTime(segRemaining) + "\r\n" +
-                Localization.T("Player.Info.RemainingTotalLabel") + " -" + FormatTime(virtualRemaining);
+            // Single-file books have no "part vs total" distinction — show the
+            // times plainly (Elapsed / Remaining / Time). Multi-part books keep
+            // the part + total breakdown.
+            string times;
+            if (currentBook != null && currentBook.Chapters.Count <= 1)
+            {
+                times =
+                    Localization.T("Player.Info.ElapsedLabel") + " " + FormatTime(virtualPos) + "\r\n" +
+                    Localization.T("Player.Info.RemainingLabel") + " -" + FormatTime(virtualRemaining) + "\r\n" +
+                    Localization.T("Player.Info.TimeLabel") + " " + FormatTime(totalDur);
+            }
+            else
+            {
+                times =
+                    Localization.T("Player.Info.ElapsedSegmentLabel") + " " + FormatTime(segPosition) + "\r\n" +
+                    Localization.T("Player.Info.ElapsedTotalLabel") + " " + FormatTime(virtualPos) + "\r\n" +
+                    Localization.T("Player.Info.RemainingSegmentLabel") + " -" + FormatTime(segRemaining) + "\r\n" +
+                    Localization.T("Player.Info.RemainingTotalLabel") + " -" + FormatTime(virtualRemaining);
+            }
+
+            return header + posLine + "\r\n" + "\r\n" + times;
         }
 
         /// <summary>Index of the DAISY heading covering the given virtual
@@ -1693,8 +1774,37 @@ namespace Nemoviz_Book_Reader
         /// the on-focus snapshot and the I key. Returns the placeholder
         /// when nothing is loaded.
         /// </summary>
+        private string BuildTextInfoText()
+        {
+            string dash = Localization.T("Common.Dash");
+            string nl = "\r\n";
+            string s = Localization.T("Player.Info.TitleLabel") + " " +
+                (string.IsNullOrWhiteSpace(currentBook.Title) ? dash : currentBook.Title) + nl;
+            if (!string.IsNullOrWhiteSpace(currentBook.Author))
+                s += Localization.T("Player.Info.AuthorLabel") + " " + currentBook.Author + nl;
+
+            // Voice + reading speed, e.g. "Voice: RHVoice Karmela, 250 WPM".
+            string voice = tts != null && !string.IsNullOrEmpty(tts.CurrentVoice) ? tts.CurrentVoice : dash;
+            s += Localization.T("Player.Info.VoiceLabel") + " " + voice + ", " + currentWpm + " WPM" + nl;
+
+            int total = tts != null ? tts.TotalChars : 0;
+            int at = tts != null ? tts.CharPosition : 0;
+            double elapsed = TextSeconds(at);
+            double totalSec = TextSeconds(total);
+
+            s += Localization.T("Player.Info.ReadLabel") + " " + TextPercentString() + "%" + nl + nl;
+            s += Localization.T("Player.Info.ElapsedLabel") + " " + FormatTime(elapsed) + nl;
+            s += Localization.T("Player.Info.RemainingLabel") + " " + FormatTime(totalSec - elapsed) + nl;
+            s += Localization.T("Player.Info.TimeLabel") + " " + FormatTime(totalSec) +
+                 " " + Localization.T("Player.Info.Estimated");
+            return s;
+        }
+
         private string BuildCurrentInfoText()
         {
+            if (currentBook != null && currentBook.IsTextBook)
+                return BuildTextInfoText();
+
             if (mpvHandle == IntPtr.Zero || currentFile == null)
                 return BuildInfoBoxPlaceholder();
 
@@ -1741,7 +1851,16 @@ namespace Nemoviz_Book_Reader
             {
                 string stateText = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
 
-                if (currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
+                if (currentBook.IsTextBook)
+                {
+                    // Text: Author — Title — NN% (percentage read).
+                    string authorPart = string.IsNullOrWhiteSpace(currentBook.Author)
+                        ? "" : currentBook.Author + " — ";
+                    string posPart = tts != null && tts.TotalChars > 0
+                        ? " — " + TextPercentString() + "%" : "";
+                    this.Text = appName + " — " + authorPart + currentBook.Title + posPart + stateText;
+                }
+                else if (currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
                 {
                     // DAISY: Author — Title — X/Y (heading position), no "Part".
                     int hi = DaisyHeadingIndexAt(GetVirtualPosition());
@@ -1777,6 +1896,26 @@ namespace Nemoviz_Book_Reader
             if (currentBook == null) return;
             try
             {
+                // Text book → remember the character offset and percentage.
+                if (currentBook.IsTextBook)
+                {
+                    if (tts != null)
+                    {
+                        currentBook.TextPosition = tts.CharPosition;
+                        int pct = tts.TotalChars > 0
+                            ? (int)(100.0 * tts.CharPosition / tts.TotalChars) : 0;
+                        // A started book (even <1 % of a long one, which rounds
+                        // to 0) must count as "reading", not "unread".
+                        if (pct == 0 && tts.CharPosition > 0) pct = 1;
+                        currentBook.PercentListened = pct;
+                    }
+                    currentBook.Volume = currentVolume;
+                    currentBook.TextWpm = currentWpm;
+                    currentBook.SeekStep = EncodeSeekStep(CurrentSeekStep());
+                    currentBook.Save();
+                    return;
+                }
+
                 double position = 0;
                 double duration = 0;
                 mpv_get_property(mpvHandle, "time-pos", 5, ref position);
@@ -1821,6 +1960,7 @@ namespace Nemoviz_Book_Reader
             {
                 currentBook.PercentListened = 100;
                 currentBook.LastPosition = "00:00:00";
+                currentBook.TextPosition = 0;
                 currentBook.Volume = currentVolume;
                 currentBook.Speed = currentSpeed;
                 currentBook.Save();
@@ -1884,6 +2024,23 @@ namespace Nemoviz_Book_Reader
 
         private void BtnPlayPause_Click(object sender, EventArgs e)
         {
+            // Text book → drive the TTS reader instead of mpv.
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                if (isPlaying)
+                {
+                    tts.Pause();
+                    SetPlayPauseState(false);
+                    if (sleepTimerActive) CancelSleepTimer(true);
+                }
+                else
+                {
+                    tts.Play();
+                    SetPlayPauseState(true);
+                }
+                return;
+            }
+
             if (mpvHandle == IntPtr.Zero || currentFile == null)
             {
                 OpenFile();
@@ -2236,6 +2393,120 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // Loading a book (from the library or at startup)
         // ──────────────────────────────────────────────
+        // ──────────────────────────────────────────────
+        // Text books (TTS)
+        // ──────────────────────────────────────────────
+        private void EnsureTts()
+        {
+            if (tts != null) return;
+            tts = new TtsReader();
+            // SAPI raises SpeakCompleted on a background thread, so marshal UI
+            // updates back to the form.
+            tts.PositionChanged += () =>
+            {
+                if (IsDisposed) return;
+                try { BeginInvoke((Action)UpdateTextPositionDisplay); } catch { }
+            };
+            tts.Finished += () =>
+            {
+                if (IsDisposed) return;
+                try { BeginInvoke((Action)(() => { SetPlayPauseState(false); FinishCurrentBook(); })); } catch { }
+            };
+        }
+
+        private void LoadTextBookPlayback(bool autoPlay)
+        {
+            EnsureTts();
+            // Silence any mpv audio left from a previous (audio) book.
+            if (mpvHandle != IntPtr.Zero) mpv_set_property_string(mpvHandle, "pause", "yes");
+            currentFile = null;
+            currentPlaylistIndex = 0;
+            isLoadingBook = false;
+
+            tts.LoadText(TtsReader.ReadFile(currentBook.TextFilePath));
+            // Reading speed: per-book override, else the global default.
+            currentWpm = currentBook.TextWpm >= 0 ? currentBook.TextWpm : appSettings.TtsWpm;
+            ApplyTtsSettings();
+            UpdateSpeedDisplay();
+            tts.SeekToChar(currentBook.TextPosition);
+
+            // Cache the character count for the reading-time estimate.
+            currentBook.TextChars = tts.TotalChars;
+
+            UpdateTitleBar();
+            UpdateTextPositionDisplay();
+            appSettings.SetLastOpenedBook(currentBook.FolderPath);
+
+            if (autoPlay)
+            {
+                SetPlayPauseState(true);
+                // Defer the first Play one tick so any pending SAPI cancel from
+                // loading has settled — otherwise it swallows this utterance and
+                // playback silently doesn't start (needed two Spaces to begin).
+                BeginInvoke((Action)(() =>
+                {
+                    if (tts != null && currentBook != null && currentBook.IsTextBook && isPlaying)
+                        tts.Play();
+                }));
+            }
+            else SetPlayPauseState(false);
+        }
+
+        private void ApplyTtsSettings()
+        {
+            if (tts == null) return;
+            tts.SetVoice(appSettings.TtsVoice);
+            tts.SetPitch(appSettings.TtsPitch * 5); // -10..10 → -50..50 %
+            tts.SetVolume(currentVolume);
+            tts.SetRate(TtsReader.WpmToRate(currentWpm));
+        }
+
+        /// <summary>Refreshes the speed field: "N WPM" for a text book, "N.Nx"
+        /// for audio.</summary>
+        private void UpdateSpeedDisplay()
+        {
+            bool text = currentBook != null && currentBook.IsTextBook;
+            string display = text
+                ? Localization.T("Player.Speed.Wpm", currentWpm)
+                : Localization.T("Player.Speed.Text", (currentSpeed / 100.0).ToString("0.0"));
+            lblSpeed.Text = display;
+            if (!tbSpeed.Focused)
+            {
+                tbSpeed.Text = display;
+                tbSpeed.AccessibleName = text
+                    ? Localization.T("Player.Speed.WpmAccessible", currentWpm)
+                    : Localization.T("Player.Speed.Accessible", (currentSpeed / 100.0).ToString("0.0"));
+            }
+        }
+
+        // Percentage read of the current text book, one decimal so it still
+        // moves on a long book where the integer percent sits at 0 for a while.
+        private string TextPercentString()
+        {
+            if (tts == null || tts.TotalChars <= 0) return "0.0";
+            return (100.0 * tts.CharPosition / tts.TotalChars).ToString("0.0",
+                System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        // Estimated reading time (seconds) for a character offset at the current
+        // reading speed (nominal words-per-minute → characters per minute).
+        private double TextSeconds(int chars)
+        {
+            int cpm = TtsReader.CharsPerMinute(currentWpm);
+            return cpm > 0 ? chars * 60.0 / cpm : 0;
+        }
+
+        private void UpdateTextPositionDisplay()
+        {
+            if (tts == null || currentBook == null || !currentBook.IsTextBook) return;
+            int percent = tts.TotalChars > 0 ? (int)(100.0 * tts.CharPosition / tts.TotalChars) : 0;
+            string posText = Localization.T("Player.Position.Text",
+                FormatTime(TextSeconds(tts.CharPosition)), FormatTime(TextSeconds(tts.TotalChars)));
+            tbProgress.Text = posText;
+            tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
+            lblProgress.Text = posText;
+        }
+
         private void LoadBook(BookData book, bool autoPlay)
         {
             // Changing the book ends the previous listening session — an
@@ -2244,6 +2515,9 @@ namespace Nemoviz_Book_Reader
             // this only ever fires on a library pick.)
             if (sleepTimerActive)
                 CancelSleepTimer(true);
+
+            // Stop any TTS reading from a previous text book.
+            if (tts != null) tts.Stop();
 
             currentBook = book;
             RebuildSeekSteps();
@@ -2277,6 +2551,13 @@ namespace Nemoviz_Book_Reader
             double speed = currentSpeed / 100.0;
             mpv_set_property_string(mpvHandle, "speed",
                 speed.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+            // Text book → read it with TTS instead of building an mpv playlist.
+            if (currentBook.IsTextBook)
+            {
+                LoadTextBookPlayback(autoPlay);
+                return;
+            }
 
             string[] audioExts = { ".mp3", ".ogg", ".flac", ".m4a", ".m4b", ".wav", ".opus", ".aac", ".wma" };
             var playlist = new List<string>();

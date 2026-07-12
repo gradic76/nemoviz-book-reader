@@ -82,6 +82,7 @@
       <HintPath>..\packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Speech" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
     </Reference>
@@ -127,6 +128,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="inifile.cs" />
+    <Compile Include="ISpeechBackend.cs" />
+    <Compile Include="Sapi5Backend.cs" />
+    <Compile Include="TextCleaner.cs" />
     <Compile Include="libraryform.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -135,6 +139,7 @@
     <Compile Include="NvdaController.cs" />
     <Compile Include="PropertiesForm.cs" />
     <Compile Include="SoundSettings.cs" />
+    <Compile Include="TtsReader.cs" />
     <Compile Include="ManageBookmarksForm.cs">
       <SubType>Form</SubType>
     </Compile>

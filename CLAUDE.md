@@ -622,6 +622,65 @@ ffmpeg — "option A") will guide the tuning; **I measure, Gordan judges by ear.
 
 ---
 
+## 8e. Text books — TTS playback (Session 13, Phase 1)
+
+A text book is a folder with a text document and no audio; the player reads it
+aloud instead of driving mpv. Phase 1 handles **`.txt`**; richer formats
+(epub/fb2/docx/… → clean text at import) are Phase 2, on-screen display Phase 3.
+
+**Engine.** `TtsReader.cs` reads sentence-by-sentence through a pluggable
+`ISpeechBackend`; only `Sapi5Backend` (System.Speech / SAPI5, in-process x64 —
+the "SAPI 5 x64" equivalent) exists so far. OneCore natural voices (WinRT) and a
+32-bit "SAPI 5" satellite for legacy voices (e.g. the user's 32-bit eSpeak) are
+planned behind the same interface — mirroring how JAWS exposes several speech
+backends. The sentence is the reading unit; position is a **character offset**
+(so seeks by sentence/paragraph/standard page/time all snap to a sentence and
+the resume point survives reloads). **Pause = cancel** (index stays), so **Play
+resumes from the start of the current sentence**, not mid-utterance. SAPI applies
+rate/volume/voice only to the *next* utterance, so a live change re-speaks the
+current sentence. Pitch is via SSML prosody. `TtsReader.ReadFile` decodes
+UTF-8/BOM with a Windows-1250 fallback.
+
+**Text cleaning.** `TextCleaner.cs` tidies unstructured text before reading
+(distilled from a Word "cleanup" macro, adapted): collapse runs of blank lines
+to **one** (preserving paragraph boundaries — the key fix for long TTS pauses),
+de-hyphenate line-broken words, tabs→space, spaced dashes→comma, strip a
+conservative set of noise symbols. Deterministic, so saved offsets stay valid.
+This becomes the core of Phase 2's cleaning.
+
+**Player integration** (branches on `BookData.IsTextBook`, like DAISY):
+- **Detection**: a folder with a `.txt` and no audio (`BookData.DetectTextBook`);
+  `TextPosition` (char offset), `TextWpm` (per-book speed override, -1 = global),
+  `TextChars` (cached for the estimate) persist in Book.ini.
+- **Transport**: `LoadTextBookPlayback` loads the text into `tts` instead of an
+  mpv playlist; Space/Back/Forward/position/save all branch to the reader.
+  **Crucially, mpv events are skipped for text books** (`EventTimer_Tick`) — an
+  IDLE event would otherwise flip `isPlaying` off (killing autoplay) or wrongly
+  "finish" the book. The first autoplay `Play()` is also deferred one tick.
+- **Seek steps** (per book, `RebuildSeekSteps`): 15 s / 30 s / 60 s / Sentence /
+  Paragraph / **Standard page** (1800 chars, the translation/journalism unit) —
+  no bookmarks yet.
+- **Speed** is **words-per-minute** (nominal; real rate is voice-dependent),
+  reusing the player's speed control (`ChangeSpeed` branch): 80–400 WPM, ±10 per
+  step, a double-beep when crossing the Settings default; maps to SAPI rate via
+  `TtsReader.WpmToRate` (175 WPM → 0). Reading-time estimates use CPM = WPM×6.
+- **Global TTS defaults** (voice/WPM/pitch/volume) live in **Settings → Text
+  Books** (`AppSettings` `[TextToSpeech]`), with a "Test voice" button.
+- **Display**: title bar + info box show **percentage** (one decimal — the
+  integer sits at 0 for a long book), estimated Elapsed/Remaining/Time, and the
+  voice + WPM ("Voice: RHVoice Karmela, 250 WPM"). A started book is forced to
+  ≥1 % so it lands in "Reading", not "Unread". Library shows "Plain text" and an
+  estimated reading time. Single-file audio books now use the same plain
+  Elapsed/Remaining/Time labels (no part/total split).
+
+**Open items:** per-book Properties for text (TTS override UI); OneCore (WinRT)
++ 32-bit satellite backends; text bookmarks; Phase 2 parsers; a promised
+personal `.lit` converter (see memory). eSpeak: the user's is 32-bit-only
+(invisible to x64 System.Speech) — install eSpeak NG (64-bit) or add the
+satellite backend.
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf migrated from ListBox to **ListView with native

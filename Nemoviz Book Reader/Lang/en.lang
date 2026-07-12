@@ -13,6 +13,13 @@ Player.Info.ElapsedSegmentLabel=Elapsed part time:
 Player.Info.ElapsedTotalLabel=Elapsed total time:
 Player.Info.RemainingSegmentLabel=Remaining part time:
 Player.Info.RemainingTotalLabel=Remaining total time:
+Player.Info.ReadLabel=Read:
+Player.Info.VoiceLabel=Voice:
+Player.Info.ElapsedLabel=Elapsed:
+Player.Info.RemainingLabel=Remaining:
+Player.Info.TimeLabel=Time:
+Player.Info.TotalLabel=Total time:
+Player.Info.Estimated=(estimated)
 Player.Info.AccessibleName=Playback information, I
 
 ; Player - title bar
@@ -82,6 +89,9 @@ Seek.Item.Part=Part
 Seek.Item.HeadingLevel=Heading {0}
 Seek.Item.Page=Page
 Seek.Item.Bookmark=Bookmark
+Seek.Item.Sentence=Sentence
+Seek.Item.Paragraph=Paragraph
+Seek.Item.StandardPage=Standard page
 
 ; Player - Go To dialog
 GoTo.List.Accessible=Book parts
@@ -125,8 +135,11 @@ Player.Volume.Text=Volume: {0}%
 Player.Volume.Accessible=Volume {0} percent
 Player.Speed.Text=Speed: {0}x
 Player.Speed.Accessible=Speed {0} times
+Player.Speed.Wpm=Speed: {0} WPM
+Player.Speed.WpmAccessible=Speed {0} words per minute
 Player.Position.Label=Position
 Player.Position.Text=Position: {0} / {1}
+Player.Position.Sentence=Sentence {0}/{1}
 Player.Position.Accessible=Position {0} percent
 
 ; Player - dialogs
@@ -179,6 +192,8 @@ Context.Delete=Delete
 Context.Properties=Properties
 Library.Details.Accessible=Book details
 Details.Field.Title=Title
+Details.Format.PlainText=Plain text
+Details.Estimated=(estimated)
 Details.Field.Author=Author
 Details.Field.Format=Format
 Details.Field.Duration=Duration
@@ -289,7 +304,9 @@ Settings.WorkInProgress=Work in progress.
 Settings.TextBooks.Language=Language:
 Settings.TextBooks.SpeechEngine=Speech engine:
 Settings.TextBooks.Voice=Voice:
-Settings.TextBooks.Speed=Speed (words per minute):
+Settings.TextBooks.Speed=Reading speed (words per minute):
+Settings.TextBooks.Test=Test voice
+Settings.TextBooks.TestSample=This is a sample of the selected voice.
 Settings.TextBooks.Volume=Volume:
 Settings.TextBooks.Pitch=Pitch:
 Settings.TextBooks.ComingSoon=Additional options for low-vision and dyslexic readers — coming soon.

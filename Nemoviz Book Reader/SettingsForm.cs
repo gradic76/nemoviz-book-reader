@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Drawing;
+using System.Speech.Synthesis;
 using System.Windows.Forms;
 
 namespace Nemoviz_Book_Reader
@@ -29,6 +30,12 @@ namespace Nemoviz_Book_Reader
         // Browse changes it; OK/Apply persist it via AppSettings.
         private TextBox tbLibraryLocation;
         private string stagedLibraryPath;
+
+        // Text Books tab — global TTS defaults (wired to AppSettings).
+        private ComboBox cmbVoice;
+        private TrackBar trkRate;
+        private TrackBar trkVolume;
+        private TrackBar trkPitch;
 
         public SettingsForm(AppSettings appSettings)
         {
@@ -215,6 +222,11 @@ namespace Nemoviz_Book_Reader
                 appSettings.SetLibraryPath(stagedLibraryPath);
                 appSettings.EnsureLibraryExists();
             }
+
+            // Text Books — global TTS defaults.
+            string voice = cmbVoice != null && cmbVoice.SelectedItem != null
+                ? cmbVoice.SelectedItem.ToString() : (appSettings.TtsVoice ?? "");
+            appSettings.SetTtsDefaults(voice, trkRate.Value, trkPitch.Value, trkVolume.Value);
         }
 
         private TabPage BuildAudioBooksTab()
@@ -258,37 +270,50 @@ namespace Nemoviz_Book_Reader
             lblVoice.Location = new Point(10, 90);
             lblVoice.Size = new Size(160, 20);
 
-            ComboBox cmbVoice = new ComboBox();
+            cmbVoice = new ComboBox();
             cmbVoice.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbVoice.Location = new Point(180, 87);
             cmbVoice.Size = new Size(240, 24);
             cmbVoice.AccessibleName = Localization.T("Settings.TextBooks.Voice");
             cmbVoice.TabIndex = 2;
+            // List every installed SAPI5 voice; select the saved default.
+            try
+            {
+                using (SpeechSynthesizer probe = new SpeechSynthesizer())
+                    foreach (InstalledVoice v in probe.GetInstalledVoices())
+                        if (v.Enabled) cmbVoice.Items.Add(v.VoiceInfo.Name);
+            }
+            catch { }
+            if (cmbVoice.Items.Count > 0)
+            {
+                int vi = cmbVoice.Items.IndexOf(appSettings.TtsVoice ?? "");
+                cmbVoice.SelectedIndex = vi >= 0 ? vi : 0;
+            }
 
             Label lblSpeed = new Label();
             lblSpeed.Text = Localization.T("Settings.TextBooks.Speed");
             lblSpeed.Location = new Point(10, 128);
             lblSpeed.Size = new Size(420, 20);
 
-            TrackBar trkSpeed = new TrackBar();
-            trkSpeed.Minimum = 100;
-            trkSpeed.Maximum = 400;
-            trkSpeed.Value = 200;
-            trkSpeed.TickFrequency = 25;
-            trkSpeed.Location = new Point(10, 150);
-            trkSpeed.Size = new Size(420, 40);
-            trkSpeed.AccessibleName = Localization.T("Settings.TextBooks.Speed");
-            trkSpeed.TabIndex = 3;
+            trkRate = new TrackBar();
+            trkRate.Minimum = 80;
+            trkRate.Maximum = 400;
+            trkRate.Value = Clamp(appSettings.TtsWpm, 80, 400);
+            trkRate.TickFrequency = 20;
+            trkRate.Location = new Point(10, 150);
+            trkRate.Size = new Size(420, 40);
+            trkRate.AccessibleName = Localization.T("Settings.TextBooks.Speed");
+            trkRate.TabIndex = 3;
 
             Label lblVolume = new Label();
             lblVolume.Text = Localization.T("Settings.TextBooks.Volume");
             lblVolume.Location = new Point(10, 194);
             lblVolume.Size = new Size(420, 20);
 
-            TrackBar trkVolume = new TrackBar();
+            trkVolume = new TrackBar();
             trkVolume.Minimum = 0;
             trkVolume.Maximum = 100;
-            trkVolume.Value = 100;
+            trkVolume.Value = Clamp(appSettings.TtsVolume, 0, 100);
             trkVolume.TickFrequency = 10;
             trkVolume.Location = new Point(10, 216);
             trkVolume.Size = new Size(420, 40);
@@ -300,19 +325,23 @@ namespace Nemoviz_Book_Reader
             lblPitch.Location = new Point(10, 260);
             lblPitch.Size = new Size(420, 20);
 
-            TrackBar trkPitch = new TrackBar();
+            trkPitch = new TrackBar();
             trkPitch.Minimum = -10;
             trkPitch.Maximum = 10;
-            trkPitch.Value = 0;
+            trkPitch.Value = Clamp(appSettings.TtsPitch, -10, 10);
             trkPitch.TickFrequency = 1;
             trkPitch.Location = new Point(10, 282);
             trkPitch.Size = new Size(420, 40);
             trkPitch.AccessibleName = Localization.T("Settings.TextBooks.Pitch");
             trkPitch.TabIndex = 5;
 
-            TextBox tbComingSoon = BuildPlaceholder(Localization.T("Settings.TextBooks.ComingSoon"),
-                new Point(10, 326), new Size(420, 30));
-            tbComingSoon.TabIndex = 6;
+            Button btnTest = new Button();
+            btnTest.Text = Localization.T("Settings.TextBooks.Test");
+            btnTest.AccessibleName = Localization.T("Settings.TextBooks.Test");
+            btnTest.Location = new Point(10, 326);
+            btnTest.Size = new Size(160, 30);
+            btnTest.TabIndex = 6;
+            btnTest.Click += (s, e) => TestVoice();
 
             page.Controls.Add(lblLanguage);
             page.Controls.Add(cmbLanguage);
@@ -321,13 +350,47 @@ namespace Nemoviz_Book_Reader
             page.Controls.Add(lblVoice);
             page.Controls.Add(cmbVoice);
             page.Controls.Add(lblSpeed);
-            page.Controls.Add(trkSpeed);
+            page.Controls.Add(trkRate);
             page.Controls.Add(lblVolume);
             page.Controls.Add(trkVolume);
             page.Controls.Add(lblPitch);
             page.Controls.Add(trkPitch);
-            page.Controls.Add(tbComingSoon);
+            page.Controls.Add(btnTest);
             return page;
+        }
+
+        /// <summary>Speaks a short sample with the currently selected voice /
+        /// rate / pitch / volume so the user can preview it (asynchronous, so it
+        /// doesn't block the dialog).</summary>
+        private void TestVoice()
+        {
+            try
+            {
+                SpeechSynthesizer s = new SpeechSynthesizer();
+                s.SpeakCompleted += (snd, ev) => s.Dispose();
+                if (cmbVoice != null && cmbVoice.SelectedItem != null)
+                    s.SelectVoice(cmbVoice.SelectedItem.ToString());
+                s.Rate = TtsReader.WpmToRate(trkRate.Value);
+                s.Volume = trkVolume.Value;
+                int pitch = trkPitch.Value * 5; // -10..10 → -50..50 %
+                string sample = Localization.T("Settings.TextBooks.TestSample");
+                if (pitch == 0)
+                    s.SpeakAsync(sample);
+                else
+                {
+                    string lang = "en-US";
+                    try { lang = s.Voice.Culture.Name; } catch { }
+                    string esc = System.Security.SecurityElement.Escape(sample) ?? "";
+                    s.SpeakSsmlAsync("<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"" +
+                        lang + "\"><prosody pitch=\"" + (pitch >= 0 ? "+" : "") + pitch + "%\">" + esc + "</prosody></speak>");
+                }
+            }
+            catch { }
+        }
+
+        private static int Clamp(int v, int lo, int hi)
+        {
+            return v < lo ? lo : (v > hi ? hi : v);
         }
 
         private TabPage BuildDeviceTab()

@@ -673,8 +673,21 @@ namespace Nemoviz_Book_Reader
             if (book.IsDaisy)
                 AddDetailRow(Localization.T("Details.Field.Author"),
                     string.IsNullOrWhiteSpace(book.Author) ? dash : book.Author);
-            AddDetailRow(Localization.T("Details.Field.Format"), book.Format);
-            AddDetailRow(Localization.T("Details.Field.Duration"), book.Duration);
+            // Text book: show the official format name and an estimated reading
+            // time from the effective reading speed (per-book override, else the
+            // Settings default). Audio/DAISY show their real format and length.
+            if (book.IsTextBook)
+            {
+                int wpm = book.TextWpm >= 0 ? book.TextWpm : appSettings.TtsWpm;
+                AddDetailRow(Localization.T("Details.Field.Format"), Localization.T("Details.Format.PlainText"));
+                AddDetailRow(Localization.T("Details.Field.Duration"),
+                    book.EstimatedReadingTime(wpm) + " " + Localization.T("Details.Estimated"));
+            }
+            else
+            {
+                AddDetailRow(Localization.T("Details.Field.Format"), book.Format);
+                AddDetailRow(Localization.T("Details.Field.Duration"), book.Duration);
+            }
             AddDetailRow(Localization.T("Details.Field.Listened"), book.PercentListened + "%");
             AddDetailRow(Localization.T("Details.Field.Speed"), Localization.T("Details.Speed.Value", speedStr));
             AddDetailRow(Localization.T("Details.Field.Added"), book.DateAdded.ToString(Localization.T("Common.DateFormat")));
