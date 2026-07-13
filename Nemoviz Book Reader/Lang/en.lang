@@ -228,6 +228,8 @@ Library.ImportFolder.Description=Select a folder with books
 Dialog.ImportSuccess.Message=Book added to library.
 Dialog.ImportSuccess.Title=Add book
 Dialog.ImportError.Message=Error adding book: {0}
+Dialog.DrmProtected.Title=Protected book
+Dialog.DrmProtected.Message=This book is DRM-protected (its content is encrypted), so it can't be opened. Please use a DRM-free copy.
 
 ; Archive password prompt (encrypted .zip/.rar/.7z on import)
 Dialog.ArchivePassword.Title=Password required

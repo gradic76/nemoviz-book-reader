@@ -130,6 +130,14 @@
     <Compile Include="inifile.cs" />
     <Compile Include="ISpeechBackend.cs" />
     <Compile Include="Sapi5Backend.cs" />
+    <Compile Include="ITextFormatParser.cs" />
+    <Compile Include="TextParsing.cs" />
+    <Compile Include="PlainTextParser.cs" />
+    <Compile Include="RtfParser.cs" />
+    <Compile Include="WordParser.cs" />
+    <Compile Include="HtmlParser.cs" />
+    <Compile Include="Fb2Parser.cs" />
+    <Compile Include="EpubParser.cs" />
     <Compile Include="TextCleaner.cs" />
     <Compile Include="TextExtractor.cs" />
     <Compile Include="libraryform.cs">

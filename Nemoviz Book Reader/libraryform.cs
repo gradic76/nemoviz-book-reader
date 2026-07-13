@@ -996,6 +996,9 @@ namespace Nemoviz_Book_Reader
                 string sourceName = System.IO.Path.GetFileName(filePath);
                 string ext = System.IO.Path.GetExtension(filePath).ToLower();
                 bool isArchive = LibraryScanner.IsExtractableArchive(sourceName);
+                // A .zip that wraps an epub (how most libraries package them) is a
+                // text import, not a generic archive.
+                bool isTextImport = TextExtractor.IsTextImport(filePath);
 
                 // Multi-volume sets fold to one clean folder name (name.7z.001
                 // → name, name.part1.rar → name).
@@ -1010,7 +1013,7 @@ namespace Nemoviz_Book_Reader
 
                 BookData imported = new BookData(destFolder);
 
-                if (isArchive)
+                if (isArchive && !isTextImport)
                 {
                     // Extract straight into the book's permanent library
                     // folder — no temp staging. Multi-volume sets are pulled
@@ -1075,12 +1078,20 @@ namespace Nemoviz_Book_Reader
                     // first played; also stores the detailed format string.
                     imported.BuildChaptersFromFolder(new string[] { destFile });
                 }
-                else if (TextExtractor.IsTextFormat(ext))
+                else if (isTextImport)
                 {
-                    // Document → extract to content.txt (the reader's input;
-                    // TtsReader cleans it on load). Structured formats also carry
-                    // a heading list + metadata. Editable formats stay flat.
+                    // Document (or a zip-wrapped epub) → extract to content.txt
+                    // (the reader's input; TtsReader cleans it on load).
+                    // Structured formats also carry a heading list + metadata.
                     TextDoc doc = TextExtractor.Extract(filePath);
+                    if (doc.DrmProtected)
+                    {
+                        if (createdFolder) TryDeleteFolder(destFolder);
+                        MessageBox.Show(Localization.T("Dialog.DrmProtected.Message"),
+                            Localization.T("Dialog.DrmProtected.Title"),
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
                     System.IO.File.WriteAllText(
                         System.IO.Path.Combine(destFolder, "content.txt"),
                         doc.Text ?? "", new System.Text.UTF8Encoding(false));
