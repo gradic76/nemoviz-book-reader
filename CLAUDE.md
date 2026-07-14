@@ -456,10 +456,34 @@ were).
 - **RAR is streamed** with the dedicated `RarReader.OpenReader(volumes, …)`,
   not the random-access Archive API: a file spanning a volume boundary breaks
   per-entry extraction ("unpacked file size does not match header"), and
-  `archive.ExtractAllEntries()` refuses a non-solid RAR. **ZIP/7z** use the
-  random-access per-entry path (7z has no streaming reader; its numeric split
-  is reassembled at the stream level, so entries never span). RAR-vs-other is
-  told by extension, or by header-sniff (`ArchiveFactory.IsArchive`) for `.001`.
+  `archive.ExtractAllEntries()` refuses a non-solid RAR. **ZIP/7z** open the
+  archive then extract through its forward reader (`archive.ExtractAllEntries()`
+  → `MoveToNextEntry`/`WriteEntryToDirectory`), **not** per-entry random access.
+  A *solid* 7z shares one compression stream, so random-access
+  `entry.WriteToDirectory` re-decompresses the whole solid block for every
+  entry — O(N²), which pegged a core for 15+ min on a 683 MB audiobook (fixed
+  by the forward reader → O(N); confirmed via the per-entry timing in
+  `ImportDiag`). RAR-vs-other is told by extension, or by header-sniff
+  (`ArchiveFactory.IsArchive`) for `.001`.
+- **Hardening** (against carelessly/maliciously packed archives): entries whose
+  name is absolute/drive-rooted or climbs out with `..` are skipped
+  (`IsUnsafeEntryPath` — path-traversal / "zip slip" guard); nested
+  archive-in-archive auto-extraction is capped at `MaxArchiveDepth` (3) so a
+  zip-in-zip set can't recurse without bound. `ImportDiag` (→
+  `%TEMP%\NBR-import-diagnostic.log`) logs begin/open/summary/skips/exceptions
+  and samples per-entry timing (first 3 + every 25th).
+- **Background extraction + progress** (`ExtractProgressForm` in libraryform.cs):
+  import runs the extraction on a background thread behind a modal progress
+  dialog (determinate bar for 7z/zip where the file count is known, marquee for
+  RAR), so the window no longer freezes for the whole extraction.
+  `ExtractArchive`/`TryExtract` take an `Action<int,int> progress`; the password
+  prompt is marshalled back to the UI thread. Outcome flows back via
+  `Error`/`Cancelled` into the existing import error handling. (The post-extract
+  steps — ResolveBookFolder, chapter/duration build, LoadBooks rescan — still run
+  on the UI thread; seconds, not minutes.) Still open (offered, not yet done):
+  uncompressed-size / free-disk cap (zip-bomb); append-only library refresh
+  instead of full rescan; clearer messages for an unsupported codec (7z PPMd) or
+  a header-encrypted 7z; spoken progress for screen-reader users.
 - **Password**: `ReaderOptions.Password`. `ExtractArchive` tries with no
   password first; if that hits a crypto/"password"/"encrypt" error
   (`IsPasswordError`), it calls the `passwordProvider` (the UI shows

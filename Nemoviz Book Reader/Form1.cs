@@ -135,7 +135,9 @@ namespace Nemoviz_Book_Reader
         // ("Heading 1", "Heading 2", …), where level N stops at every heading
         // of depth ≤ N. This list runs parallel to cmbSeek.Items (one entry
         // per row) so the selected step is known without fixed indices.
-        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark, Sentence, Paragraph, StandardPage, Min10 }
+        // New kinds are appended (never reordered) so the persisted ordinal in
+        // Book.ini stays valid across versions.
+        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark, Sentence, Paragraph, StandardPage, Min10, Min15, Min30 }
         private struct SeekStep
         {
             public SeekStepKind Kind;
@@ -461,6 +463,8 @@ namespace Nemoviz_Book_Reader
                 case SeekStepKind.Min1: return 60;
                 case SeekStepKind.Min5: return 300;
                 case SeekStepKind.Min10: return 600;
+                case SeekStepKind.Min15: return 900;
+                case SeekStepKind.Min30: return 1800;
                 default: return 15;
             }
         }
@@ -501,6 +505,8 @@ namespace Nemoviz_Book_Reader
             {
                 case SeekStepKind.Heading:
                     TextHeadingSeek(step.Level, dir); break;
+                case SeekStepKind.Page:
+                    TextPageSeek(dir); break;
                 case SeekStepKind.Sentence:
                     if (dir > 0) tts.NextSentence(); else tts.PrevSentence(); break;
                 case SeekStepKind.Paragraph:
@@ -509,6 +515,34 @@ namespace Nemoviz_Book_Reader
                     tts.SeekChars(dir * TtsReader.StandardPageChars); break;
                 default: // time steps (15/30/60 s / 5 / 10 min)
                     tts.SeekSeconds(dir * GetSeekStepSeconds()); break;
+            }
+        }
+
+        /// <summary>Seek to the next/previous print-page marker in a structured
+        /// text book (mirrors TextHeadingSeek's 50-char back grace).</summary>
+        private void TextPageSeek(int dir)
+        {
+            if (tts == null || currentBook == null || currentBook.TextPages.Count == 0)
+            {
+                Console.Beep(300, 150);
+                return;
+            }
+            var pages = currentBook.TextPages;
+            int cur = tts.CharPosition;
+            if (dir > 0)
+            {
+                for (int i = 0; i < pages.Count; i++)
+                    if (pages[i].Offset > cur + 1) { tts.SeekToChar(pages[i].Offset); return; }
+                Console.Beep(300, 150);
+            }
+            else
+            {
+                int idx = -1;
+                for (int i = pages.Count - 1; i >= 0; i--)
+                    if (pages[i].Offset <= cur) { idx = i; break; }
+                if (idx < 0) { Console.Beep(300, 150); return; }
+                int target = (idx == 0 || cur - pages[idx].Offset > 50) ? pages[idx].Offset : pages[idx - 1].Offset;
+                tts.SeekToChar(target);
             }
         }
 
@@ -598,7 +632,11 @@ namespace Nemoviz_Book_Reader
         /// dropdown can still be changed directly when it has focus.</summary>
         private void ChangeSeekStep(int delta)
         {
-            int newIndex = Math.Max(0, Math.Min(cmbSeek.Items.Count - 1, cmbSeek.SelectedIndex + delta));
+            int count = cmbSeek.Items.Count;
+            if (count <= 0) return;
+            // Circular: past the last item wraps to the first (and vice versa)
+            // when navigating in the same direction.
+            int newIndex = ((cmbSeek.SelectedIndex + delta) % count + count) % count;
             cmbSeek.SelectedIndex = newIndex;
             AnnounceToScreenReader(lblAnnounceInfo, Localization.T("Player.Seek.Announce", cmbSeek.Text));
         }
@@ -618,68 +656,74 @@ namespace Nemoviz_Book_Reader
             cmbSeek.Items.Clear();
             seekSteps.Clear();
 
-            // Text book: time steps + structural reading units (sentence /
-            // paragraph / standard page). No audio "Part"/DAISY here.
-            if (currentBook != null && currentBook.IsTextBook)
+            PlayerType type = GetPlayerType();
+
+            // Structural unit(s) first (coarsest), then time steps (finest last),
+            // then Bookmark (dynamic — only when the book has bookmarks). Per type:
+            //   Single audio:  30m,15m,10m,5m,60s,30s,15s,[Bookmark]
+            //   Multi audio:   Part, 30m,15m,10m,5m,60s,30s,15s,[Bookmark]
+            //   DAISY:         H1,H2,…,Page, 15m,10m,5m,60s,30s,15s,[Bookmark]
+            //   Flat text:     Standard page, 15m,10m,5m,60s,30s,15s,[Bookmark]
+            //   Structured:    H1,H2,…,Page, 15m,10m,5m,60s,30s,15s
+            switch (type)
             {
-                // Structured text (epub/fb2/html with headings) gets DAISY-style
-                // Heading levels (coarsest first); flat text drops them and adds
-                // bigger time steps. Both are ordered coarsest → finest. No
-                // Paragraph — in a single-blob txt it can span most of the book.
-                if (currentBook.TextHeadings.Count > 0)
+                case PlayerType.MultiAudio:
+                    AddSeekStep(new SeekStep(SeekStepKind.Part), Localization.T("Seek.Item.Part"));
+                    goto case PlayerType.SingleAudio;
+
+                case PlayerType.SingleAudio:
+                    AddSeekStep(new SeekStep(SeekStepKind.Min30), Localization.T("Seek.Item.30min"));
+                    AddTimeSteps15DownWithBookmark();
+                    break;
+
+                case PlayerType.Daisy:
+                    foreach (int level in HeadingLevelsPresent())
+                        AddSeekStep(new SeekStep(SeekStepKind.Heading, level),
+                            Localization.T("Seek.Item.HeadingLevel", level));
+                    if (currentBook.DaisyPages.Count > 0)
+                        AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
+                    AddTimeSteps15DownWithBookmark();
+                    break;
+
+                case PlayerType.StructuredText:
                     foreach (int level in TextHeadingLevelsPresent())
                         AddSeekStep(new SeekStep(SeekStepKind.Heading, level),
                             Localization.T("Seek.Item.HeadingLevel", level));
+                    if (currentBook.TextPages.Count > 0)
+                        AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
+                    // Structured text: no Bookmark row (text bookmarks not yet
+                    // supported) — plain time steps from 15 min down.
+                    AddSeekStep(new SeekStep(SeekStepKind.Min15), Localization.T("Seek.Item.15min"));
+                    AddSeekStep(new SeekStep(SeekStepKind.Min10), Localization.T("Seek.Item.10min"));
+                    AddSeekStep(new SeekStep(SeekStepKind.Min5), Localization.T("Seek.Item.5min"));
+                    AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
+                    AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
+                    AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
+                    break;
 
-                AddSeekStep(new SeekStep(SeekStepKind.StandardPage), Localization.T("Seek.Item.StandardPage"));
-                AddSeekStep(new SeekStep(SeekStepKind.Min10), Localization.T("Seek.Item.10min"));
-                AddSeekStep(new SeekStep(SeekStepKind.Min5), Localization.T("Seek.Item.5min"));
-                AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
-                AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
-                AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
-                AddSeekStep(new SeekStep(SeekStepKind.Sentence), Localization.T("Seek.Item.Sentence"));
-
-                int ti = seekSteps.FindIndex(s => s.Kind == previous.Kind && s.Level == previous.Level);
-                cmbSeek.SelectedIndex = ti >= 0 ? ti : 0;
-                cmbSeek.EndUpdate();
-                return;
+                case PlayerType.FlatText:
+                    AddSeekStep(new SeekStep(SeekStepKind.StandardPage), Localization.T("Seek.Item.StandardPage"));
+                    AddTimeSteps15DownWithBookmark();
+                    break;
             }
-
-            // Ordered coarsest → finest (largest jump first, smallest last), so
-            // the default for a new book (the first row) is the biggest unit:
-            //   DAISY:   Heading 1, Heading 2, …, Page, [Bookmark], 5m,1m,30s,15s
-            //   plain:   Part, [Bookmark], 5m, 1m, 30s, 15s
-            // Bookmark sits between the structural units and the time steps.
-            bool isDaisy = currentBook != null && currentBook.IsDaisy;
-
-            if (isDaisy)
-            {
-                // One Heading step per depth present ("Heading 1", "Heading 2",
-                // …), coarsest first. Level N navigates every heading of depth
-                // ≤ N (talking-book model).
-                foreach (int level in HeadingLevelsPresent())
-                    AddSeekStep(new SeekStep(SeekStepKind.Heading, level),
-                        Localization.T("Seek.Item.HeadingLevel", level));
-                if (currentBook.DaisyPages.Count > 0)
-                    AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
-            }
-            else
-            {
-                // "Part" (by audio file) is only meaningful for plain audio.
-                AddSeekStep(new SeekStep(SeekStepKind.Part), Localization.T("Seek.Item.Part"));
-            }
-
-            if (currentBook != null && currentBook.Bookmarks.Count > 0)
-                AddSeekStep(new SeekStep(SeekStepKind.Bookmark), Localization.T("Seek.Item.Bookmark"));
-
-            AddSeekStep(new SeekStep(SeekStepKind.Min5), Localization.T("Seek.Item.5min"));
-            AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
-            AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
-            AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
 
             int idx = seekSteps.FindIndex(s => s.Kind == previous.Kind && s.Level == previous.Level);
             cmbSeek.SelectedIndex = idx >= 0 ? idx : 0;
             cmbSeek.EndUpdate();
+        }
+
+        /// <summary>Appends the shared time steps 15 min → 15 s, then a Bookmark
+        /// step when the current book has any bookmarks.</summary>
+        private void AddTimeSteps15DownWithBookmark()
+        {
+            AddSeekStep(new SeekStep(SeekStepKind.Min15), Localization.T("Seek.Item.15min"));
+            AddSeekStep(new SeekStep(SeekStepKind.Min10), Localization.T("Seek.Item.10min"));
+            AddSeekStep(new SeekStep(SeekStepKind.Min5), Localization.T("Seek.Item.5min"));
+            AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
+            AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
+            AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
+            if (currentBook != null && currentBook.Bookmarks.Count > 0)
+                AddSeekStep(new SeekStep(SeekStepKind.Bookmark), Localization.T("Seek.Item.Bookmark"));
         }
 
         private void AddSeekStep(SeekStep step, string label)
@@ -768,11 +812,11 @@ namespace Nemoviz_Book_Reader
                     break;
 
                 case Keys.Right:
-                    if (!infoBoxHasFocus) { SeekRelative(+5); return true; }
+                    if (!infoBoxHasFocus) { ArrowSeek(+1); return true; }
                     break;
 
                 case Keys.Left:
-                    if (!infoBoxHasFocus) { SeekRelative(-5); return true; }
+                    if (!infoBoxHasFocus) { ArrowSeek(-1); return true; }
                     break;
 
                 case Keys.I:
@@ -975,6 +1019,18 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // Seek
         // ──────────────────────────────────────────────
+        // Seek arrows (Left/Right): 5 s in audio, one sentence in a text book.
+        private void ArrowSeek(int dir)
+        {
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                if (tts == null) return;
+                if (dir > 0) tts.NextSentence(); else tts.PrevSentence();
+                return;
+            }
+            SeekRelative(dir * 5);
+        }
+
         private void SeekRelative(int seconds)
         {
             if (mpvHandle == IntPtr.Zero) return;
@@ -1140,15 +1196,14 @@ namespace Nemoviz_Book_Reader
         private string BuildInfoBoxPlaceholder()
         {
             string dash = Localization.T("Common.Dash");
+            string nl = "\r\n";
             string zero = FormatTime(0);
             return
-                Localization.T("Player.Info.TitleLabel") + " " + dash + "\r\n" +
-                Localization.T("Player.Info.ChapterLabel") + " " + dash + "\r\n" +
-                "\r\n" +
-                Localization.T("Player.Info.ElapsedSegmentLabel") + " " + zero + "\r\n" +
-                Localization.T("Player.Info.ElapsedTotalLabel") + " " + zero + "\r\n" +
-                Localization.T("Player.Info.RemainingSegmentLabel") + " -" + zero + "\r\n" +
-                Localization.T("Player.Info.RemainingTotalLabel") + " -" + zero;
+                Localization.T("Player.Info.TitleLabel") + " " + dash + nl +
+                Localization.T("Player.Info.AuthorLabel") + " " + nl +
+                Localization.T("Player.Info.BookmarksLabel") + " 0" + nl + nl +
+                Localization.T("Player.Info.ElapsedLabel") + " " + zero + nl +
+                Localization.T("Player.Info.RemainingLabel") + " -" + zero;
         }
 
         /// <summary>
@@ -1528,8 +1583,18 @@ namespace Nemoviz_Book_Reader
                 tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
                 lblProgress.Text = posText;
 
-                // Note: the info box is deliberately NOT updated here — it's
-                // an on-focus/on-demand snapshot (see BuildTopPanel).
+                // Title bar counts down live (window caption — a sighted user
+                // sees remaining time / percent advance during playback, not
+                // only on pause / part change).
+                UpdateTitleBar();
+
+                // Info box: refresh only while it does NOT have focus, so the
+                // displayed times advance for a sighted user without causing
+                // screen-reader chatter (the on-Enter refresh keeps it correct
+                // the moment it's focused). This preserves the "no live ticker
+                // under the reader cursor" rule.
+                if (this.ActiveControl != tbInfo)
+                    tbInfo.Text = BuildCurrentInfoText();
             }
         }
 
@@ -1788,65 +1853,163 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // Info box
         // ──────────────────────────────────────────────
+        // Player book type — drives title bar, info box, seek steps and Go To.
+        // M4B currently falls through to the audio branches (fallback = single-
+        // file) until a dedicated chapter parser exists.
+        private enum PlayerType { SingleAudio, MultiAudio, Daisy, FlatText, StructuredText }
+
+        private PlayerType GetPlayerType()
+        {
+            if (currentBook == null) return PlayerType.SingleAudio;
+            if (currentBook.IsTextBook)
+                return currentBook.TextHeadings.Count > 0 ? PlayerType.StructuredText : PlayerType.FlatText;
+            if (currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
+                return PlayerType.Daisy;
+            // DAISY with no headings, or plain audio → single vs multi by parts.
+            return currentBook.Chapters.Count > 1 ? PlayerType.MultiAudio : PlayerType.SingleAudio;
+        }
+
+        // Short format name for the info box (MP3 Audio / Daisy Audio 3 / Apple
+        // Book M4B / EPUB / MS Word Docx …).
+        private string PlayerFormatLabel()
+        {
+            if (currentBook == null) return Localization.T("Common.Dash");
+            if (currentBook.IsTextBook)
+                return string.IsNullOrWhiteSpace(currentBook.Format)
+                    ? Localization.T("Common.Dash") : currentBook.Format;
+
+            string fmt = currentBook.Format ?? "";
+            int comma = fmt.IndexOf(',');
+            string head = (comma >= 0 ? fmt.Substring(0, comma) : fmt).Trim();
+            if (currentBook.IsDaisy && head.StartsWith("Daisy", StringComparison.OrdinalIgnoreCase))
+                return "Daisy Audio " + head.Substring(5).Trim();
+            if (head.StartsWith("M4B", StringComparison.OrdinalIgnoreCase))
+                return "Apple Book M4B";
+            return string.IsNullOrWhiteSpace(head) ? Localization.T("Common.Dash") : head;
+        }
+
+        // Producer (audio/accessible-edition producer), already normalized;
+        // empty when there is none.
+        private string PlayerProducer()
+        {
+            return currentBook != null ? BookData.NormalizeProducer(currentBook.Producer) : "";
+        }
+
+        // Publisher (print-edition publisher, dc:publisher); empty when none.
+        private string PlayerPublisher()
+        {
+            return currentBook != null ? BookData.NormalizeProducer(currentBook.Publisher) : "";
+        }
+
+        // Percentage of the whole audiobook played, one decimal (e.g. "12.3").
+        private string AudioPercentString(double pos, double total)
+        {
+            if (total <= 0) return "0.0";
+            double p = 100.0 * pos / total;
+            if (p < 0) p = 0; else if (p > 100) p = 100;
+            return p.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        // DAISY page label covering the given position (last page at or before
+        // it). null when the book declares no page targets.
+        private string DaisyPageLabelAt(double virtualPos)
+        {
+            if (currentBook == null || currentBook.DaisyPages.Count == 0) return null;
+            var ps = currentBook.DaisyPages;
+            string label = null;
+            for (int i = ps.Count - 1; i >= 0; i--)
+                if (ps[i].Position <= virtualPos + 0.05) { label = ps[i].Label; break; }
+            return label;
+        }
+
+        // Current print-page label in a structured text book (last page marker
+        // at or before the reading position). null when the book has no pages.
+        private string CurrentTextPageLabel()
+        {
+            if (currentBook == null || tts == null || currentBook.TextPages.Count == 0) return null;
+            int at = tts.CharPosition;
+            string label = null;
+            foreach (var p in currentBook.TextPages)
+            {
+                if (p.Offset <= at) label = p.Label;
+                else break;
+            }
+            return label;
+        }
+
+        // Current heading in a structured text book (last heading whose offset is
+        // at or before the reading position). Label is null when none applies.
+        private (int Level, string Label) CurrentTextHeading()
+        {
+            var res = (Level: 0, Label: (string)null);
+            if (currentBook == null || tts == null || currentBook.TextHeadings.Count == 0)
+                return res;
+            int at = tts.CharPosition;
+            foreach (var h in currentBook.TextHeadings)
+            {
+                if (h.Offset <= at) res = (h.Level, h.Label);
+                else break;
+            }
+            return res;
+        }
+
         private string BuildInfoBoxText(double segPosition, double segDuration, double segRemaining,
             double virtualPos, double totalDur, double virtualRemaining)
         {
             string dash = Localization.T("Common.Dash");
-            string titleText = currentBook != null ? currentBook.Title :
+            string nl = "\r\n";
+            PlayerType type = GetPlayerType();
+
+            string title = currentBook != null ? currentBook.Title :
                 (currentFile != null ? System.IO.Path.GetFileNameWithoutExtension(currentFile) : dash);
+            string author = currentBook != null && !string.IsNullOrWhiteSpace(currentBook.Author)
+                ? currentBook.Author : "";
+            int bmk = currentBook != null ? currentBook.Bookmarks.Count : 0;
 
-            // Header: Title, plus a separate Author line for produced formats
-            // (DAISY) that carry it.
-            string header = Localization.T("Player.Info.TitleLabel") + " " + titleText + "\r\n";
-            if (currentBook != null && !string.IsNullOrWhiteSpace(currentBook.Author))
-                header += Localization.T("Player.Info.AuthorLabel") + " " + currentBook.Author + "\r\n";
+            var sb = new System.Text.StringBuilder();
+            sb.Append(Localization.T("Player.Info.TitleLabel")).Append(' ').Append(title).Append(nl);
+            sb.Append(Localization.T("Player.Info.AuthorLabel")).Append(' ').Append(author).Append(nl);
 
-            // Position line. DAISY navigates by headings: show just the current
-            // heading's name (the tagline already carries its own numbering/
-            // description — no "Heading:" label, no X/Y). Plain audio keeps
-            // "Part: X/Y — <file>".
-            string posLine;
-            if (currentBook != null && currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
+            if (type == PlayerType.Daisy)
             {
+                // TITLE / AUTHOR / Chapter / Page / Bookmarks / Daisy Audio / times.
                 int hi = DaisyHeadingIndexAt(virtualPos);
-                posLine = currentBook.DaisyHeadings[hi].Label;
+                string chapter = hi >= 0 ? currentBook.DaisyHeadings[hi].Label : dash;
+                string page = DaisyPageLabelAt(virtualPos) ?? dash;
+                sb.Append(Localization.T("Player.Info.ChapterLabel")).Append(' ').Append(chapter).Append(nl);
+                sb.Append(Localization.T("Player.Info.PageLabel")).Append(' ').Append(page).Append(nl);
+                sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl);
+                sb.Append(PlayerFormatLabel()).Append(nl).Append(nl);
+                sb.Append(Localization.T("Player.Info.ElapsedLabel")).Append(' ').Append(FormatTime(virtualPos)).Append(nl);
+                sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -").Append(FormatTime(virtualRemaining));
             }
-            else
+            else if (type == PlayerType.MultiAudio)
             {
-                // Plain audio: no "Part:" label — just the position value
-                // (X/Y, plus the file name when the book has several parts).
-                posLine = dash;
+                // TITLE / AUTHOR / format / Bookmarks / Part X/Y / part + total times.
+                string part = dash;
+                int partNum = currentPlaylistIndex + 1;
                 if (currentBook != null && currentBook.Chapters.Count > 0
                     && currentPlaylistIndex < currentBook.Chapters.Count)
-                {
-                    posLine = (currentPlaylistIndex + 1) + "/" + currentBook.Chapters.Count;
-                    if (currentBook.Chapters.Count > 1)
-                        posLine += " — " + System.IO.Path.GetFileNameWithoutExtension(
-                            currentBook.Chapters[currentPlaylistIndex].FileName);
-                }
-            }
-
-            // Single-file books have no "part vs total" distinction — show the
-            // times plainly (Elapsed / Remaining / Time). Multi-part books keep
-            // the part + total breakdown.
-            string times;
-            if (currentBook != null && currentBook.Chapters.Count <= 1)
-            {
-                times =
-                    Localization.T("Player.Info.ElapsedLabel") + " " + FormatTime(virtualPos) + "\r\n" +
-                    Localization.T("Player.Info.RemainingLabel") + " -" + FormatTime(virtualRemaining) + "\r\n" +
-                    Localization.T("Player.Info.TimeLabel") + " " + FormatTime(totalDur);
+                    part = partNum + "/" + currentBook.Chapters.Count;
+                sb.Append(PlayerFormatLabel()).Append(nl);
+                sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl);
+                sb.Append(Localization.T("Player.Info.PartLabel")).Append(' ').Append(part).Append(nl).Append(nl);
+                sb.Append(Localization.T("Player.Info.PartNumElapsed", partNum)).Append(' ').Append(FormatTime(segPosition)).Append(nl);
+                sb.Append(Localization.T("Player.Info.PartNumRemaining", partNum)).Append(" -").Append(FormatTime(segRemaining)).Append(nl);
+                sb.Append(Localization.T("Player.Info.ElapsedLabel")).Append(' ').Append(FormatTime(virtualPos)).Append(nl);
+                sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -").Append(FormatTime(virtualRemaining));
             }
             else
             {
-                times =
-                    Localization.T("Player.Info.ElapsedSegmentLabel") + " " + FormatTime(segPosition) + "\r\n" +
-                    Localization.T("Player.Info.ElapsedTotalLabel") + " " + FormatTime(virtualPos) + "\r\n" +
-                    Localization.T("Player.Info.RemainingSegmentLabel") + " -" + FormatTime(segRemaining) + "\r\n" +
-                    Localization.T("Player.Info.RemainingTotalLabel") + " -" + FormatTime(virtualRemaining);
+                // Single-file audio (and M4B fallback): TITLE / AUTHOR / format /
+                // Bookmarks / elapsed / remaining.
+                sb.Append(PlayerFormatLabel()).Append(nl);
+                sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl).Append(nl);
+                sb.Append(Localization.T("Player.Info.ElapsedLabel")).Append(' ').Append(FormatTime(virtualPos)).Append(nl);
+                sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -").Append(FormatTime(virtualRemaining));
             }
 
-            return header + posLine + "\r\n" + "\r\n" + times;
+            return sb.ToString();
         }
 
         /// <summary>Index of the DAISY heading covering the given virtual
@@ -1872,26 +2035,63 @@ namespace Nemoviz_Book_Reader
         {
             string dash = Localization.T("Common.Dash");
             string nl = "\r\n";
-            string s = Localization.T("Player.Info.TitleLabel") + " " +
-                (string.IsNullOrWhiteSpace(currentBook.Title) ? dash : currentBook.Title) + nl;
-            if (!string.IsNullOrWhiteSpace(currentBook.Author))
-                s += Localization.T("Player.Info.AuthorLabel") + " " + currentBook.Author + nl;
+            PlayerType type = GetPlayerType();
 
-            // Voice + reading speed, e.g. "Voice: RHVoice Karmela, 250 WPM".
+            var sb = new System.Text.StringBuilder();
+            sb.Append(Localization.T("Player.Info.TitleLabel")).Append(' ')
+              .Append(string.IsNullOrWhiteSpace(currentBook.Title) ? dash : currentBook.Title).Append(nl);
+            sb.Append(Localization.T("Player.Info.AuthorLabel")).Append(' ')
+              .Append(string.IsNullOrWhiteSpace(currentBook.Author) ? "" : currentBook.Author).Append(nl);
+
+            // Structured text carries producer + publisher and chapter/page lines.
+            if (type == PlayerType.StructuredText)
+            {
+                string prod = PlayerProducer();
+                if (prod.Length > 0)
+                    sb.Append(Localization.T("Player.Info.ProducerLabel")).Append(' ').Append(prod).Append(nl);
+                string pub = PlayerPublisher();
+                if (pub.Length > 0)
+                    sb.Append(Localization.T("Player.Info.PublisherLabel")).Append(' ').Append(pub).Append(nl);
+            }
+
+            sb.Append(PlayerFormatLabel()).Append(nl);
+
+            if (type == PlayerType.StructuredText)
+            {
+                var h = CurrentTextHeading();
+                sb.Append(Localization.T("Player.Info.ChapterLabel")).Append(' ')
+                  .Append(string.IsNullOrWhiteSpace(h.Label) ? dash : h.Label).Append(nl);
+                // PAGE sits between Chapter and Bookmarks; shown only when the
+                // book has page markers.
+                if (currentBook.TextPages.Count > 0)
+                {
+                    string page = CurrentTextPageLabel();
+                    sb.Append(Localization.T("Player.Info.PageLabel")).Append(' ')
+                      .Append(string.IsNullOrWhiteSpace(page) ? dash : page).Append(nl);
+                }
+            }
+
+            int bmk = currentBook != null ? currentBook.Bookmarks.Count : 0;
+            sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl);
+
+            // Speech engine + voice + reading speed, e.g.
+            // "Speech engine: RHVoice Karmela, 250 WPM".
             string voice = tts != null && !string.IsNullOrEmpty(tts.CurrentVoice) ? tts.CurrentVoice : dash;
-            s += Localization.T("Player.Info.VoiceLabel") + " " + voice + ", " + currentWpm + " WPM" + nl;
+            sb.Append(Localization.T("Player.Info.SpeechEngineLabel")).Append(' ')
+              .Append(voice).Append(", ").Append(currentWpm).Append(" WPM").Append(nl).Append(nl);
 
             int total = tts != null ? tts.TotalChars : 0;
             int at = tts != null ? tts.CharPosition : 0;
             double elapsed = TextSeconds(at);
             double totalSec = TextSeconds(total);
 
-            s += Localization.T("Player.Info.ReadLabel") + " " + TextPercentString() + "%" + nl + nl;
-            s += Localization.T("Player.Info.ElapsedLabel") + " " + FormatTime(elapsed) + nl;
-            s += Localization.T("Player.Info.RemainingLabel") + " " + FormatTime(totalSec - elapsed) + nl;
-            s += Localization.T("Player.Info.TimeLabel") + " " + FormatTime(totalSec) +
-                 " " + Localization.T("Player.Info.Estimated");
-            return s;
+            // Elapsed/remaining carry no "≈" — the approximation mark is reserved
+            // for the total-time figure (shown only in the Library info box).
+            sb.Append(Localization.T("Player.Info.ElapsedLabel")).Append(' ')
+              .Append(FormatTime(elapsed)).Append("  ").Append(TextPercentString()).Append('%').Append(nl);
+            sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -")
+              .Append(FormatTime(totalSec - elapsed));
+            return sb.ToString();
         }
 
         private string BuildCurrentInfoText()
@@ -1941,45 +2141,87 @@ namespace Nemoviz_Book_Reader
         {
             string appName = Localization.T("App.Name");
 
-            if (currentBook != null)
+            if (currentBook == null)
             {
-                string stateText = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
-
-                if (currentBook.IsTextBook)
+                if (currentFile != null)
                 {
-                    // Text: Author — Title — NN% (percentage read).
-                    string authorPart = string.IsNullOrWhiteSpace(currentBook.Author)
-                        ? "" : currentBook.Author + " — ";
-                    string posPart = tts != null && tts.TotalChars > 0
-                        ? " — " + TextPercentString() + "%" : "";
-                    this.Text = appName + " — " + authorPart + currentBook.Title + posPart + stateText;
+                    string st = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
+                    this.Text = appName + " — " + System.IO.Path.GetFileNameWithoutExtension(currentFile) + st;
                 }
-                else if (currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
+                else this.Text = appName;
+                return;
+            }
+
+            string stateText = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
+            const string sep = " — ";
+            PlayerType type = GetPlayerType();
+            string title = currentBook.Title;
+            string body;
+
+            if (type == PlayerType.FlatText || type == PlayerType.StructuredText)
+            {
+                // Text: per TTS speed. Structured → Title / Chapter / Page (or
+                // -remaining if no pages); flat → Title / X.Y% / -remaining.
+                double elapsed = tts != null ? TextSeconds(tts.CharPosition) : 0;
+                double total = tts != null ? TextSeconds(tts.TotalChars) : 0;
+                string remaining = "-" + FormatTime(total - elapsed);
+                if (type == PlayerType.StructuredText)
                 {
-                    // DAISY: Author — Title — X/Y (heading position), no "Part".
-                    int hi = DaisyHeadingIndexAt(GetVirtualPosition());
-                    string authorPart = string.IsNullOrWhiteSpace(currentBook.Author)
-                        ? "" : currentBook.Author + " — ";
-                    string posPart = " — " + (hi + 1) + "/" + currentBook.DaisyHeadings.Count;
-                    this.Text = appName + " — " + authorPart + currentBook.Title + posPart + stateText;
+                    var h = CurrentTextHeading();
+                    string chap = string.IsNullOrWhiteSpace(h.Label) ? Localization.T("Common.Dash") : h.Label;
+                    // A book with print pages shows the page number here instead
+                    // of the (estimated) remaining time.
+                    string tail = remaining;
+                    if (currentBook.TextPages.Count > 0)
+                    {
+                        string page = CurrentTextPageLabel();
+                        tail = Localization.T("Player.Info.PageLabel") + " " +
+                               (string.IsNullOrWhiteSpace(page) ? Localization.T("Common.Dash") : page);
+                    }
+                    body = title + sep + chap + sep + tail;
                 }
                 else
                 {
-                    string chapterText = "";
-                    if (currentBook.Chapters.Count > 0 && currentPlaylistIndex < currentBook.Chapters.Count)
-                        chapterText = Localization.T("Player.TitleBar.Chapter", currentPlaylistIndex + 1, currentBook.Chapters.Count);
-                    this.Text = appName + " — " + currentBook.Title + chapterText + stateText;
+                    string pct = (tts != null && tts.TotalChars > 0) ? TextPercentString() : "0.0";
+                    body = title + sep + pct + "%" + sep + remaining;
                 }
-            }
-            else if (currentFile != null)
-            {
-                string stateText = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
-                this.Text = appName + " — " + System.IO.Path.GetFileNameWithoutExtension(currentFile) + stateText;
             }
             else
             {
-                this.Text = appName;
+                double virtualPos = GetVirtualPosition();
+                double totalDur = currentBook.TotalDuration > 0 ? currentBook.TotalDuration : 0;
+                if (totalDur <= 0 && mpvHandle != IntPtr.Zero)
+                {
+                    double d = 0;
+                    mpv_get_property(mpvHandle, "duration", 5, ref d);
+                    totalDur = d;
+                }
+                string remaining = "-" + FormatTime(totalDur - virtualPos);
+
+                if (type == PlayerType.Daisy)
+                {
+                    // DAISY: Title / Chapter (heading) / Page.
+                    int hi = DaisyHeadingIndexAt(virtualPos);
+                    string chap = hi >= 0 ? currentBook.DaisyHeadings[hi].Label : Localization.T("Common.Dash");
+                    string page = DaisyPageLabelAt(virtualPos);
+                    body = title + sep + chap + (page != null ? sep + page : "");
+                }
+                else if (type == PlayerType.MultiAudio)
+                {
+                    // Multi-file audio: Title / part X/Y / -remaining.
+                    string part = Localization.T("Common.Dash");
+                    if (currentBook.Chapters.Count > 0 && currentPlaylistIndex < currentBook.Chapters.Count)
+                        part = (currentPlaylistIndex + 1) + "/" + currentBook.Chapters.Count;
+                    body = title + sep + part + sep + remaining;
+                }
+                else
+                {
+                    // Single-file audio (and M4B fallback): Title / X.Y% / -remaining.
+                    body = title + sep + AudioPercentString(virtualPos, totalDur) + "%" + sep + remaining;
+                }
             }
+
+            this.Text = appName + " — " + body + stateText;
         }
 
         // ──────────────────────────────────────────────
@@ -2103,6 +2345,31 @@ namespace Nemoviz_Book_Reader
             // already open (book finished while browsing it).
             if (!isLibraryOpen)
                 BeginInvoke((Action)(() => BtnLibrary_Click(null, EventArgs.Empty)));
+        }
+
+        /// <summary>
+        /// Unloads the active book without touching its saved progress — used
+        /// when the user marks the currently-playing book as read from the
+        /// Library (which already persisted it at 100%). Stops playback and
+        /// returns the player to its empty state.
+        /// </summary>
+        private void UnloadActiveBook()
+        {
+            SetPlayPauseState(false);
+            if (tts != null) tts.Stop();
+            // "stop" unloads the current file and clears the playlist, so mpv
+            // releases its handle on the audio — otherwise the folder can't be
+            // deleted while it's still open (the reason a marked-read active book
+            // couldn't be deleted until another book was loaded).
+            MpvCommand("stop");
+
+            // currentBook == null first, so no stray SaveCurrentBookProgress can
+            // overwrite the 100% the Library just wrote with a stale position.
+            currentBook = null;
+            currentFile = null;
+            RebuildSeekSteps();
+            tbInfo.Text = BuildInfoBoxPlaceholder();
+            UpdateTitleBar();
         }
 
         // ──────────────────────────────────────────────
@@ -2278,7 +2545,11 @@ namespace Nemoviz_Book_Reader
             isLibraryOpen = true;
             try
             {
-                using (LibraryForm libraryForm = new LibraryForm(appSettings, currentBook != null ? currentBook.FolderPath : null))
+                // The callback lets the Library unload the active book the moment
+                // it's marked read (so it can be deleted in the same session,
+                // with mpv's file handle released) rather than waiting for close.
+                using (LibraryForm libraryForm = new LibraryForm(appSettings,
+                    currentBook != null ? currentBook.FolderPath : null, UnloadActiveBook))
                 {
                     libraryForm.ShowDialog(this);
 
@@ -2352,6 +2623,14 @@ namespace Nemoviz_Book_Reader
             {
                 if (currentBook.TextHeadings.Count > 0) TextGoTo();
                 else Console.Beep(300, 150);
+                return;
+            }
+
+            // Single-file audio (and the M4B single-file fallback) have no parts
+            // or chapters to list — Go To is inactive (low beep).
+            if (GetPlayerType() == PlayerType.SingleAudio)
+            {
+                Console.Beep(300, 150);
                 return;
             }
 
@@ -2614,6 +2893,12 @@ namespace Nemoviz_Book_Reader
             tbProgress.Text = posText;
             tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
             lblProgress.Text = posText;
+
+            // Live title bar + info box (same rule as audio: caption always,
+            // info box only while unfocused) so text progress advances visibly.
+            UpdateTitleBar();
+            if (this.ActiveControl != tbInfo)
+                tbInfo.Text = BuildCurrentInfoText();
         }
 
         private void LoadBook(BookData book, bool autoPlay)

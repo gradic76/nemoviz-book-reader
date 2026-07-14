@@ -31,6 +31,9 @@ namespace Nemoviz_Book_Reader
         private TextBox tbLibraryLocation;
         private string stagedLibraryPath;
 
+        // Audio Books tab — use embedded metadata for title/author.
+        private CheckBox chkUseMetadata;
+
         // Text Books tab — global TTS defaults (wired to AppSettings).
         private ComboBox cmbVoice;
         private TrackBar trkRate;
@@ -223,6 +226,10 @@ namespace Nemoviz_Book_Reader
                 appSettings.EnsureLibraryExists();
             }
 
+            // Audio Books — metadata-vs-folder-name choice.
+            if (chkUseMetadata != null)
+                appSettings.SetUseMetadata(chkUseMetadata.Checked);
+
             // Text Books — global TTS defaults.
             string voice = cmbVoice != null && cmbVoice.SelectedItem != null
                 ? cmbVoice.SelectedItem.ToString() : (appSettings.TtsVoice ?? "");
@@ -232,8 +239,23 @@ namespace Nemoviz_Book_Reader
         private TabPage BuildAudioBooksTab()
         {
             TabPage page = new TabPage(Localization.T("Settings.Tab.AudioBooks"));
-            page.Controls.Add(BuildPlaceholder(Localization.T("Settings.WorkInProgress"),
-                new Point(10, 20), new Size(420, 30)));
+
+            chkUseMetadata = new CheckBox();
+            chkUseMetadata.Text = Localization.T("Settings.Audio.UseMetadata");
+            chkUseMetadata.AccessibleName = Localization.T("Settings.Audio.UseMetadata");
+            chkUseMetadata.Location = new Point(10, 20);
+            chkUseMetadata.Size = new Size(430, 44);
+            chkUseMetadata.TabIndex = 0;
+            chkUseMetadata.Checked = appSettings.UseMetadata;
+
+            Label lblHint = new Label();
+            lblHint.Text = Localization.T("Settings.Audio.UseMetadata.Hint");
+            lblHint.Location = new Point(28, 66);
+            lblHint.Size = new Size(410, 60);
+            lblHint.TabStop = false;
+
+            page.Controls.Add(chkUseMetadata);
+            page.Controls.Add(lblHint);
             return page;
         }
 

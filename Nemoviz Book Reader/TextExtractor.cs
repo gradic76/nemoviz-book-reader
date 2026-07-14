@@ -11,8 +11,12 @@ namespace Nemoviz_Book_Reader
     {
         public string Text = "";
         public List<(int Level, string Title, int Offset)> Headings = new List<(int, string, int)>();
+        // Print-page markers (EPUB page-list / NCX pageList) → character offsets.
+        public List<(string Label, int Offset)> Pages = new List<(string, int)>();
         public string Title = "";
         public string Author = "";
+        public string Producer = "";   // accessible-edition producer (empty for EPUB)
+        public string Publisher = "";  // dc:publisher (EPUB print/edition publisher)
         public bool DrmProtected = false;
     }
 

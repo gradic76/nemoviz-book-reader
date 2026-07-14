@@ -36,6 +36,8 @@ namespace Nemoviz_Book_Reader
         public string Version;                     // "2.02" or "3.0"
         public string Title;
         public string Author;
+        public string Publisher;                   // dc:publisher (print-edition publisher)
+        public string Producer;                    // ncc:producer (audio-producing institution)
         public string TotalTime;                   // as declared in metadata (string)
         public List<string> AudioPlayOrder = new List<string>();
         public List<DaisyNavPoint> Headings = new List<DaisyNavPoint>();
@@ -113,6 +115,8 @@ namespace Nemoviz_Book_Reader
             var book = new DaisyBook { ContentRoot = root, Version = "2.02" };
             book.Title = FirstNonEmpty(MetaContent(ncc, "dc:title"), TagText(ncc, "title"));
             book.Author = MetaContent(ncc, "dc:creator");
+            book.Publisher = MetaContent(ncc, "dc:publisher");
+            book.Producer = MetaContent(ncc, "ncc:producer");
             book.TotalTime = MetaContent(ncc, "ncc:totalTime");
 
             // Headings: <h1..h6 ...><a href="file.smil#frag">Title</a></h1..>
@@ -189,6 +193,8 @@ namespace Nemoviz_Book_Reader
                 XmlDocument opf = LoadXml(opfPath);
                 book.Title = FirstNonEmpty(MetaByName(opf, "dc:title"), ElemText(opf, "Title"));
                 book.Author = FirstNonEmpty(MetaByName(opf, "dc:creator"), ElemText(opf, "Creator"));
+                book.Publisher = FirstNonEmpty(MetaByName(opf, "dc:publisher"), ElemText(opf, "Publisher"));
+                book.Producer = MetaByName(opf, "dtb:producer");
                 book.TotalTime = MetaAttr(opf, "dtb:totalTime");
 
                 var manifest = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

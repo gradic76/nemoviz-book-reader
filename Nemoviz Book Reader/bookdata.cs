@@ -15,10 +15,18 @@ namespace Nemoviz_Book_Reader
         // taken from the folder name is the convention (we can't reliably split
         // author from title there). Shown alongside Title only when non-empty.
         public string Author { get; set; }
+        // Producer / publisher, from dc:publisher (DAISY + EPUB). Empty for audio
+        // and editable text (no such tag). Placeholder values like "N/A" are
+        // normalized to empty. Shown only when non-empty.
+        public string Producer { get; set; }
+        // Print-edition publisher, from dc:publisher (DAISY + EPUB). Distinct
+        // from Producer (the audio/accessible-edition producer, DAISY ncc:producer).
+        public string Publisher { get; set; }
         public string Format { get; set; }
         public string Duration { get; set; }
         public string LastPosition { get; set; }
         public int PercentListened { get; set; }
+        public bool Favorite { get; set; }
         public int Volume { get; set; }
         public int Speed { get; set; }
         // Index of the selected seek step in the player's dropdown
@@ -62,6 +70,9 @@ namespace Nemoviz_Book_Reader
         // Heading structure of a produced text book (epub/fb2/html): level +
         // title + character offset into content.txt. Empty for flat text.
         public List<(int Level, string Label, int Offset)> TextHeadings { get; private set; }
+        // Print-page markers of a produced text book (EPUB page-list): label +
+        // character offset into content.txt. Empty when the book has no pages.
+        public List<(string Label, int Offset)> TextPages { get; private set; }
 
         public BookData(string folderPath)
         {
@@ -73,6 +84,7 @@ namespace Nemoviz_Book_Reader
             Bookmarks = new List<double>();
             DaisyHeadings = new List<(int, string, double)>();
             DaisyPages = new List<(int, string, double)>();
+            TextPages = new List<(string, int)>();
             TextHeadings = new List<(int, string, int)>();
             Sound = new SoundSettings();
             Load();
@@ -86,10 +98,13 @@ namespace Nemoviz_Book_Reader
             // The legacy "Author" key in old Book.ini files is simply ignored.
             Title = ini.Read("Book", "Title", Path.GetFileName(FolderPath));
             Author = ini.Read("Book", "Author", "");
+            Producer = ini.Read("Book", "Producer", "");
+            Publisher = ini.Read("Book", "Publisher", "");
             Format = ini.Read("Book", "Format", "Unknown");
             Duration = ini.Read("Book", "Duration", "00:00:00");
             LastPosition = ini.Read("Progress", "LastPosition", "00:00:00");
             PercentListened = int.Parse(ini.Read("Progress", "PercentListened", "0"));
+            Favorite = ini.Read("Book", "Favorite", "0") == "1";
             Volume = int.Parse(ini.Read("Settings", "Volume", "100"));
             Speed = int.Parse(ini.Read("Settings", "Speed", "100"));
             // -1 = never chosen for this book yet → the player defaults to the
@@ -116,6 +131,7 @@ namespace Nemoviz_Book_Reader
         private void LoadTextNav()
         {
             TextHeadings.Clear();
+            TextPages.Clear();
             if (!IsTextBook) return;
             int.TryParse(ini.Read("TextNav", "Count", "0"), out int n);
             for (int i = 0; i < n; i++)
@@ -124,6 +140,13 @@ namespace Nemoviz_Book_Reader
                 if (p.Length == 3 && int.TryParse(p[0], out int lvl) && int.TryParse(p[1], out int off))
                     TextHeadings.Add((lvl, p[2], off));
             }
+            int.TryParse(ini.Read("TextNav", "PageCount", "0"), out int pc);
+            for (int i = 0; i < pc; i++)
+            {
+                string[] p = ini.Read("TextNav", "P" + i, "").Split(new[] { '|' }, 2);
+                if (p.Length == 2 && int.TryParse(p[0], out int off))
+                    TextPages.Add((p[1], off));
+            }
         }
 
         /// <summary>Sets the heading structure (from the import extractor) so the
@@ -131,6 +154,13 @@ namespace Nemoviz_Book_Reader
         public void SetTextHeadings(List<(int Level, string Label, int Offset)> headings)
         {
             TextHeadings = headings ?? new List<(int, string, int)>();
+        }
+
+        /// <summary>Sets the page-marker structure (from the import extractor) so
+        /// the next Save persists it to [TextNav].</summary>
+        public void SetTextPages(List<(string Label, int Offset)> pages)
+        {
+            TextPages = pages ?? new List<(string, int)>();
         }
 
         /// <summary>A text book is a folder that has a readable text document
@@ -217,8 +247,12 @@ namespace Nemoviz_Book_Reader
             // "Daisy <version>, <sample rate>, <bitrate>, <channels>".
             Title = db.Title ?? "";
             Author = db.Author ?? "";
+            Producer = NormalizeProducer(db.Producer);
+            Publisher = NormalizeProducer(db.Publisher);
             ini.Write("Book", "Title", Title);
             ini.Write("Book", "Author", Author);
+            ini.Write("Book", "Producer", Producer);
+            ini.Write("Book", "Publisher", Publisher);
 
             string audioDetails = ordered.Count > 0 ? DetectAudioFormatString(ordered[0]) : null;
             // Drop the leading codec name ("MP3 Audio, ...") and prefix the
@@ -502,6 +536,22 @@ namespace Nemoviz_Book_Reader
         /// Maps a file extension to a friendly format name
         /// (single source of truth, also used by LibraryScanner).
         /// </summary>
+        /// <summary>
+        /// Cleans a raw dc:publisher value: trims it and drops placeholder
+        /// non-values ("N/A", "Non disponible", "-", …) so they never show as a
+        /// producer. Returns "" when there is no real publisher.
+        /// </summary>
+        public static string NormalizeProducer(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return "";
+            string p = System.Net.WebUtility.HtmlDecode(raw).Trim();
+            string low = p.ToLowerInvariant();
+            if (low == "n/a" || low == "na" || low == "-" || low == "unknown" ||
+                low == "non disponible" || low == "non disponibile" || low == "none")
+                return "";
+            return p;
+        }
+
         public static string FriendlyFormatName(string extension)
         {
             switch ((extension ?? "").ToLower())
@@ -524,9 +574,15 @@ namespace Nemoviz_Book_Reader
                 case ".caf": return "CAF Audio";
                 case ".epub": return "EPUB";
                 case ".txt": return "Plain text";
+                case ".docx": return "MS Word Docx";
+                case ".doc": return "MS Word";
+                case ".rtf": return "Rich Text RTF";
+                case ".odt": return "Open Office ODF";
                 case ".pdf": return "PDF";
                 case ".djvu": return "DjVu";
-                case ".fb2": return "FB2";
+                case ".fb2": return "FictionBook FB2";
+                case ".htm":
+                case ".html": return "HTML";
                 case ".mobi": return "MOBI";
                 case ".azw": return "AZW";
                 case ".azw3": return "AZW3";
@@ -547,8 +603,11 @@ namespace Nemoviz_Book_Reader
         {
             ini.Write("Book", "Title", Title);
             ini.Write("Book", "Author", Author ?? "");
+            ini.Write("Book", "Producer", Producer ?? "");
+            ini.Write("Book", "Publisher", Publisher ?? "");
             ini.Write("Book", "Format", Format);
             ini.Write("Book", "Duration", Duration);
+            ini.Write("Book", "Favorite", Favorite ? "1" : "0");
             ini.Write("Book", "DateAdded", DateAdded.ToString());
             ini.Write("Progress", "LastPosition", LastPosition);
             ini.Write("Progress", "PercentListened", PercentListened.ToString());
@@ -562,6 +621,9 @@ namespace Nemoviz_Book_Reader
             for (int i = 0; i < TextHeadings.Count; i++)
                 ini.Write("TextNav", "H" + i,
                     TextHeadings[i].Level + "|" + TextHeadings[i].Offset + "|" + TextHeadings[i].Label);
+            ini.Write("TextNav", "PageCount", TextPages.Count.ToString());
+            for (int i = 0; i < TextPages.Count; i++)
+                ini.Write("TextNav", "P" + i, TextPages[i].Offset + "|" + TextPages[i].Label);
             Sound.Save(ini);
         }
     }

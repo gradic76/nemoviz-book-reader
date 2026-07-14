@@ -47,6 +47,14 @@ namespace Nemoviz_Book_Reader
         private AppSettings appSettings;
         private string activeBookFolderPath;
 
+        // Set when the user marks the currently-playing book as read; the owner
+        // (Form1) checks this after the dialog closes and unloads that book.
+        public bool ActiveBookMarkedRead { get; private set; }
+
+        // Callback into the player to stop + unload the active book immediately
+        // (so it can be deleted in the same Library session).
+        private readonly Action unloadActiveBook;
+
         // Shelf categories
         private const int CatReading = 0;
         private const int CatUnread = 1;
@@ -57,6 +65,7 @@ namespace Nemoviz_Book_Reader
         private const int FilterReading = 1;
         private const int FilterUnread = 2;
         private const int FilterRead = 3;
+        private const int FilterFavorites = 4;
 
         // The details ListView rows are built fresh per selection (see
         // ShowDetails): the Author row only appears for books that carry an
@@ -64,10 +73,12 @@ namespace Nemoviz_Book_Reader
 
         public BookData SelectedBook { get; private set; }
 
-        public LibraryForm(AppSettings settings, string activeBookFolderPath = null)
+        public LibraryForm(AppSettings settings, string activeBookFolderPath = null,
+            Action unloadActiveBook = null)
         {
             appSettings = settings;
             this.activeBookFolderPath = activeBookFolderPath;
+            this.unloadActiveBook = unloadActiveBook;
             books = new List<BookData>();
             BuildUI();
             LoadBooks();
@@ -249,6 +260,7 @@ namespace Nemoviz_Book_Reader
             cbFilter.Items.Add(Localization.T("Shelf.Filter.Reading"));
             cbFilter.Items.Add(Localization.T("Shelf.Filter.Unread"));
             cbFilter.Items.Add(Localization.T("Shelf.Filter.Read"));
+            cbFilter.Items.Add(Localization.T("Shelf.Filter.Favorites"));
             cbFilter.SelectedIndex = FilterAll;
             // Subscribe only after the initial SelectedIndex is set,
             // so building the UI doesn't trigger a premature rebuild.
@@ -297,8 +309,17 @@ namespace Nemoviz_Book_Reader
             ctxOpen.ShortcutKeyDisplayString = "Enter";
             ctxOpen.Click += (s, e) => OpenSelectedBook();
 
-            ToolStripMenuItem ctxRestart = new ToolStripMenuItem(Localization.T("Context.Restart"));
-            ctxRestart.Click += (s, e) => RestartSelectedBook();
+            ToolStripMenuItem ctxMarkRead = new ToolStripMenuItem(Localization.T("Context.MarkRead"));
+            ctxMarkRead.Click += (s, e) => MarkSelected(true);
+
+            ToolStripMenuItem ctxMarkUnread = new ToolStripMenuItem(Localization.T("Context.MarkUnread"));
+            ctxMarkUnread.Click += (s, e) => MarkSelected(false);
+
+            ToolStripMenuItem ctxAddFav = new ToolStripMenuItem(Localization.T("Context.AddFavorite"));
+            ctxAddFav.Click += (s, e) => SetSelectedFavorite(true);
+
+            ToolStripMenuItem ctxRemoveFav = new ToolStripMenuItem(Localization.T("Context.RemoveFavorite"));
+            ctxRemoveFav.Click += (s, e) => SetSelectedFavorite(false);
 
             ToolStripMenuItem ctxRename = new ToolStripMenuItem(Localization.T("Context.Rename"));
             ctxRename.ShortcutKeyDisplayString = "F2";
@@ -313,7 +334,11 @@ namespace Nemoviz_Book_Reader
             ctxProperties.Click += (s, e) => ShowProperties();
 
             ctx.Items.Add(ctxOpen);
-            ctx.Items.Add(ctxRestart);
+            ctx.Items.Add(new ToolStripSeparator());
+            ctx.Items.Add(ctxMarkRead);
+            ctx.Items.Add(ctxMarkUnread);
+            ctx.Items.Add(ctxAddFav);
+            ctx.Items.Add(ctxRemoveFav);
             ctx.Items.Add(new ToolStripSeparator());
             ctx.Items.Add(ctxRename);
             ctx.Items.Add(ctxDelete);
@@ -321,10 +346,23 @@ namespace Nemoviz_Book_Reader
             ctx.Items.Add(ctxProperties);
 
             // No book selected (empty shelf) — nothing for the menu to act on.
+            // Otherwise show the read/unread and favorites items contextually.
             ctx.Opening += (s, e) =>
             {
-                if (GetSelectedBook() == null)
+                BookData b = GetSelectedBook();
+                if (b == null)
+                {
                     e.Cancel = true;
+                    return;
+                }
+                bool active = PathsEqual(b.FolderPath, activeBookFolderPath);
+                int cat = GetCategory(b);
+                // "Mark as read" — everywhere except books already in Read.
+                ctxMarkRead.Visible = cat != CatRead;
+                // "Mark as unread" — not on the active book, not on Unread books.
+                ctxMarkUnread.Visible = !active && cat != CatUnread;
+                ctxAddFav.Visible = !b.Favorite;
+                ctxRemoveFav.Visible = b.Favorite;
             };
 
             listBooks.ContextMenuStrip = ctx;
@@ -485,9 +523,23 @@ namespace Nemoviz_Book_Reader
             {
                 AddGroup(unread, null);
             }
-            else
+            else if (filter == FilterRead)
             {
                 AddGroup(read, null);
+            }
+            else
+            {
+                // Favorites — every favorite book, regardless of its section.
+                var favorites = new List<BookData>();
+                foreach (BookData b in books)
+                {
+                    if (!b.Favorite) continue;
+                    if (query.Length > 0 && !NormalizeForSearch(b.Title).Contains(query))
+                        continue;
+                    favorites.Add(b);
+                }
+                favorites.Sort(cmp);
+                AddGroup(favorites, null);
             }
 
             listBooks.EndUpdate();
@@ -531,6 +583,10 @@ namespace Nemoviz_Book_Reader
                 // single merged Title.
                 string shelfText = string.IsNullOrWhiteSpace(b.Author)
                     ? b.Title : b.Author + " — " + b.Title;
+                // Favorites are spoken with "Favorite" appended after the name;
+                // there is no separate Favorites shelf section.
+                if (b.Favorite)
+                    shelfText += ", " + Localization.T("Shelf.Favorite");
                 ListViewItem item = new ListViewItem(shelfText);
                 item.Tag = b;
                 if (lvg != null)
@@ -661,37 +717,115 @@ namespace Nemoviz_Book_Reader
             // already have theirs from import). One-time, cached in Book.ini.
             book.EnsureDurationDetails();
 
-            string speedStr = (book.Speed / 100.0).ToString("0.0");
             string dash = Localization.T("Common.Dash");
 
             listViewDetails.BeginUpdate();
             listViewDetails.Items.Clear();
             AddDetailRow(Localization.T("Details.Field.Title"), book.Title);
-            // Author row only for books that carry one (DAISY) — shown even if
-            // empty (a dash), a cue to fill it in via F2. Plain audio has no
-            // author, so the row is omitted entirely.
-            if (book.IsDaisy)
-                AddDetailRow(Localization.T("Details.Field.Author"),
-                    string.IsNullOrWhiteSpace(book.Author) ? dash : book.Author);
-            // Text book: show the official format name and an estimated reading
-            // time from the effective reading speed (per-book override, else the
-            // Settings default). Audio/DAISY show their real format and length.
+
             if (book.IsTextBook)
-            {
-                int wpm = book.TextWpm >= 0 ? book.TextWpm : appSettings.TtsWpm;
-                AddDetailRow(Localization.T("Details.Field.Format"), Localization.T("Details.Format.PlainText"));
-                AddDetailRow(Localization.T("Details.Field.Duration"),
-                    book.EstimatedReadingTime(wpm) + " " + Localization.T("Details.Estimated"));
-            }
+                ShowTextDetails(book, dash);
             else
-            {
-                AddDetailRow(Localization.T("Details.Field.Format"), book.Format);
-                AddDetailRow(Localization.T("Details.Field.Duration"), book.Duration);
-            }
-            AddDetailRow(Localization.T("Details.Field.Listened"), book.PercentListened + "%");
-            AddDetailRow(Localization.T("Details.Field.Speed"), Localization.T("Details.Speed.Value", speedStr));
-            AddDetailRow(Localization.T("Details.Field.Added"), book.DateAdded.ToString(Localization.T("Common.DateFormat")));
+                ShowAudioDetails(book, dash);
+
             listViewDetails.EndUpdate();
+        }
+
+        // Library details for an audio / DAISY book:
+        // TITLE / AUTHOR / PRODUCER / TIME / ELAPSED / REMAINING / READ /
+        // FORMAT / [PAGES for DAISY] / SOUND PROCESSING / ADDED.
+        private void ShowAudioDetails(BookData book, string dash)
+        {
+            AddDetailRow(Localization.T("Details.Field.Author"),
+                string.IsNullOrWhiteSpace(book.Author) ? dash : book.Author);
+            // Producer always shown (empty = unknown, per spec); Publisher only
+            // when present (DAISY has both; plain audio has neither).
+            AddDetailRow(Localization.T("Details.Field.Producer"),
+                BookData.NormalizeProducer(book.Producer));
+            string pub = BookData.NormalizeProducer(book.Publisher);
+            if (!string.IsNullOrEmpty(pub))
+                AddDetailRow(Localization.T("Details.Field.Publisher"), pub);
+
+            double totalSec = ParseDetailTime(book.Duration);
+            double elapsedSec = ParseDetailTime(book.LastPosition);
+            double remaining = totalSec - elapsedSec;
+            if (remaining < 0) remaining = 0;
+
+            AddDetailRow(Localization.T("Details.Field.Time"), book.Duration);
+            AddDetailRow(Localization.T("Details.Field.Elapsed"), FormatDetailTime(elapsedSec));
+            AddDetailRow(Localization.T("Details.Field.Remaining"), "-" + FormatDetailTime(remaining));
+            string readPct = totalSec > 0
+                ? (100.0 * elapsedSec / totalSec).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)
+                : book.PercentListened.ToString();
+            AddDetailRow(Localization.T("Details.Field.Read"), readPct + "%");
+            AddDetailRow(Localization.T("Details.Field.Format"), book.Format);
+            if (book.IsDaisy)
+                // Empty (unknown), not "0", when the book declares no pages —
+                // "0" would wrongly read as "zero pages".
+                AddDetailRow(Localization.T("Details.Field.Pages"),
+                    book.DaisyPages.Count > 0 ? book.DaisyPages.Count.ToString() : "");
+            AddDetailRow(Localization.T("Details.Field.SoundProcessing"),
+                Localization.T(book.Sound != null && book.Sound.Enabled ? "Details.Sound.On" : "Details.Sound.Off"));
+            AddDetailRow(Localization.T("Details.Field.Added"),
+                book.DateAdded.ToString(Localization.T("Common.DateFormatLong")));
+        }
+
+        // Library details for a text book: real source format, reading speed in
+        // WPM, estimated reading time, and author/producer when present.
+        private void ShowTextDetails(BookData book, string dash)
+        {
+            AddDetailRow(Localization.T("Details.Field.Author"),
+                string.IsNullOrWhiteSpace(book.Author) ? dash : book.Author);
+            string prod = BookData.NormalizeProducer(book.Producer);
+            if (!string.IsNullOrEmpty(prod))
+                AddDetailRow(Localization.T("Details.Field.Producer"), prod);
+            string pub = BookData.NormalizeProducer(book.Publisher);
+            if (!string.IsNullOrEmpty(pub))
+                AddDetailRow(Localization.T("Details.Field.Publisher"), pub);
+
+            int wpm = book.TextWpm >= 0 ? book.TextWpm : appSettings.TtsWpm;
+            AddDetailRow(Localization.T("Details.Field.Format"), book.Format);
+            // Page count between Format and Time, when the book has page markers.
+            if (book.TextPages.Count > 0)
+                AddDetailRow(Localization.T("Details.Field.Pages"), book.TextPages.Count.ToString());
+            AddDetailRow(Localization.T("Details.Field.Time"),
+                "≈" + book.EstimatedReadingTime(wpm));
+            AddDetailRow(Localization.T("Details.Field.Speed"), Localization.T("Details.Speed.Wpm", wpm));
+            AddDetailRow(Localization.T("Details.Field.Read"), book.PercentListened + "%");
+            AddDetailRow(Localization.T("Details.Field.Added"),
+                book.DateAdded.ToString(Localization.T("Common.DateFormatLong")));
+        }
+
+        // Fills a book's title/author from an audio file's Album/Artist tags
+        // (Album = book title, Artist/AlbumArtist = author). Best-effort — any
+        // read error leaves the folder-name title in place.
+        private void ApplyAudioMetadata(BookData book, string audioFile)
+        {
+            try
+            {
+                using (var tf = TagLib.File.Create(audioFile))
+                {
+                    string album = tf.Tag.Album;
+                    string artist = tf.Tag.FirstPerformer;
+                    if (string.IsNullOrWhiteSpace(artist)) artist = tf.Tag.FirstAlbumArtist;
+                    if (!string.IsNullOrWhiteSpace(album)) book.Title = album.Trim();
+                    if (!string.IsNullOrWhiteSpace(artist)) book.Author = artist.Trim();
+                }
+            }
+            catch { }
+        }
+
+        private static double ParseDetailTime(string hhmmss)
+        {
+            TimeSpan t;
+            return TimeSpan.TryParse(hhmmss, out t) ? t.TotalSeconds : 0;
+        }
+
+        private static string FormatDetailTime(double seconds)
+        {
+            if (seconds < 0) seconds = 0;
+            TimeSpan t = TimeSpan.FromSeconds(seconds);
+            return string.Format("{0:D2}:{1:D2}:{2:D2}", (int)t.TotalHours, t.Minutes, t.Seconds);
         }
 
         private void AddDetailRow(string field, string value)
@@ -749,16 +883,45 @@ namespace Nemoviz_Book_Reader
             this.Close();
         }
 
-        private void RestartSelectedBook()
+        // Mark the selected book as read (100%) or unread (0%, rewound). Marking
+        // the *active* book as read deactivates it in the player: we flag it so the
+        // owner (Form1) can unload it once the Library dialog closes.
+        private void MarkSelected(bool read)
         {
             BookData book = GetSelectedBook();
             if (book == null) return;
-            book.LastPosition = "00:00:00";
-            book.PercentListened = 0;
+
+            if (read)
+            {
+                book.PercentListened = 100;
+                if (PathsEqual(book.FolderPath, activeBookFolderPath))
+                {
+                    ActiveBookMarkedRead = true;
+                    // Unload it from the player right now (releases mpv's file
+                    // handle) and drop our "active" reference, so it can be
+                    // deleted immediately without loading another book first.
+                    unloadActiveBook?.Invoke();
+                    activeBookFolderPath = null;
+                }
+            }
+            else
+            {
+                book.PercentListened = 0;
+                book.LastPosition = "00:00:00";
+                book.TextPosition = 0;
+            }
             book.Save();
-            // The book just moved to the "Unread" group — rebuild and follow it.
+            // The book just changed group (Read / Unread) — rebuild and follow it.
             RebuildShelf(book);
-            MessageBox.Show(Localization.T("Dialog.Restart.Message"), Localization.T("Dialog.Restart.Title"));
+        }
+
+        private void SetSelectedFavorite(bool favorite)
+        {
+            BookData book = GetSelectedBook();
+            if (book == null) return;
+            book.Favorite = favorite;
+            book.Save();
+            RebuildShelf(book);
         }
 
         private void RenameSelectedBook()
@@ -1025,8 +1188,16 @@ namespace Nemoviz_Book_Reader
                     // archive itself is left untouched (it usually lives outside
                     // the library).
                     int pwAttempts = 0;
-                    LibraryScanner.ExtractArchive(filePath, destFolder,
-                        () => ArchivePasswordPrompt.Show(this, sourceName, pwAttempts++ > 0));
+                    // Extract on a background thread behind a progress dialog so
+                    // the window stays responsive; surface the outcome through the
+                    // same OperationCanceledException / Exception paths as before.
+                    using (ExtractProgressForm prog = new ExtractProgressForm(filePath, destFolder,
+                        owner => ArchivePasswordPrompt.Show(owner, sourceName, pwAttempts++ > 0)))
+                    {
+                        prog.ShowDialog(this);
+                        if (prog.Cancelled) throw new OperationCanceledException();
+                        if (prog.Error != null) throw prog.Error;
+                    }
                     // Name the book after the folder closest to the files (the
                     // wrapper the archive packed everything into), not the
                     // archive file itself.
@@ -1077,6 +1248,11 @@ namespace Nemoviz_Book_Reader
                     // Build duration/chapters up front so it isn't 00:00:00 until
                     // first played; also stores the detailed format string.
                     imported.BuildChaptersFromFolder(new string[] { destFile });
+                    // Title/author from the Album/Artist tags when the user opted
+                    // in — the plain Title tag is unreliable for audiobooks (track
+                    // ranges, or empty), so Album is the clean book title.
+                    if (appSettings.UseMetadata)
+                        ApplyAudioMetadata(imported, destFile);
                 }
                 else if (isTextImport)
                 {
@@ -1095,10 +1271,26 @@ namespace Nemoviz_Book_Reader
                     System.IO.File.WriteAllText(
                         System.IO.Path.Combine(destFolder, "content.txt"),
                         doc.Text ?? "", new System.Text.UTF8Encoding(false));
-                    if (!string.IsNullOrWhiteSpace(doc.Title)) imported.Title = doc.Title;
-                    if (!string.IsNullOrWhiteSpace(doc.Author)) imported.Author = doc.Author;
+                    // Title/author from embedded metadata only when the user
+                    // opted in (else the file name stands). Producer has no
+                    // name-based fallback, so it always comes from metadata.
+                    if (appSettings.UseMetadata)
+                    {
+                        if (!string.IsNullOrWhiteSpace(doc.Title)) imported.Title = doc.Title;
+                        if (!string.IsNullOrWhiteSpace(doc.Author)) imported.Author = doc.Author;
+                    }
+                    imported.Producer = BookData.NormalizeProducer(doc.Producer);
+                    imported.Publisher = BookData.NormalizeProducer(doc.Publisher);
                     imported.SetTextHeadings(doc.Headings);
-                    imported.Format = Localization.T("Details.Format.PlainText");
+                    imported.SetTextPages(doc.Pages);
+                    // Record the real source format (MS Word Docx / EPUB / RTF …),
+                    // not the extracted content.txt. A .zip that actually wraps an
+                    // epub reports as EPUB.
+                    string srcExt = System.IO.Path.GetExtension(filePath);
+                    if (string.Equals(srcExt, ".zip", StringComparison.OrdinalIgnoreCase)
+                        && EpubParser.WrapsEpub(filePath))
+                        srcExt = ".epub";
+                    imported.Format = BookData.FriendlyFormatName(srcExt);
                 }
                 else
                 {
@@ -1109,7 +1301,6 @@ namespace Nemoviz_Book_Reader
                 }
 
                 imported.Save();
-
                 LoadBooks();
                 MessageBox.Show(Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
             }
@@ -1199,6 +1390,103 @@ namespace Nemoviz_Book_Reader
             {
                 MessageBox.Show(Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
             }
+        }
+    }
+
+    /// <summary>
+    /// Modal progress dialog that runs an archive extraction on a background
+    /// thread so the UI stays responsive (extraction of a large book used to
+    /// freeze the window for its whole duration). Shows a determinate bar when
+    /// the file count is known (7z/zip) or an indeterminate marquee (RAR,
+    /// streamed). Auto-closes when extraction finishes; Error/Cancelled expose
+    /// the outcome to the caller, which keeps the original import error handling.
+    /// </summary>
+    internal class ExtractProgressForm : Form
+    {
+        public Exception Error { get; private set; }
+        public bool Cancelled { get; private set; }
+
+        private readonly string archivePath;
+        private readonly string destFolder;
+        private readonly Func<IWin32Window, string> passwordProvider;
+        private readonly ProgressBar bar;
+        private readonly Label status;
+
+        public ExtractProgressForm(string archivePath, string destFolder,
+            Func<IWin32Window, string> passwordProvider)
+        {
+            this.archivePath = archivePath;
+            this.destFolder = destFolder;
+            this.passwordProvider = passwordProvider;
+
+            Text = Localization.T("Extract.Progress.Title");
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            ControlBox = false;
+            MinimizeBox = false;
+            MaximizeBox = false;
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterParent;
+            ClientSize = new Size(420, 96);
+
+            status = new Label
+            {
+                Location = new Point(12, 14),
+                Size = new Size(396, 24),
+                Text = Localization.T("Extract.Progress.Preparing"),
+                TabStop = true
+            };
+            status.AccessibleName = status.Text;
+
+            bar = new ProgressBar
+            {
+                Location = new Point(12, 46),
+                Size = new Size(396, 24),
+                Style = ProgressBarStyle.Marquee,
+                MarqueeAnimationSpeed = 40
+            };
+
+            Controls.Add(status);
+            Controls.Add(bar);
+            AcceptButton = null;
+            CancelButton = null;
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    LibraryScanner.ExtractArchive(archivePath, destFolder,
+                        // Password prompt must run on the UI thread.
+                        () => (string)Invoke(new Func<string>(() => passwordProvider(this))),
+                        // Progress → marshal onto the UI thread.
+                        (done, total) => { try { BeginInvoke(new Action(() => Report(done, total))); } catch { } });
+                }
+                catch (OperationCanceledException) { Cancelled = true; }
+                catch (Exception ex) { Error = ex; }
+                finally
+                {
+                    try { BeginInvoke(new Action(() => { DialogResult = DialogResult.OK; Close(); })); } catch { }
+                }
+            });
+        }
+
+        private void Report(int done, int total)
+        {
+            if (total > 0)
+            {
+                if (bar.Style != ProgressBarStyle.Blocks) bar.Style = ProgressBarStyle.Blocks;
+                bar.Maximum = total;
+                bar.Value = Math.Min(done, total);
+                status.Text = Localization.T("Extract.Progress.Determinate", done, total);
+            }
+            else
+            {
+                status.Text = Localization.T("Extract.Progress.Indeterminate", done);
+            }
+            status.AccessibleName = status.Text;
         }
     }
 }

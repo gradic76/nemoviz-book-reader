@@ -101,7 +101,7 @@ namespace Nemoviz_Book_Reader
             if (opfXml == null) return new TextDoc();
             string opfDir = DirOf(opfPath);
 
-            string title = "", author = "", ncxId = null, navHref = null;
+            string title = "", author = "", publisher = "", ncxId = null, navHref = null;
             Dictionary<string, string> manifest = new Dictionary<string, string>(); // id → href
             Dictionary<string, string> mediaType = new Dictionary<string, string>();
             List<string> spine = new List<string>();
@@ -113,6 +113,7 @@ namespace Nemoviz_Book_Reader
                     string ln = el.Name.LocalName;
                     if (ln == "title" && title == "") title = (el.Value ?? "").Trim();
                     else if (ln == "creator" && author == "") author = (el.Value ?? "").Trim();
+                    else if (ln == "publisher" && publisher == "") publisher = (el.Value ?? "").Trim();
                     else if (ln == "item")
                     {
                         string id = (string)el.Attribute("id");
@@ -177,7 +178,31 @@ namespace Nemoviz_Book_Reader
             if (headings == null || headings.Count == 0) headings = hn;
             headings = headings.OrderBy(h => h.Offset).ToList();
 
-            return new TextDoc { Text = body, Headings = headings, Title = title, Author = author };
+            // Print-page markers (NCX pageList preferred, then EPUB3 nav
+            // page-list), resolved to char offsets the same way as the TOC.
+            List<(int Level, string Title, string Src)> pageToc = null;
+            string pageTocDir = null;
+            if (ncxHref != null)
+            {
+                string ncxPath = TextParsing.ResolvePath(opfDir, ncxHref);
+                pageToc = ParseNcxPages(TextParsing.ReadZipEntry(zip, ncxPath));
+                if (pageToc != null && pageToc.Count > 0) pageTocDir = DirOf(ncxPath);
+            }
+            if ((pageToc == null || pageToc.Count == 0) && navHref != null)
+            {
+                string navPath = TextParsing.ResolvePath(opfDir, navHref);
+                pageToc = ParseNavPages(TextParsing.ReadZipEntry(zip, navPath));
+                if (pageToc != null && pageToc.Count > 0) pageTocDir = DirOf(navPath);
+            }
+            var pages = new List<(string Label, int Offset)>();
+            if (pageToc != null && pageToc.Count > 0 && pageTocDir != null)
+            {
+                foreach (var r in ResolveToc(pageToc, pageTocDir, fileStart, fileIds))
+                    pages.Add((r.Title, r.Offset));
+                pages = pages.OrderBy(p => p.Offset).ToList();
+            }
+
+            return new TextDoc { Text = body, Headings = headings, Pages = pages, Title = title, Author = author, Publisher = publisher };
         }
 
         // ── DRM (only content encryption counts; fonts are obfuscation) ───
@@ -281,6 +306,82 @@ namespace Nemoviz_Book_Reader
                             if (inToc && ln == "ol" && depth > 0) depth--;
                             else if (inToc && ln == "a") { if (href != null) list.Add((depth, txt.ToString().Trim(), href)); inA = false; }
                             else if (ln == "nav") inToc = false;
+                        }
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        // NCX pageList → (0, page label, src). Each <pageTarget> carries a
+        // <navLabel><text> and a <content src="…">.
+        private static List<(int Level, string Title, string Src)> ParseNcxPages(string ncxXml)
+        {
+            var list = new List<(int, string, string)>();
+            if (string.IsNullOrEmpty(ncxXml)) return list;
+            try
+            {
+                XmlReaderSettings st = new XmlReaderSettings { CheckCharacters = false, DtdProcessing = DtdProcessing.Ignore, IgnoreComments = true };
+                using (XmlReader r = XmlReader.Create(new StringReader(ncxXml), st))
+                {
+                    bool inTarget = false, inLabel = false; StringBuilder label = new StringBuilder();
+                    while (r.Read())
+                    {
+                        string ln = r.LocalName;
+                        if (r.NodeType == XmlNodeType.Element)
+                        {
+                            if (ln == "pageTarget") { inTarget = true; label.Clear(); }
+                            else if (ln == "navLabel" && inTarget) inLabel = true;
+                            else if (ln == "content" && inTarget)
+                            {
+                                string src = r.GetAttribute("src");
+                                if (src != null) list.Add((0, label.ToString().Trim(), src));
+                            }
+                        }
+                        else if ((r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA) && inLabel)
+                            label.Append(r.Value);
+                        else if (r.NodeType == XmlNodeType.EndElement)
+                        {
+                            if (ln == "navLabel") inLabel = false;
+                            else if (ln == "pageTarget") inTarget = false;
+                        }
+                    }
+                }
+            }
+            catch { }
+            return list;
+        }
+
+        // EPUB3 nav with epub:type="page-list" → (0, page label, href).
+        private static List<(int Level, string Title, string Src)> ParseNavPages(string navXml)
+        {
+            var list = new List<(int, string, string)>();
+            if (string.IsNullOrEmpty(navXml)) return list;
+            try
+            {
+                XmlReaderSettings st = new XmlReaderSettings { CheckCharacters = false, DtdProcessing = DtdProcessing.Ignore, IgnoreComments = true };
+                using (XmlReader r = XmlReader.Create(new StringReader(navXml), st))
+                {
+                    bool inPages = false, inA = false; string href = null; StringBuilder txt = new StringBuilder();
+                    while (r.Read())
+                    {
+                        string ln = r.LocalName;
+                        if (r.NodeType == XmlNodeType.Element)
+                        {
+                            if (ln == "nav")
+                            {
+                                string type = r.GetAttribute("type", "http://www.idpf.org/2007/ops") ?? r.GetAttribute("epub:type");
+                                inPages = type != null && type.Contains("page-list");
+                            }
+                            else if (inPages && ln == "a") { inA = true; href = r.GetAttribute("href"); txt.Clear(); }
+                        }
+                        else if ((r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA) && inA)
+                            txt.Append(r.Value);
+                        else if (r.NodeType == XmlNodeType.EndElement)
+                        {
+                            if (inPages && ln == "a") { if (href != null) list.Add((0, txt.ToString().Trim(), href)); inA = false; }
+                            else if (ln == "nav") inPages = false;
                         }
                     }
                 }

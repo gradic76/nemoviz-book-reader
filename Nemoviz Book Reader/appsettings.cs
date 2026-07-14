@@ -31,6 +31,15 @@ namespace Nemoviz_Book_Reader
         /// </summary>
         public bool GoToAutoPlay { get; private set; }
 
+        /// <summary>
+        /// When true (default), a book's title/author come from embedded
+        /// metadata when available — audio: Album = title, Artist = author;
+        /// EPUB: dc:title / dc:creator. When false, the folder/file name is used
+        /// instead. Plain text (docx/rtf/odt/txt) has no usable metadata, so the
+        /// name is always used regardless of this setting.
+        /// </summary>
+        public bool UseMetadata { get; private set; }
+
         // Global text-to-speech defaults for text books (per-book overrides live
         // in Book.ini). Speed is a nominal words-per-minute; pitch is SAPI-style
         // (-10..10); volume 0..100.
@@ -48,6 +57,7 @@ namespace Nemoviz_Book_Reader
             LangPath = ini.Read("App", "LangPath", DefaultLangPath);
             LanguageCode = ini.Read("App", "Language", "en");
             GoToAutoPlay = ini.Read("Player", "GoToAutoPlay", "0") == "1";
+            UseMetadata = ini.Read("Import", "UseMetadata", "1") == "1";
             TtsVoice = ini.Read("TextToSpeech", "Voice", "");
             int.TryParse(ini.Read("TextToSpeech", "Wpm", "175"), out int ttsWpm);
             TtsWpm = ttsWpm;
@@ -91,6 +101,12 @@ namespace Nemoviz_Book_Reader
         {
             LanguageCode = code;
             ini.Write("App", "Language", code);
+        }
+
+        public void SetUseMetadata(bool value)
+        {
+            UseMetadata = value;
+            ini.Write("Import", "UseMetadata", value ? "1" : "0");
         }
 
         public void SetGoToAutoPlay(bool value)

@@ -40,7 +40,12 @@ namespace Nemoviz_Book_Reader
             return books;
         }
 
-        private void ScanFolder(string folderPath, List<BookData> books)
+        // An archive may contain further archives; cap how deep we auto-extract
+        // so a maliciously or accidentally nested set (zip-in-zip-in-zip…) can't
+        // recurse without bound.
+        private const int MaxArchiveDepth = 3;
+
+        private void ScanFolder(string folderPath, List<BookData> books, int archiveDepth = 0)
         {
             foreach (string file in Directory.GetFiles(folderPath))
             {
@@ -50,7 +55,11 @@ namespace Nemoviz_Book_Reader
                 // GetFileParts, so don't treat them as archives of their own.
                 if (IsVolumeContinuation(fn)) continue;
                 if (IsExtractableArchive(fn))
-                    ExtractAndScan(file, folderPath, books);
+                {
+                    // Cap archive-in-archive recursion (see MaxArchiveDepth).
+                    if (archiveDepth >= MaxArchiveDepth) continue;
+                    ExtractAndScan(file, folderPath, books, archiveDepth);
+                }
             }
 
             bool hasMediaFiles = false;
@@ -73,7 +82,7 @@ namespace Nemoviz_Book_Reader
             else
             {
                 foreach (string subFolder in Directory.GetDirectories(folderPath))
-                    ScanFolder(subFolder, books);
+                    ScanFolder(subFolder, books, archiveDepth);
             }
         }
 
@@ -113,7 +122,7 @@ namespace Nemoviz_Book_Reader
         /// at this point, so nothing is left to keep. Corrupt or
         /// password-protected archives are skipped silently so one bad file
         /// doesn't stop the whole scan.</summary>
-        private void ExtractAndScan(string archivePath, string destinationFolder, List<BookData> books)
+        private void ExtractAndScan(string archivePath, string destinationFolder, List<BookData> books, int archiveDepth = 0)
         {
             try
             {
@@ -126,7 +135,7 @@ namespace Nemoviz_Book_Reader
                 // (ArchivePasswordRequiredException) like any other unreadable
                 // one — the whole scan must not stall on a single bad file.
                 ExtractArchive(archivePath, extractPath);
-                ScanFolder(extractPath, books);
+                ScanFolder(extractPath, books, archiveDepth + 1);
                 // The set is fully owned by the library now — remove every
                 // volume, not just the first part.
                 foreach (FileInfo v in GetArchiveVolumes(archivePath))
@@ -242,12 +251,13 @@ namespace Nemoviz_Book_Reader
         /// cancel throws OperationCanceledException. Other failures (corrupt,
         /// unsupported split) propagate. The password is only ever held in
         /// memory for the duration of the call — never stored or logged.</summary>
-        public static void ExtractArchive(string archivePath, string destFolder, Func<string> passwordProvider = null)
+        public static void ExtractArchive(string archivePath, string destFolder,
+            Func<string> passwordProvider = null, Action<int, int> progress = null)
         {
             IReadOnlyList<FileInfo> volumes = GetArchiveVolumes(archivePath);
 
             // Common case: not encrypted — one pass, no password.
-            if (TryExtract(volumes, destFolder, null) == ExtractOutcome.Success)
+            if (TryExtract(volumes, destFolder, null, progress) == ExtractOutcome.Success)
                 return;
 
             if (passwordProvider == null)
@@ -259,15 +269,17 @@ namespace Nemoviz_Book_Reader
                 string password = passwordProvider();
                 if (string.IsNullOrEmpty(password))
                     throw new OperationCanceledException();
-                if (TryExtract(volumes, destFolder, password) == ExtractOutcome.Success)
+                if (TryExtract(volumes, destFolder, password, progress) == ExtractOutcome.Success)
                     return;
             }
         }
 
-        private static ExtractOutcome TryExtract(IReadOnlyList<FileInfo> volumes, string destFolder, string password)
+        private static ExtractOutcome TryExtract(IReadOnlyList<FileInfo> volumes, string destFolder,
+            string password, Action<int, int> progress = null)
         {
             ReaderOptions readerOptions = new ReaderOptions { Password = password };
             ExtractionOptions extractionOptions = new ExtractionOptions { ExtractFullPath = true, Overwrite = true };
+            int n = 0;
             try
             {
                 if (IsRar(volumes[0]))
@@ -283,23 +295,47 @@ namespace Nemoviz_Book_Reader
                         while (reader.MoveToNextEntry())
                         {
                             if (reader.Entry.IsDirectory) continue;
+                            if (IsUnsafeEntryPath(reader.Entry.Key)) continue;
+                            n++;
                             reader.WriteEntryToDirectory(destFolder, extractionOptions);
+                            // RAR streams forward without a known total up front →
+                            // indeterminate progress (total = 0).
+                            if (progress != null && (n <= 3 || n % 5 == 0))
+                                progress(n, 0);
                         }
                     }
                 }
                 else
                 {
-                    // ZIP / 7z: random-access per-entry extraction. (7z does not
-                    // support a streaming reader; its numeric split is reassembled
-                    // at the stream level, so entries never span a volume.)
+                    // ZIP / 7z: extract through the archive's forward reader
+                    // (ExtractAllEntries), NOT per-entry random access. A *solid*
+                    // 7z shares one compression stream across all files, so
+                    // random-access WriteToDirectory re-decompresses from the
+                    // start of the solid block for every entry — O(N²), pegging a
+                    // core and taking many minutes on a large audiobook. The
+                    // forward reader decompresses the stream once → O(N). (7z has
+                    // no standalone stream reader, but ExtractAllEntries on an
+                    // already-opened archive reads in solid order and is fine.)
                     using (IArchive archive = volumes.Count == 1
                         ? ArchiveFactory.OpenArchive(volumes[0], readerOptions)
                         : ArchiveFactory.OpenArchive(volumes, readerOptions))
                     {
-                        foreach (IArchiveEntry entry in archive.Entries)
+                        // File count for a determinate progress bar (header-only,
+                        // no decompression — cheap even on a big solid archive).
+                        int total = 0;
+                        try { foreach (IArchiveEntry e in archive.Entries) if (!e.IsDirectory) total++; } catch { total = 0; }
+                        int step = total > 100 ? total / 100 : 1;
+                        using (IReader reader = archive.ExtractAllEntries())
                         {
-                            if (entry.IsDirectory) continue;
-                            entry.WriteToDirectory(destFolder, extractionOptions);
+                            while (reader.MoveToNextEntry())
+                            {
+                                if (reader.Entry.IsDirectory) continue;
+                                if (IsUnsafeEntryPath(reader.Entry.Key)) continue;
+                                n++;
+                                reader.WriteEntryToDirectory(destFolder, extractionOptions);
+                                if (progress != null && (n <= 3 || n == total || n % step == 0))
+                                    progress(n, total);
+                            }
                         }
                     }
                 }
@@ -328,6 +364,23 @@ namespace Nemoviz_Book_Reader
                     return true;
             }
             catch { }
+            return false;
+        }
+
+        /// <summary>Rejects an archive entry whose name would escape the target
+        /// folder — an absolute/rooted path, or one that climbs out with "..".
+        /// Guards against a maliciously or carelessly packed archive writing
+        /// files anywhere on disk (path traversal / "zip slip").</summary>
+        private static bool IsUnsafeEntryPath(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return false;
+            string k = key.Replace('\\', '/');
+            // Absolute ("/foo") or drive-rooted ("C:/foo", "C:foo").
+            if (k.StartsWith("/")) return true;
+            if (k.Length >= 2 && char.IsLetter(k[0]) && k[1] == ':') return true;
+            // Any ".." segment that could climb above the destination.
+            foreach (string seg in k.Split('/'))
+                if (seg == "..") return true;
             return false;
         }
 
