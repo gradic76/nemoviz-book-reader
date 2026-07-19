@@ -130,6 +130,8 @@
     <Compile Include="inifile.cs" />
     <Compile Include="ISpeechBackend.cs" />
     <Compile Include="Sapi5Backend.cs" />
+    <Compile Include="Sapi5SatelliteBackend.cs" />
+    <Compile Include="CompositeSpeechBackend.cs" />
     <Compile Include="ITextFormatParser.cs" />
     <Compile Include="TextParsing.cs" />
     <Compile Include="PlainTextParser.cs" />
@@ -203,6 +205,12 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- Compile the 32-bit SAPI5 host (TtsHost32.cs) into the output as a separate
+       x86 exe. It is deliberately NOT in the main (x64) Compile set; the x64 app
+       launches it out-of-process to reach 32-bit-only voices (eSpeak/RHVoice). -->
+  <Target Name="BuildTtsHost32" AfterTargets="Build">
+    <Exec Command="&quot;$(MSBuildToolsPath)\Roslyn\csc.exe&quot; /nologo /platform:x86 /target:exe /out:&quot;$(OutDir)TtsHost32.exe&quot; /r:&quot;$(FrameworkPathOverride)\System.Speech.dll&quot; &quot;$(ProjectDir)TtsHost32.cs&quot;" />
+  </Target>
   <Import Project="..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

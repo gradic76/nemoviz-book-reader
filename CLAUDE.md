@@ -758,6 +758,37 @@ M4B's cover art — a real MP4 video track — never pops a video window.
 
 ---
 
+## 8g. TTS backends — 32-bit satellite (Phase 1)
+
+Text-book speech is behind `ISpeechBackend` (sentence chunks; `TtsReader` owns
+position). Now multi-backend, presented as one via `CompositeSpeechBackend`:
+- `Sapi5Backend` — in-process x64 SAPI5 (only 64-bit voices).
+- `Sapi5SatelliteBackend` — launches a **32-bit** host `TtsHost32.exe` so the
+  x64 app can use 32-bit-only voices (eSpeak, RHVoice). The host plays audio
+  itself and speaks a stdio line protocol (see `TtsHost32.cs`); the backend
+  caches its voice list, forwards commands, raises `Completed` on `DONE`.
+- `CompositeSpeechBackend` merges voices (64-bit wins duplicate names), routes
+  at the selected voice's owning backend, carries rate/volume/pitch across a
+  backend switch. `TtsReader()` uses it; SettingsForm's Voice combo + Test do too.
+
+**Packaging:** `TtsHost32.cs` is NOT in the main x64 Compile set; a post-build
+MSBuild `Exec` target compiles it x86 with `$(MSBuildToolsPath)\Roslyn\csc.exe`
+(note: `$(CscToolPath)` was empty here) into the output dir.
+
+**eSpeak gotcha:** eSpeak's SAPI driver sets `SpeakCompleted.Cancelled = true`
+even on a natural end → the reader stopped after each sentence. The host ignores
+`e.Cancelled`; an utterance is cancelled only if we sent CANCEL or a newer Speak
+superseded it (`e.Prompt != currentPrompt`).
+
+**Temporary / still to do:** `BtnSettings_Click` pushes a changed Settings voice
+onto the live book (no restart) — interim; final design is Settings voice = the
+*default* only, real per-book voice in a (not-yet-built) per-book text Properties.
+Phase 2 = a Settings "Speech Engine" combo grouping voices by vendor+arch, then
+Voice filtered to the group. OneCore/WinRT backend (e.g. "Microsoft Matej") is a
+separate later backend. See memory `project-tts-backends`.
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one

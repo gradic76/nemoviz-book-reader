@@ -55,7 +55,7 @@ namespace Nemoviz_Book_Reader
             get { return (index >= 0 && index < sentenceText.Count) ? sentenceText[index] : ""; }
         }
 
-        public TtsReader() : this(new Sapi5Backend()) { }
+        public TtsReader() : this(new CompositeSpeechBackend()) { }
 
         public TtsReader(ISpeechBackend backend)
         {

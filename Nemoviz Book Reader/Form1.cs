@@ -2623,6 +2623,17 @@ namespace Nemoviz_Book_Reader
             {
                 dlg.ShowDialog(this);
             }
+            // TEMPORARY behaviour: push a changed default voice onto the live text
+            // reader so it takes effect without a restart. This is interim — the
+            // Settings voice is meant to be only the DEFAULT for new books, and the
+            // actual per-book voice will live in each book's Properties (deferred:
+            // per-book text Properties). Once that exists, the Settings change
+            // should stop overriding an already-loaded book's own voice.
+            if (currentBook != null && currentBook.IsTextBook && tts != null
+                && !string.Equals(tts.CurrentVoice, appSettings.TtsVoice, StringComparison.OrdinalIgnoreCase))
+            {
+                ApplyTtsSettings();
+            }
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)

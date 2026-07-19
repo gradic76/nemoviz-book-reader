@@ -298,12 +298,13 @@ namespace Nemoviz_Book_Reader
             cmbVoice.Size = new Size(240, 24);
             cmbVoice.AccessibleName = Localization.T("Settings.TextBooks.Voice");
             cmbVoice.TabIndex = 2;
-            // List every installed SAPI5 voice; select the saved default.
+            // List every voice from every backend — in-process 64-bit SAPI5 plus
+            // the 32-bit satellite (eSpeak / RHVoice) — merged, 64-bit winning
+            // duplicates. Select the saved default.
             try
             {
-                using (SpeechSynthesizer probe = new SpeechSynthesizer())
-                    foreach (InstalledVoice v in probe.GetInstalledVoices())
-                        if (v.Enabled) cmbVoice.Items.Add(v.VoiceInfo.Name);
+                foreach (string name in EnsureSpeech().GetVoices())
+                    cmbVoice.Items.Add(name);
             }
             catch { }
             if (cmbVoice.Items.Count > 0)
@@ -388,26 +389,32 @@ namespace Nemoviz_Book_Reader
         {
             try
             {
-                SpeechSynthesizer s = new SpeechSynthesizer();
-                s.SpeakCompleted += (snd, ev) => s.Dispose();
+                CompositeSpeechBackend sp = EnsureSpeech();
                 if (cmbVoice != null && cmbVoice.SelectedItem != null)
-                    s.SelectVoice(cmbVoice.SelectedItem.ToString());
-                s.Rate = TtsReader.WpmToRate(trkRate.Value);
-                s.Volume = trkVolume.Value;
-                int pitch = trkPitch.Value * 5; // -10..10 → -50..50 %
-                string sample = Localization.T("Settings.TextBooks.TestSample");
-                if (pitch == 0)
-                    s.SpeakAsync(sample);
-                else
-                {
-                    string lang = "en-US";
-                    try { lang = s.Voice.Culture.Name; } catch { }
-                    string esc = System.Security.SecurityElement.Escape(sample) ?? "";
-                    s.SpeakSsmlAsync("<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"" +
-                        lang + "\"><prosody pitch=\"" + (pitch >= 0 ? "+" : "") + pitch + "%\">" + esc + "</prosody></speak>");
-                }
+                    sp.SelectVoice(cmbVoice.SelectedItem.ToString());
+                sp.SetRate(TtsReader.WpmToRate(trkRate.Value));
+                sp.SetVolume(trkVolume.Value);
+                sp.SetPitch(trkPitch.Value * 5); // -10..10 → -50..50 %
+                sp.Cancel();                      // stop any still-playing sample
+                sp.Speak(Localization.T("Settings.TextBooks.TestSample"));
             }
             catch { }
+        }
+
+        // Lazily-created merged speech backend (64-bit + 32-bit satellite), used
+        // for the voice list and the Test button; disposed with the dialog.
+        private CompositeSpeechBackend speech;
+        private CompositeSpeechBackend EnsureSpeech()
+        {
+            if (speech == null) speech = new CompositeSpeechBackend();
+            return speech;
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            try { speech?.Dispose(); } catch { }
+            speech = null;
         }
 
         private static int Clamp(int v, int lo, int hi)
