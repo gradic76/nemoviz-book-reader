@@ -55,10 +55,16 @@ namespace Nemoviz_Book_Reader
         // (so it can be deleted in the same Library session).
         private readonly Action unloadActiveBook;
 
-        // Shelf categories
+        // Shelf categories (also the status codes; NowReading is a 4th status
+        // layered on top of Reading for the last-opened book).
         private const int CatReading = 0;
         private const int CatUnread = 1;
         private const int CatRead = 2;
+        private const int StatusNowReading = 3;
+
+        // Per-item status badge icons (colored dots) + bold font for Now reading.
+        private ImageList statusIcons;
+        private Font boldFont;
 
         // Filter combo indices (must match the order items are added)
         private const int FilterAll = 0;
@@ -90,6 +96,14 @@ namespace Nemoviz_Book_Reader
             // Default tab order would land on the search box first;
             // the shelf is the natural starting point.
             listBooks.Focus();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            // Manually-created GDI resources (not owned by any control).
+            if (boldFont != null) { boldFont.Dispose(); boldFont = null; }
+            if (statusIcons != null) { statusIcons.Dispose(); statusIcons = null; }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -288,8 +302,21 @@ namespace Nemoviz_Book_Reader
             listBooks.FullRowSelect = true;
             listBooks.MultiSelect = false;
             listBooks.HideSelection = false;
-            listBooks.ShowGroups = true;
+            listBooks.ShowGroups = false;
             listBooks.Font = new Font("Segoe UI", 11);
+            // Status badges: a small colored dot per item (red = unread,
+            // yellow = reading, green = read, blue = now reading). Purely
+            // visual — the same status is also spoken as a text flag on the
+            // item name, so screen-reader users lose nothing.
+            statusIcons = new ImageList();
+            statusIcons.ImageSize = new Size(16, 16);
+            statusIcons.ColorDepth = ColorDepth.Depth32Bit;
+            statusIcons.Images.Add("reading", MakeStatusDot(Color.FromArgb(222, 170, 40)));    // yellow
+            statusIcons.Images.Add("unread", MakeStatusDot(Color.FromArgb(210, 66, 66)));      // red
+            statusIcons.Images.Add("read", MakeStatusDot(Color.FromArgb(70, 160, 74)));        // green
+            statusIcons.Images.Add("nowreading", MakeStatusDot(Color.FromArgb(58, 120, 214))); // blue
+            listBooks.SmallImageList = statusIcons;
+            boldFont = new Font(listBooks.Font, FontStyle.Bold);
             listBooks.AccessibleName = Localization.T("Library.List.Accessible");
             listBooks.Columns.Add("", 320);
             // Keep the single column matched to the shelf width (the splitter
@@ -446,10 +473,11 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>
-        /// Rebuilds the shelf from `books`, applying search text, the status
-        /// filter, group headers (Now Reading / Reading / Unread / Read) and
-        /// the current sort. Tries to keep `keepSelected` selected; otherwise
-        /// selects the first book.
+        /// Rebuilds the shelf from `books` as one flat, sorted list (no group
+        /// headers). Each item carries its status as a spoken text flag plus a
+        /// colored badge icon; the Now-reading book is bold and pinned to the
+        /// top. Search + the status/Favorites filter narrow the list. Tries to
+        /// keep `keepSelected` selected; otherwise selects the first book.
         /// </summary>
         private void RebuildShelf(BookData keepSelected)
         {
@@ -457,91 +485,44 @@ namespace Nemoviz_Book_Reader
             int filter = cbFilter.SelectedIndex;
             if (filter < 0) filter = FilterAll;
 
-            var reading = new List<BookData>();
-            var unread = new List<BookData>();
-            var read = new List<BookData>();
-
+            var list = new List<BookData>();
             foreach (BookData b in books)
             {
                 if (query.Length > 0 && !NormalizeForSearch(b.Title).Contains(query))
                     continue;
-
-                switch (GetCategory(b))
+                int cat = GetCategory(b);
+                bool include;
+                switch (filter)
                 {
-                    case CatReading: reading.Add(b); break;
-                    case CatUnread: unread.Add(b); break;
-                    default: read.Add(b); break;
+                    case FilterReading: include = cat == CatReading; break;
+                    case FilterUnread: include = cat == CatUnread; break;
+                    case FilterRead: include = cat == CatRead; break;
+                    case FilterFavorites: include = b.Favorite; break;
+                    default: include = true; break; // All
                 }
+                if (include) list.Add(b);
             }
 
-            Comparison<BookData> cmp = GetComparer();
-            reading.Sort(cmp);
-            unread.Sort(cmp);
-            read.Sort(cmp);
-
-            // The last-listened book gets its own "Now Reading" group at the
-            // top — but only while it's actually being read. Once finished
-            // (or rewound to zero), it sits in its natural group.
-            BookData nowReading = null;
-            string lastPath = appSettings.LastOpenedBookPath;
-            if (!string.IsNullOrEmpty(lastPath))
+            // Order follows the sort menu; the Now-reading book is then pinned
+            // to the very top (it can appear under All / Reading / Favorites).
+            list.Sort(GetComparer());
+            for (int i = 0; i < list.Count; i++)
             {
-                for (int i = 0; i < reading.Count; i++)
+                if (IsNowReading(list[i]))
                 {
-                    if (PathsEqual(reading[i].FolderPath, lastPath))
-                    {
-                        nowReading = reading[i];
-                        reading.RemoveAt(i);
-                        break;
-                    }
+                    BookData nr = list[i];
+                    list.RemoveAt(i);
+                    list.Insert(0, nr);
+                    break;
                 }
             }
-
-            bool showAll = filter == FilterAll;
 
             listBooks.BeginUpdate();
             listBooks.Items.Clear();
             listBooks.Groups.Clear();
-            listBooks.ShowGroups = showAll;
-
-            if (showAll)
-            {
-                if (nowReading != null)
-                    AddGroup(new List<BookData> { nowReading }, Localization.T("Shelf.Group.NowReading"));
-                AddGroup(reading, Localization.T("Shelf.Group.Reading"));
-                AddGroup(unread, Localization.T("Shelf.Group.Unread"));
-                AddGroup(read, Localization.T("Shelf.Group.Read"));
-            }
-            else if (filter == FilterReading)
-            {
-                // The now-reading book belongs to this category — pinned first.
-                if (nowReading != null)
-                    reading.Insert(0, nowReading);
-                AddGroup(reading, null);
-            }
-            else if (filter == FilterUnread)
-            {
-                AddGroup(unread, null);
-            }
-            else if (filter == FilterRead)
-            {
-                AddGroup(read, null);
-            }
-            else
-            {
-                // Favorites — every favorite book, regardless of its section.
-                var favorites = new List<BookData>();
-                foreach (BookData b in books)
-                {
-                    if (!b.Favorite) continue;
-                    if (query.Length > 0 && !NormalizeForSearch(b.Title).Contains(query))
-                        continue;
-                    favorites.Add(b);
-                }
-                favorites.Sort(cmp);
-                AddGroup(favorites, null);
-            }
-
+            listBooks.ShowGroups = false;
+            foreach (BookData b in list)
+                listBooks.Items.Add(BuildShelfItem(b));
             listBooks.EndUpdate();
 
             ListViewItem toSelect = null;
@@ -565,34 +546,76 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        private void AddGroup(List<BookData> group, string headerText)
+        /// <summary>Builds one shelf row: "Author — Title" + spoken status flag
+        /// (+ ", Favorite"), a colored status badge, and a bold font for the
+        /// Now-reading book.</summary>
+        private ListViewItem BuildShelfItem(BookData b)
         {
-            if (group.Count == 0) return;
+            string name = string.IsNullOrWhiteSpace(b.Author) ? b.Title : b.Author + " — " + b.Title;
+            int status = GetShelfStatus(b);
+            // Status first so a screen reader announces it before the title;
+            // Favorite last, after the rest.
+            string text = Localization.T(StatusTextKey(status)) + ", " + name;
+            if (b.Favorite)
+                text += ", " + Localization.T("Shelf.Favorite");
+            ListViewItem item = new ListViewItem(text);
+            item.Tag = b;
+            item.ImageKey = StatusIconKey(status);
+            if (status == StatusNowReading)
+                item.Font = boldFont;
+            return item;
+        }
 
-            ListViewGroup lvg = null;
-            if (headerText != null)
-            {
-                lvg = new ListViewGroup(headerText);
-                listBooks.Groups.Add(lvg);
-            }
+        // The last-opened book counts as "Now reading" only while it's still
+        // in progress (Reading category) — a finished or rewound book isn't.
+        private bool IsNowReading(BookData b)
+        {
+            string last = appSettings.LastOpenedBookPath;
+            return !string.IsNullOrEmpty(last)
+                && PathsEqual(b.FolderPath, last)
+                && GetCategory(b) == CatReading;
+        }
 
-            foreach (BookData b in group)
+        private int GetShelfStatus(BookData b)
+        {
+            return IsNowReading(b) ? StatusNowReading : GetCategory(b);
+        }
+
+        private static string StatusTextKey(int status)
+        {
+            switch (status)
             {
-                // Show "Author — Title" when the book carries a separate author
-                // (produced formats like DAISY); plain audiobooks show the
-                // single merged Title.
-                string shelfText = string.IsNullOrWhiteSpace(b.Author)
-                    ? b.Title : b.Author + " — " + b.Title;
-                // Favorites are spoken with "Favorite" appended after the name;
-                // there is no separate Favorites shelf section.
-                if (b.Favorite)
-                    shelfText += ", " + Localization.T("Shelf.Favorite");
-                ListViewItem item = new ListViewItem(shelfText);
-                item.Tag = b;
-                if (lvg != null)
-                    item.Group = lvg;
-                listBooks.Items.Add(item);
+                case StatusNowReading: return "Shelf.Status.NowReading";
+                case CatUnread: return "Shelf.Status.Unread";
+                case CatRead: return "Shelf.Status.Read";
+                default: return "Shelf.Status.Reading";
             }
+        }
+
+        private static string StatusIconKey(int status)
+        {
+            switch (status)
+            {
+                case StatusNowReading: return "nowreading";
+                case CatUnread: return "unread";
+                case CatRead: return "read";
+                default: return "reading";
+            }
+        }
+
+        // A 16×16 transparent bitmap with a filled colored circle — the status
+        // badge shown at the left of each shelf row.
+        private static Bitmap MakeStatusDot(Color color)
+        {
+            Bitmap bmp = new Bitmap(16, 16);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.Clear(Color.Transparent);
+                using (Brush br = new SolidBrush(color))
+                    g.FillEllipse(br, 3, 3, 10, 10);
+            }
+            return bmp;
         }
 
         /// <summary>Returns the selected book, or null if nothing is selected.</summary>

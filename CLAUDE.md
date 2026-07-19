@@ -731,11 +731,20 @@ install eSpeak NG (64-bit) or add the satellite backend.
 
 ## 9. Library window
 
-`LibraryForm.cs`. Book shelf migrated from ListBox to **ListView with native
-groups** (four groups: **Now Reading / Reading / Unread / Read**, empty groups
-suppressed) — native groups solved the screen-reader item-count problem that
-separators caused. Author-merge: no separate Author field; a single Name/Title
-taken from the folder name. Detailed audio format shown in book details via
+`LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one
+flat sorted list — no group headers** (the earlier Now Reading / Reading /
+Unread / Read native groups were removed by request). Each row instead carries
+its status two ways: a **spoken text flag** appended to the item name (", Now
+reading" / ", Reading" / ", Read" / ", Unread", then ", Favorite") so screen
+readers announce it, and a **colored badge icon** (`SmallImageList` dots —
+red = unread, yellow = reading, green = read, blue = now reading; drawn at
+runtime by `MakeStatusDot`). The **Now-reading** book (last-opened while still
+in progress) is **bold** and pinned to the top; otherwise order follows the
+sort menu. The status/**Favorites** filter combo (All / Reading / Unread /
+Read / Favorites) replaces the old group navigation — "sections on demand".
+`BuildShelfItem` builds each row; `GetShelfStatus`/`IsNowReading` classify it.
+Author-merge: DAISY/text carry a separate Author (shown "Author — Title");
+plain audio shows a single Title from the folder name. Detailed audio format shown in book details via
 TagLib# (e.g. "MP3 Audio, 44.1 kHz, 128 kbps, stereo"), lazy-loaded per book.
 Search + filter row with **diacritic-insensitive** matching (č↔c↔ć via Unicode
 decomposition, đ special-cased), Ctrl+F. Sort options carry a checkmark plus
