@@ -1276,6 +1276,15 @@ namespace Nemoviz_Book_Reader
                     // ranges, or empty), so Album is the clean book title.
                     if (appSettings.UseMetadata)
                         ApplyAudioMetadata(imported, destFile);
+                    // M4B: parse the embedded chapter marks (title + time) so the
+                    // player can navigate by chapter. Falls back to plain single-
+                    // file audio when the file has no chapters.
+                    if (M4bParser.IsM4bFile(destFile))
+                    {
+                        M4bBook m4b = M4bParser.TryParse(destFile);
+                        if (m4b != null && m4b.HasChapters)
+                            imported.SetM4bChapters(m4b.Chapters);
+                    }
                 }
                 else if (isTextImport)
                 {

@@ -137,7 +137,7 @@ namespace Nemoviz_Book_Reader
         // per row) so the selected step is known without fixed indices.
         // New kinds are appended (never reordered) so the persisted ordinal in
         // Book.ini stays valid across versions.
-        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark, Sentence, Paragraph, StandardPage, Min10, Min15, Min30 }
+        private enum SeekStepKind { Sec15, Sec30, Min1, Min5, Part, Heading, Page, Bookmark, Sentence, Paragraph, StandardPage, Min10, Min15, Min30, Chapter }
         private struct SeekStep
         {
             public SeekStepKind Kind;
@@ -478,6 +478,7 @@ namespace Nemoviz_Book_Reader
                 case SeekStepKind.Part: PartForward(); break;
                 case SeekStepKind.Heading: StructForward(HeadingPositions(step.Level)); break;
                 case SeekStepKind.Page: StructForward(PagePositions()); break;
+                case SeekStepKind.Chapter: StructForward(M4bChapterPositions()); break;
                 case SeekStepKind.Bookmark: BookmarkForward(); break;
                 default: SeekRelative(+GetSeekStepSeconds()); break;
             }
@@ -492,6 +493,7 @@ namespace Nemoviz_Book_Reader
                 case SeekStepKind.Part: PartBack(); break;
                 case SeekStepKind.Heading: StructBack(HeadingPositions(step.Level)); break;
                 case SeekStepKind.Page: StructBack(PagePositions()); break;
+                case SeekStepKind.Chapter: StructBack(M4bChapterPositions()); break;
                 case SeekStepKind.Bookmark: BookmarkBack(); break;
                 default: SeekRelative(-GetSeekStepSeconds()); break;
             }
@@ -682,6 +684,12 @@ namespace Nemoviz_Book_Reader
                             Localization.T("Seek.Item.HeadingLevel", level));
                     if (currentBook.DaisyPages.Count > 0)
                         AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
+                    AddTimeSteps15DownWithBookmark();
+                    break;
+
+                case PlayerType.M4b:
+                    // Chapter, then 15 min → 15 s, then Bookmark (dynamic).
+                    AddSeekStep(new SeekStep(SeekStepKind.Chapter), Localization.T("Seek.Item.Chapter"));
                     AddTimeSteps15DownWithBookmark();
                     break;
 
@@ -1856,7 +1864,7 @@ namespace Nemoviz_Book_Reader
         // Player book type — drives title bar, info box, seek steps and Go To.
         // M4B currently falls through to the audio branches (fallback = single-
         // file) until a dedicated chapter parser exists.
-        private enum PlayerType { SingleAudio, MultiAudio, Daisy, FlatText, StructuredText }
+        private enum PlayerType { SingleAudio, MultiAudio, Daisy, M4b, FlatText, StructuredText }
 
         private PlayerType GetPlayerType()
         {
@@ -1865,6 +1873,10 @@ namespace Nemoviz_Book_Reader
                 return currentBook.TextHeadings.Count > 0 ? PlayerType.StructuredText : PlayerType.FlatText;
             if (currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
                 return PlayerType.Daisy;
+            // M4B with real chapter marks (a single file navigated by chapter);
+            // one with none falls through to single-file audio.
+            if (currentBook.IsM4b && currentBook.M4bChapters.Count > 0)
+                return PlayerType.M4b;
             // DAISY with no headings, or plain audio → single vs multi by parts.
             return currentBook.Chapters.Count > 1 ? PlayerType.MultiAudio : PlayerType.SingleAudio;
         }
@@ -1908,6 +1920,27 @@ namespace Nemoviz_Book_Reader
             double p = 100.0 * pos / total;
             if (p < 0) p = 0; else if (p > 100) p = 100;
             return p.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        // Index of the M4B chapter covering the given position (last chapter at
+        // or before it). -1 when the book has no M4B chapters.
+        private int M4bChapterIndexAt(double virtualPos)
+        {
+            if (currentBook == null || currentBook.M4bChapters.Count == 0) return -1;
+            var cs = currentBook.M4bChapters;
+            int idx = 0;
+            for (int i = cs.Count - 1; i >= 0; i--)
+                if (cs[i].Position <= virtualPos + 0.05) { idx = i; break; }
+            return idx;
+        }
+
+        // Absolute virtual-timeline positions of the M4B chapters, in order.
+        private System.Collections.Generic.List<double> M4bChapterPositions()
+        {
+            var list = new System.Collections.Generic.List<double>();
+            if (currentBook != null)
+                foreach (var c in currentBook.M4bChapters) list.Add(c.Position);
+            return list;
         }
 
         // DAISY page label covering the given position (last page at or before
@@ -1999,10 +2032,21 @@ namespace Nemoviz_Book_Reader
                 sb.Append(Localization.T("Player.Info.ElapsedLabel")).Append(' ').Append(FormatTime(virtualPos)).Append(nl);
                 sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -").Append(FormatTime(virtualRemaining));
             }
+            else if (type == PlayerType.M4b)
+            {
+                // TITLE / AUTHOR / Chapter / Bookmarks / Apple Book M4B / times.
+                int ci = M4bChapterIndexAt(virtualPos);
+                string chapter = ci >= 0 ? currentBook.M4bChapters[ci].Title : dash;
+                sb.Append(Localization.T("Player.Info.ChapterLabel")).Append(' ').Append(chapter).Append(nl);
+                sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl);
+                sb.Append(PlayerFormatLabel()).Append(nl).Append(nl);
+                sb.Append(Localization.T("Player.Info.ElapsedLabel")).Append(' ').Append(FormatTime(virtualPos)).Append(nl);
+                sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -").Append(FormatTime(virtualRemaining));
+            }
             else
             {
-                // Single-file audio (and M4B fallback): TITLE / AUTHOR / format /
-                // Bookmarks / elapsed / remaining.
+                // Single-file audio (and M4B-without-chapters fallback): TITLE /
+                // AUTHOR / format / Bookmarks / elapsed / remaining.
                 sb.Append(PlayerFormatLabel()).Append(nl);
                 sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl).Append(nl);
                 sb.Append(Localization.T("Player.Info.ElapsedLabel")).Append(' ').Append(FormatTime(virtualPos)).Append(nl);
@@ -2214,9 +2258,17 @@ namespace Nemoviz_Book_Reader
                         part = (currentPlaylistIndex + 1) + "/" + currentBook.Chapters.Count;
                     body = title + sep + part + sep + remaining;
                 }
+                else if (type == PlayerType.M4b)
+                {
+                    // M4B: Title / Chapter.
+                    int ci = M4bChapterIndexAt(virtualPos);
+                    string chap = ci >= 0 ? currentBook.M4bChapters[ci].Title : Localization.T("Common.Dash");
+                    body = title + sep + chap;
+                }
                 else
                 {
-                    // Single-file audio (and M4B fallback): Title / X.Y% / -remaining.
+                    // Single-file audio (and M4B-without-chapters fallback):
+                    // Title / X.Y% / -remaining.
                     body = title + sep + AudioPercentString(virtualPos, totalDur) + "%" + sep + remaining;
                 }
             }
@@ -2648,6 +2700,7 @@ namespace Nemoviz_Book_Reader
             double[] targets;
             int preselect;
             bool daisyNav = currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0;
+            bool m4bNav = GetPlayerType() == PlayerType.M4b;
 
             if (daisyNav)
             {
@@ -2663,6 +2716,17 @@ namespace Nemoviz_Book_Reader
                 preselect = 0;
                 for (int i = hs.Count - 1; i >= 0; i--)
                     if (hs[i].Position <= pos + 0.05) { preselect = i; break; }
+            }
+            else if (m4bNav)
+            {
+                var cs = currentBook.M4bChapters;
+                names = new string[cs.Count];
+                targets = new double[cs.Count];
+                for (int i = 0; i < cs.Count; i++) { names[i] = cs[i].Title; targets[i] = cs[i].Position; }
+                double pos = GetVirtualPosition();
+                preselect = 0;
+                for (int i = cs.Count - 1; i >= 0; i--)
+                    if (cs[i].Position <= pos + 0.05) { preselect = i; break; }
             }
             else
             {
@@ -3231,7 +3295,13 @@ namespace Nemoviz_Book_Reader
                 mpvHandle = mpv_create();
                 if (mpvHandle == IntPtr.Zero) return;
                 mpv_initialize(mpvHandle);
+                // Audio-only player: never open a video window. "audio-display"
+                // suppresses attached-picture cover art (MP3/FLAC), but an M4B/MP4
+                // cover is a real video track, so also disable video-track
+                // selection outright — otherwise mpv pops a window showing the
+                // cover image.
                 mpv_set_property_string(mpvHandle, "audio-display", "no");
+                mpv_set_property_string(mpvHandle, "vid", "no");
             }
             catch (Exception ex)
             {

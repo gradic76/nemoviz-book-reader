@@ -729,6 +729,35 @@ install eSpeak NG (64-bit) or add the satellite backend.
 
 ---
 
+## 8f. M4B chapters (Apple audiobooks)
+
+`M4bParser.cs`. An M4B is a single MP4 audio file with embedded chapter marks;
+it overlays on the single-file virtual timeline like DAISY does on multi-file
+(chapters are time positions within the one file). No dependency — TagLib#
+doesn't expose MP4 chapters reliably, so the parser walks the box (atom) tree
+itself: `ReadMoov` stream-scans the top level for `moov` **without loading the
+huge `mdat`**, then `Walk` builds a flat box list. Two chapter sources, in order:
+1. **Nero `chpl`** (moov/udta/chpl) — titles + 100 ns start times, all inline;
+   record base offset found by trying candidates (9 in every real book).
+2. **QuickTime text chapter track** — the audio track's `tref/chap` → chapter
+   track **id** (followed by id, *not* handler type — a dangling `chap`→id 0 is
+   why one sample book has no chapters), whose `stts` gives start times and
+   whose samples (`stsc`/`stsz`/`stco`, read from the file) give titles.
+Metadata: `©nam`/`©ART`, falling back to `aART` (album artist) for the author.
+Verified against 13 real books (see memory [[project-m4b-analysis]]): chapters
+in 12/13 via chpl (identical counts to the QT track).
+
+Wired in: import parses chapters (`M4bParser.TryParse` in `ImportFile`) into
+`BookData.IsM4b` + `M4bChapters` (persisted in Book.ini `[M4bNav]` as
+`C<i>=<seconds>|<title>`). `GetPlayerType` returns `M4b` when chapters exist
+(else single-file audio). Player: title bar `Title — Chapter`; info box adds a
+Chapter line + "Apple Book M4B" format; seek step **Chapter** (via
+`StructForward`/`StructBack` over `M4bChapterPositions`); Go To lists chapters.
+**mpv is set `vid=no` at init** (plus the existing `audio-display=no`) so an
+M4B's cover art — a real MP4 video track — never pops a video window.
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one

@@ -53,6 +53,13 @@ namespace Nemoviz_Book_Reader
         public List<(int Level, string Label, double Position)> DaisyHeadings { get; private set; }
         public List<(int Level, string Label, double Position)> DaisyPages { get; private set; }
 
+        // M4B (Apple audiobook) chapter overlay — a single audio file with
+        // time-stamped chapter marks (title + position in seconds). Parsed once
+        // at import and persisted in Book.ini's [M4bNav]. IsM4b is true only
+        // when the book actually carries chapters.
+        public bool IsM4b { get; private set; }
+        public List<(string Title, double Position)> M4bChapters { get; private set; }
+
         // Per-book sound-processing settings (Properties dialog). Inert while
         // Sound.Enabled is false. Persisted in Book.ini's [Sound] section.
         public SoundSettings Sound { get; private set; }
@@ -84,6 +91,7 @@ namespace Nemoviz_Book_Reader
             Bookmarks = new List<double>();
             DaisyHeadings = new List<(int, string, double)>();
             DaisyPages = new List<(int, string, double)>();
+            M4bChapters = new List<(string, double)>();
             TextPages = new List<(string, int)>();
             TextHeadings = new List<(int, string, int)>();
             Sound = new SoundSettings();
@@ -117,6 +125,7 @@ namespace Nemoviz_Book_Reader
             LoadChapters();
             LoadBookmarks();
             BuildDaisyNav();
+            LoadM4bNav();
             Sound.Load(ini);
             DetectTextBook();
             int.TryParse(ini.Read("Progress", "TextPosition", "0"), out int tp);
@@ -161,6 +170,31 @@ namespace Nemoviz_Book_Reader
         public void SetTextPages(List<(string Label, int Offset)> pages)
         {
             TextPages = pages ?? new List<(string, int)>();
+        }
+
+        // [M4bNav]: C<i>=<position seconds>|<title>. Positions are absolute
+        // virtual-timeline seconds (a single-file book, so = time in the file).
+        private void LoadM4bNav()
+        {
+            M4bChapters.Clear();
+            int.TryParse(ini.Read("M4bNav", "Count", "0"), out int n);
+            for (int i = 0; i < n; i++)
+            {
+                string[] p = ini.Read("M4bNav", "C" + i, "").Split(new[] { '|' }, 2);
+                if (p.Length == 2 && double.TryParse(p[0],
+                        System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out double pos))
+                    M4bChapters.Add((p[1], pos));
+            }
+            IsM4b = M4bChapters.Count > 0;
+        }
+
+        /// <summary>Sets the M4B chapter list (from M4bParser at import) so the
+        /// next Save persists it to [M4bNav].</summary>
+        public void SetM4bChapters(List<(string Title, double Position)> chapters)
+        {
+            M4bChapters = chapters ?? new List<(string, double)>();
+            IsM4b = M4bChapters.Count > 0;
         }
 
         /// <summary>A text book is a folder that has a readable text document
@@ -624,6 +658,11 @@ namespace Nemoviz_Book_Reader
             ini.Write("TextNav", "PageCount", TextPages.Count.ToString());
             for (int i = 0; i < TextPages.Count; i++)
                 ini.Write("TextNav", "P" + i, TextPages[i].Offset + "|" + TextPages[i].Label);
+            ini.Write("M4bNav", "Count", M4bChapters.Count.ToString());
+            for (int i = 0; i < M4bChapters.Count; i++)
+                ini.Write("M4bNav", "C" + i,
+                    M4bChapters[i].Position.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    + "|" + M4bChapters[i].Title);
             Sound.Save(ini);
         }
     }
