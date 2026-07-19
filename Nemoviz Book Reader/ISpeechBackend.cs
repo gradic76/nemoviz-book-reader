@@ -18,6 +18,10 @@ namespace Nemoviz_Book_Reader
         /// <summary>Friendly names of the voices this backend offers.</summary>
         List<string> GetVoices();
 
+        /// <summary>Voices with their vendor string (for grouping by engine).
+        /// Vendor is "" when the voice exposes none.</summary>
+        List<(string Name, string Vendor)> GetVoiceInfos();
+
         /// <summary>Friendly name of the voice currently selected.</summary>
         string CurrentVoiceName { get; }
 

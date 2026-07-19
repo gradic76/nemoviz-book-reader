@@ -19,6 +19,9 @@ namespace Nemoviz_Book_Reader
         private readonly Dictionary<string, ISpeechBackend> owner =
             new Dictionary<string, ISpeechBackend>(StringComparer.OrdinalIgnoreCase);
         private readonly List<string> mergedVoices = new List<string>();
+        // Merged voice metadata for grouping (name + vendor + architecture bits).
+        private readonly List<(string Name, string Vendor, int Arch)> catalog =
+            new List<(string, string, int)>();
 
         private ISpeechBackend active;
         private int rate, volume = 100, pitch;
@@ -29,26 +32,57 @@ namespace Nemoviz_Book_Reader
         {
             // In-process (64-bit) first so it wins duplicate voice names, then the
             // 32-bit satellite for the voices only it can see.
-            Add(new Sapi5Backend());
-            try { Add(new Sapi5SatelliteBackend()); } catch { }
+            Add(new Sapi5Backend(), 64);
+            try { Add(new Sapi5SatelliteBackend(), 32); } catch { }
 
             active = backends.Count > 0 ? backends[0] : null;
         }
 
-        private void Add(ISpeechBackend b)
+        private void Add(ISpeechBackend b, int arch)
         {
             if (b == null) return;
             backends.Add(b);
             b.Completed += cancelled => Completed?.Invoke(cancelled);
-            foreach (string v in b.GetVoices())
+            foreach (var vi in b.GetVoiceInfos())
             {
-                if (string.IsNullOrEmpty(v) || owner.ContainsKey(v)) continue; // 64-bit wins dupes
-                owner[v] = b;
-                mergedVoices.Add(v);
+                if (string.IsNullOrEmpty(vi.Name) || owner.ContainsKey(vi.Name)) continue; // 64-bit wins dupes
+                owner[vi.Name] = b;
+                mergedVoices.Add(vi.Name);
+                catalog.Add((vi.Name, vi.Vendor, arch));
             }
         }
 
         public List<string> GetVoices() { return new List<string>(mergedVoices); }
+
+        public List<(string Name, string Vendor)> GetVoiceInfos()
+        {
+            var list = new List<(string, string)>();
+            foreach (var c in catalog) list.Add((c.Name, c.Vendor));
+            return list;
+        }
+
+        /// <summary>Voices paired with a friendly engine group ("eSpeak (32-bit)",
+        /// "Microsoft (64-bit)", …) for the Settings engine/voice pickers.</summary>
+        public List<(string Name, string Engine)> GetVoiceCatalog()
+        {
+            var list = new List<(string, string)>();
+            foreach (var c in catalog) list.Add((c.Name, EngineLabel(c.Name, c.Vendor, c.Arch)));
+            return list;
+        }
+
+        // Derives a friendly engine group from a voice's vendor (often a URL or
+        // empty) + name + architecture. Falls back to "SAPI 5 (N-bit)".
+        private static string EngineLabel(string name, string vendor, int arch)
+        {
+            string hay = ((vendor ?? "") + " " + (name ?? "")).ToLowerInvariant();
+            string b;
+            if (hay.Contains("espeak")) b = "eSpeak";
+            else if (hay.Contains("microsoft")) b = "Microsoft";
+            else if (hay.Contains("rhvoice")) b = "RHVoice";
+            else if (!string.IsNullOrWhiteSpace(vendor) && !vendor.TrimStart().StartsWith("http")) b = vendor.Trim();
+            else b = "SAPI 5";
+            return b + " (" + arch + "-bit)";
+        }
 
         public string CurrentVoiceName { get { return active != null ? active.CurrentVoiceName : ""; } }
 

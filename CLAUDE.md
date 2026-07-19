@@ -780,12 +780,20 @@ even on a natural end → the reader stopped after each sentence. The host ignor
 `e.Cancelled`; an utterance is cancelled only if we sent CANCEL or a newer Speak
 superseded it (`e.Prompt != currentPrompt`).
 
+**Phase 2 (done):** Settings → Text Books is a two-combo picker — "Speech
+Engine" (vendor + architecture, e.g. "eSpeak (32-bit)", "Microsoft (64-bit)",
+"SAPI 5 (32-bit)") filters the "Voice" combo to that group. Backends now report a
+per-voice **vendor**; `CompositeSpeechBackend.GetVoiceCatalog()` derives the
+engine label (`EngineLabel`: eSpeak from its URL vendor, Microsoft, else "SAPI 5").
+Only the voice is persisted (`TtsVoice`); the engine is derived from it on open.
+Fine-tuning left: RHVoice voices (Karmela/Marija) expose no vendor/metadata so
+they land under "SAPI 5 (32-bit)" rather than "RHVoice".
+
 **Temporary / still to do:** `BtnSettings_Click` pushes a changed Settings voice
 onto the live book (no restart) — interim; final design is Settings voice = the
 *default* only, real per-book voice in a (not-yet-built) per-book text Properties.
-Phase 2 = a Settings "Speech Engine" combo grouping voices by vendor+arch, then
-Voice filtered to the group. OneCore/WinRT backend (e.g. "Microsoft Matej") is a
-separate later backend. See memory `project-tts-backends`.
+OneCore/WinRT backend (e.g. "Microsoft Matej") is a separate later backend. See
+memory `project-tts-backends`.
 
 ---
 

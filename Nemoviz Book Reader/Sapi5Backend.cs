@@ -36,6 +36,24 @@ namespace Nemoviz_Book_Reader
             return list;
         }
 
+        public List<(string Name, string Vendor)> GetVoiceInfos()
+        {
+            var list = new List<(string, string)>();
+            try
+            {
+                foreach (InstalledVoice v in synth.GetInstalledVoices())
+                {
+                    if (!v.Enabled) continue;
+                    string vendor = "";
+                    try { string s; if (v.VoiceInfo.AdditionalInfo != null && v.VoiceInfo.AdditionalInfo.TryGetValue("Vendor", out s)) vendor = s ?? ""; }
+                    catch { }
+                    list.Add((v.VoiceInfo.Name, vendor));
+                }
+            }
+            catch { }
+            return list;
+        }
+
         public void SelectVoice(string name)
         {
             if (string.IsNullOrEmpty(name)) return;

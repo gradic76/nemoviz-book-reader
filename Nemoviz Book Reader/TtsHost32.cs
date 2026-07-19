@@ -45,7 +45,7 @@ class TtsHost32
         try
         {
             foreach (InstalledVoice v in synth.GetInstalledVoices())
-                if (v.Enabled) Emit("VOICE\t" + v.VoiceInfo.Name);
+                if (v.Enabled) Emit("VOICE\t" + v.VoiceInfo.Name + "\t" + Vendor(v.VoiceInfo));
         }
         catch { }
         Emit("READY");
@@ -107,6 +107,12 @@ class TtsHost32
     private static void Emit(string msg)
     {
         lock (outLock) { Console.Out.WriteLine(msg); Console.Out.Flush(); }
+    }
+
+    private static string Vendor(VoiceInfo v)
+    {
+        try { string s; return v.AdditionalInfo != null && v.AdditionalInfo.TryGetValue("Vendor", out s) ? (s ?? "") : ""; }
+        catch { return ""; }
     }
 
     private static string DecodeB64(string s)

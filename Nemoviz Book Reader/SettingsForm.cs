@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
 using System.Speech.Synthesis;
@@ -35,7 +36,11 @@ namespace Nemoviz_Book_Reader
         private CheckBox chkUseMetadata;
 
         // Text Books tab — global TTS defaults (wired to AppSettings).
+        private ComboBox cmbSpeechEngine;
         private ComboBox cmbVoice;
+        // Voice → engine-group catalog (from the merged backends), for the
+        // engine/voice two-combo picker.
+        private List<(string Name, string Engine)> voiceCatalog;
         private TrackBar trkRate;
         private TrackBar trkVolume;
         private TrackBar trkPitch;
@@ -280,12 +285,13 @@ namespace Nemoviz_Book_Reader
             lblSpeechEngine.Location = new Point(10, 56);
             lblSpeechEngine.Size = new Size(160, 20);
 
-            ComboBox cmbSpeechEngine = new ComboBox();
+            cmbSpeechEngine = new ComboBox();
             cmbSpeechEngine.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbSpeechEngine.Location = new Point(180, 53);
             cmbSpeechEngine.Size = new Size(240, 24);
             cmbSpeechEngine.AccessibleName = Localization.T("Settings.TextBooks.SpeechEngine");
             cmbSpeechEngine.TabIndex = 1;
+            cmbSpeechEngine.SelectedIndexChanged += (s, e) => PopulateVoicesForEngine();
 
             Label lblVoice = new Label();
             lblVoice.Text = Localization.T("Settings.TextBooks.Voice");
@@ -298,20 +304,27 @@ namespace Nemoviz_Book_Reader
             cmbVoice.Size = new Size(240, 24);
             cmbVoice.AccessibleName = Localization.T("Settings.TextBooks.Voice");
             cmbVoice.TabIndex = 2;
-            // List every voice from every backend — in-process 64-bit SAPI5 plus
-            // the 32-bit satellite (eSpeak / RHVoice) — merged, 64-bit winning
-            // duplicates. Select the saved default.
-            try
-            {
-                foreach (string name in EnsureSpeech().GetVoices())
-                    cmbVoice.Items.Add(name);
-            }
-            catch { }
-            if (cmbVoice.Items.Count > 0)
-            {
-                int vi = cmbVoice.Items.IndexOf(appSettings.TtsVoice ?? "");
-                cmbVoice.SelectedIndex = vi >= 0 ? vi : 0;
-            }
+
+            // Two-level picker: Speech Engine (vendor + architecture, e.g.
+            // "eSpeak (32-bit)", "Microsoft (64-bit)") → Voice within that engine.
+            // Merged from every backend (64-bit wins duplicate names).
+            try { voiceCatalog = EnsureSpeech().GetVoiceCatalog(); } catch { voiceCatalog = new List<(string, string)>(); }
+            var engines = new List<string>();
+            foreach (var c in voiceCatalog)
+                if (!engines.Contains(c.Engine)) engines.Add(c.Engine);
+            foreach (string en in engines) cmbSpeechEngine.Items.Add(en);
+
+            // Restore the saved default voice: pick its engine, then the voice.
+            string savedVoice = appSettings.TtsVoice ?? "";
+            string savedEngine = null;
+            foreach (var c in voiceCatalog)
+                if (string.Equals(c.Name, savedVoice, StringComparison.OrdinalIgnoreCase)) { savedEngine = c.Engine; break; }
+            int ei = savedEngine != null ? cmbSpeechEngine.Items.IndexOf(savedEngine) : -1;
+            if (ei < 0 && cmbSpeechEngine.Items.Count > 0) ei = 0;
+            if (ei >= 0) cmbSpeechEngine.SelectedIndex = ei;   // fires PopulateVoicesForEngine
+            int svi = cmbVoice.Items.IndexOf(savedVoice);
+            if (svi >= 0) cmbVoice.SelectedIndex = svi;
+            else if (cmbVoice.Items.Count > 0) cmbVoice.SelectedIndex = 0;
 
             Label lblSpeed = new Label();
             lblSpeed.Text = Localization.T("Settings.TextBooks.Speed");
@@ -399,6 +412,17 @@ namespace Nemoviz_Book_Reader
                 sp.Speak(Localization.T("Settings.TextBooks.TestSample"));
             }
             catch { }
+        }
+
+        // Fills the Voice combo with the voices of the currently-selected engine.
+        private void PopulateVoicesForEngine()
+        {
+            if (cmbVoice == null || cmbSpeechEngine == null || voiceCatalog == null) return;
+            string engine = cmbSpeechEngine.SelectedItem as string;
+            cmbVoice.Items.Clear();
+            foreach (var c in voiceCatalog)
+                if (c.Engine == engine) cmbVoice.Items.Add(c.Name);
+            if (cmbVoice.Items.Count > 0) cmbVoice.SelectedIndex = 0;
         }
 
         // Lazily-created merged speech backend (64-bit + 32-bit satellite), used

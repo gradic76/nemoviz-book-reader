@@ -21,7 +21,7 @@ namespace Nemoviz_Book_Reader
         private Process proc;
         private StreamWriter toHost;
         private Thread reader;
-        private readonly List<string> voices = new List<string>();
+        private readonly List<(string Name, string Vendor)> voices = new List<(string, string)>();
         private readonly object writeLock = new object();
         private string currentVoice = "";
         private bool paused;
@@ -54,7 +54,11 @@ namespace Nemoviz_Book_Reader
                 while (sw.ElapsedMilliseconds < 8000 && (line = proc.StandardOutput.ReadLine()) != null)
                 {
                     if (line == "READY") break;
-                    if (line.StartsWith("VOICE\t")) voices.Add(line.Substring(6));
+                    if (line.StartsWith("VOICE\t"))
+                    {
+                        string[] parts = line.Substring(6).Split('\t');
+                        voices.Add((parts[0], parts.Length > 1 ? parts[1] : ""));
+                    }
                 }
 
                 // Subsequent events (DONE) come on a background reader.
@@ -88,7 +92,14 @@ namespace Nemoviz_Book_Reader
             catch { }
         }
 
-        public List<string> GetVoices() { return new List<string>(voices); }
+        public List<string> GetVoices()
+        {
+            var list = new List<string>();
+            foreach (var v in voices) list.Add(v.Name);
+            return list;
+        }
+
+        public List<(string Name, string Vendor)> GetVoiceInfos() { return new List<(string, string)>(voices); }
 
         public string CurrentVoiceName { get { return currentVoice; } }
 
