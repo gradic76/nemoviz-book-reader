@@ -797,6 +797,38 @@ memory `project-tts-backends`.
 
 ---
 
+## 8h. Supported formats + official names
+
+`BookData.FriendlyFormatName` is the **single source of truth** for the format
+shown in the player and library info boxes. It returns **"TAG — Official Name"**
+(e.g. `MP3 — MPEG-1 Audio Layer III`, `EPUB — Electronic Publication`): the short
+tag first so it's recognised/spoken immediately, the official name after. For
+audio, `DetectAudioFormatString` appends the technical details after a comma
+(`…, 44.1 kHz, 128 kbps, stereo`) — the player info box shows only the part
+before the comma, the library shows the whole string. DAISY has no extension, so
+`Form1.PlayerFormatLabel` shapes it the same way from the parsed version:
+`DAISY 2.02 — Digital Accessible Information System` (works for 3.0 too).
+
+Audio extensions (`LibraryScanner.AudioExtensions`, 24): mp3, ogg, flac, m4a,
+m4b, wav, opus, aac, wma, ape, mka, spx, oga, dsf, dff, caf, aiff, aif, ac3,
+amr, weba, webm, au, voc. Keep this array, the two file-open filters (Form1 and
+libraryform) and `FriendlyFormatName` in sync.
+
+**Two independent layers — verified separately (2026-07-20, samples in
+`D:\Test Naslovi\misc audio`):** mpv decodes/plays, TagLib# reads duration+tags.
+They fail independently: `.caf`/`.oga` (and `.ac3`/`.amr`/`.weba`/`.au`/`.voc`)
+play fine but TagLib has no reader → **`MpvDuration.TryGet` is the fallback**
+(its own silent `ao=null` libmpv context, lazily created, released via
+`MpvDuration.Shutdown()` on exit); without it such books import as 0:00 with a
+broken timeline. Conversely `.ape` reads in TagLib but one sample wouldn't play —
+that file had a **non-standard ID3v2 tag prepended** (APE uses APEv2 tags at the
+END); a clean APE plays fine, so the format stays supported. Lesson learned
+twice (APE, and a hand-made VOC with a bad checksum): **a single failing sample
+usually means a malformed file, not a missing codec** — verify before dropping a
+format.
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one

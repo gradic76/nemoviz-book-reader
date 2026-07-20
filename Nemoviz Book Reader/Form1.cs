@@ -1893,10 +1893,10 @@ namespace Nemoviz_Book_Reader
             string fmt = currentBook.Format ?? "";
             int comma = fmt.IndexOf(',');
             string head = (comma >= 0 ? fmt.Substring(0, comma) : fmt).Trim();
+            // DAISY carries its version instead of an extension; give it the same
+            // "TAG — Official Name" shape as FriendlyFormatName produces.
             if (currentBook.IsDaisy && head.StartsWith("Daisy", StringComparison.OrdinalIgnoreCase))
-                return "Daisy Audio " + head.Substring(5).Trim();
-            if (head.StartsWith("M4B", StringComparison.OrdinalIgnoreCase))
-                return "Apple Book M4B";
+                return "DAISY " + head.Substring(5).Trim() + " — Digital Accessible Information System";
             return string.IsNullOrWhiteSpace(head) ? Localization.T("Common.Dash") : head;
         }
 
@@ -3111,10 +3111,10 @@ namespace Nemoviz_Book_Reader
         private string BuildFileFilter()
         {
             return
-                Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf|" +
+                Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc|" +
                 Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
                 Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc;*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 
@@ -3328,6 +3328,7 @@ namespace Nemoviz_Book_Reader
             sleepTimer?.Stop();
             if (mpvHandle != IntPtr.Zero)
                 mpv_terminate_destroy(mpvHandle);
+            MpvDuration.Shutdown();   // release the duration-probe context too
             base.OnFormClosing(e);
         }
     }

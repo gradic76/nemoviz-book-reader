@@ -16,7 +16,10 @@ namespace Nemoviz_Book_Reader
         // (single source of truth for supported extensions).
         public static readonly string[] AudioExtensions =
             { ".mp3", ".ogg", ".flac", ".m4a", ".m4b", ".wav", ".opus", ".aac",
-              ".wma", ".ape", ".mka", ".spx", ".oga", ".dsf", ".dff", ".caf" };
+              ".wma", ".ape", ".mka", ".spx", ".oga", ".dsf", ".dff", ".caf",
+              // Prepared ahead of samples — mpv decodes these; duration falls
+              // back to mpv where TagLib has no reader (ac3/amr/weba).
+              ".aiff", ".aif", ".ac3", ".amr", ".weba", ".webm", ".au", ".voc" };
         public static readonly string[] TextExtensions =
             { ".epub", ".txt", ".pdf", ".djvu", ".fb2", ".mobi", ".azw", ".azw3", ".cbz", ".cbr" };
         public static readonly string[] ArchiveExtensions =

@@ -356,6 +356,11 @@ namespace Nemoviz_Book_Reader
                 }
                 catch { dur = 0; }
 
+                // TagLib has no reader for some formats mpv plays perfectly
+                // (.caf, .oga, .ac3, .amr, .weba, .spx, .dff) — ask mpv instead,
+                // so the book doesn't end up with a 0:00 duration.
+                if (dur <= 0) dur = MpvDuration.TryGet(filePath);
+
                 string fileName = Path.GetFileName(filePath);
                 Chapters.Add((fileName, dur));
                 Offsets.Add(TotalDuration);
@@ -586,42 +591,62 @@ namespace Nemoviz_Book_Reader
             return p;
         }
 
+        /// <summary>
+        /// Maps a file extension to "TAG — Official Format Name" (e.g.
+        /// "MP3 — MPEG-1 Audio Layer III"). The short tag comes first so it is
+        /// recognised (and spoken) immediately, with the official name after it.
+        /// This is the single source of truth for the format shown in the player
+        /// and library info boxes; for audio the technical details (sample rate,
+        /// bitrate, channels) are appended after a comma by
+        /// DetectAudioFormatString.
+        /// </summary>
         public static string FriendlyFormatName(string extension)
         {
             switch ((extension ?? "").ToLower())
             {
-                case ".mp3": return "MP3 Audio";
-                case ".ogg": return "OGG Audio";
-                case ".flac": return "FLAC Audio";
-                case ".m4a": return "M4A Audio";
-                case ".m4b": return "M4B Audio";
-                case ".wav": return "WAV Audio";
-                case ".opus": return "Opus Audio";
-                case ".aac": return "AAC Audio";
-                case ".wma": return "WMA Audio";
-                case ".ape": return "APE Audio";
-                case ".mka": return "MKA Audio";
-                case ".spx": return "Speex Audio";
-                case ".oga": return "OGA Audio";
-                case ".dsf": return "DSF Audio";
-                case ".dff": return "DFF Audio";
-                case ".caf": return "CAF Audio";
-                case ".epub": return "EPUB";
-                case ".txt": return "Plain text";
-                case ".docx": return "MS Word Docx";
-                case ".doc": return "MS Word";
-                case ".rtf": return "Rich Text RTF";
-                case ".odt": return "Open Office ODF";
-                case ".pdf": return "PDF";
-                case ".djvu": return "DjVu";
-                case ".fb2": return "FictionBook FB2";
+                // ── Audio ────────────────────────────────────────────────
+                case ".mp3": return "MP3 — MPEG-1 Audio Layer III";
+                case ".m4a": return "M4A — MPEG-4 Part 14 Audio";
+                case ".m4b": return "M4B — MPEG-4 Audiobook";
+                case ".wav": return "WAV — Waveform Audio File Format";
+                case ".ogg": return "OGG — Ogg Vorbis Audio";
+                case ".oga": return "OGA — Ogg Audio File";
+                case ".opus": return "OPUS — Opus Interactive Audio Codec";
+                case ".spx": return "SPX — Ogg Speex Audio";
+                case ".flac": return "FLAC — Free Lossless Audio Codec";
+                case ".aac": return "AAC — Advanced Audio Coding";
+                case ".wma": return "WMA — Windows Media Audio";
+                case ".ape": return "APE — Monkey's Audio";
+                case ".mka": return "MKA — Matroska Audio";
+                case ".dsf": return "DSF — DSD Stream File";
+                case ".dff": return "DFF — Direct Stream Digital Interchange File Format";
+                case ".caf": return "CAF — Core Audio Format";
+                case ".aiff": return "AIFF — Audio Interchange File Format";
+                case ".aif": return "AIF — Audio Interchange File";
+                case ".ac3": return "AC3 — Dolby Digital Audio Codec 3";
+                case ".amr": return "AMR — Adaptive Multi-Rate Audio Codec";
+                case ".weba": return "WEBA — WebM Audio";
+                case ".webm": return "WEBM — WebM Audio";
+                case ".au": return "AU — Sun Microsystems Audio";
+                case ".voc": return "VOC — Creative Voice File";
+
+                // ── Text / documents ─────────────────────────────────────
+                case ".txt": return "TXT — Plain Text";
+                case ".rtf": return "RTF — Rich Text Format";
+                case ".docx": return "DOCX — Microsoft Word Document";
+                case ".doc": return "DOC — Microsoft Word Document";
+                case ".odt": return "ODT — OpenDocument Text";
+                case ".epub": return "EPUB — Electronic Publication";
+                case ".fb2": return "FB2 — FictionBook 2";
                 case ".htm":
-                case ".html": return "HTML";
-                case ".mobi": return "MOBI";
-                case ".azw": return "AZW";
-                case ".azw3": return "AZW3";
-                case ".cbz": return "CBZ";
-                case ".cbr": return "CBR";
+                case ".html": return "HTML — HyperText Markup Language";
+                case ".pdf": return "PDF — Portable Document Format";
+                case ".djvu": return "DJVU — DjVu Document";
+                case ".mobi": return "MOBI — Mobipocket eBook";
+                case ".azw": return "AZW — Amazon Kindle eBook";
+                case ".azw3": return "AZW3 — Kindle Format 8";
+                case ".cbz": return "CBZ — Comic Book Archive (ZIP)";
+                case ".cbr": return "CBR — Comic Book Archive (RAR)";
             }
             return "Unknown";
         }
