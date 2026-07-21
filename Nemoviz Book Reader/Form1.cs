@@ -710,7 +710,13 @@ namespace Nemoviz_Book_Reader
                     break;
 
                 case PlayerType.FlatText:
-                    AddSeekStep(new SeekStep(SeekStepKind.StandardPage), Localization.T("Seek.Item.StandardPage"));
+                    // A flat book with real print pages (a paged PDF with no
+                    // outline) navigates by its actual pages; a page-less book
+                    // (plain .txt) falls back to the fixed 1800-char page unit.
+                    if (currentBook.TextPages.Count > 0)
+                        AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
+                    else
+                        AddSeekStep(new SeekStep(SeekStepKind.StandardPage), Localization.T("Seek.Item.StandardPage"));
                     AddTimeSteps15DownWithBookmark();
                     break;
             }
@@ -2114,6 +2120,14 @@ namespace Nemoviz_Book_Reader
                       .Append(string.IsNullOrWhiteSpace(page) ? dash : page).Append(nl);
                 }
             }
+            else if (type == PlayerType.FlatText && currentBook.TextPages.Count > 0)
+            {
+                // Flat book that still has real print pages (a paged PDF with no
+                // outline): no Chapter line, but the page is a useful locator.
+                string page = CurrentTextPageLabel();
+                sb.Append(Localization.T("Player.Info.PageLabel")).Append(' ')
+                  .Append(string.IsNullOrWhiteSpace(page) ? dash : page).Append(nl);
+            }
 
             int bmk = currentBook != null ? currentBook.Bookmarks.Count : 0;
             sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl);
@@ -2226,8 +2240,22 @@ namespace Nemoviz_Book_Reader
                 }
                 else
                 {
+                    // Flat text. With real print pages (a paged PDF/EPUB that has
+                    // no chapters) the page is the natural locator →
+                    // "Title — Page: N — X.Y%"; a plain .txt (no pages) keeps
+                    // "Title — X.Y% — -remaining".
                     string pct = (tts != null && tts.TotalChars > 0) ? TextPercentString() : "0.0";
-                    body = title + sep + pct + "%" + sep + remaining;
+                    if (currentBook.TextPages.Count > 0)
+                    {
+                        string page = CurrentTextPageLabel();
+                        string p = Localization.T("Player.Info.PageLabel") + " " +
+                                   (string.IsNullOrWhiteSpace(page) ? Localization.T("Common.Dash") : page);
+                        body = title + sep + p + sep + pct + "%";
+                    }
+                    else
+                    {
+                        body = title + sep + pct + "%" + sep + remaining;
+                    }
                 }
             }
             else
@@ -3112,9 +3140,9 @@ namespace Nemoviz_Book_Reader
         {
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc|" +
-                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr|" +
+                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3|" +
                 Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc;*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.djvu;*.mobi;*.azw;*.azw3;*.cbz;*.cbr;*.zip;*.rar;*.7z;*.001;*.z01|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc;*.txt;*.rtf;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 

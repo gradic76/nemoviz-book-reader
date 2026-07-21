@@ -33,6 +33,7 @@ namespace Nemoviz_Book_Reader
             new HtmlParser(),
             new Fb2Parser(),
             new EpubParser(),
+            new PdfParser(),
         };
 
         /// <summary>True if the extension is one a parser handles (by extension
@@ -54,18 +55,36 @@ namespace Nemoviz_Book_Reader
             return false;
         }
 
+        /// <summary>
+        /// A produced format (epub/fb2/html/docx…) is only treated as STRUCTURED
+        /// when it yields at least this many headings. Below it, the whole book
+        /// is read as FLAT text (a handful of stray &lt;hN&gt; across an entire
+        /// book isn't navigable structure — it just produces a near-useless Go To
+        /// / Heading seek). This is the single global rule for every parser; the
+        /// format LABEL is untouched (the user still sees "EPUB"/"DOCX"), only
+        /// navigation goes flat. Tunable in one place.
+        /// </summary>
+        public const int MinStructureHeadings = 5;
+
         /// <summary>Extracts a document (or a zip-wrapped epub) to text. Never
         /// null; an unreadable/unsupported file yields an empty TextDoc.</summary>
         public static TextDoc Extract(string filePath)
         {
             try
             {
+                TextDoc doc = null;
                 string ext = Path.GetExtension(filePath).ToLowerInvariant();
                 foreach (ITextFormatParser p in Parsers)
-                    if (p.Handles(ext)) return p.Parse(filePath) ?? new TextDoc();
-                if (ext == ".zip" && EpubParser.WrapsEpub(filePath))
-                    return new EpubParser().Parse(filePath) ?? new TextDoc();
-                return new TextDoc();
+                    if (p.Handles(ext)) { doc = p.Parse(filePath); break; }
+                if (doc == null && ext == ".zip" && EpubParser.WrapsEpub(filePath))
+                    doc = new EpubParser().Parse(filePath);
+                doc = doc ?? new TextDoc();
+
+                // Global structure-vs-flat rule (see MinStructureHeadings).
+                if (doc.Headings != null && doc.Headings.Count < MinStructureHeadings)
+                    doc.Headings.Clear();
+
+                return doc;
             }
             catch { return new TextDoc(); }
         }
