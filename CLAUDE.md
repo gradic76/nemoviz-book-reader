@@ -456,15 +456,18 @@ were).
 - **RAR is streamed** with the dedicated `RarReader.OpenReader(volumes, …)`,
   not the random-access Archive API: a file spanning a volume boundary breaks
   per-entry extraction ("unpacked file size does not match header"), and
-  `archive.ExtractAllEntries()` refuses a non-solid RAR. **ZIP/7z** open the
-  archive then extract through its forward reader (`archive.ExtractAllEntries()`
-  → `MoveToNextEntry`/`WriteEntryToDirectory`), **not** per-entry random access.
-  A *solid* 7z shares one compression stream, so random-access
-  `entry.WriteToDirectory` re-decompresses the whole solid block for every
-  entry — O(N²), which pegged a core for 15+ min on a 683 MB audiobook (fixed
-  by the forward reader → O(N); confirmed via the per-entry timing in
-  `ImportDiag`). RAR-vs-other is told by extension, or by header-sniff
-  (`ArchiveFactory.IsArchive`) for `.001`.
+  `archive.ExtractAllEntries()` refuses a non-solid RAR. **ZIP/7z** branch on
+  `archive.IsSolid || Type == SevenZip`: **solid/7z** extract through the forward
+  reader (`ExtractAllEntries()` → `MoveToNextEntry`/`WriteEntryToDirectory`) —
+  a *solid* archive shares one compression stream, so random-access
+  `entry.WriteToDirectory` would re-decompress the whole block per entry (O(N²),
+  pegged a core for 15+ min on a 683 MB audiobook); the forward reader is O(N).
+  **Non-solid ZIP** uses per-entry random access — `ExtractAllEntries()` *throws*
+  on it ("can only be used on solid archives or 7Zip archives"). (That guard was
+  a regression from the initial solid-7z fix, which used the forward reader for
+  all non-RAR archives and broke every plain ZIP, incl. DAISY-in-zip.) RAR-vs-
+  other is told by extension, or by header-sniff (`ArchiveFactory.IsArchive`)
+  for `.001`.
 - **Hardening** (against carelessly/maliciously packed archives): entries whose
   name is absolute/drive-rooted or climbs out with `..` are skipped
   (`IsUnsafeEntryPath` — path-traversal / "zip slip" guard); nested
@@ -600,6 +603,16 @@ current heading's tagline. The **seek step** gains per-depth **Heading** levels
 and, when present, **Page** — see section 6. Producers who leave metadata blank
 (e.g. Obi's "Untitled Obi Project") are shown as-is; the user fixes them with
 F2 rename (which offers Author + Title for DAISY, one field for plain audio).
+
+**Import paths for DAISY (all three now covered):** an archive containing a
+DAISY book (Add File) is handled in `ImportFile`; an already-extracted DAISY
+**folder** (Add Folder) and a DAISY **nav file** (Add File on `ncc.html` / `.opf`
+/ `.ncx`) both route through `LibraryForm.ImportDaisyFolder`, which copies the
+whole tree into the library, `FlattenDaisyToRoot`s it, and builds chapters +
+Author/Title from the navigation. Without this, Add Folder imported a DAISY book
+as loose multi-file audio (ignoring the NCC) and opening ncc.html was mistaken
+for a plain HTML text book. `ImportDaisyFolder` returns false when the folder
+isn't DAISY so the caller falls back to the generic import.
 
 ---
 

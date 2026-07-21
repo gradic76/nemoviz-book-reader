@@ -1181,6 +1181,17 @@ namespace Nemoviz_Book_Reader
             {
                 string sourceName = System.IO.Path.GetFileName(filePath);
                 string ext = System.IO.Path.GetExtension(filePath).ToLower();
+
+                // Opening a DAISY navigation file (ncc.html / .opf / .ncx)
+                // imports the WHOLE book from its containing folder — otherwise
+                // ncc.html would be mistaken for a plain HTML text book. Falls
+                // through when the folder isn't actually DAISY.
+                string lower = sourceName.ToLower();
+                if (lower == "ncc.html" || lower == "ncc.htm" || ext == ".opf" || ext == ".ncx")
+                {
+                    if (ImportDaisyFolder(System.IO.Path.GetDirectoryName(filePath))) return;
+                }
+
                 bool isArchive = LibraryScanner.IsExtractableArchive(sourceName);
                 // A .zip that wraps an epub (how most libraries package them) is a
                 // text import, not a generic archive.
@@ -1349,6 +1360,67 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        /// <summary>
+        /// Imports an already-extracted DAISY book folder as a single book:
+        /// copies the whole tree into the library, flattens the DAISY export to
+        /// the book root, and builds the reading-order timeline + Author/Title
+        /// from the navigation (the same finish as the archive-import path).
+        /// Returns false when the folder is not a DAISY book (caller falls back
+        /// to the generic import); true when it handled it (success or error).
+        /// </summary>
+        private bool ImportDaisyFolder(string sourceFolder)
+        {
+            if (string.IsNullOrEmpty(sourceFolder) || !System.IO.Directory.Exists(sourceFolder))
+                return false;
+            if (DaisyParser.TryParse(sourceFolder) == null)
+                return false;   // not DAISY — let the caller handle it normally
+
+            string name = System.IO.Path.GetFileName(sourceFolder.TrimEnd('\\', '/'));
+            string destFolder = System.IO.Path.Combine(appSettings.LibraryPath, name);
+            bool created = false;
+            try
+            {
+                // Copy into the library unless the folder already IS the target
+                // (e.g. re-importing something already inside the library).
+                if (!PathsEqual(sourceFolder, destFolder))
+                {
+                    created = !System.IO.Directory.Exists(destFolder);
+                    CopyTree(sourceFolder, destFolder);
+                }
+
+                DaisyBook daisy = DaisyParser.TryParse(destFolder);
+                if (daisy == null) throw new Exception("DAISY navigation not found after copy.");
+                LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
+
+                BookData imported = new BookData(destFolder);
+                imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
+                imported.Save();
+
+                LoadBooks();
+                MessageBox.Show(Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
+            }
+            catch (Exception ex)
+            {
+                if (created) TryDeleteFolder(destFolder);
+                MessageBox.Show(Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
+            }
+            return true;   // handled either way — don't fall through to generic import
+        }
+
+        /// <summary>Recursively copies a folder tree (skipping any Book.ini).</summary>
+        private static void CopyTree(string src, string dst)
+        {
+            System.IO.Directory.CreateDirectory(dst);
+            foreach (string f in System.IO.Directory.GetFiles(src))
+            {
+                if (System.IO.Path.GetFileName(f).ToLower() == "book.ini") continue;
+                string d = System.IO.Path.Combine(dst, System.IO.Path.GetFileName(f));
+                if (!System.IO.File.Exists(d)) System.IO.File.Copy(f, d);
+            }
+            foreach (string sub in System.IO.Directory.GetDirectories(src))
+                CopyTree(sub, System.IO.Path.Combine(dst, System.IO.Path.GetFileName(sub)));
+        }
+
         private static void TryDeleteFolder(string path)
         {
             try
@@ -1375,6 +1447,10 @@ namespace Nemoviz_Book_Reader
 
             try
             {
+                // A DAISY book (ncc.html / OPF+NCX anywhere under the folder) is
+                // imported as ONE book with its navigation, not as loose audio.
+                if (ImportDaisyFolder(folderPath)) return;
+
                 LibraryScanner scanner = new LibraryScanner(folderPath, false);
                 List<BookData> found = scanner.Scan();
 

@@ -310,32 +310,54 @@ namespace Nemoviz_Book_Reader
                 }
                 else
                 {
-                    // ZIP / 7z: extract through the archive's forward reader
-                    // (ExtractAllEntries), NOT per-entry random access. A *solid*
-                    // 7z shares one compression stream across all files, so
-                    // random-access WriteToDirectory re-decompresses from the
-                    // start of the solid block for every entry — O(N²), pegging a
-                    // core and taking many minutes on a large audiobook. The
-                    // forward reader decompresses the stream once → O(N). (7z has
-                    // no standalone stream reader, but ExtractAllEntries on an
-                    // already-opened archive reads in solid order and is fine.)
+                    // ZIP / 7z. Two paths, because SharpCompress's forward reader
+                    // (ExtractAllEntries) is ONLY allowed for solid archives or
+                    // 7z — calling it on a plain non-solid ZIP throws
+                    // ("ExtractAllEntries can only be used on solid archives …").
+                    //   • solid / 7z  → the forward reader: a solid archive shares
+                    //     one compression stream, so per-entry random access would
+                    //     re-decompress the whole block for every file (O(N²),
+                    //     minutes on a big audiobook); one forward pass is O(N).
+                    //   • non-solid zip → per-entry random access (each entry is
+                    //     independently compressed, so this is O(N) and the only
+                    //     option the forward reader would reject).
                     using (IArchive archive = volumes.Count == 1
                         ? ArchiveFactory.OpenArchive(volumes[0], readerOptions)
                         : ArchiveFactory.OpenArchive(volumes, readerOptions))
                     {
+                        bool solid = false;
+                        try { solid = archive.IsSolid; } catch { }
+                        bool useForwardReader = solid || archive.Type == ArchiveType.SevenZip;
+
                         // File count for a determinate progress bar (header-only,
                         // no decompression — cheap even on a big solid archive).
                         int total = 0;
                         try { foreach (IArchiveEntry e in archive.Entries) if (!e.IsDirectory) total++; } catch { total = 0; }
                         int step = total > 100 ? total / 100 : 1;
-                        using (IReader reader = archive.ExtractAllEntries())
+
+                        if (useForwardReader)
                         {
-                            while (reader.MoveToNextEntry())
+                            using (IReader reader = archive.ExtractAllEntries())
                             {
-                                if (reader.Entry.IsDirectory) continue;
-                                if (IsUnsafeEntryPath(reader.Entry.Key)) continue;
+                                while (reader.MoveToNextEntry())
+                                {
+                                    if (reader.Entry.IsDirectory) continue;
+                                    if (IsUnsafeEntryPath(reader.Entry.Key)) continue;
+                                    n++;
+                                    reader.WriteEntryToDirectory(destFolder, extractionOptions);
+                                    if (progress != null && (n <= 3 || n == total || n % step == 0))
+                                        progress(n, total);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (IArchiveEntry entry in archive.Entries)
+                            {
+                                if (entry.IsDirectory) continue;
+                                if (IsUnsafeEntryPath(entry.Key)) continue;
                                 n++;
-                                reader.WriteEntryToDirectory(destFolder, extractionOptions);
+                                entry.WriteToDirectory(destFolder, extractionOptions);
                                 if (progress != null && (n <= 3 || n == total || n % step == 0))
                                     progress(n, total);
                             }
