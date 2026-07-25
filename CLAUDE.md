@@ -614,6 +614,25 @@ as loose multi-file audio (ignoring the NCC) and opening ncc.html was mistaken
 for a plain HTML text book. `ImportDaisyFolder` returns false when the folder
 isn't DAISY so the caller falls back to the generic import.
 
+**Text DAISY (no audio) — read by TTS (Session 16).** A DAISY book with no
+audio is a *text* book: `DaisyTextExtractor` pulls the reading text from its
+content — DAISY 3 → the DTBook XML (`<dtbook>…`), DAISY 2.02 → the content
+XHTML — both through the shared `TextParsing` HTML pipeline (DAISY content uses
+`<h1>`–`<h6>`/`<p>` like HTML; `<pagenum>` stripped for now). All three DAISY
+import paths route a text DAISY (`DaisyTextExtractor.IsTextDaisy` = no audio) to
+`SetupTextBook`: flatten → `content.txt` → `[TextNav]` headings + DAISY
+title/author → Format `"DAISY <ver> — …"`; the audio timeline is skipped. On
+load `BuildDaisyNav` no longer claims a no-audio DAISY as `IsDaisy` (and
+short-circuits when `content.txt` exists), so `DetectTextBook` picks it up;
+`DetectTextBook` prefers `content.txt` over a stray `.txt`. `EpubParser.WrapsEpub`
+excludes DAISY (a DAISY 3 zip also has a `.opf`) via `LooksLikeDaisy`
+(ncc.html / DTBook / Z39.86; **not** dtbncx — epub2 has an NCX too) so a DAISY
+zip goes to the archive+DAISY path, not the epub path. Verified end-to-end on
+real DAISY 3 + 2.02 text samples. **Still open:** page navigation for text DAISY
+(`<pagenum>` markers), and **text+audio DAISY multi-modal** (follow/​highlight
+text while the audio plays — currently a text+audio DAISY imports & plays as
+plain audio, text unused; that's the Phase-3 on-screen-display work).
+
 ---
 
 ## 8d. Sound processing — Properties dialog (Session 12)
