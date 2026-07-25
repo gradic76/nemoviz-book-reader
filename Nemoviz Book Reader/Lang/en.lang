@@ -352,6 +352,7 @@ Settings.TextBooks.Volume=Volume:
 Settings.TextBooks.Pitch=Pitch:
 Settings.TextBooks.ComingSoon=Additional options for low-vision and dyslexic readers — coming soon.
 Settings.Device.SoundCard=Sound card:
+Settings.Device.Default=System default (auto)
 Settings.OK.Accessible=OK
 Settings.Cancel.Accessible=Cancel
 Settings.Apply=Apply

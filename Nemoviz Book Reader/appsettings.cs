@@ -48,6 +48,11 @@ namespace Nemoviz_Book_Reader
         public int TtsPitch { get; private set; }
         public int TtsVolume { get; private set; }
 
+        /// <summary>The libmpv <c>audio-device</c> identifier for output (e.g.
+        /// <c>wasapi/{…}</c>). Empty means <c>auto</c> — mpv picks the system
+        /// default. Set from Settings → Device.</summary>
+        public string AudioDevice { get; private set; }
+
         public AppSettings()
         {
             ini = new IniFile(SettingsPath);
@@ -65,6 +70,13 @@ namespace Nemoviz_Book_Reader
             TtsPitch = ttsPitch;
             int.TryParse(ini.Read("TextToSpeech", "Volume", "100"), out int ttsVol);
             TtsVolume = ttsVol;
+            AudioDevice = ini.Read("Audio", "Device", "");
+        }
+
+        public void SetAudioDevice(string device)
+        {
+            AudioDevice = device ?? "";
+            ini.Write("Audio", "Device", AudioDevice);
         }
 
         public void SetTtsDefaults(string voice, int wpm, int pitch, int volume)

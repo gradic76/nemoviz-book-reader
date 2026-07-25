@@ -45,9 +45,22 @@ namespace Nemoviz_Book_Reader
         private TrackBar trkVolume;
         private TrackBar trkPitch;
 
-        public SettingsForm(AppSettings appSettings)
+        // Device tab — output sound-card picker. The combo shows human-readable
+        // descriptions; deviceIds[i] is the mpv identifier for row i. A live-apply
+        // callback (from the player) switches the output on selection so the user
+        // hears the change immediately.
+        private ComboBox cmbSoundCard;
+        private readonly List<MpvAudioDevices.Device> audioDevices;
+        private readonly List<string> deviceIds = new List<string>();
+        private readonly Action<string> applyAudioDeviceLive;
+
+        public SettingsForm(AppSettings appSettings,
+            List<MpvAudioDevices.Device> audioDevices = null,
+            Action<string> applyAudioDeviceLive = null)
         {
             this.appSettings = appSettings;
+            this.audioDevices = audioDevices ?? new List<MpvAudioDevices.Device>();
+            this.applyAudioDeviceLive = applyAudioDeviceLive;
             this.stagedLibraryPath = appSettings.LibraryPath;
 
             this.Text = Localization.T("Dialog.Settings.Title");
@@ -239,6 +252,14 @@ namespace Nemoviz_Book_Reader
             string voice = cmbVoice != null && cmbVoice.SelectedItem != null
                 ? cmbVoice.SelectedItem.ToString() : (appSettings.TtsVoice ?? "");
             appSettings.SetTtsDefaults(voice, trkRate.Value, trkPitch.Value, trkVolume.Value);
+
+            // Device — persist the chosen output card (empty = system default).
+            if (cmbSoundCard != null)
+            {
+                int i = cmbSoundCard.SelectedIndex;
+                if (i >= 0 && i < deviceIds.Count)
+                    appSettings.SetAudioDevice(deviceIds[i]);
+            }
         }
 
         private TabPage BuildAudioBooksTab()
@@ -455,12 +476,43 @@ namespace Nemoviz_Book_Reader
             lblSoundCard.Location = new Point(10, 22);
             lblSoundCard.Size = new Size(160, 20);
 
-            ComboBox cmbSoundCard = new ComboBox();
+            cmbSoundCard = new ComboBox();
             cmbSoundCard.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbSoundCard.Location = new Point(180, 19);
             cmbSoundCard.Size = new Size(240, 24);
             cmbSoundCard.AccessibleName = Localization.T("Settings.Device.SoundCard");
             cmbSoundCard.TabIndex = 0;
+
+            // Populate from the live mpv device list. Each row's identifier is kept
+            // in deviceIds parallel to the combo; mpv's own "auto" entry (system
+            // default) is relabelled for clarity and always sits first.
+            int selected = 0;
+            foreach (MpvAudioDevices.Device dev in audioDevices)
+            {
+                string id = dev.Name ?? "";
+                string label = id == "auto"
+                    ? Localization.T("Settings.Device.Default")
+                    : (!string.IsNullOrEmpty(dev.Description) ? dev.Description : id);
+                if (string.Equals(id, appSettings.AudioDevice, StringComparison.OrdinalIgnoreCase))
+                    selected = deviceIds.Count;
+                deviceIds.Add(id);
+                cmbSoundCard.Items.Add(label);
+            }
+            // Fallback so the tab is never empty if mpv returned nothing.
+            if (cmbSoundCard.Items.Count == 0)
+            {
+                deviceIds.Add("");
+                cmbSoundCard.Items.Add(Localization.T("Settings.Device.Default"));
+            }
+            cmbSoundCard.SelectedIndex = Math.Min(selected, cmbSoundCard.Items.Count - 1);
+
+            // Live preview: switch the player's output the moment a card is picked.
+            cmbSoundCard.SelectedIndexChanged += (s, e) =>
+            {
+                int i = cmbSoundCard.SelectedIndex;
+                if (i >= 0 && i < deviceIds.Count)
+                    applyAudioDeviceLive?.Invoke(deviceIds[i]);
+            };
 
             page.Controls.Add(lblSoundCard);
             page.Controls.Add(cmbSoundCard);

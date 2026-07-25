@@ -2647,10 +2647,17 @@ namespace Nemoviz_Book_Reader
 
         private void BtnSettings_Click(object sender, EventArgs e)
         {
-            using (SettingsForm dlg = new SettingsForm(appSettings))
+            // Pass the live device list + a live-apply hook so the user hears the
+            // output move to the picked card immediately (great for testing without
+            // fiddling with an external amp).
+            var audioDevices = MpvAudioDevices.Get(mpvHandle);
+            using (SettingsForm dlg = new SettingsForm(appSettings, audioDevices, SetAudioDeviceLive))
             {
                 dlg.ShowDialog(this);
             }
+            // Re-apply the persisted device: on OK/Apply this is the newly-saved
+            // one; on Cancel it reverts any live preview that wasn't kept.
+            SetAudioDeviceLive(appSettings.AudioDevice);
             // TEMPORARY behaviour: push a changed default voice onto the live text
             // reader so it takes effect without a restart. This is interim — the
             // Settings voice is meant to be only the DEFAULT for new books, and the
@@ -2662,6 +2669,16 @@ namespace Nemoviz_Book_Reader
             {
                 ApplyTtsSettings();
             }
+        }
+
+        /// <summary>Switch libmpv's output device live (empty → "auto", the
+        /// system default). Used for the Settings → Device live preview and to
+        /// re-apply the persisted choice when the dialog closes.</summary>
+        private void SetAudioDeviceLive(string device)
+        {
+            if (mpvHandle == IntPtr.Zero) return;
+            mpv_set_property_string(mpvHandle, "audio-device",
+                string.IsNullOrEmpty(device) ? "auto" : device);
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)
@@ -3341,6 +3358,9 @@ namespace Nemoviz_Book_Reader
                 // cover image.
                 mpv_set_property_string(mpvHandle, "audio-display", "no");
                 mpv_set_property_string(mpvHandle, "vid", "no");
+                // Output device chosen in Settings → Device (empty = mpv "auto").
+                if (appSettings != null && !string.IsNullOrEmpty(appSettings.AudioDevice))
+                    mpv_set_property_string(mpvHandle, "audio-device", appSettings.AudioDevice);
             }
             catch (Exception ex)
             {
