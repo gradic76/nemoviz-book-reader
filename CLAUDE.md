@@ -878,6 +878,28 @@ folder is gone, or the last book was already finished.
 
 ## 10. Roadmap / suggested order
 
+### Editions: Lite vs Pro (Gordan, Session 15)
+
+NBR ships in two editions. **The player binary is the same** — Pro is simply
+Lite plus a set of add-on features that depend on **external resources and
+open decisions about which of them to use**. The distinction is about what a
+feature *requires*, not about a different app.
+
+- **Lite** — everything self-contained: the whole player as built so far
+  (audio + text + DAISY + M4B playback, all the file-format parsers, sound
+  processing, TTS text reading, Settings, Bookmarks, Sleep Timer) **plus the
+  remaining core items** below (Properties, finishing Settings, Help, and any
+  small polish). No cloud, no heavyweight external engines.
+- **Pro** — the add-ons that pull in external engines / models / services and
+  need a "which one, and do we even use it" decision: **STT / ASR**
+  (audiobook → synced on-screen/braille text), **OCR** (scanned image-only
+  PDFs/DjVu → text), and **translation**. These are parked until Lite is done.
+
+**Workflow rule:** until Lite is finished, when reporting "where we stopped"
+or "what's left", list **Lite items only**. Treat STT/OCR/translate as a
+separate Pro backlog — mention them only when explicitly asked about Pro.
+See memory `project-lite-pro-editions`.
+
 **Intended sequence going forward (Gordan, Session 10):**
 
 1. **Support for all planned file types** — the remaining audio formats and
