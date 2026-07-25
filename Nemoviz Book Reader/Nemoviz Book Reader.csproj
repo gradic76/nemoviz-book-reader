@@ -169,6 +169,7 @@
     <Compile Include="Fb2Parser.cs" />
     <Compile Include="EpubParser.cs" />
     <Compile Include="PdfParser.cs" />
+    <Compile Include="MobiParser.cs" />
     <Compile Include="M4bParser.cs" />
     <Compile Include="MpvDuration.cs" />
     <Compile Include="TextCleaner.cs" />
