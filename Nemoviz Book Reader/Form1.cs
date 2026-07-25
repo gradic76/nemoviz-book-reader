@@ -2676,9 +2676,13 @@ namespace Nemoviz_Book_Reader
         /// re-apply the persisted choice when the dialog closes.</summary>
         private void SetAudioDeviceLive(string device)
         {
-            if (mpvHandle == IntPtr.Zero) return;
-            mpv_set_property_string(mpvHandle, "audio-device",
-                string.IsNullOrEmpty(device) ? "auto" : device);
+            // Audio books play through mpv; text books through the TTS backend
+            // (SAPI AudioOutput). Route the picked card to both so the choice
+            // works whichever kind of book is open.
+            if (mpvHandle != IntPtr.Zero)
+                mpv_set_property_string(mpvHandle, "audio-device",
+                    string.IsNullOrEmpty(device) ? "auto" : device);
+            tts?.SetAudioDevice(device);
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)
@@ -2920,6 +2924,8 @@ namespace Nemoviz_Book_Reader
                 if (IsDisposed) return;
                 try { BeginInvoke((Action)(() => { SetPlayPauseState(false); FinishCurrentBook(); })); } catch { }
             };
+            // Start on the output device chosen in Settings → Device.
+            tts.SetAudioDevice(appSettings.AudioDevice);
         }
 
         private void LoadTextBookPlayback(bool autoPlay)

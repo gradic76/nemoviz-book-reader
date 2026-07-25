@@ -32,6 +32,12 @@ namespace Nemoviz_Book_Reader
         void SetVolume(int volume);      // 0..100
         void SetPitch(int pitchPercent); // -50..50
 
+        /// <summary>Routes speech to a specific output device. The id is the
+        /// libmpv-style "wasapi/{guid}" (the guid is the shared WASAPI endpoint id,
+        /// so it maps to the matching SAPI audio-output token); empty/"auto" means
+        /// the system default. A backend that can't select a device ignores it.</summary>
+        void SetAudioDevice(string deviceId);
+
         /// <summary>Starts speaking one chunk asynchronously.</summary>
         void Speak(string text);
 

@@ -69,6 +69,12 @@ namespace Nemoviz_Book_Reader
         public void SetRate(int r) { rate = r; backend.SetRate(r); RestartCurrent(); }
         public void SetVolume(int v) { backend.SetVolume(v); RestartCurrent(); }
         public void SetPitch(int p) { backend.SetPitch(p); RestartCurrent(); }
+        /// <summary>Routes speech to a specific output device (mpv-style id;
+        /// empty/"auto" = system default). Restarts the current sentence so the
+        /// switch is immediate — and so the device is applied with no utterance in
+        /// flight, which some voices (RHVoice) need to re-init their audio cleanly
+        /// instead of dropping the first sentence into silence.</summary>
+        public void SetAudioDevice(string deviceId) { backend.SetAudioDevice(deviceId); RestartCurrent(); }
 
         // SAPI applies rate/volume/voice to the NEXT utterance, not the one in
         // progress, so re-speak the current sentence to make a live change

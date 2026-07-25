@@ -1,36 +1,66 @@
 using System;
 using System.Collections.Generic;
-using System.Speech.Synthesis;
+using System.Windows.Forms;
 
 namespace Nemoviz_Book_Reader
 {
-    /// <summary>The in-process SAPI5 speech backend (System.Speech) — the
-    /// "SAPI 5 x64" equivalent. Sees every 64-bit SAPI5 voice registered on the
-    /// system (Zira, RHVoice, eSpeak NG once installed, …). 32-bit-only voices
-    /// and OneCore natural voices are handled by separate backends added later.
-    /// Speaks straight to the speaker; pitch (which SAPI has no direct property
-    /// for) is applied through SSML prosody, and plain SpeakAsync is used when
-    /// pitch is 0 to avoid SSML escaping in the common case.</summary>
+    /// <summary>
+    /// The in-process SAPI 5 speech backend, on the SAPI COM automation object
+    /// (<c>SAPI.SpVoice</c>) via late binding — no interop assembly, no vendoring.
+    /// System.Speech was the earlier host but it hides SAPI's audio-output
+    /// selection; the COM object exposes <c>AudioOutput</c>, so this is what lets
+    /// text-to-speech follow the sound-card picked in Settings → Device, exactly
+    /// how screen readers do it. Sees every 64-bit SAPI 5 voice (Zira, RHVoice, …).
+    ///
+    /// SAPI COM raises completion through connection-point events that late binding
+    /// can't reach, so end-of-utterance is detected by polling
+    /// <c>Status.RunningState</c> (2 = speaking) on a UI-thread timer — the reader
+    /// only needs sentence-level completion, not word boundaries. All calls stay on
+    /// the creating (UI/STA) thread.
+    /// </summary>
     public class Sapi5Backend : ISpeechBackend
     {
-        private readonly SpeechSynthesizer synth;
+        private const int SVSFlagsAsync = 1;
+        private const int SVSFPurgeBeforeSpeak = 2;
+        private const int SVSFIsXML = 8;
+        private const int SVSFIsNotXML = 16;
+        private const int SRSEIsSpeaking = 2;
+
+        private readonly dynamic voice;          // SAPI.SpVoice
+        private readonly Timer poll;             // completion poller (UI thread)
         private int pitchPercent;
+
+        // Utterance state machine (single UI thread → no locking needed).
+        private bool speaking, sawSpeaking, cancelled, paused;
+        private int speakStartTick;
+
+        // Desired output device (mpv-style id) and the last one actually applied.
+        private string desiredDeviceId = "";
+        private string appliedDeviceId = null;
 
         public event Action<bool> Completed;
 
         public Sapi5Backend()
         {
-            synth = new SpeechSynthesizer();
-            synth.SpeakCompleted += (s, e) => Completed?.Invoke(e.Cancelled);
+            Type t = Type.GetTypeFromProgID("SAPI.SpVoice");
+            if (t == null) throw new NotSupportedException("SAPI.SpVoice not available");
+            voice = Activator.CreateInstance(t);
+            poll = new Timer { Interval = 50 };
+            poll.Tick += Poll_Tick;
         }
 
         public List<string> GetVoices()
         {
-            List<string> list = new List<string>();
+            var list = new List<string>();
             try
             {
-                foreach (InstalledVoice v in synth.GetInstalledVoices())
-                    if (v.Enabled) list.Add(v.VoiceInfo.Name);
+                dynamic toks = voice.GetVoices();
+                int n = toks.Count;
+                for (int i = 0; i < n; i++)
+                {
+                    string name = SafeDesc(toks.Item(i));
+                    if (!string.IsNullOrEmpty(name)) list.Add(name);
+                }
             }
             catch { }
             return list;
@@ -41,13 +71,16 @@ namespace Nemoviz_Book_Reader
             var list = new List<(string, string)>();
             try
             {
-                foreach (InstalledVoice v in synth.GetInstalledVoices())
+                dynamic toks = voice.GetVoices();
+                int n = toks.Count;
+                for (int i = 0; i < n; i++)
                 {
-                    if (!v.Enabled) continue;
+                    dynamic tok = toks.Item(i);
+                    string name = SafeDesc(tok);
+                    if (string.IsNullOrEmpty(name)) continue;
                     string vendor = "";
-                    try { string s; if (v.VoiceInfo.AdditionalInfo != null && v.VoiceInfo.AdditionalInfo.TryGetValue("Vendor", out s)) vendor = s ?? ""; }
-                    catch { }
-                    list.Add((v.VoiceInfo.Name, vendor));
+                    try { vendor = tok.GetAttribute("Vendor") ?? ""; } catch { }
+                    list.Add((name, vendor));
                 }
             }
             catch { }
@@ -57,72 +90,169 @@ namespace Nemoviz_Book_Reader
         public void SelectVoice(string name)
         {
             if (string.IsNullOrEmpty(name)) return;
-            try { synth.SelectVoice(name); } catch { /* gone/disabled */ }
+            try
+            {
+                dynamic toks = voice.GetVoices();
+                int n = toks.Count;
+                for (int i = 0; i < n; i++)
+                {
+                    dynamic tok = toks.Item(i);
+                    if (string.Equals(SafeDesc(tok), name, StringComparison.Ordinal))
+                    {
+                        voice.Voice = tok;
+                        return;
+                    }
+                }
+            }
+            catch { }
         }
 
         public string CurrentVoiceName
         {
-            get { try { return synth.Voice.Name; } catch { return ""; } }
+            get { try { return SafeDesc(voice.Voice); } catch { return ""; } }
         }
 
-        public void SetRate(int rate) { synth.Rate = Clamp(rate, -10, 10); }
-        public void SetVolume(int volume) { synth.Volume = Clamp(volume, 0, 100); }
+        public void SetRate(int rate) { try { voice.Rate = Clamp(rate, -10, 10); } catch { } }
+        public void SetVolume(int volume) { try { voice.Volume = Clamp(volume, 0, 100); } catch { } }
         public void SetPitch(int percent) { pitchPercent = Clamp(percent, -50, 50); }
 
-        public bool IsPaused { get { return synth.State == SynthesizerState.Paused; } }
+        /// <summary>Selects the SAPI audio-output token matching the mpv device id
+        /// (by shared WASAPI guid). Applied on the next Speak.</summary>
+        public void SetAudioDevice(string deviceId)
+        {
+            desiredDeviceId = deviceId ?? "";
+        }
+
+        private void ApplyDeviceIfNeeded()
+        {
+            if (string.Equals(desiredDeviceId, appliedDeviceId, StringComparison.OrdinalIgnoreCase))
+                return;
+            try
+            {
+                string guid = ExtractGuid(desiredDeviceId);
+                if (guid == null)
+                {
+                    // "auto"/empty/unknown → fall back to the system default output.
+                    try { voice.AudioOutput = null; } catch { }
+                }
+                else
+                {
+                    dynamic outs = voice.GetAudioOutputs();
+                    int n = outs.Count;
+                    for (int i = 0; i < n; i++)
+                    {
+                        dynamic tok = outs.Item(i);
+                        string id = "";
+                        try { id = tok.Id ?? ""; } catch { }
+                        if (id.IndexOf(guid, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            voice.AudioOutput = tok;
+                            break;
+                        }
+                    }
+                }
+                appliedDeviceId = desiredDeviceId;
+            }
+            catch { }
+        }
+
+        public bool IsPaused { get { return paused; } }
 
         public void Speak(string text)
         {
             try
             {
+                ApplyDeviceIfNeeded();
+                cancelled = false;
+                sawSpeaking = false;
+                paused = false;
+                speaking = true;
+                speakStartTick = Environment.TickCount;
                 if (pitchPercent == 0)
-                    synth.SpeakAsync(text);
+                    voice.Speak(text ?? "", SVSFlagsAsync | SVSFIsNotXML);
                 else
-                    synth.SpeakSsmlAsync(BuildSsml(text));
+                    voice.Speak(BuildSsml(text ?? ""), SVSFlagsAsync | SVSFIsXML);
+                poll.Start();
             }
-            catch { }
+            catch { speaking = false; }
         }
 
         public void Pause()
         {
-            if (synth.State == SynthesizerState.Speaking)
+            if (speaking && !paused)
             {
-                try { synth.Pause(); } catch { }
+                try { voice.Pause(); paused = true; } catch { }
             }
         }
 
         public void Resume()
         {
-            if (synth.State == SynthesizerState.Paused)
+            if (paused)
             {
-                try { synth.Resume(); } catch { }
+                try { voice.Resume(); } catch { }
+                paused = false;
             }
         }
 
         public void Cancel()
         {
-            try { synth.SpeakAsyncCancelAll(); } catch { }
+            if (!speaking && !paused) return;
+            if (paused) { try { voice.Resume(); } catch { } paused = false; }
+            cancelled = true;
+            try { voice.Speak("", SVSFPurgeBeforeSpeak); } catch { }
+            // Completion (cancelled=true) fires on the next poll once SAPI leaves
+            // the speaking state.
+        }
+
+        private void Poll_Tick(object sender, EventArgs e)
+        {
+            if (!speaking || paused) return;
+            int rs;
+            try { rs = (int)voice.Status.RunningState; } catch { return; }
+            if (rs == SRSEIsSpeaking) { sawSpeaking = true; return; }
+            // Not in the speaking state: done once we've actually seen it speak, or
+            // after a short grace for a very short/empty utterance that never did.
+            if (!sawSpeaking && Environment.TickCount - speakStartTick < 400) return;
+            speaking = false;
+            poll.Stop();
+            bool wasCancelled = cancelled;
+            cancelled = false;
+            Completed?.Invoke(wasCancelled);
         }
 
         private string BuildSsml(string text)
         {
-            string lang = "en-US";
-            try { lang = synth.Voice.Culture.Name; } catch { }
+            // SAPI accepts SSML with SVSFIsXML; the prosody pitch wrapper works
+            // regardless of the declared language, so a fixed xml:lang is fine.
             string esc = System.Security.SecurityElement.Escape(text) ?? "";
             string pitch = (pitchPercent >= 0 ? "+" : "") + pitchPercent + "%";
-            return "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"" + lang + "\">"
+            return "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\">"
                  + "<prosody pitch=\"" + pitch + "\">" + esc + "</prosody></speak>";
         }
 
-        private static int Clamp(int v, int lo, int hi)
+        private static string SafeDesc(dynamic token)
         {
-            return v < lo ? lo : (v > hi ? hi : v);
+            try { return (string)token.GetDescription(); } catch { return ""; }
         }
+
+        // Pulls the WASAPI endpoint guid "{…}" out of an mpv id like
+        // "wasapi/{0.0.0.0}.{guid}" or "wasapi/{guid}". Null for auto/openal/empty.
+        private static string ExtractGuid(string mpvId)
+        {
+            if (string.IsNullOrEmpty(mpvId)) return null;
+            int last = mpvId.LastIndexOf('{');
+            int close = last >= 0 ? mpvId.IndexOf('}', last) : -1;
+            if (last < 0 || close < 0) return null;
+            return mpvId.Substring(last, close - last + 1); // includes the braces
+        }
+
+        private static int Clamp(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
 
         public void Dispose()
         {
-            try { synth.SpeakAsyncCancelAll(); } catch { }
-            try { synth.Dispose(); } catch { }
+            try { poll.Stop(); poll.Dispose(); } catch { }
+            try { voice.Speak("", SVSFPurgeBeforeSpeak); } catch { }
+            try { System.Runtime.InteropServices.Marshal.FinalReleaseComObject(voice); } catch { }
         }
     }
 }

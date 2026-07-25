@@ -25,6 +25,7 @@ namespace Nemoviz_Book_Reader
 
         private ISpeechBackend active;
         private int rate, volume = 100, pitch;
+        private string audioDevice = "";
 
         public event Action<bool> Completed;
 
@@ -32,7 +33,7 @@ namespace Nemoviz_Book_Reader
         {
             // In-process (64-bit) first so it wins duplicate voice names, then the
             // 32-bit satellite for the voices only it can see.
-            Add(new Sapi5Backend(), 64);
+            try { Add(new Sapi5Backend(), 64); } catch { }
             try { Add(new Sapi5SatelliteBackend(), 32); } catch { }
 
             active = backends.Count > 0 ? backends[0] : null;
@@ -103,6 +104,14 @@ namespace Nemoviz_Book_Reader
         public void SetRate(int r) { rate = r; active?.SetRate(r); }
         public void SetVolume(int v) { volume = v; active?.SetVolume(v); }
         public void SetPitch(int p) { pitch = p; active?.SetPitch(p); }
+
+        // Output device applies to every backend (independent of the active voice)
+        // so switching voice keeps the chosen sound card.
+        public void SetAudioDevice(string deviceId)
+        {
+            audioDevice = deviceId ?? "";
+            foreach (ISpeechBackend b in backends) b.SetAudioDevice(audioDevice);
+        }
 
         public void Speak(string text) { active?.Speak(text); }
         public void Pause() { active?.Pause(); }
