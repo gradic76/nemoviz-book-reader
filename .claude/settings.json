@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Process*)",
+      "PowerShell(Get-ChildItem*)",
+      "PowerShell(Get-Content*)",
+      "PowerShell(Get-ItemProperty*)",
+      "mcp__claude-in-chrome__find",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "mcp__claude-in-chrome__read_page",
+      "Bash(taskkill *)",
+      "PowerShell(Stop-Process*)",
+      "PowerShell(Start-Process*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "PowerShell(& \"C:\\Program Files\\Microsoft Visual Studio*)"
+    ]
+  }
+}

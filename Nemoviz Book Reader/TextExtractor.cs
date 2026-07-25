@@ -35,6 +35,7 @@ namespace Nemoviz_Book_Reader
             new EpubParser(),
             new PdfParser(),
             new MobiParser(),
+            new DocParser(),
         };
 
         /// <summary>True if the extension is one a parser handles (by extension
