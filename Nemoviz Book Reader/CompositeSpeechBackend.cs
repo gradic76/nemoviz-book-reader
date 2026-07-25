@@ -71,17 +71,21 @@ namespace Nemoviz_Book_Reader
             return list;
         }
 
-        // Derives a friendly engine group from a voice's vendor (often a URL or
-        // empty) + name + architecture. Falls back to "SAPI 5 (N-bit)".
+        // The engine group is whatever the voice's own Vendor attribute reports
+        // (e.g. "Microsoft", "Olga Yakovleva"), verbatim — no hard-coded renaming.
+        // A vendor given as a URL (some engines, e.g. eSpeak) is shown as its
+        // readable host; a missing vendor falls back to "SAPI 5".
         private static string EngineLabel(string name, string vendor, int arch)
         {
-            string hay = ((vendor ?? "") + " " + (name ?? "")).ToLowerInvariant();
-            string b;
-            if (hay.Contains("espeak")) b = "eSpeak";
-            else if (hay.Contains("microsoft")) b = "Microsoft";
-            else if (hay.Contains("rhvoice")) b = "RHVoice";
-            else if (!string.IsNullOrWhiteSpace(vendor) && !vendor.TrimStart().StartsWith("http")) b = vendor.Trim();
-            else b = "SAPI 5";
+            string b = (vendor ?? "").Trim();
+            if (b.Length == 0)
+                b = "SAPI 5";
+            else if (b.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                b = b.Replace("https://", "").Replace("http://", "").Replace("www.", "").TrimEnd('/');
+                int slash = b.IndexOf('/');
+                if (slash > 0) b = b.Substring(0, slash);
+            }
             return b + " (" + arch + "-bit)";
         }
 

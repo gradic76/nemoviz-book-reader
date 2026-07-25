@@ -21,7 +21,9 @@ namespace Nemoviz_Book_Reader
     public static class DaisyTextExtractor
     {
         private static readonly Regex RxPagenum =
-            new Regex("<pagenum\\b[^>]*>.*?</pagenum>", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+            new Regex("<pagenum\\b[^>]*>(.*?)</pagenum>", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+        private static readonly Regex RxTags =
+            new Regex("<[^>]+>", RegexOptions.Compiled);
         private static readonly Regex RxEncoding =
             new Regex("encoding=[\"']([^\"']+)[\"']", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -57,6 +59,7 @@ namespace Nemoviz_Book_Reader
                 if (!string.IsNullOrWhiteSpace(d2.Author)) imported.Author = d2.Author;
             }
             imported.SetTextHeadings(doc.Headings);
+            imported.SetTextPages(doc.Pages);
             string ver = string.IsNullOrEmpty(d2.Version) ? "" : d2.Version + " ";
             imported.Format = "DAISY " + ver + "— Digital Accessible Information System";
         }
@@ -73,19 +76,36 @@ namespace Nemoviz_Book_Reader
 
                 StringBuilder full = new StringBuilder();
                 var headings = new List<(int Level, string Title, int Offset)>();
+                var pages = new List<(string Label, int Offset)>();
+                int pageSeq = 0;
                 foreach (string cf in contentFiles)
                 {
                     string raw = ReadText(cf);
                     if (string.IsNullOrEmpty(raw)) continue;
-                    raw = RxPagenum.Replace(raw, " ");   // drop page-number markers from the flow
-                    TextParsing.Assemble(TextParsing.HtmlBlocks(raw), out string text, out var heads, out _);
+                    // Replace each <pagenum>N</pagenum> with an empty anchor we can
+                    // locate after assembly (and remember N). This records the page
+                    // marker's position and takes the number out of the reading flow.
+                    var pageLabels = new Dictionary<string, string>();
+                    raw = RxPagenum.Replace(raw, m =>
+                    {
+                        string label = RxTags.Replace(m.Groups[1].Value, "").Trim();
+                        string id = "__nbrpage" + (pageSeq++) + "__";
+                        pageLabels[id] = label;
+                        return "<span id=\"" + id + "\"></span>";
+                    });
+
+                    TextParsing.Assemble(TextParsing.HtmlBlocks(raw), out string text, out var heads, out var ids);
                     if (text.Length == 0) continue;
                     int start = full.Length;
                     foreach (var h in heads) headings.Add((h.Level, h.Title, start + h.Offset));
+                    foreach (var kv in pageLabels)
+                        if (ids.TryGetValue(kv.Key, out int off))
+                            pages.Add((kv.Value, start + off));
                     full.Append(text).Append("\n\n");
                 }
                 doc.Text = full.ToString().TrimEnd('\n');
                 doc.Headings = headings;
+                doc.Pages = pages.OrderBy(p => p.Offset).ToList();
 
                 // Same global structure-vs-flat rule as the file parsers.
                 if (doc.Headings.Count < TextExtractor.MinStructureHeadings)
