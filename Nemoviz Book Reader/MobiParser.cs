@@ -60,7 +60,7 @@ namespace Nemoviz_Book_Reader
             ushort encryption = BE16(all, r0 + 12);
 
             if (encryption != 0) { doc.DrmProtected = true; return; }   // real DRM → never strip
-            if (compression != 1 && compression != 2) return;           // 17480 = HUFF/CDIC (unhandled)
+            if (compression != 1 && compression != 2 && compression != 17480) return; // unknown codec
 
             // MOBI header (present on every real book): text encoding, the
             // extra-trailing-bytes flags, and the EXTH metadata block.
@@ -79,8 +79,29 @@ namespace Nemoviz_Book_Reader
                 ReadMetadata(all, r0, hdrLen, enc, doc);
             }
 
+            // HUFF/CDIC needs its Huffman/dictionary records built first (the
+            // record indices sit at record0 0x70/0x74). Can't build → no text.
+            HuffCdic huff = null;
+            if (compression == 17480)
+            {
+                int huffIdx = (int)BE32(all, r0 + 0x70);
+                int huffCount = (int)BE32(all, r0 + 0x74);
+                if (huffIdx > 0 && huffCount >= 2 && huffIdx + huffCount <= recOff.Count - 1)
+                {
+                    var h = new HuffCdic();
+                    if (h.LoadHuff(all, recOff[huffIdx]))
+                    {
+                        bool ok = true;
+                        for (int c = 1; c < huffCount && ok; c++)
+                            ok = h.LoadCdic(all, recOff[huffIdx + c]);
+                        if (ok) huff = h;
+                    }
+                }
+                if (huff == null) return;
+            }
+
             // Decompress text records 1..textRecCount, trimming per-record trailing
-            // bytes first (or the PalmDOC stream corrupts).
+            // bytes first (or the compressed stream corrupts).
             var outBytes = new List<byte>(textRecCount * 4096);
             for (int i = 1; i <= textRecCount && i + 1 < recOff.Count; i++)
             {
@@ -91,6 +112,7 @@ namespace Nemoviz_Book_Reader
                 Array.Copy(all, start, rec, 0, len);
                 int trimmed = TrimTrailing(rec, len, extraFlags);
                 if (compression == 2) PalmDocDecompress(rec, trimmed, outBytes);
+                else if (compression == 17480) huff.Unpack(rec, trimmed, outBytes);
                 else for (int k = 0; k < trimmed; k++) outBytes.Add(rec[k]);
             }
 
@@ -218,6 +240,147 @@ namespace Nemoviz_Book_Reader
                         int idx = srcStart + j;
                         outBuf.Add(idx >= baseCount && idx < outBuf.Count ? outBuf[idx] : (byte)' ');
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// HUFF/CDIC decompressor (compression id 17480) — the other MOBI text
+        /// codec, common in commercial Kindle books. One HUFF record holds the
+        /// Huffman code tables; the following CDIC records hold the phrase
+        /// dictionary. Each text record is a Huffman bit-stream of phrase indices;
+        /// a phrase may itself be Huffman-encoded (decoded once, then cached).
+        /// Ported from the well-known KindleUnpack algorithm.
+        /// </summary>
+        private sealed class HuffCdic
+        {
+            private readonly int[] dictCodelen = new int[256];
+            private readonly bool[] dictTerm = new bool[256];
+            private readonly ulong[] dictMaxcode = new ulong[256];
+            private readonly ulong[] mincode = new ulong[33];
+            private readonly ulong[] maxcode = new ulong[33];
+            private readonly List<byte[]> phrases = new List<byte[]>();
+            private readonly List<bool> phraseCompressed = new List<bool>();
+            private int loadedPhrases;
+
+            public bool LoadHuff(byte[] b, int r)
+            {
+                // "HUFF" + header length 0x18.
+                if (r + 24 > b.Length || Encoding.ASCII.GetString(b, r, 4) != "HUFF") return false;
+                int off1 = (int)BE32(b, r + 8);
+                int off2 = (int)BE32(b, r + 12);
+                if (r + off1 + 256 * 4 > b.Length || r + off2 + 64 * 4 > b.Length) return false;
+
+                for (int i = 0; i < 256; i++)
+                {
+                    uint v = BE32(b, r + off1 + i * 4);
+                    int codelen = (int)(v & 0x1f);
+                    bool term = (v & 0x80) != 0;
+                    ulong mc = v >> 8;
+                    if (codelen == 0) return false;
+                    dictCodelen[i] = codelen;
+                    dictTerm[i] = term;
+                    dictMaxcode[i] = ((mc + 1) << (32 - codelen)) - 1;
+                }
+                // dict2: 32 (min,max) uint32 pairs. The tables are indexed by code
+                // length 1..32 with a leading 0 slot, so code length N maps to
+                // pair N-1 (matching Calibre's HuffReader — an off-by-one here
+                // silently corrupts every non-terminal code).
+                mincode[0] = 0; maxcode[0] = (1UL << 32) - 1;
+                for (int cl = 1; cl <= 32; cl++)
+                {
+                    int di = cl - 1;
+                    uint mn = BE32(b, r + off2 + (di * 2) * 4);
+                    uint mx = BE32(b, r + off2 + (di * 2 + 1) * 4);
+                    mincode[cl] = ((ulong)mn) << (32 - cl);
+                    maxcode[cl] = (((ulong)mx + 1) << (32 - cl)) - 1;
+                }
+                return true;
+            }
+
+            public bool LoadCdic(byte[] b, int r)
+            {
+                // "CDIC" + header length 0x10.
+                if (r + 16 > b.Length || Encoding.ASCII.GetString(b, r, 4) != "CDIC") return false;
+                int total = (int)BE32(b, r + 8);
+                int bits = (int)BE32(b, r + 12);
+                if (bits < 0 || bits > 16) return false;
+                int n = Math.Min(1 << bits, total - loadedPhrases);
+                if (n < 0) n = 0;
+                if (r + 16 + n * 2 > b.Length) return false;
+
+                for (int i = 0; i < n; i++)
+                {
+                    int off = BE16(b, r + 16 + i * 2);
+                    int at = r + 16 + off;
+                    if (at + 2 > b.Length) { phrases.Add(new byte[0]); phraseCompressed.Add(false); continue; }
+                    int blen = BE16(b, at);
+                    int plen = blen & 0x7fff;
+                    // High bit SET = terminal phrase; CLEAR = the phrase is itself
+                    // a Huffman stream to decode (Calibre semantics, verified).
+                    bool comp = (blen & 0x8000) == 0;
+                    int pstart = at + 2;
+                    if (pstart + plen > b.Length) plen = Math.Max(0, b.Length - pstart);
+                    byte[] phrase = new byte[plen];
+                    Array.Copy(b, pstart, phrase, 0, plen);
+                    phrases.Add(phrase);
+                    phraseCompressed.Add(comp);
+                }
+                loadedPhrases += n;
+                return true;
+            }
+
+            private static ulong ReadU64BE(byte[] d, int pos)
+            {
+                ulong v = 0;
+                for (int i = 0; i < 8; i++)
+                    v = (v << 8) | (pos + i < d.Length ? d[pos + i] : (byte)0);
+                return v;
+            }
+
+            /// <summary>Decode one Huffman text record into the shared output.</summary>
+            public void Unpack(byte[] rec, int len, List<byte> outBuf)
+            {
+                byte[] data = new byte[len + 16];      // pad so a 64-bit read never runs off the end
+                Array.Copy(rec, 0, data, 0, len);
+                long bitsleft = (long)len * 8;
+                int pos = 0;
+                ulong x = ReadU64BE(data, pos);
+                int n = 32;
+
+                while (true)
+                {
+                    if (n <= 0) { pos += 4; x = ReadU64BE(data, pos); n += 32; }
+                    ulong code = (x >> n) & 0xffffffffUL;
+
+                    int idx = (int)(code >> 24);
+                    int codelen = dictCodelen[idx];
+                    ulong mc = dictMaxcode[idx];
+                    if (!dictTerm[idx])
+                    {
+                        while (codelen < 32 && code < mincode[codelen]) codelen++;
+                        mc = maxcode[codelen];
+                    }
+                    if (codelen <= 0 || codelen > 32) break;   // corrupt stream guard
+
+                    n -= codelen;
+                    bitsleft -= codelen;
+                    if (bitsleft < 0) break;
+
+                    ulong r = (mc - code) >> (32 - codelen);
+                    int ri = (int)r;
+                    if (ri < 0 || ri >= phrases.Count) break;
+
+                    byte[] slice = phrases[ri];
+                    if (phraseCompressed[ri])
+                    {
+                        phraseCompressed[ri] = false;       // clear first → a self-reference can't recurse forever
+                        var tmp = new List<byte>();
+                        Unpack(slice, slice.Length, tmp);   // a phrase may itself be Huffman-encoded
+                        slice = tmp.ToArray();
+                        phrases[ri] = slice;
+                    }
+                    outBuf.AddRange(slice);
                 }
             }
         }
