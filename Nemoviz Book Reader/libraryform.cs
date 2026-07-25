@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -178,8 +179,16 @@ namespace Nemoviz_Book_Reader
             menuFile.DropDownItems.Add(menuFileOpenFile);
             menuFile.DropDownItems.Add(menuFileOpenFolder);
             menuFile.DropDownItems.Add(new ToolStripSeparator());
-            menuFile.DropDownItems.Add(new ToolStripMenuItem(Localization.T("Menu.File.Exit")) { ShortcutKeys = Keys.Alt | Keys.F4 });
-            ((ToolStripMenuItem)menuFile.DropDownItems[3]).Click += (s, e) => this.Close();
+
+            ToolStripMenuItem menuFileClear = new ToolStripMenuItem(Localization.T("Menu.File.ClearLibrary"));
+            menuFileClear.Click += (s, e) => ClearLibrary();
+            menuFile.DropDownItems.Add(menuFileClear);
+
+            menuFile.DropDownItems.Add(new ToolStripSeparator());
+
+            ToolStripMenuItem menuFileExit = new ToolStripMenuItem(Localization.T("Menu.File.Exit")) { ShortcutKeys = Keys.Alt | Keys.F4 };
+            menuFileExit.Click += (s, e) => this.Close();
+            menuFile.DropDownItems.Add(menuFileExit);
 
             menuView = new ToolStripMenuItem(Localization.T("Menu.View"));
 
@@ -1055,6 +1064,47 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        /// <summary>Removes every book from the library (folders and their files),
+        /// after a strong confirmation. The book currently open in the player is
+        /// left in place — it can't be deleted while active.</summary>
+        private void ClearLibrary()
+        {
+            int count = books.Count;
+            if (count == 0)
+            {
+                MessageBox.Show(Localization.T("Dialog.ClearLibrary.Empty"), Localization.T("Dialog.ClearLibrary.Title"));
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(
+                Localization.T("Dialog.ClearLibrary.Message", count),
+                Localization.T("Dialog.ClearLibrary.Title"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);   // default No — this is destructive
+            if (result != DialogResult.Yes) return;
+
+            int deleted = 0, skipped = 0;
+            foreach (BookData book in books.ToList())
+            {
+                // Never delete the book currently open in the player.
+                if (PathsEqual(book.FolderPath, activeBookFolderPath)) { skipped++; continue; }
+                try
+                {
+                    if (System.IO.Directory.Exists(book.FolderPath))
+                        System.IO.Directory.Delete(book.FolderPath, true);
+                    deleted++;
+                }
+                catch { skipped++; }   // locked/in-use folder — leave it, report it
+            }
+
+            LoadBooks();
+            string msg = Localization.T("Dialog.ClearLibrary.Done", deleted);
+            if (skipped > 0)
+                msg += " " + Localization.T("Dialog.ClearLibrary.Skipped", skipped);
+            MessageBox.Show(msg, Localization.T("Dialog.ClearLibrary.Title"));
+        }
+
         private void DeleteSelectedBook()
         {
             BookData book = GetSelectedBook();
@@ -1175,6 +1225,15 @@ namespace Nemoviz_Book_Reader
 
         private void ImportFile(string filePath)
         {
+            ImportFileCore(filePath, false);
+        }
+
+        /// <summary>Imports one file as its own book. Returns true on success.
+        /// When <paramref name="quiet"/> is true (batch folder import) it shows no
+        /// success/error dialog and does not refresh the shelf — the caller does
+        /// that once for the whole batch.</summary>
+        private bool ImportFileCore(string filePath, bool quiet)
+        {
             string destFolder = null;
             bool createdFolder = false;
             try
@@ -1189,7 +1248,7 @@ namespace Nemoviz_Book_Reader
                 string lower = sourceName.ToLower();
                 if (lower == "ncc.html" || lower == "ncc.htm" || ext == ".opf" || ext == ".ncx")
                 {
-                    if (ImportDaisyFolder(System.IO.Path.GetDirectoryName(filePath))) return;
+                    if (ImportDaisyFolder(System.IO.Path.GetDirectoryName(filePath))) return true;
                 }
 
                 bool isArchive = LibraryScanner.IsExtractableArchive(sourceName);
@@ -1202,7 +1261,13 @@ namespace Nemoviz_Book_Reader
                 string bookName = isArchive
                     ? LibraryScanner.BaseArchiveName(filePath)
                     : System.IO.Path.GetFileNameWithoutExtension(filePath);
-                destFolder = System.IO.Path.Combine(appSettings.LibraryPath, bookName);
+                // Batch folder import: give each file its own folder even when two
+                // files share a base name (e.g. "02 Exile.pdf" + "02 Exile.azw3"),
+                // disambiguating by format, so neither book is silently overwritten.
+                // Single Add File keeps reusing the folder (re-import = update).
+                destFolder = quiet
+                    ? MakeUniqueBookFolder(bookName, ext)
+                    : System.IO.Path.Combine(appSettings.LibraryPath, bookName);
 
                 createdFolder = !System.IO.Directory.Exists(destFolder);
                 if (createdFolder)
@@ -1311,10 +1376,11 @@ namespace Nemoviz_Book_Reader
                     if (doc.DrmProtected)
                     {
                         if (createdFolder) TryDeleteFolder(destFolder);
-                        MessageBox.Show(Localization.T("Dialog.DrmProtected.Message"),
-                            Localization.T("Dialog.DrmProtected.Title"),
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
+                        if (!quiet)
+                            MessageBox.Show(Localization.T("Dialog.DrmProtected.Message"),
+                                Localization.T("Dialog.DrmProtected.Title"),
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
                     }
                     System.IO.File.WriteAllText(
                         System.IO.Path.Combine(destFolder, "content.txt"),
@@ -1349,19 +1415,26 @@ namespace Nemoviz_Book_Reader
                 }
 
                 imported.Save();
-                LoadBooks();
-                MessageBox.Show(Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
+                if (!quiet)
+                {
+                    LoadBooks();
+                    MessageBox.Show(Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
+                }
+                return true;
             }
             catch (OperationCanceledException)
             {
                 // User cancelled the archive password prompt — quietly undo the
                 // empty folder we just made, no error dialog.
                 if (createdFolder) TryDeleteFolder(destFolder);
+                return false;
             }
             catch (Exception ex)
             {
                 if (createdFolder) TryDeleteFolder(destFolder);
-                MessageBox.Show(Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
+                if (!quiet)
+                    MessageBox.Show(Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
+                return false;
             }
         }
 
@@ -1461,40 +1534,52 @@ namespace Nemoviz_Book_Reader
                 // imported as ONE book with its navigation, not as loose audio.
                 if (ImportDaisyFolder(folderPath)) return;
 
-                LibraryScanner scanner = new LibraryScanner(folderPath, false);
-                List<BookData> found = scanner.Scan();
+                // Two kinds of content need opposite grouping:
+                //  • loose TEXT-book files (pdf/mobi/epub/doc/…) — a folder of
+                //    ebooks is a COLLECTION, so each file is its own book;
+                //  • loose AUDIO files — a folder of audio is ONE book (its parts).
+                var textFiles = EnumerateTextBookFiles(folderPath);
+                var audioBooks = new LibraryScanner(folderPath, false).Scan()
+                    .Where(b => FolderHasAudio(b.FolderPath)).ToList();
 
-                if (found.Count == 0)
+                int total = textFiles.Count + audioBooks.Count;
+                if (total == 0)
                 {
                     MessageBox.Show(Localization.T("Dialog.NoBooksFound.Message"), Localization.T("Dialog.NoBooksFound.Title"));
                     return;
                 }
-
-                if (found.Count > 50)
+                if (total > 50)
                 {
                     DialogResult result = MessageBox.Show(
-                        Localization.T("Dialog.ConfirmManyBooks.Message", found.Count),
+                        Localization.T("Dialog.ConfirmManyBooks.Message", total),
                         Localization.T("Dialog.ConfirmManyBooks.Title"),
                         MessageBoxButtons.YesNo);
                     if (result == DialogResult.No) return;
                 }
 
-                int imported = 0;
-                foreach (BookData book in found)
+                int imported = 0, skipped = 0;
+
+                // Each text-book file → its own book (quiet, no per-file dialogs).
+                // A file that can't be imported (DRM-protected, unreadable) is
+                // counted so the summary can tell the user some were left out.
+                foreach (string tf in textFiles)
+                    if (ImportFileCore(tf, true)) imported++; else skipped++;
+
+                // Each audio folder → one book (copy its files, as before, but not
+                // the text files handled above).
+                foreach (BookData book in audioBooks)
                 {
                     string destFolder = System.IO.Path.Combine(
                         appSettings.LibraryPath,
                         System.IO.Path.GetFileName(book.FolderPath));
-
                     if (!System.IO.Directory.Exists(destFolder))
                         System.IO.Directory.CreateDirectory(destFolder);
-
                     foreach (string file in System.IO.Directory.GetFiles(book.FolderPath))
                     {
-                        if (System.IO.Path.GetFileName(file).ToLower() == "book.ini")
-                            continue;
-
-                        string destFile = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(file));
+                        string fn = System.IO.Path.GetFileName(file);
+                        if (fn.ToLower() == "book.ini") continue;
+                        if (IsTextBookFile(file)) continue;   // it's its own book
+                        string destFile = System.IO.Path.Combine(destFolder, fn);
                         if (!System.IO.File.Exists(destFile))
                             System.IO.File.Copy(file, destFile);
                     }
@@ -1502,12 +1587,85 @@ namespace Nemoviz_Book_Reader
                 }
 
                 LoadBooks();
-                MessageBox.Show(Localization.T("Dialog.ImportFolderSuccess.Message", imported), Localization.T("Dialog.ImportFolderSuccess.Title"));
+                string msg = Localization.T("Dialog.ImportFolderSuccess.Message", imported);
+                if (skipped > 0)
+                    msg += " " + Localization.T("Dialog.ImportFolderSuccess.Skipped", skipped);
+                MessageBox.Show(msg, Localization.T("Dialog.ImportFolderSuccess.Title"));
             }
             catch (Exception ex)
             {
                 MessageBox.Show(Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
             }
+        }
+
+        /// <summary>A free library folder path for a book, disambiguating a
+        /// base-name collision by format then a number, so importing two files
+        /// that share a name (different formats) keeps both books.</summary>
+        private string MakeUniqueBookFolder(string bookName, string ext)
+        {
+            string lib = appSettings.LibraryPath;
+            string path = System.IO.Path.Combine(lib, bookName);
+            if (!System.IO.Directory.Exists(path)) return path;
+
+            string e = (ext ?? "").TrimStart('.').ToLowerInvariant();
+            string baseName = string.IsNullOrEmpty(e) ? bookName : bookName + " (" + e + ")";
+            path = System.IO.Path.Combine(lib, baseName);
+            int n = 2;
+            while (System.IO.Directory.Exists(path))
+                path = System.IO.Path.Combine(lib, baseName + " (" + (n++) + ")");
+            return path;
+        }
+
+        /// <summary>True if the file is a text-book format we import one-per-file.</summary>
+        private static bool IsTextBookFile(string path)
+        {
+            string fn = System.IO.Path.GetFileName(path).ToLower();
+            if (fn == "content.txt" || fn == "book.ini") return false;
+            return TextExtractor.IsTextFormat(System.IO.Path.GetExtension(path));
+        }
+
+        private static bool FolderHasAudio(string folder)
+        {
+            try
+            {
+                foreach (string f in System.IO.Directory.GetFiles(folder))
+                    if (Array.IndexOf(LibraryScanner.AudioExtensions, System.IO.Path.GetExtension(f).ToLower()) >= 0)
+                        return true;
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>Every loose text-book file under the folder (recursively), each
+        /// of which becomes its own book. Skips DAISY subfolders (ncc.html / .opf /
+        /// .ncx) — those are whole-book units handled elsewhere.</summary>
+        private static List<string> EnumerateTextBookFiles(string folder)
+        {
+            var result = new List<string>();
+            CollectTextBookFiles(folder, result);
+            return result;
+        }
+
+        private static void CollectTextBookFiles(string folder, List<string> result)
+        {
+            try
+            {
+                string[] files = System.IO.Directory.GetFiles(folder);
+                // A DAISY/structured folder is one book, not a bag of text files.
+                bool daisyLike = files.Any(f =>
+                {
+                    string n = System.IO.Path.GetFileName(f).ToLower();
+                    string e = System.IO.Path.GetExtension(f).ToLower();
+                    return n == "ncc.html" || e == ".opf" || e == ".ncx";
+                });
+                if (!daisyLike)
+                    foreach (string f in files)
+                        if (IsTextBookFile(f)) result.Add(f);
+
+                foreach (string sub in System.IO.Directory.GetDirectories(folder))
+                    CollectTextBookFiles(sub, result);
+            }
+            catch { }
         }
     }
 
