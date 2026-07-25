@@ -3234,7 +3234,11 @@ namespace Nemoviz_Book_Reader
                 BookData book = new BookData(destFolder);
 
                 DaisyBook daisy = DaisyParser.TryParse(destFolder);
-                if (daisy != null)
+                if (daisy != null && DaisyTextExtractor.IsTextDaisy(daisy))
+                {
+                    DaisyTextExtractor.SetupTextBook(book, destFolder, daisy, appSettings.UseMetadata);
+                }
+                else if (daisy != null)
                 {
                     LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
                     book.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));

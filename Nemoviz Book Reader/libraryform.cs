@@ -1242,7 +1242,12 @@ namespace Nemoviz_Book_Reader
                     // navigation), flattening any nested export folder to root
                     // first, and take the title from the DAISY metadata.
                     DaisyBook daisy = DaisyParser.TryParse(destFolder);
-                    if (daisy != null)
+                    if (daisy != null && DaisyTextExtractor.IsTextDaisy(daisy))
+                    {
+                        // Text-only DAISY → read by TTS like any text book.
+                        DaisyTextExtractor.SetupTextBook(imported, destFolder, daisy, appSettings.UseMetadata);
+                    }
+                    else if (daisy != null)
                     {
                         LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
                         imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
@@ -1390,10 +1395,15 @@ namespace Nemoviz_Book_Reader
 
                 DaisyBook daisy = DaisyParser.TryParse(destFolder);
                 if (daisy == null) throw new Exception("DAISY navigation not found after copy.");
-                LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
 
                 BookData imported = new BookData(destFolder);
-                imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
+                if (DaisyTextExtractor.IsTextDaisy(daisy))
+                    DaisyTextExtractor.SetupTextBook(imported, destFolder, daisy, appSettings.UseMetadata);
+                else
+                {
+                    LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
+                    imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
+                }
                 imported.Save();
 
                 LoadBooks();

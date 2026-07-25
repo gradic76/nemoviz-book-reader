@@ -34,10 +34,39 @@ namespace Nemoviz_Book_Reader
                 if (data == null) return false;
                 using (MemoryStream ms = new MemoryStream(data))
                 using (ZipArchive zip = new ZipArchive(ms, ZipArchiveMode.Read))
+                {
+                    // A DAISY book also carries a .opf (DAISY 3) — but it's not an
+                    // epub; let it fall through to the archive + DAISY import path.
+                    if (LooksLikeDaisy(zip)) return false;
                     return zip.Entries.Any(e => e.FullName.ToLowerInvariant().EndsWith(".opf"))
                         || zip.Entries.Any(e => e.FullName == "mimetype");
+                }
             }
             catch { return false; }
+        }
+
+        /// <summary>True if the zip is a DAISY book, not an epub. DAISY 2.02 has
+        /// ncc.html; DAISY 3 has a DTBook content item (media-type x-dtbook) or the
+        /// Z39.86 spec reference. (dtbncx is NOT a signal — epub2 uses an NCX too.)</summary>
+        private static bool LooksLikeDaisy(ZipArchive zip)
+        {
+            if (zip.Entries.Any(e => Path.GetFileName(e.FullName).Equals("ncc.html", StringComparison.OrdinalIgnoreCase)))
+                return true;
+            foreach (ZipArchiveEntry e in zip.Entries.Where(x => x.FullName.ToLowerInvariant().EndsWith(".opf")))
+            {
+                try
+                {
+                    using (StreamReader r = new StreamReader(e.Open()))
+                    {
+                        string opf = r.ReadToEnd();
+                        if (opf.IndexOf("x-dtbook", StringComparison.OrdinalIgnoreCase) >= 0
+                            || opf.IndexOf("z39.86", StringComparison.OrdinalIgnoreCase) >= 0)
+                            return true;
+                    }
+                }
+                catch { }
+            }
+            return false;
         }
 
         public TextDoc Parse(string filePath)

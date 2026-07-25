@@ -207,6 +207,10 @@ namespace Nemoviz_Book_Reader
             if (IsDaisy || Chapters.Count > 0) return;
             try
             {
+                // content.txt is the reading text written by import (text formats,
+                // text DAISY) — prefer it over any stray .txt in the folder.
+                string preferred = Path.Combine(FolderPath, "content.txt");
+                if (File.Exists(preferred)) { IsTextBook = true; TextFilePath = preferred; return; }
                 foreach (string f in Directory.GetFiles(FolderPath))
                     if (Path.GetExtension(f).ToLower() == ".txt")
                     {
@@ -230,9 +234,15 @@ namespace Nemoviz_Book_Reader
             IsDaisy = false;
             try
             {
+                // A text DAISY was flattened to content.txt at import; it reads as a
+                // text book, so skip the (potentially heavy) DAISY re-parse here.
+                if (File.Exists(Path.Combine(FolderPath, "content.txt"))) return;
                 if (!DaisyParser.IsDaisy(FolderPath)) return;
                 DaisyBook db = DaisyParser.TryParse(FolderPath);
                 if (db == null) return;
+                // A text-only DAISY (no audio) is read by TTS, not played — leave
+                // IsDaisy false so DetectTextBook claims it as a text book.
+                if (db.AudioPlayOrder.Count == 0) return;
                 IsDaisy = true;
 
                 var offset = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
