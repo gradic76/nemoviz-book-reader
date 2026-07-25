@@ -397,7 +397,11 @@ namespace Nemoviz_Book_Reader
             var result = new List<(int, string, int)>();
             foreach (var t in toc)
             {
-                if (string.IsNullOrWhiteSpace(t.Title)) continue;
+                // Some producers double-encode the label, so the unescaped text is
+                // itself markup (e.g. "<span xml:lang=…>1</span>…"). Strip any tags
+                // to the visible text before using it as a heading/page title.
+                string label = StripTags(t.Title);
+                if (string.IsNullOrWhiteSpace(label)) continue;
                 string src = t.Src; string frag = null;
                 int hash = src.IndexOf('#');
                 if (hash >= 0) { frag = src.Substring(hash + 1); src = src.Substring(0, hash); }
@@ -406,9 +410,23 @@ namespace Nemoviz_Book_Reader
                 int off = baseOff;
                 if (frag != null && fileIds.TryGetValue(entryPath, out var ids) && ids.TryGetValue(frag, out int fo))
                     off = baseOff + fo;
-                result.Add((t.Level, t.Title, off));
+                result.Add((t.Level, label, off));
             }
             return result;
+        }
+
+        /// <summary>Removes markup left in a TOC label and collapses whitespace.
+        /// Handles real HTML tags (&lt;span&gt;…) and a broken-producer variant that
+        /// emits tags as "{!{span…}!}" literally (seen in a real Vietnamese book).</summary>
+        private static string StripTags(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return s;
+            bool hasAngle = s.IndexOf('<') >= 0;
+            bool hasBrace = s.IndexOf("{!{", StringComparison.Ordinal) >= 0;
+            if (!hasAngle && !hasBrace) return s;
+            if (hasAngle) s = System.Text.RegularExpressions.Regex.Replace(s, "<[^>]+>", "");
+            if (hasBrace) s = System.Text.RegularExpressions.Regex.Replace(s, @"\{!\{.*?\}!\}", "");
+            return System.Text.RegularExpressions.Regex.Replace(s, "\\s+", " ").Trim();
         }
     }
 }

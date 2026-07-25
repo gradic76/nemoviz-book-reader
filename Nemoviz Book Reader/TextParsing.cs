@@ -39,11 +39,26 @@ namespace Nemoviz_Book_Reader
             headings = new List<(int, string, int)>();
             idOffsets = new Dictionary<string, int>();
 
+            List<string> carried = null;   // ids from blocks that cleaned to empty
             foreach (Block b in blocks)
             {
                 string clean = TextCleaner.Clean(b.Text);
-                if (clean.Length == 0) continue;
+                if (clean.Length == 0)
+                {
+                    // Block vanished after cleaning — carry its ids to the next
+                    // real block so a #fragment target on it still resolves.
+                    if (b.Ids != null && b.Ids.Count > 0)
+                        (carried ?? (carried = new List<string>())).AddRange(b.Ids);
+                    continue;
+                }
                 int off = sb.Length;
+                if (carried != null)
+                {
+                    foreach (string id in carried)
+                        if (!string.IsNullOrEmpty(id) && !idOffsets.ContainsKey(id))
+                            idOffsets[id] = off;
+                    carried = null;
+                }
                 if (b.Ids != null)
                     foreach (string id in b.Ids)
                         if (!string.IsNullOrEmpty(id) && !idOffsets.ContainsKey(id))
@@ -85,11 +100,18 @@ namespace Nemoviz_Book_Reader
             System.Action flush = () =>
             {
                 if (cur.ToString().Trim().Length > 0)
+                {
                     blocks.Add(new Block { IsHeading = heading, Level = level, Text = cur.ToString(), Ids = ids });
+                    ids = new List<string>();   // consumed by this block
+                }
+                // An empty block is discarded, but KEEP its ids so they carry to
+                // the next non-empty block. Without this, an id on a heading tag
+                // (<h2 id="x">) or on an empty anchor right before content is lost
+                // when the preceding </p> already emptied the buffer — collapsing
+                // every TOC #fragment to the file's start offset.
                 cur.Clear();
                 heading = false;
                 level = 0;
-                ids = new List<string>();
             };
 
             foreach (Match m in RxToken.Matches(html))
