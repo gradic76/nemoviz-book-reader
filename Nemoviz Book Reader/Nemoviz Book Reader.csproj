@@ -166,6 +166,7 @@
     <Compile Include="SpeechDictionary.cs" />
     <Compile Include="SpeechDictionaryForm.cs" />
     <Compile Include="DictRuleForm.cs" />
+    <Compile Include="TextHelpForm.cs" />
     <Compile Include="SpeechInventory.cs" />
     <Compile Include="Sapi5Backend.cs" />
     <Compile Include="Sapi5SatelliteBackend.cs" />

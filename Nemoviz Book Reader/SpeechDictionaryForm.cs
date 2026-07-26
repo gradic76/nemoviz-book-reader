@@ -27,7 +27,7 @@ namespace Nemoviz_Book_Reader
         private ComboBox cmbScope;
         private ListView list;
         private TextBox tbTry, tbResult;
-        private Button btnAdd, btnEdit, btnRemove, btnUp, btnDown, btnTry;
+        private Button btnAdd, btnEdit, btnRemove, btnUp, btnDown, btnTry, btnHelp;
 
         private SpeechDictionary current;             // the file being edited
         private readonly List<DictRule> working = new List<DictRule>();
@@ -98,6 +98,16 @@ namespace Nemoviz_Book_Reader
 
             btnTry = MakeButton("Dict.TryButton", 590, 362, tab++, () => TryIt());
             this.Controls.Add(btnTry);
+
+            // The regular-expression primer. Only a page of text, but a rule
+            // written from memory is where a dictionary goes wrong first.
+            btnHelp = MakeButton("Dict.Help", 12, 466, tab++, () =>
+            {
+                using (var h = new TextHelpForm(Localization.T("Dict.Help.Title"),
+                                                Localization.T("Dict.Help.Text")))
+                    h.ShowDialog(this);
+            });
+            this.Controls.Add(btnHelp);
 
             this.Controls.Add(SettingsForm.MakeLabel(Localization.T("Dict.Result"), 12, 402));
             tbResult = new TextBox();
