@@ -54,6 +54,20 @@ namespace Nemoviz_Book_Reader
         /// numbers of the one before it.</summary>
         public VoicePrefsTable TtsVoicePrefs { get; private set; }
 
+        /// <summary>Whether the keyboard's media keys (Play/Pause, Next, Previous)
+        /// drive NBR at all. On by default.</summary>
+        public bool MediaKeys { get; private set; }
+
+        /// <summary>Whether they drive it even when NBR is in the background. Off
+        /// by default: registering them system-wide takes them away from every
+        /// other player, which is a choice the user has to make deliberately.</summary>
+        public bool MediaKeysGlobal { get; private set; }
+
+        /// <summary>Whether the explanatory hint lines are shown beside controls.
+        /// On by default — they cost a first-time user nothing and can be switched
+        /// off from any dialog that has the toggle.</summary>
+        public bool ShowHints { get; private set; }
+
         /// <summary>The libmpv <c>audio-device</c> identifier for output (e.g.
         /// <c>wasapi/{…}</c>). Empty means <c>auto</c> — mpv picks the system
         /// default. Set from Settings → Device.</summary>
@@ -82,6 +96,23 @@ namespace Nemoviz_Book_Reader
             // set of numbers; they belong to the voice that was selected then.
             TtsVoicePrefs.SetIfAbsent(TtsVoice, new VoicePrefs(TtsWpm, TtsVolume, TtsPitch));
             AudioDevice = ini.Read("Audio", "Device", "");
+            MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
+            MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
+            ShowHints = ini.Read("App", "ShowHints", "1") == "1";
+        }
+
+        public void SetMediaKeys(bool enabled, bool global)
+        {
+            MediaKeys = enabled;
+            MediaKeysGlobal = global;
+            ini.Write("Player", "MediaKeys", enabled ? "1" : "0");
+            ini.Write("Player", "MediaKeysGlobal", global ? "1" : "0");
+        }
+
+        public void SetShowHints(bool value)
+        {
+            ShowHints = value;
+            ini.Write("App", "ShowHints", value ? "1" : "0");
         }
 
         /// <summary>The remembered setup of a voice, or the neutral default when

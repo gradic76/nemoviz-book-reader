@@ -1,4 +1,4 @@
-﻿; Nemoviz Book Reader - English
+; Nemoviz Book Reader - English
 LanguageName=English
 
 ; App
@@ -401,3 +401,11 @@ Settings.OK.Accessible=OK
 Settings.Cancel.Accessible=Cancel
 Settings.Apply=Apply
 Settings.Apply.Accessible=Apply
+Settings.General.UseMultimediaKeys.Hint=The Play/Pause, Next and Previous keys on a keyboard or headset control NBR. Next and Previous move by the seek step you have chosen.
+Settings.General.UseMultimediaKeysGlobally.Hint=Also while you are working in another program. This takes the keys away from every other player on the computer, so leave it off if you use one.
+Settings.General.LibraryLocation.Hint=Where your books are kept. Moving it does not move the books already there; copy them yourself if you want them in the new place.
+Settings.General.Language.Hint=The language NBR speaks to you in. It has nothing to do with the language a book is read in, which each book decides for itself.
+Settings.TextBooks.Speech.Hint=The voice new books start with. Each voice keeps its own speed, volume and pitch, and a book can be given its own voice in its Properties.
+Settings.TextBooks.Braille.Hint=For reading on a braille display. The table decides how the text is turned into braille cells; a braille book remembers the table it was read with.
+Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears.
+Settings.Device.Hint=Which sound card everything comes out of, speech included. It takes effect at once, so you can hear the change while choosing.

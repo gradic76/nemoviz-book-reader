@@ -34,15 +34,31 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // Multimedia keys (WM_APPCOMMAND)
         // ──────────────────────────────────────────────
-        // Handled locally: the keys work while any NBR window control has
-        // focus. A future Settings option may add a global mode
-        // (RegisterHotKey) and an off switch.
+        // Handled locally (WM_APPCOMMAND): the keys work while any NBR window
+        // control has focus. Settings → General switches them off, or claims them
+        // system-wide (RegisterHotKey → WM_HOTKEY) so they work from anywhere.
         private const int WM_APPCOMMAND = 0x0319;
         private const int APPCOMMAND_MEDIA_NEXTTRACK = 11;
         private const int APPCOMMAND_MEDIA_PREVIOUSTRACK = 12;
         private const int APPCOMMAND_MEDIA_PLAY_PAUSE = 14;
         private const int APPCOMMAND_MEDIA_PLAY = 46;
         private const int APPCOMMAND_MEDIA_PAUSE = 47;
+
+        private const int WM_HOTKEY = 0x0312;
+        private const int VK_MEDIA_NEXT_TRACK = 0xB0;
+        private const int VK_MEDIA_PREV_TRACK = 0xB1;
+        private const int VK_MEDIA_STOP = 0xB2;
+        private const int VK_MEDIA_PLAY_PAUSE = 0xB3;
+        // Our own ids for the registered hotkeys (any small unique numbers).
+        private const int HotkeyPlayPause = 9101;
+        private const int HotkeyNext = 9102;
+        private const int HotkeyPrev = 9103;
+        private const int HotkeyStop = 9104;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
         private IntPtr mpvHandle = IntPtr.Zero;
         private bool isPlaying = false;
@@ -248,13 +264,18 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // WM_APPCOMMAND bubbles up from the focused child control to the
         // form via DefWindowProc, so handling it here covers the whole
-        // window. When no file is loaded the message is passed through to
-        // the system (base.WndProc), so pressing Play/Pause with an empty
-        // player doesn't pop up the Open File dialog and other apps can
-        // still react.
+        // window. With no book loaded — or with the keys switched off in
+        // Settings — the message is passed through to the system
+        // (base.WndProc), so pressing Play/Pause doesn't pop up the Open File
+        // dialog and other media apps still react.
+        //
+        // The GLOBAL mode is a different mechanism: RegisterHotKey claims the
+        // media keys system-wide and delivers WM_HOTKEY even when NBR is in the
+        // background. It is off by default because claiming them takes them
+        // away from every other player on the machine.
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM_APPCOMMAND && currentFile != null)
+            if (m.Msg == WM_APPCOMMAND && currentBook != null && appSettings.MediaKeys)
             {
                 int cmd = (int)((m.LParam.ToInt64() >> 16) & 0x0FFF);
                 switch (cmd)
@@ -285,7 +306,41 @@ namespace Nemoviz_Book_Reader
                         return;
                 }
             }
+            if (m.Msg == WM_HOTKEY && currentBook != null && appSettings.MediaKeys)
+            {
+                switch (m.WParam.ToInt32())
+                {
+                    case HotkeyPlayPause: BtnPlayPause_Click(null, EventArgs.Empty); return;
+                    case HotkeyNext: SeekStepForward(); return;
+                    case HotkeyPrev: SeekStepBackward(); return;
+                    case HotkeyStop:
+                        if (isPlaying) BtnPlayPause_Click(null, EventArgs.Empty);
+                        return;
+                }
+            }
             base.WndProc(ref m);
+        }
+
+        /// <summary>Claims (or releases) the media keys system-wide, to match
+        /// Settings. Safe to call at any time and as often as you like — it always
+        /// releases what it registered before. A key another app has already
+        /// claimed simply fails to register; NBR then still gets it while focused,
+        /// through WM_APPCOMMAND.</summary>
+        private void ApplyMediaKeySettings()
+        {
+            if (!IsHandleCreated) return;
+            foreach (int id in new[] { HotkeyPlayPause, HotkeyNext, HotkeyPrev, HotkeyStop })
+                try { UnregisterHotKey(this.Handle, id); } catch { }
+
+            if (!appSettings.MediaKeys || !appSettings.MediaKeysGlobal) return;
+            try
+            {
+                RegisterHotKey(this.Handle, HotkeyPlayPause, 0, VK_MEDIA_PLAY_PAUSE);
+                RegisterHotKey(this.Handle, HotkeyNext, 0, VK_MEDIA_NEXT_TRACK);
+                RegisterHotKey(this.Handle, HotkeyPrev, 0, VK_MEDIA_PREV_TRACK);
+                RegisterHotKey(this.Handle, HotkeyStop, 0, VK_MEDIA_STOP);
+            }
+            catch { }
         }
 
         // ──────────────────────────────────────────────
@@ -2694,6 +2749,8 @@ namespace Nemoviz_Book_Reader
             // Re-apply the persisted device: on OK/Apply this is the newly-saved
             // one; on Cancel it reverts any live preview that wasn't kept.
             SetAudioDeviceLive(appSettings.AudioDevice);
+            // The media keys may have been switched on/off or gone global.
+            ApplyMediaKeySettings();
             // A book that has chosen its own voice in Properties is NEVER touched by
             // a Settings change — that is the whole point of the per-book setting.
             // A book that has not is simply reading with the default, so when the
@@ -3578,8 +3635,19 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            // The media keys can only be claimed once there is a window to
+            // deliver WM_HOTKEY to.
+            ApplyMediaKeySettings();
+        }
+
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            // Give the media keys back to the system / other players.
+            foreach (int id in new[] { HotkeyPlayPause, HotkeyNext, HotkeyPrev, HotkeyStop })
+                try { UnregisterHotKey(this.Handle, id); } catch { }
             SaveCurrentBookProgress();
             eventTimer?.Stop();
             progressTimer?.Stop();
