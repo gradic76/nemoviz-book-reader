@@ -1,4 +1,4 @@
-# CLAUDE.md — Nemoviz Book Reader (NBR)
+﻿# CLAUDE.md — Nemoviz Book Reader (NBR)
 
 This file is the persistent project brief for Claude Code. Read it fully at
 the start of every session. It replaces the per-session "recap" documents the
@@ -1090,49 +1090,18 @@ sequence above supersedes its ordering).
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal
   dialog.
-- **FIXED, AWAITING GORDAN'S TEST — the four linked per-book-voice symptoms
-  (Session 17/18).** The ordering hypothesis recorded last session was **wrong**:
-  `LoadTextBookPlayback` already applies the settings before the first `Play()`.
-  The real cause was that **the voice was routed to the wrong backend**, plus
-  two bugs in the 32-bit host. Root causes found and fixed:
-  1. **Duplicate voice names, never deduplicated.** `Sapi5Backend` named a voice
-     by SAPI COM's `GetDescription()` ("Microsoft Zira Desktop - English (United
-     States)") while the 32-bit host reports System.Speech's `VoiceInfo.Name`
-     ("Microsoft Zira Desktop"). The composite's "64-bit wins duplicates" rule
-     compares names, so it never saw the duplicate: **Zira appeared twice and the
-     saved Settings voice resolved to the 32-bit satellite** — which is why the
-     in-process async purge no longer seemed to work (symptom 4: pause only at
-     the end of a sentence — the host was speaking, not `Sapi5Backend`). Fix:
-     `Sapi5Backend` now reports the token's own `Name` attribute; the composite
-     resolves a requested name loosely (bare name, so a voice saved under the old
-     description still resolves) and dedupes on it. Verified: the catalog now
-     lists one Zira, "Microsoft (64-bit)".
-  2. **The host changed voice/rate/volume/pitch without `synthLock`,** while a
-     look-ahead render may own the (non-thread-safe) synthesizer — the change
-     could throw and be swallowed, so the host kept the old voice until some
-     later command arrived while it was idle. That is symptom 1 (a book's own
-     voice ignored at load, applied only after Properties + restart).
-  3. **The look-ahead buffer survived a settings change** — the next sentence had
-     already been rendered in the OLD voice and was still played (symptom 2: one
-     sentence in the previous voice at the changeover). `DropAhead()` now
-     invalidates it on VOICE/RATE/VOL/PITCH.
-  4. `CompositeSpeechBackend.Cancel()` only reached the ACTIVE backend, so the
-     one being switched away from kept talking; it now cancels all of them, and
-     `SelectVoice` silences the outgoing backend first.
-  5. **Text-book Volume (symptom 3): the number existed twice.** For a text book
-     the player's Volume field IS the speech volume, but `TextVolume` and
-     `Volume` were stored separately and drifted. They are now one number:
-     `ChangeVolume` and the save path keep `TextVolume` on the field's value, the
-     player hands the live value to Properties, and `PersistTextOptions` writes
-     it back to `Volume` too (on a hybrid book the Audio tab's own field wins).
-  **Still to test by ear:** eSpeak book loads in its own voice; no old-voice
-  sentence at a changeover; pause is immediate on Zira; the Volume field agrees
-  with Properties; Cancel/OK on both book kinds; and the Library entry point
-  (it opens Properties without the player's live values).
-  **Known, not hit on this machine:** the host's buffered path plays with
-  `SoundPlayer.PlaySync` and cancels via `Stop()`; if a 32-bit *buffered* voice
-  ever pauses late, that pair is the suspect (eSpeak uses the real-time path,
-  and 64-bit voices don't go through the host at all).
+- **RESOLVED & CONFIRMED BY GORDAN (Session 18): the four per-voice/voice-
+  routing symptoms.** Root causes were voice-name duplication across backends
+  (SAPI description vs plain Name), the 32-bit host mutating the voice without
+  `synthLock`, a look-ahead buffer that survived a settings change, a Cancel
+  that reached only the active backend, and the text-book volume existing
+  twice. All fixed (e05cba6) and tested by ear: "TTS-ovi se mijenjaju u hodu,
+  zvučne kartice se mijenjaju u hodu". Details in sections 8g and 8e.
+  **Still untested:** Cancel/OK on both book kinds, and the Library entry
+  point (it opens Properties without the player's live values).
+  **Known, not hit on this machine:** a 32-bit *buffered* voice pausing late
+  would point at the host's playback pair (Play/Stop) — eSpeak uses the
+  real-time path and 64-bit voices never go through the host.
 - **Combo boxes: NVDA does not announce the selection when it changes with
   Up/Down — app-wide** (confirmed by Gordan, Session 17). JAWS is correct
   everywhere: it reads the name on focus, announces each arrow change, and
