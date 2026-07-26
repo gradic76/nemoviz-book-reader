@@ -762,15 +762,35 @@ engine either stumbles on or invents a name for) along with zero-width marks and
 a stray mid-file BOM. Deterministic, so saved offsets stay valid.
 This becomes the core of Phase 2's cleaning.
 
-**Known drift (found Session 18, not yet fixed).** Heading/page offsets are
-stored at IMPORT, measured on the text as written to `content.txt`; the reader
-cleans that text again in `TtsReader.LoadText`, and every character the cleaner
-*removes* shifts the reader's offsets against the stored ones. The rules that
-delete rather than replace (noise symbols, de-hyphenation, collapsing runs of
-spaces and blank lines) therefore make headings drift progressively — small in
-most books, more in a bullet-heavy one. The architectural fix is to clean **once,
-at import**, so the parser's offsets and the reader's text are the same text;
-that also needs a one-time re-clean of books already in the library.
+**Cleaning happens ONCE, at import (fixed Session 18).** It used to run again on
+every load, which meant the heading and page offsets — taken at import, on the
+uncleaned text — pointed further and further past their targets as the reader's
+copy lost characters. Measured before the fix: 0 of 20 headings in one epub
+landed on their own title, and a braille book's marks were 2071 characters out by
+the end.
+- `TextCleaner.CleanWithOffsets(text, offsets)` cleans **and moves a set of
+  character offsets with it**: the offsets are the cut points, each piece is
+  cleaned on its own, and each offset's new value is the length of everything
+  cleaned before it. No marker characters are smuggled into the text, where they
+  would change what the rules see.
+- Two rules span a line break (de-hyphenation, unwrapping a continued line) and
+  one spans a space (a dash used as punctuation), so a cut landing exactly there —
+  a braille page mark sits at a line break — is handled at the seam by hand.
+  Without that the assembled text differed from a plain clean and stopped being
+  idempotent.
+- `CleanDoc(TextDoc)` does it for an extracted document at import;
+  `BookData.CleanTextFileOnce()` does it for a book imported earlier, once, and
+  `[Book] TextCleaned` records that it happened. `TtsReader.LoadText(text,
+  alreadyClean: true)` then leaves the file exactly as written.
+- **The two coordinate systems.** Heading and page offsets come from the PARSER
+  and are in raw-text coordinates → they get moved. The reading position and
+  bookmarks came from the READER, which had already cleaned the text → they are
+  already in cleaned coordinates and must be left alone; moving them would apply
+  the drift twice. (They can be a character or two out where a cut fell inside a
+  rewritten pattern; the reader snaps to the nearest sentence, so it never shows.)
+- Verified: headings land on their own titles (20/20 where they had been 0/20),
+  the assembled text is identical to a whole-text clean and idempotent, and the
+  one-time migration of a real book leaves its position where it was.
 
 **Player integration** (branches on `BookData.IsTextBook`, like DAISY):
 - **Detection**: a folder with a `.txt` and no audio (`BookData.DetectTextBook`);
@@ -1182,10 +1202,8 @@ sequence above supersedes its ordering).
 
 ## 11. TODO (open items)
 
-- **Heading/page offsets drift against the reader's text** — see the "Known
-  drift" note in section 8e. The fix is to run `TextCleaner` once at import
-  instead of on every load, plus a one-time re-clean of the books already in the
-  library.
+- **Settings → Misc is still an empty placeholder** — waiting on what Gordan
+  wants there.
 - **RESOLVED & CONFIRMED BY GORDAN (Session 18): the four per-voice/voice-
   routing symptoms.** Root causes were voice-name duplication across backends
   (SAPI description vs plain Name), the 32-bit host mutating the voice without

@@ -3128,8 +3128,13 @@ namespace Nemoviz_Book_Reader
             currentPlaylistIndex = 0;
             isLoadingBook = false;
 
+            // A book imported before cleaning moved to import time is brought up to
+            // date once, here: content.txt is rewritten cleaned and every stored
+            // character offset (headings, pages, the reading position, bookmarks)
+            // moves with it. After that the reader takes the file as it stands.
+            currentBook.CleanTextFileOnce();
             string bookText = TtsReader.ReadFile(currentBook.TextFilePath);
-            tts.LoadText(bookText);
+            tts.LoadText(bookText, currentBook.TextCleaned);
             // A book imported before NBR could tell languages apart gets told now,
             // once, so it too is read by a voice that speaks it.
             if (string.IsNullOrEmpty(currentBook.TextLanguage))

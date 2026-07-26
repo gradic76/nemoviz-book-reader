@@ -58,6 +58,10 @@ namespace Nemoviz_Book_Reader
             DaisyBook d2 = DaisyParser.TryParse(destFolder) ?? daisy;
 
             TextDoc doc = Extract(destFolder);
+            // Clean once, here, with the heading and page offsets moving with the
+            // text — the reader then reads exactly this and nothing drifts.
+            TextCleaner.CleanDoc(doc);
+            imported.TextCleaned = true;
             try
             {
                 File.WriteAllText(Path.Combine(destFolder, "content.txt"),

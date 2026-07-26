@@ -87,6 +87,12 @@ namespace Nemoviz_Book_Reader
         /// back to a voice restores the speed/volume/pitch it was read at rather
         /// than inheriting the previous voice's.</summary>
         public VoicePrefsTable TextVoicePrefs { get; private set; }
+        /// <summary>Whether <c>content.txt</c> has already been through
+        /// <see cref="TextCleaner"/>, with the heading and page offsets moved to
+        /// match. Books imported before that was done get it once, on load
+        /// (<see cref="CleanTextFileOnce"/>); the reader never cleans again, so
+        /// nothing shifts under the stored marks.</summary>
+        public bool TextCleaned { get; set; }
         /// <summary>The language the book is written in (a culture tag like
         /// "hr-HR"), worked out at import from its own metadata and its actual
         /// words. Empty when it could not be told. It picks the default voice: a
@@ -160,6 +166,7 @@ namespace Nemoviz_Book_Reader
             int.TryParse(ini.Read("Settings", "TextPitch", "-99"), out int tpit);
             TextPitch = tpit;
             TextLanguage = ini.Read("Book", "Language", "");
+            TextCleaned = ini.Read("Book", "TextCleaned", "0") == "1";
             TextVoicePrefs = new VoicePrefsTable();
             TextVoicePrefs.Load(ini);
             // A book saved before voices were remembered individually has one set
@@ -206,6 +213,51 @@ namespace Nemoviz_Book_Reader
         public void SetTextPages(List<(string Label, int Offset)> pages)
         {
             TextPages = pages ?? new List<(string, int)>();
+        }
+
+        /// <summary>Brings a book imported before cleaning moved to import time up
+        /// to date: rewrites <c>content.txt</c> cleaned and moves its stored
+        /// heading and page offsets with it, so they keep pointing at the same
+        /// words. One-time — <see cref="TextCleaned"/> then says so. Returns true
+        /// when the file was rewritten (the caller re-reads it).</summary>
+        public bool CleanTextFileOnce()
+        {
+            if (TextCleaned || !IsTextBook || string.IsNullOrEmpty(TextFilePath)) return false;
+            try
+            {
+                string raw = TtsReader.ReadFile(TextFilePath);
+                if (string.IsNullOrEmpty(raw)) return false;
+
+                // Only the marks the PARSER recorded are moved. They were measured
+                // on the raw text, which is what needs correcting.
+                //
+                // The reading position and the bookmarks are NOT: they were taken
+                // from the reader, which had already cleaned the text, so they are
+                // in the cleaned text's own coordinates — the very ones this file
+                // is being brought into. Moving them again would push them off by
+                // the drift a second time. (They can be a couple of characters out
+                // where a cut fell inside a pattern the cleaning rules rewrite;
+                // the reader snaps to the nearest sentence, so that is invisible.)
+                var offsets = new List<int>();
+                foreach (var h in TextHeadings) offsets.Add(h.Offset);
+                foreach (var p in TextPages) offsets.Add(p.Offset);
+
+                string cleaned = TextCleaner.CleanWithOffsets(raw, offsets);
+                File.WriteAllText(TextFilePath, cleaned, new System.Text.UTF8Encoding(false));
+
+                int at = 0;
+                for (int i = 0; i < TextHeadings.Count; i++, at++)
+                    TextHeadings[i] = (TextHeadings[i].Level, TextHeadings[i].Label, offsets[at]);
+                for (int i = 0; i < TextPages.Count; i++, at++)
+                    TextPages[i] = (TextPages[i].Label, offsets[at]);
+                if (TextPosition > cleaned.Length) TextPosition = 0;
+
+                TextChars = cleaned.Length;
+                TextCleaned = true;
+                Save();
+                return true;
+            }
+            catch { return false; }
         }
 
         // [M4bNav]: C<i>=<position seconds>|<title>. Positions are absolute
@@ -744,6 +796,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextVolume", TextVolume.ToString());
             ini.Write("Settings", "TextPitch", TextPitch.ToString());
             ini.Write("Book", "Language", TextLanguage ?? "");
+            ini.Write("Book", "TextCleaned", TextCleaned ? "1" : "0");
             TextVoicePrefs.Save(ini);
             ini.Write("Book", "TextChars", TextChars.ToString());
             ini.Write("TextNav", "Count", TextHeadings.Count.ToString());

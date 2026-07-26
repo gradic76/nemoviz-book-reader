@@ -98,13 +98,19 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Loads document text, splits into sentences/paragraphs, and
-        /// resets to the start. Stops any current reading.</summary>
-        public void LoadText(string text)
+        /// resets to the start. Stops any current reading.
+        ///
+        /// <para><paramref name="alreadyClean"/> is true for a book whose
+        /// content.txt was cleaned at import, with its heading and page offsets
+        /// moved to match. Cleaning it again would remove a few more characters and
+        /// shift the reader against those stored marks — the drift this whole
+        /// arrangement exists to prevent — so it is left exactly as written.</para></summary>
+        public void LoadText(string text, bool alreadyClean = false)
         {
             Stop();
             // Tidy the raw text (collapse big gaps, de-hyphenate, strip noise)
             // so TTS reads smoothly without long pauses or "stumbling".
-            fullText = TextCleaner.Clean(text);
+            fullText = alreadyClean ? (text ?? "") : TextCleaner.Clean(text);
             Split();
             index = 0;
             RaisePosition();

@@ -1416,6 +1416,11 @@ namespace Nemoviz_Book_Reader
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return false;
                     }
+                    // Clean here, once, with the heading and page offsets moving
+                    // with the text — what is written is exactly what the reader
+                    // will read, so no mark can drift under it later.
+                    TextCleaner.CleanDoc(doc);
+                    imported.TextCleaned = true;
                     System.IO.File.WriteAllText(
                         System.IO.Path.Combine(destFolder, "content.txt"),
                         doc.Text ?? "", new System.Text.UTF8Encoding(false));
