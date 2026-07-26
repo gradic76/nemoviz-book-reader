@@ -21,7 +21,8 @@ namespace Nemoviz_Book_Reader
               // back to mpv where TagLib has no reader (ac3/amr/weba).
               ".aiff", ".aif", ".ac3", ".amr", ".weba", ".webm", ".au", ".voc" };
         public static readonly string[] TextExtensions =
-            { ".epub", ".txt", ".pdf", ".fb2", ".mobi", ".azw", ".azw3", ".doc" };
+            { ".epub", ".txt", ".pdf", ".fb2", ".mobi", ".azw", ".azw3", ".doc",
+              ".brf", ".brl", ".bra" };
         public static readonly string[] ArchiveExtensions =
             { ".zip", ".rar", ".7z" };
 

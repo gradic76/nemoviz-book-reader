@@ -173,6 +173,8 @@
     <Compile Include="PdfParser.cs" />
     <Compile Include="MobiParser.cs" />
     <Compile Include="DocParser.cs" />
+    <Compile Include="LibLouis.cs" />
+    <Compile Include="BrfParser.cs" />
     <Compile Include="MpvAudioDevices.cs" />
     <Compile Include="M4bParser.cs" />
     <Compile Include="MpvDuration.cs" />
@@ -231,6 +233,14 @@
   <ItemGroup>
     <Content Include="libmpv-2.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <!-- liblouis (LGPL 2.1+) — braille back-translation, plus its table set.
+         The tables are data files resolved at runtime from louis\tables. -->
+    <Content Include="liblouis.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="louis\tables\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="nvdaControllerClient.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

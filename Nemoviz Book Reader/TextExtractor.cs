@@ -16,6 +16,9 @@ namespace Nemoviz_Book_Reader
         public string Title = "";
         public string Author = "";
         public string Producer = "";   // accessible-edition producer (empty for EPUB)
+        // Braille only: id of the table the text was back-translated with, so the
+        // book remembers it and the user can correct the choice later.
+        public string BrailleTable = "";
         public string Publisher = "";  // dc:publisher (EPUB print/edition publisher)
         public bool DrmProtected = false;
     }
@@ -36,6 +39,7 @@ namespace Nemoviz_Book_Reader
             new PdfParser(),
             new MobiParser(),
             new DocParser(),
+            new BrfParser(),
         };
 
         /// <summary>True if the extension is one a parser handles (by extension

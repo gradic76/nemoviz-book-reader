@@ -1,0 +1,6 @@
+# Croatian literary Braille — 2020 standard (Funtek / Hrvatski savez slijepih):
+# dž/lj/nj are written as two cells; 126/345 are the round brackets.
+include braille-patterns.cti
+include hr-2020-chardefs.cti
+include hr-2020-parens.cti
+include hr-2020-translation.cti

@@ -1,0 +1,5 @@
+# Croatian literary Braille — OLD standard (pre-2020): single-cell lj/nj/dž.
+# Clean base (braille-patterns), Croatian char defs without German collisions.
+include braille-patterns.cti
+include hr-cro-chardefs.cti
+include hr-cro-translation.cti

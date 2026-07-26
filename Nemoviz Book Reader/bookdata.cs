@@ -19,6 +19,10 @@ namespace Nemoviz_Book_Reader
         // and editable text (no such tag). Placeholder values like "N/A" are
         // normalized to empty. Shown only when non-empty.
         public string Producer { get; set; }
+        /// <summary>Braille books only: the liblouis table this book was read with
+        /// (language + grade + national standard). A .brf declares none of that, so
+        /// it is auto-detected at import and remembered here for later correction.</summary>
+        public string BrailleTable { get; set; }
         // Print-edition publisher, from dc:publisher (DAISY + EPUB). Distinct
         // from Producer (the audio/accessible-edition producer, DAISY ncc:producer).
         public string Publisher { get; set; }
@@ -107,6 +111,7 @@ namespace Nemoviz_Book_Reader
             Title = ini.Read("Book", "Title", Path.GetFileName(FolderPath));
             Author = ini.Read("Book", "Author", "");
             Producer = ini.Read("Book", "Producer", "");
+            BrailleTable = ini.Read("Braille", "Table", "");
             Publisher = ini.Read("Book", "Publisher", "");
             Format = ini.Read("Book", "Format", "Unknown");
             Duration = ini.Read("Book", "Duration", "00:00:00");
@@ -645,6 +650,9 @@ namespace Nemoviz_Book_Reader
                 case ".rtf": return "RTF — Rich Text Format";
                 case ".docx": return "DOCX — Microsoft Word Document";
                 case ".doc": return "DOC — Microsoft Word Document";
+                case ".brf": return "BRF — Braille Ready Format";
+                case ".brl": return "BRL — Braille File";
+                case ".bra": return "BRA — Braille File";
                 case ".odt": return "ODT — OpenDocument Text";
                 case ".epub": return "EPUB — Electronic Publication";
                 case ".fb2": return "FB2 — FictionBook 2";
@@ -675,6 +683,8 @@ namespace Nemoviz_Book_Reader
             ini.Write("Book", "Producer", Producer ?? "");
             ini.Write("Book", "Publisher", Publisher ?? "");
             ini.Write("Book", "Format", Format);
+            if (!string.IsNullOrEmpty(BrailleTable))
+                ini.Write("Braille", "Table", BrailleTable);
             ini.Write("Book", "Duration", Duration);
             ini.Write("Book", "Favorite", Favorite ? "1" : "0");
             ini.Write("Book", "DateAdded", DateAdded.ToString());

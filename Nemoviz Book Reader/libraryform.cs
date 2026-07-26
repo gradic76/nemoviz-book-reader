@@ -1188,9 +1188,9 @@ namespace Nemoviz_Book_Reader
         {
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc|" +
-                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3|" +
+                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.brf;*.brl;*.bra|" +
                 Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc;*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.zip;*.rar;*.7z;*.001;*.z01|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc;*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.brf;*.brl;*.bra;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 
@@ -1397,6 +1397,19 @@ namespace Nemoviz_Book_Reader
                     imported.Publisher = BookData.NormalizeProducer(doc.Publisher);
                     imported.SetTextHeadings(doc.Headings);
                     imported.SetTextPages(doc.Pages);
+                    // Braille: remember which table produced the text, and keep the
+                    // original cells beside it so the reading can be redone with a
+                    // different table if the auto-detected one was wrong.
+                    if (!string.IsNullOrEmpty(doc.BrailleTable))
+                    {
+                        imported.BrailleTable = doc.BrailleTable;
+                        try
+                        {
+                            string keep = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(filePath));
+                            if (!System.IO.File.Exists(keep)) System.IO.File.Copy(filePath, keep);
+                        }
+                        catch { }
+                    }
                     // Record the real source format (MS Word Docx / EPUB / RTF …),
                     // not the extracted content.txt. A .zip that actually wraps an
                     // epub reports as EPUB.

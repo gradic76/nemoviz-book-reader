@@ -1,0 +1,13 @@
+# Croatian digits per the 2020 standard (Funtek): standard form is numsign(3456)+a-j;
+# these lowered forms are marked noback so they never hijack back-translation of
+# punctuation (dots-2 = comma, 25 = colon, ...).
+noback digit 1 2
+noback digit 2 23
+noback digit 3 25
+noback digit 4 256
+noback digit 5 26
+noback digit 6 235
+noback digit 7 2356
+noback digit 8 236
+noback digit 9 35
+noback digit 0 356
