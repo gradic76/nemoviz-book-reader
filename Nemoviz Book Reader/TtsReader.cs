@@ -64,6 +64,12 @@ namespace Nemoviz_Book_Reader
         }
 
         public List<string> GetVoices() { return backend.GetVoices(); }
+        /// <summary>Voices with their vendor and the language they speak — what
+        /// picking a voice for a book's language needs.</summary>
+        public List<(string Name, string Vendor, string Language)> GetVoiceInfos()
+        {
+            return backend.GetVoiceInfos();
+        }
         public string CurrentVoice { get { return backend.CurrentVoiceName; } }
         public void SetVoice(string name) { backend.SelectVoice(name); RestartCurrent(); }
         public void SetRate(int r) { rate = r; backend.SetRate(r); RestartCurrent(); }

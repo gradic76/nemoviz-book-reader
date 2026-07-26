@@ -87,6 +87,12 @@ namespace Nemoviz_Book_Reader
         /// back to a voice restores the speed/volume/pitch it was read at rather
         /// than inheriting the previous voice's.</summary>
         public VoicePrefsTable TextVoicePrefs { get; private set; }
+        /// <summary>The language the book is written in (a culture tag like
+        /// "hr-HR"), worked out at import from its own metadata and its actual
+        /// words. Empty when it could not be told. It picks the default voice: a
+        /// Croatian book should not be read out in English because that is what
+        /// Settings happens to name.</summary>
+        public string TextLanguage { get; set; }
         // Character count of the text, cached for the reading-time estimate.
         public int TextChars { get; set; }
         // Heading structure of a produced text book (epub/fb2/html): level +
@@ -153,6 +159,7 @@ namespace Nemoviz_Book_Reader
             TextVolume = tvol;
             int.TryParse(ini.Read("Settings", "TextPitch", "-99"), out int tpit);
             TextPitch = tpit;
+            TextLanguage = ini.Read("Book", "Language", "");
             TextVoicePrefs = new VoicePrefsTable();
             TextVoicePrefs.Load(ini);
             // A book saved before voices were remembered individually has one set
@@ -722,6 +729,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextVoice", TextVoice ?? "");
             ini.Write("Settings", "TextVolume", TextVolume.ToString());
             ini.Write("Settings", "TextPitch", TextPitch.ToString());
+            ini.Write("Book", "Language", TextLanguage ?? "");
             TextVoicePrefs.Save(ini);
             ini.Write("Book", "TextChars", TextChars.ToString());
             ini.Write("TextNav", "Count", TextHeadings.Count.ToString());

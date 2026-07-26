@@ -625,7 +625,9 @@ namespace Nemoviz_Book_Reader
             // The saved name may predate the switch to plain voice names (it could
             // be SAPI's description, "â€¦ - English (United States)"), so fall back
             // to matching the bare name â€” OK then rewrites it in the current form.
-            string want = !string.IsNullOrEmpty(book.TextVoice) ? book.TextVoice : "";
+            // With no voice of its own, the book starts on one that speaks its
+            // language — the same choice the player makes.
+            string want = !string.IsNullOrEmpty(book.TextVoice) ? book.TextVoice : DefaultVoiceForLanguage();
             foreach (var c in textCatalog)
                 if (!string.Equals(c.Name, want, StringComparison.OrdinalIgnoreCase)
                     && string.Equals(BareVoiceName(c.Name), BareVoiceName(want), StringComparison.OrdinalIgnoreCase))
@@ -811,6 +813,25 @@ namespace Nemoviz_Book_Reader
             else TextVoicesForSelection();
         }
 
+        /// <summary>The voice a book with no voice of its own opens on: the
+        /// Settings default when it speaks the book's language, otherwise the first
+        /// installed voice that does. Mirrors Form1.DefaultVoiceForBook.</summary>
+        private string DefaultVoiceForLanguage()
+        {
+            string settingsVoice = appSettings != null ? (appSettings.TtsVoice ?? "") : "";
+            string lang = book.TextLanguage;
+            if (string.IsNullOrEmpty(lang) || textCatalog == null) return settingsVoice;
+
+            foreach (var c in textCatalog)
+                if (string.Equals(c.Name, settingsVoice, StringComparison.OrdinalIgnoreCase)
+                    && LanguageDetector.SameLanguage(c.Language, lang))
+                    return settingsVoice;
+            foreach (var c in textCatalog)
+                if (LanguageDetector.SameLanguage(c.Language, lang))
+                    return c.Name;
+            return settingsVoice;
+        }
+
         /// <summary>A voice name without SAPI's " - language" tail, so a name saved
         /// in either form still finds its voice.</summary>
         private static string BareVoiceName(string n)
@@ -928,6 +949,9 @@ namespace Nemoviz_Book_Reader
             if (!string.IsNullOrWhiteSpace(book.Author))
                 sb.Append(Localization.T("Details.Field.Author")).Append(' ').Append(book.Author).Append(nl);
             sb.Append(Localization.T("Details.Field.Format")).Append(' ').Append(book.Format ?? "").Append(nl);
+            if (!string.IsNullOrEmpty(book.TextLanguage))
+                sb.Append(Localization.T("Prop.Text.Language")).Append(' ')
+                  .Append(LanguageDetector.DisplayName(book.TextLanguage)).Append(nl);
             if (book.TextChars > 0)
                 sb.Append(Localization.T("Prop.Text.Characters")).Append(' ').Append(book.TextChars.ToString("N0")).Append(nl);
             if (book.TextHeadings.Count > 0)

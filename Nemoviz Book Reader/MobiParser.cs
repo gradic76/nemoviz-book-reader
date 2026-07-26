@@ -151,6 +151,7 @@ namespace Nemoviz_Book_Reader
                             case 100: if (string.IsNullOrEmpty(doc.Author)) doc.Author = val; break; // creator
                             case 101: if (string.IsNullOrEmpty(doc.Publisher)) doc.Publisher = val; break;
                             case 503: if (!IsHexHash(val)) doc.Title = val; break; // updated title (preferred)
+                            case 524: if (string.IsNullOrEmpty(doc.Language)) doc.Language = val; break; // dc:language
                         }
                         p += len;
                     }

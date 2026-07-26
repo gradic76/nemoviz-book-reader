@@ -756,11 +756,31 @@ the dispatch list.
   is encrypted** (font obfuscation via encryption.xml is ignored); real DRM →
   skip + message, never stripped.
 
-**Open items:** per-book Properties for text (TTS override UI); OneCore (WinRT)
-+ 32-bit satellite backends; text bookmarks; Layer-2/3 parsers (pdf/mobi/…); a
-promised personal `.lit` converter (see memory). Test feedback still to apply is
-in memory. eSpeak: the user's is 32-bit-only (invisible to x64 System.Speech) —
-install eSpeak NG (64-bit) or add the satellite backend.
+**Language detection (`LanguageDetector.cs`).** An imported text book works out
+what language it is in, so it is read by a voice that speaks it instead of
+whatever Settings happens to name. Three layers, cheapest first: **script**
+(Greek/Cyrillic/Arabic/Hebrew/Hangul/kana/Han from Unicode ranges), **stopword
+share** (~20 languages, ~50 commonest words each — the winner takes 27–58 % of
+all tokens where the runner-up takes 6–27 %), and **neighbour markers** for the
+one pair stopwords cannot split, **hr vs sr**: the ijekavian/ekavian axis
+(vrijeme/vreme, dijete/dete, prije/pre) plus lexical pairs (tisuća/hiljada,
+kruh/hleb). Nothing in the two lexical lists may appear in both, or a clear book
+scores a tie. Two thresholds keep it honest — below 0.10 of tokens, or a margin
+under 0.05, it says **nothing** rather than guessing.
+
+**The file's own `dc:language` does NOT win.** Parsers now carry it
+(`TextDoc.Language`: EPUB OPF, FB2 `<lang>`, MOBI EXTH 524, DAISY), but of 24
+declaring samples **4 (17 %) declared it wrongly** — three Vietnamese DAISY books
+and a Greek one all said "en". So `LanguageDetector.Resolve` lets a confident
+reading of the actual words overrule the declaration, and falls back to the
+declaration only when the text can't tell (unknown script, degraded braille).
+Stored per book in `Book.ini` `[Book] Language`; a book imported before this
+existed gets it on first load. **Measured over ~85 real books** (txt, docx/odt/
+rtf, epub, brf, Kindle, DAISY, in en/hr/sr/fr/es/pt/el/ar/vi): every book with
+extractable text landed on the right voice language.
+
+**Open items:** text bookmarks; Layer-3 parsers; a promised personal `.lit`
+converter (see memory). Test feedback still to apply is in memory.
 
 ---
 

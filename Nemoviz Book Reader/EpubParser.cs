@@ -130,7 +130,7 @@ namespace Nemoviz_Book_Reader
             if (opfXml == null) return new TextDoc();
             string opfDir = DirOf(opfPath);
 
-            string title = "", author = "", publisher = "", ncxId = null, navHref = null;
+            string title = "", author = "", publisher = "", language = "", ncxId = null, navHref = null;
             Dictionary<string, string> manifest = new Dictionary<string, string>(); // id → href
             Dictionary<string, string> mediaType = new Dictionary<string, string>();
             List<string> spine = new List<string>();
@@ -143,6 +143,7 @@ namespace Nemoviz_Book_Reader
                     if (ln == "title" && title == "") title = (el.Value ?? "").Trim();
                     else if (ln == "creator" && author == "") author = (el.Value ?? "").Trim();
                     else if (ln == "publisher" && publisher == "") publisher = (el.Value ?? "").Trim();
+                    else if (ln == "language" && language == "") language = (el.Value ?? "").Trim();
                     else if (ln == "item")
                     {
                         string id = (string)el.Attribute("id");
@@ -231,7 +232,8 @@ namespace Nemoviz_Book_Reader
                 pages = pages.OrderBy(p => p.Offset).ToList();
             }
 
-            return new TextDoc { Text = body, Headings = headings, Pages = pages, Title = title, Author = author, Publisher = publisher };
+            return new TextDoc { Text = body, Headings = headings, Pages = pages, Title = title,
+                                 Author = author, Publisher = publisher, Language = language };
         }
 
         // ── DRM (only content encryption counts; fonts are obfuscation) ───

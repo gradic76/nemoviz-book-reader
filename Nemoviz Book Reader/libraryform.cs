@@ -1395,6 +1395,10 @@ namespace Nemoviz_Book_Reader
                     }
                     imported.Producer = BookData.NormalizeProducer(doc.Producer);
                     imported.Publisher = BookData.NormalizeProducer(doc.Publisher);
+                    // What language it is in, so it gets read by a voice that
+                    // speaks it. The file's own claim is only a claim — the text
+                    // overrules it when it is sure (see LanguageDetector.Resolve).
+                    imported.TextLanguage = LanguageDetector.Resolve(doc.Language, doc.Text);
                     imported.SetTextHeadings(doc.Headings);
                     imported.SetTextPages(doc.Pages);
                     // Braille: remember which table produced the text, and keep the

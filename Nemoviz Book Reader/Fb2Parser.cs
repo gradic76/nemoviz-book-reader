@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace Nemoviz_Book_Reader
                 if (string.IsNullOrEmpty(xml)) return new TextDoc();
 
                 List<TextParsing.Block> blocks = new List<TextParsing.Block>();
-                string title = "", first = "", last = "";
+                string title = "", first = "", last = "", lang = "";
                 StringBuilder cur = new StringBuilder();
                 StringBuilder headBuf = new StringBuilder(), metaBuf = new StringBuilder();
                 int depth = 0;
@@ -53,7 +53,8 @@ namespace Nemoviz_Book_Reader
                                 else if (ln == "p" && !inTitle) flushPara();
                                 else if (ln == "empty-line") flushPara();
                             }
-                            else if (inDesc && (ln == "book-title" || ln == "first-name" || ln == "last-name"))
+                            else if (inDesc && (ln == "book-title" || ln == "first-name"
+                                             || ln == "last-name" || ln == "lang"))
                             { metaField = ln; metaBuf.Clear(); }
                         }
                         else if (reader.NodeType == XmlNodeType.Text || reader.NodeType == XmlNodeType.CDATA)
@@ -84,6 +85,7 @@ namespace Nemoviz_Book_Reader
                                 if (ln == "book-title") title = val;
                                 else if (ln == "first-name") first = val;
                                 else if (ln == "last-name") last = val;
+                                else if (ln == "lang") lang = val;
                                 metaField = null;
                             }
                         }
@@ -92,7 +94,8 @@ namespace Nemoviz_Book_Reader
                 flushPara();
 
                 TextParsing.Assemble(blocks, out string text, out var headings, out _);
-                return new TextDoc { Text = text, Headings = headings, Title = title, Author = (first + " " + last).Trim() };
+                return new TextDoc { Text = text, Headings = headings, Title = title,
+                                     Author = (first + " " + last).Trim(), Language = lang };
             }
             catch { return new TextDoc(); }
         }

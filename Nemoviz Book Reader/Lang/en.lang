@@ -291,6 +291,7 @@ Prop.Info.Accessible=Book information
 Prop.Playback.Title=Playback
 Prop.Playback.Volume=Volume:
 Prop.Playback.Speed=Speed (×):
+Prop.Text.Language=Language:
 Prop.Text.Characters=Characters:
 Prop.Text.Headings=Headings:
 Prop.Text.Pages=Pages:

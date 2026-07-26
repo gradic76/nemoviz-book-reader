@@ -188,6 +188,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="libraryscanner.cs" />
+    <Compile Include="LanguageDetector.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="NvdaController.cs" />
     <Compile Include="PropertiesForm.cs" />

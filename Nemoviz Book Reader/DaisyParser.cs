@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -37,6 +37,7 @@ namespace Nemoviz_Book_Reader
         public string Title;
         public string Author;
         public string Publisher;                   // dc:publisher (print-edition publisher)
+        public string Language;                    // dc:language, as the producer declared it
         public string Producer;                    // ncc:producer (audio-producing institution)
         public string TotalTime;                   // as declared in metadata (string)
         public List<string> AudioPlayOrder = new List<string>();
@@ -116,6 +117,7 @@ namespace Nemoviz_Book_Reader
             book.Title = FirstNonEmpty(MetaContent(ncc, "dc:title"), TagText(ncc, "title"));
             book.Author = MetaContent(ncc, "dc:creator");
             book.Publisher = MetaContent(ncc, "dc:publisher");
+            book.Language = MetaContent(ncc, "dc:language");
             book.Producer = MetaContent(ncc, "ncc:producer");
             book.TotalTime = MetaContent(ncc, "ncc:totalTime");
 
@@ -194,6 +196,7 @@ namespace Nemoviz_Book_Reader
                 book.Title = FirstNonEmpty(MetaByName(opf, "dc:title"), ElemText(opf, "Title"));
                 book.Author = FirstNonEmpty(MetaByName(opf, "dc:creator"), ElemText(opf, "Creator"));
                 book.Publisher = FirstNonEmpty(MetaByName(opf, "dc:publisher"), ElemText(opf, "Publisher"));
+                book.Language = FirstNonEmpty(MetaByName(opf, "dc:language"), ElemText(opf, "Language"));
                 book.Producer = MetaByName(opf, "dtb:producer");
                 book.TotalTime = MetaAttr(opf, "dtb:totalTime");
 

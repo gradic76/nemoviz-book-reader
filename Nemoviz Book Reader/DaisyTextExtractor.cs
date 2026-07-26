@@ -58,6 +58,10 @@ namespace Nemoviz_Book_Reader
                 if (!string.IsNullOrWhiteSpace(d2.Title)) imported.Title = d2.Title;
                 if (!string.IsNullOrWhiteSpace(d2.Author)) imported.Author = d2.Author;
             }
+            // DAISY producers get dc:language wrong often enough (three Vietnamese
+            // books and a Greek one in the samples all declared "en") that the text
+            // has the last word — see LanguageDetector.Resolve.
+            imported.TextLanguage = LanguageDetector.Resolve(d2.Language, doc.Text);
             imported.SetTextHeadings(doc.Headings);
             imported.SetTextPages(doc.Pages);
             string ver = string.IsNullOrEmpty(d2.Version) ? "" : d2.Version + " ";

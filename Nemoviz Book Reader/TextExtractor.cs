@@ -20,6 +20,11 @@ namespace Nemoviz_Book_Reader
         // book remembers it and the user can correct the choice later.
         public string BrailleTable = "";
         public string Publisher = "";  // dc:publisher (EPUB print/edition publisher)
+        /// <summary>The language the FILE claims (dc:language, FB2 &lt;lang&gt;,
+        /// MOBI EXTH 524, DAISY dc:language). Only a claim — producers get it
+        /// wrong often enough that <see cref="LanguageDetector.Resolve"/> lets a
+        /// confident reading of the actual text overrule it.</summary>
+        public string Language = "";
         public bool DrmProtected = false;
     }
 

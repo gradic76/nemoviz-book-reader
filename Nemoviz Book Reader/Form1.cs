@@ -3012,7 +3012,16 @@ namespace Nemoviz_Book_Reader
             currentPlaylistIndex = 0;
             isLoadingBook = false;
 
-            tts.LoadText(TtsReader.ReadFile(currentBook.TextFilePath));
+            string bookText = TtsReader.ReadFile(currentBook.TextFilePath);
+            tts.LoadText(bookText);
+            // A book imported before NBR could tell languages apart gets told now,
+            // once, so it too is read by a voice that speaks it.
+            if (string.IsNullOrEmpty(currentBook.TextLanguage))
+            {
+                currentBook.TextLanguage = LanguageDetector.Resolve("", bookText);
+                if (!string.IsNullOrEmpty(currentBook.TextLanguage))
+                    try { currentBook.Save(); } catch { }
+            }
             // Voice, speed, volume and pitch all come from ApplyTtsSettings: they
             // belong to the voice this book is read with, not to the player's
             // previous state.
@@ -3048,7 +3057,7 @@ namespace Nemoviz_Book_Reader
         private string EffectiveTextVoice()
         {
             string configured = currentBook != null && !string.IsNullOrEmpty(currentBook.TextVoice)
-                ? currentBook.TextVoice : (appSettings.TtsVoice ?? "");
+                ? currentBook.TextVoice : DefaultVoiceForBook();
             string live = tts != null ? tts.CurrentVoice : "";
             return !string.IsNullOrEmpty(live) ? live : configured;
         }
@@ -3075,15 +3084,45 @@ namespace Nemoviz_Book_Reader
             currentBook.TextPitch = currentTextPitch;
         }
 
+        /// <summary>The voice a book with no chosen voice of its own should be read
+        /// with: the Settings default when it speaks the book's language, otherwise
+        /// the best voice that does. A Croatian book must not be read out in
+        /// English merely because that is what Settings happens to name.</summary>
+        private string DefaultVoiceForBook()
+        {
+            string settingsVoice = appSettings.TtsVoice ?? "";
+            string lang = currentBook != null ? currentBook.TextLanguage : "";
+            if (tts == null || string.IsNullOrEmpty(lang)) return settingsVoice;
+
+            List<(string Name, string Vendor, string Language)> voices;
+            try { voices = tts.GetVoiceInfos(); }
+            catch { return settingsVoice; }
+
+            // Already right? Keep it — the user's default wins whenever it fits.
+            foreach (var v in voices)
+                if (string.Equals(v.Name, settingsVoice, StringComparison.OrdinalIgnoreCase)
+                    && LanguageDetector.SameLanguage(v.Language, lang))
+                    return settingsVoice;
+
+            // Otherwise the first voice that speaks the language. The catalog is
+            // ordered in-process first, so a 64-bit voice wins over the satellite.
+            foreach (var v in voices)
+                if (LanguageDetector.SameLanguage(v.Language, lang))
+                    return v.Name;
+
+            return settingsVoice;   // nothing installed speaks it
+        }
+
         private void ApplyTtsSettings()
         {
             if (tts == null) return;
-            // A book can carry its own voice (its Properties); where it doesn't,
-            // the Settings default applies. The speed/volume/pitch then follow THAT
-            // voice — remembered per voice, so a change of voice or engine never
-            // drags the previous one's numbers along.
+            // A book can carry its own voice (its Properties); where it doesn't, the
+            // Settings default applies — unless the book is in a language that
+            // default doesn't speak. The speed/volume/pitch then follow THAT voice —
+            // remembered per voice, so a change of voice or engine never drags the
+            // previous one's numbers along.
             string voice = currentBook != null && !string.IsNullOrEmpty(currentBook.TextVoice)
-                ? currentBook.TextVoice : appSettings.TtsVoice;
+                ? currentBook.TextVoice : DefaultVoiceForBook();
             VoicePrefs p = ResolveVoicePrefs(voice);
             currentWpm = p.Wpm;
             currentVolume = p.Volume;
