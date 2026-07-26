@@ -758,14 +758,7 @@ namespace Nemoviz_Book_Reader
                             Localization.T("Seek.Item.HeadingLevel", level));
                     if (currentBook.TextPages.Count > 0)
                         AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
-                    // Structured text: no Bookmark row (text bookmarks not yet
-                    // supported) — plain time steps from 15 min down.
-                    AddSeekStep(new SeekStep(SeekStepKind.Min15), Localization.T("Seek.Item.15min"));
-                    AddSeekStep(new SeekStep(SeekStepKind.Min10), Localization.T("Seek.Item.10min"));
-                    AddSeekStep(new SeekStep(SeekStepKind.Min5), Localization.T("Seek.Item.5min"));
-                    AddSeekStep(new SeekStep(SeekStepKind.Min1), Localization.T("Seek.Item.1min"));
-                    AddSeekStep(new SeekStep(SeekStepKind.Sec30), Localization.T("Seek.Item.30s"));
-                    AddSeekStep(new SeekStep(SeekStepKind.Sec15), Localization.T("Seek.Item.15s"));
+                    AddTimeSteps15DownWithBookmark();
                     break;
 
                 case PlayerType.FlatText:
@@ -2654,6 +2647,58 @@ namespace Nemoviz_Book_Reader
         /// earlier). Both preserve the current play/pause state, same as
         /// any other virtual-position seek.
         /// </summary>
+        // ── Positions in the book's own unit ──────────────────────────────
+        // An audio book is measured in seconds on the virtual timeline, a text
+        // book in characters. Bookmarks are stored in whichever unit the book
+        // uses, so these three keep the bookmark code identical for both.
+
+        /// <summary>Where we are, in this book's own unit.</summary>
+        private double BookPosition()
+        {
+            if (currentBook != null && currentBook.IsTextBook)
+                return tts != null ? tts.CharPosition : 0;
+            return GetVirtualPosition();
+        }
+
+        /// <summary>Jumps there, in this book's own unit.</summary>
+        private void SeekToBookPosition(double position, Action after = null)
+        {
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                if (tts != null) tts.SeekToChar((int)Math.Round(position));
+                UpdateTextPositionDisplay();
+                after?.Invoke();
+                return;
+            }
+            SeekToVirtualPosition(position, after);
+        }
+
+        /// <summary>How a bookmark's position reads in the Manage Bookmarks list.
+        /// An audio book shows the clock time it sits at; a text book's position is
+        /// a character offset, which tells the user nothing, so it shows how far
+        /// into the book it is — the same percentage the player displays.</summary>
+        private string FormatBookmarkPosition(double position)
+        {
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                int total = tts != null ? tts.TotalChars : 0;
+                double pct = total > 0 ? 100.0 * position / total : 0;
+                return pct.ToString("0.0") + " %";
+            }
+            TimeSpan t = TimeSpan.FromSeconds(position);
+            return string.Format("{0:D2}:{1:D2}", (int)t.TotalHours, t.Minutes);
+        }
+
+        /// <summary>The "you have only just passed it" window that makes Back
+        /// rewind to the current mark instead of the one before: 3 seconds, in
+        /// whichever unit this book counts in.</summary>
+        private double BookBackGrace()
+        {
+            if (currentBook != null && currentBook.IsTextBook)
+                return Math.Max(20, TtsReader.CharsPerMinute(currentWpm) * 3.0 / 60.0);
+            return 3.0;
+        }
+
         private void BookmarkBack()
         {
             if (currentBook == null || currentBook.Bookmarks.Count == 0)
@@ -2662,7 +2707,7 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
-            double pos = GetVirtualPosition();
+            double pos = BookPosition();
             int currentIndex = -1;
             for (int i = currentBook.Bookmarks.Count - 1; i >= 0; i--)
             {
@@ -2679,10 +2724,10 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
-            if (currentIndex == 0 || pos - currentBook.Bookmarks[currentIndex] > 3.0)
-                SeekToVirtualPosition(currentBook.Bookmarks[currentIndex]);
+            if (currentIndex == 0 || pos - currentBook.Bookmarks[currentIndex] > BookBackGrace())
+                SeekToBookPosition(currentBook.Bookmarks[currentIndex]);
             else
-                SeekToVirtualPosition(currentBook.Bookmarks[currentIndex - 1]);
+                SeekToBookPosition(currentBook.Bookmarks[currentIndex - 1]);
         }
 
         private void BookmarkForward()
@@ -2693,12 +2738,12 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
-            double pos = GetVirtualPosition();
+            double pos = BookPosition();
             foreach (double bookmark in currentBook.Bookmarks)
             {
                 if (bookmark > pos)
                 {
-                    SeekToVirtualPosition(bookmark);
+                    SeekToBookPosition(bookmark);
                     return;
                 }
             }
@@ -2988,7 +3033,9 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
-            currentBook.AddBookmark(GetVirtualPosition());
+            // Stored in the book's own unit — seconds for audio, the character
+            // offset for a text book, which is what its position is.
+            currentBook.AddBookmark(BookPosition());
             RebuildSeekSteps();
 
             // Ascending series of five short beeps (~1 second total) — a
@@ -3013,16 +3060,12 @@ namespace Nemoviz_Book_Reader
             }
 
             // Opening the dialog pauses playback (if running), same coupling
-            // as the Sleep Timer dialog — a direct mpv call, so it does not
-            // touch an active Sleep Timer.
+            // as the Sleep Timer dialog — a programmatic pause, so it does not
+            // touch an active Sleep Timer. Works for both engines.
             bool wasPlaying = isPlaying;
-            if (wasPlaying)
-            {
-                mpv_set_property_string(mpvHandle, "pause", "yes");
-                SetPlayPauseState(false);
-            }
+            if (wasPlaying) PausePlaybackQuietly();
 
-            using (ManageBookmarksForm dlg = new ManageBookmarksForm(currentBook.Bookmarks))
+            using (ManageBookmarksForm dlg = new ManageBookmarksForm(currentBook.Bookmarks, FormatBookmarkPosition))
             {
                 DialogResult result = dlg.ShowDialog(this);
 
@@ -3036,25 +3079,14 @@ namespace Nemoviz_Book_Reader
                         // OK confirmed with a bookmark selected: jump there
                         // and make sure playback continues from there.
                         double pos = dlg.ResultBookmarks[dlg.PlayIndex];
-                        SeekToVirtualPosition(pos, () =>
-                        {
-                            if (!isPlaying)
-                            {
-                                mpv_set_property_string(mpvHandle, "pause", "no");
-                                SetPlayPauseState(true);
-                            }
-                        });
+                        SeekToBookPosition(pos, () => { if (!isPlaying) ResumePlaybackQuietly(); });
                         return;
                     }
                 }
 
                 // Plain OK (edits only, no jump) or Cancel: restore exactly
                 // the playback state from before the dialog opened.
-                if (wasPlaying)
-                {
-                    mpv_set_property_string(mpvHandle, "pause", "no");
-                    SetPlayPauseState(true);
-                }
+                if (wasPlaying) ResumePlaybackQuietly();
             }
         }
 

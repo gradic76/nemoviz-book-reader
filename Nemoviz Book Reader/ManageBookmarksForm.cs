@@ -39,9 +39,16 @@ namespace Nemoviz_Book_Reader
         /// which case deletions are still committed but there is no jump.</summary>
         public int PlayIndex { get; private set; } = -1;
 
-        public ManageBookmarksForm(List<double> bookmarks)
+        // How a stored position reads to the user. Audio bookmarks are seconds on
+        // the virtual timeline and show as H:MM; a text book's are character
+        // offsets, which mean nothing to anyone, so the player passes a formatter
+        // that turns them into how far into the book they are.
+        private readonly Func<double, string> formatPosition;
+
+        public ManageBookmarksForm(List<double> bookmarks, Func<double, string> formatPosition = null)
         {
             working = new List<double>(bookmarks);
+            this.formatPosition = formatPosition;
 
             this.Text = Localization.T("Dialog.ManageBookmarks.Title");
             this.ClientSize = new Size(420, 380);
@@ -195,9 +202,14 @@ namespace Nemoviz_Book_Reader
             for (int i = 0; i < working.Count; i++)
             {
                 string number = (i + 1).ToString("D" + width);
-                TimeSpan t = TimeSpan.FromSeconds(working[i]);
-                string time = string.Format("{0:D2}:{1:D2}", (int)t.TotalHours, t.Minutes);
-                lstBookmarks.Items.Add(Localization.T("Bookmark.Item.Format", number, time));
+                string where;
+                if (formatPosition != null) where = formatPosition(working[i]);
+                else
+                {
+                    TimeSpan t = TimeSpan.FromSeconds(working[i]);
+                    where = string.Format("{0:D2}:{1:D2}", (int)t.TotalHours, t.Minutes);
+                }
+                lstBookmarks.Items.Add(Localization.T("Bookmark.Item.Format", number, where));
             }
 
             if (selectIndex >= 0 && selectIndex < working.Count)
