@@ -11,7 +11,7 @@
 //   parent -> host : VOICE<TAB>name | RATE<TAB>n | VOL<TAB>n | PITCH<TAB>n
 //                    | SPEAK<TAB>base64utf8 | PRERENDER<TAB>base64utf8
 //                    | PAUSE | RESUME | CANCEL | QUIT
-//   host  -> parent: VOICE<TAB>name   (one per installed voice, at startup)
+//                    VOICE<TAB>name<TAB>vendor<TAB>language  (per voice)
 //                    READY             (startup enumeration done)
 //                    DONE<TAB>natural | DONE<TAB>cancelled  (utterance ended)
 using System;
@@ -72,7 +72,7 @@ class TtsHost32
         try
         {
             foreach (InstalledVoice v in synth.GetInstalledVoices())
-                if (v.Enabled) Emit("VOICE\t" + v.VoiceInfo.Name + "\t" + Vendor(v.VoiceInfo));
+                if (v.Enabled) Emit("VOICE\t" + v.VoiceInfo.Name + "\t" + Vendor(v.VoiceInfo) + "\t" + Lang(v.VoiceInfo));
         }
         catch { }
         Emit("READY");
@@ -337,6 +337,13 @@ class TtsHost32
     private static void Emit(string msg)
     {
         lock (outLock) { Console.Out.WriteLine(msg); Console.Out.Flush(); }
+    }
+
+    // The culture the voice speaks, e.g. "hr-HR" — used to group voices by
+    // language in Settings.
+    private static string Lang(VoiceInfo v)
+    {
+        try { return v.Culture != null ? v.Culture.Name : ""; } catch { return ""; }
     }
 
     private static string Vendor(VoiceInfo v)

@@ -66,9 +66,9 @@ namespace Nemoviz_Book_Reader
             return list;
         }
 
-        public List<(string Name, string Vendor)> GetVoiceInfos()
+        public List<(string Name, string Vendor, string Language)> GetVoiceInfos()
         {
-            var list = new List<(string, string)>();
+            var list = new List<(string, string, string)>();
             try
             {
                 dynamic toks = voice.GetVoices();
@@ -80,11 +80,27 @@ namespace Nemoviz_Book_Reader
                     if (string.IsNullOrEmpty(name)) continue;
                     string vendor = "";
                     try { vendor = tok.GetAttribute("Vendor") ?? ""; } catch { }
-                    list.Add((name, vendor));
+                    string lang = "";
+                    try { lang = CultureOfLcid(tok.GetAttribute("Language")); } catch { }
+                    list.Add((name, vendor, lang));
                 }
             }
             catch { }
             return list;
+        }
+
+        /// <summary>SAPI reports a voice's language as a hex LCID (possibly several,
+        /// semicolon-separated); the first one becomes a culture name like "hr-HR".</summary>
+        public static string CultureOfLcid(string attribute)
+        {
+            if (string.IsNullOrWhiteSpace(attribute)) return "";
+            string first = attribute.Split(';')[0].Trim();
+            try
+            {
+                int lcid = int.Parse(first, System.Globalization.NumberStyles.HexNumber);
+                return new System.Globalization.CultureInfo(lcid).Name;
+            }
+            catch { return ""; }
         }
 
         public void SelectVoice(string name)

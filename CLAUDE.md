@@ -1005,6 +1005,19 @@ sequence above supersedes its ordering).
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal
   dialog.
+- **Combo boxes: NVDA does not announce the selection when it changes with
+  Up/Down — app-wide** (confirmed by Gordan, Session 17). JAWS is correct
+  everywhere: it reads the name on focus, announces each arrow change, and
+  handles Alt+Down + arrows. NVDA reads the value on Tab-focus and handles
+  Alt+Down fine, but **arrowing through a closed combo changes the selection
+  silently**. This is NVDA's MSAA handling, not our code — the established
+  remedy is already in `PropertiesForm`: speak the new value through
+  `NvdaController` on `SelectedIndexChanged` (a no-op under JAWS, so no
+  double-speak). **Fix globally, not per dialog:** put it in the shared combo
+  factory (`SettingsForm.MakeCombo` and the equivalent used by the other
+  dialogs) so every combo inherits it. Deferred to the single accessibility
+  pass at the end, once the UI has stopped moving — the NVDA controller itself
+  is only a speech channel and cannot change how a control reports itself.
 - A cosmetic JAWS note on the info box: it announces "i edit read only" rather
   than "read only edit" order — this is JAWS's internal handling of
   multiline vs singleline EDIT controls, not our code. Deferred to final

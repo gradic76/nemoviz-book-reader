@@ -40,10 +40,23 @@ namespace Nemoviz_Book_Reader
         private ComboBox cmbVoice;
         // Voice → engine-group catalog (from the merged backends), for the
         // engine/voice two-combo picker.
-        private List<(string Name, string Engine)> voiceCatalog;
-        private TrackBar trkRate;
-        private TrackBar trkVolume;
-        private TrackBar trkPitch;
+        private List<(string Name, string Engine, string Language)> voiceCatalog;
+        private ComboBox cmbLanguage;
+        private readonly List<string> languageCodes = new List<string>();
+        private NumericUpDown numRate;
+        private NumericUpDown numVolume;
+        private NumericUpDown numPitch;
+
+        // Braille and visual output: the settings surface for the two branches that
+        // still have to be built, so the shape is agreed before the work starts.
+        private CheckBox chkBraille;
+        private ComboBox cmbBrailleTable;
+        private CheckBox chkVisual;
+        private ComboBox cmbVisualMode;
+        private ComboBox cmbHighlight;
+        private ComboBox cmbHighlightColour;
+        private ComboBox cmbTextColour;
+        private ComboBox cmbBackColour;
 
         // Device tab — output sound-card picker. The combo shows human-readable
         // descriptions; deviceIds[i] is the mpv identifier for row i. A live-apply
@@ -64,7 +77,7 @@ namespace Nemoviz_Book_Reader
             this.stagedLibraryPath = appSettings.LibraryPath;
 
             this.Text = Localization.T("Dialog.Settings.Title");
-            this.ClientSize = new Size(480, 460);
+            this.ClientSize = new Size(560, 700);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -80,7 +93,7 @@ namespace Nemoviz_Book_Reader
 
             tabSettings = new TabControl();
             tabSettings.Location = new Point(10, 40);
-            tabSettings.Size = new Size(460, 370);
+            tabSettings.Size = new Size(540, 610);
             tabSettings.TabIndex = 1;
 
             tabSettings.TabPages.Add(BuildGeneralTab());
@@ -93,7 +106,7 @@ namespace Nemoviz_Book_Reader
             btnOK.Text = Localization.T("Btn.OK");
             btnOK.AccessibleName = Localization.T("Settings.OK.Accessible");
             btnOK.Size = new Size(90, 32);
-            btnOK.Location = new Point(180, 420);
+            btnOK.Location = new Point(260, 655);
             btnOK.TabIndex = 2;
             btnOK.DialogResult = DialogResult.OK;
             // Click fires before the dialog closes, so this persists on OK too.
@@ -103,7 +116,7 @@ namespace Nemoviz_Book_Reader
             btnCancel.Text = Localization.T("Btn.Cancel");
             btnCancel.AccessibleName = Localization.T("Settings.Cancel.Accessible");
             btnCancel.Size = new Size(90, 32);
-            btnCancel.Location = new Point(280, 420);
+            btnCancel.Location = new Point(360, 655);
             btnCancel.TabIndex = 3;
             btnCancel.DialogResult = DialogResult.Cancel;
 
@@ -112,7 +125,7 @@ namespace Nemoviz_Book_Reader
             btnApply.Text = Localization.T("Settings.Apply");
             btnApply.AccessibleName = Localization.T("Settings.Apply.Accessible");
             btnApply.Size = new Size(90, 32);
-            btnApply.Location = new Point(380, 420);
+            btnApply.Location = new Point(460, 655);
             btnApply.TabIndex = 4;
             btnApply.Click += (s, e) => SaveSettings();
 
@@ -251,7 +264,7 @@ namespace Nemoviz_Book_Reader
             // Text Books — global TTS defaults.
             string voice = cmbVoice != null && cmbVoice.SelectedItem != null
                 ? cmbVoice.SelectedItem.ToString() : (appSettings.TtsVoice ?? "");
-            appSettings.SetTtsDefaults(voice, trkRate.Value, trkPitch.Value, trkVolume.Value);
+            appSettings.SetTtsDefaults(voice, (int)numRate.Value, (int)numPitch.Value, (int)numVolume.Value);
 
             // Device — persist the chosen output card (empty = system default).
             if (cmbSoundCard != null)
@@ -285,135 +298,303 @@ namespace Nemoviz_Book_Reader
             return page;
         }
 
+        // Text Books is three groups: how the text is SPOKEN, how it goes to a
+        // BRAILLE display, and how it is SHOWN. Speech is live; the other two are
+        // the settings surface for the output branches still to be built, so their
+        // controls are present but inert. Settings holds the DEFAULTS — each book
+        // can override them in its own Properties.
         private TabPage BuildTextBooksTab()
         {
             TabPage page = new TabPage(Localization.T("Settings.Tab.TextBooks"));
+            page.AutoScroll = true;
 
-            Label lblLanguage = new Label();
-            lblLanguage.Text = Localization.T("Settings.TextBooks.Language");
-            lblLanguage.Location = new Point(10, 22);
-            lblLanguage.Size = new Size(160, 20);
+            page.Controls.Add(BuildSpeechGroup());
+            page.Controls.Add(BuildBrailleGroup(8, 292));
+            page.Controls.Add(BuildVisualGroup(8, 384));
+            return page;
+        }
 
-            ComboBox cmbLanguage = new ComboBox();
-            cmbLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbLanguage.Location = new Point(180, 19);
-            cmbLanguage.Size = new Size(240, 24);
-            cmbLanguage.AccessibleName = Localization.T("Settings.TextBooks.Language");
-            cmbLanguage.TabIndex = 0;
+        // ── Speech: engine → language → voice, then how it sounds ─────────────
+        private GroupBox BuildSpeechGroup()
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.TextBooks.SpeechGroup");
+            box.Location = new Point(8, 6);
+            box.Size = new Size(500, 280);
 
-            Label lblSpeechEngine = new Label();
-            lblSpeechEngine.Text = Localization.T("Settings.TextBooks.SpeechEngine");
-            lblSpeechEngine.Location = new Point(10, 56);
-            lblSpeechEngine.Size = new Size(160, 20);
+            int lx = 14, cx = 170, cw = 310, y = 26, tab = 0;
 
-            cmbSpeechEngine = new ComboBox();
-            cmbSpeechEngine.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbSpeechEngine.Location = new Point(180, 53);
-            cmbSpeechEngine.Size = new Size(240, 24);
-            cmbSpeechEngine.AccessibleName = Localization.T("Settings.TextBooks.SpeechEngine");
-            cmbSpeechEngine.TabIndex = 1;
-            cmbSpeechEngine.SelectedIndexChanged += (s, e) => PopulateVoicesForEngine();
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.SpeechEngine"), lx, y + 3));
+            cmbSpeechEngine = MakeCombo(Localization.T("Settings.TextBooks.SpeechEngine"), cx, y, cw, tab++);
+            cmbSpeechEngine.SelectedIndexChanged += (s, e) => PopulateLanguagesForEngine();
+            box.Controls.Add(cmbSpeechEngine);
 
-            Label lblVoice = new Label();
-            lblVoice.Text = Localization.T("Settings.TextBooks.Voice");
-            lblVoice.Location = new Point(10, 90);
-            lblVoice.Size = new Size(160, 20);
+            y += 34;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Language"), lx, y + 3));
+            cmbLanguage = MakeCombo(Localization.T("Settings.TextBooks.Language"), cx, y, cw, tab++);
+            cmbLanguage.SelectedIndexChanged += (s, e) => PopulateVoicesForSelection();
+            box.Controls.Add(cmbLanguage);
 
-            cmbVoice = new ComboBox();
-            cmbVoice.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbVoice.Location = new Point(180, 87);
-            cmbVoice.Size = new Size(240, 24);
-            cmbVoice.AccessibleName = Localization.T("Settings.TextBooks.Voice");
-            cmbVoice.TabIndex = 2;
+            y += 34;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Voice"), lx, y + 3));
+            cmbVoice = MakeCombo(Localization.T("Settings.TextBooks.Voice"), cx, y, cw, tab++);
+            box.Controls.Add(cmbVoice);
 
-            // Two-level picker: Speech Engine (vendor + architecture, e.g.
-            // "eSpeak (32-bit)", "Microsoft (64-bit)") → Voice within that engine.
-            // Merged from every backend (64-bit wins duplicate names).
-            try { voiceCatalog = EnsureSpeech().GetVoiceCatalog(); } catch { voiceCatalog = new List<(string, string)>(); }
-            var engines = new List<string>();
-            foreach (var c in voiceCatalog)
-                if (!engines.Contains(c.Engine)) engines.Add(c.Engine);
-            foreach (string en in engines) cmbSpeechEngine.Items.Add(en);
+            // Numeric fields rather than sliders: a screen reader speaks the value
+            // on every step, which a track bar does not.
+            y += 40;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Speed"), lx, y + 3));
+            numRate = MakeNumeric(Localization.T("Settings.TextBooks.Speed"), cx, y, 80, 400,
+                                  Clamp(appSettings.TtsWpm, 80, 400), tab++);
+            box.Controls.Add(numRate);
 
-            // Restore the saved default voice: pick its engine, then the voice.
-            string savedVoice = appSettings.TtsVoice ?? "";
-            string savedEngine = null;
-            foreach (var c in voiceCatalog)
-                if (string.Equals(c.Name, savedVoice, StringComparison.OrdinalIgnoreCase)) { savedEngine = c.Engine; break; }
-            int ei = savedEngine != null ? cmbSpeechEngine.Items.IndexOf(savedEngine) : -1;
-            if (ei < 0 && cmbSpeechEngine.Items.Count > 0) ei = 0;
-            if (ei >= 0) cmbSpeechEngine.SelectedIndex = ei;   // fires PopulateVoicesForEngine
-            int svi = cmbVoice.Items.IndexOf(savedVoice);
-            if (svi >= 0) cmbVoice.SelectedIndex = svi;
-            else if (cmbVoice.Items.Count > 0) cmbVoice.SelectedIndex = 0;
+            y += 34;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Volume"), lx, y + 3));
+            numVolume = MakeNumeric(Localization.T("Settings.TextBooks.Volume"), cx, y, 0, 100,
+                                    Clamp(appSettings.TtsVolume, 0, 100), tab++);
+            box.Controls.Add(numVolume);
 
-            Label lblSpeed = new Label();
-            lblSpeed.Text = Localization.T("Settings.TextBooks.Speed");
-            lblSpeed.Location = new Point(10, 128);
-            lblSpeed.Size = new Size(420, 20);
+            y += 34;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Pitch"), lx, y + 3));
+            numPitch = MakeNumeric(Localization.T("Settings.TextBooks.Pitch"), cx, y, -10, 10,
+                                   Clamp(appSettings.TtsPitch, -10, 10), tab++);
+            box.Controls.Add(numPitch);
 
-            trkRate = new TrackBar();
-            trkRate.Minimum = 80;
-            trkRate.Maximum = 400;
-            trkRate.Value = Clamp(appSettings.TtsWpm, 80, 400);
-            trkRate.TickFrequency = 20;
-            trkRate.Location = new Point(10, 150);
-            trkRate.Size = new Size(420, 40);
-            trkRate.AccessibleName = Localization.T("Settings.TextBooks.Speed");
-            trkRate.TabIndex = 3;
-
-            Label lblVolume = new Label();
-            lblVolume.Text = Localization.T("Settings.TextBooks.Volume");
-            lblVolume.Location = new Point(10, 194);
-            lblVolume.Size = new Size(420, 20);
-
-            trkVolume = new TrackBar();
-            trkVolume.Minimum = 0;
-            trkVolume.Maximum = 100;
-            trkVolume.Value = Clamp(appSettings.TtsVolume, 0, 100);
-            trkVolume.TickFrequency = 10;
-            trkVolume.Location = new Point(10, 216);
-            trkVolume.Size = new Size(420, 40);
-            trkVolume.AccessibleName = Localization.T("Settings.TextBooks.Volume");
-            trkVolume.TabIndex = 4;
-
-            Label lblPitch = new Label();
-            lblPitch.Text = Localization.T("Settings.TextBooks.Pitch");
-            lblPitch.Location = new Point(10, 260);
-            lblPitch.Size = new Size(420, 20);
-
-            trkPitch = new TrackBar();
-            trkPitch.Minimum = -10;
-            trkPitch.Maximum = 10;
-            trkPitch.Value = Clamp(appSettings.TtsPitch, -10, 10);
-            trkPitch.TickFrequency = 1;
-            trkPitch.Location = new Point(10, 282);
-            trkPitch.Size = new Size(420, 40);
-            trkPitch.AccessibleName = Localization.T("Settings.TextBooks.Pitch");
-            trkPitch.TabIndex = 5;
-
+            y += 36;
             Button btnTest = new Button();
             btnTest.Text = Localization.T("Settings.TextBooks.Test");
             btnTest.AccessibleName = Localization.T("Settings.TextBooks.Test");
-            btnTest.Location = new Point(10, 326);
+            btnTest.Location = new Point(cx, y);
             btnTest.Size = new Size(160, 30);
-            btnTest.TabIndex = 6;
+            btnTest.TabIndex = tab++;
             btnTest.Click += (s, e) => TestVoice();
+            box.Controls.Add(btnTest);
 
-            page.Controls.Add(lblLanguage);
-            page.Controls.Add(cmbLanguage);
-            page.Controls.Add(lblSpeechEngine);
-            page.Controls.Add(cmbSpeechEngine);
-            page.Controls.Add(lblVoice);
-            page.Controls.Add(cmbVoice);
-            page.Controls.Add(lblSpeed);
-            page.Controls.Add(trkRate);
-            page.Controls.Add(lblVolume);
-            page.Controls.Add(trkVolume);
-            page.Controls.Add(lblPitch);
-            page.Controls.Add(trkPitch);
-            page.Controls.Add(btnTest);
-            return page;
+            // Fill the cascade and restore the saved default voice.
+            try { voiceCatalog = EnsureSpeech().GetVoiceCatalog(); }
+            catch { voiceCatalog = new List<(string, string, string)>(); }
+
+            var engines = new List<string>();
+            foreach (var c in voiceCatalog)
+                if (!engines.Contains(c.Engine)) engines.Add(c.Engine);
+            engines.Sort(StringComparer.CurrentCultureIgnoreCase);
+            foreach (string en in engines) cmbSpeechEngine.Items.Add(en);
+
+            string savedVoice = appSettings.TtsVoice ?? "";
+            string savedEngine = null, savedLang = null;
+            foreach (var c in voiceCatalog)
+                if (string.Equals(c.Name, savedVoice, StringComparison.OrdinalIgnoreCase))
+                { savedEngine = c.Engine; savedLang = c.Language; break; }
+
+            int ei = savedEngine != null ? cmbSpeechEngine.Items.IndexOf(savedEngine) : -1;
+            if (ei < 0 && cmbSpeechEngine.Items.Count > 0) ei = 0;
+            if (ei >= 0) cmbSpeechEngine.SelectedIndex = ei;   // cascades to language + voice
+
+            if (savedLang != null)
+            {
+                int li = languageCodes.IndexOf(savedLang);
+                if (li >= 0) cmbLanguage.SelectedIndex = li;   // cascades to voice
+            }
+            int svi = cmbVoice.Items.IndexOf(savedVoice);
+            if (svi >= 0) cmbVoice.SelectedIndex = svi;
+            return box;
+        }
+
+        // ── Braille output (placeholder for the display branch) ───────────────
+        private GroupBox BuildBrailleGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.TextBooks.BrailleGroup");
+            box.Location = new Point(x, y);
+            box.Size = new Size(500, 86);
+
+            chkBraille = new CheckBox();
+            chkBraille.Text = Localization.T("Settings.TextBooks.UseBraille");
+            chkBraille.AccessibleName = Localization.T("Settings.TextBooks.UseBraille");
+            chkBraille.Location = new Point(14, 22);
+            chkBraille.Size = new Size(470, 24);
+            chkBraille.TabIndex = 0;
+            chkBraille.CheckedChanged += (s, e) => UpdateBrailleEnabled();
+            box.Controls.Add(chkBraille);
+
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.BrailleTable"), 14, 55));
+            cmbBrailleTable = MakeCombo(Localization.T("Settings.TextBooks.BrailleTable"), 170, 52, 310, 1);
+            // The tables NBR ships for reading .brf books; the same list serves as
+            // the default for what a braille display would be sent.
+            cmbBrailleTable.Items.Add(Localization.T("Settings.TextBooks.BrailleTableAuto"));
+            foreach (BrailleTableInfo t in BrailleTables.All) cmbBrailleTable.Items.Add(t.Display);
+            cmbBrailleTable.SelectedIndex = 0;
+            box.Controls.Add(cmbBrailleTable);
+
+            UpdateBrailleEnabled();
+            return box;
+        }
+
+        // ── Visual output (placeholder for the on-screen branch) ──────────────
+        private GroupBox BuildVisualGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.TextBooks.VisualGroup");
+            box.Location = new Point(x, y);
+            box.Size = new Size(500, 224);
+
+            chkVisual = new CheckBox();
+            chkVisual.Text = Localization.T("Settings.TextBooks.UseVisual");
+            chkVisual.AccessibleName = Localization.T("Settings.TextBooks.UseVisual");
+            chkVisual.Location = new Point(14, 22);
+            chkVisual.Size = new Size(470, 24);
+            chkVisual.TabIndex = 0;
+            chkVisual.CheckedChanged += (s, e) => UpdateVisualEnabled();
+            box.Controls.Add(chkVisual);
+
+            int lx = 14, cx = 170, cw = 310, yy = 52, tab = 1;
+
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.VisualMode"), lx, yy + 3));
+            cmbVisualMode = MakeCombo(Localization.T("Settings.TextBooks.VisualMode"), cx, yy, cw, tab++);
+            cmbVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.TwoRows"));
+            cmbVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.FullInstant"));
+            cmbVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.FullScrolling"));
+            cmbVisualMode.SelectedIndex = 0;
+            box.Controls.Add(cmbVisualMode);
+
+            yy += 34;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Highlight"), lx, yy + 3));
+            cmbHighlight = MakeCombo(Localization.T("Settings.TextBooks.Highlight"), cx, yy, cw, tab++);
+            cmbHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.None"));
+            cmbHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Word"));
+            cmbHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Sentence"));
+            cmbHighlight.SelectedIndex = 2;
+            box.Controls.Add(cmbHighlight);
+
+            yy += 34;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.HighlightColour"), lx, yy + 3));
+            cmbHighlightColour = MakeCombo(Localization.T("Settings.TextBooks.HighlightColour"), cx, yy, cw, tab++);
+            box.Controls.Add(cmbHighlightColour);
+
+            yy += 34;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.TextColour"), lx, yy + 3));
+            cmbTextColour = MakeCombo(Localization.T("Settings.TextBooks.TextColour"), cx, yy, cw, tab++);
+            box.Controls.Add(cmbTextColour);
+
+            yy += 34;
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.BackColour"), lx, yy + 3));
+            cmbBackColour = MakeCombo(Localization.T("Settings.TextBooks.BackColour"), cx, yy, cw, tab++);
+            box.Controls.Add(cmbBackColour);
+
+            // High-contrast pairs first — this is the audience that needs them.
+            string[] colours =
+            {
+                Localization.T("Settings.Colour.White"), Localization.T("Settings.Colour.Black"),
+                Localization.T("Settings.Colour.Yellow"), Localization.T("Settings.Colour.Blue"),
+                Localization.T("Settings.Colour.Green"), Localization.T("Settings.Colour.Red")
+            };
+            foreach (string c in colours) { cmbTextColour.Items.Add(c); cmbBackColour.Items.Add(c); cmbHighlightColour.Items.Add(c); }
+            cmbHighlightColour.SelectedIndex = 3;   // blue highlight under yellow-on-black
+            cmbTextColour.SelectedIndex = 2;   // yellow on black: the usual low-vision pair
+            cmbBackColour.SelectedIndex = 1;
+
+            UpdateVisualEnabled();
+            return box;
+        }
+
+        /// <summary>Everything under "Use braille output" follows the checkbox —
+        /// dimmed and out of the tab order while the feature is off.</summary>
+        private void UpdateBrailleEnabled()
+        {
+            bool on = chkBraille != null && chkBraille.Checked;
+            SetEnabled(on, cmbBrailleTable);
+        }
+
+        private void UpdateVisualEnabled()
+        {
+            bool on = chkVisual != null && chkVisual.Checked;
+            SetEnabled(on, cmbVisualMode, cmbHighlight, cmbHighlightColour, cmbTextColour, cmbBackColour);
+        }
+
+        private static void SetEnabled(bool on, params Control[] controls)
+        {
+            foreach (Control c in controls)
+                if (c != null) { c.Enabled = on; c.TabStop = on; }
+        }
+
+        // ── Small builders, so the layout above stays readable ────────────────
+        private static Label MakeLabel(string text, int x, int y)
+        {
+            Label l = new Label();
+            l.Text = text;
+            l.Location = new Point(x, y);
+            l.Size = new Size(150, 20);
+            l.TabStop = false;
+            return l;
+        }
+
+        private static ComboBox MakeCombo(string name, int x, int y, int w, int tabIndex)
+        {
+            ComboBox c = new ComboBox();
+            c.DropDownStyle = ComboBoxStyle.DropDownList;
+            c.Location = new Point(x, y);
+            c.Size = new Size(w, 24);
+            c.AccessibleName = name;
+            c.TabIndex = tabIndex;
+            return c;
+        }
+
+        private static NumericUpDown MakeNumeric(string name, int x, int y, int min, int max, int value, int tabIndex)
+        {
+            NumericUpDown n = new NumericUpDown();
+            n.Minimum = min;
+            n.Maximum = max;
+            n.Value = Clamp(value, min, max);
+            n.Location = new Point(x, y);
+            n.Size = new Size(90, 24);
+            n.AccessibleName = name;
+            n.TabIndex = tabIndex;
+            return n;
+        }
+
+        /// <summary>Engine chosen → list the languages that engine actually speaks.</summary>
+        private void PopulateLanguagesForEngine()
+        {
+            if (cmbLanguage == null || cmbSpeechEngine == null || voiceCatalog == null) return;
+            string engine = cmbSpeechEngine.SelectedItem as string;
+            cmbLanguage.Items.Clear();
+            languageCodes.Clear();
+            foreach (var c in voiceCatalog)
+            {
+                if (c.Engine != engine) continue;
+                string code = string.IsNullOrEmpty(c.Language) ? "" : c.Language;
+                if (languageCodes.Contains(code)) continue;
+                languageCodes.Add(code);
+                cmbLanguage.Items.Add(LanguageLabel(code));
+            }
+            if (cmbLanguage.Items.Count > 0) cmbLanguage.SelectedIndex = 0;  // cascades to voice
+            else PopulateVoicesForSelection();
+        }
+
+        /// <summary>Engine + language chosen → the voices that match both.</summary>
+        private void PopulateVoicesForSelection()
+        {
+            if (cmbVoice == null || cmbSpeechEngine == null || voiceCatalog == null) return;
+            string engine = cmbSpeechEngine.SelectedItem as string;
+            int li = cmbLanguage != null ? cmbLanguage.SelectedIndex : -1;
+            string lang = (li >= 0 && li < languageCodes.Count) ? languageCodes[li] : null;
+
+            cmbVoice.Items.Clear();
+            foreach (var c in voiceCatalog)
+            {
+                if (c.Engine != engine) continue;
+                if (lang != null && (c.Language ?? "") != lang) continue;
+                cmbVoice.Items.Add(c.Name);
+            }
+            if (cmbVoice.Items.Count > 0) cmbVoice.SelectedIndex = 0;
+        }
+
+        /// <summary>"hr-HR" → the language's own name, so the list reads naturally.</summary>
+        private static string LanguageLabel(string code)
+        {
+            if (string.IsNullOrEmpty(code)) return Localization.T("Settings.TextBooks.LanguageUnknown");
+            try { return new System.Globalization.CultureInfo(code).DisplayName + "  (" + code + ")"; }
+            catch { return code; }
         }
 
         /// <summary>Speaks a short sample with the currently selected voice /
@@ -426,9 +607,9 @@ namespace Nemoviz_Book_Reader
                 CompositeSpeechBackend sp = EnsureSpeech();
                 if (cmbVoice != null && cmbVoice.SelectedItem != null)
                     sp.SelectVoice(cmbVoice.SelectedItem.ToString());
-                sp.SetRate(TtsReader.WpmToRate(trkRate.Value));
-                sp.SetVolume(trkVolume.Value);
-                sp.SetPitch(trkPitch.Value * 5); // -10..10 → -50..50 %
+                sp.SetRate(TtsReader.WpmToRate((int)numRate.Value));
+                sp.SetVolume((int)numVolume.Value);
+                sp.SetPitch((int)numPitch.Value * 5); // -10..10 → -50..50 %
                 sp.Cancel();                      // stop any still-playing sample
                 sp.Speak(Localization.T("Settings.TextBooks.TestSample"));
             }
@@ -436,15 +617,6 @@ namespace Nemoviz_Book_Reader
         }
 
         // Fills the Voice combo with the voices of the currently-selected engine.
-        private void PopulateVoicesForEngine()
-        {
-            if (cmbVoice == null || cmbSpeechEngine == null || voiceCatalog == null) return;
-            string engine = cmbSpeechEngine.SelectedItem as string;
-            cmbVoice.Items.Clear();
-            foreach (var c in voiceCatalog)
-                if (c.Engine == engine) cmbVoice.Items.Add(c.Name);
-            if (cmbVoice.Items.Count > 0) cmbVoice.SelectedIndex = 0;
-        }
 
         // Lazily-created merged speech backend (64-bit + 32-bit satellite), used
         // for the voice list and the Test button; disposed with the dialog.

@@ -19,9 +19,9 @@ namespace Nemoviz_Book_Reader
         private readonly Dictionary<string, ISpeechBackend> owner =
             new Dictionary<string, ISpeechBackend>(StringComparer.OrdinalIgnoreCase);
         private readonly List<string> mergedVoices = new List<string>();
-        // Merged voice metadata for grouping (name + vendor + architecture bits).
-        private readonly List<(string Name, string Vendor, int Arch)> catalog =
-            new List<(string, string, int)>();
+        // Merged voice metadata for grouping (name + vendor + language + architecture).
+        private readonly List<(string Name, string Vendor, string Language, int Arch)> catalog =
+            new List<(string, string, string, int)>();
 
         private ISpeechBackend active;
         private int rate, volume = 100, pitch;
@@ -49,25 +49,26 @@ namespace Nemoviz_Book_Reader
                 if (string.IsNullOrEmpty(vi.Name) || owner.ContainsKey(vi.Name)) continue; // 64-bit wins dupes
                 owner[vi.Name] = b;
                 mergedVoices.Add(vi.Name);
-                catalog.Add((vi.Name, vi.Vendor, arch));
+                catalog.Add((vi.Name, vi.Vendor, vi.Language, arch));
             }
         }
 
         public List<string> GetVoices() { return new List<string>(mergedVoices); }
 
-        public List<(string Name, string Vendor)> GetVoiceInfos()
+        public List<(string Name, string Vendor, string Language)> GetVoiceInfos()
         {
-            var list = new List<(string, string)>();
-            foreach (var c in catalog) list.Add((c.Name, c.Vendor));
+            var list = new List<(string, string, string)>();
+            foreach (var c in catalog) list.Add((c.Name, c.Vendor, c.Language));
             return list;
         }
 
         /// <summary>Voices paired with a friendly engine group ("eSpeak (32-bit)",
-        /// "Microsoft (64-bit)", …) for the Settings engine/voice pickers.</summary>
-        public List<(string Name, string Engine)> GetVoiceCatalog()
+        /// "Microsoft (64-bit)", …) and the language they speak — the three levels
+        /// the Settings pickers cascade through: engine → language → voice.</summary>
+        public List<(string Name, string Engine, string Language)> GetVoiceCatalog()
         {
-            var list = new List<(string, string)>();
-            foreach (var c in catalog) list.Add((c.Name, EngineLabel(c.Name, c.Vendor, c.Arch)));
+            var list = new List<(string, string, string)>();
+            foreach (var c in catalog) list.Add((c.Name, EngineLabel(c.Name, c.Vendor, c.Arch), c.Language));
             return list;
         }
 
