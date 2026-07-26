@@ -1005,6 +1005,16 @@ sequence above supersedes its ordering).
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal
   dialog.
+- **Properties live-preview: finish testing (Session 17).** Volume/speed and a
+  text book's voice/speed/volume/pitch now preview live, but the volume path
+  was still misbehaving when the session ended: a TEXT book's "Volume" field is
+  the TTS volume (`TextVolume`), not playback volume, and it was seeded with a
+  flat 100 instead of the live value — shown as 100 while actually 50, jumping
+  to the real value on first edit, and "falling" to 50 later when the arrows
+  were used. Seeding from the live value is committed but **untested**. Speed
+  looked unaffected; retest both, plus Cancel/OK, on a text book AND an audio
+  book, and check the Library entry point too (it opens Properties without the
+  player's live values, so its fields fall back to what is stored).
 - **Combo boxes: NVDA does not announce the selection when it changes with
   Up/Down — app-wide** (confirmed by Gordan, Session 17). JAWS is correct
   everywhere: it reads the name on focus, announces each arrow change, and
