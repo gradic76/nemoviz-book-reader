@@ -793,27 +793,55 @@ M4B's cover art — a real MP4 video track — never pops a video window.
 
 ---
 
-## 8g. TTS backends — 32-bit satellite (Phase 1)
+## 8g. TTS backends — three engines, one voice list
 
 Text-book speech is behind `ISpeechBackend` (sentence chunks; `TtsReader` owns
-position). Now multi-backend, presented as one via `CompositeSpeechBackend`:
-- `Sapi5Backend` — in-process x64 SAPI5 (only 64-bit voices).
-- `Sapi5SatelliteBackend` — launches a **32-bit** host `TtsHost32.exe` so the
-  x64 app can use 32-bit-only voices (eSpeak, RHVoice). The host plays audio
-  itself and speaks a stdio line protocol (see `TtsHost32.cs`); the backend
-  caches its voice list, forwards commands, raises `Completed` on `DONE`.
-- `CompositeSpeechBackend` merges voices (64-bit wins duplicate names), routes
-  at the selected voice's owning backend, carries rate/volume/pitch across a
-  backend switch. `TtsReader()` uses it; SettingsForm's Voice combo + Test do too.
+position). Three backends, presented as one via `CompositeSpeechBackend`:
+- `Sapi5Backend` — in-process x64, SAPI COM `SpVoice`. Every 64-bit SAPI 5 voice
+  (Zira, RHVoice Karmela/Marija) plus output-device selection via `AudioOutput`.
+- **`OneCoreBackend` — the OneCore/WinRT voices** (`Speech_OneCore` hive), which
+  SAPI cannot see at all: on a Croatian machine this is the only way to
+  **Microsoft Matej (hr-HR)**. **No Windows SDK and no vendored winmd** — the
+  type comes from `Type.GetType("…, Windows, ContentType=WindowsRuntime")`, and
+  the async result (a bare `__ComObject` reflection can't inspect) is unwrapped
+  with `AsTask` from `System.Runtime.WindowsRuntime` (in the GAC, part of the
+  framework). Synthesis hands back a finished `audio/wav` in memory. Rate/volume/
+  pitch map onto WinRT's multipliers (`SpeakingRate`/`AudioVolume`/`AudioPitch`).
+  Synthesis runs on a worker thread; a UI-thread timer starts playback and
+  watches for the end, so every COM call stays on one thread.
+- `Sapi5SatelliteBackend` — launches the **32-bit** host `TtsHost32.exe` for
+  32-bit-only voices (eSpeak); stdio line protocol (see `TtsHost32.cs`), the
+  backend caches its voice list, forwards commands, raises `Completed` on `DONE`.
+- `CompositeSpeechBackend` merges voices (64-bit wins duplicates, compared on the
+  bare name), routes at the selected voice's owning backend, carries
+  rate/volume/pitch across a switch, cancels the backend it switches away from,
+  and `Cancel()` reaches **all** backends. `TtsReader()` uses it; SettingsForm's
+  Voice combo + Test button do too.
+
+**`SapiWavPlayer` — one playback path for rendered speech (shared by the OneCore
+backend and the 32-bit host, compiled into both).** Anything that produces a WAV
+plays it through SAPI's `SpVoice.SpeakStream` with `AudioOutput` set from the mpv
+device id, because that gives the two things `SoundPlayer` cannot: **the sound
+card chosen in Settings → Device**, and a **purge that stops playback instantly**.
+It also owns `TrimTrailingSilence` (engines pad the end — Zira by ~¾ s — which
+would otherwise be heard as a gap between sentences).
+
+**The 32-bit host runs on SAPI COM, not System.Speech** (rewritten once
+`SpVoice` was proven able to render every voice — eSpeak included — to a wave
+file, which System.Speech could not). That single change fixed three things:
+32-bit voices now follow the chosen sound card (`DEVICE` command → the player's
+`AudioOutput`); eSpeak no longer needs the crackly real-time path, so **every**
+voice gets the buffered, gapless one; and the host names a voice by its token
+`Name`, the same name the in-process backend reports, so the two lists merge
+instead of duplicating. The old System.Speech gotcha (eSpeak's driver calling a
+natural end "cancelled") is gone with it — completion is now decided by the host
+from playback, via a generation counter.
 
 **Packaging:** `TtsHost32.cs` is NOT in the main x64 Compile set; a post-build
 MSBuild `Exec` target compiles it x86 with `$(MSBuildToolsPath)\Roslyn\csc.exe`
-(note: `$(CscToolPath)` was empty here) into the output dir.
-
-**eSpeak gotcha:** eSpeak's SAPI driver sets `SpeakCompleted.Cancelled = true`
-even on a natural end → the reader stopped after each sentence. The host ignores
-`e.Cancelled`; an utterance is cancelled only if we sent CANCEL or a newer Speak
-superseded it (`e.Prompt != currentPrompt`).
+(note: `$(CscToolPath)` was empty here) into the output dir, together with the
+shared `SapiWavPlayer.cs` and a `Microsoft.CSharp` reference (both drive SAPI
+through late-bound `dynamic`).
 
 **Phase 2 (done):** Settings → Text Books is a two-combo picker — "Speech
 Engine" (vendor + architecture, e.g. "eSpeak (32-bit)", "Microsoft (64-bit)",
@@ -821,19 +849,30 @@ Engine" (vendor + architecture, e.g. "eSpeak (32-bit)", "Microsoft (64-bit)",
 per-voice **vendor**; `CompositeSpeechBackend.GetVoiceCatalog()` derives the
 engine label (`EngineLabel`: eSpeak from its URL vendor, Microsoft, else "SAPI 5").
 Only the voice is persisted (`TtsVoice`); the engine is derived from it on open.
-**A voice is named by its plain name in both backends** — `Sapi5Backend` reports
-the SAPI token's `Name` attribute, not `GetDescription()` (which appends the
-language) — so the same voice seen by both is recognised as one and the 64-bit
-copy wins. A name saved in the old (description) form still resolves: lookup
-falls back to comparing the bare name. Current grouping on Gordan's machine:
-"Microsoft (64-bit)" = Zira, "Olga Yakovleva (64-bit)" = Karmela/Marija (RHVoice,
-via the SpVoice vendor attribute), "espeak.sf.net (32-bit)" = the eSpeak voices.
+**A voice is named by its plain name in every backend** — `Sapi5Backend` and the
+host both report the SAPI token's `Name` attribute, not `GetDescription()` (which
+appends the language) — so the same voice seen by two backends is recognised as
+one and the 64-bit copy wins. A name saved in the old (description) form still
+resolves: lookup falls back to comparing the bare name. The catalog on Gordan's
+machine (verified end to end): "Microsoft (64-bit)" = Zira, "Olga Yakovleva
+(64-bit)" = Karmela/Marija (RHVoice, via the SpVoice vendor attribute),
+**"Microsoft OneCore (64-bit)" = Matej**, "espeak.sf.net (32-bit)" = eSpeak-hr
+and eSpeak-hr+michael. All four speak, and a cancel is reported in 46 ms
+(in-process), 143 ms (OneCore) and 319 ms (32-bit host, IPC included).
+
+**Sound card.** Every backend follows Settings → Device now: `Sapi5Backend` via
+`SpVoice.AudioOutput`, OneCore and the 32-bit host via `SapiWavPlayer`. The mpv
+device id and the SAPI output token are matched on the shared WASAPI endpoint
+guid; empty/"auto" = system default. `Form1.SetAudioDeviceLive` routes a live
+change to mpv AND the reader, and Settings' **Test voice** now speaks through the
+card being chosen rather than the system default.
 
 **Temporary / still to do:** `BtnSettings_Click` pushes a changed Settings voice
 onto the live book (no restart) — interim; final design is Settings voice = the
-*default* only, real per-book voice in a (not-yet-built) per-book text Properties.
-OneCore/WinRT backend (e.g. "Microsoft Matej") is a separate later backend. See
-memory `project-tts-backends`.
+*default* only, real per-book voice in the book's Properties (that dialog now
+exists — see 8d — so this can be finished). **SAPI 4** is the one speech source
+still not covered (32-bit only, would need direct COM interop in the host); see
+the auto-discovery requirement in memory `project-tts-backends`.
 
 ---
 

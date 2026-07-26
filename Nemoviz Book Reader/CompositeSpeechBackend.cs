@@ -32,8 +32,10 @@ namespace Nemoviz_Book_Reader
         public CompositeSpeechBackend()
         {
             // In-process (64-bit) first so it wins duplicate voice names, then the
+            // OneCore voices (a separate engine SAPI cannot see at all), then the
             // 32-bit satellite for the voices only it can see.
             try { Add(new Sapi5Backend(), 64); } catch { }
+            try { Add(new OneCoreBackend(), 64); } catch { }
             try { Add(new Sapi5SatelliteBackend(), 32); } catch { }
 
             active = backends.Count > 0 ? backends[0] : null;

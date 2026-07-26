@@ -653,7 +653,23 @@ namespace Nemoviz_Book_Reader
         private CompositeSpeechBackend EnsureSpeech()
         {
             if (speech == null) speech = new CompositeSpeechBackend();
+            // The sample must come out of the card being chosen, not the system
+            // default — the Device tab and the Test button are usually pressed in
+            // the same visit, and every backend can follow the choice now.
+            speech.SetAudioDevice(SelectedDeviceId());
             return speech;
+        }
+
+        /// <summary>The output card currently picked in the Device tab, falling
+        /// back to the persisted one before that tab has been touched.</summary>
+        private string SelectedDeviceId()
+        {
+            if (cmbSoundCard != null)
+            {
+                int i = cmbSoundCard.SelectedIndex;
+                if (i >= 0 && i < deviceIds.Count) return deviceIds[i];
+            }
+            return appSettings.AudioDevice ?? "";
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)

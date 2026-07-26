@@ -113,10 +113,9 @@ namespace Nemoviz_Book_Reader
         public void SetRate(int rate) { Send("RATE\t" + rate); }
         public void SetVolume(int volume) { Send("VOL\t" + volume); }
         public void SetPitch(int pitchPercent) { Send("PITCH\t" + pitchPercent); }
-        // Output-device selection for the 32-bit host isn't wired yet (the host
-        // would need the same SpVoice.AudioOutput handling) — no-op for now, so
-        // 32-bit-only voices stay on the system default.
-        public void SetAudioDevice(string deviceId) { }
+        // The host plays through SAPI's own output token, so it follows the sound
+        // card picked in Settings → Device exactly like the in-process backend.
+        public void SetAudioDevice(string deviceId) { Send("DEVICE\t" + (deviceId ?? "")); }
 
         public void Speak(string text)
         {
