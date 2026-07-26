@@ -36,7 +36,7 @@ namespace Nemoviz_Book_Reader
         // dialog (they are shown/hidden together by the switch at the top).
         private CheckBox chkUseMultimediaKeys;
         private CheckBox chkUseMultimediaKeysGlobally;
-        private readonly List<Label> hints = new List<Label>();
+        private readonly List<TextBox> hints = new List<TextBox>();
 
         // Audio Books tab — use embedded metadata for title/author.
         private CheckBox chkUseMetadata;
@@ -100,7 +100,7 @@ namespace Nemoviz_Book_Reader
             // Live, without closing the window: the hints simply appear or go.
             chkShowHints.CheckedChanged += (s, e) =>
             {
-                foreach (Label h in hints) h.Visible = chkShowHints.Checked;
+                foreach (TextBox h in hints) { h.Visible = chkShowHints.Checked; h.TabStop = chkShowHints.Checked; }
             };
 
             tabSettings = new TabControl();
@@ -185,7 +185,7 @@ namespace Nemoviz_Book_Reader
             chkUseMultimediaKeysGlobally.AccessibleName = Localization.T("Settings.General.UseMultimediaKeysGlobally");
             chkUseMultimediaKeysGlobally.Location = new Point(28, 78);
             chkUseMultimediaKeysGlobally.Size = new Size(452, 24);
-            chkUseMultimediaKeysGlobally.TabIndex = 1;
+            chkUseMultimediaKeysGlobally.TabIndex = 2;
             chkUseMultimediaKeysGlobally.Checked = appSettings.MediaKeysGlobal;
 
             Label lblLibraryLocation = new Label();
@@ -204,14 +204,14 @@ namespace Nemoviz_Book_Reader
             tbLibraryLocation.Size = new Size(330, 23);
             tbLibraryLocation.Text = stagedLibraryPath;
             tbLibraryLocation.AccessibleName = Localization.T("Settings.General.LibraryLocation");
-            tbLibraryLocation.TabIndex = 2;
+            tbLibraryLocation.TabIndex = 4;
 
             Button btnBrowse = new Button();
             btnBrowse.Text = Localization.T("Settings.General.Browse");
             btnBrowse.AccessibleName = Localization.T("Settings.General.Browse.Accessible");
             btnBrowse.Location = new Point(348, 167);
             btnBrowse.Size = new Size(90, 26);
-            btnBrowse.TabIndex = 3;
+            btnBrowse.TabIndex = 5;
             btnBrowse.Click += (s, e) => BrowseLibraryLocation();
 
             Label lblLanguage = new Label();
@@ -229,21 +229,21 @@ namespace Nemoviz_Book_Reader
             cmbLanguage.Location = new Point(180, 237);
             cmbLanguage.Size = new Size(240, 24);
             cmbLanguage.AccessibleName = Localization.T("Settings.General.Language");
-            cmbLanguage.TabIndex = 4;
+            cmbLanguage.TabIndex = 7;
             cmbLanguage.Items.Add(Localization.T("LanguageName"));
             cmbLanguage.SelectedIndex = 0;
 
             page.Controls.Add(chkUseMultimediaKeys);
-            page.Controls.Add(MakeHint("Settings.General.UseMultimediaKeys.Hint", 28, 42, 470, 32));
+            page.Controls.Add(MakeHint("Settings.General.UseMultimediaKeys.Hint", 28, 42, 470, 32, 1));
             page.Controls.Add(chkUseMultimediaKeysGlobally);
-            page.Controls.Add(MakeHint("Settings.General.UseMultimediaKeysGlobally.Hint", 46, 104, 452, 32));
+            page.Controls.Add(MakeHint("Settings.General.UseMultimediaKeysGlobally.Hint", 46, 104, 452, 32, 3));
             page.Controls.Add(lblLibraryLocation);
             page.Controls.Add(tbLibraryLocation);
             page.Controls.Add(btnBrowse);
-            page.Controls.Add(MakeHint("Settings.General.LibraryLocation.Hint", 10, 196, 470, 32));
+            page.Controls.Add(MakeHint("Settings.General.LibraryLocation.Hint", 10, 196, 470, 32, 6));
             page.Controls.Add(lblLanguage);
             page.Controls.Add(cmbLanguage);
-            page.Controls.Add(MakeHint("Settings.General.Language.Hint", 10, 266, 470, 32));
+            page.Controls.Add(MakeHint("Settings.General.Language.Hint", 10, 266, 470, 32, 8));
             UpdateMediaKeyEnabled();
             return page;
         }
@@ -256,20 +256,27 @@ namespace Nemoviz_Book_Reader
                        chkUseMultimediaKeysGlobally);
         }
 
-        /// <summary>An explanatory line under a control. Not tabbable — it is there
-        /// to be read, not visited — and all of them appear and disappear together
-        /// with the "Show help hints" switch at the top of the dialog.</summary>
-        private Label MakeHint(string key, int x, int y, int w, int h)
+        /// <summary>An explanatory hint under a control — the same read-only,
+        /// TABBABLE textbox the Go To dialog uses. It has to be tabbable: a plain
+        /// label is invisible to a screen reader driven by Tab, which is how this
+        /// app is used, so the first version of these hints simply could not be
+        /// read. The "Show help hints" switch takes them out of the tab order and
+        /// off the screen together — which is exactly why they may be tabbable in
+        /// the first place.</summary>
+        private TextBox MakeHint(string key, int x, int y, int w, int h, int tabIndex)
         {
-            Label l = new Label();
-            l.Text = Localization.T(key);
-            l.Location = new Point(x, y);
-            l.Size = new Size(w, h);
-            l.TabStop = false;
-            l.ForeColor = SystemColors.GrayText;
-            l.Visible = appSettings.ShowHints;
-            hints.Add(l);
-            return l;
+            TextBox t = new TextBox();
+            t.Multiline = true;
+            t.ReadOnly = true;
+            t.Text = Localization.T(key);
+            t.AccessibleName = Localization.T("GoTo.Hint.Accessible");
+            t.Location = new Point(x, y);
+            t.Size = new Size(w, h);
+            t.TabIndex = tabIndex;
+            t.TabStop = appSettings.ShowHints;
+            t.Visible = appSettings.ShowHints;
+            hints.Add(t);
+            return t;
         }
 
         /// <summary>Browse for a new library folder; only stages the choice
@@ -343,7 +350,7 @@ namespace Nemoviz_Book_Reader
             chkUseMetadata.Checked = appSettings.UseMetadata;
 
             page.Controls.Add(chkUseMetadata);
-            page.Controls.Add(MakeHint("Settings.Audio.UseMetadata.Hint", 28, 66, 460, 60));
+            page.Controls.Add(MakeHint("Settings.Audio.UseMetadata.Hint", 28, 66, 460, 60, 1));
             return page;
         }
 
@@ -358,11 +365,11 @@ namespace Nemoviz_Book_Reader
             page.AutoScroll = true;
 
             page.Controls.Add(BuildSpeechGroup());
-            page.Controls.Add(MakeHint("Settings.TextBooks.Speech.Hint", 14, 292, 480, 32));
+            page.Controls.Add(MakeHint("Settings.TextBooks.Speech.Hint", 14, 292, 480, 32, 1));
             page.Controls.Add(BuildBrailleGroup(8, 330));
-            page.Controls.Add(MakeHint("Settings.TextBooks.Braille.Hint", 14, 422, 480, 32));
+            page.Controls.Add(MakeHint("Settings.TextBooks.Braille.Hint", 14, 422, 480, 32, 3));
             page.Controls.Add(BuildVisualGroup(8, 460));
-            page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 690, 480, 32));
+            page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 690, 480, 32, 5));
             return page;
         }
 
@@ -824,7 +831,7 @@ namespace Nemoviz_Book_Reader
 
             page.Controls.Add(lblSoundCard);
             page.Controls.Add(cmbSoundCard);
-            page.Controls.Add(MakeHint("Settings.Device.Hint", 10, 52, 480, 32));
+            page.Controls.Add(MakeHint("Settings.Device.Hint", 10, 52, 480, 32, 1));
             return page;
         }
 

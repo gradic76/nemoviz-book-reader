@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -59,6 +59,11 @@ namespace Nemoviz_Book_Reader
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+        // Every beep the player makes goes through this, so the feedback comes out
+        // of the same card as the book rather than wherever Windows sends system
+        // sounds — on headphones or a second card those are different rooms.
+        private readonly SignalTones tones = new SignalTones();
 
         private IntPtr mpvHandle = IntPtr.Zero;
         private bool isPlaying = false;
@@ -200,6 +205,7 @@ namespace Nemoviz_Book_Reader
             Localization.Initialize(appSettings.LangPath, appSettings.LanguageCode);
             BuildUI();
             InitializeMpv();
+            tones.SetDevice(appSettings.AudioDevice);
             this.KeyPreview = true;
             this.KeyDown += Form1_KeyDown;
 
@@ -585,7 +591,7 @@ namespace Nemoviz_Book_Reader
         {
             if (tts == null || currentBook == null || currentBook.TextPages.Count == 0)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
             var pages = currentBook.TextPages;
@@ -594,14 +600,14 @@ namespace Nemoviz_Book_Reader
             {
                 for (int i = 0; i < pages.Count; i++)
                     if (pages[i].Offset > cur + 1) { tts.SeekToChar(pages[i].Offset); return; }
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
             }
             else
             {
                 int idx = -1;
                 for (int i = pages.Count - 1; i >= 0; i--)
                     if (pages[i].Offset <= cur) { idx = i; break; }
-                if (idx < 0) { Console.Beep(300, 150); return; }
+                if (idx < 0) { tones.Play(300, 150); return; }
                 int target = (idx == 0 || cur - pages[idx].Offset > 50) ? pages[idx].Offset : pages[idx - 1].Offset;
                 tts.SeekToChar(target);
             }
@@ -635,20 +641,20 @@ namespace Nemoviz_Book_Reader
         private void TextHeadingSeek(int maxLevel, int dir)
         {
             var offs = TextHeadingOffsets(maxLevel);
-            if (tts == null || offs.Count == 0) { Console.Beep(300, 150); return; }
+            if (tts == null || offs.Count == 0) { tones.Play(300, 150); return; }
             int cur = tts.CharPosition;
             if (dir > 0)
             {
                 foreach (int o in offs)
                     if (o > cur + 1) { tts.SeekToChar(o); return; }
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
             }
             else
             {
                 int idx = -1;
                 for (int i = offs.Count - 1; i >= 0; i--)
                     if (offs[i] <= cur) { idx = i; break; }
-                if (idx < 0) { Console.Beep(300, 150); return; }
+                if (idx < 0) { tones.Play(300, 150); return; }
                 // >~50 chars into the heading rewinds to its start, else previous.
                 tts.SeekToChar((idx == 0 || cur - offs[idx] > 50) ? offs[idx] : offs[idx - 1]);
             }
@@ -835,11 +841,11 @@ namespace Nemoviz_Book_Reader
         /// ascending (reading order).</summary>
         private void StructForward(System.Collections.Generic.List<double> positions)
         {
-            if (positions == null || positions.Count == 0) { Console.Beep(300, 150); return; }
+            if (positions == null || positions.Count == 0) { tones.Play(300, 150); return; }
             double pos = GetVirtualPosition();
             foreach (double p in positions)
                 if (p > pos + 0.05) { SeekToVirtualPosition(p); return; }
-            Console.Beep(300, 150);
+            tones.Play(300, 150);
         }
 
         /// <summary>Generic "previous structural mark" jump, mirroring
@@ -847,12 +853,12 @@ namespace Nemoviz_Book_Reader
         /// rewinds to it, otherwise jumps to the one before.</summary>
         private void StructBack(System.Collections.Generic.List<double> positions)
         {
-            if (positions == null || positions.Count == 0) { Console.Beep(300, 150); return; }
+            if (positions == null || positions.Count == 0) { tones.Play(300, 150); return; }
             double pos = GetVirtualPosition();
             int cur = -1;
             for (int i = positions.Count - 1; i >= 0; i--)
                 if (positions[i] <= pos + 0.05) { cur = i; break; }
-            if (cur < 0) { Console.Beep(300, 150); return; }
+            if (cur < 0) { tones.Play(300, 150); return; }
 
             if (cur == 0 || pos - positions[cur] > 3.0)
                 SeekToVirtualPosition(positions[cur]);
@@ -1032,9 +1038,9 @@ namespace Nemoviz_Book_Reader
             }
 
             if (currentVolume == 0)
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
             else if (currentVolume == 100)
-                Console.Beep(1200, 150);
+                tones.Play(1200, 150);
         }
 
         // ──────────────────────────────────────────────
@@ -1057,7 +1063,7 @@ namespace Nemoviz_Book_Reader
                 RememberCurrentVoicePrefs();
                 UpdateSpeedDisplay();
                 AnnounceToScreenReader(lblAnnounceSpeed, Localization.T("Player.Speed.WpmAccessible", currentWpm));
-                if (crossedDefault) { Console.Beep(880, 70); Console.Beep(880, 70); }
+                if (crossedDefault) tones.Play(new[] { (880, 70), (880, 70) });
                 return;
             }
 
@@ -1084,10 +1090,7 @@ namespace Nemoviz_Book_Reader
             AnnounceToScreenReader(lblAnnounceSpeed, text);
 
             if (currentSpeed == 100)
-            {
-                Console.Beep(800, 120);
-                Console.Beep(800, 120);
-            }
+                tones.Play(new[] { (800, 120), (800, 120) });
         }
 
         // ──────────────────────────────────────────────
@@ -1693,7 +1696,7 @@ namespace Nemoviz_Book_Reader
             // timer entirely.
             if (currentBook == null)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
@@ -1829,9 +1832,7 @@ namespace Nemoviz_Book_Reader
             if (!sleepWarned5Min && sec <= 300)
             {
                 sleepWarned5Min = true;
-                Console.Beep(900, 120);
-                Console.Beep(900, 120);
-                Console.Beep(900, 120);
+                tones.Play(new[] { (900, 120), (900, 120), (900, 120) });
             }
 
             // Final stretch: a smooth volume fadeout over the last
@@ -2706,7 +2707,7 @@ namespace Nemoviz_Book_Reader
         {
             if (currentBook == null || currentBook.Bookmarks.Count == 0)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
@@ -2723,7 +2724,7 @@ namespace Nemoviz_Book_Reader
 
             if (currentIndex < 0)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
@@ -2737,7 +2738,7 @@ namespace Nemoviz_Book_Reader
         {
             if (currentBook == null || currentBook.Bookmarks.Count == 0)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
@@ -2752,7 +2753,7 @@ namespace Nemoviz_Book_Reader
             }
 
             // Already past the last bookmark.
-            Console.Beep(300, 150);
+            tones.Play(300, 150);
         }
 
         private void BtnLibrary_Click(object sender, EventArgs e)
@@ -2859,6 +2860,7 @@ namespace Nemoviz_Book_Reader
                 mpv_set_property_string(mpvHandle, "audio-device",
                     string.IsNullOrEmpty(device) ? "auto" : device);
             tts?.SetAudioDevice(device);
+            tones.SetDevice(device);   // the app's own beeps follow the book
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)
@@ -2871,7 +2873,7 @@ namespace Nemoviz_Book_Reader
             // Same "no go" feedback as Go To / bookmarks with nothing loaded.
             if (currentBook == null)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
             // Volume and speed live in the player's own fields until progress is
@@ -2929,7 +2931,7 @@ namespace Nemoviz_Book_Reader
         {
             if (currentBook == null)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
@@ -2938,7 +2940,7 @@ namespace Nemoviz_Book_Reader
             if (currentBook.IsTextBook)
             {
                 if (currentBook.TextHeadings.Count > 0) TextGoTo();
-                else Console.Beep(300, 150);
+                else tones.Play(300, 150);
                 return;
             }
 
@@ -2946,14 +2948,14 @@ namespace Nemoviz_Book_Reader
             // or chapters to list — Go To is inactive (low beep).
             if (GetPlayerType() == PlayerType.SingleAudio)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
             if (currentBook.Chapters.Count == 0)
             {
                 // No playable content — a short low beep as audible feedback.
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
@@ -3032,7 +3034,7 @@ namespace Nemoviz_Book_Reader
             // Same "no go" feedback as Go To / Sleep Timer with nothing loaded.
             if (currentBook == null)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
@@ -3044,9 +3046,7 @@ namespace Nemoviz_Book_Reader
             // Ascending series of five short beeps (~1 second total) — a
             // bit more attention-grabbing than the plain "no go" beep, since
             // this confirms a successful action rather than a blocked one.
-            int[] freqs = { 500, 650, 800, 950, 1100 };
-            foreach (int freq in freqs)
-                Console.Beep(freq, 200);
+            tones.Play(new[] { (500, 200), (650, 200), (800, 200), (950, 200), (1100, 200) });
 
             // Deliberately no position/percent details here — TMI for a
             // one-key command; the Manage Bookmarks list is where that
@@ -3058,7 +3058,7 @@ namespace Nemoviz_Book_Reader
         {
             if (currentBook == null || currentBook.Bookmarks.Count == 0)
             {
-                Console.Beep(300, 150);
+                tones.Play(300, 150);
                 return;
             }
 
@@ -3689,6 +3689,7 @@ namespace Nemoviz_Book_Reader
             sleepTimer?.Stop();
             if (mpvHandle != IntPtr.Zero)
                 mpv_terminate_destroy(mpvHandle);
+            try { tones.Dispose(); } catch { }
             MpvDuration.Shutdown();   // release the duration-probe context too
             LibLouis.Shutdown();      // release liblouis' table cache
             base.OnFormClosing(e);

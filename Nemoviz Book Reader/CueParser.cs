@@ -138,13 +138,26 @@ namespace Nemoviz_Book_Reader
             CueSheet sheet = TryParse(cue);
             if (sheet == null) return null;
 
-            // The sheet should name the file it describes; a mismatch means it was
-            // copied in from elsewhere, and its times would be meaningless.
-            string named = Path.GetFileName(sheet.AudioFile ?? "");
-            string actual = Path.GetFileName(audioFiles[0]);
+            // The sheet names the file it describes — but by the name it had when
+            // the sheet was written. A ripper writes the CUE against its WAV and
+            // the WAV is encoded to FLAC afterwards, so a sheet reading
+            // FILE "… .wav" beside a real "… .flac" is the normal case, not a
+            // mismatch. Compare without the extension.
+            string named = Path.GetFileNameWithoutExtension(sheet.AudioFile ?? "");
+            string actual = Path.GetFileNameWithoutExtension(audioFiles[0]);
             if (!string.IsNullOrEmpty(named)
                 && !string.Equals(named, actual, StringComparison.OrdinalIgnoreCase))
-                return null;
+            {
+                // Different name altogether. The sheet still describes this folder
+                // if it is the only sheet beside the only audio file and carries
+                // the same name as one of them — otherwise it was copied in from
+                // somewhere else. The caller checks the times against the real
+                // duration as well, which catches a foreign sheet outright.
+                string cueName = Path.GetFileNameWithoutExtension(cue);
+                if (!string.Equals(cueName, actual, StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(cueName, named, StringComparison.OrdinalIgnoreCase))
+                    return null;
+            }
             return sheet;
         }
 

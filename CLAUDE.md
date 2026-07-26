@@ -84,6 +84,18 @@ non-obvious code choices exist because of it.
   this ever regresses, the fallback is making the fields non-focusable
   (`TabStop = false`) and relying solely on the announcement.
 
+- **Every sound NBR makes comes out of the sound card the book is playing on**
+  (`SignalTones.cs`). The beeps — "nothing loaded", the volume floor/ceiling, the
+  speed-default double beep, the bookmark confirmation, the sleep timer's
+  five-minute warning — are generated as small WAVs and played through
+  `SapiWavPlayer`, exactly like speech. `Console.Beep` cannot do this: it goes
+  wherever Windows sends system sounds, so for a listener on headphones or a
+  second card the feedback landed in a different room from the audio it belongs
+  to. It also blocked the UI thread for the length of the tone (the five-beep
+  bookmark series froze the player for a second); a series is now one buffer
+  played in the background, which keeps its timing exact too. Tones fade in and
+  out over 5 ms, because a sine that starts at full amplitude is heard as a click.
+
 ### The info box lesson (do not regress this)
 
 The playback info box (`tbInfo`) was the single biggest accessibility
@@ -563,11 +575,18 @@ discards.
   handle creation and whenever Settings closes, and releases them on exit.
   `WM_APPCOMMAND` gates on the **book**, not a current file, so the keys work on
   text books too.
-- **Hint system (done).** `SettingsForm.MakeHint` puts an explanatory line under
-  a control — not tabbable — and the "Show help hints" switch at the top shows or
-  hides all of them **live**, as designed. Persisted (`[App] ShowHints`) so other
-  dialogs can honour it as they grow hints of their own. Written for General,
-  Text Books (speech / braille / visual), Device and Audio Books.
+- **Hint system (done).** `SettingsForm.MakeHint` puts an explanatory hint under a
+  control and the "Show help hints" switch at the top shows or hides all of them
+  **live**. Persisted (`[App] ShowHints`) so other dialogs can honour it as they
+  grow hints of their own. Written for General, Text Books (speech / braille /
+  visual), Device and Audio Books.
+  **A hint is a read-only TABBABLE TextBox, never a Label** (the shape the Go To
+  dialog already used). The first version used labels and Gordan reported the
+  hints were simply not there: a screen reader driven by Tab — which is how this
+  app is used — never visits a label. Each hint carries the TabIndex right after
+  the control it explains, and the switch takes `TabStop` away with `Visible`, so
+  turning hints off also takes them out of the tab order. Verified by dumping the
+  real tab order of every tab, switch on and off.
 
 Everything else (Text Books, Device, sliders, hints toggle) is still
 scaffolding to fill in as each subsystem is built. Sound processing was
@@ -868,9 +887,14 @@ the same chapter list (`SetM4bChapters` — the storage is shared; the name is
 historical). `BuildChaptersFromFolder` reads it, which covers every route into
 the library (file import, folder import, background scan), and a single-file
 import copies the sheet in beside its audio so the book keeps it. Rules:
-**only** with exactly one audio file, **only** when the sheet names that file,
-and a **multi-FILE sheet is ignored** — that describes a folder of tracks, which
-NBR already navigates by Part. `INDEX 01` is the track start (`INDEX 00` is the
+**only** with exactly one audio file, and a **multi-FILE sheet is ignored** —
+that describes a folder of tracks, which NBR already navigates by Part.
+**The name in the sheet is matched WITHOUT its extension**: a ripper writes the
+CUE against its WAV and the WAV is encoded to FLAC afterwards, so
+`FILE "… .wav"` beside a real `… .flac` is the normal case, not a mismatch —
+that was exactly why the first version found nothing in Gordan's sample. What
+actually guards against a sheet copied in from another rip is the **duration
+check**: a sheet whose last mark lies beyond the end of the audio is refused. `INDEX 01` is the track start (`INDEX 00` is the
 pre-gap); times are `MM:SS:FF` with **75 frames to the second**; an untitled
 track falls back to "Track N". The sheet's header TITLE/PERFORMER are parsed and
 available but deliberately **not** applied — the audio tags already fill those in.

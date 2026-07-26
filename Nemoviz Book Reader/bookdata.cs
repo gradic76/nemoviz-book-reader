@@ -432,7 +432,12 @@ namespace Nemoviz_Book_Reader
             if (M4bChapters.Count == 0)
             {
                 CueSheet cue = CueParser.TryParseForFolder(FolderPath, audioFiles);
-                if (cue != null) SetM4bChapters(cue.Chapters);
+                // A sheet whose last mark lies beyond the end of the audio is not
+                // describing this file — it was copied in from another rip. That
+                // check is worth more than any name comparison.
+                if (cue != null && (TotalDuration <= 0
+                        || cue.Chapters[cue.Chapters.Count - 1].Position < TotalDuration))
+                    SetM4bChapters(cue.Chapters);
             }
         }
 
