@@ -1005,16 +1005,32 @@ sequence above supersedes its ordering).
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal
   dialog.
-- **Properties live-preview: finish testing (Session 17).** Volume/speed and a
-  text book's voice/speed/volume/pitch now preview live, but the volume path
-  was still misbehaving when the session ended: a TEXT book's "Volume" field is
-  the TTS volume (`TextVolume`), not playback volume, and it was seeded with a
-  flat 100 instead of the live value — shown as 100 while actually 50, jumping
-  to the real value on first edit, and "falling" to 50 later when the arrows
-  were used. Seeding from the live value is committed but **untested**. Speed
-  looked unaffected; retest both, plus Cancel/OK, on a text book AND an audio
-  book, and check the Library entry point too (it opens Properties without the
-  player's live values, so its fields fall back to what is stored).
+- **OPEN — per-book voice is not applied when a book LOADS (Session 17, four
+  linked symptoms, all reported by Gordan after 22b9eda; the last eSpeak test
+  FAILED).**
+  1. Opening a book whose Properties say eSpeak starts reading with the
+     Settings voice (Zira). Only confirming Properties and restarting the book
+     switches it.
+  2. Even then, Zira speaks one short sentence at the start before eSpeak takes
+     over.
+  3. The text-book Volume symptoms are unchanged by the seeding fix (still
+     shows/behaves wrong).
+  4. Zira has **regressed to pausing only at the end of a sentence** — the
+     async-purge fix (Sapi5Backend.Cancel) worked when first tested, so
+     something after it re-broke or bypasses it.
+  **Prime hypothesis for 1 + 2:** the reader starts speaking before the book's
+  settings are applied — `LoadTextBookPlayback` plays first and
+  `ApplyTtsSettings` lands afterwards, so the first sentence uses whatever
+  voice the backend already had, and the per-book voice only takes effect from
+  the next utterance. Check the ordering in `LoadTextBookPlayback` /
+  `EnsureTts` and apply settings BEFORE the first `Play()`; note the autoplay
+  `Play()` is deliberately deferred one tick, which is probably the race.
+  **For 4:** verify which backend is active (`CompositeSpeechBackend` switches
+  on voice) and that `Cancel` really reaches `Sapi5Backend` with
+  `SVSFPurgeBeforeSpeak | SVSFlagsAsync` — a voice switch may leave the reader
+  cancelling on the wrong backend.
+  Also still untested: Cancel/OK on both book kinds, and the Library entry
+  point (it opens Properties without the player's live values).
 - **Combo boxes: NVDA does not announce the selection when it changes with
   Up/Down — app-wide** (confirmed by Gordan, Session 17). JAWS is correct
   everywhere: it reads the name on focus, announces each arrow change, and
