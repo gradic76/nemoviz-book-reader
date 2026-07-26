@@ -327,7 +327,17 @@ listening and plans to fall asleep — it is **not** a standalone shutdown
 scheduler. Therefore:
 
 - A timer can only be set with something loaded; on an empty player the button
-  gives a short low beep (same as Ctrl+G with no book).
+  gives a short low beep (same as Ctrl+G with no book). The test is the **book**,
+  not a current file — a text book is read by the speech engine and has no
+  current file, which used to lock it out of the timer altogether.
+- **It works the same on a text book.** Every playback move the timer makes
+  (the pause when its dialog opens, the resume on Cancel, the start, the
+  one-press cancel, the pause at expiry) goes through
+  `PausePlaybackQuietly`/`ResumePlaybackQuietly`, which drive mpv or the reader
+  depending on the book — still *programmatic* pauses, so they don't cancel the
+  timer the way a user pause does. The fadeout fades speech volume via
+  `TtsReader.SetVolumeQuiet` (no re-speak), so there it steps down sentence by
+  sentence rather than second by second.
 - **Starting a timer starts playback** if it isn't already playing.
 - A **manual pause cancels the timer**, with an announcement. The cancel hook
   lives **only** in the pause branch of `BtnPlayPause_Click` — every
@@ -545,7 +555,19 @@ discards.
   (`LanguageName`); **not wired** to `AppSettings.SetLanguage` yet because
   there's nothing to switch to until `hr.lang` exists (end-of-project
   translation pass).
-- The two multimedia-key checkboxes are still unwired placeholders.
+- **Multimedia keys (done).** The first checkbox turns them on or off (off = the
+  message goes back to the system, so another player gets it); the second claims
+  them **system-wide** via `RegisterHotKey` → `WM_HOTKEY`, so they work while NBR
+  is in the background. Global is off by default (claiming them takes them from
+  every other player) and is disabled while the keys are off. NBR registers on
+  handle creation and whenever Settings closes, and releases them on exit.
+  `WM_APPCOMMAND` gates on the **book**, not a current file, so the keys work on
+  text books too.
+- **Hint system (done).** `SettingsForm.MakeHint` puts an explanatory line under
+  a control — not tabbable — and the "Show help hints" switch at the top shows or
+  hides all of them **live**, as designed. Persisted (`[App] ShowHints`) so other
+  dialogs can honour it as they grow hints of their own. Written for General,
+  Text Books (speech / braille / visual), Device and Audio Books.
 
 Everything else (Text Books, Device, sliders, hints toggle) is still
 scaffolding to fill in as each subsystem is built. Sound processing was
@@ -628,8 +650,13 @@ short-circuits when `content.txt` exists), so `DetectTextBook` picks it up;
 excludes DAISY (a DAISY 3 zip also has a `.opf`) via `LooksLikeDaisy`
 (ncc.html / DTBook / Z39.86; **not** dtbncx — epub2 has an NCX too) so a DAISY
 zip goes to the archive+DAISY path, not the epub path. Verified end-to-end on
-real DAISY 3 + 2.02 text samples. **Still open:** page navigation for text DAISY
-(`<pagenum>` markers), and **text+audio DAISY multi-modal** (follow/​highlight
+real DAISY 3 + 2.02 text samples. **Print pages are kept** (both spellings: a
+DAISY 3 `<pagenum>` element and a DAISY 2.02 `<span class="page-normal|front|
+special">`): the number is taken out of the reading flow — nobody wants "247"
+read out mid-sentence — but its position is recorded, so the book navigates by
+its real printed pages (Page seek step). Measured on the samples: 67–712 pages in
+the DAISY 3 books; the three 2.02 samples genuinely carry no page markers at all,
+which is why they show none. **Still open:** **text+audio DAISY multi-modal** (follow/​highlight
 text while the audio plays — currently a text+audio DAISY imports & plays as
 plain audio, text unused; that's the Phase-3 on-screen-display work).
 
@@ -714,8 +741,14 @@ This becomes the core of Phase 2's cleaning.
   IDLE event would otherwise flip `isPlaying` off (killing autoplay) or wrongly
   "finish" the book. The first autoplay `Play()` is also deferred one tick.
 - **Seek steps** (per book, `RebuildSeekSteps`): 15 s / 30 s / 60 s / Sentence /
-  Paragraph / **Standard page** (1800 chars, the translation/journalism unit) —
-  no bookmarks yet.
+  Paragraph / **Standard page** (1800 chars, the translation/journalism unit),
+  and **Bookmark** once the book has one.
+- **Bookmarks** work here too. A mark is stored in the book's own unit — the
+  character offset for text, seconds for audio — and `BookPosition` /
+  `SeekToBookPosition` / `BookBackGrace` keep one set of bookmark code serving
+  both (the three-second "just passed it" window becomes characters at the
+  book's reading speed). Manage Bookmarks shows a text mark as how far into the
+  book it is, since a character offset tells the reader nothing.
 - **Speed** is **words-per-minute** (nominal; real rate is voice-dependent),
   reusing the player's speed control (`ChangeSpeed` branch): 80–400 WPM, **±5 per
   step**, a double-beep when crossing the Settings default; maps to SAPI rate via
@@ -784,7 +817,7 @@ converter (see memory). Test feedback still to apply is in memory.
 
 ---
 
-## 8f. M4B chapters (Apple audiobooks)
+## 8f. Chapters inside one audio file — M4B, and CUE sheets
 
 `M4bParser.cs`. An M4B is a single MP4 audio file with embedded chapter marks;
 it overlays on the single-file virtual timeline like DAISY does on multi-file
@@ -810,6 +843,19 @@ Chapter line + "Apple Book M4B" format; seek step **Chapter** (via
 `StructForward`/`StructBack` over `M4bChapterPositions`); Go To lists chapters.
 **mpv is set `vid=no` at init** (plus the existing `audio-display=no`) so an
 M4B's cover art — a real MP4 video track — never pops a video window.
+
+**CUE sheets (`CueParser.cs`) are the same thing written outside the file.** A
+`.cue` beside one long audio file marks where each track begins, so it becomes
+the same chapter list (`SetM4bChapters` — the storage is shared; the name is
+historical). `BuildChaptersFromFolder` reads it, which covers every route into
+the library (file import, folder import, background scan), and a single-file
+import copies the sheet in beside its audio so the book keeps it. Rules:
+**only** with exactly one audio file, **only** when the sheet names that file,
+and a **multi-FILE sheet is ignored** — that describes a folder of tracks, which
+NBR already navigates by Part. `INDEX 01` is the track start (`INDEX 00` is the
+pre-gap); times are `MM:SS:FF` with **75 frames to the second**; an untitled
+track falls back to "Track N". The sheet's header TITLE/PERFORMER are parsed and
+available but deliberately **not** applied — the audio tags already fill those in.
 
 ---
 

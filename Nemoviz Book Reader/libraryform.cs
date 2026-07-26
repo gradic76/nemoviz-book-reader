@@ -831,6 +831,36 @@ namespace Nemoviz_Book_Reader
         // Fills a book's title/author from an audio file's Album/Artist tags
         // (Album = book title, Artist/AlbumArtist = author). Best-effort — any
         // read error leaves the folder-name title in place.
+        /// <summary>Brings a CUE sheet along with the audio file it describes. Only
+        /// the sheet that actually names this file (or shares its name) — a folder
+        /// can hold several, each belonging to a different rip.</summary>
+        private static void CopyCueSheet(string sourceAudioFile, string destFolder)
+        {
+            try
+            {
+                string srcDir = System.IO.Path.GetDirectoryName(sourceAudioFile);
+                if (string.IsNullOrEmpty(srcDir)) return;
+                string audioName = System.IO.Path.GetFileName(sourceAudioFile);
+
+                foreach (string cue in System.IO.Directory.GetFiles(srcDir, "*.cue"))
+                {
+                    CueSheet sheet = CueParser.TryParse(cue);
+                    bool named = sheet != null && !string.IsNullOrEmpty(sheet.AudioFile)
+                        && string.Equals(System.IO.Path.GetFileName(sheet.AudioFile), audioName,
+                                         StringComparison.OrdinalIgnoreCase);
+                    bool sameName = string.Equals(System.IO.Path.GetFileNameWithoutExtension(cue),
+                                                  System.IO.Path.GetFileNameWithoutExtension(sourceAudioFile),
+                                                  StringComparison.OrdinalIgnoreCase);
+                    if (!named && !sameName) continue;
+
+                    string dest = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(cue));
+                    if (!System.IO.File.Exists(dest)) System.IO.File.Copy(cue, dest);
+                    return;
+                }
+            }
+            catch { /* the sheet is a bonus; a failure must not stop the import */ }
+        }
+
         private void ApplyAudioMetadata(BookData book, string audioFile)
         {
             try
@@ -1349,6 +1379,10 @@ namespace Nemoviz_Book_Reader
                     string destFile = System.IO.Path.Combine(destFolder, System.IO.Path.GetFileName(filePath));
                     if (!System.IO.File.Exists(destFile))
                         System.IO.File.Copy(filePath, destFile);
+                    // A CUE sheet lying beside the chosen file belongs to it: bring
+                    // it along, so the book keeps its own copy and its track marks
+                    // become chapters (BuildChaptersFromFolder reads it).
+                    CopyCueSheet(filePath, destFolder);
                     // Build duration/chapters up front so it isn't 00:00:00 until
                     // first played; also stores the detailed format string.
                     imported.BuildChaptersFromFolder(new string[] { destFile });

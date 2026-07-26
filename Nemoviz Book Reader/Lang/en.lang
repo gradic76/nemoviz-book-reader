@@ -409,3 +409,4 @@ Settings.TextBooks.Speech.Hint=The voice new books start with. Each voice keeps 
 Settings.TextBooks.Braille.Hint=For reading on a braille display. The table decides how the text is turned into braille cells; a braille book remembers the table it was read with.
 Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears.
 Settings.Device.Hint=Which sound card everything comes out of, speech included. It takes effect at once, so you can hear the change while choosing.
+Cue.Track=Track {0}

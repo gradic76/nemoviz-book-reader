@@ -425,6 +425,15 @@ namespace Nemoviz_Book_Reader
                 Format = DetectAudioFormatString(audioFiles[0]);
                 ini.Write("Book", "Format", Format);
             }
+
+            // A CUE sheet beside one long file marks where each track begins —
+            // the same thing an M4B carries inside itself, so it becomes the same
+            // chapter list. Only when the book has no chapter marks already.
+            if (M4bChapters.Count == 0)
+            {
+                CueSheet cue = CueParser.TryParseForFolder(FolderPath, audioFiles);
+                if (cue != null) SetM4bChapters(cue.Chapters);
+            }
         }
 
         /// <summary>Lazily builds the chapter list + total duration for a plain

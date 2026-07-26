@@ -15,13 +15,25 @@ namespace Nemoviz_Book_Reader
     ///   • DAISY 3 / Z39.86 → a DTBook XML document (&lt;dtbook&gt;…).
     ///   • DAISY 2.02 → the content XHTML file(s) beside ncc.html.
     /// Audio DAISY keeps going through <see cref="DaisyParser"/>; this is only for
-    /// the text-only case. Page markers (&lt;pagenum&gt;) are stripped from the
-    /// reading flow for now (page navigation for text DAISY is a later step).
+    /// the text-only case.
+    ///
+    /// <para><b>Print pages</b> are kept: each marker is taken out of the reading
+    /// flow (nobody wants "247" read out mid-sentence) but its position is
+    /// recorded, so the book navigates by its real printed pages. The two DAISY
+    /// generations write them differently — DAISY 3 as a
+    /// &lt;pagenum&gt; element, DAISY 2.02 as a &lt;span class="page-normal"&gt;
+    /// (also page-front for roman-numbered front matter, and page-special) — and
+    /// both are read.</para>
     /// </summary>
     public static class DaisyTextExtractor
     {
         private static readonly Regex RxPagenum =
             new Regex("<pagenum\\b[^>]*>(.*?)</pagenum>", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+        // DAISY 2.02: <span class="page-normal" id="…">247</span> (or div, and
+        // page-front / page-special for front matter and inserts).
+        private static readonly Regex RxPageSpan =
+            new Regex("<(span|div)\\b[^>]*\\bclass\\s*=\\s*[\"'][^\"']*\\bpage-(normal|front|special)\\b[^\"']*[\"'][^>]*>(.*?)</\\1>",
+                      RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
         private static readonly Regex RxTags =
             new Regex("<[^>]+>", RegexOptions.Compiled);
         private static readonly Regex RxEncoding =
@@ -93,6 +105,14 @@ namespace Nemoviz_Book_Reader
                     raw = RxPagenum.Replace(raw, m =>
                     {
                         string label = RxTags.Replace(m.Groups[1].Value, "").Trim();
+                        string id = "__nbrpage" + (pageSeq++) + "__";
+                        pageLabels[id] = label;
+                        return "<span id=\"" + id + "\"></span>";
+                    });
+                    // The DAISY 2.02 spelling of the same thing.
+                    raw = RxPageSpan.Replace(raw, m =>
+                    {
+                        string label = RxTags.Replace(m.Groups[3].Value, "").Trim();
                         string id = "__nbrpage" + (pageSeq++) + "__";
                         pageLabels[id] = label;
                         return "<span id=\"" + id + "\"></span>";
