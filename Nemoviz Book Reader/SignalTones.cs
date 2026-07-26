@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Nemoviz_Book_Reader
 {
@@ -11,9 +13,17 @@ namespace Nemoviz_Book_Reader
     /// <c>Console.Beep</c> does not: it goes wherever Windows sends system sounds,
     /// which for someone listening on headphones or a second card means the
     /// feedback lands in a different room from the audio it belongs to. So a tone
-    /// is generated here as a small WAV and played through
-    /// <see cref="SapiWavPlayer"/>, exactly like speech — one output for
-    /// everything NBR makes.</para>
+    /// is generated here as a small WAV and played on its own libmpv context,
+    /// pointed at the same <c>audio-device</c> as everything else.</para>
+    ///
+    /// <para><b>Why mpv and not SAPI</b> (which is how speech is played): SAPI
+    /// output is not shareable across processes. Playing a tone through a second
+    /// <c>SpVoice</c> on the SAME output token **killed the 32-bit speech host's
+    /// playback** — measured: with eSpeak reading, sentences after a beep were
+    /// reported finished in ~420 ms instead of being spoken, i.e. silence. On the
+    /// default device, or through <c>Console.Beep</c>, the same test read normally.
+    /// mpv opens WASAPI in shared mode, so its tones simply mix with the book, the
+    /// speech host and everything else.</para>
     ///
     /// <para>It also stops blocking: <c>Console.Beep</c> holds the calling thread
     /// for the whole tone, so the five-beep bookmark series froze the UI for a
@@ -22,19 +32,34 @@ namespace Nemoviz_Book_Reader
     /// </summary>
     public class SignalTones : IDisposable
     {
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr mpv_create();
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_initialize(IntPtr ctx);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern void mpv_terminate_destroy(IntPtr ctx);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_set_property_string(IntPtr ctx, string name, string data);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_command(IntPtr ctx, IntPtr args);
+
         private const int SampleRate = 22050;
         private const int GapMs = 30;        // silence between tones in a series
 
-        private SapiWavPlayer player;
-        private bool playerFailed;
+        private readonly object gate = new object();
+        private IntPtr ctx = IntPtr.Zero;
+        private bool unavailable;
         private string deviceId = "";
+        // The tone file currently playing; kept until the next one so mpv is never
+        // reading a file we have just deleted.
+        private string lastFile;
 
         /// <summary>Which card the tones play on (mpv-style id, as in Settings →
         /// Device). Empty = system default.</summary>
         public void SetDevice(string mpvDeviceId)
         {
-            deviceId = mpvDeviceId ?? "";
-            if (player != null) player.SetDevice(deviceId);
+            lock (gate)
+            {
+                deviceId = mpvDeviceId ?? "";
+                if (ctx != IntPtr.Zero)
+                    mpv_set_property_string(ctx, "audio-device",
+                        deviceId.Length == 0 ? "auto" : deviceId);
+            }
         }
 
         /// <summary>One tone.</summary>
@@ -47,25 +72,66 @@ namespace Nemoviz_Book_Reader
         public void Play((int Freq, int Ms)[] tones)
         {
             if (tones == null || tones.Length == 0) return;
-            try
+            lock (gate)
             {
-                if (!playerFailed)
+                try
                 {
-                    if (player == null)
+                    if (!unavailable && (ctx != IntPtr.Zero || Create()))
                     {
-                        player = new SapiWavPlayer();
-                        player.SetDevice(deviceId);
+                        string path = Write(Render(tones));
+                        if (path != null)
+                        {
+                            Command("loadfile", path, "replace");
+                            CleanUp(path);
+                            return;
+                        }
                     }
-                    if (player.Play(Render(tones))) return;
                 }
+                catch { unavailable = true; }
             }
-            catch { playerFailed = true; }   // no SAPI here — fall through
 
             // Last resort: the system beep, on whatever device Windows uses.
             foreach (var t in tones)
             {
                 try { Console.Beep(Clamp(t.Freq, 37, 32767), Math.Max(1, t.Ms)); } catch { }
             }
+        }
+
+        private bool Create()
+        {
+            ctx = mpv_create();
+            if (ctx == IntPtr.Zero) { unavailable = true; return false; }
+            mpv_set_property_string(ctx, "terminal", "no");
+            if (mpv_initialize(ctx) < 0) { unavailable = true; ctx = IntPtr.Zero; return false; }
+            mpv_set_property_string(ctx, "vid", "no");
+            mpv_set_property_string(ctx, "audio-display", "no");
+            // Keep the device open between tones: reopening it for every beep costs
+            // a noticeable delay before the sound starts.
+            mpv_set_property_string(ctx, "audio-keep-open", "yes");
+            mpv_set_property_string(ctx, "audio-device", deviceId.Length == 0 ? "auto" : deviceId);
+            return true;
+        }
+
+        private string Write(byte[] wav)
+        {
+            if (wav == null) return null;
+            try
+            {
+                string path = Path.Combine(Path.GetTempPath(),
+                    "nbr-tone-" + Guid.NewGuid().ToString("N") + ".wav");
+                File.WriteAllBytes(path, wav);
+                return path;
+            }
+            catch { return null; }
+        }
+
+        /// <summary>Deletes the previous tone file now that mpv has moved on to a
+        /// new one. (Deleting the file we just handed it would be a race.)</summary>
+        private void CleanUp(string current)
+        {
+            if (lastFile != null && lastFile != current)
+                try { File.Delete(lastFile); } catch { }
+            lastFile = current;
         }
 
         /// <summary>Builds a 16-bit mono WAV holding the whole series. Each tone
@@ -138,10 +204,37 @@ namespace Nemoviz_Book_Reader
 
         private static int Clamp(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
 
+        private void Command(params string[] args)
+        {
+            IntPtr[] ptrs = new IntPtr[args.Length + 1];
+            for (int i = 0; i < args.Length; i++) ptrs[i] = Utf8(args[i]);
+            ptrs[args.Length] = IntPtr.Zero;
+            GCHandle h = GCHandle.Alloc(ptrs, GCHandleType.Pinned);
+            try { mpv_command(ctx, h.AddrOfPinnedObject()); }
+            finally
+            {
+                h.Free();
+                foreach (IntPtr p in ptrs) if (p != IntPtr.Zero) Marshal.FreeHGlobal(p);
+            }
+        }
+
+        private static IntPtr Utf8(string s)
+        {
+            byte[] b = Encoding.UTF8.GetBytes(s ?? "");
+            IntPtr p = Marshal.AllocHGlobal(b.Length + 1);
+            Marshal.Copy(b, 0, p, b.Length);
+            Marshal.WriteByte(p, b.Length, 0);
+            return p;
+        }
+
         public void Dispose()
         {
-            try { if (player != null) player.Dispose(); } catch { }
-            player = null;
+            lock (gate)
+            {
+                if (ctx != IntPtr.Zero) { try { mpv_terminate_destroy(ctx); } catch { } ctx = IntPtr.Zero; }
+                unavailable = true;
+                if (lastFile != null) { try { File.Delete(lastFile); } catch { } lastFile = null; }
+            }
         }
     }
 }

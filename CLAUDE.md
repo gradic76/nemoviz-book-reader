@@ -87,8 +87,16 @@ non-obvious code choices exist because of it.
 - **Every sound NBR makes comes out of the sound card the book is playing on**
   (`SignalTones.cs`). The beeps — "nothing loaded", the volume floor/ceiling, the
   speed-default double beep, the bookmark confirmation, the sleep timer's
-  five-minute warning — are generated as small WAVs and played through
-  `SapiWavPlayer`, exactly like speech. `Console.Beep` cannot do this: it goes
+  five-minute warning — are generated as small WAVs and played on **their own
+  libmpv context**, pointed at the same `audio-device` as everything else.
+  **Not through SAPI, and this is a hard-won rule:** playing a tone through a
+  second `SpVoice` on the same output token **kills the 32-bit speech host's
+  playback**. Measured — with eSpeak reading, every sentence after a beep was
+  reported finished in ~420 ms instead of being spoken (silence); the same test
+  with the tone on the *default* device, or through `Console.Beep`, read normally.
+  SAPI output is not shareable across processes; mpv opens WASAPI in shared mode,
+  so its tones simply mix with the book, the speech host and everything else.
+  `Console.Beep` cannot do the job either: it goes
   wherever Windows sends system sounds, so for a listener on headphones or a
   second card the feedback landed in a different room from the audio it belongs
   to. It also blocked the UI thread for the length of the tone (the five-beep
