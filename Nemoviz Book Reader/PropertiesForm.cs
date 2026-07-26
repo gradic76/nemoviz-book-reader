@@ -511,7 +511,7 @@ namespace Nemoviz_Book_Reader
             FillSettings(book.Sound);
             PersistTextOptions();
             if (numPlayVolume != null) book.Volume = (int)numPlayVolume.Value;
-            if (numPlaySpeed != null) book.Speed = (int)numPlaySpeed.Value;
+            if (numPlaySpeed != null) book.Speed = (int)Math.Round(numPlaySpeed.Value * 100);
             book.Save();
         }
 
@@ -837,8 +837,10 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(numPlayVolume);
 
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Prop.Playback.Speed"), 240, 28));
-            numPlaySpeed = SettingsForm.MakeNumeric(Localization.T("Prop.Playback.Speed"),
-                                                    340, 25, 50, 300, Clamp(book.Speed, 50, 300), 1, 10);
+            // Speed is the same multiplier the player and the library show (1,4×),
+            // not a percentage, and it steps by the player's own Ctrl+←/→ step.
+            numPlaySpeed = SettingsForm.MakeDecimal(Localization.T("Prop.Playback.Speed"), 340, 25,
+                                                    0.5m, 3.0m, Clamp(book.Speed, 50, 300) / 100m, 1, 0.1m, 1);
             box.Controls.Add(numPlaySpeed);
             numPlayVolume.ValueChanged += (s, e) => PreviewPlayback();
             numPlaySpeed.ValueChanged += (s, e) => PreviewPlayback();
@@ -857,7 +859,7 @@ namespace Nemoviz_Book_Reader
         private void PreviewPlayback()
         {
             if (initialising || onPlaybackPreview == null || numPlayVolume == null || numPlaySpeed == null) return;
-            onPlaybackPreview((int)numPlayVolume.Value, (int)numPlaySpeed.Value);
+            onPlaybackPreview((int)numPlayVolume.Value, (int)Math.Round(numPlaySpeed.Value * 100));
         }
 
         /// <summary>The Text tab's read-out: what this book will actually be read

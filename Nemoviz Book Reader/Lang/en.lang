@@ -1,4 +1,4 @@
-; Nemoviz Book Reader - English
+﻿; Nemoviz Book Reader - English
 LanguageName=English
 
 ; App
@@ -290,7 +290,7 @@ Dialog.ArchiveInFolder.Message=This folder contains archive files (.zip / .rar /
 Prop.Info.Accessible=Book information
 Prop.Playback.Title=Playback
 Prop.Playback.Volume=Volume:
-Prop.Playback.Speed=Speed (%):
+Prop.Playback.Speed=Speed (×):
 Prop.Text.Characters=Characters:
 Prop.Text.Headings=Headings:
 Prop.Text.Pages=Pages:

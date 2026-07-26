@@ -561,6 +561,26 @@ namespace Nemoviz_Book_Reader
             return n;
         }
 
+        /// <summary>A spin box for a fractional value — the playback-speed
+        /// multiplier, which is written the same way everywhere it appears
+        /// (1,4× in the player, the library details and here), never as a
+        /// percentage.</summary>
+        internal static NumericUpDown MakeDecimal(string name, int x, int y, decimal min, decimal max,
+                                                  decimal value, int tabIndex, decimal increment, int decimals)
+        {
+            NumericUpDown n = new NumericUpDown();
+            n.DecimalPlaces = decimals;
+            n.Minimum = min;
+            n.Maximum = max;
+            n.Increment = increment;
+            n.Value = value < min ? min : (value > max ? max : value);
+            n.Location = new Point(x, y);
+            n.Size = new Size(90, 24);
+            n.AccessibleName = name;
+            n.TabIndex = tabIndex;
+            return n;
+        }
+
         /// <summary>Engine chosen → list the languages that engine actually speaks.</summary>
         private void PopulateLanguagesForEngine()
         {
