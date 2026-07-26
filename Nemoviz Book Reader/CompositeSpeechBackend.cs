@@ -118,6 +118,7 @@ namespace Nemoviz_Book_Reader
         }
 
         public void Speak(string text) { active?.Speak(text); }
+        public void PreRender(string text) { active?.PreRender(text); }
         public void Pause() { active?.Pause(); }
         public void Resume() { active?.Resume(); }
         public void Cancel() { active?.Cancel(); }

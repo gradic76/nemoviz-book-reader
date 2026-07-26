@@ -196,6 +196,10 @@ namespace Nemoviz_Book_Reader
             reading = true;
             RaisePosition();
             backend.Speak(sentenceText[index]);
+            // Hint the next sentence so a backend that renders before playing can
+            // have it ready — otherwise every sentence starts with a synthesis gap.
+            if (index + 1 < sentenceText.Count)
+                backend.PreRender(sentenceText[index + 1]);
         }
 
         private void OnCompleted(bool cancelled)

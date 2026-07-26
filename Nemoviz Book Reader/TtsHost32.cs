@@ -9,25 +9,51 @@
 //
 // Protocol (tab-separated, one command/event per line):
 //   parent -> host : VOICE<TAB>name | RATE<TAB>n | VOL<TAB>n | PITCH<TAB>n
-//                    | SPEAK<TAB>base64utf8 | PAUSE | RESUME | CANCEL | QUIT
+//                    | SPEAK<TAB>base64utf8 | PRERENDER<TAB>base64utf8
+//                    | PAUSE | RESUME | CANCEL | QUIT
 //   host  -> parent: VOICE<TAB>name   (one per installed voice, at startup)
 //                    READY             (startup enumeration done)
 //                    DONE<TAB>natural | DONE<TAB>cancelled  (utterance ended)
 using System;
+using System.IO;
+using System.Media;
 using System.Speech.Synthesis;
 using System.Text;
+using System.Threading;
 
 class TtsHost32
 {
     private static SpeechSynthesizer synth;
     private static int pitchPercent;
     private static readonly object outLock = new object();
-    // Some SAPI drivers (notably eSpeak) set e.Cancelled = true even on a natural
-    // end, which would make the reader stop after every sentence. So don't trust
-    // e.Cancelled: an utterance is "cancelled" only if WE asked to cancel it, or
-    // it was superseded by a newer Speak (its prompt is no longer the current one).
-    private static bool cancelRequested;
-    private static Prompt currentPrompt;
+
+    // Audio is NOT rendered straight to the sound card. Each utterance is
+    // synthesised into a WAV buffer first and then played as one continuous
+    // stream. Rendering in real time made the output crackle: the odd underrun
+    // with any voice, and constantly between words with eSpeak, whose SAPI driver
+    // emits audio in per-word chunks and restarts the stream at every boundary.
+    // Buffering removes the real-time constraint and the chunk seams alike.
+    private static readonly object synthLock = new object();
+    private static readonly object playLock = new object();
+    private static SoundPlayer player;
+    // Bumped by every new utterance and by CANCEL; a worker whose generation is no
+    // longer current reports its utterance as cancelled. (This also replaces the
+    // old SpeakCompleted handling: some SAPI drivers — eSpeak again — report a
+    // natural end as "cancelled", which used to stop the reader after a sentence.)
+    private static int generation;
+    // Voices whose driver can't render to a stream (eSpeak) — they use the
+    // real-time path instead, and this remembers them after the first attempt.
+    private static readonly System.Collections.Generic.HashSet<string> noBuffer =
+        new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    private static readonly ManualResetEvent spoken = new ManualResetEvent(false);
+
+    // Look-ahead: the parent sends the NEXT sentence while the current one plays, so
+    // its audio is already rendered when the time comes and the gap between
+    // sentences disappears. Only one sentence is held — that's all the reader needs.
+    private static string aheadText;
+    private static byte[] aheadWav;
+    private static readonly ManualResetEvent aheadReady = new ManualResetEvent(false);
+    private static readonly object aheadLock = new object();
 
     static int Main()
     {
@@ -37,9 +63,10 @@ class TtsHost32
         try { synth = new SpeechSynthesizer(); }
         catch { Emit("READY"); return 1; }
 
-        synth.SpeakCompleted += (s, e) =>
-            Emit("DONE\t" + ((e.Prompt == currentPrompt && !cancelRequested) ? "natural" : "cancelled"));
-        try { synth.SetOutputToDefaultAudioDevice(); } catch { }
+        // Completion is reported by this host (see SpeakWorker), not from the
+        // driver's own flag — some engines call a natural end "cancelled". The
+        // event only releases the real-time path's wait.
+        synth.SpeakCompleted += (s, e) => spoken.Set();
 
         // Announce the voices this (32-bit) host can see, then READY.
         try
@@ -55,7 +82,7 @@ class TtsHost32
         {
             try { if (!Handle(line)) break; } catch { }
         }
-        try { synth.SpeakAsyncCancelAll(); } catch { }
+        lock (playLock) { generation++; StopPlayback(); }
         try { synth.Dispose(); } catch { }
         return 0;
     }
@@ -73,25 +100,228 @@ class TtsHost32
             case "VOL": synth.Volume = Clamp(ParseInt(arg), 0, 100); break;
             case "PITCH": pitchPercent = Clamp(ParseInt(arg), -50, 50); break;
             case "SPEAK": Speak(DecodeB64(arg)); break;
-            case "PAUSE": if (synth.State == SynthesizerState.Speaking) { try { synth.Pause(); } catch { } } break;
-            case "RESUME": if (synth.State == SynthesizerState.Paused) { try { synth.Resume(); } catch { } } break;
-            case "CANCEL": cancelRequested = true; try { synth.SpeakAsyncCancelAll(); } catch { } break;
+            case "PRERENDER": PreRender(DecodeB64(arg)); break;
+            // Buffered playback can't pause mid-stream; the reader doesn't use
+            // these anyway (it pauses by cancelling and re-speaking the sentence).
+            case "PAUSE": break;
+            case "RESUME": break;
+            case "CANCEL":
+                lock (playLock) { generation++; StopPlayback(); }
+                try { synth.SpeakAsyncCancelAll(); } catch { }   // real-time path
+                spoken.Set();
+                break;
             case "QUIT": return false;
         }
         return true;
     }
 
+    /// <summary>Starts an utterance: it is rendered to a WAV buffer and played on a
+    /// worker thread, so the command loop stays responsive.</summary>
     private static void Speak(string text)
+    {
+        int myGen;
+        lock (playLock)
+        {
+            myGen = ++generation;   // supersedes anything still playing
+            StopPlayback();
+        }
+        try { synth.SpeakAsyncCancelAll(); } catch { }   // stop a real-time utterance
+        spoken.Set();
+        Thread t = new Thread(() => SpeakWorker(text, myGen));
+        t.IsBackground = true;
+        t.Start();
+    }
+
+    /// <summary>Renders a sentence ahead of time (the parent sends the next one while
+    /// the current is still playing) so it can start instantly. Ignored for voices
+    /// that can't render to a stream — they have nothing to gain.</summary>
+    private static void PreRender(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+        lock (noBuffer) { if (noBuffer.Contains(CurrentVoice())) return; }
+        lock (aheadLock)
+        {
+            if (aheadText == text) return;      // already prepared or preparing
+            aheadText = text;
+            aheadWav = null;
+            aheadReady.Reset();
+        }
+        Thread t = new Thread(() =>
+        {
+            byte[] wav = TryRender(text);
+            lock (aheadLock)
+            {
+                if (aheadText == text) { aheadWav = wav; aheadReady.Set(); }
+            }
+        });
+        t.IsBackground = true;
+        t.Start();
+    }
+
+    /// <summary>Takes the pre-rendered audio for this sentence if we have it, waiting
+    /// briefly when it is still being prepared.</summary>
+    private static byte[] TakeAhead(string text)
+    {
+        bool mine;
+        lock (aheadLock) mine = aheadText == text;
+        if (!mine) return null;
+        aheadReady.WaitOne(5000);
+        lock (aheadLock)
+        {
+            byte[] wav = aheadText == text ? aheadWav : null;
+            if (wav != null) { aheadText = null; aheadWav = null; aheadReady.Reset(); }
+            return wav;
+        }
+    }
+
+    private static void SpeakWorker(string text, int myGen)
+    {
+        byte[] wav = TakeAhead(text) ?? TryRender(text);
+        if (wav == null) { SpeakRealtime(text, myGen); return; }
+
+        if (wav.Length > 44 && IsCurrent(myGen))
+        {
+            SoundPlayer p = null;
+            try
+            {
+                p = new SoundPlayer(new MemoryStream(wav));
+                lock (playLock)
+                {
+                    if (myGen != generation) { Report(myGen); return; }
+                    player = p;
+                }
+                p.PlaySync();             // returns early if Stop() is called
+            }
+            catch { }
+            finally
+            {
+                lock (playLock) { if (player == p) player = null; }
+                try { if (p != null) p.Dispose(); } catch { }
+            }
+        }
+        Report(myGen);
+    }
+
+    /// <summary>Renders the utterance to a WAV buffer, or null when this voice's
+    /// driver can't do that. Not every SAPI engine can render to a stream — eSpeak
+    /// throws — so those voices keep the real-time path (see SpeakRealtime).</summary>
+    private static byte[] TryRender(string text)
+    {
+        string voice = CurrentVoice();
+        lock (noBuffer) { if (noBuffer.Contains(voice)) return null; }
+        try
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                lock (synthLock)          // the synthesizer is not thread-safe
+                {
+                    synth.SetOutputToWaveStream(ms);
+                    if (pitchPercent == 0) synth.Speak(text);
+                    else synth.SpeakSsml(BuildSsml(text));
+                    synth.SetOutputToNull();   // finalises the WAV header
+                }
+                if (ms.Length > 44) return TrimTrailingSilence(ms.ToArray());
+            }
+        }
+        catch { }
+        lock (noBuffer) { noBuffer.Add(voice); }   // remember: this one can't buffer
+        return null;
+    }
+
+    /// <summary>
+    /// Cuts the silence engines leave at the end of a rendered utterance — Zira pads
+    /// roughly three quarters of a second — which would otherwise be played out in
+    /// full and heard as a long gap between sentences. A short tail is kept so the
+    /// last word doesn't sound clipped. Returns the buffer unchanged if the WAV
+    /// isn't the plain 8/16-bit PCM shape we understand.
+    /// </summary>
+    private static byte[] TrimTrailingSilence(byte[] w)
     {
         try
         {
-            // New utterance: invalidate the previous prompt first (so a stale
-            // completion in the gap counts as cancelled), then clear the flag.
-            currentPrompt = null;
-            cancelRequested = false;
-            currentPrompt = pitchPercent == 0 ? synth.SpeakAsync(text) : synth.SpeakSsmlAsync(BuildSsml(text));
+            if (w.Length < 44 || Encoding.ASCII.GetString(w, 0, 4) != "RIFF") return w;
+            int rate = BitConverter.ToInt32(w, 24);
+            int channels = BitConverter.ToInt16(w, 22);
+            int bits = BitConverter.ToInt16(w, 34);
+            if ((bits != 16 && bits != 8) || channels < 1 || rate <= 0) return w;
+
+            int pos = 12, dataOff = -1, dataLen = 0;
+            while (pos + 8 <= w.Length)
+            {
+                string id = Encoding.ASCII.GetString(w, pos, 4);
+                int len = BitConverter.ToInt32(w, pos + 4);
+                if (len < 0) return w;
+                if (id == "data") { dataOff = pos + 8; dataLen = len; break; }
+                pos += 8 + len + (len & 1);
+            }
+            if (dataOff < 0) return w;
+            if (dataOff + dataLen > w.Length) dataLen = w.Length - dataOff;
+
+            int frame = (bits / 8) * channels;
+            if (frame <= 0 || dataLen < frame) return w;
+
+            int last = dataLen;
+            for (int i = dataLen - frame; i >= 0; i -= frame)
+            {
+                int s = bits == 16 ? BitConverter.ToInt16(w, dataOff + i) : (w[dataOff + i] - 128) << 8;
+                if (Math.Abs(s) > 150) { last = i + frame; break; }
+            }
+            int keep = last + (rate / 25) * frame;          // ~40 ms of tail
+            if (keep >= dataLen) return w;                   // nothing worth cutting
+            if (dataLen - keep < (rate / 10) * frame) return w;   // less than 100 ms — leave it
+
+            byte[] outBuf = new byte[dataOff + keep];
+            Buffer.BlockCopy(w, 0, outBuf, 0, dataOff + keep);
+            Buffer.BlockCopy(BitConverter.GetBytes(keep), 0, outBuf, dataOff - 4, 4);          // data size
+            Buffer.BlockCopy(BitConverter.GetBytes(outBuf.Length - 8), 0, outBuf, 4, 4);       // RIFF size
+            return outBuf;
+        }
+        catch { return w; }
+    }
+
+    /// <summary>The original path: let the driver render straight to the sound card.
+    /// Used for voices that can't render to a stream; keeps them working, crackle
+    /// and all, rather than leaving them silent.</summary>
+    private static void SpeakRealtime(string text, int myGen)
+    {
+        try
+        {
+            lock (synthLock)
+            {
+                synth.SetOutputToDefaultAudioDevice();
+                spoken.Reset();
+                if (pitchPercent == 0) synth.SpeakAsync(text);
+                else synth.SpeakSsmlAsync(BuildSsml(text));
+            }
+            spoken.WaitOne(120000);       // SpeakCompleted, or a cancel, releases this
         }
         catch { }
+        Report(myGen);
+    }
+
+    private static string CurrentVoice()
+    {
+        try { lock (synthLock) return synth.Voice.Name ?? ""; }
+        catch { return ""; }
+    }
+
+    private static bool IsCurrent(int myGen)
+    {
+        lock (playLock) return myGen == generation;
+    }
+
+    /// <summary>Reports the utterance's end — "cancelled" if it was superseded or
+    /// stopped, so the reader knows not to advance to the next sentence.</summary>
+    private static void Report(int myGen)
+    {
+        Emit("DONE\t" + (IsCurrent(myGen) ? "natural" : "cancelled"));
+    }
+
+    /// <summary>Stops any playback in progress. Caller holds playLock.</summary>
+    private static void StopPlayback()
+    {
+        try { if (player != null) player.Stop(); } catch { }
+        player = null;
     }
 
     private static string BuildSsml(string text)

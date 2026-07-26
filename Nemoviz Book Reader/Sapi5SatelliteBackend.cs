@@ -125,6 +125,14 @@ namespace Nemoviz_Book_Reader
             Send("SPEAK\t" + b64);
         }
 
+        /// <summary>Asks the host to render the next sentence while this one plays,
+        /// so buffered voices start it with no gap.</summary>
+        public void PreRender(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            Send("PRERENDER\t" + Convert.ToBase64String(Encoding.UTF8.GetBytes(text)));
+        }
+
         public void Pause() { paused = true; Send("PAUSE"); }
         public void Resume() { paused = false; Send("RESUME"); }
         public void Cancel() { paused = false; Send("CANCEL"); }

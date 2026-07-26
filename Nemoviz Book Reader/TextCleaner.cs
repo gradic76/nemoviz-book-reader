@@ -19,6 +19,18 @@ namespace Nemoviz_Book_Reader
         // letter-hyphen-newline-letter → glue the word back together.
         private static readonly Regex Dehyphenate = new Regex(@"(\p{L})-\n(\p{L})", RegexOptions.Compiled);
         // A spaced dash (hyphen / en / em) used as punctuation → comma.
+        // A hard line break in the middle of a sentence is just the source's
+        // wrapping — braille wraps at ~40 columns, PDF at the page width, plain text
+        // at 70-odd. Speech engines treat every newline as a prosodic boundary, so
+        // those breaks make a voice stutter mid-sentence (very audible on Microsoft
+        // voices, less so on eSpeak). A line that continues in lowercase is a
+        // continuation, so the break becomes a space. It is a REPLACEMENT, not a
+        // deletion: the text keeps its length, so every heading/page offset already
+        // stored for a book stays exactly valid. Blank-line paragraph breaks are
+        // untouched (the next line doesn't start with a lowercase letter there).
+        private static readonly Regex WrappedLine =
+            new Regex(@"(?<=\S)\n(?=\p{Ll})", RegexOptions.Compiled);
+
         private static readonly Regex SpacedDash = new Regex(@" [-–—] ", RegexOptions.Compiled);
         private static readonly Regex TrailingSpace = new Regex(@"[ \t]+\n", RegexOptions.Compiled);
         private static readonly Regex MultiSpace = new Regex(@"[ \t]{2,}", RegexOptions.Compiled);
@@ -32,6 +44,7 @@ namespace Nemoviz_Book_Reader
             t = t.Replace('\t', ' ');
             t = Noise.Replace(t, "");
             t = Dehyphenate.Replace(t, "$1$2");
+            t = WrappedLine.Replace(t, " ");   // unwrap mid-sentence line breaks
             t = SpacedDash.Replace(t, ", ");
             t = TrailingSpace.Replace(t, "\n");
             t = MultiSpace.Replace(t, " ");

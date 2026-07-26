@@ -41,6 +41,11 @@ namespace Nemoviz_Book_Reader
         /// <summary>Starts speaking one chunk asynchronously.</summary>
         void Speak(string text);
 
+        /// <summary>Hints the chunk that will be spoken next, so a backend that
+        /// renders audio before playing it can have it ready and start without a
+        /// gap. Backends that speak straight to the device ignore this.</summary>
+        void PreRender(string text);
+
         void Pause();
         void Resume();
         /// <summary>Cancels the current utterance (Completed fires with cancelled=true).</summary>

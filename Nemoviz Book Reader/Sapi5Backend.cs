@@ -177,6 +177,9 @@ namespace Nemoviz_Book_Reader
             catch { speaking = false; }
         }
 
+        // Speaks straight to the device, so there is nothing to prepare ahead.
+        public void PreRender(string text) { }
+
         public void Pause()
         {
             if (speaking && !paused)
