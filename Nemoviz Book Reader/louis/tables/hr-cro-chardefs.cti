@@ -59,7 +59,7 @@ punctuation   \x003A 25              #58    : COLON
 punctuation   \x003B 23              #59    ; SEMICOLON
 math          \x003C 246-3              #60    < LESS-THAN SIGN
 math          \x003D 4-2356            #61    = EQUALS SIGN
-math          \x003E 135-2              #62    > GREATER-THAN SIGN
+noback math          \x003E 135-2              #62    > GREATER-THAN SIGN
 punctuation   \x003F 26              #63    ? QUESTION MARK
 
 include latinLetterDef6Dots.uti
@@ -68,7 +68,7 @@ punctuation   \x005B 6-12356          #91    [  LEFT SQUARE BRACKET
 sign          \x005C 4-1256            #92    \  REVERSE SOLIDUS
 punctuation   \x005D 6-23456          #93    ]  RIGHT SQUARE BRACKET
 sign          \x005E 5          #94    ^  CIRCUMFLEX ACCENT
-sign          \x005F 456           #95    _  LOW LINE
+noback sign          \x005F 456           #95    _  LOW LINE
 sign          \x0060 4             #96    `  GRAVE ACCENT
 punctuation   \x007B 12356           #123   {  LEFT CURLY BRACKET
 sign          \x007C 45              #124   |  VERTICAL LINE

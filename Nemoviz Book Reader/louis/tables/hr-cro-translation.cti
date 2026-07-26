@@ -256,7 +256,7 @@ always \x2266 4-246-2356
 midnum \s>\s 0-135-2
 midnum \s> 0-135-2
 midnum > 0-135-2
-always > 135-2
+noback always > 135-2
 # Veći ili jednak:
 midnum \s\x2265\s 0-135-2356
 midnum \s\x2265 0-135-2356
