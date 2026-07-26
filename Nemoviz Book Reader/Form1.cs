@@ -990,10 +990,10 @@ namespace Nemoviz_Book_Reader
         private void ChangeSpeed(int delta)
         {
             // Text book: the speed control is words-per-minute, not an mpv
-            // multiplier. Step ±10 WPM, beep when passing the Settings default.
+            // multiplier. Step ±5 WPM, beep when passing the Settings default.
             if (currentBook != null && currentBook.IsTextBook)
             {
-                int step = delta > 0 ? 10 : -10;
+                int step = delta > 0 ? 5 : -5;
                 int newWpm = Math.Max(80, Math.Min(400, currentWpm + step));
                 int def = appSettings.TtsWpm;
                 bool crossedDefault = (currentWpm - def) * (newWpm - def) <= 0 && currentWpm != newWpm;

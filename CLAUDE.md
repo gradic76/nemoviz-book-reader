@@ -717,9 +717,12 @@ This becomes the core of Phase 2's cleaning.
   Paragraph / **Standard page** (1800 chars, the translation/journalism unit) —
   no bookmarks yet.
 - **Speed** is **words-per-minute** (nominal; real rate is voice-dependent),
-  reusing the player's speed control (`ChangeSpeed` branch): 80–400 WPM, ±10 per
-  step, a double-beep when crossing the Settings default; maps to SAPI rate via
+  reusing the player's speed control (`ChangeSpeed` branch): 80–400 WPM, **±5 per
+  step**, a double-beep when crossing the Settings default; maps to SAPI rate via
   `TtsReader.WpmToRate` (175 WPM → 0). Reading-time estimates use CPM = WPM×6.
+  **The spin boxes in Settings and Properties step by the same amount as the
+  player** (`MakeNumeric`'s `increment`): 5 WPM, 5 % volume, 10 % playback speed —
+  stepping by 1 is far too slow when every step is spoken.
 - **Global TTS defaults** (voice/WPM/pitch/volume) live in **Settings → Text
   Books** (`AppSettings` `[TextToSpeech]`), with a "Test voice" button.
 - **Display**: title bar + info box show **percentage** (one decimal — the

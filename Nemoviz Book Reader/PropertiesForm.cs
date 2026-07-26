@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -65,7 +65,7 @@ namespace Nemoviz_Book_Reader
 
         private bool suppressAnnounce;
         // True while the dialog is still being built: filling the pickers fires
-        // change events, and those must not be mistaken for the user editing —
+        // change events, and those must not be mistaken for the user editing â€”
         // otherwise opening Properties would immediately push its starting values
         // onto live playback.
         private bool initialising = true;
@@ -99,21 +99,24 @@ namespace Nemoviz_Book_Reader
             SoundSettings s = book.Sound;
 
             this.Text = ShelfName(book);
-            this.ClientSize = new Size(730, 540);
+            // Tall enough that the Text tab's three groups fit without scrolling
+            // (a scrollbar there also stole width and brought a horizontal one
+            // with it), and still short enough for a 1080p screen at 150 %.
+            this.ClientSize = new Size(730, 606);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.ShowInTaskbar = false;
             this.StartPosition = FormStartPosition.CenterParent;
 
-            // Column A — full-height info + live technical read-out.
+            // Column A â€” full-height info + live technical read-out.
             tbInfo = new TextBox();
             tbInfo.Multiline = true;
             tbInfo.ReadOnly = true;
             tbInfo.ScrollBars = ScrollBars.Vertical;
             tbInfo.BackColor = SystemColors.Window;
             tbInfo.Location = new Point(8, 8);
-            tbInfo.Size = new Size(232, 470);
+            tbInfo.Size = new Size(232, 510);
             tbInfo.TabStop = true;
             tbInfo.TabIndex = 0;
             tbInfo.AccessibleName = Localization.T("Prop.Info.Accessible");
@@ -157,10 +160,10 @@ namespace Nemoviz_Book_Reader
             cmbNrmType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbNrmType.Location = new Point(10, 40);
             cmbNrmType.Size = new Size(CellW - 24, 24);
-            cmbNrmType.AccessibleName = gNrm.Text + " — " + Localization.T("Prop.Normalize.Method");
+            cmbNrmType.AccessibleName = gNrm.Text + " â€” " + Localization.T("Prop.Normalize.Method");
             cmbNrmType.TabIndex = 1;
-            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Speech"));   // 0 → speechnorm
-            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Dynamic"));  // 1 → dynaudnorm
+            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Speech"));   // 0 â†’ speechnorm
+            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Dynamic"));  // 1 â†’ dynaudnorm
             cmbNrmType.SelectedIndex =
                 string.Equals(s.NormalizeType, "dynaudnorm", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
             gNrm.Controls.Add(cmbNrmType);
@@ -168,7 +171,7 @@ namespace Nemoviz_Book_Reader
             cmbNrm.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbNrm.Location = new Point(10, 70);
             cmbNrm.Size = new Size(CellW - 24, 24);
-            cmbNrm.AccessibleName = gNrm.Text + " — " + Localization.T("Prop.Stage.Level");
+            cmbNrm.AccessibleName = gNrm.Text + " â€” " + Localization.T("Prop.Stage.Level");
             cmbNrm.TabIndex = 2;
             foreach (string k in L5) cmbNrm.Items.Add(Localization.T(k));
             cmbNrm.SelectedIndex = Clamp(s.NormalizeLevel, 0, L5.Length - 1);
@@ -205,7 +208,7 @@ namespace Nemoviz_Book_Reader
             btnOK.Text = Localization.T("Btn.OK");
             btnOK.AccessibleName = Localization.T("Btn.OK");
             btnOK.Size = new Size(90, 30);
-            btnOK.Location = new Point(438, 498);
+            btnOK.Location = new Point(438, 564);
             btnOK.TabIndex = 10;
             btnOK.DialogResult = DialogResult.OK;
             btnOK.Click += (s2, e) => Persist();
@@ -214,7 +217,7 @@ namespace Nemoviz_Book_Reader
             btnCancel.Text = Localization.T("Btn.Cancel");
             btnCancel.AccessibleName = Localization.T("Btn.Cancel");
             btnCancel.Size = new Size(90, 30);
-            btnCancel.Location = new Point(534, 498);
+            btnCancel.Location = new Point(534, 564);
             btnCancel.TabIndex = 11;
             btnCancel.DialogResult = DialogResult.Cancel;
 
@@ -226,7 +229,7 @@ namespace Nemoviz_Book_Reader
 
             tabs = new TabControl();
             tabs.Location = new Point(8, 8);
-            tabs.Size = new Size(714, 476);
+            tabs.Size = new Size(714, 548);
             tabs.TabIndex = 0;
 
             if (hasAudio)
@@ -277,7 +280,7 @@ namespace Nemoviz_Book_Reader
             onPreview?.Invoke(BuildCurrent(), chkBypass.Checked);
         }
 
-        // ── Cell builders ─────────────────────────────────────────────────
+        // â”€â”€ Cell builders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private GroupBox StageBox(string titleKey, int x, int y, int tabIndex)
         {
             GroupBox g = new GroupBox();
@@ -290,7 +293,7 @@ namespace Nemoviz_Book_Reader
 
         private CheckBox StageEnable(GroupBox g)
         {
-            // No "Use" label — the group already names the stage and the check
+            // No "Use" label â€” the group already names the stage and the check
             // state alone says whether it is on. Accessible name = the stage
             // name so a screen reader reads e.g. "Soften sibilance, checkbox".
             CheckBox c = new CheckBox();
@@ -309,7 +312,7 @@ namespace Nemoviz_Book_Reader
             cb.DropDownStyle = ComboBoxStyle.DropDownList;
             cb.Location = new Point(10, 46);
             cb.Size = new Size(CellW - 24, 24);
-            cb.AccessibleName = g.Text + " — " + Localization.T("Prop.Stage.Level");
+            cb.AccessibleName = g.Text + " â€” " + Localization.T("Prop.Stage.Level");
             cb.TabIndex = 1;
             foreach (string k in itemKeys) cb.Items.Add(Localization.T(k));
             cb.SelectedIndex = Clamp(selected, 0, itemKeys.Length - 1);
@@ -363,7 +366,7 @@ namespace Nemoviz_Book_Reader
                     p.Enabled = master && st.Enable.Checked;
         }
 
-        // ── Info column (live technical read-out) ─────────────────────────
+        // â”€â”€ Info column (live technical read-out) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private void RefreshInfo()
         {
             string dash = Localization.T("Common.Dash");
@@ -455,7 +458,7 @@ namespace Nemoviz_Book_Reader
 
         private static string ShelfName(BookData b)
         {
-            return string.IsNullOrWhiteSpace(b.Author) ? b.Title : b.Author + " — " + b.Title;
+            return string.IsNullOrWhiteSpace(b.Author) ? b.Title : b.Author + " â€” " + b.Title;
         }
 
         private static int Clamp(int v, int lo, int hi)
@@ -519,7 +522,7 @@ namespace Nemoviz_Book_Reader
             base.OnFormClosed(e);
         }
 
-        // ── Text tab: the SAME options as Settings → Text Books, but for THIS book.
+        // â”€â”€ Text tab: the SAME options as Settings â†’ Text Books, but for THIS book.
         // Settings holds the defaults; a book only departs from them when the user
         // says so, which is what the "custom" switch at the top means. Left off, the
         // book simply follows Settings and every control below is dimmed and out of
@@ -537,15 +540,15 @@ namespace Nemoviz_Book_Reader
             tbTextInfo.ScrollBars = ScrollBars.Vertical;
             tbTextInfo.BackColor = SystemColors.Window;
             tbTextInfo.Location = new Point(8, 8);
-            tbTextInfo.Size = new Size(232, 440);
+            tbTextInfo.Size = new Size(232, 510);
             tbTextInfo.TabStop = true;
             tbTextInfo.TabIndex = 0;
             tbTextInfo.AccessibleName = Localization.T("Prop.Info.Accessible");
             page.Controls.Add(tbTextInfo);
 
             page.Controls.Add(BuildTextSpeechGroup(248, 8));
-            page.Controls.Add(BuildTextBrailleGroup(248, 254));
-            page.Controls.Add(BuildTextVisualGroup(248, 346));
+            page.Controls.Add(BuildTextBrailleGroup(248, 226));
+            page.Controls.Add(BuildTextVisualGroup(248, 314));
 
             UpdateTextEnabled();
             return page;
@@ -556,40 +559,42 @@ namespace Nemoviz_Book_Reader
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.TextBooks.SpeechGroup");
             box.Location = new Point(x, y);
-            box.Size = new Size(452, 238);
+            box.Size = new Size(452, 212);
 
-            int lx = 10, cx = 150, cw = 288, yy = 24, tab = 0;
+            // The field column starts far enough right for the longest caption
+            // ("Reading speed (words per minute):") to be written out in full.
+            int lx = 10, cx = 210, cw = 232, yy = 22, tab = 0;
 
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.SpeechEngine"), lx, yy + 3));
             cmbTEngine = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.SpeechEngine"), cx, yy, cw, tab++);
             cmbTEngine.SelectedIndexChanged += (s, e) => TextLanguagesForEngine();
             box.Controls.Add(cmbTEngine);
 
-            yy += 34;
+            yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Language"), lx, yy + 3));
             cmbTLanguage = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Language"), cx, yy, cw, tab++);
             cmbTLanguage.SelectedIndexChanged += (s, e) => TextVoicesForSelection();
             box.Controls.Add(cmbTLanguage);
 
-            yy += 34;
+            yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Voice"), lx, yy + 3));
             cmbTVoice = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Voice"), cx, yy, cw, tab++);
             cmbTVoice.SelectedIndexChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
             box.Controls.Add(cmbTVoice);
 
-            yy += 40;
+            yy += 34;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Speed"), lx, yy + 3));
             numTWpm = SettingsForm.MakeNumeric(Localization.T("Settings.TextBooks.Speed"), cx, yy, 80, 400,
-                                               book.TextWpm >= 0 ? book.TextWpm : 175, tab++);
+                                               book.TextWpm >= 0 ? book.TextWpm : 175, tab++, 5);
             box.Controls.Add(numTWpm);
 
-            yy += 34;
+            yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Volume"), lx, yy + 3));
             numTVolume = SettingsForm.MakeNumeric(Localization.T("Settings.TextBooks.Volume"), cx, yy, 0, 100,
-                                                  book.TextVolume >= 0 ? book.TextVolume : Clamp(book.Volume, 0, 100), tab++);
+                                                  book.TextVolume >= 0 ? book.TextVolume : Clamp(book.Volume, 0, 100), tab++, 5);
             box.Controls.Add(numTVolume);
 
-            yy += 34;
+            yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Pitch"), lx, yy + 3));
             numTPitch = SettingsForm.MakeNumeric(Localization.T("Settings.TextBooks.Pitch"), cx, yy, -10, 10,
                                                  book.TextPitch >= -10 && book.TextPitch <= 10 ? book.TextPitch : 0, tab++);
@@ -598,7 +603,7 @@ namespace Nemoviz_Book_Reader
             numTPitch.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
             box.Controls.Add(numTPitch);
 
-            // Fill the same engine → language → voice cascade Settings uses.
+            // Fill the same engine â†’ language â†’ voice cascade Settings uses.
             try { textCatalog = TextSpeech().GetVoiceCatalog(); }
             catch { textCatalog = new List<(string, string, string)>(); }
             var engines = new List<string>();
@@ -608,8 +613,8 @@ namespace Nemoviz_Book_Reader
             foreach (string en in engines) cmbTEngine.Items.Add(en);
 
             // The saved name may predate the switch to plain voice names (it could
-            // be SAPI's description, "… - English (United States)"), so fall back
-            // to matching the bare name — OK then rewrites it in the current form.
+            // be SAPI's description, "â€¦ - English (United States)"), so fall back
+            // to matching the bare name â€” OK then rewrites it in the current form.
             string want = !string.IsNullOrEmpty(book.TextVoice) ? book.TextVoice : "";
             foreach (var c in textCatalog)
                 if (!string.Equals(c.Name, want, StringComparison.OrdinalIgnoreCase)
@@ -637,22 +642,22 @@ namespace Nemoviz_Book_Reader
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.TextBooks.BrailleGroup");
             box.Location = new Point(x, y);
-            box.Size = new Size(452, 86);
+            box.Size = new Size(452, 80);
 
             chkTBraille = new CheckBox();
             chkTBraille.Text = Localization.T("Settings.TextBooks.UseBraille");
             chkTBraille.AccessibleName = Localization.T("Settings.TextBooks.UseBraille");
-            chkTBraille.Location = new Point(14, 22);
-            chkTBraille.Size = new Size(430, 24);
+            chkTBraille.Location = new Point(14, 20);
+            chkTBraille.Size = new Size(424, 24);
             chkTBraille.TabIndex = 0;
             chkTBraille.CheckedChanged += (s, e) => UpdateTextEnabled();
             box.Controls.Add(chkTBraille);
 
-            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.BrailleTable"), 10, 55));
-            cmbTBrailleTable = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.BrailleTable"), 150, 52, 288, 1);
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.BrailleTable"), 10, 51));
+            cmbTBrailleTable = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.BrailleTable"), 210, 48, 232, 1);
             cmbTBrailleTable.Items.Add(Localization.T("Settings.TextBooks.BrailleTableAuto"));
             foreach (BrailleTableInfo t in BrailleTables.All) cmbTBrailleTable.Items.Add(t.Display);
-            // A braille book remembers the table it was read with — show that one.
+            // A braille book remembers the table it was read with â€” show that one.
             int bi = 0;
             for (int i = 0; i < BrailleTables.All.Length; i++)
                 if (string.Equals(BrailleTables.All[i].Id, book.BrailleTable, StringComparison.OrdinalIgnoreCase))
@@ -667,18 +672,18 @@ namespace Nemoviz_Book_Reader
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.TextBooks.VisualGroup");
             box.Location = new Point(x, y);
-            box.Size = new Size(452, 224);
+            box.Size = new Size(452, 204);
 
             chkTVisual = new CheckBox();
             chkTVisual.Text = Localization.T("Settings.TextBooks.UseVisual");
             chkTVisual.AccessibleName = Localization.T("Settings.TextBooks.UseVisual");
-            chkTVisual.Location = new Point(14, 22);
-            chkTVisual.Size = new Size(430, 24);
+            chkTVisual.Location = new Point(14, 20);
+            chkTVisual.Size = new Size(424, 24);
             chkTVisual.TabIndex = 0;
             chkTVisual.CheckedChanged += (s, e) => UpdateTextEnabled();
             box.Controls.Add(chkTVisual);
 
-            int lx = 10, cx = 150, cw = 288, yy = 52, tab = 1;
+            int lx = 10, cx = 210, cw = 232, yy = 48, tab = 1;
 
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.VisualMode"), lx, yy + 3));
             cmbTVisualMode = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.VisualMode"), cx, yy, cw, tab++);
@@ -688,7 +693,7 @@ namespace Nemoviz_Book_Reader
             cmbTVisualMode.SelectedIndex = 0;
             box.Controls.Add(cmbTVisualMode);
 
-            yy += 34;
+            yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Highlight"), lx, yy + 3));
             cmbTHighlight = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Highlight"), cx, yy, cw, tab++);
             cmbTHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.None"));
@@ -697,17 +702,17 @@ namespace Nemoviz_Book_Reader
             cmbTHighlight.SelectedIndex = 2;
             box.Controls.Add(cmbTHighlight);
 
-            yy += 34;
+            yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.HighlightColour"), lx, yy + 3));
             cmbTHighlightColour = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.HighlightColour"), cx, yy, cw, tab++);
             box.Controls.Add(cmbTHighlightColour);
 
-            yy += 34;
+            yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.TextColour"), lx, yy + 3));
             cmbTTextColour = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.TextColour"), cx, yy, cw, tab++);
             box.Controls.Add(cmbTTextColour);
 
-            yy += 34;
+            yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.BackColour"), lx, yy + 3));
             cmbTBackColour = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.BackColour"), cx, yy, cw, tab++);
             box.Controls.Add(cmbTBackColour);
@@ -802,7 +807,7 @@ namespace Nemoviz_Book_Reader
             book.TextVolume = numTVolume != null ? (int)numTVolume.Value : -1;
             book.TextPitch = numTPitch != null ? (int)numTPitch.Value : -99;
             // A text book has no playback volume of its own: the player's Volume
-            // field IS this speech volume, so keep the two the same number — the
+            // field IS this speech volume, so keep the two the same number â€” the
             // player reads book.Volume back when the dialog closes. (On a hybrid
             // book the Audio tab's own field is written afterwards and wins.)
             if (book.TextVolume >= 0) book.Volume = book.TextVolume;
@@ -816,7 +821,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Per-book playback level and speed, alongside the processing
-        /// stages — they are what the book sounds like just as much as the filters.
+        /// stages â€” they are what the book sounds like just as much as the filters.
         /// The player writes these back as the user adjusts them live, so the dialog
         /// simply shows and edits the stored values.</summary>
         private GroupBox BuildPlaybackGroup(int x, int y)
@@ -828,12 +833,12 @@ namespace Nemoviz_Book_Reader
 
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Prop.Playback.Volume"), 10, 28));
             numPlayVolume = SettingsForm.MakeNumeric(Localization.T("Prop.Playback.Volume"),
-                                                     120, 25, 0, 100, Clamp(book.Volume, 0, 100), 0);
+                                                     120, 25, 0, 100, Clamp(book.Volume, 0, 100), 0, 5);
             box.Controls.Add(numPlayVolume);
 
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Prop.Playback.Speed"), 240, 28));
             numPlaySpeed = SettingsForm.MakeNumeric(Localization.T("Prop.Playback.Speed"),
-                                                    340, 25, 50, 300, Clamp(book.Speed, 50, 300), 1);
+                                                    340, 25, 50, 300, Clamp(book.Speed, 50, 300), 1, 10);
             box.Controls.Add(numPlaySpeed);
             numPlayVolume.ValueChanged += (s, e) => PreviewPlayback();
             numPlaySpeed.ValueChanged += (s, e) => PreviewPlayback();
@@ -856,7 +861,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>The Text tab's read-out: what this book will actually be read
-        /// with, and where each value comes from — the book's own setting, or the
+        /// with, and where each value comes from â€” the book's own setting, or the
         /// Settings default it inherits.</summary>
         private void RefreshTextInfo()
         {

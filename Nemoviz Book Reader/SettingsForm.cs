@@ -322,7 +322,7 @@ namespace Nemoviz_Book_Reader
             box.Location = new Point(8, 6);
             box.Size = new Size(500, 280);
 
-            int lx = 14, cx = 170, cw = 310, y = 26, tab = 0;
+            int lx = 14, cx = 214, cw = 272, y = 26, tab = 0;
 
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.SpeechEngine"), lx, y + 3));
             cmbSpeechEngine = MakeCombo(Localization.T("Settings.TextBooks.SpeechEngine"), cx, y, cw, tab++);
@@ -345,13 +345,13 @@ namespace Nemoviz_Book_Reader
             y += 40;
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Speed"), lx, y + 3));
             numRate = MakeNumeric(Localization.T("Settings.TextBooks.Speed"), cx, y, 80, 400,
-                                  Clamp(appSettings.TtsWpm, 80, 400), tab++);
+                                  Clamp(appSettings.TtsWpm, 80, 400), tab++, 5);
             box.Controls.Add(numRate);
 
             y += 34;
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Volume"), lx, y + 3));
             numVolume = MakeNumeric(Localization.T("Settings.TextBooks.Volume"), cx, y, 0, 100,
-                                    Clamp(appSettings.TtsVolume, 0, 100), tab++);
+                                    Clamp(appSettings.TtsVolume, 0, 100), tab++, 5);
             box.Controls.Add(numVolume);
 
             y += 34;
@@ -418,7 +418,7 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(chkBraille);
 
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.BrailleTable"), 14, 55));
-            cmbBrailleTable = MakeCombo(Localization.T("Settings.TextBooks.BrailleTable"), 170, 52, 310, 1);
+            cmbBrailleTable = MakeCombo(Localization.T("Settings.TextBooks.BrailleTable"), 214, 52, 272, 1);
             // The tables NBR ships for reading .brf books; the same list serves as
             // the default for what a braille display would be sent.
             cmbBrailleTable.Items.Add(Localization.T("Settings.TextBooks.BrailleTableAuto"));
@@ -447,7 +447,7 @@ namespace Nemoviz_Book_Reader
             chkVisual.CheckedChanged += (s, e) => UpdateVisualEnabled();
             box.Controls.Add(chkVisual);
 
-            int lx = 14, cx = 170, cw = 310, yy = 52, tab = 1;
+            int lx = 14, cx = 214, cw = 272, yy = 52, tab = 1;
 
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.VisualMode"), lx, yy + 3));
             cmbVisualMode = MakeCombo(Localization.T("Settings.TextBooks.VisualMode"), cx, yy, cw, tab++);
@@ -523,7 +523,10 @@ namespace Nemoviz_Book_Reader
             Label l = new Label();
             l.Text = text;
             l.Location = new Point(x, y);
-            l.Size = new Size(150, 20);
+            // AutoSize, not a fixed 150 px: a longer caption ("Reading speed (words
+            // per minute):") was silently cut off where the field column began.
+            // The field columns leave room for the longest label in each dialog.
+            l.AutoSize = true;
             l.TabStop = false;
             return l;
         }
@@ -539,11 +542,17 @@ namespace Nemoviz_Book_Reader
             return c;
         }
 
-        internal static NumericUpDown MakeNumeric(string name, int x, int y, int min, int max, int value, int tabIndex)
+        /// <summary>A spin box. <paramref name="increment"/> is the arrow step — it
+        /// matches the player's own step for the same value (5 WPM, 5 % volume,
+        /// 10 % speed), because stepping by 1 through those ranges takes far too
+        /// long when every step is spoken.</summary>
+        internal static NumericUpDown MakeNumeric(string name, int x, int y, int min, int max, int value, int tabIndex,
+                                                  int increment = 1)
         {
             NumericUpDown n = new NumericUpDown();
             n.Minimum = min;
             n.Maximum = max;
+            n.Increment = increment;
             n.Value = Clamp(value, min, max);
             n.Location = new Point(x, y);
             n.Size = new Size(90, 24);
