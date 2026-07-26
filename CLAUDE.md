@@ -1161,8 +1161,9 @@ sequence above supersedes its ordering).
   that reached only the active backend, and the text-book volume existing
   twice. All fixed (e05cba6) and tested by ear: "TTS-ovi se mijenjaju u hodu,
   zvučne kartice se mijenjaju u hodu". Details in sections 8g and 8e.
-  **Still untested:** Cancel/OK on both book kinds, and the Library entry
-  point (it opens Properties without the player's live values).
+  **Properties is fully tested too (Session 18):** Cancel and OK on both an audio
+  and a text book, and from the Library as well as the player — volume, speed and
+  what each voice remembers all behave. Nothing outstanding here.
   **Known, not hit on this machine:** a 32-bit *buffered* voice pausing late
   would point at the host's playback pair (Play/Stop) — eSpeak uses the
   real-time path and 64-bit voices never go through the host.
