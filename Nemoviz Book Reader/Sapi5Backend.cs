@@ -218,7 +218,7 @@ namespace Nemoviz_Book_Reader
             if (!speaking && !paused) return;
             if (paused) { try { voice.Resume(); } catch { } paused = false; }
             cancelled = true;
-            try { voice.Speak("", SVSFPurgeBeforeSpeak); } catch { }
+            try { voice.Speak("", SVSFPurgeBeforeSpeak | SVSFlagsAsync); } catch { }
             // Completion (cancelled=true) fires on the next poll once SAPI leaves
             // the speaking state.
         }
@@ -270,7 +270,7 @@ namespace Nemoviz_Book_Reader
         public void Dispose()
         {
             try { poll.Stop(); poll.Dispose(); } catch { }
-            try { voice.Speak("", SVSFPurgeBeforeSpeak); } catch { }
+            try { voice.Speak("", SVSFPurgeBeforeSpeak | SVSFlagsAsync); } catch { }
             try { System.Runtime.InteropServices.Marshal.FinalReleaseComObject(voice); } catch { }
         }
     }

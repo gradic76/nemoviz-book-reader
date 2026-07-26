@@ -76,6 +76,11 @@ namespace Nemoviz_Book_Reader
         // Per-book reading speed override (words per minute); -1 = use the
         // global default from Settings. Set from the text book's Properties.
         public int TextWpm { get; set; }
+        /// <summary>Per-book speech overrides; empty/-1 means "use the Settings
+        /// default". Settings holds the defaults, a book may differ.</summary>
+        public string TextVoice { get; set; }
+        public int TextVolume { get; set; }
+        public int TextPitch { get; set; }
         // Character count of the text, cached for the reading-time estimate.
         public int TextChars { get; set; }
         // Heading structure of a produced text book (epub/fb2/html): level +
@@ -137,6 +142,11 @@ namespace Nemoviz_Book_Reader
             TextPosition = tp;
             int.TryParse(ini.Read("Settings", "TextWpm", "-1"), out int tw);
             TextWpm = tw;
+            TextVoice = ini.Read("Settings", "TextVoice", "");
+            int.TryParse(ini.Read("Settings", "TextVolume", "-1"), out int tvol);
+            TextVolume = tvol;
+            int.TryParse(ini.Read("Settings", "TextPitch", "-99"), out int tpit);
+            TextPitch = tpit;
             int.TryParse(ini.Read("Book", "TextChars", "0"), out int tc);
             TextChars = tc;
             LoadTextNav();
@@ -695,6 +705,9 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "SeekStep", SeekStep.ToString());
             ini.Write("Progress", "TextPosition", TextPosition.ToString());
             ini.Write("Settings", "TextWpm", TextWpm.ToString());
+            ini.Write("Settings", "TextVoice", TextVoice ?? "");
+            ini.Write("Settings", "TextVolume", TextVolume.ToString());
+            ini.Write("Settings", "TextPitch", TextPitch.ToString());
             ini.Write("Book", "TextChars", TextChars.ToString());
             ini.Write("TextNav", "Count", TextHeadings.Count.ToString());
             for (int i = 0; i < TextHeadings.Count; i++)

@@ -77,7 +77,7 @@ namespace Nemoviz_Book_Reader
             this.stagedLibraryPath = appSettings.LibraryPath;
 
             this.Text = Localization.T("Dialog.Settings.Title");
-            this.ClientSize = new Size(560, 700);
+            this.ClientSize = new Size(560, 560);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -93,7 +93,7 @@ namespace Nemoviz_Book_Reader
 
             tabSettings = new TabControl();
             tabSettings.Location = new Point(10, 40);
-            tabSettings.Size = new Size(540, 610);
+            tabSettings.Size = new Size(540, 470);
             tabSettings.TabIndex = 1;
 
             tabSettings.TabPages.Add(BuildGeneralTab());
@@ -106,7 +106,7 @@ namespace Nemoviz_Book_Reader
             btnOK.Text = Localization.T("Btn.OK");
             btnOK.AccessibleName = Localization.T("Settings.OK.Accessible");
             btnOK.Size = new Size(90, 32);
-            btnOK.Location = new Point(260, 655);
+            btnOK.Location = new Point(260, 518);
             btnOK.TabIndex = 2;
             btnOK.DialogResult = DialogResult.OK;
             // Click fires before the dialog closes, so this persists on OK too.
@@ -116,7 +116,7 @@ namespace Nemoviz_Book_Reader
             btnCancel.Text = Localization.T("Btn.Cancel");
             btnCancel.AccessibleName = Localization.T("Settings.Cancel.Accessible");
             btnCancel.Size = new Size(90, 32);
-            btnCancel.Location = new Point(360, 655);
+            btnCancel.Location = new Point(360, 518);
             btnCancel.TabIndex = 3;
             btnCancel.DialogResult = DialogResult.Cancel;
 
@@ -125,7 +125,7 @@ namespace Nemoviz_Book_Reader
             btnApply.Text = Localization.T("Settings.Apply");
             btnApply.AccessibleName = Localization.T("Settings.Apply.Accessible");
             btnApply.Size = new Size(90, 32);
-            btnApply.Location = new Point(460, 655);
+            btnApply.Location = new Point(460, 518);
             btnApply.TabIndex = 4;
             btnApply.Click += (s, e) => SaveSettings();
 
@@ -511,14 +511,14 @@ namespace Nemoviz_Book_Reader
             SetEnabled(on, cmbVisualMode, cmbHighlight, cmbHighlightColour, cmbTextColour, cmbBackColour);
         }
 
-        private static void SetEnabled(bool on, params Control[] controls)
+        internal static void SetEnabled(bool on, params Control[] controls)
         {
             foreach (Control c in controls)
                 if (c != null) { c.Enabled = on; c.TabStop = on; }
         }
 
         // ── Small builders, so the layout above stays readable ────────────────
-        private static Label MakeLabel(string text, int x, int y)
+        internal static Label MakeLabel(string text, int x, int y)
         {
             Label l = new Label();
             l.Text = text;
@@ -528,7 +528,7 @@ namespace Nemoviz_Book_Reader
             return l;
         }
 
-        private static ComboBox MakeCombo(string name, int x, int y, int w, int tabIndex)
+        internal static ComboBox MakeCombo(string name, int x, int y, int w, int tabIndex)
         {
             ComboBox c = new ComboBox();
             c.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -539,7 +539,7 @@ namespace Nemoviz_Book_Reader
             return c;
         }
 
-        private static NumericUpDown MakeNumeric(string name, int x, int y, int min, int max, int value, int tabIndex)
+        internal static NumericUpDown MakeNumeric(string name, int x, int y, int min, int max, int value, int tabIndex)
         {
             NumericUpDown n = new NumericUpDown();
             n.Minimum = min;
@@ -590,7 +590,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>"hr-HR" → the language's own name, so the list reads naturally.</summary>
-        private static string LanguageLabel(string code)
+        internal static string LanguageLabel(string code)
         {
             if (string.IsNullOrEmpty(code)) return Localization.T("Settings.TextBooks.LanguageUnknown");
             try { return new System.Globalization.CultureInfo(code).DisplayName + "  (" + code + ")"; }

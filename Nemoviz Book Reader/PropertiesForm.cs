@@ -47,15 +47,39 @@ namespace Nemoviz_Book_Reader
 
         private Button btnResetAll;
         private CheckBox chkBypass;
+        private TabControl tabs;
+
+        // Text tab (per-book reading options; mirrors Settings -> Text Books).
+        private TextBox tbTextInfo;
+        private NumericUpDown numPlayVolume, numPlaySpeed;
+        private ComboBox cmbTEngine, cmbTLanguage, cmbTVoice;
+        private NumericUpDown numTWpm, numTVolume, numTPitch;
+        private CheckBox chkTBraille; private ComboBox cmbTBrailleTable;
+        private CheckBox chkTVisual;
+        private ComboBox cmbTVisualMode, cmbTHighlight, cmbTHighlightColour, cmbTTextColour, cmbTBackColour;
+        private List<(string Name, string Engine, string Language)> textCatalog;
+        private readonly List<string> textLanguageCodes = new List<string>();
+        private CompositeSpeechBackend textSpeech;
         private Button btnOK;
         private Button btnCancel;
 
         private bool suppressAnnounce;
+        // True while the dialog is still being built: filling the pickers fires
+        // change events, and those must not be mistaken for the user editing —
+        // otherwise opening Properties would immediately push its starting values
+        // onto live playback.
+        private bool initialising = true;
 
         // Live-preview hook: when the dialog is opened from the player, this
         // applies the (unsaved) settings to playback on every change so the user
         // hears edits on the fly. Null when opened from the library (no audio).
         private readonly Action<SoundSettings, bool> onPreview;
+        // Live preview for playback level and speed, so they are heard while being
+        // adjusted just like the processing stages. Cancel restores the old values.
+        private readonly Action<int, int> onPlaybackPreview;
+        // Same idea for a text book: the voice and how it reads are heard while
+        // being chosen, not only after OK.
+        private readonly Action<string, int, int, int> onTextPreview;
 
         /// <summary>Whether the user has toggled Bypass (compare processed vs.
         /// raw).</summary>
@@ -64,14 +88,18 @@ namespace Nemoviz_Book_Reader
         private static readonly string[] L5 =
             { "Prop.Level.Minimal", "Prop.Level.Light", "Prop.Level.Medium", "Prop.Level.Strong", "Prop.Level.Maximum" };
 
-        public PropertiesForm(BookData book, Action<SoundSettings, bool> onPreview = null)
+        public PropertiesForm(BookData book, Action<SoundSettings, bool> onPreview = null,
+                              Action<int, int> onPlaybackPreview = null,
+                              Action<string, int, int, int> onTextPreview = null)
         {
             this.book = book;
             this.onPreview = onPreview;
+            this.onPlaybackPreview = onPlaybackPreview;
+            this.onTextPreview = onTextPreview;
             SoundSettings s = book.Sound;
 
             this.Text = ShelfName(book);
-            this.ClientSize = new Size(700, 486);
+            this.ClientSize = new Size(730, 540);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -177,7 +205,7 @@ namespace Nemoviz_Book_Reader
             btnOK.Text = Localization.T("Btn.OK");
             btnOK.AccessibleName = Localization.T("Btn.OK");
             btnOK.Size = new Size(90, 30);
-            btnOK.Location = new Point(448, 404);
+            btnOK.Location = new Point(438, 498);
             btnOK.TabIndex = 10;
             btnOK.DialogResult = DialogResult.OK;
             btnOK.Click += (s2, e) => Persist();
@@ -186,19 +214,40 @@ namespace Nemoviz_Book_Reader
             btnCancel.Text = Localization.T("Btn.Cancel");
             btnCancel.AccessibleName = Localization.T("Btn.Cancel");
             btnCancel.Size = new Size(90, 30);
-            btnCancel.Location = new Point(544, 404);
+            btnCancel.Location = new Point(534, 498);
             btnCancel.TabIndex = 11;
             btnCancel.DialogResult = DialogResult.Cancel;
 
-            this.Controls.Add(tbInfo);
-            this.Controls.Add(chkMaster);
-            foreach (GroupBox g in stageCells) this.Controls.Add(g);
-            this.Controls.Add(btnResetAll);
-            this.Controls.Add(chkBypass);
+            // A book's properties are grouped by what it IS: sound processing for
+            // anything with audio, reading options for anything with text. A hybrid
+            // book (audio and text together) simply shows both tabs.
+            bool hasAudio = book.Chapters.Count > 0 || !book.IsTextBook;
+            bool hasText = book.IsTextBook;
+
+            tabs = new TabControl();
+            tabs.Location = new Point(8, 8);
+            tabs.Size = new Size(714, 476);
+            tabs.TabIndex = 0;
+
+            if (hasAudio)
+            {
+                TabPage audio = new TabPage(Localization.T("Prop.Tab.Audio"));
+                audio.Controls.Add(tbInfo);
+                audio.Controls.Add(chkMaster);
+                foreach (GroupBox g in stageCells) audio.Controls.Add(g);
+                audio.Controls.Add(btnResetAll);
+                audio.Controls.Add(chkBypass);
+                audio.Controls.Add(BuildPlaybackGroup(248, 404));
+                tabs.TabPages.Add(audio);
+            }
+            if (hasText) tabs.TabPages.Add(BuildTextPage());
+
+            this.Controls.Add(tabs);
             this.Controls.Add(btnOK);
             this.Controls.Add(btnCancel);
             this.AcceptButton = btnOK;
             this.CancelButton = btnCancel;
+            initialising = false;   // from here on, changes really are the user's
 
             // Master gates the cells; each stage's own switch gates its params
             // (an unchecked stage can't have its parameters changed). Any change
@@ -457,7 +506,382 @@ namespace Nemoviz_Book_Reader
         private void Persist()
         {
             FillSettings(book.Sound);
+            PersistTextOptions();
+            if (numPlayVolume != null) book.Volume = (int)numPlayVolume.Value;
+            if (numPlaySpeed != null) book.Speed = (int)numPlaySpeed.Value;
             book.Save();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            // The catalog backend starts the 32-bit host; let it go with the dialog.
+            try { if (textSpeech != null) { textSpeech.Dispose(); textSpeech = null; } } catch { }
+            base.OnFormClosed(e);
+        }
+
+        // ── Text tab: the SAME options as Settings → Text Books, but for THIS book.
+        // Settings holds the defaults; a book only departs from them when the user
+        // says so, which is what the "custom" switch at the top means. Left off, the
+        // book simply follows Settings and every control below is dimmed and out of
+        // the tab order.
+        private TabPage BuildTextPage()
+        {
+            TabPage page = new TabPage(Localization.T("Prop.Tab.Text"));
+            page.AutoScroll = true;
+
+            // Column A mirrors the Audio tab: book basics plus a live read-out of
+            // the reading settings, so the same shape is familiar on both tabs.
+            tbTextInfo = new TextBox();
+            tbTextInfo.Multiline = true;
+            tbTextInfo.ReadOnly = true;
+            tbTextInfo.ScrollBars = ScrollBars.Vertical;
+            tbTextInfo.BackColor = SystemColors.Window;
+            tbTextInfo.Location = new Point(8, 8);
+            tbTextInfo.Size = new Size(232, 440);
+            tbTextInfo.TabStop = true;
+            tbTextInfo.TabIndex = 0;
+            tbTextInfo.AccessibleName = Localization.T("Prop.Info.Accessible");
+            page.Controls.Add(tbTextInfo);
+
+            page.Controls.Add(BuildTextSpeechGroup(248, 8));
+            page.Controls.Add(BuildTextBrailleGroup(248, 254));
+            page.Controls.Add(BuildTextVisualGroup(248, 346));
+
+            UpdateTextEnabled();
+            return page;
+        }
+
+        private GroupBox BuildTextSpeechGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.TextBooks.SpeechGroup");
+            box.Location = new Point(x, y);
+            box.Size = new Size(452, 238);
+
+            int lx = 10, cx = 150, cw = 288, yy = 24, tab = 0;
+
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.SpeechEngine"), lx, yy + 3));
+            cmbTEngine = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.SpeechEngine"), cx, yy, cw, tab++);
+            cmbTEngine.SelectedIndexChanged += (s, e) => TextLanguagesForEngine();
+            box.Controls.Add(cmbTEngine);
+
+            yy += 34;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Language"), lx, yy + 3));
+            cmbTLanguage = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Language"), cx, yy, cw, tab++);
+            cmbTLanguage.SelectedIndexChanged += (s, e) => TextVoicesForSelection();
+            box.Controls.Add(cmbTLanguage);
+
+            yy += 34;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Voice"), lx, yy + 3));
+            cmbTVoice = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Voice"), cx, yy, cw, tab++);
+            cmbTVoice.SelectedIndexChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
+            box.Controls.Add(cmbTVoice);
+
+            yy += 40;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Speed"), lx, yy + 3));
+            numTWpm = SettingsForm.MakeNumeric(Localization.T("Settings.TextBooks.Speed"), cx, yy, 80, 400,
+                                               book.TextWpm >= 0 ? book.TextWpm : 175, tab++);
+            box.Controls.Add(numTWpm);
+
+            yy += 34;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Volume"), lx, yy + 3));
+            numTVolume = SettingsForm.MakeNumeric(Localization.T("Settings.TextBooks.Volume"), cx, yy, 0, 100,
+                                                  book.TextVolume >= 0 ? book.TextVolume : Clamp(book.Volume, 0, 100), tab++);
+            box.Controls.Add(numTVolume);
+
+            yy += 34;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Pitch"), lx, yy + 3));
+            numTPitch = SettingsForm.MakeNumeric(Localization.T("Settings.TextBooks.Pitch"), cx, yy, -10, 10,
+                                                 book.TextPitch >= -10 && book.TextPitch <= 10 ? book.TextPitch : 0, tab++);
+            numTWpm.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
+            numTVolume.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
+            numTPitch.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
+            box.Controls.Add(numTPitch);
+
+            // Fill the same engine → language → voice cascade Settings uses.
+            try { textCatalog = TextSpeech().GetVoiceCatalog(); }
+            catch { textCatalog = new List<(string, string, string)>(); }
+            var engines = new List<string>();
+            foreach (var c in textCatalog)
+                if (!engines.Contains(c.Engine)) engines.Add(c.Engine);
+            engines.Sort(StringComparer.CurrentCultureIgnoreCase);
+            foreach (string en in engines) cmbTEngine.Items.Add(en);
+
+            string want = !string.IsNullOrEmpty(book.TextVoice) ? book.TextVoice : "";
+            string wantEngine = null, wantLang = null;
+            foreach (var c in textCatalog)
+                if (string.Equals(c.Name, want, StringComparison.OrdinalIgnoreCase))
+                { wantEngine = c.Engine; wantLang = c.Language; break; }
+            int ei = wantEngine != null ? cmbTEngine.Items.IndexOf(wantEngine) : -1;
+            if (ei < 0 && cmbTEngine.Items.Count > 0) ei = 0;
+            if (ei >= 0) cmbTEngine.SelectedIndex = ei;
+            if (wantLang != null)
+            {
+                int li = textLanguageCodes.IndexOf(wantLang);
+                if (li >= 0) cmbTLanguage.SelectedIndex = li;
+            }
+            int vi = cmbTVoice.Items.IndexOf(want);
+            if (vi >= 0) cmbTVoice.SelectedIndex = vi;
+            return box;
+        }
+
+        private GroupBox BuildTextBrailleGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.TextBooks.BrailleGroup");
+            box.Location = new Point(x, y);
+            box.Size = new Size(452, 86);
+
+            chkTBraille = new CheckBox();
+            chkTBraille.Text = Localization.T("Settings.TextBooks.UseBraille");
+            chkTBraille.AccessibleName = Localization.T("Settings.TextBooks.UseBraille");
+            chkTBraille.Location = new Point(14, 22);
+            chkTBraille.Size = new Size(430, 24);
+            chkTBraille.TabIndex = 0;
+            chkTBraille.CheckedChanged += (s, e) => UpdateTextEnabled();
+            box.Controls.Add(chkTBraille);
+
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.BrailleTable"), 10, 55));
+            cmbTBrailleTable = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.BrailleTable"), 150, 52, 288, 1);
+            cmbTBrailleTable.Items.Add(Localization.T("Settings.TextBooks.BrailleTableAuto"));
+            foreach (BrailleTableInfo t in BrailleTables.All) cmbTBrailleTable.Items.Add(t.Display);
+            // A braille book remembers the table it was read with — show that one.
+            int bi = 0;
+            for (int i = 0; i < BrailleTables.All.Length; i++)
+                if (string.Equals(BrailleTables.All[i].Id, book.BrailleTable, StringComparison.OrdinalIgnoreCase))
+                { bi = i + 1; break; }
+            cmbTBrailleTable.SelectedIndex = bi;
+            box.Controls.Add(cmbTBrailleTable);
+            return box;
+        }
+
+        private GroupBox BuildTextVisualGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.TextBooks.VisualGroup");
+            box.Location = new Point(x, y);
+            box.Size = new Size(452, 224);
+
+            chkTVisual = new CheckBox();
+            chkTVisual.Text = Localization.T("Settings.TextBooks.UseVisual");
+            chkTVisual.AccessibleName = Localization.T("Settings.TextBooks.UseVisual");
+            chkTVisual.Location = new Point(14, 22);
+            chkTVisual.Size = new Size(430, 24);
+            chkTVisual.TabIndex = 0;
+            chkTVisual.CheckedChanged += (s, e) => UpdateTextEnabled();
+            box.Controls.Add(chkTVisual);
+
+            int lx = 10, cx = 150, cw = 288, yy = 52, tab = 1;
+
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.VisualMode"), lx, yy + 3));
+            cmbTVisualMode = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.VisualMode"), cx, yy, cw, tab++);
+            cmbTVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.TwoRows"));
+            cmbTVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.FullInstant"));
+            cmbTVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.FullScrolling"));
+            cmbTVisualMode.SelectedIndex = 0;
+            box.Controls.Add(cmbTVisualMode);
+
+            yy += 34;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Highlight"), lx, yy + 3));
+            cmbTHighlight = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Highlight"), cx, yy, cw, tab++);
+            cmbTHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.None"));
+            cmbTHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Word"));
+            cmbTHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Sentence"));
+            cmbTHighlight.SelectedIndex = 2;
+            box.Controls.Add(cmbTHighlight);
+
+            yy += 34;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.HighlightColour"), lx, yy + 3));
+            cmbTHighlightColour = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.HighlightColour"), cx, yy, cw, tab++);
+            box.Controls.Add(cmbTHighlightColour);
+
+            yy += 34;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.TextColour"), lx, yy + 3));
+            cmbTTextColour = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.TextColour"), cx, yy, cw, tab++);
+            box.Controls.Add(cmbTTextColour);
+
+            yy += 34;
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.BackColour"), lx, yy + 3));
+            cmbTBackColour = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.BackColour"), cx, yy, cw, tab++);
+            box.Controls.Add(cmbTBackColour);
+
+            string[] colours =
+            {
+                Localization.T("Settings.Colour.White"), Localization.T("Settings.Colour.Black"),
+                Localization.T("Settings.Colour.Yellow"), Localization.T("Settings.Colour.Blue"),
+                Localization.T("Settings.Colour.Green"), Localization.T("Settings.Colour.Red")
+            };
+            foreach (string c in colours)
+            {
+                cmbTHighlightColour.Items.Add(c); cmbTTextColour.Items.Add(c); cmbTBackColour.Items.Add(c);
+            }
+            cmbTHighlightColour.SelectedIndex = 3;
+            cmbTTextColour.SelectedIndex = 2;
+            cmbTBackColour.SelectedIndex = 1;
+            return box;
+        }
+
+        /// <summary>Each switch gates what belongs to it: the book only overrides the
+        /// Settings defaults while "custom" is on, and the braille / visual options
+        /// only matter while their own output is on.</summary>
+        private void UpdateTextEnabled()
+        {
+            SettingsForm.SetEnabled(chkTBraille != null && chkTBraille.Checked, cmbTBrailleTable);
+            SettingsForm.SetEnabled(chkTVisual != null && chkTVisual.Checked,
+                                    cmbTVisualMode, cmbTHighlight, cmbTHighlightColour,
+                                    cmbTTextColour, cmbTBackColour);
+            RefreshTextInfo();
+        }
+
+        private void TextLanguagesForEngine()
+        {
+            if (cmbTLanguage == null || textCatalog == null) return;
+            string engine = cmbTEngine.SelectedItem as string;
+            cmbTLanguage.Items.Clear();
+            textLanguageCodes.Clear();
+            foreach (var c in textCatalog)
+            {
+                if (c.Engine != engine) continue;
+                string code = c.Language ?? "";
+                if (textLanguageCodes.Contains(code)) continue;
+                textLanguageCodes.Add(code);
+                cmbTLanguage.Items.Add(SettingsForm.LanguageLabel(code));
+            }
+            if (cmbTLanguage.Items.Count > 0) cmbTLanguage.SelectedIndex = 0;
+            else TextVoicesForSelection();
+        }
+
+        private void TextVoicesForSelection()
+        {
+            if (cmbTVoice == null || textCatalog == null) return;
+            string engine = cmbTEngine.SelectedItem as string;
+            int li = cmbTLanguage != null ? cmbTLanguage.SelectedIndex : -1;
+            string lang = (li >= 0 && li < textLanguageCodes.Count) ? textLanguageCodes[li] : null;
+            cmbTVoice.Items.Clear();
+            foreach (var c in textCatalog)
+            {
+                if (c.Engine != engine) continue;
+                if (lang != null && (c.Language ?? "") != lang) continue;
+                cmbTVoice.Items.Add(c.Name);
+            }
+            if (cmbTVoice.Items.Count > 0) cmbTVoice.SelectedIndex = 0;
+        }
+
+        /// <summary>The voice catalog for the pickers. Created on demand (it starts
+        /// the 32-bit host) and released when the dialog closes.</summary>
+        private CompositeSpeechBackend TextSpeech()
+        {
+            if (textSpeech == null) textSpeech = new CompositeSpeechBackend();
+            return textSpeech;
+        }
+
+        /// <summary>Writes the per-book reading settings. "Custom" off clears them,
+        /// which is how a book goes back to following Settings.</summary>
+        private void PersistTextOptions()
+        {
+            if (cmbTVoice == null) return;   // no Text tab on this book
+            book.TextVoice = cmbTVoice != null && cmbTVoice.SelectedItem != null
+                ? cmbTVoice.SelectedItem.ToString() : "";
+            book.TextWpm = numTWpm != null ? (int)numTWpm.Value : -1;
+            book.TextVolume = numTVolume != null ? (int)numTVolume.Value : -1;
+            book.TextPitch = numTPitch != null ? (int)numTPitch.Value : -99;
+
+            if (cmbTBrailleTable != null)
+            {
+                int i = cmbTBrailleTable.SelectedIndex - 1;   // 0 = auto-detect
+                book.BrailleTable = (i >= 0 && i < BrailleTables.All.Length)
+                    ? BrailleTables.All[i].Id : "";
+            }
+        }
+
+        /// <summary>Per-book playback level and speed, alongside the processing
+        /// stages — they are what the book sounds like just as much as the filters.
+        /// The player writes these back as the user adjusts them live, so the dialog
+        /// simply shows and edits the stored values.</summary>
+        private GroupBox BuildPlaybackGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Prop.Playback.Title");
+            box.Location = new Point(x, y);
+            box.Size = new Size(CellW * 2 + 8, 70);
+
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Prop.Playback.Volume"), 10, 28));
+            numPlayVolume = SettingsForm.MakeNumeric(Localization.T("Prop.Playback.Volume"),
+                                                     120, 25, 0, 100, Clamp(book.Volume, 0, 100), 0);
+            box.Controls.Add(numPlayVolume);
+
+            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Prop.Playback.Speed"), 240, 28));
+            numPlaySpeed = SettingsForm.MakeNumeric(Localization.T("Prop.Playback.Speed"),
+                                                    340, 25, 50, 300, Clamp(book.Speed, 50, 300), 1);
+            box.Controls.Add(numPlaySpeed);
+            numPlayVolume.ValueChanged += (s, e) => PreviewPlayback();
+            numPlaySpeed.ValueChanged += (s, e) => PreviewPlayback();
+            return box;
+        }
+
+        /// <summary>Applies the reading settings to the live reader so the change is
+        /// heard at once; the values are only committed on OK.</summary>
+        private void PreviewText()
+        {
+            if (initialising || onTextPreview == null || cmbTVoice == null) return;
+            string v = cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
+            onTextPreview(v, (int)numTWpm.Value, (int)numTVolume.Value, (int)numTPitch.Value);
+        }
+
+        private void PreviewPlayback()
+        {
+            if (initialising || onPlaybackPreview == null || numPlayVolume == null || numPlaySpeed == null) return;
+            onPlaybackPreview((int)numPlayVolume.Value, (int)numPlaySpeed.Value);
+        }
+
+        /// <summary>The Text tab's read-out: what this book will actually be read
+        /// with, and where each value comes from — the book's own setting, or the
+        /// Settings default it inherits.</summary>
+        private void RefreshTextInfo()
+        {
+            if (tbTextInfo == null) return;
+            string nl = Environment.NewLine;
+            var sb = new StringBuilder();
+
+            sb.Append(Localization.T("Details.Field.Title")).Append(' ').Append(book.Title ?? "").Append(nl);
+            if (!string.IsNullOrWhiteSpace(book.Author))
+                sb.Append(Localization.T("Details.Field.Author")).Append(' ').Append(book.Author).Append(nl);
+            sb.Append(Localization.T("Details.Field.Format")).Append(' ').Append(book.Format ?? "").Append(nl);
+            if (book.TextChars > 0)
+                sb.Append(Localization.T("Prop.Text.Characters")).Append(' ').Append(book.TextChars.ToString("N0")).Append(nl);
+            if (book.TextHeadings.Count > 0)
+                sb.Append(Localization.T("Prop.Text.Headings")).Append(' ').Append(book.TextHeadings.Count).Append(nl);
+            if (book.TextPages.Count > 0)
+                sb.Append(Localization.T("Prop.Text.Pages")).Append(' ').Append(book.TextPages.Count).Append(nl);
+            sb.Append(nl);
+
+            sb.Append(Localization.T("Settings.TextBooks.SpeechGroup")).Append(nl);
+            string voice = cmbTVoice != null && cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
+            string engine = cmbTEngine != null && cmbTEngine.SelectedItem != null ? cmbTEngine.SelectedItem.ToString() : "";
+            sb.Append("  ").Append(Localization.T("Settings.TextBooks.Voice")).Append(' ').Append(voice).Append(nl);
+            sb.Append("  ").Append(Localization.T("Settings.TextBooks.SpeechEngine")).Append(' ').Append(engine).Append(nl);
+            if (numTWpm != null)
+                sb.Append("  ").Append(Localization.T("Settings.TextBooks.Speed")).Append(' ')
+                  .Append((int)numTWpm.Value).Append(" WPM").Append(nl);
+            if (numTVolume != null)
+                sb.Append("  ").Append(Localization.T("Settings.TextBooks.Volume")).Append(' ')
+                  .Append((int)numTVolume.Value).Append('%').Append(nl);
+            if (numTPitch != null)
+                sb.Append("  ").Append(Localization.T("Settings.TextBooks.Pitch")).Append(' ')
+                  .Append((int)numTPitch.Value).Append(nl);
+            sb.Append(nl);
+
+            sb.Append(Localization.T("Settings.TextBooks.BrailleGroup")).Append(": ")
+              .Append(Localization.T(chkTBraille != null && chkTBraille.Checked ? "Prop.On" : "Prop.Off")).Append(nl);
+            if (chkTBraille != null && chkTBraille.Checked && cmbTBrailleTable != null && cmbTBrailleTable.SelectedItem != null)
+                sb.Append("  ").Append(cmbTBrailleTable.SelectedItem).Append(nl);
+
+            sb.Append(Localization.T("Settings.TextBooks.VisualGroup")).Append(": ")
+              .Append(Localization.T(chkTVisual != null && chkTVisual.Checked ? "Prop.On" : "Prop.Off")).Append(nl);
+            if (chkTVisual != null && chkTVisual.Checked && cmbTVisualMode != null && cmbTVisualMode.SelectedItem != null)
+                sb.Append("  ").Append(cmbTVisualMode.SelectedItem).Append(nl);
+
+            tbTextInfo.Text = sb.ToString();
         }
     }
 }

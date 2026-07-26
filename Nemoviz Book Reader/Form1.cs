@@ -2665,10 +2665,41 @@ namespace Nemoviz_Book_Reader
             // per-book text Properties). Once that exists, the Settings change
             // should stop overriding an already-loaded book's own voice.
             if (currentBook != null && currentBook.IsTextBook && tts != null
+                && string.IsNullOrEmpty(currentBook.TextVoice)   // a per-book voice wins
                 && !string.Equals(tts.CurrentVoice, appSettings.TtsVoice, StringComparison.OrdinalIgnoreCase))
             {
                 ApplyTtsSettings();
             }
+        }
+
+        /// <summary>Applies a reading-setting edit from Properties to the live
+        /// reader, so the voice is heard as it is chosen. Only the reader is touched;
+        /// the book settles when the dialog closes, so Cancel restores it.</summary>
+        private void PreviewTextSpeech(string voice, int wpm, int volume, int pitch)
+        {
+            if (tts == null) return;
+            if (!string.IsNullOrEmpty(voice) &&
+                !string.Equals(tts.CurrentVoice, voice, StringComparison.OrdinalIgnoreCase))
+                tts.SetVoice(voice);
+            currentWpm = Math.Min(400, Math.Max(80, wpm));
+            tts.SetRate(TtsReader.WpmToRate(currentWpm));
+            tts.SetVolume(Math.Min(100, Math.Max(0, volume)));
+            tts.SetPitch(Math.Min(10, Math.Max(-10, pitch)) * 5);
+            UpdateSpeedDisplay();
+        }
+
+        /// <summary>Hears a volume / speed edit from the Properties dialog straight
+        /// away, the same way the processing stages preview. Only playback is
+        /// touched — the player's own fields are settled when the dialog closes, so
+        /// Cancel simply restores what the book had.</summary>
+        private void PreviewPlayback(int volume, int speedPercent)
+        {
+            if (mpvHandle == IntPtr.Zero) return;
+            mpv_set_property_string(mpvHandle, "volume",
+                Math.Min(100, Math.Max(0, volume)).ToString());
+            mpv_set_property_string(mpvHandle, "speed",
+                (Math.Min(300, Math.Max(50, speedPercent)) / 100.0)
+                    .ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
         /// <summary>Switch libmpv's output device live (empty → "auto", the
@@ -2698,16 +2729,45 @@ namespace Nemoviz_Book_Reader
                 Console.Beep(300, 150);
                 return;
             }
+            // Volume and speed live in the player's own fields until progress is
+            // saved, so hand the CURRENT values to the dialog — otherwise it would
+            // show the last-saved ones and look stale.
+            currentBook.Volume = currentVolume;
+            currentBook.Speed = currentSpeed;
+            if (currentBook.IsTextBook) currentBook.TextWpm = currentWpm;
+
             // Pass a live-preview hook so edits are heard on the fly while the
             // dialog is open.
-            using (PropertiesForm dlg = new PropertiesForm(currentBook, ApplySoundProcessing))
+            using (PropertiesForm dlg = new PropertiesForm(currentBook, ApplySoundProcessing, PreviewPlayback, PreviewTextSpeech))
             {
                 dlg.ShowDialog(this);
             }
+            if (currentBook == null) return;
+
             // Settle on the persisted state (OK saved the new values; Cancel
             // kept the old ones) — either way re-apply the book's settings.
-            if (currentBook != null)
-                ApplySoundProcessing(currentBook.Sound, false);
+            ApplySoundProcessing(currentBook.Sound, false);
+
+            // The dialog may have changed volume / speed / the reading voice; take
+            // them back so playback matches what the user just set.
+            currentVolume = Math.Min(100, Math.Max(0, currentBook.Volume));
+            currentSpeed = Math.Min(300, Math.Max(50, currentBook.Speed));
+            if (mpvHandle != IntPtr.Zero)
+            {
+                mpv_set_property_string(mpvHandle, "volume", currentVolume.ToString());
+                mpv_set_property_string(mpvHandle, "speed",
+                    (currentSpeed / 100.0).ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+            string volText = Localization.T("Player.Volume.Text", currentVolume);
+            lblVolume.Text = volText;
+            tbVolume.Text = volText;
+            tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", currentVolume);
+            if (currentBook.IsTextBook)
+            {
+                if (currentBook.TextWpm >= 0) currentWpm = currentBook.TextWpm;
+                ApplyTtsSettings();
+            }
+            UpdateSpeedDisplay();
         }
 
         /// <summary>Builds the book's sound-processing filter chain and applies
@@ -2969,9 +3029,18 @@ namespace Nemoviz_Book_Reader
         private void ApplyTtsSettings()
         {
             if (tts == null) return;
-            tts.SetVoice(appSettings.TtsVoice);
-            tts.SetPitch(appSettings.TtsPitch * 5); // -10..10 → -50..50 %
-            tts.SetVolume(currentVolume);
+            // A book can carry its own reading settings (its Properties); where it
+            // doesn't, the Settings defaults apply. Empty / -1 means "not set".
+            bool own = currentBook != null;
+            string voice = own && !string.IsNullOrEmpty(currentBook.TextVoice)
+                ? currentBook.TextVoice : appSettings.TtsVoice;
+            int pitch = own && currentBook.TextPitch >= -10 && currentBook.TextPitch <= 10
+                ? currentBook.TextPitch : appSettings.TtsPitch;
+            int volume = own && currentBook.TextVolume >= 0
+                ? currentBook.TextVolume : currentVolume;
+            tts.SetVoice(voice);
+            tts.SetPitch(pitch * 5); // -10..10 → -50..50 %
+            tts.SetVolume(volume);
             tts.SetRate(TtsReader.WpmToRate(currentWpm));
         }
 

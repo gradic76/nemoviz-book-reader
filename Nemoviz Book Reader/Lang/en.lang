@@ -288,6 +288,17 @@ Dialog.ArchiveInFolder.Message=This folder contains archive files (.zip / .rar /
 ; (e.g. "Normalization", "Equalizer", "Compressor", "De-esser") — revisit
 ; before the final English pass.
 Prop.Info.Accessible=Book information
+Prop.Playback.Title=Playback
+Prop.Playback.Volume=Volume:
+Prop.Playback.Speed=Speed (%):
+Prop.Text.Characters=Characters:
+Prop.Text.Headings=Headings:
+Prop.Text.Pages=Pages:
+Prop.On=on
+Prop.Off=off
+Prop.Tab.Audio=Audio
+Prop.Tab.Text=Text
+Prop.Text.UseCustom=Use custom reading settings for this book (otherwise the Settings defaults apply)
 Prop.UseSoundProcessing=Use sound processing
 Prop.Stage.Use=Use
 Prop.Stage.Level=Level
