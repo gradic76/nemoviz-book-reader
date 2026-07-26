@@ -88,14 +88,20 @@ namespace Nemoviz_Book_Reader
         private static readonly string[] L5 =
             { "Prop.Level.Minimal", "Prop.Level.Light", "Prop.Level.Medium", "Prop.Level.Strong", "Prop.Level.Maximum" };
 
+        // The global speech settings, for the fallback when this book has never
+        // been read with the voice being picked. Null when the caller has none.
+        private readonly AppSettings appSettings;
+
         public PropertiesForm(BookData book, Action<SoundSettings, bool> onPreview = null,
                               Action<int, int> onPlaybackPreview = null,
-                              Action<string, int, int, int> onTextPreview = null)
+                              Action<string, int, int, int> onTextPreview = null,
+                              AppSettings appSettings = null)
         {
             this.book = book;
             this.onPreview = onPreview;
             this.onPlaybackPreview = onPlaybackPreview;
             this.onTextPreview = onTextPreview;
+            this.appSettings = appSettings;
             SoundSettings s = book.Sound;
 
             this.Text = ShelfName(book);
@@ -579,7 +585,11 @@ namespace Nemoviz_Book_Reader
             yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Voice"), lx, yy + 3));
             cmbTVoice = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Voice"), cx, yy, cw, tab++);
-            cmbTVoice.SelectedIndexChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
+            // Speed / volume / pitch belong to the VOICE: picking one shows what
+            // this book was last read with using it, else how that voice is set up
+            // in Settings, else the neutral default — never the numbers of the
+            // voice being left behind.
+            cmbTVoice.SelectedIndexChanged += (s, e) => { LoadPrefsForSelectedVoice(); RefreshTextInfo(); PreviewText(); };
             box.Controls.Add(cmbTVoice);
 
             yy += 34;
@@ -634,7 +644,45 @@ namespace Nemoviz_Book_Reader
             }
             int vi = cmbTVoice.Items.IndexOf(want);
             if (vi >= 0) cmbTVoice.SelectedIndex = vi;
+            LoadPrefsForSelectedVoice();
             return box;
+        }
+
+        // Voices adjusted during this visit, staged so several can be set up in one
+        // go and Cancel still discards them all.
+        private readonly VoicePrefsTable stagedTextPrefs = new VoicePrefsTable();
+        private string textPrefsVoice = "";
+
+        /// <summary>Shows the selected voice's speed / volume / pitch for THIS book:
+        /// what it was last read with here, else how the voice is set up in
+        /// Settings, else the neutral default. What is on screen is first filed
+        /// under the voice being left, so switching back restores it.</summary>
+        private void LoadPrefsForSelectedVoice()
+        {
+            if (cmbTVoice == null || numTWpm == null || numTVolume == null || numTPitch == null) return;
+            string voice = cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
+            if (string.IsNullOrEmpty(voice) || string.Equals(voice, textPrefsVoice, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            StageTextPrefs();
+            textPrefsVoice = voice;
+            VoicePrefs fallback = appSettings != null ? appSettings.PrefsFor(voice) : VoicePrefs.Default;
+            VoicePrefs p = stagedTextPrefs.Get(voice, book.TextVoicePrefs.Get(voice, fallback));
+            // One quiet update: set all three, then let the caller refresh and
+            // preview once, instead of restarting the sentence three times.
+            bool wasInit = initialising;
+            initialising = true;
+            numTWpm.Value = Clamp(p.Wpm, (int)numTWpm.Minimum, (int)numTWpm.Maximum);
+            numTVolume.Value = Clamp(p.Volume, (int)numTVolume.Minimum, (int)numTVolume.Maximum);
+            numTPitch.Value = Clamp(p.Pitch, (int)numTPitch.Minimum, (int)numTPitch.Maximum);
+            initialising = wasInit;
+        }
+
+        private void StageTextPrefs()
+        {
+            if (string.IsNullOrEmpty(textPrefsVoice) || numTWpm == null) return;
+            stagedTextPrefs.Set(textPrefsVoice,
+                new VoicePrefs((int)numTWpm.Value, (int)numTVolume.Value, (int)numTPitch.Value));
         }
 
         private GroupBox BuildTextBrailleGroup(int x, int y)
@@ -806,6 +854,11 @@ namespace Nemoviz_Book_Reader
             book.TextWpm = numTWpm != null ? (int)numTWpm.Value : -1;
             book.TextVolume = numTVolume != null ? (int)numTVolume.Value : -1;
             book.TextPitch = numTPitch != null ? (int)numTPitch.Value : -99;
+            // File the numbers under the voice they were set for — every voice this
+            // book has been read with keeps its own, so coming back to one restores
+            // it instead of inheriting whatever was used last.
+            StageTextPrefs();
+            foreach (var kv in stagedTextPrefs.All()) book.TextVoicePrefs.Set(kv.Key, kv.Value);
             // A text book has no playback volume of its own: the player's Volume
             // field IS this speech volume, so keep the two the same number â€” the
             // player reads book.Volume back when the dialog closes. (On a hybrid

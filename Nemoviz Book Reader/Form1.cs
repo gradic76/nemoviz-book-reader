@@ -56,8 +56,12 @@ namespace Nemoviz_Book_Reader
 
         private int currentVolume = 100;
         private int currentSpeed = 100;
-        // Reading speed for the current text book (words per minute).
+        // Reading speed for the current text book (words per minute) and its
+        // pitch (-10..10). Both belong to the voice in use and are remembered
+        // per voice; the player has a control for the speed, pitch is set in the
+        // book's Properties.
         private int currentWpm = 175;
+        private int currentTextPitch = 0;
         private int currentProgress = 0;
         private int currentPlaylistIndex = 0;
         private bool isLoadingBook = false;
@@ -954,8 +958,9 @@ namespace Nemoviz_Book_Reader
                 if (tts != null) tts.SetVolume(currentVolume);
                 // For a text book the Volume field IS the speech volume, so the
                 // book's own TextVolume follows it — the two are one number, and
-                // Properties must never show a different one from the player.
-                currentBook.TextVolume = currentVolume;
+                // Properties must never show a different one from the player. It
+                // is filed under the voice in use, so it comes back with it.
+                RememberCurrentVoicePrefs();
             }
             else if (mpvHandle != IntPtr.Zero)
                 mpv_set_property_string(mpvHandle, "volume", currentVolume.ToString());
@@ -995,10 +1000,13 @@ namespace Nemoviz_Book_Reader
             {
                 int step = delta > 0 ? 5 : -5;
                 int newWpm = Math.Max(80, Math.Min(400, currentWpm + step));
-                int def = appSettings.TtsWpm;
+                // The "default" the beep marks is this voice's own default speed,
+                // not the one belonging to whichever voice Settings happens to name.
+                int def = appSettings.PrefsFor(EffectiveTextVoice()).Wpm;
                 bool crossedDefault = (currentWpm - def) * (newWpm - def) <= 0 && currentWpm != newWpm;
                 currentWpm = newWpm;
                 if (tts != null) tts.SetRate(TtsReader.WpmToRate(currentWpm));
+                RememberCurrentVoicePrefs();
                 UpdateSpeedDisplay();
                 AnnounceToScreenReader(lblAnnounceSpeed, Localization.T("Player.Speed.WpmAccessible", currentWpm));
                 if (crossedDefault) { Console.Beep(880, 70); Console.Beep(880, 70); }
@@ -2330,8 +2338,7 @@ namespace Nemoviz_Book_Reader
                         currentBook.PercentListened = pct;
                     }
                     currentBook.Volume = currentVolume;
-                    currentBook.TextVolume = currentVolume;   // same number, see ChangeVolume
-                    currentBook.TextWpm = currentWpm;
+                    RememberCurrentVoicePrefs();   // fills TextWpm/TextVolume/TextPitch too
                     currentBook.SeekStep = EncodeSeekStep(CurrentSeekStep());
                     currentBook.Save();
                     return;
@@ -2663,15 +2670,14 @@ namespace Nemoviz_Book_Reader
             // Re-apply the persisted device: on OK/Apply this is the newly-saved
             // one; on Cancel it reverts any live preview that wasn't kept.
             SetAudioDeviceLive(appSettings.AudioDevice);
-            // TEMPORARY behaviour: push a changed default voice onto the live text
-            // reader so it takes effect without a restart. This is interim — the
-            // Settings voice is meant to be only the DEFAULT for new books, and the
-            // actual per-book voice will live in each book's Properties (deferred:
-            // per-book text Properties). Once that exists, the Settings change
-            // should stop overriding an already-loaded book's own voice.
+            // A book that has chosen its own voice in Properties is NEVER touched by
+            // a Settings change — that is the whole point of the per-book setting.
+            // A book that has not is simply reading with the default, so when the
+            // default changes it follows, voice and all: its speed/volume/pitch
+            // come from what that voice was last read with here (ApplyTtsSettings),
+            // not from the voice being left behind.
             if (currentBook != null && currentBook.IsTextBook && tts != null
-                && string.IsNullOrEmpty(currentBook.TextVoice)   // a per-book voice wins
-                && !string.Equals(tts.CurrentVoice, appSettings.TtsVoice, StringComparison.OrdinalIgnoreCase))
+                && string.IsNullOrEmpty(currentBook.TextVoice))
             {
                 ApplyTtsSettings();
             }
@@ -2687,10 +2693,15 @@ namespace Nemoviz_Book_Reader
                 !string.Equals(tts.CurrentVoice, voice, StringComparison.OrdinalIgnoreCase))
                 tts.SetVoice(voice);
             currentWpm = Math.Min(400, Math.Max(80, wpm));
+            currentVolume = Math.Min(100, Math.Max(0, volume));
+            currentTextPitch = Math.Min(10, Math.Max(-10, pitch));
             tts.SetRate(TtsReader.WpmToRate(currentWpm));
-            tts.SetVolume(Math.Min(100, Math.Max(0, volume)));
-            tts.SetPitch(Math.Min(10, Math.Max(-10, pitch)) * 5);
+            tts.SetVolume(currentVolume);
+            tts.SetPitch(currentTextPitch * 5);
+            // The player's own fields follow the preview, so what is heard and what
+            // is shown never disagree; Cancel puts the stored values back.
             UpdateSpeedDisplay();
+            UpdateVolumeDisplay();
         }
 
         /// <summary>Hears a volume / speed edit from the Properties dialog straight
@@ -2739,17 +2750,15 @@ namespace Nemoviz_Book_Reader
             // show the last-saved ones and look stale.
             currentBook.Volume = currentVolume;
             currentBook.Speed = currentSpeed;
-            if (currentBook.IsTextBook)
-            {
-                currentBook.TextWpm = currentWpm;
-                // The speech volume is the player's Volume field for a text book;
-                // hand the LIVE value over so the dialog can't show a stale one.
-                currentBook.TextVolume = currentVolume;
-            }
+            // The speech settings live in the player's own fields until progress is
+            // saved, so file the LIVE ones under the voice in use — that is what the
+            // dialog will show for it.
+            if (currentBook.IsTextBook) RememberCurrentVoicePrefs();
 
             // Pass a live-preview hook so edits are heard on the fly while the
             // dialog is open.
-            using (PropertiesForm dlg = new PropertiesForm(currentBook, ApplySoundProcessing, PreviewPlayback, PreviewTextSpeech))
+            using (PropertiesForm dlg = new PropertiesForm(currentBook, ApplySoundProcessing, PreviewPlayback,
+                                                           PreviewTextSpeech, appSettings))
             {
                 dlg.ShowDialog(this);
             }
@@ -2769,15 +2778,10 @@ namespace Nemoviz_Book_Reader
                 mpv_set_property_string(mpvHandle, "speed",
                     (currentSpeed / 100.0).ToString(System.Globalization.CultureInfo.InvariantCulture));
             }
-            string volText = Localization.T("Player.Volume.Text", currentVolume);
-            lblVolume.Text = volText;
-            tbVolume.Text = volText;
-            tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", currentVolume);
-            if (currentBook.IsTextBook)
-            {
-                if (currentBook.TextWpm >= 0) currentWpm = currentBook.TextWpm;
-                ApplyTtsSettings();
-            }
+            UpdateVolumeDisplay();
+            // A text book takes its speed / volume / pitch back from the voice the
+            // dialog left it on, not from the fields the player had before.
+            if (currentBook.IsTextBook) ApplyTtsSettings();
             UpdateSpeedDisplay();
         }
 
@@ -3009,10 +3013,10 @@ namespace Nemoviz_Book_Reader
             isLoadingBook = false;
 
             tts.LoadText(TtsReader.ReadFile(currentBook.TextFilePath));
-            // Reading speed: per-book override, else the global default.
-            currentWpm = currentBook.TextWpm >= 0 ? currentBook.TextWpm : appSettings.TtsWpm;
+            // Voice, speed, volume and pitch all come from ApplyTtsSettings: they
+            // belong to the voice this book is read with, not to the player's
+            // previous state.
             ApplyTtsSettings();
-            UpdateSpeedDisplay();
             tts.SeekToChar(currentBook.TextPosition);
 
             // Cache the character count for the reading-time estimate.
@@ -3037,22 +3041,75 @@ namespace Nemoviz_Book_Reader
             else SetPlayPauseState(false);
         }
 
+        /// <summary>The voice this book is actually read with: its own if it has
+        /// one, otherwise the Settings default. The name the reader resolved wins
+        /// when there is one, so what we remember is filed under the voice that
+        /// really spoke.</summary>
+        private string EffectiveTextVoice()
+        {
+            string configured = currentBook != null && !string.IsNullOrEmpty(currentBook.TextVoice)
+                ? currentBook.TextVoice : (appSettings.TtsVoice ?? "");
+            string live = tts != null ? tts.CurrentVoice : "";
+            return !string.IsNullOrEmpty(live) ? live : configured;
+        }
+
+        /// <summary>How a voice should sound here: what this book was last read
+        /// with using that voice, else how the voice is set up in Settings, else
+        /// the neutral default — never the settings of the voice used before it.</summary>
+        private VoicePrefs ResolveVoicePrefs(string voice)
+        {
+            VoicePrefs global = appSettings.PrefsFor(voice);
+            return currentBook != null ? currentBook.TextVoicePrefs.Get(voice, global) : global;
+        }
+
+        /// <summary>Files the speed / volume / pitch now in use under the voice in
+        /// use, so switching away and back restores them.</summary>
+        private void RememberCurrentVoicePrefs()
+        {
+            if (currentBook == null || !currentBook.IsTextBook) return;
+            string voice = EffectiveTextVoice();
+            if (string.IsNullOrEmpty(voice)) return;
+            currentBook.TextVoicePrefs.Set(voice, new VoicePrefs(currentWpm, currentVolume, currentTextPitch));
+            currentBook.TextWpm = currentWpm;
+            currentBook.TextVolume = currentVolume;
+            currentBook.TextPitch = currentTextPitch;
+        }
+
         private void ApplyTtsSettings()
         {
             if (tts == null) return;
-            // A book can carry its own reading settings (its Properties); where it
-            // doesn't, the Settings defaults apply. Empty / -1 means "not set".
-            bool own = currentBook != null;
-            string voice = own && !string.IsNullOrEmpty(currentBook.TextVoice)
+            // A book can carry its own voice (its Properties); where it doesn't,
+            // the Settings default applies. The speed/volume/pitch then follow THAT
+            // voice — remembered per voice, so a change of voice or engine never
+            // drags the previous one's numbers along.
+            string voice = currentBook != null && !string.IsNullOrEmpty(currentBook.TextVoice)
                 ? currentBook.TextVoice : appSettings.TtsVoice;
-            int pitch = own && currentBook.TextPitch >= -10 && currentBook.TextPitch <= 10
-                ? currentBook.TextPitch : appSettings.TtsPitch;
-            int volume = own && currentBook.TextVolume >= 0
-                ? currentBook.TextVolume : currentVolume;
+            VoicePrefs p = ResolveVoicePrefs(voice);
+            currentWpm = p.Wpm;
+            currentVolume = p.Volume;
+            currentTextPitch = p.Pitch;
+
             tts.SetVoice(voice);
-            tts.SetPitch(pitch * 5); // -10..10 → -50..50 %
-            tts.SetVolume(volume);
+            tts.SetPitch(currentTextPitch * 5); // -10..10 → -50..50 %
+            tts.SetVolume(currentVolume);
             tts.SetRate(TtsReader.WpmToRate(currentWpm));
+
+            RememberCurrentVoicePrefs();
+            UpdateVolumeDisplay();
+            UpdateSpeedDisplay();
+        }
+
+        /// <summary>Refreshes the Volume field and its spoken name from
+        /// <c>currentVolume</c> (the same text ChangeVolume shows).</summary>
+        private void UpdateVolumeDisplay()
+        {
+            string text = Localization.T("Player.Volume.Text", currentVolume);
+            lblVolume.Text = text;
+            if (!tbVolume.Focused)
+            {
+                tbVolume.Text = text;
+                tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", currentVolume);
+            }
         }
 
         /// <summary>Refreshes the speed field: "N WPM" for a text book, "N.Nx"

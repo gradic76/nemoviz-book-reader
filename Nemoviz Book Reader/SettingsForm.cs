@@ -261,9 +261,13 @@ namespace Nemoviz_Book_Reader
             if (chkUseMetadata != null)
                 appSettings.SetUseMetadata(chkUseMetadata.Checked);
 
-            // Text Books — global TTS defaults.
+            // Text Books — the default voice, plus how every voice touched in this
+            // visit is set up (each keeps its own speed / volume / pitch).
             string voice = cmbVoice != null && cmbVoice.SelectedItem != null
                 ? cmbVoice.SelectedItem.ToString() : (appSettings.TtsVoice ?? "");
+            StageCurrentPrefs();
+            foreach (var kv in stagedPrefs.All())
+                appSettings.SetVoicePrefs(kv.Key, kv.Value);
             appSettings.SetTtsDefaults(voice, (int)numRate.Value, (int)numPitch.Value, (int)numVolume.Value);
 
             // Device — persist the chosen output card (empty = system default).
@@ -338,6 +342,10 @@ namespace Nemoviz_Book_Reader
             y += 34;
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Voice"), lx, y + 3));
             cmbVoice = MakeCombo(Localization.T("Settings.TextBooks.Voice"), cx, y, cw, tab++);
+            // Speed / volume / pitch belong to the VOICE, so picking one shows how
+            // that voice is set up here — never the numbers of the previous voice,
+            // which sound completely different on another engine.
+            cmbVoice.SelectedIndexChanged += (s, e) => LoadPrefsForSelectedVoice();
             box.Controls.Add(cmbVoice);
 
             // Numeric fields rather than sliders: a screen reader speaks the value
@@ -397,7 +405,42 @@ namespace Nemoviz_Book_Reader
             }
             int svi = cmbVoice.Items.IndexOf(savedVoice);
             if (svi >= 0) cmbVoice.SelectedIndex = svi;
+            LoadPrefsForSelectedVoice();
             return box;
+        }
+
+        // Voices set up during this visit to the dialog. Held here rather than
+        // written straight through, so several voices can be adjusted in one visit
+        // and Cancel still discards the lot.
+        private readonly VoicePrefsTable stagedPrefs = new VoicePrefsTable();
+        private string prefsVoice = "";
+
+        /// <summary>Shows the selected voice's remembered speed / volume / pitch,
+        /// or the neutral default for a voice this machine hasn't set up yet. What
+        /// was on screen is first filed under the voice being left, so switching
+        /// back and forth doesn't lose an adjustment.</summary>
+        private void LoadPrefsForSelectedVoice()
+        {
+            if (cmbVoice == null || numRate == null || numVolume == null || numPitch == null) return;
+            string voice = cmbVoice.SelectedItem != null ? cmbVoice.SelectedItem.ToString() : "";
+            if (string.IsNullOrEmpty(voice) || string.Equals(voice, prefsVoice, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            StageCurrentPrefs();
+            prefsVoice = voice;
+            VoicePrefs p = stagedPrefs.Get(voice, appSettings.PrefsFor(voice));
+            numRate.Value = Clamp(p.Wpm, (int)numRate.Minimum, (int)numRate.Maximum);
+            numVolume.Value = Clamp(p.Volume, (int)numVolume.Minimum, (int)numVolume.Maximum);
+            numPitch.Value = Clamp(p.Pitch, (int)numPitch.Minimum, (int)numPitch.Maximum);
+        }
+
+        /// <summary>Files what the three fields currently show under the voice they
+        /// belong to.</summary>
+        private void StageCurrentPrefs()
+        {
+            if (string.IsNullOrEmpty(prefsVoice) || numRate == null) return;
+            stagedPrefs.Set(prefsVoice,
+                new VoicePrefs((int)numRate.Value, (int)numVolume.Value, (int)numPitch.Value));
         }
 
         // ── Braille output (placeholder for the display branch) ───────────────

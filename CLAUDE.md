@@ -867,12 +867,30 @@ guid; empty/"auto" = system default. `Form1.SetAudioDeviceLive` routes a live
 change to mpv AND the reader, and Settings' **Test voice** now speaks through the
 card being chosen rather than the system default.
 
-**Temporary / still to do:** `BtnSettings_Click` pushes a changed Settings voice
-onto the live book (no restart) — interim; final design is Settings voice = the
-*default* only, real per-book voice in the book's Properties (that dialog now
-exists — see 8d — so this can be finished). **SAPI 4** is the one speech source
-still not covered (32-bit only, would need direct COM interop in the host); see
-the auto-discovery requirement in memory `project-tts-backends`.
+**Speed / volume / pitch are remembered PER VOICE** (`VoicePrefs.cs`;
+`VoicePrefsTable` persists as an indexed `[TextVoices]` section in both
+Settings.ini and Book.ini). Voices differ enormously in how fast they sound at
+the same nominal WPM, so carrying the previous voice's numbers across a change of
+engine or speaker is worse than useless. Picking a voice now shows/applies, in
+order: **what this book was last read with using that voice → how that voice is
+set up in Settings → the neutral default (175 WPM, 100 %, pitch 0)** — never the
+settings of the voice being left behind. `Form1.ResolveVoicePrefs` is that
+cascade; `RememberCurrentVoicePrefs` files the live values under the voice in use
+(player volume/speed keys, Properties, and every save). Settings and Properties
+stage the voices touched in one visit and commit them on OK/Apply, so Cancel
+discards. Upgrading doesn't lose anything: a book's (or Settings') single old set
+of numbers is filed under the voice it was last used with.
+
+**Settings vs. the book (settled).** A book that has chosen its own voice in
+Properties is never touched by a Settings change. A book that hasn't is reading
+with the default, so it follows a Settings change — voice **and** that voice's
+remembered speed/volume/pitch. (This replaces the old "TEMPORARY" live-push.)
+
+**Still to do:** **SAPI 4** is the one speech source not covered (32-bit only,
+would need direct COM interop in the host); see the auto-discovery requirement in
+memory `project-tts-backends`. Engine labels stay exactly as the voices report
+themselves — **no hard-coded renaming** (e.g. RHVoice shows as its vendor "Olga
+Yakovleva"); Gordan wants to consult the authors before any relabeling.
 
 ---
 

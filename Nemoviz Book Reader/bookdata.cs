@@ -77,10 +77,16 @@ namespace Nemoviz_Book_Reader
         // global default from Settings. Set from the text book's Properties.
         public int TextWpm { get; set; }
         /// <summary>Per-book speech overrides; empty/-1 means "use the Settings
-        /// default". Settings holds the defaults, a book may differ.</summary>
+        /// default". Settings holds the defaults, a book may differ. These are the
+        /// values of the book's CURRENT voice — every voice this book has been
+        /// read with keeps its own in <see cref="TextVoicePrefs"/>.</summary>
         public string TextVoice { get; set; }
         public int TextVolume { get; set; }
         public int TextPitch { get; set; }
+        /// <summary>How each voice was set up while reading THIS book, so going
+        /// back to a voice restores the speed/volume/pitch it was read at rather
+        /// than inheriting the previous voice's.</summary>
+        public VoicePrefsTable TextVoicePrefs { get; private set; }
         // Character count of the text, cached for the reading-time estimate.
         public int TextChars { get; set; }
         // Heading structure of a produced text book (epub/fb2/html): level +
@@ -147,6 +153,14 @@ namespace Nemoviz_Book_Reader
             TextVolume = tvol;
             int.TryParse(ini.Read("Settings", "TextPitch", "-99"), out int tpit);
             TextPitch = tpit;
+            TextVoicePrefs = new VoicePrefsTable();
+            TextVoicePrefs.Load(ini);
+            // A book saved before voices were remembered individually has one set
+            // of numbers; they belong to the voice it was last read with.
+            if (!string.IsNullOrEmpty(TextVoice) && TextWpm >= 0)
+                TextVoicePrefs.SetIfAbsent(TextVoice,
+                    new VoicePrefs(TextWpm, TextVolume >= 0 ? TextVolume : 100,
+                                   TextPitch >= -10 && TextPitch <= 10 ? TextPitch : 0));
             int.TryParse(ini.Read("Book", "TextChars", "0"), out int tc);
             TextChars = tc;
             LoadTextNav();
@@ -708,6 +722,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextVoice", TextVoice ?? "");
             ini.Write("Settings", "TextVolume", TextVolume.ToString());
             ini.Write("Settings", "TextPitch", TextPitch.ToString());
+            TextVoicePrefs.Save(ini);
             ini.Write("Book", "TextChars", TextChars.ToString());
             ini.Write("TextNav", "Count", TextHeadings.Count.ToString());
             for (int i = 0; i < TextHeadings.Count; i++)

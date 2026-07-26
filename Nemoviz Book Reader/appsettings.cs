@@ -42,11 +42,17 @@ namespace Nemoviz_Book_Reader
 
         // Global text-to-speech defaults for text books (per-book overrides live
         // in Book.ini). Speed is a nominal words-per-minute; pitch is SAPI-style
-        // (-10..10); volume 0..100.
+        // (-10..10); volume 0..100. These are the values of the DEFAULT voice
+        // below; every voice the user has set up keeps its own in TtsVoicePrefs.
         public string TtsVoice { get; private set; }
         public int TtsWpm { get; private set; }
         public int TtsPitch { get; private set; }
         public int TtsVolume { get; private set; }
+
+        /// <summary>Speed / volume / pitch remembered per voice, so picking a
+        /// voice restores how that voice was set up instead of inheriting the
+        /// numbers of the one before it.</summary>
+        public VoicePrefsTable TtsVoicePrefs { get; private set; }
 
         /// <summary>The libmpv <c>audio-device</c> identifier for output (e.g.
         /// <c>wasapi/{…}</c>). Empty means <c>auto</c> — mpv picks the system
@@ -70,7 +76,19 @@ namespace Nemoviz_Book_Reader
             TtsPitch = ttsPitch;
             int.TryParse(ini.Read("TextToSpeech", "Volume", "100"), out int ttsVol);
             TtsVolume = ttsVol;
+            TtsVoicePrefs = new VoicePrefsTable();
+            TtsVoicePrefs.Load(ini);
+            // Settings written before voices were remembered individually hold one
+            // set of numbers; they belong to the voice that was selected then.
+            TtsVoicePrefs.SetIfAbsent(TtsVoice, new VoicePrefs(TtsWpm, TtsVolume, TtsPitch));
             AudioDevice = ini.Read("Audio", "Device", "");
+        }
+
+        /// <summary>The remembered setup of a voice, or the neutral default when
+        /// this machine has never set that voice up.</summary>
+        public VoicePrefs PrefsFor(string voice)
+        {
+            return TtsVoicePrefs.Get(voice, VoicePrefs.Default);
         }
 
         public void SetAudioDevice(string device)
@@ -79,6 +97,9 @@ namespace Nemoviz_Book_Reader
             ini.Write("Audio", "Device", AudioDevice);
         }
 
+        /// <summary>Stores the default voice and how it is set up. The numbers are
+        /// also filed under that voice, so returning to it later restores them
+        /// even after other voices have been used in between.</summary>
         public void SetTtsDefaults(string voice, int wpm, int pitch, int volume)
         {
             TtsVoice = voice ?? "";
@@ -89,6 +110,16 @@ namespace Nemoviz_Book_Reader
             ini.Write("TextToSpeech", "Wpm", TtsWpm.ToString());
             ini.Write("TextToSpeech", "Pitch", TtsPitch.ToString());
             ini.Write("TextToSpeech", "Volume", TtsVolume.ToString());
+            SetVoicePrefs(TtsVoice, new VoicePrefs(wpm, volume, pitch));
+        }
+
+        /// <summary>Remembers how one voice is set up (any voice, not just the
+        /// default one) and saves it straight away.</summary>
+        public void SetVoicePrefs(string voice, VoicePrefs prefs)
+        {
+            if (string.IsNullOrEmpty(voice)) return;
+            TtsVoicePrefs.Set(voice, prefs);
+            TtsVoicePrefs.Save(ini);
         }
 
         public void SetLibraryPath(string newPath)
