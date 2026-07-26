@@ -16,6 +16,14 @@ namespace Nemoviz_Book_Reader
         // Clear layout/list noise + the invisible soft hyphen. Left alone:
         // guillemets/quotes, ampersand, angle/brackets, backslash, tilde.
         private static readonly Regex Noise = new Regex("[•·◦▪‣⁃¶­]", RegexOptions.Compiled);
+        // Private Use Area: not text at all, but a glyph from some symbol font —
+        // a Word/Wingdings list bullet (U+F0B7) above all — that survived the
+        // conversion. It has no meaning to read out, and a speech engine either
+        // stumbles on it or invents a name for it. Zero-width marks and a stray
+        // mid-file BOM go the same way. Replaced with a space rather than deleted:
+        // "•Nema" must not become "Nema" glued to the word before it.
+        private static readonly Regex Invisible =
+            new Regex(@"[\uE000-\uF8FF\u200B-\u200F\uFEFF]", RegexOptions.Compiled);
         // letter-hyphen-newline-letter → glue the word back together.
         private static readonly Regex Dehyphenate = new Regex(@"(\p{L})-\n(\p{L})", RegexOptions.Compiled);
         // A spaced dash (hyphen / en / em) used as punctuation → comma.
@@ -43,6 +51,7 @@ namespace Nemoviz_Book_Reader
             string t = text.Replace("\r\n", "\n").Replace("\r", "\n");
             t = t.Replace('\t', ' ');
             t = Noise.Replace(t, "");
+            t = Invisible.Replace(t, " ");
             t = Dehyphenate.Replace(t, "$1$2");
             t = WrappedLine.Replace(t, " ");   // unwrap mid-sentence line breaks
             t = SpacedDash.Replace(t, ", ");

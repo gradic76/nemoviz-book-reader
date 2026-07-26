@@ -196,6 +196,60 @@ namespace Nemoviz_Book_Reader
             SeekToSentence(target);
         }
 
+        /// <summary>The opening words of the sentence a character offset falls in.
+        /// A bookmark in a text book is a number of characters, which tells the
+        /// reader nothing — the words it sits on tell them exactly where they
+        /// were. Ends with an ellipsis when the sentence goes on.</summary>
+        public string SnippetAt(int charOffset, int words)
+        {
+            if (sentenceStart.Count == 0 || words <= 0) return "";
+            int target = 0;
+            for (int i = sentenceStart.Count - 1; i >= 0; i--)
+                if (sentenceStart[i] <= charOffset) { target = i; break; }
+
+            // Splitting a real book leaves the odd fragment that is nothing but
+            // punctuation (a stray full stop after a page number, say). Naming the
+            // place "." helps nobody, so look ahead a little for words.
+            string sentence = "";
+            for (int i = target; i < sentenceText.Count && i <= target + 3; i++)
+            {
+                sentence = CleanEdges(sentenceText[i]);
+                if (HasWordCharacter(sentence)) break;
+            }
+            if (!HasWordCharacter(sentence)) return "";
+
+            string[] parts = sentence.Split(new[] { ' ', '\t', '\n', '\r' },
+                                            StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length <= words) return sentence;
+            return string.Join(" ", parts, 0, words) + "…";
+        }
+
+        // Trim() alone leaves the invisible characters that litter converted books
+        // (zero-width spaces, joiners, a stray BOM), which then show up as a gap in
+        // front of the snippet.
+        private static string CleanEdges(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            int a = 0, b = s.Length - 1;
+            while (a <= b && IsInvisible(s[a])) a++;
+            while (b >= a && IsInvisible(s[b])) b--;
+            return s.Substring(a, b - a + 1);
+        }
+
+        private static bool IsInvisible(char c)
+        {
+            return char.IsWhiteSpace(c)
+                || (c >= '\u200B' && c <= '\u200F')   // zero-width space … RTL mark
+                || c == '\uFEFF';                     // BOM left in mid-file
+        }
+
+        private static bool HasWordCharacter(string s)
+        {
+            foreach (char c in s)
+                if (char.IsLetterOrDigit(c)) return true;
+            return false;
+        }
+
         private void SpeakCurrent()
         {
             if (index < 0 || index >= sentenceText.Count)

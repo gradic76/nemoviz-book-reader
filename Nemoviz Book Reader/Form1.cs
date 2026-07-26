@@ -2674,16 +2674,19 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>How a bookmark's position reads in the Manage Bookmarks list.
-        /// An audio book shows the clock time it sits at; a text book's position is
+        /// An audio book shows the clock time it sits at. A text book's position is
         /// a character offset, which tells the user nothing, so it shows how far
-        /// into the book it is — the same percentage the player displays.</summary>
+        /// into the book it is — and then **the words it sits on**, which is what
+        /// actually identifies the place ("41,7 %, Tada je Perica shvatio da…").</summary>
         private string FormatBookmarkPosition(double position)
         {
             if (currentBook != null && currentBook.IsTextBook)
             {
                 int total = tts != null ? tts.TotalChars : 0;
                 double pct = total > 0 ? 100.0 * position / total : 0;
-                return pct.ToString("0.0") + " %";
+                string where = pct.ToString("0.0") + " %";
+                string snippet = tts != null ? tts.SnippetAt((int)Math.Round(position), 6) : "";
+                return string.IsNullOrEmpty(snippet) ? where : where + ", " + snippet;
             }
             TimeSpan t = TimeSpan.FromSeconds(position);
             return string.Format("{0:D2}:{1:D2}", (int)t.TotalHours, t.Minutes);

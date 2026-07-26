@@ -51,7 +51,7 @@ namespace Nemoviz_Book_Reader
             this.formatPosition = formatPosition;
 
             this.Text = Localization.T("Dialog.ManageBookmarks.Title");
-            this.ClientSize = new Size(420, 380);
+            this.ClientSize = new Size(560, 380);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -60,7 +60,7 @@ namespace Nemoviz_Book_Reader
 
             lstBookmarks = new ListBox();
             lstBookmarks.Location = new Point(10, 10);
-            lstBookmarks.Size = new Size(400, 280);
+            lstBookmarks.Size = new Size(540, 280);
             lstBookmarks.TabIndex = 0;
             lstBookmarks.AccessibleName = Localization.T("ManageBookmarks.List.Accessible");
             lstBookmarks.DoubleClick += (s, e) => ConfirmOK();
@@ -84,7 +84,7 @@ namespace Nemoviz_Book_Reader
             btnOK.Text = Localization.T("Btn.OK");
             btnOK.AccessibleName = Localization.T("ManageBookmarks.OK.Accessible");
             btnOK.Size = new Size(100, 32);
-            btnOK.Location = new Point(150, 300);
+            btnOK.Location = new Point(220, 300);
             btnOK.TabIndex = 2;
             btnOK.Click += (s, e) => ConfirmOK();
 
@@ -92,7 +92,7 @@ namespace Nemoviz_Book_Reader
             btnCancel.Text = Localization.T("Btn.Cancel");
             btnCancel.AccessibleName = Localization.T("ManageBookmarks.Cancel.Accessible");
             btnCancel.Size = new Size(100, 32);
-            btnCancel.Location = new Point(290, 300);
+            btnCancel.Location = new Point(430, 300);
             btnCancel.TabIndex = 3;
             btnCancel.DialogResult = DialogResult.Cancel;
 

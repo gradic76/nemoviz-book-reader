@@ -386,12 +386,12 @@ opens). For **close/shutdown**, the action fires immediately via
 for an app that's closing, and `Close()` under a fresh modal dialog would be
 fragile).
 
-**Known edge case (still to verify — see TODO).** If a book finishes while the
-Library window is *manually* open and playback was running in the background,
-a close/shutdown action would fire with `isLibraryOpen == true`, i.e.
-`Close()` under a modal dialog. Shutdown still works (the system command is
-issued before closing); "Stop + close" in that combination needs testing, and
-if fragile, the fix is to close any open dialogs before `Close()`.
+**The modal-Library edge case — VERIFIED (Gordan, Session 18), no fix needed.**
+A timer expiring while the Library window is *manually* open, with playback
+running in the background, fires the action with `isLibraryOpen == true`, i.e.
+`Close()` under a modal dialog. Both **Stop** and **Stop + close** were tested in
+exactly that state and did the right thing, so the long-standing worry about
+closing beneath a modal dialog is settled.
 
 ---
 
@@ -728,8 +728,22 @@ UTF-8/BOM with a Windows-1250 fallback.
 (distilled from a Word "cleanup" macro, adapted): collapse runs of blank lines
 to **one** (preserving paragraph boundaries — the key fix for long TTS pauses),
 de-hyphenate line-broken words, tabs→space, spaced dashes→comma, strip a
-conservative set of noise symbols. Deterministic, so saved offsets stay valid.
+conservative set of noise symbols, and blank out **Private Use Area** characters
+(U+E000–U+F8FF — a Word/Wingdings list bullet, U+F0B7, is the usual one: not text
+at all, but a glyph from a symbol font that survived conversion, which a speech
+engine either stumbles on or invents a name for) along with zero-width marks and
+a stray mid-file BOM. Deterministic, so saved offsets stay valid.
 This becomes the core of Phase 2's cleaning.
+
+**Known drift (found Session 18, not yet fixed).** Heading/page offsets are
+stored at IMPORT, measured on the text as written to `content.txt`; the reader
+cleans that text again in `TtsReader.LoadText`, and every character the cleaner
+*removes* shifts the reader's offsets against the stored ones. The rules that
+delete rather than replace (noise symbols, de-hyphenation, collapsing runs of
+spaces and blank lines) therefore make headings drift progressively — small in
+most books, more in a bullet-heavy one. The architectural fix is to clean **once,
+at import**, so the parser's offsets and the reader's text are the same text;
+that also needs a one-time re-clean of books already in the library.
 
 **Player integration** (branches on `BookData.IsTextBook`, like DAISY):
 - **Detection**: a folder with a `.txt` and no audio (`BookData.DetectTextBook`);
@@ -747,8 +761,12 @@ This becomes the core of Phase 2's cleaning.
   character offset for text, seconds for audio — and `BookPosition` /
   `SeekToBookPosition` / `BookBackGrace` keep one set of bookmark code serving
   both (the three-second "just passed it" window becomes characters at the
-  book's reading speed). Manage Bookmarks shows a text mark as how far into the
-  book it is, since a character offset tells the reader nothing.
+  book's reading speed). Manage Bookmarks shows a text mark as **how far into the
+  book it is plus the words it sits on** ("41,7 %, Tada je Perica shvatio da…" —
+  `TtsReader.SnippetAt`, six words); a character offset tells the reader nothing,
+  the words tell them exactly where they were. A fragment that is only
+  punctuation (a stray full stop after a page number) is skipped for the next
+  sentence with actual words in it.
 - **Speed** is **words-per-minute** (nominal; real rate is voice-dependent),
   reusing the player's speed control (`ChangeSpeed` branch): 80–400 WPM, **±5 per
   step**, a double-beep when crossing the Settings default; maps to SAPI rate via
@@ -1132,10 +1150,10 @@ sequence above supersedes its ordering).
 
 ## 11. TODO (open items)
 
-- **Verify Sleep Timer expiry (close/shutdown) in the modal-Library edge
-  case** described in section 7: a book finishing while the Library window is
-  manually open with background playback, i.e. `Close()` beneath a modal
-  dialog.
+- **Heading/page offsets drift against the reader's text** — see the "Known
+  drift" note in section 8e. The fix is to run `TextCleaner` once at import
+  instead of on every load, plus a one-time re-clean of the books already in the
+  library.
 - **RESOLVED & CONFIRMED BY GORDAN (Session 18): the four per-voice/voice-
   routing symptoms.** Root causes were voice-name duplication across backends
   (SAPI description vs plain Name), the 32-bit host mutating the voice without
