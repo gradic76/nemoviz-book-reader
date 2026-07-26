@@ -46,7 +46,11 @@ namespace Nemoviz_Book_Reader
             b.Completed += cancelled => Completed?.Invoke(cancelled);
             foreach (var vi in b.GetVoiceInfos())
             {
-                if (string.IsNullOrEmpty(vi.Name) || owner.ContainsKey(vi.Name)) continue; // 64-bit wins dupes
+                // 64-bit wins duplicates. The comparison is on the bare name so a
+                // voice both backends can see is recognised as one voice even if
+                // they spell it differently (SAPI's description vs the plain name).
+                if (string.IsNullOrEmpty(vi.Name) || owner.ContainsKey(vi.Name)) continue;
+                if (ResolveVoice(vi.Name) != null) continue;
                 owner[vi.Name] = b;
                 mergedVoices.Add(vi.Name);
                 catalog.Add((vi.Name, vi.Vendor, vi.Language, arch));
@@ -95,15 +99,44 @@ namespace Nemoviz_Book_Reader
         public void SelectVoice(string name)
         {
             if (string.IsNullOrEmpty(name)) return;
-            if (owner.TryGetValue(name, out ISpeechBackend b) && b != null)
+            string resolved = ResolveVoice(name);
+            if (resolved != null && owner.TryGetValue(resolved, out ISpeechBackend b) && b != null)
             {
+                // Switching backend: silence the old one first. Cancel() only ever
+                // reaches the ACTIVE backend, so without this the backend we are
+                // leaving keeps speaking its utterance to the end — heard as the
+                // previous voice reading one more sentence after the change.
+                if (!ReferenceEquals(b, active)) active?.Cancel();
                 active = b;
                 // Carry the current rate/volume/pitch onto the newly-active backend.
                 active.SetRate(rate);
                 active.SetVolume(volume);
                 active.SetPitch(pitch);
+                name = resolved;
             }
             active?.SelectVoice(name);
+        }
+
+        /// <summary>Maps a requested voice name onto one this composite actually
+        /// knows. Exact (case-insensitive) first; otherwise the bare name is
+        /// compared, so a voice stored under SAPI's description ("Microsoft Zira
+        /// Desktop - English (United States)") still finds "Microsoft Zira
+        /// Desktop". Null when nothing matches.</summary>
+        private string ResolveVoice(string name)
+        {
+            if (owner.ContainsKey(name)) return name;
+            string want = BareName(name);
+            foreach (string v in mergedVoices)
+                if (string.Equals(BareName(v), want, StringComparison.OrdinalIgnoreCase))
+                    return v;
+            return null;
+        }
+
+        private static string BareName(string n)
+        {
+            if (string.IsNullOrEmpty(n)) return "";
+            int dash = n.IndexOf(" - ", StringComparison.Ordinal);
+            return (dash > 0 ? n.Substring(0, dash) : n).Trim();
         }
 
         public void SetRate(int r) { rate = r; active?.SetRate(r); }
@@ -122,7 +155,16 @@ namespace Nemoviz_Book_Reader
         public void PreRender(string text) { active?.PreRender(text); }
         public void Pause() { active?.Pause(); }
         public void Resume() { active?.Resume(); }
-        public void Cancel() { active?.Cancel(); }
+        /// <summary>Stops speech everywhere, not just on the active backend: after a
+        /// voice change the utterance still in flight may belong to the backend we
+        /// just left, and Pause/Stop/seek must silence that one too. Cancelling an
+        /// idle backend is a no-op.</summary>
+        public void Cancel()
+        {
+            active?.Cancel();
+            foreach (ISpeechBackend b in backends)
+                if (!ReferenceEquals(b, active)) b.Cancel();
+        }
         public bool IsPaused { get { return active != null && active.IsPaused; } }
 
         public void Dispose()

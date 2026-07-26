@@ -818,8 +818,13 @@ Engine" (vendor + architecture, e.g. "eSpeak (32-bit)", "Microsoft (64-bit)",
 per-voice **vendor**; `CompositeSpeechBackend.GetVoiceCatalog()` derives the
 engine label (`EngineLabel`: eSpeak from its URL vendor, Microsoft, else "SAPI 5").
 Only the voice is persisted (`TtsVoice`); the engine is derived from it on open.
-Fine-tuning left: RHVoice voices (Karmela/Marija) expose no vendor/metadata so
-they land under "SAPI 5 (32-bit)" rather than "RHVoice".
+**A voice is named by its plain name in both backends** — `Sapi5Backend` reports
+the SAPI token's `Name` attribute, not `GetDescription()` (which appends the
+language) — so the same voice seen by both is recognised as one and the 64-bit
+copy wins. A name saved in the old (description) form still resolves: lookup
+falls back to comparing the bare name. Current grouping on Gordan's machine:
+"Microsoft (64-bit)" = Zira, "Olga Yakovleva (64-bit)" = Karmela/Marija (RHVoice,
+via the SpVoice vendor attribute), "espeak.sf.net (32-bit)" = the eSpeak voices.
 
 **Temporary / still to do:** `BtnSettings_Click` pushes a changed Settings voice
 onto the live book (no restart) — interim; final design is Settings voice = the
@@ -1005,32 +1010,49 @@ sequence above supersedes its ordering).
   case** described in section 7: a book finishing while the Library window is
   manually open with background playback, i.e. `Close()` beneath a modal
   dialog.
-- **OPEN — per-book voice is not applied when a book LOADS (Session 17, four
-  linked symptoms, all reported by Gordan after 22b9eda; the last eSpeak test
-  FAILED).**
-  1. Opening a book whose Properties say eSpeak starts reading with the
-     Settings voice (Zira). Only confirming Properties and restarting the book
-     switches it.
-  2. Even then, Zira speaks one short sentence at the start before eSpeak takes
-     over.
-  3. The text-book Volume symptoms are unchanged by the seeding fix (still
-     shows/behaves wrong).
-  4. Zira has **regressed to pausing only at the end of a sentence** — the
-     async-purge fix (Sapi5Backend.Cancel) worked when first tested, so
-     something after it re-broke or bypasses it.
-  **Prime hypothesis for 1 + 2:** the reader starts speaking before the book's
-  settings are applied — `LoadTextBookPlayback` plays first and
-  `ApplyTtsSettings` lands afterwards, so the first sentence uses whatever
-  voice the backend already had, and the per-book voice only takes effect from
-  the next utterance. Check the ordering in `LoadTextBookPlayback` /
-  `EnsureTts` and apply settings BEFORE the first `Play()`; note the autoplay
-  `Play()` is deliberately deferred one tick, which is probably the race.
-  **For 4:** verify which backend is active (`CompositeSpeechBackend` switches
-  on voice) and that `Cancel` really reaches `Sapi5Backend` with
-  `SVSFPurgeBeforeSpeak | SVSFlagsAsync` — a voice switch may leave the reader
-  cancelling on the wrong backend.
-  Also still untested: Cancel/OK on both book kinds, and the Library entry
-  point (it opens Properties without the player's live values).
+- **FIXED, AWAITING GORDAN'S TEST — the four linked per-book-voice symptoms
+  (Session 17/18).** The ordering hypothesis recorded last session was **wrong**:
+  `LoadTextBookPlayback` already applies the settings before the first `Play()`.
+  The real cause was that **the voice was routed to the wrong backend**, plus
+  two bugs in the 32-bit host. Root causes found and fixed:
+  1. **Duplicate voice names, never deduplicated.** `Sapi5Backend` named a voice
+     by SAPI COM's `GetDescription()` ("Microsoft Zira Desktop - English (United
+     States)") while the 32-bit host reports System.Speech's `VoiceInfo.Name`
+     ("Microsoft Zira Desktop"). The composite's "64-bit wins duplicates" rule
+     compares names, so it never saw the duplicate: **Zira appeared twice and the
+     saved Settings voice resolved to the 32-bit satellite** — which is why the
+     in-process async purge no longer seemed to work (symptom 4: pause only at
+     the end of a sentence — the host was speaking, not `Sapi5Backend`). Fix:
+     `Sapi5Backend` now reports the token's own `Name` attribute; the composite
+     resolves a requested name loosely (bare name, so a voice saved under the old
+     description still resolves) and dedupes on it. Verified: the catalog now
+     lists one Zira, "Microsoft (64-bit)".
+  2. **The host changed voice/rate/volume/pitch without `synthLock`,** while a
+     look-ahead render may own the (non-thread-safe) synthesizer — the change
+     could throw and be swallowed, so the host kept the old voice until some
+     later command arrived while it was idle. That is symptom 1 (a book's own
+     voice ignored at load, applied only after Properties + restart).
+  3. **The look-ahead buffer survived a settings change** — the next sentence had
+     already been rendered in the OLD voice and was still played (symptom 2: one
+     sentence in the previous voice at the changeover). `DropAhead()` now
+     invalidates it on VOICE/RATE/VOL/PITCH.
+  4. `CompositeSpeechBackend.Cancel()` only reached the ACTIVE backend, so the
+     one being switched away from kept talking; it now cancels all of them, and
+     `SelectVoice` silences the outgoing backend first.
+  5. **Text-book Volume (symptom 3): the number existed twice.** For a text book
+     the player's Volume field IS the speech volume, but `TextVolume` and
+     `Volume` were stored separately and drifted. They are now one number:
+     `ChangeVolume` and the save path keep `TextVolume` on the field's value, the
+     player hands the live value to Properties, and `PersistTextOptions` writes
+     it back to `Volume` too (on a hybrid book the Audio tab's own field wins).
+  **Still to test by ear:** eSpeak book loads in its own voice; no old-voice
+  sentence at a changeover; pause is immediate on Zira; the Volume field agrees
+  with Properties; Cancel/OK on both book kinds; and the Library entry point
+  (it opens Properties without the player's live values).
+  **Known, not hit on this machine:** the host's buffered path plays with
+  `SoundPlayer.PlaySync` and cancels via `Stop()`; if a 32-bit *buffered* voice
+  ever pauses late, that pair is the suspect (eSpeak uses the real-time path,
+  and 64-bit voices don't go through the host at all).
 - **Combo boxes: NVDA does not announce the selection when it changes with
   Up/Down — app-wide** (confirmed by Gordan, Session 17). JAWS is correct
   everywhere: it reads the name on focus, announces each arrow change, and

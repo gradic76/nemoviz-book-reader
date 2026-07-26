@@ -95,10 +95,30 @@ class TtsHost32
         string arg = tab >= 0 ? line.Substring(tab + 1) : "";
         switch (cmd)
         {
-            case "VOICE": try { synth.SelectVoice(arg); } catch { } break;
-            case "RATE": synth.Rate = Clamp(ParseInt(arg), -10, 10); break;
-            case "VOL": synth.Volume = Clamp(ParseInt(arg), 0, 100); break;
-            case "PITCH": pitchPercent = Clamp(ParseInt(arg), -50, 50); break;
+            // Everything that changes how the text will sound has to (a) drop the
+            // look-ahead — it was rendered with the OLD settings, and playing it
+            // is heard as the previous voice reading one more sentence — and
+            // (b) take synthLock: the synthesizer is not thread-safe, and a
+            // look-ahead render in flight owns it. Setting the voice underneath a
+            // running render is exactly how a book's own voice got silently lost
+            // at load (the change threw, and the host kept the old voice until
+            // some later command happened to arrive while it was idle).
+            case "VOICE":
+                DropAhead();
+                lock (synthLock) { try { synth.SelectVoice(arg); } catch { } }
+                break;
+            case "RATE":
+                DropAhead();
+                lock (synthLock) { synth.Rate = Clamp(ParseInt(arg), -10, 10); }
+                break;
+            case "VOL":
+                DropAhead();
+                lock (synthLock) { synth.Volume = Clamp(ParseInt(arg), 0, 100); }
+                break;
+            case "PITCH":
+                DropAhead();
+                pitchPercent = Clamp(ParseInt(arg), -50, 50);
+                break;
             case "SPEAK": Speak(DecodeB64(arg)); break;
             case "PRERENDER": PreRender(DecodeB64(arg)); break;
             // Buffered playback can't pause mid-stream; the reader doesn't use
@@ -156,6 +176,15 @@ class TtsHost32
         });
         t.IsBackground = true;
         t.Start();
+    }
+
+    /// <summary>Throws the look-ahead away, waking anyone waiting on it (they
+    /// re-check, find nothing, and render the sentence fresh with the settings
+    /// that are current now).</summary>
+    private static void DropAhead()
+    {
+        lock (aheadLock) { aheadText = null; aheadWav = null; }
+        aheadReady.Set();
     }
 
     /// <summary>Takes the pre-rendered audio for this sentence if we have it, waiting

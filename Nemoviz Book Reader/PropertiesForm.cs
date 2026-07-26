@@ -607,7 +607,14 @@ namespace Nemoviz_Book_Reader
             engines.Sort(StringComparer.CurrentCultureIgnoreCase);
             foreach (string en in engines) cmbTEngine.Items.Add(en);
 
+            // The saved name may predate the switch to plain voice names (it could
+            // be SAPI's description, "… - English (United States)"), so fall back
+            // to matching the bare name — OK then rewrites it in the current form.
             string want = !string.IsNullOrEmpty(book.TextVoice) ? book.TextVoice : "";
+            foreach (var c in textCatalog)
+                if (!string.Equals(c.Name, want, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(BareVoiceName(c.Name), BareVoiceName(want), StringComparison.OrdinalIgnoreCase))
+                { want = c.Name; break; }
             string wantEngine = null, wantLang = null;
             foreach (var c in textCatalog)
                 if (string.Equals(c.Name, want, StringComparison.OrdinalIgnoreCase))
@@ -751,6 +758,15 @@ namespace Nemoviz_Book_Reader
             else TextVoicesForSelection();
         }
 
+        /// <summary>A voice name without SAPI's " - language" tail, so a name saved
+        /// in either form still finds its voice.</summary>
+        private static string BareVoiceName(string n)
+        {
+            if (string.IsNullOrEmpty(n)) return "";
+            int dash = n.IndexOf(" - ", StringComparison.Ordinal);
+            return (dash > 0 ? n.Substring(0, dash) : n).Trim();
+        }
+
         private void TextVoicesForSelection()
         {
             if (cmbTVoice == null || textCatalog == null) return;
@@ -785,6 +801,11 @@ namespace Nemoviz_Book_Reader
             book.TextWpm = numTWpm != null ? (int)numTWpm.Value : -1;
             book.TextVolume = numTVolume != null ? (int)numTVolume.Value : -1;
             book.TextPitch = numTPitch != null ? (int)numTPitch.Value : -99;
+            // A text book has no playback volume of its own: the player's Volume
+            // field IS this speech volume, so keep the two the same number — the
+            // player reads book.Volume back when the dialog closes. (On a hybrid
+            // book the Audio tab's own field is written afterwards and wins.)
+            if (book.TextVolume >= 0) book.Volume = book.TextVolume;
 
             if (cmbTBrailleTable != null)
             {

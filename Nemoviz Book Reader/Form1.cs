@@ -952,6 +952,10 @@ namespace Nemoviz_Book_Reader
             if (currentBook != null && currentBook.IsTextBook)
             {
                 if (tts != null) tts.SetVolume(currentVolume);
+                // For a text book the Volume field IS the speech volume, so the
+                // book's own TextVolume follows it — the two are one number, and
+                // Properties must never show a different one from the player.
+                currentBook.TextVolume = currentVolume;
             }
             else if (mpvHandle != IntPtr.Zero)
                 mpv_set_property_string(mpvHandle, "volume", currentVolume.ToString());
@@ -2326,6 +2330,7 @@ namespace Nemoviz_Book_Reader
                         currentBook.PercentListened = pct;
                     }
                     currentBook.Volume = currentVolume;
+                    currentBook.TextVolume = currentVolume;   // same number, see ChangeVolume
                     currentBook.TextWpm = currentWpm;
                     currentBook.SeekStep = EncodeSeekStep(CurrentSeekStep());
                     currentBook.Save();
@@ -2734,7 +2739,13 @@ namespace Nemoviz_Book_Reader
             // show the last-saved ones and look stale.
             currentBook.Volume = currentVolume;
             currentBook.Speed = currentSpeed;
-            if (currentBook.IsTextBook) currentBook.TextWpm = currentWpm;
+            if (currentBook.IsTextBook)
+            {
+                currentBook.TextWpm = currentWpm;
+                // The speech volume is the player's Volume field for a text book;
+                // hand the LIVE value over so the dialog can't show a stale one.
+                currentBook.TextVolume = currentVolume;
+            }
 
             // Pass a live-preview hook so edits are heard on the fly while the
             // dialog is open.

@@ -58,7 +58,7 @@ namespace Nemoviz_Book_Reader
                 int n = toks.Count;
                 for (int i = 0; i < n; i++)
                 {
-                    string name = SafeDesc(toks.Item(i));
+                    string name = VoiceName(toks.Item(i));
                     if (!string.IsNullOrEmpty(name)) list.Add(name);
                 }
             }
@@ -76,7 +76,7 @@ namespace Nemoviz_Book_Reader
                 for (int i = 0; i < n; i++)
                 {
                     dynamic tok = toks.Item(i);
-                    string name = SafeDesc(tok);
+                    string name = VoiceName(tok);
                     if (string.IsNullOrEmpty(name)) continue;
                     string vendor = "";
                     try { vendor = tok.GetAttribute("Vendor") ?? ""; } catch { }
@@ -113,7 +113,11 @@ namespace Nemoviz_Book_Reader
                 for (int i = 0; i < n; i++)
                 {
                     dynamic tok = toks.Item(i);
-                    if (string.Equals(SafeDesc(tok), name, StringComparison.Ordinal))
+                    // The token's own Name is what the voice is known by now; the
+                    // description is still accepted so a voice saved under the old
+                    // (description) name in a Book.ini keeps working.
+                    if (string.Equals(VoiceName(tok), name, StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(SafeDesc(tok), name, StringComparison.OrdinalIgnoreCase))
                     {
                         voice.Voice = tok;
                         return;
@@ -125,7 +129,7 @@ namespace Nemoviz_Book_Reader
 
         public string CurrentVoiceName
         {
-            get { try { return SafeDesc(voice.Voice); } catch { return ""; } }
+            get { try { return VoiceName(voice.Voice); } catch { return ""; } }
         }
 
         public void SetRate(int rate) { try { voice.Rate = Clamp(rate, -10, 10); } catch { } }
@@ -252,6 +256,27 @@ namespace Nemoviz_Book_Reader
         private static string SafeDesc(dynamic token)
         {
             try { return (string)token.GetDescription(); } catch { return ""; }
+        }
+
+        /// <summary>The name a voice is known by — the token's own <c>Name</c>
+        /// attribute ("Microsoft Zira Desktop"), not SAPI's description, which
+        /// appends the language ("Microsoft Zira Desktop - English (United
+        /// States)"). The 32-bit host reports System.Speech's <c>VoiceInfo.Name</c>,
+        /// i.e. the bare name, so using the description here made the SAME voice
+        /// look like two different ones: the merge in
+        /// <see cref="CompositeSpeechBackend"/> never recognised the duplicate and
+        /// a saved "Microsoft Zira Desktop" resolved to the 32-bit satellite
+        /// instead of this in-process backend. Falls back to the description for
+        /// a token that doesn't expose the attribute.</summary>
+        private static string VoiceName(dynamic token)
+        {
+            try
+            {
+                string name = token.GetAttribute("Name") as string;
+                if (!string.IsNullOrEmpty(name)) return name;
+            }
+            catch { }
+            return SafeDesc(token);
         }
 
         // Pulls the WASAPI endpoint guid "{…}" out of an mpv id like
