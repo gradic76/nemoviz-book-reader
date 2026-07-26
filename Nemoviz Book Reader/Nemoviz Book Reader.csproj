@@ -161,6 +161,7 @@
     <Compile Include="ISpeechBackend.cs" />
     <Compile Include="OneCoreBackend.cs" />
     <Compile Include="SapiWavPlayer.cs" />
+    <Compile Include="SpeechInventory.cs" />
     <Compile Include="Sapi5Backend.cs" />
     <Compile Include="Sapi5SatelliteBackend.cs" />
     <Compile Include="CompositeSpeechBackend.cs" />

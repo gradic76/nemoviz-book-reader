@@ -39,6 +39,11 @@ namespace Nemoviz_Book_Reader
             try { Add(new Sapi5SatelliteBackend(), 32); } catch { }
 
             active = backends.Count > 0 ? backends[0] : null;
+
+            // Record what this machine actually has — including sources NBR cannot
+            // drive yet (SAPI 4). On another user's setup that log is the first
+            // place to look when an expected voice is missing from the list.
+            SpeechInventory.LogOnce(GetVoiceCatalog());
         }
 
         private void Add(ISpeechBackend b, int arch)
