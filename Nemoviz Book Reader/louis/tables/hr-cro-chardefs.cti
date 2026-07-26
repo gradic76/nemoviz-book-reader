@@ -74,7 +74,7 @@ punctuation   \x007B 12356           #123   {  LEFT CURLY BRACKET
 sign          \x007C 45              #124   |  VERTICAL LINE
 punctuation   \x007D 23456           #125   }  RIGHT CURLY BRACKET
 sign          \x007E 56            #126   ~  TILDE
-sign          \x007F 456             #127  [DELETE]
+noback sign          \x007F 456             #127  [DELETE]
 sign          \x0040 4-345           #64    @  COMMERCIAL AT
 sign          \x2022 6-35           #82226 •
 sign          \x2026 3-3-3           #8230 elipsis

@@ -269,9 +269,6 @@ always \x2267 4-135-2356
 
 #----------- SPECIAL SYLLABLES -----------------------------------------------
 
-always \x0044\x017D 12456			# LATIN CAPITAL LETTER D + LATIN CAPITAL LETTER Z WITH CARON
-always \x0044\x017E 12456			# LATIN CAPITAL LETTER D + LATIN SMALL LETTER Z WITH CARON
-always \x0064\x017E 12456			# LATIN SMALL LETTER D + LATIN SMALL LETTER Z WITH CARON
 
 #----------- SPECIAL WORDS ---------------------------------------------------
 

@@ -58,6 +58,7 @@ namespace Nemoviz_Book_Reader
                 var sb = new StringBuilder();
                 var pageMarks = new List<(string Label, int Offset)>();
                 int pageNo = 0;
+                char rail = '\0';   // side-rail character of a box we're inside
                 foreach (List<string> page in pages)
                 {
                     pageNo++;
@@ -66,8 +67,18 @@ namespace Nemoviz_Book_Reader
                     {
                         string line = LibLouis.BackTranslate(cells, table.File);
                         if (line == null) continue;
-                        line = line.TrimEnd();
-                        if (IsDecorative(line)) continue;
+                        line = StripUntranslated(line).TrimEnd();
+                        if (IsDecorative(line))
+                        {
+                            // A box side-rail is a lone character; remember it so the
+                            // framed line between the rails can shed its prefix.
+                            string bare = line.Trim();
+                            rail = bare.Length == 1 ? bare[0] : '\0';
+                            continue;
+                        }
+                        // Blank lines are kept: they carry the paragraph breaks the
+                        // reader needs for pacing.
+                        line = StripRail(line, rail);
                         if (!pageHasText)
                         {
                             pageMarks.Add((pageNo.ToString(), sb.Length));
@@ -132,17 +143,55 @@ namespace Nemoviz_Book_Reader
             return pages;
         }
 
-        /// <summary>Drops rules and ornamental boxes ("=====", "PCCCC?") that carry no
-        /// reading content: a run of one repeated non-alphanumeric character.</summary>
+        /// <summary>Removes cells liblouis had no text for — formatting indicators
+        /// (emphasis, producer marks) that would otherwise reach TTS as raw braille
+        /// characters.</summary>
+        private static string StripUntranslated(string line)
+        {
+            var sb = new StringBuilder(line.Length);
+            foreach (char c in line)
+                if (c < 0x2800 || c > 0x28FF) sb.Append(c);
+            return sb.ToString();
+        }
+
+        /// <summary>Sheds the left rail of a title box from the line it frames, so
+        /// "l⇥SMOGOVCI" reads as "SMOGOVCI".</summary>
+        private static string StripRail(string line, char rail)
+        {
+            if (rail == '\0') return line;
+            int i = 0;
+            while (i < line.Length && char.IsWhiteSpace(line[i])) i++;
+            if (i >= line.Length || line[i] != rail) return line;
+            int j = i + 1;
+            if (j >= line.Length || !char.IsWhiteSpace(line[j])) return line;
+            return line.Substring(0, i) + line.Substring(j);
+        }
+
+        /// <summary>Drops ornamental rules and title boxes, which carry no reading
+        /// content but would be spoken. A box border back-translates to a run of one
+        /// repeated character ("pccccccccccccđ", "v-----------"), whatever that
+        /// character happens to be — so the test is repetition, not punctuation. A
+        /// line left with a single stray character is a box side-rail.</summary>
         private static bool IsDecorative(string line)
         {
             string t = line.Trim();
+            if (t.Length == 0) return false;
+            if (t.Length == 1) return !char.IsDigit(t[0]);   // side-rail remnant
+
             if (t.Length < 5) return false;
-            char first = t[0];
-            if (char.IsLetterOrDigit(first)) return false;
-            int same = 0;
-            foreach (char c in t) if (c == first) same++;
-            return same * 10 >= t.Length * 7;   // ≥70 % the same character
+            int best = 0;
+            var counts = new Dictionary<char, int>();
+            foreach (char c in t)
+            {
+                if (char.IsWhiteSpace(c)) continue;
+                int n = counts.TryGetValue(c, out int prev) ? prev + 1 : 1;
+                counts[c] = n;
+                if (n > best) best = n;
+            }
+            int solid = 0;
+            foreach (char c in t) if (!char.IsWhiteSpace(c)) solid++;
+            if (solid < 5) return false;
+            return best * 10 >= solid * 6;   // ≥60 % one and the same character
         }
 
         // ── Table auto-detection ─────────────────────────────────────────────
