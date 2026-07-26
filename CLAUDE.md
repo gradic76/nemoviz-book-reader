@@ -1097,6 +1097,47 @@ Form feed = braille page; ornamental rules/boxes are dropped.
 
 ---
 
+## 8j. User speech dictionary
+
+What NBR should say instead of what the book says: "John" read as "Džon", a
+footnote marker skipped, a comma or an apostrophe dropped into a word to move
+where a particular engine puts the stress.
+
+**It ships empty and stays empty until the user writes something.** No supplied
+rules, no abbreviation list, nothing inferred — Gordan's explicit instruction, and
+the right one: what one reader wants another does not, and much of it depends on
+which voice they use. NBR supplies the tool, the user supplies the content.
+
+- **Where it applies.** `TtsReader` rewrites only the string handed to the speech
+  engine (`Spoken()`, called from `SpeakCurrent`/`PreRender`) — nowhere else. The
+  book's own text is untouched, so every stored character offset (reading
+  position, headings, pages, bookmarks) stays valid, and braille (and the future
+  on-screen display) still show what the author wrote. It runs *after* sentence
+  splitting, so a replacement containing a full stop cannot break a sentence.
+- **Literally.** A replacement is passed on exactly as typed; the spaces, commas
+  and apostrophes people use to bend an engine's stress are the whole point, so
+  nothing tidies them afterwards.
+- **Three scopes, most specific first: voice → language → global.** A voice rule
+  fixes one engine, a language rule belongs to the language whatever reads it, a
+  global rule is the user's own habit. Each is its own plain-text file in
+  `Dictionaries\` (`voice-<name>.dic`, `lang-hr.dic`, `global.dic`) so a
+  dictionary can be backed up or passed to someone else.
+- **A rule** is: pattern, match (whole word / anywhere / regular expression),
+  case-sensitive yes-no, "say this instead" or "say nothing at all", plus an
+  on/off switch and the user's own note. Rules apply in list order, each once over
+  the sentence — a replacement can never re-feed its own pattern.
+- **A user's regex cannot take the reader down**: patterns are compiled with a
+  50 ms `MatchTimeout` and validated when saved (a bad one is explained on the
+  spot, not swallowed while reading). Measured: a deliberately catastrophic
+  pattern gives up after ~60 ms and reading continues.
+- **UI**: Settings → Text Books → "Speech dictionary…" (`SpeechDictionaryForm` +
+  `DictRuleForm`). The **Try it** box is not decoration — without it a blind user
+  would have to find the right place in a book to hear whether a rule works; it
+  runs the rules *as currently edited* and speaks the result in the selected
+  voice. Space toggles a rule on/off in the list, Delete removes, Enter edits.
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one

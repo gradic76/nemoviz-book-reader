@@ -256,6 +256,21 @@ namespace Nemoviz_Book_Reader
             return false;
         }
 
+        /// <summary>The user's speech dictionaries in force for the current voice
+        /// and book language, most specific first. Null or empty = nothing to
+        /// apply, which is how NBR ships.</summary>
+        public List<SpeechDictionary> Dictionaries { get; set; }
+
+        /// <summary>The sentence as the engine should hear it: the book's own words
+        /// with the user's dictionary applied. This is the ONLY place the text is
+        /// rewritten — what is stored, displayed, brailled or counted for a
+        /// position is always the book's own.</summary>
+        private string Spoken(string sentence)
+        {
+            return Dictionaries == null || Dictionaries.Count == 0
+                ? sentence : SpeechDictionaries.Apply(Dictionaries, sentence);
+        }
+
         private void SpeakCurrent()
         {
             if (index < 0 || index >= sentenceText.Count)
@@ -266,11 +281,11 @@ namespace Nemoviz_Book_Reader
             }
             reading = true;
             RaisePosition();
-            backend.Speak(sentenceText[index]);
+            backend.Speak(Spoken(sentenceText[index]));
             // Hint the next sentence so a backend that renders before playing can
             // have it ready — otherwise every sentence starts with a synthesis gap.
             if (index + 1 < sentenceText.Count)
-                backend.PreRender(sentenceText[index + 1]);
+                backend.PreRender(Spoken(sentenceText[index + 1]));
         }
 
         private void OnCompleted(bool cancelled)

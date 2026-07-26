@@ -2800,6 +2800,11 @@ namespace Nemoviz_Book_Reader
             SetAudioDeviceLive(appSettings.AudioDevice);
             // The media keys may have been switched on/off or gone global.
             ApplyMediaKeySettings();
+            // The user may have edited their speech dictionary: drop what is
+            // cached and take whatever now applies, from the next sentence on.
+            SpeechDictionaries.Reload();
+            if (tts != null && currentBook != null && currentBook.IsTextBook)
+                tts.Dictionaries = SpeechDictionaries.Active(tts.CurrentVoice, currentBook.TextLanguage);
             // A book that has chosen its own voice in Properties is NEVER touched by
             // a Settings change — that is the whole point of the per-book setting.
             // A book that has not is simply reading with the default, so when the
@@ -3250,6 +3255,11 @@ namespace Nemoviz_Book_Reader
             currentTextPitch = p.Pitch;
 
             tts.SetVoice(voice);
+            // Whatever the user has put in their own dictionary for this voice and
+            // this language — nothing at all unless they wrote it themselves.
+            tts.Dictionaries = SpeechDictionaries.Active(
+                !string.IsNullOrEmpty(tts.CurrentVoice) ? tts.CurrentVoice : voice,
+                currentBook != null ? currentBook.TextLanguage : "");
             tts.SetPitch(currentTextPitch * 5); // -10..10 → -50..50 %
             tts.SetVolume(currentVolume);
             tts.SetRate(TtsReader.WpmToRate(currentWpm));

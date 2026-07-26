@@ -433,6 +433,15 @@ namespace Nemoviz_Book_Reader
             btnTest.Click += (s, e) => TestVoice();
             box.Controls.Add(btnTest);
 
+            Button btnDict = new Button();
+            btnDict.Text = Localization.T("Dict.Open");
+            btnDict.AccessibleName = Localization.T("Dict.Open.Accessible");
+            btnDict.Location = new Point(cx + 176, y);
+            btnDict.Size = new Size(180, 30);
+            btnDict.TabIndex = tab++;
+            btnDict.Click += (s, e) => OpenDictionary();
+            box.Controls.Add(btnDict);
+
             // Fill the cascade and restore the saved default voice.
             try { voiceCatalog = EnsureSpeech().GetVoiceCatalog(); }
             catch { voiceCatalog = new List<(string, string, string)>(); }
@@ -722,6 +731,40 @@ namespace Nemoviz_Book_Reader
             if (string.IsNullOrEmpty(code)) return Localization.T("Settings.TextBooks.LanguageUnknown");
             try { return new System.Globalization.CultureInfo(code).DisplayName + "  (" + code + ")"; }
             catch { return code; }
+        }
+
+        /// <summary>Opens the user's speech dictionary for the voice and language
+        /// currently picked here, so a rule lands where they are looking. The "Try
+        /// it" box speaks through the same voice.</summary>
+        private void OpenDictionary()
+        {
+            string voice = cmbVoice != null && cmbVoice.SelectedItem != null
+                ? cmbVoice.SelectedItem.ToString() : "";
+            int li = cmbLanguage != null ? cmbLanguage.SelectedIndex : -1;
+            string lang = (li >= 0 && li < languageCodes.Count) ? languageCodes[li] : "";
+
+            using (var dlg = new SpeechDictionaryForm(lang, voice, SpeakSample))
+                dlg.ShowDialog(this);
+            // Whatever was edited takes effect from the next sentence read.
+            SpeechDictionaries.Reload();
+        }
+
+        /// <summary>Says a line with the voice selected here — used by the
+        /// dictionary's "Try it".</summary>
+        private void SpeakSample(string text)
+        {
+            try
+            {
+                CompositeSpeechBackend sp = EnsureSpeech();
+                if (cmbVoice != null && cmbVoice.SelectedItem != null)
+                    sp.SelectVoice(cmbVoice.SelectedItem.ToString());
+                sp.SetRate(TtsReader.WpmToRate((int)numRate.Value));
+                sp.SetVolume((int)numVolume.Value);
+                sp.SetPitch((int)numPitch.Value * 5);
+                sp.Cancel();
+                sp.Speak(text);
+            }
+            catch { }
         }
 
         /// <summary>Speaks a short sample with the currently selected voice /
