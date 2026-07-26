@@ -74,6 +74,11 @@ namespace Nemoviz_Book_Reader
         public void SetVoice(string name) { backend.SelectVoice(name); RestartCurrent(); }
         public void SetRate(int r) { rate = r; backend.SetRate(r); RestartCurrent(); }
         public void SetVolume(int v) { backend.SetVolume(v); RestartCurrent(); }
+        /// <summary>Volume for the sentences still to come, without re-speaking the
+        /// one in progress. The sleep timer's fadeout uses it: restarting the
+        /// sentence on every step of a 45-second ramp would be unbearable, so the
+        /// fade steps down at each sentence boundary instead.</summary>
+        public void SetVolumeQuiet(int v) { backend.SetVolume(v); }
         public void SetPitch(int p) { backend.SetPitch(p); RestartCurrent(); }
         /// <summary>Routes speech to a specific output device (mpv-style id;
         /// empty/"auto" = system default). Restarts the current sentence so the

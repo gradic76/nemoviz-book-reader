@@ -1639,8 +1639,11 @@ namespace Nemoviz_Book_Reader
         {
             // The timer is tied to a listening session — with an empty
             // player there is nothing to time. Same audible feedback as
-            // Ctrl+G without a book: a short low beep.
-            if (currentFile == null)
+            // Ctrl+G without a book: a short low beep. The test is the BOOK,
+            // not a current file: a text book is read by the speech engine and
+            // has no current file at all, which used to lock it out of the
+            // timer entirely.
+            if (currentBook == null)
             {
                 Console.Beep(300, 150);
                 return;
@@ -1655,11 +1658,7 @@ namespace Nemoviz_Book_Reader
             // possible fadeout volume, which must happen while inaudible.
             if (sleepTimerActive)
             {
-                if (isPlaying)
-                {
-                    mpv_set_property_string(mpvHandle, "pause", "yes");
-                    SetPlayPauseState(false);
-                }
+                if (isPlaying) PausePlaybackQuietly();
                 CancelSleepTimer(true);
                 return;
             }
@@ -1669,23 +1668,14 @@ namespace Nemoviz_Book_Reader
             // always resumes via StartSleepTimer; cancelling resumes only if
             // playback was actually running before the dialog opened.
             bool wasPlaying = isPlaying;
-            if (wasPlaying)
-            {
-                mpv_set_property_string(mpvHandle, "pause", "yes");
-                SetPlayPauseState(false);
-            }
+            if (wasPlaying) PausePlaybackQuietly();
 
             using (SleepTimerForm dlg = new SleepTimerForm())
             {
                 if (dlg.ShowDialog(this) == DialogResult.OK)
-                {
                     StartSleepTimer(dlg.SelectedMinutes, dlg.SelectedAction);
-                }
                 else if (wasPlaying)
-                {
-                    mpv_set_property_string(mpvHandle, "pause", "no");
-                    SetPlayPauseState(true);
-                }
+                    ResumePlaybackQuietly();
             }
         }
 
@@ -1702,17 +1692,41 @@ namespace Nemoviz_Book_Reader
             sleepTimer.Start();
 
             // Starting a timer starts the listening session: if playback is
-            // paused, it begins now. (Direct mpv call — deliberately NOT
-            // BtnPlayPause_Click, which is reserved for user-initiated
-            // toggles and carries the cancel hook.)
-            if (!isPlaying)
-            {
-                mpv_set_property_string(mpvHandle, "pause", "no");
-                SetPlayPauseState(true);
-            }
+            // paused, it begins now. (Deliberately NOT BtnPlayPause_Click, which
+            // is reserved for user-initiated toggles and carries the cancel hook.)
+            if (!isPlaying) ResumePlaybackQuietly();
 
             AnnounceToScreenReader(lblAnnounceInfo,
                 Localization.T("SleepTimer.Announce.Set", minutes));
+        }
+
+        /// <summary>Pauses whatever is playing — mpv for an audio book, the speech
+        /// reader for a text one — WITHOUT the user-pause semantics: these are the
+        /// sleep timer's own programmatic pauses, which must not cancel the timer
+        /// (see the coupling rules in section 7 of the brief).</summary>
+        private void PausePlaybackQuietly()
+        {
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                if (tts != null) tts.Pause();
+            }
+            else if (mpvHandle != IntPtr.Zero)
+                mpv_set_property_string(mpvHandle, "pause", "yes");
+            SetPlayPauseState(false);
+        }
+
+        /// <summary>The other half: resumes the right engine for this book.</summary>
+        private void ResumePlaybackQuietly()
+        {
+            if (currentBook != null && currentBook.IsTextBook)
+            {
+                SetPlayPauseState(true);
+                if (tts != null) tts.Play();
+                return;
+            }
+            if (mpvHandle != IntPtr.Zero)
+                mpv_set_property_string(mpvHandle, "pause", "no");
+            SetPlayPauseState(true);
         }
 
         /// <summary>
@@ -1744,6 +1758,9 @@ namespace Nemoviz_Book_Reader
         {
             if (mpvHandle != IntPtr.Zero)
                 mpv_set_property_string(mpvHandle, "volume", currentVolume.ToString());
+            // A text book fades the speech volume instead, so put that back too.
+            if (tts != null && currentBook != null && currentBook.IsTextBook)
+                tts.SetVolumeQuiet(currentVolume);
         }
 
         private void SleepTimer_Tick(object sender, EventArgs e)
@@ -1775,10 +1792,21 @@ namespace Nemoviz_Book_Reader
             // currentVolume and the UI stay untouched, so the saved volume
             // and the Volume field never see the faded values. One step
             // per tick (1 s) is plenty smooth for a ~45-step ramp.
-            if (sec <= SleepFadeSeconds && isPlaying && mpvHandle != IntPtr.Zero)
+            // A text book fades the same way, through the speech engine. Speech
+            // volume only takes effect on the NEXT sentence (changing it mid-
+            // utterance would mean re-speaking the sentence), so there the fade
+            // steps down sentence by sentence rather than second by second —
+            // still a fade, just coarser, and the last minute of a book is
+            // exactly where sentences are short.
+            if (sec <= SleepFadeSeconds && isPlaying)
             {
                 int fadedVolume = (int)Math.Round(currentVolume * (sec / (double)SleepFadeSeconds));
-                mpv_set_property_string(mpvHandle, "volume", fadedVolume.ToString());
+                if (currentBook != null && currentBook.IsTextBook)
+                {
+                    if (tts != null) tts.SetVolumeQuiet(fadedVolume);
+                }
+                else if (mpvHandle != IntPtr.Zero)
+                    mpv_set_property_string(mpvHandle, "volume", fadedVolume.ToString());
             }
         }
 
@@ -1833,11 +1861,7 @@ namespace Nemoviz_Book_Reader
         /// </summary>
         private void ExecuteSleepTimerAction()
         {
-            if (isPlaying)
-            {
-                mpv_set_property_string(mpvHandle, "pause", "yes");
-                SetPlayPauseState(false);
-            }
+            if (isPlaying) PausePlaybackQuietly();
 
             // Also restores the (now inaudible) volume, so a later resume
             // plays at the user's set level.
