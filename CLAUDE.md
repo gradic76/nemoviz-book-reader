@@ -861,6 +861,41 @@ format.
 
 ---
 
+## 8i. Electronic braille (.brf) — liblouis back-translation
+
+A `.brf`/`.brl`/`.bra` is a stream of braille **cells**, not text. `BrfParser`
+maps each byte to a cell (standard **Braille ASCII**), converts to Unicode
+braille (U+2800…), and **back-translates to text via liblouis** (`LibLouis.cs`,
+P/Invoke). Output then flows into the normal text pipeline (TTS, pages, nav).
+Form feed = braille page; ornamental rules/boxes are dropped.
+
+- **ABI gotcha:** this Windows liblouis build is `__stdcall` with a **32-bit
+  widechar** (UCS-4) → buffers marshal as `uint[]`, not `ushort[]`. Tables are
+  passed **by absolute path** so their `include` chains resolve without
+  `LOUIS_TABLEPATH`. Vendored: `liblouis.dll` + `louis\tables\` (copied to output).
+- **Croatian needed custom tables.** Shipped `hr-g1.ctb` mis-reads literary
+  braille: it includes `text_nabcc.dis` (8-dot computer display); `hr-chardefs`
+  defines German ä/ö/ü/**ß on ž's cell**; and `hr-digits.uti` puts digits on the
+  **č/ć/š/đ cells**, shadowing those letters. Built from the official standard
+  (*Standard hrvatske brajice*, Funtek / HSS 2020): **`hr-old.ctb`** (pre-2020,
+  single-cell dž/lj/nj) and **`hr-2020.ctb`** (two-cell digraphs; freed cells =
+  round brackets). Croatian has **no standardised contracted grade** → grade 1
+  only. Digits use the standard's lowered forms, marked `noback` so they don't
+  hijack back-translation of punctuation.
+- **The unavoidable ambiguity:** the same cell is `lj` (old) or `(` (2020), and a
+  .brf declares **neither language nor grade nor standard revision**. So the
+  table is **per book**: auto-detected at import, persisted in `Book.ini`
+  `[Braille] Table`, and the original .brf is kept beside `content.txt` so the
+  reading can be redone with another table. **Detection is a heuristic** (letter/
+  junk ratio, mid-word capitals, accent rate, and decisively the share of the
+  language's own everyday words) — **the user is the authority**.
+- Verified on 19 real books (HR grade 1, FR, EN UEB contracted): 18 detect
+  correctly; one English TOC-heavy file misdetects — which is what the override
+  is for. **Still open:** the per-book override UI (needs the text Properties
+  dialog), `.pef` support, and more languages/samples.
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one
