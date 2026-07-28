@@ -285,8 +285,15 @@ on the form did not change JAWS here).
 display, changed only via Shift+Up/Down or the mouse. So plain Up/Down are
 volume even when it has focus.
 
-**One rule for every seek, in every kind of book: a step that CANNOT move plays
-the "no go" beep; a step that moves is silent.** Each seek helper
+**One rule for every seek, in every kind of book: a step that does NOT get you
+the whole way plays the "no go" beep; a full step is silent.** For the steps that
+jump from mark to mark (Part, Heading, Page, Chapter, Bookmark, Sentence,
+Paragraph) that means "there was no next mark". For the **continuous** steps
+(the time rows, Standard page, the plain arrows) it means the jump ran into the
+beginning or the end of the book: it still lands on the edge, and the beep says
+"that is as far as it goes this way". Testing the first version showed why the
+distinction matters — near the end a time step moved two seconds and said
+nothing, which reads as "the time steps don't work". Each seek helper
 (`PartForward/Back`, `StructForward/Back`, `BookmarkForward/Back`,
 `SeekRelative`, `TextSeek`) *returns whether it went anywhere* and makes no sound
 itself; the two dispatchers own the beep. So "there is nothing further that way"

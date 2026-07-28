@@ -169,16 +169,24 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Jump by a character delta (standard page = ±1800), snapped
-        /// to the sentence containing the target offset.</summary>
-        public void SeekChars(int delta) { SeekToChar(CharPosition + delta); }
+        /// to the sentence containing the target offset. Returns whether the WHOLE
+        /// step fitted in the book: a jump that runs off either end still lands on
+        /// it, but says so, which is how the player knows to sound its "that is as
+        /// far as it goes" beep.</summary>
+        public bool SeekChars(int delta)
+        {
+            int want = CharPosition + delta;
+            SeekToChar(want);
+            return want >= 0 && want <= TotalChars;
+        }
 
         /// <summary>Jump by an estimated number of seconds of speech (time seek),
         /// using the current rate to gauge characters per second.</summary>
-        public void SeekSeconds(int seconds)
+        public bool SeekSeconds(int seconds)
         {
             int cps = BaseCharsPerSecond + rate; // ~15 at rate 0
             if (cps < 5) cps = 5;
-            SeekChars(seconds * cps);
+            return SeekChars(seconds * cps);
         }
 
         public void SeekToSentence(int i)

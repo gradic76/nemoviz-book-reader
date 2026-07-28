@@ -577,8 +577,10 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Seek in a text book by the selected step (dir +1/-1). True when
-        /// it went somewhere. A text book's position is a character offset and its
-        /// seeks are immediate, so "did it move" is simply read back afterwards.</summary>
+        /// the whole step was available. A text book's position is a character
+        /// offset and its seeks are immediate, so for the steps that jump from mark
+        /// to mark "did it move" is simply read back afterwards; the two continuous
+        /// steps (standard page, time) say for themselves whether they fitted.</summary>
         private bool TextSeek(SeekStep step, int dir)
         {
             if (tts == null) return false;
@@ -594,7 +596,7 @@ namespace Nemoviz_Book_Reader
                 case SeekStepKind.Paragraph:
                     if (dir > 0) tts.NextParagraph(); else tts.PrevParagraph(); break;
                 case SeekStepKind.StandardPage:
-                    tts.SeekChars(dir * TtsReader.StandardPageChars); break;
+                    return tts.SeekChars(dir * TtsReader.StandardPageChars);
                 case SeekStepKind.Bookmark:
                     // The same jump an audio book makes; BookmarkForward/Back work
                     // in the book's own unit, so they need no text branch of their
@@ -602,7 +604,7 @@ namespace Nemoviz_Book_Reader
                     // seek below and wandered off by 15 seconds instead.
                     if (dir > 0) BookmarkForward(); else BookmarkBack(); break;
                 default: // time steps (15/30/60 s / 5 / 10 min)
-                    tts.SeekSeconds(dir * GetSeekStepSeconds()); break;
+                    return tts.SeekSeconds(dir * GetSeekStepSeconds());
             }
             return tts.CharPosition != before;
         }
@@ -1129,32 +1131,42 @@ namespace Nemoviz_Book_Reader
             if (!SeekRelative(dir * 5)) tones.Play(300, 150);
         }
 
-        /// <summary>Seeks by a number of seconds. False when the position could not
-        /// change — already at the very beginning going back, or at the end going
-        /// forward — so the caller can say so, the same as any other step.</summary>
+        /// <summary>
+        /// Seeks by a number of seconds. Returns whether the WHOLE step was
+        /// available: a jump that runs into the beginning or the end of the book
+        /// still moves there, but reports false, so the beep says "that is as far
+        /// as it goes this way".
+        ///
+        /// <para>A time step is not like a heading: there is always somewhere to
+        /// go until the very edge, so "it moved" is the wrong test — near the end
+        /// the step is simply cut short, and without this the player would move
+        /// two seconds and say nothing.</para>
+        /// </summary>
         private bool SeekRelative(int seconds)
         {
             if (mpvHandle == IntPtr.Zero) return false;
 
             if (currentBook != null && currentBook.Chapters.Count > 0)
             {
-                double virtualPos = GetVirtualPosition();
-                double target = virtualPos + seconds;
+                double from = GetVirtualPosition();
+                double wanted = from + seconds;
+                double target = wanted;
                 if (target < 0) target = 0;
                 if (currentBook.TotalDuration > 0 && target > currentBook.TotalDuration)
                     target = currentBook.TotalDuration;
-                if (Math.Abs(target - virtualPos) < 0.05) return false;
-                SeekToVirtualPosition(target);
-                return true;
+                if (Math.Abs(target - from) > 0.05) SeekToVirtualPosition(target);
+                return Math.Abs(target - wanted) < 0.05;
             }
 
             double pos = 0, duration = 0;
             mpv_get_property(mpvHandle, "time-pos", 5, ref pos);
             mpv_get_property(mpvHandle, "duration", 5, ref duration);
-            if (seconds < 0 && pos <= 0.05) return false;
-            if (seconds > 0 && duration > 0 && pos >= duration - 0.05) return false;
-            MpvCommand("seek", seconds.ToString(), "relative");
-            return true;
+            double want = pos + seconds;
+            double clamped = want < 0 ? 0 : (duration > 0 && want > duration ? duration : want);
+            if (Math.Abs(clamped - pos) > 0.05)
+                MpvCommand("seek", clamped.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture),
+                           "absolute");
+            return Math.Abs(clamped - want) < 0.05;
         }
 
         // ──────────────────────────────────────────────
