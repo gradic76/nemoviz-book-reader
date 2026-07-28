@@ -168,6 +168,10 @@
     <Compile Include="DictRuleForm.cs" />
     <Compile Include="TextHelpForm.cs" />
     <Compile Include="UiTheme.cs" />
+    <Compile Include="DialogSkin.cs" />
+    <Compile Include="HintSystem.cs" />
+    <Compile Include="NewPlayerSkin.cs" />
+    <Compile Include="SkinCanvas.cs" />
     <Compile Include="SpeechInventory.cs" />
     <Compile Include="Sapi5Backend.cs" />
     <Compile Include="Sapi5SatelliteBackend.cs" />

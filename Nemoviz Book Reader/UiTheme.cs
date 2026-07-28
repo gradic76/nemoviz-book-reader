@@ -100,82 +100,23 @@ namespace Nemoviz_Book_Reader
     {
         public override string Id { get { return NewId; } }
 
-        // A restrained palette; the point for now is that it is visibly NOT the
-        // classic one, not that it is final.
-        private static readonly Color Window = Color.FromArgb(246, 247, 250);
-        private static readonly Color Face = Color.FromArgb(233, 237, 246);
-        private static readonly Color FaceHover = Color.FromArgb(214, 224, 241);
-        private static readonly Color FaceDown = Color.FromArgb(196, 210, 233);
-        private static readonly Color Edge = Color.FromArgb(120, 140, 170);
-        private static readonly Color Ink = Color.FromArgb(24, 28, 36);
+        /// <summary>The redesign now brings its own layout: the borderless
+        /// 960 × 480 hi-fi panel built by <see cref="NewPlayerSkin"/>.</summary>
+        public override bool BuildsOwnLayout { get { return true; } }
 
-        protected override void Style(Control root)
+        public override void BuildPlayerLayout(Form player)
         {
-            ForEachControl(root, c =>
-            {
-                Form form = c as Form;
-                if (form != null) { form.BackColor = Window; return; }
-
-                Panel panel = c as Panel;
-                if (panel != null) { panel.BackColor = Window; return; }
-
-                Button button = c as Button;
-                if (button != null) { StyleButton(button); return; }
-
-                TextBox box = c as TextBox;
-                if (box != null && box.ReadOnly)
-                {
-                    // The display fields keep a plain, quiet edit look — that was a
-                    // hard-won accessibility decision, so only the colours change.
-                    box.BackColor = Color.White;
-                    box.ForeColor = Ink;
-                    return;
-                }
-            });
+            Form1 f = player as Form1;
+            if (f != null) NewPlayerSkin.Build(f);
         }
 
-        /// <summary>Flat, rounded, with a face that lightens under the mouse and
-        /// darkens when pressed. It stays a real Button — role, name, keyboard and
-        /// tab order are the framework's, not ours.</summary>
-        private static void StyleButton(Button b)
-        {
-            b.FlatStyle = FlatStyle.Flat;
-            b.BackColor = Face;
-            b.ForeColor = Ink;
-            b.FlatAppearance.BorderSize = 1;
-            b.FlatAppearance.BorderColor = Edge;
-            b.FlatAppearance.MouseOverBackColor = FaceHover;
-            b.FlatAppearance.MouseDownBackColor = FaceDown;
-            b.UseVisualStyleBackColor = false;
+        /// <summary>Nothing to restyle: <see cref="NewPlayerSkin"/> lays the
+        /// player out and paints every part of it, and Apply runs AFTER
+        /// BuildPlayerLayout — so anything done here would undo the skin. The
+        /// other windows (Library, Settings, Properties) also pass through here
+        /// and are deliberately left alone until the panel is settled and they
+        /// get a pass of their own.</summary>
+        protected override void Style(Control root) { }
 
-            RoundOff(b);
-            b.SizeChanged -= OnButtonResized;
-            b.SizeChanged += OnButtonResized;
-        }
-
-        private static void OnButtonResized(object sender, EventArgs e)
-        {
-            RoundOff(sender as Button);
-        }
-
-        /// <summary>Rounds the corners by clipping the control's region. The mouse
-        /// follows the shape, so the corners belong to whatever is behind.</summary>
-        private static void RoundOff(Button b)
-        {
-            if (b == null || b.Width < 8 || b.Height < 8) return;
-            int r = Math.Min(14, Math.Min(b.Width, b.Height) / 2);
-            using (var path = new GraphicsPath())
-            {
-                var rect = new Rectangle(0, 0, b.Width, b.Height);
-                path.AddArc(rect.X, rect.Y, r * 2, r * 2, 180, 90);
-                path.AddArc(rect.Right - r * 2 - 1, rect.Y, r * 2, r * 2, 270, 90);
-                path.AddArc(rect.Right - r * 2 - 1, rect.Bottom - r * 2 - 1, r * 2, r * 2, 0, 90);
-                path.AddArc(rect.X, rect.Bottom - r * 2 - 1, r * 2, r * 2, 90, 90);
-                path.CloseFigure();
-                Region old = b.Region;
-                b.Region = new Region(path);
-                if (old != null) old.Dispose();
-            }
-        }
     }
 }

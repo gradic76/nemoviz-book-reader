@@ -1201,6 +1201,203 @@ borderless window (`FormBorderStyle.None`) would win 29 units and, measured, the
 caption text and accessible name survive for `INSERT+T` / `NVDA+T` — but that
 needs verifying by ear before it is relied on.
 
+**Settled with Gordan so far (2026-07-28)** — decisions only, nothing built yet:
+
+- **Panel legends are short.** `Označi` (57 units at 12 pt) and `Oznake` (62)
+  replace `Postavi knjižnu oznaku` (167) and `Knjižne oznake` (113). The longest
+  legend on the panel is now **`Knjižnica`, 71 units at 12 pt / 88 at 14 pt**, so
+  a side column of **91 units** carries the whole set. The full wording stays in
+  `AccessibleName` — the screen reader still says "Postavi knjižnu oznaku, Ctrl+B".
+- **Type.** 12 pt base, 14 pt for the display, 11 pt floor. Legends are printed
+  under clean buttons; only the transport ring is iconographic.
+- **A groove around every control.** Each button and the ring sits in a recess
+  cut into the panel, **3–4 units wide** — that reads as about a millimetre on
+  both a 13" laptop (0.22 mm per unit) and Gordan's screen (0.42 mm per unit).
+  The groove is what solves the one real accessibility risk in a silver-on-silver
+  panel: a control the same colour as its background has no edge without it.
+- **Groove colour: near-black, two-tone.** Shadow wall (top/left) at `#000`,
+  lit wall (bottom/right) at `#3A3A38`, so the groove itself looks round rather
+  than like a drawn line. Measured against a `#C0C0BC` panel: shadow wall
+  **11.5:1**, lit wall **6.2:1**, and **4.8:1** in the worst case where the lit
+  wall meets the darkest part of the silver — every edge stays well past the 3:1
+  a boundary needs. Wall against wall is only 1.8:1, which is fine: that pair is
+  a modelling cue, not the edge that carries the information.
+- **Legends are jet black** (`#0A0A0A`) on the silver — **10.8:1** on the panel
+  body, 8.3:1 at its darkest, past AAA either way. Keep ~8 units between a groove
+  and the cap height of the legend under it, or the text looks stuck to the shadow.
+**The two lit colours, settled 2026-07-28.** Amber `#FFC14A` means **the keyboard
+is here** — focus, and nothing else. Electric blue `#4FB8FF` means **the device is
+showing you something** — the seconds marker, the power lamp, and the backlight
+that flashes round a key when it fires. The first build had the marker in amber
+too, at 1.0:1 against the focus ring, which broke the rule that those two must
+never be confusable. Gordan's instinct for blue turned out to be the more
+accessible choice as well: amber against blue survives red-green colour blindness,
+which is the common kind, whereas amber against the glass's phosphor green would
+not have. Blue measures 8.2:1 on the ring's near-black channel.
+
+**A key does not sink when pressed** — it is not a switch and has no on and off.
+Instead its well goes electric blue and the glow blooms outward onto the silver
+over 260 ms. Firing outranks focus while it lasts.
+
+**The power key.** With no title bar there is no X, so the panel carries its own:
+a round key with a drawn standby mark at the top of the middle column, an electric
+blue lamp beside it, above the speed slider. **The lamp burns steady while the app
+is simply running and breathes — a slow fade up and down over 2.8 s, never a hard
+blink — while a sleep timer counts down.** One lamp, two states, no second colour;
+an active timer was otherwise invisible to anyone not using a screen reader.
+Measured: the lamp's pixel sits at 169 with no timer and swings 62 ↔ 168 with one.
+The sleep-timer key gets the same breath as a **steady blue bloom around it** on
+the same clock, so lamp and key pulse together rather than drifting. Focus still
+wins the well: amber inside the groove, blue blooming outside, so a focused
+counting-down key shows both facts at once.
+The full repaint stays at once a second — the in-between ticks repaint the lamp
+and that one key, nothing else. The power key is **out of the tab order** by
+Gordan's decision: whoever can see it can click it, whoever cannot has `Alt+F4`,
+and a keyboard user could never reach a title bar's X either — so nothing is
+lost, and the one irreversible key on the panel cannot be landed on in passing.
+Verified by synthetic click: the process exits.
+
+**Legends are live, not frozen.** They were captured once at build time, which
+silently broke the sleep timer: the player writes its countdown into
+`btnTimer.Text` and that never reached the panel. The canvas now prefers a key's
+current `Text` over its stored legend, and drops to the last word when the live
+text will not fit the cell — so "Sleep Timer 14:59" prints as "14:59" instead of
+being cut off. This also moved the legends off the cached layer, which is right:
+anything the player can change at runtime does not belong in a bitmap drawn once. Making room for it cost the ring six units of radius and moved the
+speed legend from above its slider to below, which is what the eight keys and the
+progress bar were already doing.
+
+- **Focus lives in the groove.** Instead of a rectangle drawn over a control, the
+  focused control's groove lights up. Against a near-black recess that is an
+  enormous change, it does not disturb the legend or the relief, and it keeps the
+  rule that every control must show focus from across the room.
+
+**Built and running (2026-07-28).** `NewPlayerSkin.cs` does the layout and the
+shapes, `SkinCanvas.cs` paints everything that is not a control, and
+`NewTheme.Style` is now **deliberately empty** — `Apply` runs *after*
+`BuildPlayerLayout`, so anything it did would undo the skin. The skin invents no
+command and renames nothing: the same Buttons carry the same handlers and the
+same `AccessibleName`s, only the two ring volume keys are new. Form1 exposes a
+small `SkinParts` / `Skin*` surface for it and nothing else.
+
+Two things worth keeping:
+
+- **The glass is rendered from `tbInfo.Text`**, not from the player's internals.
+  The part before the first `": "` becomes the silkscreened label, the rest is
+  lit, and anything shaped like a time becomes flap tiles with the seconds
+  dropped. What is drawn and what a screen reader reads therefore cannot drift.
+- **The read-only fields are parked below the client area** (`y = H + 4` and on
+  down), the same trick the `lblAnnounce*` labels have always used. They stay in
+  the tab order and still speak; the drawn panel gets the space. `tbInfo` is out
+  of the tab order by agreement — it is reached with `I`.
+
+**Lessons from the first build, all measured on the screenshot rather than
+argued:** a 4-unit groove of one flat colour reads as a **border, not a recess**
+— what sells a hole is a light lip outside the bottom-right and a black cut edge
+at the top-left. A two-stop face gradient reads as a flat card; the half cylinder
+needs five stops plus a specular line on the crown and a dark one under the
+belly. Ring marks of 1.4 units at `#6A706C` measured ~3:1 against the channel and
+**vanished** — a third-party description of the screenshot reported the ring as
+having no marks at all. And the first focus treatment replaced the whole recess
+with amber, which made the focused key read as *a different control*: both that
+describer and my own pixel scan miscounted the column because of it. Focus now
+rides inside the well and the groove structure stays.
+
+**The display (left square) — settled 2026-07-28.** Glass is **424 × 424** (480
+less a standard 12 margin, the 4-unit groove and a 12 bezel on each side).
+
+- **One fixed slot order, lines appear only when they have content** — so a value
+  is always in the same place whatever the book type, which matters more to a
+  screen reader than to the eye: title (2 lines reserved) · author · chapter
+  (2 lines reserved) · page · bookmarks · **times** · publisher (year) · producer
+  (year) · format · voice + WPM. **Part x/y and the per-part times are dropped**:
+  for multi-file books the chapter line shows the part's *name*, which is more
+  use than "3/17". Measured against 54 real chapter labels from the library —
+  half of them do not fit one line at any size, hence the two-line reservation.
+- **Times sit in the middle and split the box**: above is what the book *is*
+  (static), below is where you *are* (live). **Hours and minutes only** — real
+  split-flap clocks had no seconds, and dropping them takes the digits from 24 pt
+  to **32 pt** (12.7 mm on Gordan's screen).
+- **Retro treatment.** Static labels are 11 pt, dull, silkscreened onto the glass;
+  dynamic values are 14 pt, lit, with a glow **behind** the glyph — the glyph
+  itself always stays crisp, since blurring it takes exactly what low vision
+  needs. Measured on `#0E1210` glass: silkscreen must not go below `#8A928C`
+  (5.9:1) or it stops being legible; lit `#D8F0E0` is 15.7:1 and reads **3.0×
+  brighter** than the label, which is the whole effect.
+- **Numbers are split-flap tiles, drawn not fonted.** No usable free split-flap
+  font exists and one would not help — the look is the card and the hairline seam
+  across its exact middle, not the glyph. Consolas and Segoe UI Semibold are both
+  installed and both have tabular figures. The tile is invisible against the glass
+  on its own (1.1:1), so **each tile gets the same groove as the panel buttons**.
+  Keep the seam 1 unit and never below 20 pt digits — it crosses 8, 0, 6 and 9.
+- **Flip animation on the minute and hour only**, ~120–180 ms. Gordan's call is
+  to run it even when Windows animations are off, on the grounds that once a
+  minute is not disturbing; the classic theme remains the way out. Rules that
+  make it safe: animation is a **target, not a queue**; only a ±1 change animates
+  and anything larger snaps (a heading jump is not 40 flips); animation is
+  **suspended while a seek key is held** and resumes on release; flipping
+  reverses direction when seeking backwards, which shows the direction for free.
+
+**Seconds live on the play ring, not on the glass.** A 44-unit dial was too small
+to resolve (10 mm on a 13" laptop) and cost the digits a third of their size. The
+ring is ~200 units — 84 mm on Gordan's screen, 44 mm on a laptop — and its
+circumference carries **12 marks 52 units apart, so one mark = 5 seconds = exactly
+one arrow seek step**. This is the answer to "what shows a 5-second step": at
+H:MM the clock only moves on every twelfth press, the progress bar cannot resolve
+5 s in a ten-hour book, and the percentage does not change — the ring marker is
+the only thing that moves at that resolution, and it jumps a clean 30° per press.
+
+- The marker rides the ring **band**, never crossing the play glyph, so it needs
+  no transparency and keeps full contrast.
+- It must differ in shape from the 12 scale marks *and* from the single/double
+  transport arrows — a **filled lit dot** rather than a dash, since every 5 s it
+  lands exactly on a mark and a dash would just look like a brighter mark.
+- It must also be distinguishable from the focus indicator (which is the whole
+  groove lighting up) — different colour and weight.
+- It steps once a second, never sweeps; the panel centre is where the eye rests,
+  so continuous motion there is more intrusive than it would be in a corner.
+- **One ring, one meaning**: the ring is seconds. Progress through the book stays
+  on the bar below.
+
+**Tab order on the new panel, set by Gordan and confirmed working (2026-07-28):**
+Play/Pause (where focus starts every time the window opens) · forward · back ·
+up · down · seek step · speed · position · Library · Settings · Properties ·
+Help · Go To... · Bookmark · Bookmarks · Timer. The power key is out of it.
+Returning from another application restores the last focused control rather than
+jumping back to Play. The keys stand in that same order down column A and then
+down column D, which is **not** how BuildUI groups them — the columns are named
+explicitly in `LayOutButtons` rather than taken from the arrays it hands over.
+
+**The volume READOUT is deliberately not in the tab order.** The ring's two
+arrows carry volume and speak on every step, so the field would only add a stop.
+The cost is real and was weighed: volume can no longer be *queried* without being
+changed. Gordan chose this over the alternative of giving volume a permanent slot
+on the glass — one arrow press either way is not, in his words, all that
+noticeable to the ear.
+
+**Ring mapping and the mouse story — settled 2026-07-28.** The centre is
+Play/Pause: `▶` when paused, `❚❚` when playing, and the `AccessibleName` says the
+**action** the press will perform ("Reproduciraj" / "Pauziraj"), which agrees with
+the glyph in both states. Around it: **up/down = volume, left/right = the seek
+step currently chosen in the combo**. That kills the volume slider outright —
+**the only two sliders left in the design are speed and the seek bar.**
+
+- The four ring arrows need `AccessibleName`s that **name the current step**
+  ("Naprijed, poglavlje"), refreshed whenever the seek-step combo changes;
+  "Naprijed" alone says nothing. They are seek-step controls, so they take the
+  "nothing further that way" beep — the exemption is only for the keyboard's
+  plain arrows.
+- **Open gap: volume has no readout any more.** It is not one of the display's
+  twelve slots and its slider is gone, so a mouse user changing volume on the
+  ring sees nothing. Suggested fix is a **transient readout** on the glass —
+  appears for ~2 s on change, then the display returns to normal, exactly like a
+  hi-fi amplifier. Costs no permanent slot.
+- **The wheel does the fine step of whatever is under the pointer**: over the
+  seek bar = 5 s (or one sentence), over the speed slider = one speed step, over
+  the ring = one volume step. This is what gives mouse users the precision the
+  keyboard gets from its plain arrows — dragging cannot, since the bar resolves
+  about three minutes per unit in a ten-hour book.
+
 ---
 
 ## 9. Library window
@@ -1306,8 +1503,193 @@ sequence above supersedes its ordering).
 
 ---
 
+## 10b. The three sub-windows under the new look
+
+`DialogSkin.cs`. Library, Settings and Properties share one shell: **960 wide —
+the player's own width — so they cover it flush left and right**, borderless with
+the same rounded casing, a 12-unit silver rim, and the panel's dark glass.
+**960 × 640** was measured against both screens: as a fixed dialog that is a
+966 × 669 window with 21 units of headroom here and 59 on a 13" laptop; sizable
+costs another 10. The ceiling is 661 fixed / 651 sizable, so 640 leaves a real
+but small margin — a taller taskbar is what would break the sizable variant.
+
+**The panel's rule matters more here, not less.** These windows are made of list,
+combo and check boxes, so **every control stays a real control and is only
+repainted**: a drawn GroupBox loses the group name a reader announces on the way
+in, a drawn ComboBox loses type-ahead. The "stickers" are real `GroupBox`es with
+a `Paint` handler.
+
+**Properties, audio (done 2026-07-28):** info glass down the whole left third
+(262 × 582 — measured on the real lines, see below), playback across the top of
+the other two thirds, then the master check with **Bypass as a rocker switch** and
+Reset all on the metal, then the six stages as stickers three and three, and the
+buttons on the metal at the foot.
+
+- **Thirds, not quarters, and 12 pt is the ceiling.** Measured on the real info
+  text plus the worst case with all six stages on: in a quarter-width column the
+  block overflows at *every* readable size, and in a third it overflows at 14 pt.
+  At 12 pt the worst case is 19 lines against 22 available — **room for about
+  three more fields before something has to give.**
+- **The dialogs use 12 pt where the player's glass uses 14.** That is hierarchy,
+  not drift: the panel is read from across the room, a dialog is read leaning in.
+- **Bypass is not a duplicate of the master switch**, which is why it stayed. The
+  audible result is identical, but `s.Enabled = chkMaster.Checked` is **written to
+  the book on OK** while `Bypass` never leaves the dialog — so A/B-ing with the
+  master risks saving "this book uses no processing". The master also greys out
+  all six cells, so you cannot keep tuning while you compare.
+
+**Two things this pass learned the hard way.** `ComboBox` and `NumericUpDown`
+**throw** on `BackColor = Color.Transparent` — only controls that paint their own
+background accept it, so those two get the glass colour instead. And a *generic*
+reflow of a group's children pulls every label away from the control it labels:
+those cells were laid out pair by pair and a loop that only knows "control"
+cannot put them back. The children are recoloured and left where they are.
+
+**Apply was dropped, deliberately (2026-07-28).** Every change is already live
+through `onPreview`, so Apply would only mean "persist now instead of on OK" —
+and Properties does not persist itself: the caller writes the book on
+`DialogResult.OK`. Gordan's call, and it also removes the refactor that would
+have needed. Note for anyone tempted to re-add it: **Apply exists in Settings,
+not here, and never did here** — `SettingsForm` has `btnApply` because Settings
+saves itself.
+
+**The `?` hint system is in.** One small `?` at the top right of each of the
+seven groups; its `AccessibleName` is "Help for <group>", never "?", because a
+reader announcing "question mark, button" seven times says nothing. `F1` opens
+the same text from wherever the focus already is, walking up the parents so it
+works from a combo inside a group. The pop-up is modal, its body is a read-only
+multiline TextBox (the shape a reader can walk line by line), `Esc` closes it,
+and focus returns to exactly where it came from.
+
+**Info column headroom, measured on the rendered dialog (not modelled):** text
+reaches 355 of 580 units — **61 % full, about eight spare lines at 12 pt** — for
+a book with five of six stages off. With everything on the model puts it at 19
+lines of 22, so **plan against three spare lines, not eight**.
+
+**Tabs, for hybrid books only:** a real `TabControl` over the **whole** client
+area, strip at the top, each page carrying its own info column and controls —
+because a hybrid's info box changes with the tab too (`tbInfo` vs `tbTextInfo`),
+so the left column belongs *inside* the tab, not above it. Costs ~28 units (one
+line off the glass) against the 78 that putting the strip in the info column
+would have cost, and keeps the real tab role and arrow navigation. Audio-only and
+text-only books get no strip at all.
+
+**Not done yet:** the tabs above (needs a commit-without-close path, which is
+new behaviour, not paint); the `?` hint buttons and their pop-up with `F1` as the
+second route; tightening the innards now that the cells grew from 112 to 138; and
+**hybrid books, which still have two tabs — the agreed layout has nowhere to put
+a tab strip, so those keep the classic dialog until that is decided.**
+
+---
+
+## 10c. Choosing a voice — the flow, agreed 2026-07-29
+
+**Language → Platform → Voice.** Not vendor: the **platform** is the thing that
+actually changes behaviour (in-process or through the 32-bit satellite, SAPI or
+OneCore), while Acapela or Ivona is only a name inside it. So the vendor stays
+part of the voice's display name and is not a step. The platform list is
+**Microsoft Speech, SAPI 5**, with SAPI 4 and a built-in eSpeak as possible
+later entries.
+
+**Bitness is not a user concept.** 32- or 64-bit is our routing problem, not
+theirs; it is shown only if the *same voice* turns up in both, where it becomes
+disambiguation — the same problem the duplicated Zira was.
+
+**Per-language default voices are the point of the whole thing.** Settings holds
+one default voice per language. Language detection currently has nowhere to send
+its answer; with this, opening a book becomes *detect → look up that language's
+default → set it into the book's Properties*, which is what finally makes the
+detector a feature rather than a fact.
+
+**Settings has no detection, Properties does** — Settings has no book, so there
+is nothing to detect. Settings sets the rule, Properties applies it.
+
+**"Set as default" lives in Properties, beside the language picker** (Gordan,
+2026-07-29). You have just chosen a voice for this book; that button promotes it
+to the default for that language, which is how Settings gets filled without
+anyone having to go there. It asks first — "set <voice> as the default voice for
+<language>?" — because it changes a rule that affects **every future book in that
+language**, not the book in front of you, and nothing else in Properties does
+that.
+
+**Two things the first text-page screenshot exposed (2026-07-29):**
+the info box and the picker can disagree on the same screen — it read
+"Language: Serbian" while the picker showed Croatian — so the two need either to
+agree or to be labelled apart ("detected" versus "reading with"). And the text
+page's info box writes "Title Elizabeth George" and "Format TXT" **without the
+colon** the audio page uses; that needs squaring, not least because the player's
+glass renderer splits its lines on `": "`.
+
+**Still to decide before code:** what happens when the detected language has no
+default. The chain is language default → global default → nothing. **Do not fall
+through to "first available voice"** — a voice that cannot speak the language
+reads the book as gibberish, and a silent wrong choice is worse than an empty box
+and a message.
+
+---
+
 ## 11. TODO (open items)
 
+- **A key fires but a keyboard SHORTCUT does not light it.** The backlight is
+  hung on `Button.Click`, so the mouse and Enter/Space light the key, but the
+  shortcut handlers call `BtnLibrary_Click(null, ...)` and friends **directly**
+  and never raise `Click`. Do not "fix" this by swapping in `PerformClick()` —
+  that silently does nothing when a control cannot be selected, which would be a
+  behaviour change on the classic path too. It lands naturally with the move of
+  the shortcuts onto function keys: that single `ProcessCmdKey` switch is the
+  right place to call `NewPlayerSkin.Canvas.Flash(theKey)`.
+- **Mouse operation cannot be tested by Gordan** (stated 2026-07-28) — so it has
+  to be verified some other way, and half of it still is not. Driven with real
+  synthetic input against the running player and **confirmed working**: Play /
+  Pause in the ring centre, the ring's seek arrows, dragging the progress blade
+  (jumped to the right chapter and the blade landed where the times said), the
+  Library key, dragging the speed knob, and **the ring's volume keys together
+  with the transient volume readout and the focus glow** — a capture after six
+  synthetic down-clicks shows the bottom sector focused and "Volume 70 percent"
+  lit on the glass, which is exactly 100 − 6 × 5.
+  **Still not confirmed: the mouse wheel** (over the bar, the speed slot and the
+  ring). Wheel events were sent but produced nothing a probe could read back, so
+  it stays unproven until a sighted mouse user tries it.
+  Note for whoever tests next: reading a parked field's text with
+  `GetWindowText` gave a **stale** value and made working volume keys look
+  broken. Trust the drawn panel, not the field text.
+  That test pass is the thing that found the progress bar reading zero.
+- **Realism, second tier, not done**: anisotropic (directional) brushing per
+  part, and a true angular gradient on the ring rather than the per-sector
+  approximation now in place. The casing also has **no drop shadow onto the
+  desktop** — that needs `CS_DROPSHADOW` via `CreateParams` on Form1 itself,
+  which the skin cannot reach from outside. Third tier (film grain, scanlines,
+  drawn screws) was rejected: it costs contrast for nothing.
+- **Publication year is never extracted** (raised by Gordan, 2026-07-28). The new
+  info box wants "Izdavač (godina)" and "Producent (godina)", but no year field
+  exists anywhere today — not in `BookData`, not in `DaisyParser`, not in
+  `TextExtractor`, and nothing reads an audio year tag. The sources are there to
+  read: DAISY `dc:date` and `ncc:sourceDate`, EPUB `dc:date`, ID3/Vorbis year via
+  TagLib. **Gordan's recollection is confirmed** — his library really does carry
+  years, but inside the wrong fields: `Publisher=Školska knjiga, Zagreb 2008.`
+  and `Title=Catherine Coulter - FBI 01 The Cove 1996`. So a parser that reads
+  `dc:date` correctly may still come back empty on real books, while the year is
+  sitting in plain sight at the end of another field. Whatever gets built should
+  fall back to a trailing-year sniff on publisher and title.
+- **Keyboard model for the new player, decided 2026-07-28.** Tab + shortcuts
+  stay exactly as they are — a roving-tabindex grouping was considered and
+  **rejected for a good reason**: in a player the arrows are *global*
+  (up/down = volume, left/right = seek) and a roving group would swallow them
+  into whichever group has focus, so the two models are mutually exclusive.
+  **Consequence, which settles the open slider question:** the volume/speed/
+  progress controls must NOT consume arrows, so they keep today's
+  `AccessibleRole.StaticText` semantics — drawn groove and knob for the eye and
+  the mouse, value in `AccessibleName`, arrows still global. Announcing does not
+  depend on any of it: `AnnounceToScreenReader` already speaks through a UIA
+  notification (JAWS) and the NVDA client, focus or no focus.
+  **Still to do:** adjust the tab order for the new layout, and move the main
+  window's shortcuts off letter keys onto function keys, modifiers and
+  navigation keys only. Watch out for: `F4` opens a focused ComboBox's dropdown,
+  `F10` activates the menu bar, `Alt+F4` closes — none of those may be reused;
+  `F1` should stay Help. The change does fix a real conflict (`cmbSeek` swallows
+  letter keys as type-ahead while focused), but **check the laptop case before
+  committing**: many laptops default the F-row to OEM media/brightness, so
+  without Fn-lock every shortcut needs Fn held.
 - **Settings → Misc is still an empty placeholder** — waiting on what Gordan
   wants there.
 - **RESOLVED & CONFIRMED BY GORDAN (Session 18): the four per-voice/voice-

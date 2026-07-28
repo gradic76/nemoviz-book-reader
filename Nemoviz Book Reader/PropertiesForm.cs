@@ -48,6 +48,31 @@ namespace Nemoviz_Book_Reader
         private Button btnResetAll;
         private CheckBox chkBypass;
         private TabControl tabs;
+        private Button btnOK, btnCancel;
+        private GroupBox gPlayback;
+
+        /// <summary>The way in for the new look. Same rule as the player: the skin
+        /// only moves and repaints what this form already built, so every role,
+        /// name, handler and tab stop survives untouched.</summary>
+        internal PropParts SkinParts
+        {
+            get
+            {
+                return new PropParts
+                {
+                    Info = tbInfo,
+                    Master = chkMaster,
+                    Bypass = chkBypass,
+                    ResetAll = btnResetAll,
+                    OK = btnOK,
+                    Cancel = btnCancel,
+                    Stages = stageCells,
+                    Playback = gPlayback,
+                    TextInfo = tbTextInfo,
+                    Tabs = tabs
+                };
+            }
+        }
 
         // Text tab (per-book reading options; mirrors Settings -> Text Books).
         private TextBox tbTextInfo;
@@ -60,8 +85,6 @@ namespace Nemoviz_Book_Reader
         private List<(string Name, string Engine, string Language)> textCatalog;
         private readonly List<string> textLanguageCodes = new List<string>();
         private CompositeSpeechBackend textSpeech;
-        private Button btnOK;
-        private Button btnCancel;
 
         private bool suppressAnnounce;
         // True while the dialog is still being built: filling the pickers fires
@@ -246,7 +269,8 @@ namespace Nemoviz_Book_Reader
                 foreach (GroupBox g in stageCells) audio.Controls.Add(g);
                 audio.Controls.Add(btnResetAll);
                 audio.Controls.Add(chkBypass);
-                audio.Controls.Add(BuildPlaybackGroup(248, 404));
+                gPlayback = BuildPlaybackGroup(248, 404);
+                audio.Controls.Add(gPlayback);
                 tabs.TabPages.Add(audio);
             }
             if (hasText) tabs.TabPages.Add(BuildTextPage());
@@ -273,6 +297,19 @@ namespace Nemoviz_Book_Reader
             UpdateEnabledStates();
             RefreshInfo();
             Preview(); // start the live chain reflecting the current settings
+
+            // The new look takes the dialog over here, at the very end, exactly as
+            // it does with the player — after everything is built and wired, so
+            // nothing it does can be mistaken for the user editing.
+            if (UiTheme.Current.BuildsOwnLayout) PropertiesSkin.Apply(this);
+        }
+
+        /// <summary>F1 opens the help for whatever the focus is sitting in, so the
+        /// keyboard never has to travel to the ? button the mouse uses.</summary>
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.F1 && HintSystem.HandleF1(this)) return true;
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void OnAnyChange()

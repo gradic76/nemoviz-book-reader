@@ -196,6 +196,81 @@ namespace Nemoviz_Book_Reader
         private Label lblAnnounceSpeed;
         private Label lblAnnounceInfo;
 
+        // ──────────────────────────────────────────────
+        // The new look's way in
+        // ──────────────────────────────────────────────
+        // NewPlayerSkin lays the redesigned player out and paints it, but the
+        // controls and the commands stay here where they have always been — the
+        // skin only rearranges and repaints what BuildUI already made, so roles,
+        // names, tab order and every handler are untouched. None of this runs
+        // under the classic theme.
+        internal PlayerParts SkinParts
+        {
+            get
+            {
+                return new PlayerParts
+                {
+                    Top = panelTop,
+                    Bottom = panelBottom,
+                    Info = tbInfo,
+                    VolumeField = tbVolume,
+                    SpeedField = tbSpeed,
+                    ProgressField = tbProgress,
+                    Seek = cmbSeek,
+                    SeekLabel = lblSeek,
+                    VolumeLabel = lblVolume,
+                    SpeedLabel = lblSpeed,
+                    ProgressLabel = lblProgress,
+                    Left = new[] { btnLibrary, btnSettings, btnTimer, btnHelp },
+                    Right = new[] { btnProperties, btnGoTo, btnSetBookmark, btnManageBookmarks },
+                    Back = btnBack,
+                    PlayPause = btnPlayPause,
+                    Forward = btnForward
+                };
+            }
+        }
+
+        /// <summary>Progress through the book, 0–1000, for the skin's bar.</summary>
+        internal int SkinProgress { get { return currentProgress; } }
+
+        /// <summary>True while something is actually playing — the skin's seconds
+        /// marker steps only then, which is what makes it a state indicator.</summary>
+        internal bool SkinIsPlaying { get { return isPlaying; } }
+
+        /// <summary>True while a sleep timer is counting down — the panel's lamp
+        /// breathes instead of burning steady, which is the only place that state
+        /// is visible to someone who is not using a screen reader.</summary>
+        internal bool SkinSleepActive { get { return sleepTimerActive; } }
+
+        internal void SkinVolume(int delta) { ChangeVolume(delta); }
+        internal void SkinSpeed(int delta) { ChangeSpeed(delta); }
+        internal void SkinArrowSeek(int dir) { ArrowSeek(dir); }
+
+        /// <summary>Speed in whatever unit this book counts it in — words a minute
+        /// for a text book, hundredths of a multiplier for audio. Both step by 5,
+        /// so the skin's knob can work in the same numbers the keyboard does and
+        /// the two can never land between steps.</summary>
+        internal int SkinSpeedRaw
+        {
+            get { return (currentBook != null && currentBook.IsTextBook) ? currentWpm : currentSpeed; }
+        }
+
+        internal bool SkinTextBook { get { return currentBook != null && currentBook.IsTextBook; } }
+
+        /// <summary>Where the progress blade was dropped, 0–1 of the whole book.
+        /// Called once on mouse-up, never during the drag: seeking on every pixel
+        /// would hammer mpv and the speech engine for a gesture the user has not
+        /// finished making.</summary>
+        internal void SkinSeekFraction(double f)
+        {
+            if (currentBook == null) return;
+            double total = currentBook.IsTextBook
+                ? (tts != null ? tts.TotalChars : 0)
+                : (currentBook.TotalDuration > 0 ? currentBook.TotalDuration : 0);
+            if (total <= 0) return;
+            SeekToBookPosition(Math.Max(0.0, Math.Min(1.0, f)) * total);
+        }
+
         public Form1()
         {
             InitializeComponent();
