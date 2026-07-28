@@ -63,6 +63,12 @@ namespace Nemoviz_Book_Reader
         /// other player, which is a choice the user has to make deliberately.</summary>
         public bool MediaKeysGlobal { get; private set; }
 
+        /// <summary>Which look the app builds: <c>classic</c> (what it has always
+        /// looked like — the build regular testing runs on) or <c>new</c> (the
+        /// redesign in progress). Temporary, until the new look replaces the old
+        /// one for good. Switched in Settings → Misc.</summary>
+        public string UiTheme { get; private set; }
+
         /// <summary>Whether the explanatory hint lines are shown beside controls.
         /// On by default — they cost a first-time user nothing and can be switched
         /// off from any dialog that has the toggle.</summary>
@@ -99,6 +105,13 @@ namespace Nemoviz_Book_Reader
             MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
             ShowHints = ini.Read("App", "ShowHints", "1") == "1";
+            UiTheme = ini.Read("App", "Theme", Nemoviz_Book_Reader.UiTheme.ClassicId);
+        }
+
+        public void SetUiTheme(string id)
+        {
+            UiTheme = id ?? Nemoviz_Book_Reader.UiTheme.ClassicId;
+            ini.Write("App", "Theme", UiTheme);
         }
 
         public void SetMediaKeys(bool enabled, bool global)

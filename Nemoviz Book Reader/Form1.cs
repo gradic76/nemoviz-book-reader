@@ -200,6 +200,7 @@ namespace Nemoviz_Book_Reader
         {
             InitializeComponent();
             appSettings = new AppSettings();
+            UiTheme.Select(appSettings.UiTheme);   // before anything builds itself
             appSettings.EnsureLibraryExists();
             appSettings.EnsureLangFolderExists();
             Localization.Initialize(appSettings.LangPath, appSettings.LanguageCode);
@@ -1608,6 +1609,14 @@ namespace Nemoviz_Book_Reader
             toolTip.SetToolTip(tbProgress, Localization.T("Tip.Progress"));
 
             this.Controls.Add(panelBottom);
+
+            // The look, last: the window has built itself the way it always has,
+            // and the chosen theme restyles it. Classic does nothing here, so the
+            // build regular testing runs on cannot drift while the new design is
+            // being worked out. A theme that eventually brings its own LAYOUT
+            // takes over above instead (UiTheme.BuildsOwnLayout).
+            if (UiTheme.Current.BuildsOwnLayout) UiTheme.Current.BuildPlayerLayout(this);
+            UiTheme.Current.Apply(this);
         }
 
         // ──────────────────────────────────────────────

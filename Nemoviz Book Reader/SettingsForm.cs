@@ -64,6 +64,9 @@ namespace Nemoviz_Book_Reader
         private ComboBox cmbTextColour;
         private ComboBox cmbBackColour;
 
+        // Misc tab — the temporary classic/new look switch.
+        private ComboBox cmbLook;
+
         // Device tab — output sound-card picker. The combo shows human-readable
         // descriptions; deviceIds[i] is the mpv identifier for row i. A live-apply
         // callback (from the player) switches the output on selection so the user
@@ -335,6 +338,19 @@ namespace Nemoviz_Book_Reader
                 if (i >= 0 && i < deviceIds.Count)
                     appSettings.SetAudioDevice(deviceIds[i]);
             }
+
+            // Misc — the look. A window builds itself once, so the change lands
+            // when NBR starts again; offer to do that now rather than leaving the
+            // user wondering why nothing happened.
+            if (cmbLook != null && !string.Equals(SelectedThemeId(), appSettings.UiTheme,
+                                                  StringComparison.OrdinalIgnoreCase))
+            {
+                appSettings.SetUiTheme(SelectedThemeId());
+                if (MessageBox.Show(this, Localization.T("Settings.Misc.Look.Restart"),
+                                    Localization.T("Settings.Misc.Look.RestartTitle"),
+                                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    Application.Restart();
+            }
         }
 
         private TabPage BuildAudioBooksTab()
@@ -428,7 +444,7 @@ namespace Nemoviz_Book_Reader
             btnTest.Text = Localization.T("Settings.TextBooks.Test");
             btnTest.AccessibleName = Localization.T("Settings.TextBooks.Test");
             btnTest.Location = new Point(cx, y);
-            btnTest.Size = new Size(160, 30);
+            btnTest.Size = new Size(112, 30);
             btnTest.TabIndex = tab++;
             btnTest.Click += (s, e) => TestVoice();
             box.Controls.Add(btnTest);
@@ -436,8 +452,10 @@ namespace Nemoviz_Book_Reader
             Button btnDict = new Button();
             btnDict.Text = Localization.T("Dict.Open");
             btnDict.AccessibleName = Localization.T("Dict.Open.Accessible");
-            btnDict.Location = new Point(cx + 176, y);
-            btnDict.Size = new Size(180, 30);
+            // Beside Test voice, and inside the group: 214 + 118 + 150 = 482 of the
+            // 486 the box has to give.
+            btnDict.Location = new Point(cx + 118, y);
+            btnDict.Size = new Size(150, 30);
             btnDict.TabIndex = tab++;
             btnDict.Click += (s, e) => OpenDictionary();
             box.Controls.Add(btnDict);
@@ -878,12 +896,30 @@ namespace Nemoviz_Book_Reader
             return page;
         }
 
+        // Misc — for now the one thing that lives here is the temporary switch
+        // between the look the app has always had and the redesign in progress.
         private TabPage BuildMiscTab()
         {
             TabPage page = new TabPage(Localization.T("Settings.Tab.Misc"));
+
+            page.Controls.Add(MakeLabel(Localization.T("Settings.Misc.Look"), 10, 22));
+            cmbLook = MakeCombo(Localization.T("Settings.Misc.Look"), 150, 18, 340, 0);
+            cmbLook.Items.Add(Localization.T("Settings.Misc.Look.Classic"));
+            cmbLook.Items.Add(Localization.T("Settings.Misc.Look.New"));
+            cmbLook.SelectedIndex =
+                string.Equals(appSettings.UiTheme, UiTheme.NewId, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+            page.Controls.Add(cmbLook);
+            page.Controls.Add(MakeHint("Settings.Misc.Look.Hint", 10, 52, 480, 46, 1));
+
             page.Controls.Add(BuildPlaceholder(Localization.T("Settings.WorkInProgress"),
-                new Point(10, 20), new Size(420, 30)));
+                new Point(10, 110), new Size(480, 30)));
             return page;
+        }
+
+        /// <summary>The chosen look, as an id for AppSettings.</summary>
+        private string SelectedThemeId()
+        {
+            return cmbLook != null && cmbLook.SelectedIndex == 1 ? UiTheme.NewId : UiTheme.ClassicId;
         }
     }
 }

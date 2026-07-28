@@ -1163,6 +1163,46 @@ which voice they use. NBR supplies the tool, the user supplies the content.
 
 ---
 
+## 8k. Two looks side by side (temporary, for the redesign)
+
+`UiTheme.cs`. While the new design is being worked out, the app can be built
+either way and the switch lives in **Settings → Misc**:
+
+- **Classic** — exactly what NBR has always looked like. `ClassicTheme.Style` is
+  deliberately **empty**, so the look regular testing runs on cannot drift while
+  the new one is being played with.
+- **New** — where the redesign happens. Today it only proves the plumbing and
+  shows the shapes are available (flat rounded buttons with hover/pressed faces,
+  a quieter window colour); the layout is still the classic 3×4 grid.
+
+**The seam.** A window builds itself exactly as before and calls
+`UiTheme.Current.Apply(this)` **once, at the end** of BuildUI — Classic does
+nothing there, New restyles what was built. When the new design needs its own
+LAYOUT rather than a new coat of paint, `BuildsOwnLayout` flips to true and
+`BuildPlayerLayout` takes the window over, again without touching the classic
+path. Nothing in a theme touches roles, names or the tab order: the look changes,
+what a screen reader gets does not.
+
+**High contrast outranks both.** When Windows is in a high-contrast scheme,
+`Apply` is a no-op whichever theme is chosen — the user has told the system what
+they need to see, and hand-picked colours would override exactly that.
+
+Persisted in `Settings.ini` `[App] Theme` (`classic` / `new`); the player selects
+the theme in its constructor, before anything builds itself, and a change offers
+to restart the app (a window builds itself once). **All of this is scaffolding
+and comes out when the new look replaces the old one for good.**
+
+**Design room on Gordan's machine, measured (2026-07-27):** the app is
+DPI-unaware, so it draws in **1280 × 720** units which Windows stretches ×1.5 onto
+1920 × 1080. Work area 1280 × **690**; window chrome costs 6 × 29 (fixed) or
+16 × 39 (sizable), so the largest sensible dialog client is about **1264 × 650**.
+The player is 640 wide — **there is width to spare and almost no height**. A
+borderless window (`FormBorderStyle.None`) would win 29 units and, measured, the
+caption text and accessible name survive for `INSERT+T` / `NVDA+T` — but that
+needs verifying by ear before it is relied on.
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one
