@@ -580,6 +580,12 @@ namespace Nemoviz_Book_Reader
                     if (dir > 0) tts.NextParagraph(); else tts.PrevParagraph(); break;
                 case SeekStepKind.StandardPage:
                     tts.SeekChars(dir * TtsReader.StandardPageChars); break;
+                case SeekStepKind.Bookmark:
+                    // The same jump an audio book makes; BookmarkForward/Back work
+                    // in the book's own unit, so they need no text branch of their
+                    // own. Without this case the step fell through to the time
+                    // seek below and wandered off by 15 seconds instead.
+                    if (dir > 0) BookmarkForward(); else BookmarkBack(); break;
                 default: // time steps (15/30/60 s / 5 / 10 min)
                     tts.SeekSeconds(dir * GetSeekStepSeconds()); break;
             }

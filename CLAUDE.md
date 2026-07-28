@@ -808,7 +808,10 @@ the end.
   character offset for text, seconds for audio — and `BookPosition` /
   `SeekToBookPosition` / `BookBackGrace` keep one set of bookmark code serving
   both (the three-second "just passed it" window becomes characters at the
-  book's reading speed). Manage Bookmarks shows a text mark as **how far into the
+  book's reading speed). **A text book seeks through its own dispatch**
+  (`TextSeek`), so every step needs a case there — Bookmark was missing at first
+  and fell through to the time seek, wandering 15 seconds instead of jumping to
+  the mark, while audio behaved perfectly. Manage Bookmarks shows a text mark as **how far into the
   book it is plus the words it sits on** ("41,7 %, Tada je Perica shvatio da…" —
   `TtsReader.SnippetAt`, six words); a character offset tells the reader nothing,
   the words tell them exactly where they were. A fragment that is only
