@@ -1574,11 +1574,38 @@ line off the glass) against the 78 that putting the strip in the info column
 would have cost, and keeps the real tab role and arrow navigation. Audio-only and
 text-only books get no strip at all.
 
+**The reading page, gone over on the rendered dialog (2026-07-29).** Four things
+the first screenshot showed, all fixed and re-checked on the running dialog:
+
+- **The help key opened the dialog.** `BringToFront` is what makes the `?` draw
+  above the sticker, but it also makes it the first CHILD — and **WinForms breaks
+  a TabIndex tie by child order**, so a `TabIndex` of 0 put it ahead of the
+  settings it explains. The reader announced "Help for Speech, button" on open and
+  Tab hit a `?` on the way into every group. It now carries a high TabIndex, which
+  keeps the paint and gives the order back. This was wrong on the **audio** page
+  too — both share `HintSystem.Attach`.
+- **One value column for the page, not one per group.** Measured per group it
+  landed in three places (Speech pushed right by "Reading speed (words per
+  minute):", Braille barely past "Braille table:"), which read as a ragged edge
+  down the column. `UnstickLabels` split into `LabelColumn` (measure every group
+  first) and `PlaceValues` (then move).
+- **The page fills its own width.** Values stopped a third short of the right
+  edge; a combo now takes the rest of its row. **A spin box deliberately does
+  not** — a three-digit number does not need 340 units, and stretching one moves
+  its arrows away from its digits.
+- **Slack goes to the gaps, not into the boxes.** Growing a box does not move
+  anything inside it, so it only bought a band of dead glass under the last row of
+  each group (~37 units under Pitch). Each box is now snug around its subject.
+
+**Accepted, not fixed:** the info glass keeps a system-coloured scroll bar on the
+dark glass, and it shows whether or not the text overflows. Changing either needs
+an owner-drawn control, and the bar has to stay reachable for a long title.
+
 **Not done yet:** the tabs above (needs a commit-without-close path, which is
-new behaviour, not paint); the `?` hint buttons and their pop-up with `F1` as the
-second route; tightening the innards now that the cells grew from 112 to 138; and
-**hybrid books, which still have two tabs — the agreed layout has nowhere to put
-a tab strip, so those keep the classic dialog until that is decided.**
+new behaviour, not paint); tightening the innards now that the cells grew from
+112 to 138; and **hybrid books, which still have two tabs — the agreed layout has
+nowhere to put a tab strip, so those keep the classic dialog until that is
+decided.**
 
 ---
 
@@ -1612,13 +1639,18 @@ anyone having to go there. It asks first — "set <voice> as the default voice f
 language**, not the book in front of you, and nothing else in Properties does
 that.
 
-**Two things the first text-page screenshot exposed (2026-07-29):**
-the info box and the picker can disagree on the same screen — it read
-"Language: Serbian" while the picker showed Croatian — so the two need either to
-agree or to be labelled apart ("detected" versus "reading with"). And the text
-page's info box writes "Title Elizabeth George" and "Format TXT" **without the
-colon** the audio page uses; that needs squaring, not least because the player's
-glass renderer splits its lines on `": "`.
+**Two things the first text-page screenshot exposed (2026-07-29).** The colon is
+**fixed**: the reading page now adds `": "` to Title / Author / Format the way the
+audio page does. The `Details.Field.*` captions carry no colon of their own because
+the Library uses them as column headings, so the separator belongs at the call site
+— and it is not cosmetic, the player's glass renderer splits a line on `": "` to
+tell the silkscreened label from the lit value.
+
+**Still open:** the info box and the picker can disagree on the same screen — it
+read "Language: Serbian" while the picker showed Croatian. Confirmed with Gordan
+that the *detection was right* (a Serbian book, read by the nearest voice), which
+is exactly why the two lines need labelling apart — **"detected" versus "reading
+with"** — rather than being made to agree.
 
 **Still to decide before code:** what happens when the detected language has no
 default. The chain is language default → global default → nothing. **Do not fall
