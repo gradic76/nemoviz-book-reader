@@ -314,7 +314,6 @@ Prop.On=on
 Prop.Off=off
 Prop.Tab.Audio=Audio
 Prop.Tab.Text=Text
-Prop.Text.UseCustom=Use custom reading settings for this book (otherwise the Settings defaults apply)
 Prop.UseSoundProcessing=Use sound processing
 Prop.Stage.Use=Use
 Prop.Stage.Level=Level

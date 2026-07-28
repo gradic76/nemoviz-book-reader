@@ -747,7 +747,7 @@ namespace Nemoviz_Book_Reader
         internal static string LanguageLabel(string code)
         {
             if (string.IsNullOrEmpty(code)) return Localization.T("Settings.TextBooks.LanguageUnknown");
-            try { return new System.Globalization.CultureInfo(code).DisplayName + "  (" + code + ")"; }
+            try { return new System.Globalization.CultureInfo(code).DisplayName + " (" + code + ")"; }
             catch { return code; }
         }
 

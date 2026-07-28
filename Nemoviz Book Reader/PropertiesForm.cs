@@ -1004,31 +1004,39 @@ namespace Nemoviz_Book_Reader
                 sb.Append(Localization.T("Prop.Text.Pages")).Append(' ').Append(book.TextPages.Count).Append(nl);
             sb.Append(nl);
 
+            // No indent under the section names. The column is 262 units wide,
+            // which is about thirty characters, so "Speech engine: Microsoft
+            // OneCore (64-bit)" always wraps — and a wrapped line in a TextBox
+            // comes back to the left margin. An indented item whose second line
+            // is NOT indented reads as two entries: the glass showed "OneCore
+            // (64-bit)" and "minute): 175 WPM" sitting at the same level as the
+            // things they are the tail of. One level throughout, and the blank
+            // line before each section name is what separates the sections.
             sb.Append(Localization.T("Settings.TextBooks.SpeechGroup")).Append(nl);
             string voice = cmbTVoice != null && cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
             string engine = cmbTEngine != null && cmbTEngine.SelectedItem != null ? cmbTEngine.SelectedItem.ToString() : "";
-            sb.Append("  ").Append(Localization.T("Settings.TextBooks.Voice")).Append(' ').Append(voice).Append(nl);
-            sb.Append("  ").Append(Localization.T("Settings.TextBooks.SpeechEngine")).Append(' ').Append(engine).Append(nl);
+            sb.Append(Localization.T("Settings.TextBooks.Voice")).Append(' ').Append(voice).Append(nl);
+            sb.Append(Localization.T("Settings.TextBooks.SpeechEngine")).Append(' ').Append(engine).Append(nl);
             if (numTWpm != null)
-                sb.Append("  ").Append(Localization.T("Settings.TextBooks.Speed")).Append(' ')
+                sb.Append(Localization.T("Settings.TextBooks.Speed")).Append(' ')
                   .Append((int)numTWpm.Value).Append(" WPM").Append(nl);
             if (numTVolume != null)
-                sb.Append("  ").Append(Localization.T("Settings.TextBooks.Volume")).Append(' ')
+                sb.Append(Localization.T("Settings.TextBooks.Volume")).Append(' ')
                   .Append((int)numTVolume.Value).Append('%').Append(nl);
             if (numTPitch != null)
-                sb.Append("  ").Append(Localization.T("Settings.TextBooks.Pitch")).Append(' ')
+                sb.Append(Localization.T("Settings.TextBooks.Pitch")).Append(' ')
                   .Append((int)numTPitch.Value).Append(nl);
             sb.Append(nl);
 
             sb.Append(Localization.T("Settings.TextBooks.BrailleGroup")).Append(": ")
               .Append(Localization.T(chkTBraille != null && chkTBraille.Checked ? "Prop.On" : "Prop.Off")).Append(nl);
             if (chkTBraille != null && chkTBraille.Checked && cmbTBrailleTable != null && cmbTBrailleTable.SelectedItem != null)
-                sb.Append("  ").Append(cmbTBrailleTable.SelectedItem).Append(nl);
+                sb.Append(cmbTBrailleTable.SelectedItem).Append(nl);
 
             sb.Append(Localization.T("Settings.TextBooks.VisualGroup")).Append(": ")
               .Append(Localization.T(chkTVisual != null && chkTVisual.Checked ? "Prop.On" : "Prop.Off")).Append(nl);
             if (chkTVisual != null && chkTVisual.Checked && cmbTVisualMode != null && cmbTVisualMode.SelectedItem != null)
-                sb.Append("  ").Append(cmbTVisualMode.SelectedItem).Append(nl);
+                sb.Append(cmbTVisualMode.SelectedItem).Append(nl);
 
             tbTextInfo.Text = sb.ToString();
         }
