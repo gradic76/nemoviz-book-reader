@@ -42,7 +42,15 @@ namespace Nemoviz_Book_Reader
             b.BackColor = Color.FromArgb(0x12, 0x18, 0x15);
             b.ForeColor = NewPlayerSkin.Lit;
             b.Font = DialogSkin.FSilk;
-            b.TabIndex = 0;
+            // Last in its group, never first. BringToFront is needed so the key
+            // draws above the sticker, but it also makes the button the first
+            // CHILD — and WinForms breaks a TabIndex tie by child order, so a
+            // TabIndex of 0 here put the help key ahead of the settings it
+            // explains. The dialog then opened with the reader announcing "Help
+            // for Speech, button" instead of the first thing to choose, and Tab
+            // hit a ? on the way into every group. A high index keeps the paint
+            // and gives the order back.
+            b.TabIndex = 900;
             b.Click += (s, e) => Show(g, b);
             g.Controls.Add(b);
             b.BringToFront();
