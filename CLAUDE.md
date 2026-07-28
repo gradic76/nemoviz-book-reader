@@ -285,6 +285,16 @@ on the form did not change JAWS here).
 display, changed only via Shift+Up/Down or the mouse. So plain Up/Down are
 volume even when it has focus.
 
+**One rule for every seek, in every kind of book: a step that CANNOT move plays
+the "no go" beep; a step that moves is silent.** Each seek helper
+(`PartForward/Back`, `StructForward/Back`, `BookmarkForward/Back`,
+`SeekRelative`, `TextSeek`) *returns whether it went anywhere* and makes no sound
+itself; the two dispatchers own the beep. So "there is nothing further that way"
+feels identical whether the step is Heading 1 or 15 seconds, and whether the book
+is audio, text or hybrid — including the plain Left/Right arrows. Standing on the
+first mark of anything, Back beeps rather than silently re-seeking to where you
+already are. Verified across every text step at both ends of a real book.
+
 ### Virtual timeline
 
 A book is many files but presents as one continuous timeline.

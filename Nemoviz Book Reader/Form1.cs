@@ -534,40 +534,55 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        // ──────────────────────────────────────────────
+        // One rule for every seek, in every kind of book: a step that CAN'T move
+        // says so with the "no go" beep, a step that moves is silent. Each seek
+        // helper below reports whether it went anywhere and beeps for nobody; the
+        // two dispatchers here own the sound. That way "there is nothing further
+        // that way" feels the same whether the step is Heading 1 or 15 seconds,
+        // and whether the book is audio, text or a hybrid.
+        // ──────────────────────────────────────────────
         private void SeekStepForward()
         {
             SeekStep step = CurrentSeekStep();
-            if (currentBook != null && currentBook.IsTextBook) { TextSeek(step, +1); return; }
-            switch (step.Kind)
+            bool moved;
+            if (currentBook != null && currentBook.IsTextBook) moved = TextSeek(step, +1);
+            else switch (step.Kind)
             {
-                case SeekStepKind.Part: PartForward(); break;
-                case SeekStepKind.Heading: StructForward(HeadingPositions(step.Level)); break;
-                case SeekStepKind.Page: StructForward(PagePositions()); break;
-                case SeekStepKind.Chapter: StructForward(M4bChapterPositions()); break;
-                case SeekStepKind.Bookmark: BookmarkForward(); break;
-                default: SeekRelative(+GetSeekStepSeconds()); break;
+                case SeekStepKind.Part: moved = PartForward(); break;
+                case SeekStepKind.Heading: moved = StructForward(HeadingPositions(step.Level)); break;
+                case SeekStepKind.Page: moved = StructForward(PagePositions()); break;
+                case SeekStepKind.Chapter: moved = StructForward(M4bChapterPositions()); break;
+                case SeekStepKind.Bookmark: moved = BookmarkForward(); break;
+                default: moved = SeekRelative(+GetSeekStepSeconds()); break;
             }
+            if (!moved) tones.Play(300, 150);
         }
 
         private void SeekStepBackward()
         {
             SeekStep step = CurrentSeekStep();
-            if (currentBook != null && currentBook.IsTextBook) { TextSeek(step, -1); return; }
-            switch (step.Kind)
+            bool moved;
+            if (currentBook != null && currentBook.IsTextBook) moved = TextSeek(step, -1);
+            else switch (step.Kind)
             {
-                case SeekStepKind.Part: PartBack(); break;
-                case SeekStepKind.Heading: StructBack(HeadingPositions(step.Level)); break;
-                case SeekStepKind.Page: StructBack(PagePositions()); break;
-                case SeekStepKind.Chapter: StructBack(M4bChapterPositions()); break;
-                case SeekStepKind.Bookmark: BookmarkBack(); break;
-                default: SeekRelative(-GetSeekStepSeconds()); break;
+                case SeekStepKind.Part: moved = PartBack(); break;
+                case SeekStepKind.Heading: moved = StructBack(HeadingPositions(step.Level)); break;
+                case SeekStepKind.Page: moved = StructBack(PagePositions()); break;
+                case SeekStepKind.Chapter: moved = StructBack(M4bChapterPositions()); break;
+                case SeekStepKind.Bookmark: moved = BookmarkBack(); break;
+                default: moved = SeekRelative(-GetSeekStepSeconds()); break;
             }
+            if (!moved) tones.Play(300, 150);
         }
 
-        /// <summary>Seek in a text book by the selected step (dir +1/-1).</summary>
-        private void TextSeek(SeekStep step, int dir)
+        /// <summary>Seek in a text book by the selected step (dir +1/-1). True when
+        /// it went somewhere. A text book's position is a character offset and its
+        /// seeks are immediate, so "did it move" is simply read back afterwards.</summary>
+        private bool TextSeek(SeekStep step, int dir)
         {
-            if (tts == null) return;
+            if (tts == null) return false;
+            int before = tts.CharPosition;
             switch (step.Kind)
             {
                 case SeekStepKind.Heading:
@@ -589,6 +604,7 @@ namespace Nemoviz_Book_Reader
                 default: // time steps (15/30/60 s / 5 / 10 min)
                     tts.SeekSeconds(dir * GetSeekStepSeconds()); break;
             }
+            return tts.CharPosition != before;
         }
 
         /// <summary>Seek to the next/previous print-page marker in a structured
@@ -596,24 +612,20 @@ namespace Nemoviz_Book_Reader
         private void TextPageSeek(int dir)
         {
             if (tts == null || currentBook == null || currentBook.TextPages.Count == 0)
-            {
-                tones.Play(300, 150);
-                return;
-            }
+                return;                                   // TextSeek beeps for us
             var pages = currentBook.TextPages;
             int cur = tts.CharPosition;
             if (dir > 0)
             {
                 for (int i = 0; i < pages.Count; i++)
                     if (pages[i].Offset > cur + 1) { tts.SeekToChar(pages[i].Offset); return; }
-                tones.Play(300, 150);
             }
             else
             {
                 int idx = -1;
                 for (int i = pages.Count - 1; i >= 0; i--)
                     if (pages[i].Offset <= cur) { idx = i; break; }
-                if (idx < 0) { tones.Play(300, 150); return; }
+                if (idx < 0) return;
                 int target = (idx == 0 || cur - pages[idx].Offset > 50) ? pages[idx].Offset : pages[idx - 1].Offset;
                 tts.SeekToChar(target);
             }
@@ -647,20 +659,19 @@ namespace Nemoviz_Book_Reader
         private void TextHeadingSeek(int maxLevel, int dir)
         {
             var offs = TextHeadingOffsets(maxLevel);
-            if (tts == null || offs.Count == 0) { tones.Play(300, 150); return; }
+            if (tts == null || offs.Count == 0) return;   // TextSeek beeps for us
             int cur = tts.CharPosition;
             if (dir > 0)
             {
                 foreach (int o in offs)
                     if (o > cur + 1) { tts.SeekToChar(o); return; }
-                tones.Play(300, 150);
             }
             else
             {
                 int idx = -1;
                 for (int i = offs.Count - 1; i >= 0; i--)
                     if (offs[i] <= cur) { idx = i; break; }
-                if (idx < 0) { tones.Play(300, 150); return; }
+                if (idx < 0) return;
                 // >~50 chars into the heading rewinds to its start, else previous.
                 tts.SeekToChar((idx == 0 || cur - offs[idx] > 50) ? offs[idx] : offs[idx - 1]);
             }
@@ -843,33 +854,35 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Generic "next structural mark" jump (headings or pages),
         /// mirroring BookmarkForward: seeks to the first mark past the current
-        /// position, low beep if already past the last. Positions are assumed
-        /// ascending (reading order).</summary>
-        private void StructForward(System.Collections.Generic.List<double> positions)
+        /// position. False when there is none — the caller makes the sound.
+        /// Positions are assumed ascending (reading order).</summary>
+        private bool StructForward(System.Collections.Generic.List<double> positions)
         {
-            if (positions == null || positions.Count == 0) { tones.Play(300, 150); return; }
+            if (positions == null || positions.Count == 0) return false;
             double pos = GetVirtualPosition();
             foreach (double p in positions)
-                if (p > pos + 0.05) { SeekToVirtualPosition(p); return; }
-            tones.Play(300, 150);
+                if (p > pos + 0.05) { SeekToVirtualPosition(p); return true; }
+            return false;
         }
 
         /// <summary>Generic "previous structural mark" jump, mirroring
         /// BookmarkBack's 3-second grace: more than 3 s past the current mark
         /// rewinds to it, otherwise jumps to the one before.</summary>
-        private void StructBack(System.Collections.Generic.List<double> positions)
+        private bool StructBack(System.Collections.Generic.List<double> positions)
         {
-            if (positions == null || positions.Count == 0) { tones.Play(300, 150); return; }
+            if (positions == null || positions.Count == 0) return false;
             double pos = GetVirtualPosition();
             int cur = -1;
             for (int i = positions.Count - 1; i >= 0; i--)
                 if (positions[i] <= pos + 0.05) { cur = i; break; }
-            if (cur < 0) { tones.Play(300, 150); return; }
+            if (cur < 0) return false;
 
-            if (cur == 0 || pos - positions[cur] > 3.0)
-                SeekToVirtualPosition(positions[cur]);
-            else
-                SeekToVirtualPosition(positions[cur - 1]);
+            // Sitting exactly on the first mark with nothing before it: there is
+            // nowhere to go, so say so rather than re-seeking to where we are.
+            if (cur == 0 && pos - positions[0] <= 3.0) return false;
+            SeekToVirtualPosition((cur == 0 || pos - positions[cur] > 3.0)
+                                  ? positions[cur] : positions[cur - 1]);
+            return true;
         }
 
         // ──────────────────────────────────────────────
@@ -1108,25 +1121,40 @@ namespace Nemoviz_Book_Reader
             if (currentBook != null && currentBook.IsTextBook)
             {
                 if (tts == null) return;
+                int before = tts.CharPosition;
                 if (dir > 0) tts.NextSentence(); else tts.PrevSentence();
+                if (tts.CharPosition == before) tones.Play(300, 150);   // start or end
                 return;
             }
-            SeekRelative(dir * 5);
+            if (!SeekRelative(dir * 5)) tones.Play(300, 150);
         }
 
-        private void SeekRelative(int seconds)
+        /// <summary>Seeks by a number of seconds. False when the position could not
+        /// change — already at the very beginning going back, or at the end going
+        /// forward — so the caller can say so, the same as any other step.</summary>
+        private bool SeekRelative(int seconds)
         {
-            if (mpvHandle == IntPtr.Zero) return;
+            if (mpvHandle == IntPtr.Zero) return false;
 
             if (currentBook != null && currentBook.Chapters.Count > 0)
             {
                 double virtualPos = GetVirtualPosition();
-                SeekToVirtualPosition(virtualPos + seconds);
+                double target = virtualPos + seconds;
+                if (target < 0) target = 0;
+                if (currentBook.TotalDuration > 0 && target > currentBook.TotalDuration)
+                    target = currentBook.TotalDuration;
+                if (Math.Abs(target - virtualPos) < 0.05) return false;
+                SeekToVirtualPosition(target);
+                return true;
             }
-            else
-            {
-                MpvCommand("seek", seconds.ToString(), "relative");
-            }
+
+            double pos = 0, duration = 0;
+            mpv_get_property(mpvHandle, "time-pos", 5, ref pos);
+            mpv_get_property(mpvHandle, "duration", 5, ref duration);
+            if (seconds < 0 && pos <= 0.05) return false;
+            if (seconds > 0 && duration > 0 && pos >= duration - 0.05) return false;
+            MpvCommand("seek", seconds.ToString(), "relative");
+            return true;
         }
 
         // ──────────────────────────────────────────────
@@ -2622,27 +2650,34 @@ namespace Nemoviz_Book_Reader
         /// the current part rewinds to its start, otherwise jumps to the
         /// previous part.
         /// </summary>
-        private void PartBack()
+        /// <summary>True when it moved. At the very beginning of the first part
+        /// there is nothing before it, and the caller says so with a beep.</summary>
+        private bool PartBack()
         {
-            if (mpvHandle == IntPtr.Zero) return;
+            if (mpvHandle == IntPtr.Zero) return false;
             double position = 0;
             mpv_get_property(mpvHandle, "time-pos", 5, ref position);
             if (position > 3.0)
             {
                 MpvCommand("seek", "0", "absolute");
-                return;
+                return true;
             }
+            if (currentPlaylistIndex <= 0) return false;
             MpvCommand("playlist-prev", "weak");
             if (!isPlaying)
                 mpv_set_property_string(mpvHandle, "pause", "yes");
+            return true;
         }
 
-        private void PartForward()
+        private bool PartForward()
         {
-            if (mpvHandle == IntPtr.Zero) return;
+            if (mpvHandle == IntPtr.Zero) return false;
+            int parts = currentBook != null ? currentBook.Chapters.Count : 0;
+            if (parts > 0 && currentPlaylistIndex >= parts - 1) return false;   // last part
             MpvCommand("playlist-next", "weak");
             if (!isPlaying)
                 mpv_set_property_string(mpvHandle, "pause", "yes");
+            return true;
         }
 
         /// <summary>
@@ -2709,13 +2744,11 @@ namespace Nemoviz_Book_Reader
             return 3.0;
         }
 
-        private void BookmarkBack()
+        /// <summary>True when it moved; the caller makes the "nothing there"
+        /// sound, so every seek step behaves the same way.</summary>
+        private bool BookmarkBack()
         {
-            if (currentBook == null || currentBook.Bookmarks.Count == 0)
-            {
-                tones.Play(300, 150);
-                return;
-            }
+            if (currentBook == null || currentBook.Bookmarks.Count == 0) return false;
 
             double pos = BookPosition();
             int currentIndex = -1;
@@ -2728,25 +2761,22 @@ namespace Nemoviz_Book_Reader
                 }
             }
 
-            if (currentIndex < 0)
-            {
-                tones.Play(300, 150);
-                return;
-            }
+            if (currentIndex < 0) return false;
 
-            if (currentIndex == 0 || pos - currentBook.Bookmarks[currentIndex] > BookBackGrace())
-                SeekToBookPosition(currentBook.Bookmarks[currentIndex]);
-            else
-                SeekToBookPosition(currentBook.Bookmarks[currentIndex - 1]);
+            double grace = BookBackGrace();
+            // On the first mark, with nothing before it and nothing to rewind:
+            // there is nowhere to go.
+            if (currentIndex == 0 && pos - currentBook.Bookmarks[0] <= grace) return false;
+
+            SeekToBookPosition(currentIndex == 0 || pos - currentBook.Bookmarks[currentIndex] > grace
+                               ? currentBook.Bookmarks[currentIndex]
+                               : currentBook.Bookmarks[currentIndex - 1]);
+            return true;
         }
 
-        private void BookmarkForward()
+        private bool BookmarkForward()
         {
-            if (currentBook == null || currentBook.Bookmarks.Count == 0)
-            {
-                tones.Play(300, 150);
-                return;
-            }
+            if (currentBook == null || currentBook.Bookmarks.Count == 0) return false;
 
             double pos = BookPosition();
             foreach (double bookmark in currentBook.Bookmarks)
@@ -2754,12 +2784,10 @@ namespace Nemoviz_Book_Reader
                 if (bookmark > pos)
                 {
                     SeekToBookPosition(bookmark);
-                    return;
+                    return true;
                 }
             }
-
-            // Already past the last bookmark.
-            tones.Play(300, 150);
+            return false;   // already past the last bookmark
         }
 
         private void BtnLibrary_Click(object sender, EventArgs e)
