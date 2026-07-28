@@ -404,9 +404,18 @@ namespace Nemoviz_Book_Reader
                 int h = i == groups.Count - 1 ? DialogSkin.ButtonsY - 12 - y : g.Height + share;
                 DialogSkin.AsSticker(g, new Rectangle(DialogSkin.ColA, y, 628, h));
                 foreach (Control c in g.Controls) DialogSkin.OnGlass(c);
-                UnstickLabels(g);
                 y += h + gap;
             }
+
+            // ONE value column for the whole page, not one per group. Measured
+            // per group it came out in three different places — Speech pushed
+            // right by "Reading speed (words per minute):", Braille barely past
+            // "Braille table:" — and the three stacked boxes read as a ragged
+            // edge down the page. The widest label on the page sets it for all
+            // of them, so every value on the reading page starts at the same x.
+            int column = 0;
+            foreach (GroupBox g in groups) column = Math.Max(column, LabelColumn(g));
+            foreach (GroupBox g in groups) PlaceValues(g, column);
 
             DialogSkin.AsKey(p.Cancel, new Rectangle(836, DialogSkin.ButtonsY,
                 DialogSkin.ButtonW, DialogSkin.ButtonH));
@@ -432,30 +441,45 @@ namespace Nemoviz_Book_Reader
             canvas.Rebuild();
         }
 
-        /// <summary>A label longer than the column it was laid out for ends up
-        /// underneath the control it names — "Reading speed (words per minute):"
-        /// swallowed its own spin box, arrows and all, and the value could not be
-        /// seen at all. The cells are wider now, so rather than move everything by
-        /// a fixed amount (which would misalign the rows that were already fine)
-        /// this pushes aside only what is actually being sat on.</summary>
-        private static void UnstickLabels(GroupBox g)
+        /// <summary>Where this group's values would have to start to clear its
+        /// own captions. A label longer than the column it was laid out for ends
+        /// up underneath the control it names — "Reading speed (words per
+        /// minute):" swallowed its own spin box, arrows and all, and the value
+        /// could not be seen. AutoSize is what makes the measurement real: the
+        /// labels were built at a fixed width and would otherwise all report the
+        /// same one.</summary>
+        private static int LabelColumn(GroupBox g)
         {
+            int column = 0;
+            foreach (Control c in g.Controls)
+            {
+                Label l = c as Label;
+                if (l == null) continue;
+                l.AutoSize = true;
+                column = Math.Max(column, l.Right + 10);
+            }
+            return column;
+        }
+
+        /// <summary>Moves every labelled value in the group to <paramref
+        /// name="column"/>. Pushing each trapped control aside on its own did
+        /// clear the overlap, but left the values in a ragged line — Reading
+        /// speed shunted right while Volume and Pitch stayed where they were —
+        /// so it is one column or nothing. A control with no label beside it
+        /// (the check box that gates the group, the ? in the corner) is left
+        /// exactly where it was.</summary>
+        private static void PlaceValues(GroupBox g, int column)
+        {
+            if (column <= 0) return;
+
             var labels = new List<Label>();
             var others = new List<Control>();
             foreach (Control c in g.Controls)
             {
                 Label l = c as Label;
-                if (l != null) { l.AutoSize = true; labels.Add(l); }
+                if (l != null) labels.Add(l);
                 else if (!(c is Button)) others.Add(c);   // the ? key sits in the corner
             }
-
-            // One column for every value in the group, set by the widest label.
-            // Pushing each trapped control aside on its own did clear the overlap,
-            // but left the values in a ragged line — Reading speed shunted right
-            // while Volume and Pitch stayed where they were.
-            int column = 0;
-            foreach (Label l in labels) column = Math.Max(column, l.Right + 10);
-            if (column == 0) return;
 
             foreach (Control c in others)
             {
