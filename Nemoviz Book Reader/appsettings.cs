@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Nemoviz_Book_Reader
@@ -101,6 +102,7 @@ namespace Nemoviz_Book_Reader
             // Settings written before voices were remembered individually hold one
             // set of numbers; they belong to the voice that was selected then.
             TtsVoicePrefs.SetIfAbsent(TtsVoice, new VoicePrefs(TtsWpm, TtsVolume, TtsPitch));
+            LoadLanguageVoices();
             AudioDevice = ini.Read("Audio", "Device", "");
             MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
@@ -133,6 +135,92 @@ namespace Nemoviz_Book_Reader
         public VoicePrefs PrefsFor(string voice)
         {
             return TtsVoicePrefs.Get(voice, VoicePrefs.Default);
+        }
+
+        // ── One default voice per language ────────────────────────────────────
+        // What finally makes language detection a feature rather than a fact:
+        // opening a book becomes detect → look up that language's voice. Stored
+        // by primary code, which is a safe INI key ("hr", "sr") unlike a voice
+        // name; the Languages line keeps the section readable and enumerable.
+        //
+        //   [LanguageVoices]
+        //   Languages=hr,sr
+        //   hr=Microsoft Matej
+        //
+        private const string LangVoiceSection = "LanguageVoices";
+        private readonly Dictionary<string, string> languageVoices =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        private void LoadLanguageVoices()
+        {
+            languageVoices.Clear();
+            string list = ini.Read(LangVoiceSection, "Languages", "");
+            foreach (string raw in list.Split(','))
+            {
+                string code = LanguageDetector.Primary(raw);
+                if (code.Length == 0) continue;
+                string voice = ini.Read(LangVoiceSection, code, "");
+                if (voice.Length > 0) languageVoices[code] = voice;
+            }
+        }
+
+        /// <summary>The voice chosen for this language and nothing else — empty
+        /// when none has been. Kept apart from <see cref="DefaultVoiceForLanguage"/>
+        /// so a caller can tell "this language has a voice" from "it is falling
+        /// back to something else", which is the difference the user is told
+        /// about.</summary>
+        public string LanguageVoice(string tag)
+        {
+            string code = LanguageDetector.Primary(tag);
+            string v;
+            return code.Length > 0 && languageVoices.TryGetValue(code, out v) ? v : "";
+        }
+
+        /// <summary>Every language that has been given a voice.</summary>
+        public IEnumerable<string> LanguagesWithVoice { get { return languageVoices.Keys; } }
+
+        /// <summary>The voice a book in this language should be read with:
+        /// <b>this language's own voice → a related language's voice → the global
+        /// default → nothing</b>. It deliberately does NOT fall through to the
+        /// first installed voice: a voice that cannot speak the language turns the
+        /// book into noise, and an empty answer the caller can report is better
+        /// than a wrong one it cannot. <paramref name="via"/> comes back as the
+        /// language actually borrowed from, empty when nothing was borrowed.</summary>
+        public string DefaultVoiceForLanguage(string tag, out string via)
+        {
+            via = "";
+            string own = LanguageVoice(tag);
+            if (own.Length > 0) return own;
+
+            foreach (string neighbour in LanguageDetector.StandInsFor(tag))
+            {
+                string v = LanguageVoice(neighbour);
+                if (v.Length > 0) { via = neighbour; return v; }
+            }
+            return TtsVoice ?? "";
+        }
+
+        public string DefaultVoiceForLanguage(string tag)
+        {
+            string via;
+            return DefaultVoiceForLanguage(tag, out via);
+        }
+
+        /// <summary>Sets (or, with an empty voice, clears) a language's voice and
+        /// writes the section straight away.</summary>
+        public void SetLanguageVoice(string tag, string voice)
+        {
+            string code = LanguageDetector.Primary(tag);
+            if (code.Length == 0) return;
+            if (string.IsNullOrEmpty(voice)) languageVoices.Remove(code);
+            else languageVoices[code] = voice;
+
+            var codes = new List<string>(languageVoices.Keys);
+            codes.Sort(StringComparer.OrdinalIgnoreCase);
+            ini.Write(LangVoiceSection, "Languages", string.Join(",", codes.ToArray()));
+            // The cleared language keeps its key in the file with an empty value;
+            // it is off the Languages line, so it is not read back.
+            ini.Write(LangVoiceSection, code, languageVoices.ContainsKey(code) ? languageVoices[code] : "");
         }
 
         public void SetAudioDevice(string device)
