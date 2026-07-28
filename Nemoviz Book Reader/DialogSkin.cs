@@ -386,22 +386,24 @@ namespace Nemoviz_Book_Reader
             canvas.Wells.Add(DialogSkin.InfoPanel);
             DialogSkin.AsGlass(p.TextInfo, DialogSkin.InfoGlass);
 
-            // Stack them full width, each keeping the height it was built with, so
-            // nothing inside has to be moved. What is left over goes to the gaps.
-            // Three rows filling the column, each keeping its own proportions: the
-            // slack is shared out in proportion to how tall each group was built,
-            // so Speech — which has six settings to Braille's two — stays the tall
-            // one instead of every row being forced to the same height.
-            const int gap = 12;
+            // Stack them full width, each keeping the height it was built with so
+            // nothing inside has to be moved, and give the slack to the GAPS.
+            // Sharing it out into the boxes instead — which is what this did at
+            // first — grows the box without moving the controls, so all it buys
+            // is a band of dead glass under the last row of every group: about
+            // 37 units under Pitch, and the same again under Background colour.
+            // A box snug around its own contents, with air between the boxes, is
+            // what makes the three read as three subjects.
+            const int pad = 10;     // breathing room under the last row
             int used = 0;
-            foreach (GroupBox g in groups) used += g.Height;
-            int spare = DialogSkin.ButtonsY - 24 - used - gap * Math.Max(0, groups.Count - 1);
+            foreach (GroupBox g in groups) used += g.Height + pad;
+            int gap = groups.Count > 1
+                ? Math.Max(12, (DialogSkin.ButtonsY - 24 - used) / (groups.Count - 1))
+                : 12;
             int y = 12;
-            for (int i = 0; i < groups.Count; i++)
+            foreach (GroupBox g in groups)
             {
-                GroupBox g = groups[i];
-                int share = used > 0 ? (int)((long)spare * g.Height / used) : 0;
-                int h = i == groups.Count - 1 ? DialogSkin.ButtonsY - 12 - y : g.Height + share;
+                int h = g.Height + pad;
                 DialogSkin.AsSticker(g, new Rectangle(DialogSkin.ColA, y, 628, h));
                 foreach (Control c in g.Controls) DialogSkin.OnGlass(c);
                 y += h + gap;
@@ -481,13 +483,29 @@ namespace Nemoviz_Book_Reader
                 else if (!(c is Button)) others.Add(c);   // the ? key sits in the corner
             }
 
+            int margin = g.Width - 14;
             foreach (Control c in others)
             {
                 bool labelled = false;
                 foreach (Label l in labels)
                     if (c.Top < l.Bottom && l.Top < c.Bottom) { labelled = true; break; }
-                if (!labelled || c.Left == column) continue;
-                if (column + c.Width > g.Width - 14) continue;   // no room; leave it
+                if (!labelled) continue;
+
+                // A combo takes the rest of the row. The cells were laid out for
+                // a narrower dialog, so at 628 wide every value stopped a third
+                // short of the right edge and each box looked half empty. A spin
+                // box keeps its own width — a three-digit number does not need
+                // 340 units, and stretching it would only move its arrows away
+                // from the digits they belong to.
+                ComboBox cb = c as ComboBox;
+                if (cb != null && margin - column >= 120)
+                {
+                    cb.Left = column;
+                    cb.Width = margin - column;
+                    continue;
+                }
+                if (c.Left == column) continue;
+                if (column + c.Width > margin) continue;   // no room; leave it
                 c.Left = column;
             }
         }
