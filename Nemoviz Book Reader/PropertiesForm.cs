@@ -982,10 +982,17 @@ namespace Nemoviz_Book_Reader
             string nl = Environment.NewLine;
             var sb = new StringBuilder();
 
-            sb.Append(Localization.T("Details.Field.Title")).Append(' ').Append(book.Title ?? "").Append(nl);
+            // The Details.Field.* captions carry no colon of their own — the
+            // Library uses them as column headings — so the separator is added
+            // here, exactly as the audio page does it. The Prop.Text.* ones
+            // below already end in a colon and only need the space. Getting
+            // this wrong is not merely untidy: the player's glass splits a line
+            // on ": " to tell the silkscreened label from the lit value, so a
+            // line without one has no label at all.
+            sb.Append(Localization.T("Details.Field.Title")).Append(": ").Append(book.Title ?? "").Append(nl);
             if (!string.IsNullOrWhiteSpace(book.Author))
-                sb.Append(Localization.T("Details.Field.Author")).Append(' ').Append(book.Author).Append(nl);
-            sb.Append(Localization.T("Details.Field.Format")).Append(' ').Append(book.Format ?? "").Append(nl);
+                sb.Append(Localization.T("Details.Field.Author")).Append(": ").Append(book.Author).Append(nl);
+            sb.Append(Localization.T("Details.Field.Format")).Append(": ").Append(book.Format ?? "").Append(nl);
             if (!string.IsNullOrEmpty(book.TextLanguage))
                 sb.Append(Localization.T("Prop.Text.Language")).Append(' ')
                   .Append(LanguageDetector.DisplayName(book.TextLanguage)).Append(nl);
