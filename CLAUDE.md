@@ -289,11 +289,16 @@ volume even when it has focus.
 the whole way plays the "no go" beep; a full step is silent.** For the steps that
 jump from mark to mark (Part, Heading, Page, Chapter, Bookmark, Sentence,
 Paragraph) that means "there was no next mark". For the **continuous** steps
-(the time rows, Standard page, the plain arrows) it means the jump ran into the
-beginning or the end of the book: it still lands on the edge, and the beep says
-"that is as far as it goes this way". Testing the first version showed why the
-distinction matters — near the end a time step moved two seconds and said
-nothing, which reads as "the time steps don't work". Each seek helper
+(the time rows, Standard page) it means the jump ran into the beginning or the
+end of the book: it still lands on the edge, and the beep says "that is as far as
+it goes this way". Testing the first version showed why the distinction matters —
+near the end a time step moved two seconds and said nothing, which reads as "the
+time steps don't work".
+
+**The plain Left/Right arrows are exempt and stay silent** (5 s of audio, one
+sentence of text): that is the small constant nudge you use while listening, and
+a beep on every nudge past the end would be noise. The audible edge belongs to
+the deliberate jump — the seek step. Each seek helper
 (`PartForward/Back`, `StructForward/Back`, `BookmarkForward/Back`,
 `SeekRelative`, `TextSeek`) *returns whether it went anywhere* and makes no sound
 itself; the two dispatchers own the beep. So "there is nothing further that way"

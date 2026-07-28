@@ -1118,17 +1118,21 @@ namespace Nemoviz_Book_Reader
         // Seek
         // ──────────────────────────────────────────────
         // Seek arrows (Left/Right): 5 s in audio, one sentence in a text book.
+        /// <summary>The plain arrows — five seconds of audio, one sentence of text.
+        /// Deliberately SILENT at the edges: this is the small, constant nudge you
+        /// use continuously while listening, and a beep every time you nudge past
+        /// the end of the book would be noise. The audible "that is as far as it
+        /// goes" belongs to the seek step (Shift+arrows), which is the deliberate
+        /// jump.</summary>
         private void ArrowSeek(int dir)
         {
             if (currentBook != null && currentBook.IsTextBook)
             {
                 if (tts == null) return;
-                int before = tts.CharPosition;
                 if (dir > 0) tts.NextSentence(); else tts.PrevSentence();
-                if (tts.CharPosition == before) tones.Play(300, 150);   // start or end
                 return;
             }
-            if (!SeekRelative(dir * 5)) tones.Play(300, 150);
+            SeekRelative(dir * 5);
         }
 
         /// <summary>
