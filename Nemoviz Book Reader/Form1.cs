@@ -2695,6 +2695,11 @@ namespace Nemoviz_Book_Reader
                 }
                 else
                 {
+                    // Space would otherwise start it reading in whatever voice
+                    // spoke last, which is the very thing the notice is there to
+                    // prevent. Say why again instead — the reader may well have
+                    // pressed it precisely because nothing happened.
+                    if (textNoVoice) { AnnounceNoVoice(); return; }
                     tts.Play();
                     SetPlayPauseState(true);
                 }
@@ -3295,6 +3300,16 @@ namespace Nemoviz_Book_Reader
             UpdateTextPositionDisplay();
             appSettings.SetLastOpenedBook(currentBook.FolderPath);
 
+            // A book nothing can read does not start reading, however it was
+            // opened. Autoplay from the Library is exactly how a Spanish book got
+            // read aloud in Croatian before anyone could stop it.
+            if (textNoVoice)
+            {
+                SetPlayPauseState(false);
+                BeginInvoke((Action)(() => AnnounceNoVoice()));
+                return;
+            }
+
             if (autoPlay)
             {
                 SetPlayPauseState(true);
@@ -3348,8 +3363,9 @@ namespace Nemoviz_Book_Reader
         /// with: the Settings default when it speaks the book's language, otherwise
         /// the best voice that does. A Croatian book must not be read out in
         /// English merely because that is what Settings happens to name.</summary>
-        private string DefaultVoiceForBook()
+        private string DefaultVoiceForBook(out VoiceSource how)
         {
+            how = VoiceSource.GlobalDefault;
             string settingsVoice = appSettings.TtsVoice ?? "";
             string lang = currentBook != null ? currentBook.TextLanguage : "";
             if (tts == null || string.IsNullOrEmpty(lang)) return settingsVoice;
@@ -3363,7 +3379,32 @@ namespace Nemoviz_Book_Reader
             // to differ. This is also where detection finally pays off: the
             // language worked out at import picks the voice the user chose for it
             // in Settings.
-            return VoiceChooser.ForLanguage(appSettings, voices, lang);
+            return VoiceChooser.ForLanguage(appSettings, voices, lang, out how);
+        }
+
+        private string DefaultVoiceForBook()
+        {
+            VoiceSource how;
+            return DefaultVoiceForBook(out how);
+        }
+
+        /// <summary>True while the loaded text book is in a language nothing
+        /// installed speaks and has not been given a voice by hand. Not a failure
+        /// to paper over by picking something: the book waits until the reader
+        /// chooses, which they do in its Properties.</summary>
+        private bool textNoVoice;
+
+        /// <summary>Says, once, that this book cannot be read and what to do about
+        /// it. Through the announcement channel rather than a message box, because
+        /// a modal on top of a book opening from the Library is one more thing to
+        /// dismiss before you can act on it.</summary>
+        private void AnnounceNoVoice()
+        {
+            string lang = currentBook != null ? currentBook.TextLanguage : "";
+            string name = SettingsForm.LanguageName(LanguageDetector.Primary(lang));
+            tones.Play(300, 150);
+            AnnounceToScreenReader(lblAnnounceInfo,
+                Localization.T("Player.NoVoiceForLanguage", name));
         }
 
         private void ApplyTtsSettings()
@@ -3374,8 +3415,26 @@ namespace Nemoviz_Book_Reader
             // default doesn't speak. The speed/volume/pitch then follow THAT voice —
             // remembered per voice, so a change of voice or engine never drags the
             // previous one's numbers along.
-            string voice = currentBook != null && !string.IsNullOrEmpty(currentBook.TextVoice)
-                ? currentBook.TextVoice : DefaultVoiceForBook();
+            string voice;
+            if (currentBook != null && !string.IsNullOrEmpty(currentBook.TextVoice))
+            {
+                voice = currentBook.TextVoice;      // chosen by hand for this book
+                textNoVoice = false;
+            }
+            else
+            {
+                VoiceSource how;
+                voice = DefaultVoiceForBook(out how);
+                textNoVoice = how == VoiceSource.NoVoice;
+            }
+
+            // Nothing installed speaks this book's language. Leave the reader
+            // exactly as it was and touch NOTHING: an empty name does not clear a
+            // voice, it leaves whatever spoke last, which is how a Spanish book
+            // came to be read aloud in Croatian the moment it was opened. The
+            // book waits, and LoadTextBookPlayback says why.
+            if (textNoVoice) return;
+
             VoicePrefs p = ResolveVoicePrefs(voice);
             currentWpm = p.Wpm;
             currentVolume = p.Volume;

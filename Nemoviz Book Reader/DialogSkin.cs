@@ -394,12 +394,19 @@ namespace Nemoviz_Book_Reader
             // 37 units under Pitch, and the same again under Background colour.
             // A box snug around its own contents, with air between the boxes, is
             // what makes the three read as three subjects.
-            const int pad = 10;     // breathing room under the last row
-            int used = 0;
-            foreach (GroupBox g in groups) used += g.Height + pad;
-            int gap = groups.Count > 1
-                ? Math.Max(12, (DialogSkin.ButtonsY - 24 - used) / (groups.Count - 1))
-                : 12;
+            // Pad and gap are what is LEFT OVER, not fixed amounts. A group can
+            // grow at runtime — the reading page's speech box does, when it has to
+            // carry the "no voice for this language" line — and with a fixed 10
+            // and 12 the stack simply ran past the bottom of the dialog and sat on
+            // the OK button. Breathing room is the first thing to give up when
+            // there is no room to breathe.
+            int content = 0;
+            foreach (GroupBox g in groups) content += g.Height;
+            int n = Math.Max(1, groups.Count);
+            int slack = DialogSkin.ButtonsY - 24 - content;
+            int pad = Math.Max(0, Math.Min(10, slack / (n * 2)));
+            slack -= pad * n;
+            int gap = n > 1 ? Math.Max(6, slack / (n - 1)) : 12;
             int y = 12;
             foreach (GroupBox g in groups)
             {

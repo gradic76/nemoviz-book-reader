@@ -661,7 +661,7 @@ namespace Nemoviz_Book_Reader
             tbTNoVoice.ReadOnly = true;
             tbTNoVoice.BorderStyle = BorderStyle.None;
             tbTNoVoice.BackColor = SystemColors.Control;
-            tbTNoVoice.SetBounds(lx, yy, cw + cx - lx - 4, 34);
+            tbTNoVoice.SetBounds(lx, yy, cw + cx - lx - 4, NoVoiceHeight);
             tbTNoVoice.TabIndex = tab++;
             tbTNoVoice.Visible = false;
             tbTNoVoice.TabStop = false;
@@ -683,25 +683,37 @@ namespace Nemoviz_Book_Reader
                 { want = c.Name; break; }
 
             // Open on the language of the voice the book will actually be read
-            // with. Where there is none, open on the book's own language so the
-            // message is about the book, and the list beside it is the free choice
-            // the reader is being offered.
+            // with — and where there is no such voice, open on NOTHING. Falling
+            // back to the first row looked harmless and was the worst bug of the
+            // lot: the list is sorted by name, so a Spanish book with no Spanish
+            // voice opened on Croatian and Karmela, which is precisely the
+            // "near enough" choice NBR is not allowed to make. Both boxes stay
+            // empty, the notice says why, and the lists are there to be used.
             string wantLang = "";
             foreach (var c in textCatalog)
                 if (string.Equals(c.Name, want, StringComparison.OrdinalIgnoreCase))
                 { wantLang = LanguageDetector.Primary(c.Language); break; }
-            if (wantLang.Length == 0) wantLang = LanguageDetector.Primary(book.TextLanguage);
 
-            int li2 = textLanguageCodes.IndexOf(wantLang);
-            if (li2 < 0 && textLanguageCodes.Count > 0) li2 = 0;
-            if (li2 >= 0) cmbTLanguage.SelectedIndex = li2;
-
-            int vi = cmbTVoice.Items.IndexOf(want);
-            if (vi >= 0) cmbTVoice.SelectedIndex = vi;
+            int li2 = wantLang.Length > 0 ? textLanguageCodes.IndexOf(wantLang) : -1;
+            if (li2 >= 0)
+            {
+                cmbTLanguage.SelectedIndex = li2;
+                int vi = cmbTVoice.Items.IndexOf(want);
+                if (vi >= 0) cmbTVoice.SelectedIndex = vi;
+            }
             LoadPrefsForSelectedVoice();
             UpdateNoVoiceNotice();
+            // The group is snug around its contents, so it has to be told when the
+            // notice is there — otherwise the message it exists to deliver is cut
+            // off by the bottom edge of the box.
+            if (tbTNoVoice.Visible) box.Height = tbTNoVoice.Bottom + 12;
             return box;
         }
+
+        // One line at 12 pt. The short wording is what keeps it to one, and one
+        // is what keeps the three groups inside the dialog — the full sentence
+        // goes on the info panel, which has the room.
+        private const int NoVoiceHeight = 24;
 
         /// <summary>Every language something installed speaks. Nothing else: a row
         /// with no voice under it would be a dead end, and no language may stand in
@@ -737,8 +749,17 @@ namespace Nemoviz_Book_Reader
             tbTNoVoice.Visible = none;
             tbTNoVoice.TabStop = none;
             if (none)
-                tbTNoVoice.Text = Localization.T("Prop.Text.NoVoiceForLanguage",
+                tbTNoVoice.Text = Localization.T("Prop.Text.NoVoiceShort",
                                                  SettingsForm.LanguageName(lang));
+        }
+
+        /// <summary>The same fact at length, for the info panel — which has the
+        /// room the one line between the controls does not.</summary>
+        private string NoVoiceExplanation()
+        {
+            string lang = LanguageDetector.Primary(book.TextLanguage);
+            if (lang.Length == 0 || VoiceChooser.VoicesFor(textCatalog, lang).Count > 0) return "";
+            return Localization.T("Prop.Text.NoVoiceForLanguage", SettingsForm.LanguageName(lang));
         }
 
         // Voices adjusted during this visit, staged so several can be set up in one
@@ -1039,7 +1060,14 @@ namespace Nemoviz_Book_Reader
             // line before each section name is what separates the sections.
             sb.Append(Localization.T("Settings.TextBooks.SpeechGroup")).Append(nl);
             string voice = cmbTVoice != null && cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
-            sb.Append(Localization.T("Settings.TextBooks.Voice")).Append(' ').Append(voice).Append(nl);
+            // An empty Voice line on its own is a puzzle. The glass is where the
+            // reader looks first, so the reason goes here too, not only on the
+            // control that caused it.
+            string why = voice.Length == 0 ? NoVoiceExplanation() : "";
+            if (why.Length > 0)
+                sb.Append(why).Append(nl);
+            else
+                sb.Append(Localization.T("Settings.TextBooks.Voice")).Append(' ').Append(voice).Append(nl);
             // What the book IS and what it is being READ IN are two different
             // facts and used to sit on the same screen looking like a
             // contradiction — "Language: Serbian" above a picker showing
