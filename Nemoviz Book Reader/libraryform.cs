@@ -11,6 +11,11 @@ namespace Nemoviz_Book_Reader
     public class LibraryForm : Form
     {
         private MenuStrip menuStrip;
+        // The shelf's right-click menu, a real Windows menu. Held as fields
+        // because Popup adjusts which items apply to the book under the cursor.
+        private ContextMenu bookMenu;
+        private MenuItem ctxOpen, ctxMarkRead, ctxMarkUnread, ctxAddFav,
+                         ctxRemoveFav, ctxRename, ctxDelete, ctxProperties;
         private ToolStripMenuItem menuFile;
         private ToolStripMenuItem menuFileOpenFile;
         private ToolStripMenuItem menuFileOpenFolder;
@@ -365,58 +370,60 @@ namespace Nemoviz_Book_Reader
             listBooks.DoubleClick += ListBooks_DoubleClick;
             listBooks.KeyDown += ListBooks_KeyDown;
 
-            ContextMenuStrip ctx = new ContextMenuStrip();
+            // A REAL Windows menu (ContextMenu → HMENU), not a ContextMenuStrip.
+            // The strip is a ToolStrip that .NET paints itself, and both readers
+            // announced it as a drop-down list with nothing selected until the
+            // user arrowed onto something — Gordan's report, 2026-07-29. A real
+            // menu is announced as a menu, highlights its first item the moment it
+            // opens, and behaves like every other menu in Windows because it IS
+            // one. The trade is the shortcut column: MenuItem has no display-only
+            // shortcut text, so the keys go in the label, which a reader reads out
+            // anyway and a ShortcutKeyDisplayString never was.
+            bookMenu = new ContextMenu();
 
-            ToolStripMenuItem ctxOpen = new ToolStripMenuItem(Localization.T("Context.Open"));
-            ctxOpen.ShortcutKeyDisplayString = "Enter";
+            ctxOpen = new MenuItem(Localization.T("Context.Open"));
             ctxOpen.Click += (s, e) => OpenSelectedBook();
 
-            ToolStripMenuItem ctxMarkRead = new ToolStripMenuItem(Localization.T("Context.MarkRead"));
+            ctxMarkRead = new MenuItem(Localization.T("Context.MarkRead"));
             ctxMarkRead.Click += (s, e) => MarkSelected(true);
 
-            ToolStripMenuItem ctxMarkUnread = new ToolStripMenuItem(Localization.T("Context.MarkUnread"));
+            ctxMarkUnread = new MenuItem(Localization.T("Context.MarkUnread"));
             ctxMarkUnread.Click += (s, e) => MarkSelected(false);
 
-            ToolStripMenuItem ctxAddFav = new ToolStripMenuItem(Localization.T("Context.AddFavorite"));
+            ctxAddFav = new MenuItem(Localization.T("Context.AddFavorite"));
             ctxAddFav.Click += (s, e) => SetSelectedFavorite(true);
 
-            ToolStripMenuItem ctxRemoveFav = new ToolStripMenuItem(Localization.T("Context.RemoveFavorite"));
+            ctxRemoveFav = new MenuItem(Localization.T("Context.RemoveFavorite"));
             ctxRemoveFav.Click += (s, e) => SetSelectedFavorite(false);
 
-            ToolStripMenuItem ctxRename = new ToolStripMenuItem(Localization.T("Context.Rename"));
-            ctxRename.ShortcutKeyDisplayString = "F2";
+            ctxRename = new MenuItem(Localization.T("Context.Rename"));
             ctxRename.Click += (s, e) => RenameSelectedBook();
 
-            ToolStripMenuItem ctxDelete = new ToolStripMenuItem(Localization.T("Context.Delete"));
-            ctxDelete.ShortcutKeyDisplayString = "Del";
+            ctxDelete = new MenuItem(Localization.T("Context.Delete"));
             ctxDelete.Click += (s, e) => DeleteSelectedBook();
 
-            ToolStripMenuItem ctxProperties = new ToolStripMenuItem(Localization.T("Context.Properties"));
-            ctxProperties.ShortcutKeyDisplayString = "Alt+Enter";
+            ctxProperties = new MenuItem(Localization.T("Context.Properties"));
             ctxProperties.Click += (s, e) => ShowProperties();
 
-            ctx.Items.Add(ctxOpen);
-            ctx.Items.Add(new ToolStripSeparator());
-            ctx.Items.Add(ctxMarkRead);
-            ctx.Items.Add(ctxMarkUnread);
-            ctx.Items.Add(ctxAddFav);
-            ctx.Items.Add(ctxRemoveFav);
-            ctx.Items.Add(new ToolStripSeparator());
-            ctx.Items.Add(ctxRename);
-            ctx.Items.Add(ctxDelete);
-            ctx.Items.Add(new ToolStripSeparator());
-            ctx.Items.Add(ctxProperties);
+            bookMenu.MenuItems.Add(ctxOpen);
+            bookMenu.MenuItems.Add(new MenuItem("-"));
+            bookMenu.MenuItems.Add(ctxMarkRead);
+            bookMenu.MenuItems.Add(ctxMarkUnread);
+            bookMenu.MenuItems.Add(ctxAddFav);
+            bookMenu.MenuItems.Add(ctxRemoveFav);
+            bookMenu.MenuItems.Add(new MenuItem("-"));
+            bookMenu.MenuItems.Add(ctxRename);
+            bookMenu.MenuItems.Add(ctxDelete);
+            bookMenu.MenuItems.Add(new MenuItem("-"));
+            bookMenu.MenuItems.Add(ctxProperties);
 
-            // No book selected (empty shelf) — nothing for the menu to act on.
-            // Otherwise show the read/unread and favorites items contextually.
-            ctx.Opening += (s, e) =>
+            // Which items apply to the book under the cursor. Popup fires before
+            // the menu is shown, the same moment ContextMenuStrip.Opening did —
+            // but it cannot cancel, so an empty shelf is caught at the call site.
+            bookMenu.Popup += (s, e) =>
             {
                 BookData b = GetSelectedBook();
-                if (b == null)
-                {
-                    e.Cancel = true;
-                    return;
-                }
+                if (b == null) return;
                 bool active = PathsEqual(b.FolderPath, activeBookFolderPath);
                 int cat = GetCategory(b);
                 // "Mark as read" — everywhere except books already in Read.
@@ -427,7 +434,13 @@ namespace Nemoviz_Book_Reader
                 ctxRemoveFav.Visible = b.Favorite;
             };
 
-            listBooks.ContextMenuStrip = ctx;
+            // A ContextMenu is not attached the way a strip was — it is shown on
+            // demand, so the right-click has to be caught here. MouseUp, not
+            // MouseDown, so the click that selects a row lands first.
+            listBooks.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Right) ShowBookMenu(new Point(e.X, e.Y));
+            };
 
             splitContainer.Panel1.Controls.Add(listBooks);
 
@@ -954,9 +967,24 @@ namespace Nemoviz_Book_Reader
             }
             else if (e.KeyCode == Keys.Apps || (e.KeyCode == Keys.F10 && e.Shift))
             {
-                if (GetSelectedBook() != null)
-                    listBooks.ContextMenuStrip.Show(listBooks, new Point(0, 0));
+                // At the selected row, not at the corner: a menu that opens where
+                // the selection is, is where a sighted user expects it, and it
+                // costs a keyboard user nothing.
+                ListViewItem sel = listBooks.SelectedItems.Count > 0 ? listBooks.SelectedItems[0] : null;
+                ShowBookMenu(sel != null
+                    ? new Point(sel.Bounds.Left + 20, sel.Bounds.Bottom)
+                    : new Point(0, 0));
+                e.Handled = true;
             }
+        }
+
+        /// <summary>Opens the shelf's menu, or does nothing when there is no book
+        /// to act on. A ContextMenu cannot cancel its own Popup the way a strip
+        /// could, so the empty shelf is caught here instead.</summary>
+        private void ShowBookMenu(Point at)
+        {
+            if (bookMenu == null || GetSelectedBook() == null) return;
+            bookMenu.Show(listBooks, at);
         }
 
         // ──────────────────────────────────────────────

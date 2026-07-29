@@ -70,6 +70,15 @@ namespace Nemoviz_Book_Reader
                 p.Menu.BringToFront();
             }
 
+            // The menu BAR stays a MenuStrip, and this is measured, not assumed.
+            // A real Win32 menu bar (Form.Menu / MainMenu) was tried on this very
+            // window: it does draw on a borderless form, but Windows draws it in
+            // the window's own top strip — OUTSIDE the rounded casing, in system
+            // colours, and it takes 15 units of client height with it, which
+            // shoved the whole skin down. A menu bar lives in the non-client area
+            // by definition, and this window has none. So the bar keeps the
+            // control that can live inside the casing; only the shelf's popup
+            // menu became a real Windows menu, which it can, being a popup.
             int y = Margin + MenuH + Gap;
 
             // Row 1: what you are looking through, and what you are looking at.
@@ -104,7 +113,10 @@ namespace Nemoviz_Book_Reader
 
             AsShelf(p.Books);
             AsShelf(p.Details);
-            FitColumns(p.Details, CW - 16);
+            // Less the panel's own 10-unit padding on each side and the vertical
+            // scroll bar, or the columns add up to more than the list and it grows
+            // a horizontal bar under itself.
+            FitColumns(p.Details, CW - 20 - SystemInformation.VerticalScrollBarWidth - 4);
 
             // The buttons sit on the metal, so the panel they were built in has
             // nothing left to be.
