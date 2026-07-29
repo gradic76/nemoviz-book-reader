@@ -1614,11 +1614,20 @@ locations Gordan has in mind.
   problem dissolves — but that mode needs input we may not have.)
 - **Visual on, no voice for the language:** the book opens and is readable but
   silent. Say so once, or stay quiet? Not decided. No block either way.
-- **What does Play mean when reading by braille or screen?** There is nothing to
-  reproduce. And **elapsed / remaining** are computed from the synthesiser's WPM,
-  which is meaningless when the *reader* sets the pace. The **sleep timer** has
-  nothing to quieten. Position tracking by character offset survives all of it.
-  Worth settling **before** braille is built, or each gets answered ad hoc.
+- **DECIDED (Gordan, 2026-07-29): Play, elapsed/remaining and the sleep timer are
+  all functions of the SPEECH, and none of them needs a new meaning.** Where
+  speech is part of the session — the synchronised reading this section is about
+  — every one of them works exactly as it does today. Where it is not, they
+  simply do not apply: Play has nothing to start, the times are computed from the
+  synthesiser's WPM while the *reader* is setting the pace instead, and the timer
+  has nothing to quieten. So the question was never "what do these mean for
+  braille", it was **"is speech in this session at all"** — one flag rather than
+  three redesigns. Position tracking by character offset survives all of it.
+  **One idea worth keeping, not required:** the sleep timer could become a plain
+  **reminder** for someone reading silently — "45 minutes and then you have to
+  get ready" — sounding an alarm **without stopping anything**. That is a
+  different thing from the timer NBR has, which exists because someone is
+  listening and plans to fall asleep (§7), and it should not be bolted onto it.
 
 ---
 
