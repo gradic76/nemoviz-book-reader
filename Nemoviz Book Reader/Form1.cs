@@ -3479,6 +3479,28 @@ namespace Nemoviz_Book_Reader
             {
                 if (tbReadingSurface.SelectionLength > 0) tbReadingSurface.Select(0, 0);
             };
+            // The arrows are GLOBAL in this player — up/down volume, left/right
+            // seek — and an edit control claims them for the caret. Gordan's
+            // report: left and right stopped navigating and the reader read out
+            // gibberish instead, which is the caret crawling a character at a
+            // time. Same rule the volume and speed fields already live by, and
+            // the same reason the seek combo is keyboard-inert: nothing on this
+            // window may swallow an arrow.
+            //
+            // Harmless where ProcessCmdKey already wins — it runs first, and when
+            // it consumes the key this handler is never reached at all.
+            tbReadingSurface.KeyDown += (s, e) =>
+            {
+                switch (e.KeyCode)
+                {
+                    case Keys.Left: case Keys.Right:
+                    case Keys.Up: case Keys.Down:
+                    case Keys.Home: case Keys.End:
+                        e.Handled = true;
+                        e.SuppressKeyPress = true;
+                        break;
+                }
+            };
             Controls.Add(tbReadingSurface);
             tbReadingSurface.BringToFront();   // the skin's canvas is added last
         }
