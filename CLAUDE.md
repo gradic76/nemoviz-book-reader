@@ -1743,12 +1743,37 @@ rule (*this language → this voice*), Properties overrides it **for one book** 
 "the main character is a man in the first person, so not Karmela for this one".
 Settings has no book, so it has no detection; Properties has both.
 
-**Both list only languages something installed speaks.** A row for a language
-with no voice under it would be a dead end now that nothing may stand in. That
-also disposed of the "Unknown Language (cnr) (cnr)" rows, since those codes have
-no voices. Settings' list carries one extra first row, *All other languages* =
-the global default, which is what a book whose language could **not** be worked
-out is read with.
+**Settings lists every language the LIBRARY holds a book in, as well as every
+language something speaks** (Gordan, 2026-07-29). Voices alone were never the
+right set: a French book with no French voice is exactly the case a rule is
+wanted for, and it could not be set while French was absent — which made "go to
+Settings and sort it out there" a dead end. A language joins the list the moment
+a book in it is read off the shelf or imported, via a **static hook on
+`AppSettings`** that `BookData` calls on both load and save; the Library scan
+builds a `BookData` per book, so **opening the shelf once registers an existing
+library for free**. Persisted as `[Languages] Seen`.
+**Rows with no voice say so**, because "French" and "Croatian" otherwise look
+identical in one list and behave nothing alike.
+
+**A language nothing speaks offers EVERY installed voice.** This is the part
+that makes the rest work, and it is *not* the substitution NBR refuses to make:
+nothing is suggested, nothing is ranked by how close it sounds, and the reader
+came to Settings on purpose. It is the one place a deliberate cross-language rule
+can be written. **Properties and `NoVoiceForm` keep the narrow list** — there you
+are choosing what reads this one book, so only languages with a voice make sense.
+
+Settings' list carries one extra first row, *All other languages* = the global
+default, which is what a book whose language could **not** be worked out is read
+with.
+
+**Considered and parked: the full Windows language list** (~350, installed ones
+at the top, a separator, the rest below). The separator is what kills it —
+WinForms combo boxes have no such thing, so it would be a fake row a screen
+reader announces like any other and the user can select; making it behave needs
+owner-drawing and skip logic, i.e. the construction most hostile to readers,
+introduced for the eye's benefit. "Unsupported" would also be the wrong word:
+those languages are not unsupported, they just have no voice installed. Revisit
+only if setting a rule for a language you own no book in turns out to be wanted.
 
 **"Set as default" in Properties is still not built** — the storage it would
 write to (`AppSettings.SetLanguageVoice`) is. It promotes this book's voice to
