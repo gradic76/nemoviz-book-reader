@@ -395,6 +395,9 @@ Settings.TextBooks.SpeechEngine=Speech engine:
 Settings.TextBooks.BookLanguage=Books in this language:
 Settings.TextBooks.AllOtherLanguages=All other languages
 Settings.TextBooks.VoiceNotSet=(no voice chosen)
+; {0} is the language row. Marks a language nothing installed speaks — it is on
+; the list because the library holds a book in it.
+Settings.TextBooks.LanguageNoVoice={0} — no voice installed
 Settings.TextBooks.Voice=Voice:
 Settings.TextBooks.Speed=Reading speed (words per minute):
 Settings.TextBooks.Test=Test voice

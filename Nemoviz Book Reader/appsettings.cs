@@ -103,6 +103,8 @@ namespace Nemoviz_Book_Reader
             // set of numbers; they belong to the voice that was selected then.
             TtsVoicePrefs.SetIfAbsent(TtsVoice, new VoicePrefs(TtsWpm, TtsVolume, TtsPitch));
             LoadLanguageVoices();
+            LoadSeenLanguages();
+            LanguageSeen = NoteLanguageSeen;
             AudioDevice = ini.Read("Audio", "Device", "");
             MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
@@ -135,6 +137,44 @@ namespace Nemoviz_Book_Reader
         public VoicePrefs PrefsFor(string voice)
         {
             return TtsVoicePrefs.Get(voice, VoicePrefs.Default);
+        }
+
+        // ── Languages this library has actually met ───────────────────────────
+        // Settings can only offer a rule for a language it knows about, and the
+        // languages with a voice installed are not that set: a French book on the
+        // shelf with no French voice is exactly the case a rule is wanted for.
+        // So the LIBRARY is the second source — a language goes on the list the
+        // moment a book in it is imported.
+        //
+        // Reported through a static hook rather than plumbed through every import
+        // path (there are four, one of them a static helper with no settings in
+        // sight). BookData.Save is the one place they all pass through, and it
+        // knows the language by then. Already-known languages return at once, so
+        // the routine progress saves cost nothing.
+        private const string SeenSection = "Languages";
+        private readonly List<string> seenLanguages = new List<string>();
+        public static Action<string> LanguageSeen;
+
+        private void LoadSeenLanguages()
+        {
+            seenLanguages.Clear();
+            foreach (string raw in ini.Read(SeenSection, "Seen", "").Split(','))
+            {
+                string c = LanguageDetector.Primary(raw);
+                if (c.Length > 0 && !seenLanguages.Contains(c)) seenLanguages.Add(c);
+            }
+        }
+
+        /// <summary>Every language a book in this library has been found to be in.</summary>
+        public IEnumerable<string> SeenLanguages { get { return seenLanguages; } }
+
+        public void NoteLanguageSeen(string tag)
+        {
+            string code = LanguageDetector.Primary(tag);
+            if (code.Length == 0 || seenLanguages.Contains(code)) return;
+            seenLanguages.Add(code);
+            seenLanguages.Sort(StringComparer.OrdinalIgnoreCase);
+            ini.Write(SeenSection, "Seen", string.Join(",", seenLanguages.ToArray()));
         }
 
         // ── One default voice per language ────────────────────────────────────

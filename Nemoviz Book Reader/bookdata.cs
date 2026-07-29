@@ -172,6 +172,12 @@ namespace Nemoviz_Book_Reader
             int.TryParse(ini.Read("Settings", "TextPitch", "-99"), out int tpit);
             TextPitch = tpit;
             TextLanguage = ini.Read("Book", "Language", "");
+            // Reading a book off the shelf registers its language too, not only
+            // saving one. Without this an existing library stays invisible to
+            // Settings until every book in it has been opened — and the Library
+            // scan builds one of these for every book, so opening the shelf once
+            // registers the lot.
+            if (AppSettings.LanguageSeen != null) AppSettings.LanguageSeen(TextLanguage);
             TextCleaned = ini.Read("Book", "TextCleaned", "0") == "1";
             TextVoicePrefs = new VoicePrefsTable();
             TextVoicePrefs.Load(ini);
@@ -802,6 +808,9 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextVolume", TextVolume.ToString());
             ini.Write("Settings", "TextPitch", TextPitch.ToString());
             ini.Write("Book", "Language", TextLanguage ?? "");
+            // Tell Settings this language exists in the library, so a voice can be
+            // chosen for it even when nothing installed speaks it.
+            if (AppSettings.LanguageSeen != null) AppSettings.LanguageSeen(TextLanguage ?? "");
             ini.Write("Book", "TextCleaned", TextCleaned ? "1" : "0");
             TextVoicePrefs.Save(ini);
             ini.Write("Book", "TextChars", TextChars.ToString());

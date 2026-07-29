@@ -491,12 +491,15 @@ namespace Nemoviz_Book_Reader
             return box;
         }
 
-        /// <summary>The languages something installed actually speaks, and only
-        /// those. A language with no voice has nothing to offer under it, so a row
-        /// for it would be a dead end — and since nothing may stand in for
-        /// anything else, there is no reason to list one. Index 0 is the global
-        /// default and carries the empty code: it is what a book whose language
-        /// could not be worked out at all is read with.</summary>
+        /// <summary>Two sources, because neither is enough on its own: the
+        /// languages something installed <b>speaks</b>, and the languages this
+        /// library has a <b>book</b> in. A French book with no French voice is
+        /// precisely the case a rule is wanted for, and it could not be set if
+        /// French were not on the list — which is what "go to Settings and sort it
+        /// out there" requires. Rows with no voice say so, because otherwise
+        /// "French" and "Croatian" look identical and behave nothing alike.
+        /// <para>Index 0 is the global default and carries the empty code: it is
+        /// what a book whose language could not be worked out is read with.</para></summary>
         private void PopulateLanguages()
         {
             cmbLanguage.Items.Clear();
@@ -511,13 +514,20 @@ namespace Nemoviz_Book_Reader
                 string p = LanguageDetector.Primary(c.Language);
                 if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
             }
+            foreach (string p in appSettings.SeenLanguages)
+                if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
+            foreach (string p in appSettings.LanguagesWithVoice)
+                if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
 
             codes.Sort((a, b) => string.Compare(LanguageName(a), LanguageName(b),
                                                 StringComparison.CurrentCultureIgnoreCase));
             foreach (string p in codes)
             {
                 languageCodes.Add(p);
-                cmbLanguage.Items.Add(LanguageName(p) + " (" + p + ")");
+                string row = LanguageName(p) + " (" + p + ")";
+                if (VoiceChooser.VoicesFor(voiceCatalog, p).Count == 0)
+                    row = Localization.T("Settings.TextBooks.LanguageNoVoice", row);
+                cmbLanguage.Items.Add(row);
             }
         }
 
@@ -570,11 +580,17 @@ namespace Nemoviz_Book_Reader
                 cmbVoice.Items.Add(Localization.T("Settings.TextBooks.VoiceNotSet"));
             }
 
-            // The voices that speak this language, and only those. A language is
-            // itself: nothing from a neighbouring one appears here however well it
-            // might read, and nothing needs marking, because everything on the
-            // list speaks the language at the top of it.
-            foreach (string name in VoiceChooser.VoicesFor(voiceCatalog, code))
+            // The voices that speak this language — and when NOTHING does, every
+            // voice on the machine instead. That is not the substitution NBR
+            // refuses to make: nothing is suggested, nothing is ranked by how
+            // close it sounds, and the reader came here on purpose. It is the one
+            // place a deliberate cross-language rule can be written, and without
+            // it "go to Settings and sort it out there" has nowhere to go. If they
+            // set a Mandarin voice for Russian, that is theirs to do.
+            List<string> speak = VoiceChooser.VoicesFor(voiceCatalog, code);
+            if (code.Length > 0 && speak.Count == 0)
+                speak = VoiceChooser.VoicesFor(voiceCatalog, "");
+            foreach (string name in speak)
             {
                 voiceNames.Add(name);
                 cmbVoice.Items.Add(name);
