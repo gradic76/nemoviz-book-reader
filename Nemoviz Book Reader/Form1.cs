@@ -3516,6 +3516,17 @@ namespace Nemoviz_Book_Reader
             string s = tts.CurrentText ?? "";
             if (tbReadingSurface.Text == s) return;
             tbReadingSurface.Text = s;
+            // Stamped so the braille lag can be MEASURED rather than guessed from
+            // two screenshots. The braille side is read out of NVDA's viewer over
+            // UI Automation; this is the other half, and the two are matched on
+            // the clock afterwards. Goes with the experiment.
+            try
+            {
+                System.IO.File.AppendAllText(
+                    System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NBR-reading-surface.log"),
+                    DateTime.Now.ToString("HH:mm:ss.fff") + "  " + s + Environment.NewLine);
+            }
+            catch { }
             // NOT Select(0, 0) here, deliberately. Putting the caret back on nought
             // after every sentence is a caret MOVE as far as the reader is
             // concerned, and it answers by speaking the character underneath —

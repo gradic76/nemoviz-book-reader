@@ -1502,7 +1502,28 @@ behind a pan, as expected. **It also follows text rewritten in place**: with the
 book playing and focus never leaving the control, the braille content changed
 from one sentence to the next on its own.
 
-**But it lags, and inconsistently.** Measured repeatedly with the book playing
+**It does NOT follow a rewrite — it FREEZES.** Measured properly on 2026-07-29
+by pairing two clocks instead of comparing screenshots: the braille viewer read
+out of NVDA over **UI Automation** (its rows are `RICHEDIT50W`, unreadable with
+`GetWindowText` across a process boundary, but their text comes back as the UIA
+`Name`), against a timestamped log the player writes whenever the surface text
+changes. In 35 seconds the surface went through **~20 sentences** while braille
+sat on **one** — the sentence that was current when focus arrived — and never
+moved. The blanks between samples are momentary clears, after which the *same*
+text returns.
+
+So **"replacing `Text` does not reach braille" is the finding**, and the idea
+below stops being an optimisation and becomes the only way forward. Everything
+in the paragraph that follows was written before this measurement and is kept
+because the reasoning still holds — but where it says "lag", read "freeze": the
+apparent movement in earlier screenshots came from focus changes made by the
+clicks that produced them, not from the text updating.
+
+**Method note, because it is reusable:** screenshots cannot measure a timing
+relationship — the caret blink alone makes a pixel hash change. Two logs on one
+clock can. The braille side needs no hardware and no image reading at all.
+
+**(Superseded, kept for its reasoning.) It lags, and inconsistently.** Measured repeatedly with the book playing
 and focus never leaving the surface: sometimes braille and the surface hold the
 same sentence, sometimes braille is one or more behind. It is a lag, not a
 freeze, and the cause is **not** the caret reset — removing `Select(0, 0)` from
