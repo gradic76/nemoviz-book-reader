@@ -3447,9 +3447,14 @@ namespace Nemoviz_Book_Reader
         // sentence appearing there and changing as it reads — and listen for
         // whether Space and the arrows still work while this control has focus.
         //
-        // Parked below the client area like the other read-only fields: it must be
-        // focusable and in the tab order to be tracked at all, but it must not
-        // take a millimetre from the drawn panel while it is only an experiment.
+        // It is ON SCREEN, and that was not the first attempt. It was parked below
+        // the client area to begin with, the way the announce labels are — but
+        // those are read through the SPEECH channel, where being off screen costs
+        // nothing. Braille goes through the reader's screen model, and a reader
+        // may treat an object outside the visible area as not being there: the
+        // first run showed an empty braille viewer. So for as long as this is an
+        // experiment it sits over the panel, plainly, where nothing about its
+        // visibility can be the reason it fails.
         private TextBox tbReadingSurface;
 
         private void EnsureReadingSurface()
@@ -3460,8 +3465,10 @@ namespace Nemoviz_Book_Reader
             tbReadingSurface.ReadOnly = true;
             tbReadingSurface.WordWrap = true;
             tbReadingSurface.ScrollBars = ScrollBars.None;
-            tbReadingSurface.Location = new Point(4, ClientSize.Height + 120);
-            tbReadingSurface.Size = new Size(560, 48);
+            tbReadingSurface.SetBounds(12, ClientSize.Height - 56, ClientSize.Width - 24, 44);
+            tbReadingSurface.BackColor = NewPlayerSkin.Glass;
+            tbReadingSurface.ForeColor = NewPlayerSkin.Lit;
+            tbReadingSurface.BorderStyle = BorderStyle.FixedSingle;
             tbReadingSurface.TabStop = true;
             tbReadingSurface.TabIndex = 900;
             tbReadingSurface.AccessibleName = Localization.T("Player.ReadingSurface.Accessible");
@@ -3473,6 +3480,7 @@ namespace Nemoviz_Book_Reader
                 if (tbReadingSurface.SelectionLength > 0) tbReadingSurface.Select(0, 0);
             };
             Controls.Add(tbReadingSurface);
+            tbReadingSurface.BringToFront();   // the skin's canvas is added last
         }
 
         /// <summary>Puts the sentence being read into the surface. Rewriting Text
