@@ -1712,6 +1712,19 @@ now, and while the book has no voice it carries `Player.Info.NoVoiceLabel` plus
 the language instead. That line would otherwise name whatever spoke last, which
 is the hardest lie on the page.
 
+**The Library staying visible behind the dialog is INTENDED — do not "fix" it**
+(Gordan, 2026-07-29). Activating a book from the Library leaves that window on
+screen underneath, because the flow is *Library → activate → problem → decide*,
+and the decision leads either to everything closing and playback starting, or to
+being back on the shelf. A dialog that had wiped the Library away first would
+leave the second outcome nowhere to return to. (Mechanically the Library is
+closed but not yet disposed, since `BtnLibrary_Click`'s `using` cannot run while
+the dialog blocks further down the same stack — but the effect is the wanted one.)
+
+**Related, and already implied by this section's 960-wide shell:** the Library is
+to be resized so that while open it **completely covers the player**, as
+Properties does. Not done.
+
 **Still wearing plain Windows chrome:** `NoVoiceForm` and `SettingsForm`.
 `DialogSkin` covers Properties only so far.
 
