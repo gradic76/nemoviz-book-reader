@@ -457,7 +457,7 @@ namespace Nemoviz_Book_Reader
         /// could not be seen. AutoSize is what makes the measurement real: the
         /// labels were built at a fixed width and would otherwise all report the
         /// same one.</summary>
-        private static int LabelColumn(GroupBox g)
+        internal static int LabelColumn(GroupBox g)
         {
             int column = 0;
             foreach (Control c in g.Controls)
@@ -477,7 +477,9 @@ namespace Nemoviz_Book_Reader
         /// so it is one column or nothing. A control with no label beside it
         /// (the check box that gates the group, the ? in the corner) is left
         /// exactly where it was.</summary>
-        private static void PlaceValues(GroupBox g, int column)
+        // Internal, and shared with SettingsSkin: the two dialogs lay their groups
+        // out the same way, and a second copy of this would drift from the first.
+        internal static void PlaceValues(GroupBox g, int column)
         {
             if (column <= 0) return;
 

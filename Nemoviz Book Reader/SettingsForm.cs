@@ -162,6 +162,28 @@ namespace Nemoviz_Book_Reader
 
             this.AcceptButton = btnOK;
             this.CancelButton = btnCancel;
+
+            // Built exactly as before, then handed over — the classic path does
+            // nothing here, the new look restyles and relays out what was built.
+            if (UiTheme.Current.BuildsOwnLayout) SettingsSkin.Apply(this);
+        }
+
+        /// <summary>What the skin is allowed to touch. Everything else it finds by
+        /// walking the tab pages, the same way the Properties reading page does.</summary>
+        internal SettingsParts SkinParts
+        {
+            get
+            {
+                return new SettingsParts
+                {
+                    Tabs = tabSettings,
+                    ShowHints = chkShowHints,
+                    Hints = hints,
+                    OK = btnOK,
+                    Cancel = btnCancel,
+                    Apply = btnApply,
+                };
+            }
         }
 
         /// <summary>Read-only, tabbable placeholder textbox — same "hint box"

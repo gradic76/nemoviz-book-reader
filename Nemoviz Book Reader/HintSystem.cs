@@ -24,7 +24,12 @@ namespace Nemoviz_Book_Reader
         // Which group explains what, and where its text lives.
         private static readonly Dictionary<Control, string> hints = new Dictionary<Control, string>();
 
-        public static void Clear() { hints.Clear(); }
+        public static void Clear() { hints.Clear(); helpKeys.Clear(); }
+
+        // The ? buttons this system created, so a layout pass can tell them from
+        // the dialog's own buttons — theirs move, this one is pinned to a corner.
+        private static readonly List<Button> helpKeys = new List<Button>();
+        public static bool IsHelpKey(Button b) { return b != null && helpKeys.Contains(b); }
 
         /// <summary>Puts a ? on a group and remembers the text behind it.</summary>
         public static void Attach(GroupBox g, string bodyKey)
@@ -54,6 +59,7 @@ namespace Nemoviz_Book_Reader
             b.Click += (s, e) => Show(g, b);
             g.Controls.Add(b);
             b.BringToFront();
+            helpKeys.Add(b);
         }
 
         /// <summary>F1 anywhere in the dialog: find the group the focus is sitting
