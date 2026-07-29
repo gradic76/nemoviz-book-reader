@@ -1660,10 +1660,28 @@ as noise. The empty answer comes back as `VoiceSource.NoVoice`, which is a
 result the caller must handle, not an error. The player and Properties each used
 to hold their own shortened copy of this rule and had already begun to differ.
 
-**When a language has no voice at all:** Properties **says so by name** and
-offers no substitute; the language and voice lists beside the message are the
-reader's free choice, including a bad one. Built; **not yet exercised**, because
-every language on Gordan's machine has a voice.
+**When a language has no voice at all** — caught in the wild on a Spanish EPUB
+(Gordan, 2026-07-29), which opened in Croatian on Karmela and started speaking
+the moment it was activated from the Library. Two separate faults, and the
+second is the one to remember:
+
+- Properties fell back to the **first row of the language list** when the book's
+  language was not in it. Sorted by name, "first" meant Croatian. A guard that
+  looks harmless is exactly how the forbidden behaviour gets back in. Both boxes
+  now stay **empty**.
+- **An empty voice name does not clear a voice — it leaves whatever spoke last.**
+  The player passed `VoiceChooser`'s empty answer straight to the reader and got
+  the previous book's voice. `ApplyTtsSettings` now recognises
+  `VoiceSource.NoVoice` and **touches nothing**; `LoadTextBookPlayback` refuses to
+  autoplay and says why; Space says it again rather than starting.
+
+The notice is written **twice**: one line between the controls (`Prop.Text.
+NoVoiceShort`), the full sentence on the info panel (`Prop.Text.
+NoVoiceForLanguage`). It is announced through `AnnounceToScreenReader`, not a
+message box — a modal over a book opening from the Library is one more thing to
+dismiss before you can act on it. **`DialogSkin` now derives pad and gap from
+what is left over** rather than fixed amounts, because the speech group grows
+when it carries the notice and the stack used to run onto the OK button.
 
 **Settings and Properties are the same two combos.** Settings sets the global
 rule (*this language → this voice*), Properties overrides it **for one book** —
