@@ -1735,8 +1735,46 @@ the dialog blocks further down the same stack — but the effect is the wanted o
 to be resized so that while open it **completely covers the player**, as
 Properties does. Not done.
 
-**Still wearing plain Windows chrome:** `NoVoiceForm` and `SettingsForm`.
-`DialogSkin` covers Properties only so far.
+**Still wearing plain Windows chrome:** `NoVoiceForm`. `DialogSkin` covers
+Properties and Settings; the Library is next.
+
+### Settings under the new look — `SettingsSkin.cs` (2026-07-29)
+
+Same shell as Properties: **960 × 640**, borderless casing, silver rim, dark
+glass, groups as stickers, **OK / Cancel / Apply** on the metal (Properties has
+no Apply; Settings saves itself, so it does).
+
+- **The tab strip is owner-drawn; the `TabControl` is real.** A drawn strip
+  would lose the tab role, the arrow navigation and the "page 2 of 5" a reader
+  announces. Selected tab **lit**, the rest **silkscreened** — the display
+  glass's two levels, so the current page reads without colour carrying it alone.
+- **The hint boxes and their switch are gone** (Gordan). A hint under every
+  control cost a third of each page to say things a reader wants once; the `?`
+  per group with `F1` says it on demand and costs a corner. Reclaiming that
+  space is most of why the pages fit. **Where no help text was written, no `?`
+  appears** — an unwritten key renders as the key, and "Hint.Settings.General.0"
+  is worse than no button.
+- **No info column** (Settings has no book to describe), which is the width that
+  fixed Text Books: it did not fit 640 in one column and used to scroll. Groups
+  fall to **two columns** when one will not fit, balanced by height and keeping
+  the order they are read in.
+
+**Three things only the rendered dialog showed, all worth keeping:**
+
+1. **Page size must come from the `TabControl`, never off the `TabPage`.** Inside
+   `SuspendLayout` the pages have not been resized yet, so `ClientSize` still
+   answers with what they were *built* at — every group came out half a page wide
+   with its values clipped off the right edge.
+2. **The value column is worked out PER COLUMN.** One shared across both let the
+   widest label on the page shove the other column's values into its own edge.
+3. **A button row built for 500 does not fit a 444-wide column** — "Speech
+   dictionary…" was cut off. They move **together**, by the worst overflow among
+   them, because nudging only the offender pushes it into its neighbour.
+   `HintSystem.IsHelpKey` now identifies its own `?` buttons so those stay pinned.
+
+**Not done:** per-tab tightening. General, Device and Misc carry loose controls
+rather than groups, so they are recoloured where they stand and sit in the left
+third of a much wider page.
 
 **Settings and Properties are the same two combos.** Settings sets the global
 rule (*this language → this voice*), Properties overrides it **for one book** —
