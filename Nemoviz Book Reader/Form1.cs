@@ -2920,17 +2920,30 @@ namespace Nemoviz_Book_Reader
             isLibraryOpen = true;
             try
             {
-                // The callback lets the Library unload the active book the moment
-                // it's marked read (so it can be deleted in the same session,
-                // with mpv's file handle released) rather than waiting for close.
-                using (LibraryForm libraryForm = new LibraryForm(appSettings,
-                    currentBook != null ? currentBook.FolderPath : null, UnloadActiveBook))
+                // Declining a book with no voice for its language puts you back on
+                // the SHELF, not into the player: nothing was loaded, so there is
+                // nothing to be left looking at. Hence the loop — the Library
+                // reopens and you pick something else. Asking here rather than
+                // letting LoadBook do it costs nothing: a voice chosen is written
+                // to the book, so LoadBook's own check then passes silently and
+                // nobody is asked twice.
+                bool backToShelf = true;
+                while (backToShelf)
                 {
-                    libraryForm.ShowDialog(this);
-
-                    if (libraryForm.DialogResult == DialogResult.OK && libraryForm.SelectedBook != null)
+                    backToShelf = false;
+                    // The callback lets the Library unload the active book the moment
+                    // it's marked read (so it can be deleted in the same session,
+                    // with mpv's file handle released) rather than waiting for close.
+                    using (LibraryForm libraryForm = new LibraryForm(appSettings,
+                        currentBook != null ? currentBook.FolderPath : null, UnloadActiveBook))
                     {
-                        LoadBook(libraryForm.SelectedBook, true);
+                        libraryForm.ShowDialog(this);
+
+                        if (libraryForm.DialogResult == DialogResult.OK && libraryForm.SelectedBook != null)
+                        {
+                            if (!EnsureVoiceForBook(libraryForm.SelectedBook)) { backToShelf = true; continue; }
+                            LoadBook(libraryForm.SelectedBook, true);
+                        }
                     }
                 }
             }
@@ -3316,32 +3329,15 @@ namespace Nemoviz_Book_Reader
             // opened. Autoplay from the Library is exactly how a Spanish book got
             // read aloud in Croatian before anyone could stop it.
             //
-            // The question is put on EVERY activation, exactly as if it were the
-            // first: declining leaves the book on the shelf unread, and coming
-            // back to it later is another attempt to read it, not a repeat of a
-            // decision already made. Nothing needs remembering for that — a book
-            // with no voice never becomes the last-opened book, so NBR never
-            // resumes one by itself, and every load of one is deliberate.
-            // Deferred a tick so the player is on screen behind the dialog rather
-            // than the dialog arriving out of nothing.
-            if (textNoVoice)
-            {
-                BookData asked = currentBook;
-                BeginInvoke((Action)(() =>
-                {
-                    if (currentBook != asked) return;      // book changed meanwhile
-                    if (AskForVoice() && autoPlay) BtnPlayPause_Click(null, EventArgs.Empty);
-                }));
-            }
-
             UpdateTitleBar();
             UpdateTextPositionDisplay();
 
             if (textNoVoice)
             {
-                // NOT the book you are now reading: it cannot be read. It stays
-                // unread in the Library, and NBR does not resume it on the next
-                // start, until something is settled about the voice.
+                // Only reachable when a book that WAS readable stops being so —
+                // the language was worked out just now, or a voice was uninstalled
+                // mid-session. NOT the book you are now reading: it stays unread
+                // in the Library and NBR does not resume it on the next start.
                 SetPlayPauseState(false);
                 return;
             }
@@ -3444,8 +3440,46 @@ namespace Nemoviz_Book_Reader
                 Localization.T("Player.NoVoiceForLanguage", name));
         }
 
-        /// <summary>Puts the question, and acts on the answer. Returns true when a
-        /// voice was chosen and the book can be read after all.
+        /// <summary>Whether this book can be read, asking about it if it cannot.
+        /// Returns false only when the reader declined — and then nothing has been
+        /// touched, so the caller must simply not load it.
+        /// <para>Answered without loading anything: the language comes off the
+        /// shelf with the book. A book imported before languages were detected has
+        /// none recorded yet, so it is let through and worked out during the load —
+        /// once, since the load then saves it.</para></summary>
+        private bool EnsureVoiceForBook(BookData book)
+        {
+            if (book == null || !book.IsTextBook) return true;
+            if (!string.IsNullOrEmpty(book.TextVoice)) return true;
+            string lang = book.TextLanguage;
+            if (string.IsNullOrEmpty(lang)) return true;
+
+            EnsureTts();
+            List<(string Name, string Vendor, string Language)> voices;
+            try { voices = tts.GetVoiceInfos(); }
+            catch { return true; }
+
+            VoiceSource how;
+            VoiceChooser.ForLanguage(appSettings, voices, lang, out how);
+            if (how != VoiceSource.NoVoice) return true;
+
+            string chosen = "";
+            using (var dlg = new NoVoiceForm(lang, voices))
+                if (dlg.ShowDialog(this) == DialogResult.OK) chosen = dlg.ChosenVoice;
+
+            // Declining writes nothing anywhere. The next activation asks again,
+            // exactly as if it were the first, because it is another attempt to
+            // read the book rather than a repeat of a decision already made.
+            if (string.IsNullOrEmpty(chosen)) return false;
+
+            book.TextVoice = chosen;
+            try { book.Save(); } catch { }
+            return true;
+        }
+
+        /// <summary>Puts the question for the book ALREADY loaded — the safety net
+        /// for a voice that goes away mid-session, and for pressing Play on a book
+        /// that cannot be read. Returns true when a voice was chosen.</summary>
         /// <para>A dialog rather than an announcement, because this is not news to
         /// be caught in passing — it is a state that has to be acknowledged, and
         /// one a reader who cannot hear the announcement would otherwise never
@@ -3595,6 +3629,14 @@ namespace Nemoviz_Book_Reader
 
         private void LoadBook(BookData book, bool autoPlay)
         {
+            // A book in a language nothing speaks is not put into the player AT
+            // ALL (Gordan, 2026-07-29). The question therefore comes before
+            // anything is swapped: declining leaves whatever was loaded exactly as
+            // it was and the title stays on the shelf, which is what "not loaded"
+            // has to mean. It used to be asked after the load, which left a book
+            // nobody could read sitting in the player.
+            if (!EnsureVoiceForBook(book)) return;
+
             // Changing the book ends the previous listening session — an
             // active sleep timer is cancelled, with the same announcement
             // as a manual pause. (At startup no timer can be active, so
