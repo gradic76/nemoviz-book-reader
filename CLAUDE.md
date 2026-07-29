@@ -1675,6 +1675,34 @@ feature *requires*, not about a different app.
   (audiobook → synced on-screen/braille text), **OCR** (scanned image-only
   PDFs/DjVu → text), and **translation**. These are parked until Lite is done.
 
+**Later, and NOT for alpha — book descriptions from the internet** (Gordan,
+2026-07-29). A "fancy feature" on the Lite backlog, deliberately parked: it needs
+no translation engine, so it does not belong in Pro.
+
+- **Goodreads is out** — its public API was shut down at the end of 2020. The
+  realistic sources are **Google Books** (best coverage, no key needed for basic
+  queries) and **Open Library** (open data, no key).
+- **The API is not the problem; matching is.** Folder-derived titles like
+  `Silvia_Urich_El_chico_de_la_mascara_de` will mis-match, and a wrong blurb is
+  worse than none — the reader has no way to notice. **ISBN is the way out where
+  it exists**: EPUB carries it as `dc:identifier` (NBR does not read it yet), and
+  an exact key needs no candidates and no confirmation.
+- **Look in the FILE first.** EPUB and DAISY carry `dc:description`. But do not
+  trust it: official editions put the first chapter of the next book, or a list of
+  the author's other titles, in that field. It is a **candidate like any other**
+  and goes through the same confirmation.
+- **Confirmation is where the title gets fixed**, rather than asking the reader to
+  tidy names beforehand: no candidate fits → correct the title there → search
+  again, and the name stays corrected for the library.
+- **Off by default, opted into.** Sending titles to a third party discloses what
+  someone is reading.
+- **Fetch once, cache in `Book.ini`.** No repeat requests, works offline after.
+- **Language:** ask Google Books to restrict to the language before thinking about
+  translating anything. Chaining Player → Books → Translate → Player couples the
+  app to two outside services for one paragraph — Gordan's call, and the right
+  one. Lite shows the description in whatever language the source has it.
+- **Where it goes:** not the player's info column (about three spare lines there,
+  measured — a description is a paragraph). The Library's details pane has room.
 **Workflow rule:** until Lite is finished, when reporting "where we stopped"
 or "what's left", list **Lite items only**. Treat STT/OCR/translate as a
 separate Pro backlog — mention them only when explicitly asked about Pro.
