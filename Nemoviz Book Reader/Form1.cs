@@ -3282,6 +3282,7 @@ namespace Nemoviz_Book_Reader
             {
                 if (IsDisposed) return;
                 try { BeginInvoke((Action)UpdateTextPositionDisplay); } catch { }
+                try { BeginInvoke((Action)UpdateReadingSurface); } catch { }
             };
             tts.Finished += () =>
             {
@@ -3329,6 +3330,9 @@ namespace Nemoviz_Book_Reader
             // opened. Autoplay from the Library is exactly how a Spanish book got
             // read aloud in Croatian before anyone could stop it.
             //
+            EnsureReadingSurface();
+            UpdateReadingSurface();
+
             UpdateTitleBar();
             UpdateTextPositionDisplay();
 
@@ -3427,6 +3431,63 @@ namespace Nemoviz_Book_Reader
         /// to paper over by picking something: the book waits until the reader
         /// chooses, which they do in its Properties.</summary>
         private bool textNoVoice;
+
+        // ──────────────────────────────────────────────
+        // The reading surface — an EXPERIMENT, not a feature yet (2026-07-29)
+        // ──────────────────────────────────────────────
+        // The question it exists to answer: if the sentence being read sits in a
+        // real, focusable, read-only control, does the SCREEN READER put it on the
+        // braille display by its own ordinary tracking? If it does, braille output
+        // costs no drivers and works with every display the reader supports, and
+        // the visual and braille outputs turn out to be one feature rather than
+        // two. See CLAUDE.md §8l for the whole model and for what has to be proved.
+        //
+        // How to run it: open a text book, Tab to the end of the player, open
+        // NVDA's Braille Viewer (NVDA menu → Tools) and press Play. Watch for the
+        // sentence appearing there and changing as it reads — and listen for
+        // whether Space and the arrows still work while this control has focus.
+        //
+        // Parked below the client area like the other read-only fields: it must be
+        // focusable and in the tab order to be tracked at all, but it must not
+        // take a millimetre from the drawn panel while it is only an experiment.
+        private TextBox tbReadingSurface;
+
+        private void EnsureReadingSurface()
+        {
+            if (tbReadingSurface != null) return;
+            tbReadingSurface = new TextBox();
+            tbReadingSurface.Multiline = true;
+            tbReadingSurface.ReadOnly = true;
+            tbReadingSurface.WordWrap = true;
+            tbReadingSurface.ScrollBars = ScrollBars.None;
+            tbReadingSurface.Location = new Point(4, ClientSize.Height + 120);
+            tbReadingSurface.Size = new Size(560, 48);
+            tbReadingSurface.TabStop = true;
+            tbReadingSurface.TabIndex = 900;
+            tbReadingSurface.AccessibleName = Localization.T("Player.ReadingSurface.Accessible");
+            // A focused multiline TextBox selects everything, which a reader
+            // announces as a selection and braille shows as a solid block. The
+            // caret goes to the start instead — the lesson the info glass taught.
+            tbReadingSurface.GotFocus += (s, e) =>
+            {
+                if (tbReadingSurface.SelectionLength > 0) tbReadingSurface.Select(0, 0);
+            };
+            Controls.Add(tbReadingSurface);
+        }
+
+        /// <summary>Puts the sentence being read into the surface. Rewriting Text
+        /// in place is exactly what is being tested: a reader may follow it, go
+        /// quiet, or re-read the lot — which is what tbInfo did, and why that one
+        /// is a snapshot rather than a ticker.</summary>
+        private void UpdateReadingSurface()
+        {
+            if (tbReadingSurface == null || tts == null) return;
+            if (currentBook == null || !currentBook.IsTextBook) return;
+            string s = tts.CurrentText ?? "";
+            if (tbReadingSurface.Text == s) return;
+            tbReadingSurface.Text = s;
+            tbReadingSurface.Select(0, 0);
+        }
 
         /// <summary>Says that this book cannot be read and what to do about it.
         /// The fallback for when the dialog is not the right answer — the reader

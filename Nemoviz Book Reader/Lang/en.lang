@@ -14,6 +14,8 @@ Player.Info.PartLabel=Part:
 Player.Info.PageLabel=Page:
 Player.Info.HeadingLabel=Heading:
 Player.Info.BookmarksLabel=Bookmarks:
+; The experimental reading surface — see CLAUDE.md 8l.
+Player.ReadingSurface.Accessible=Reading surface
 Player.Info.VoiceLabel=Voice:
 ; {0} is the book's language. Stands in the voice line while the book has none.
 Player.Info.NoVoiceLabel=No installed voice speaks
