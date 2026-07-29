@@ -240,54 +240,20 @@ namespace Nemoviz_Book_Reader
             return code == "hr" || code == "sr" || code == "bs" || code == "sh" || code == "hbs" || code == "cnr";
         }
 
-        // Languages whose voices read ANOTHER language well enough to be used for
-        // it. This is not the same claim as SameLanguage: Czech and Croatian are
-        // two languages, but a Czech voice reads a Croatian book intelligibly,
-        // because the sound inventory and the letter-to-sound rules line up. The
-        // table is seeded from Gordan's own listening (2026-07-29) — "srpski i
-        // hrvatski mogu se čitati međusobno, češki i slovački također jako dobro
-        // čitaju hr i sr" — and is meant to GROW as more pairs are heard. Nothing
-        // goes in that has not actually been listened to: a wrong entry here does
-        // not fail loudly, it just reads a book in an accent nobody asked for.
+        // There is deliberately NO table of languages that may stand in for one
+        // another (Gordan, 2026-07-29). A first version had one — Serbian and
+        // Croatian reading each other, Czech and Slovak reading both — and it was
+        // rejected outright: Croatian is Croatian, Serbian is Serbian, Czech is
+        // Czech. A book gets a voice in ITS OWN language or it gets told there
+        // isn't one; NBR does not decide for the reader that a near-enough accent
+        // will do. If they want a Mandarin voice for a Russian book that is their
+        // choice to make by hand, but it is never one NBR offers by guessing that
+        // two languages are close.
         //
-        // Direction matters and is not assumed. An entry means "a voice in THIS
-        // language may read that book", so cs appearing under hr says a Czech
-        // voice reads Croatian — it does not claim a Croatian voice reads Czech.
-        private static readonly Dictionary<string, string[]> StandIns =
-            new Dictionary<string, string[]>
-            {
-                ["hr"] = new[] { "sr", "bs", "cs", "sk" },
-                ["sr"] = new[] { "hr", "bs", "cs", "sk" },
-                ["bs"] = new[] { "hr", "sr", "cs", "sk" },
-                ["cnr"] = new[] { "sr", "hr", "bs", "cs", "sk" },
-                ["sh"] = new[] { "hr", "sr", "bs", "cs", "sk" },
-                ["cs"] = new[] { "sk" },
-                ["sk"] = new[] { "cs" },
-            };
-
-        /// <summary>The languages whose voices can read a book in
-        /// <paramref name="tag"/>, best first, NOT counting the language itself
-        /// (for that, see <see cref="SameLanguage"/>). Empty when nothing has been
-        /// heard to work — which is the honest answer, and better than offering a
-        /// voice that would turn the book into noise.</summary>
-        public static string[] StandInsFor(string tag)
-        {
-            string p = Primary(tag);
-            string[] v;
-            return p.Length > 0 && StandIns.TryGetValue(p, out v) ? v : new string[0];
-        }
-
-        /// <summary>Every language this detector can name, so a language can be
-        /// given a default voice even when nothing installed speaks it — which is
-        /// exactly the case a stand-in exists for.</summary>
-        public static List<string> KnownLanguages()
-        {
-            var all = new List<string>();
-            foreach (var k in Stopwords.Keys) if (!all.Contains(k)) all.Add(k);
-            foreach (var k in CyrillicStopwords.Keys) if (!all.Contains(k)) all.Add(k);
-            foreach (var k in StandIns.Keys) if (!all.Contains(k)) all.Add(k);
-            return all;
-        }
+        // Note that SameLanguage is a different question and still groups BCMS —
+        // it answers "is this the same language", which matters to DETECTION.
+        // Choosing a voice asks the narrower question and matches on the primary
+        // code alone.
 
         /// <summary>"hr-HR" → "hr"; empty stays empty.</summary>
         public static string Primary(string tag)

@@ -179,33 +179,6 @@ namespace Nemoviz_Book_Reader
         /// <summary>Every language that has been given a voice.</summary>
         public IEnumerable<string> LanguagesWithVoice { get { return languageVoices.Keys; } }
 
-        /// <summary>The voice a book in this language should be read with:
-        /// <b>this language's own voice → a related language's voice → the global
-        /// default → nothing</b>. It deliberately does NOT fall through to the
-        /// first installed voice: a voice that cannot speak the language turns the
-        /// book into noise, and an empty answer the caller can report is better
-        /// than a wrong one it cannot. <paramref name="via"/> comes back as the
-        /// language actually borrowed from, empty when nothing was borrowed.</summary>
-        public string DefaultVoiceForLanguage(string tag, out string via)
-        {
-            via = "";
-            string own = LanguageVoice(tag);
-            if (own.Length > 0) return own;
-
-            foreach (string neighbour in LanguageDetector.StandInsFor(tag))
-            {
-                string v = LanguageVoice(neighbour);
-                if (v.Length > 0) { via = neighbour; return v; }
-            }
-            return TtsVoice ?? "";
-        }
-
-        public string DefaultVoiceForLanguage(string tag)
-        {
-            string via;
-            return DefaultVoiceForLanguage(tag, out via);
-        }
-
         /// <summary>Sets (or, with an empty voice, clears) a language's voice and
         /// writes the section straight away.</summary>
         public void SetLanguageVoice(string tag, string voice)

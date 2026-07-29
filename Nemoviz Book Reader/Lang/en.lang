@@ -380,9 +380,6 @@ Settings.TextBooks.SpeechEngine=Speech engine:
 Settings.TextBooks.BookLanguage=Books in this language:
 Settings.TextBooks.AllOtherLanguages=All other languages
 Settings.TextBooks.VoiceNotSet=(no voice chosen)
-; {0} is the voice, {1} the language it actually speaks — a voice offered for
-; a language it does not speak, but reads well enough to be used for.
-Settings.TextBooks.VoiceStandIn={0} — a {1} voice
 Settings.TextBooks.Voice=Voice:
 Settings.TextBooks.Speed=Reading speed (words per minute):
 Settings.TextBooks.Test=Test voice
@@ -425,7 +422,7 @@ Settings.General.UseMultimediaKeys.Hint=The Play/Pause, Next and Previous keys o
 Settings.General.UseMultimediaKeysGlobally.Hint=Also while you are working in another program. This takes the keys away from every other player on the computer, so leave it off if you use one.
 Settings.General.LibraryLocation.Hint=Where your books are kept. Moving it does not move the books already there; copy them yourself if you want them in the new place.
 Settings.General.Language.Hint=The language NBR speaks to you in. It has nothing to do with the language a book is read in, which each book decides for itself.
-Settings.TextBooks.Speech.Hint=Which voice reads which language. NBR works out what language a book is in and reads it with the voice chosen here for that language; "All other languages" is what it falls back on. A voice that speaks a related language is offered too, because it reads the book perfectly well. Each voice keeps its own speed, volume and pitch, and a single book can still be given its own voice in its Properties.
+Settings.TextBooks.Speech.Hint=Which voice reads which language. NBR works out what language a book is in and starts it with the voice chosen here for that language; with no choice made it uses the first voice that speaks it. Only voices that actually speak the language are offered — nothing is ever substituted from a language that merely sounds close. "All other languages" is for a book whose language could not be worked out. Each voice keeps its own speed, volume and pitch, and a single book can still be given its own voice in its Properties.
 Settings.TextBooks.Braille.Hint=For reading on a braille display. The table decides how the text is turned into braille cells; a braille book remembers the table it was read with.
 Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears.
 Settings.Device.Hint=Which sound card everything comes out of, speech included. It takes effect at once, so you can hear the change while choosing.

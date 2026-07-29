@@ -491,11 +491,12 @@ namespace Nemoviz_Book_Reader
             return box;
         }
 
-        /// <summary>Every language a book can be in, not only the ones something
-        /// installed speaks. A language with no voice of its own is exactly the
-        /// case a stand-in exists for — a Bosnian book has to be able to be sent
-        /// to a Croatian voice, and it cannot be if Bosnian is not on the list.
-        /// Index 0 is the global default and carries the empty code.</summary>
+        /// <summary>The languages something installed actually speaks, and only
+        /// those. A language with no voice has nothing to offer under it, so a row
+        /// for it would be a dead end — and since nothing may stand in for
+        /// anything else, there is no reason to list one. Index 0 is the global
+        /// default and carries the empty code: it is what a book whose language
+        /// could not be worked out at all is read with.</summary>
         private void PopulateLanguages()
         {
             cmbLanguage.Items.Clear();
@@ -510,37 +511,26 @@ namespace Nemoviz_Book_Reader
                 string p = LanguageDetector.Primary(c.Language);
                 if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
             }
-            foreach (string p in LanguageDetector.KnownLanguages())
-                if (!codes.Contains(p)) codes.Add(p);
-            foreach (string p in appSettings.LanguagesWithVoice)
-                if (!codes.Contains(p)) codes.Add(p);
 
-            // "sh" and "cnr" are grouping codes the detector uses internally, and
-            // Windows cannot name either — they came out as "Unknown Language
-            // (cnr) (cnr)", which is not a row anyone should be asked to choose.
-            // Nothing is lost by dropping them: a book detected as one still
-            // resolves, through the stand-ins, to the Serbian or Croatian row.
-            codes.RemoveAll(c => !HasRealName(c));
-
-            codes.Sort((a, b) => string.Compare(LanguageDetector.DisplayName(a),
-                                                LanguageDetector.DisplayName(b),
+            codes.Sort((a, b) => string.Compare(LanguageName(a), LanguageName(b),
                                                 StringComparison.CurrentCultureIgnoreCase));
             foreach (string p in codes)
             {
                 languageCodes.Add(p);
-                cmbLanguage.Items.Add(LanguageDetector.DisplayName(p) + " (" + p + ")");
+                cmbLanguage.Items.Add(LanguageName(p) + " (" + p + ")");
             }
         }
 
-        /// <summary>Whether Windows can put a name to this code. It answers with
-        /// "Unknown Language (xx)" for one it does not know, and DisplayName hands
-        /// that straight back — so this is the test for a code worth showing.</summary>
-        private static bool HasRealName(string code)
+        /// <summary>A language's name, or its bare code when Windows has none for
+        /// it — it answers "Unknown Language (xx)" in that case, which read as
+        /// "Unknown Language (cnr) (cnr)" once the code was appended.</summary>
+        internal static string LanguageName(string code)
         {
             string name = LanguageDetector.DisplayName(code);
-            return name.Length > 0
-                && !string.Equals(name, code, StringComparison.OrdinalIgnoreCase)
-                && name.IndexOf("Unknown", StringComparison.OrdinalIgnoreCase) < 0;
+            if (name.Length == 0
+                || name.IndexOf("Unknown", StringComparison.OrdinalIgnoreCase) >= 0)
+                return code;
+            return name;
         }
 
         /// <summary>The code behind the selected row; empty means the global
@@ -580,40 +570,14 @@ namespace Nemoviz_Book_Reader
                 cmbVoice.Items.Add(Localization.T("Settings.TextBooks.VoiceNotSet"));
             }
 
-            // Voices that speak exactly this language, plainly named.
-            foreach (var c in voiceCatalog)
+            // The voices that speak this language, and only those. A language is
+            // itself: nothing from a neighbouring one appears here however well it
+            // might read, and nothing needs marking, because everything on the
+            // list speaks the language at the top of it.
+            foreach (string name in VoiceChooser.VoicesFor(voiceCatalog, code))
             {
-                if (code.Length > 0 && LanguageDetector.Primary(c.Language) != code) continue;
-                voiceNames.Add(c.Name);
-                cmbVoice.Items.Add(c.Name);
-            }
-
-            // Then everything that can READ it without speaking it, each saying
-            // what it actually speaks so the choice is never made blind. Two
-            // sources, one label: SameLanguage (Croatian and Serbian count as one
-            // language, which is why a Croatian voice turns up under Serbian at
-            // all) and StandInsFor (a Czech voice reads them both). Marking these
-            // matters more than it looks — with six voices under Serbian and only
-            // one of them actually Serbian, an unmarked list says the opposite of
-            // the truth.
-            if (code.Length > 0)
-            {
-                var reachable = new List<string>();
-                foreach (var c in voiceCatalog)
-                    if (LanguageDetector.SameLanguage(c.Language, code)) reachable.Add(c.Name);
-                foreach (string neighbour in LanguageDetector.StandInsFor(code))
-                    foreach (var c in voiceCatalog)
-                        if (LanguageDetector.SameLanguage(c.Language, neighbour)
-                            && !reachable.Contains(c.Name))
-                            reachable.Add(c.Name);
-
-                foreach (var c in voiceCatalog)
-                {
-                    if (!reachable.Contains(c.Name) || voiceNames.Contains(c.Name)) continue;
-                    voiceNames.Add(c.Name);
-                    cmbVoice.Items.Add(Localization.T("Settings.TextBooks.VoiceStandIn",
-                        c.Name, LanguageDetector.DisplayName(LanguageDetector.Primary(c.Language))));
-                }
+                voiceNames.Add(name);
+                cmbVoice.Items.Add(name);
             }
 
             string want;
