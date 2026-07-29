@@ -1502,11 +1502,30 @@ behind a pan, as expected. **It also follows text rewritten in place**: with the
 book playing and focus never leaving the control, the braille content changed
 from one sentence to the next on its own.
 
-**But it lags.** In the same frame the surface read "Uto ona žena primijeti
-gljive…" while braille still showed "Buco je žalosno pogledao taj toliko f" — a
-sentence or more behind. Whether that is NVDA's own update cadence, our rewrite
-pattern, or the caret never really moving is **not yet known**, and it is the
-next thing to find out. It is a lag, not a freeze.
+**But it lags, and inconsistently.** Measured repeatedly with the book playing
+and focus never leaving the surface: sometimes braille and the surface hold the
+same sentence, sometimes braille is one or more behind. It is a lag, not a
+freeze, and the cause is **not** the caret reset — removing `Select(0, 0)` from
+the update path changed nothing, because **WinForms moves the caret itself when
+`Text` is assigned**, so the event fires either way. That also explains the noise
+Gordan hears: NVDA speaks the character under the caret on every sentence, which
+is the new sentence's first letter and therefore always a capital.
+
+**The idea to try next, and it may fix both at once: stop replacing `Text`.**
+Put the WHOLE book in the control once and move the **selection** to the current
+sentence instead. The text then never changes — only the position does, which is
+what the reader is built to follow. It would also make panning natural (the rest
+of the book is really there to pan into) and turn routing keys into a genuine
+position, rather than an index into one lonely sentence.
+
+**A constraint that falls out of all this: braille follows FOCUS.** For the book
+to be on the display, the reading surface has to hold focus — click any button
+and braille shows that button instead ("Pause, Space"). So the reading surface
+cannot be one stop among many in the tab order; when braille output is on it has
+to be where focus *lives*, with every other control reachable some other way.
+That is a design consequence, not a bug, and it is why **nothing on the player
+may swallow an arrow** — verified with Gordan: Space, volume and sentence
+stepping all work from inside the control once the arrows are suppressed.
 
 **Two traps that cost a false result each, worth remembering when testing this
 way:** braille follows **focus**, so the first sampling run measured the *Claude
