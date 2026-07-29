@@ -1584,6 +1584,13 @@ and the run after that had the book **paused**, so nothing could change anywhere
 Always confirm from the same frame that (a) the player shows the pause glyph, and
 (b) the braille content belongs to the book.
 
+**Status: braille output is solved and verified, bar one item.** It reaches the
+display with no drivers, follows the reading at 67–170 ms, stays silent, and the
+player's keys (Space, volume, sentence stepping) all work from inside the
+surface. **Routing keys remain unproven** — the detection is built (the surface
+polls for a caret it did not move and logs `ROUTED to <offset>` with the words
+there), but exercising it needs either real hardware or a sighted hand on the
+viewer's "route to cell by hovering". It belongs to the equipped-location pass.
 **The original three things to prove. Two are audible, so no hardware is needed:**
 
 1. Does the reader follow the control when its content is rewritten in place, or

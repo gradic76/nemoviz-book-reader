@@ -3503,6 +3503,39 @@ namespace Nemoviz_Book_Reader
             };
             Controls.Add(tbReadingSurface);
             tbReadingSurface.BringToFront();   // the skin's canvas is added last
+
+            // Watches for a caret WE did not move. A routing key on a braille
+            // display — or the viewer's "route to cell by hovering" — moves the
+            // caret through the screen reader, so no mouse or key event ever
+            // reaches us; polling is the only way to see it. This is how the
+            // third open question gets answered without a display: if the caret
+            // lands where the finger pointed, a routing key is a position in the
+            // book, and the whole model works.
+            var watch = new Timer();
+            watch.Interval = 200;
+            watch.Tick += (s, e) =>
+            {
+                if (tbReadingSurface == null) return;
+                int at = tbReadingSurface.SelectionStart;
+                if (at == lastCaretSet) return;
+                lastCaretSet = at;
+                SurfaceLog("ROUTED to " + at + "  " + tts.SnippetAt(at, 6));
+            };
+            watch.Start();
+        }
+
+        private int lastCaretSet = -1;
+
+        private void SurfaceLog(string line)
+        {
+            try
+            {
+                System.IO.File.AppendAllText(
+                    System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NBR-reading-surface.log"),
+                    DateTime.Now.ToString("HH:mm:ss.fff") + "  " + line + Environment.NewLine,
+                    System.Text.Encoding.UTF8);
+            }
+            catch { }
         }
 
         /// <summary>Puts the WHOLE book in the surface, once. Everything after that
@@ -3543,17 +3576,12 @@ namespace Nemoviz_Book_Reader
             // output is unchanged and the commentary has nothing to report.
             tbReadingSurface.Select(start, 0);
             tbReadingSurface.ScrollToCaret();
+            lastCaretSet = tbReadingSurface.SelectionStart;   // ours, not a routing key
             // Stamped so the braille lag can be MEASURED rather than guessed from
             // two screenshots. The braille side is read out of NVDA's viewer over
             // UI Automation; this is the other half, and the two are matched on
             // the clock afterwards. Goes with the experiment.
-            try
-            {
-                System.IO.File.AppendAllText(
-                    System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NBR-reading-surface.log"),
-                    DateTime.Now.ToString("HH:mm:ss.fff") + "  " + s + Environment.NewLine);
-            }
-            catch { }
+            SurfaceLog("SENT  " + s);
             // NOT Select(0, 0) here, deliberately. Putting the caret back on nought
             // after every sentence is a caret MOVE as far as the reader is
             // concerned, and it answers by speaking the character underneath —
