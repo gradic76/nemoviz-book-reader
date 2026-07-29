@@ -1400,6 +1400,131 @@ step currently chosen in the combo**. That kills the volume slider outright —
 
 ---
 
+## 8l. Three outputs, one position — the reading model (agreed 2026-07-29)
+
+A text book has **three** outputs: speech, braille, on-screen. Everything built so
+far quietly assumed speech was the only one — including the block on a book whose
+language has no voice, which was written the same afternoon we were talking about
+universal design. **"Cannot be spoken" is not "cannot be read."**
+
+**They depend on language completely differently:**
+
+| output | needs | coverage |
+|---|---|---|
+| visual | nothing at all | total — text is text |
+| braille | a liblouis table | **480 vendored table files, ~170 language prefixes** |
+| speech | an installed voice for that language | a handful on a typical machine |
+
+So for an uncommon language braille may be the **only** way to read a book, which
+makes an unconditional no-voice block actively harmful. **The gate must ask "can
+any ENABLED output present this book?", not "is there a voice?"** — and the
+no-voice dialog should offer all three ways forward, not just "borrow a voice".
+Today only speech exists, so the behaviour is unchanged; the rule should be
+*written* the general way now so nothing has to be unpicked later.
+
+### The sync model
+
+**The character offset is the sync point.** It already is the canonical position,
+which turns out to be the thing that makes this work: one position, three
+renderers windowing it. Sentence-to-sentence sync would have broken on the first
+braille line shorter than a sentence.
+
+**"When" and "how much" are two separate questions.** The clock says when to
+advance; the unit says how much to take. Speech usually owns both — but not
+always, see blink mode below. Separating them is also why a missing voice needs a
+**pacer, not a fake TTS**: what braille and visual need from speech is a *clock*,
+and a fake voice would drag in voice names, per-voice prefs and the speech
+dictionary, none of which mean anything when nothing is spoken.
+**"Use any voice and mute the speakers" is worse than it sounds**: a Croatian
+voice over French text takes the wrong time per sentence, so the pacing would be
+*wrong*, and NBR's own beeps go through the same card.
+**Asynchronous reading is just the pacer switched off** — no separate mode. (NBR
+still earns its keep there: library, position across sessions, bookmarks,
+heading/page navigation, format handling. Only the *reading* part is what Notepad
+also does.)
+
+**Braille — two modes (Gordan):** *follow the TTS speed*, or *drive the TTS with
+your own navigation*. They differ by whether speech runs **continuously** or
+**only on demand**. Panning is a **seek**, like the plain arrows, and its unit is
+one or more **display widths** — a new seek step alongside sentence / paragraph /
+standard page, present when braille output is on.
+
+**Visual — frames, not content units (Gordan).** Sound has no frame; a screen
+does, and its size depends on the font the reader chose. Subtitle mode = two rows
+as one frame; a sentence may fit or break into three. Blink and scroll have bigger
+frames and their own limits. **In blink mode the frame decides how much** — the
+text is shown exactly as long as the TTS needs for it, so speech must be handed
+precisely what fits, or the frame flies away half-read. Speech still owns *when*.
+**The screen never leads** — no researched app does that, and NBR does not need
+it: the existing **seek steps already are** "screen leads", under another name.
+
+**Speak / spell one word on demand** belongs to the *reader*, not to any one
+output: a name or foreign word met in braille (which gives letters, not sound), or
+a word a low-vision reader cannot resolve. Mouse click in the visual display; a
+key otherwise.
+
+### The braille transport — the hard constraint
+
+**No display drivers.** Too many vendors, series and models; the binary would
+balloon and some vendors charge for driver access (Gordan). **BrlAPI (BRLTTY)** is
+the real universal answer — output *and* input, including routing keys, ~90
+display families — but it is **the wrong bet on Windows**: BRLTTY must be running
+and holding the display, while on Windows the display is held by NVDA or JAWS, and
+two cannot fight over one device.
+
+**Through the screen reader, speech and braille are different channels.** Sending
+text to NVDA's `speakText` or JAWS's `SayString` — what PotPlayer and Screen Reader
+for Kodi do, and what NBR already does — puts **nothing** on a display. Braille is
+`nvdaController_brailleMessage`, a separate call, and a *message* channel:
+transient, overwritten as soon as the reader has something else to show. Fine for
+"here is the current sentence", poor as a surface to live in. JAWS has no
+equivalent public call — braille there is written from a JAWS script, which would
+mean shipping one.
+
+### The idea worth testing before any of that is accepted
+
+**Put the text in a real, focusable, read-only control and the screen reader
+brailles it by its own normal tracking.** No API, no drivers, every display the
+user's reader supports. It would also give **panning** (the reader handles it) and
+**routing keys** — which move the caret in that control, and *the caret we can
+observe*, which is the word-lookup, free. **Visual and braille output may then be
+one feature, not two.**
+
+Consequence if it works: panning becomes a **look-away, not a seek**, because the
+reader handles it and we never see it — the opposite of the model above, and not
+because it is better but because it is the only one that route allows.
+
+**Three things to prove. Two are audible, so no hardware is needed for them:**
+
+1. Does the reader follow the control when its content is rewritten in place, or
+   does it go quiet / re-read everything — the lesson `tbInfo` already taught?
+2. Do **Space and the arrows** still work while that control has focus? An edit
+   control likes to eat exactly those. NBR solved a version of this on the volume
+   and speed fields.
+3. Do routing keys really surface as a caret move? **This one needs a display.**
+
+**NVDA's Braille Viewer (NVDA menu → Tools) removes the hardware blocker for the
+rest**: it shows on screen exactly what would be on the display, as text — so it
+can be screenshotted and read like any other window. JAWS has its own under
+Utilities. Real hardware is then only a confirmation pass, at the equipped
+locations Gordan has in mind.
+
+### Still open
+
+- **The WPM floor.** 80 WPM was chosen for *speech*; driving **fingers** it is
+  still fast for a beginner or a foreign language. Braille probably needs its own,
+  lower range rather than inheriting the TTS number. (In *braille-leads* mode the
+  problem dissolves — but that mode needs input we may not have.)
+- **Visual on, no voice for the language:** the book opens and is readable but
+  silent. Say so once, or stay quiet? Not decided. No block either way.
+- **What does Play mean when reading by braille or screen?** There is nothing to
+  reproduce. And **elapsed / remaining** are computed from the synthesiser's WPM,
+  which is meaningless when the *reader* sets the pace. The **sleep timer** has
+  nothing to quieten. Position tracking by character offset survives all of it.
+  Worth settling **before** braille is built, or each gets answered ad hoc.
+
+---
+
 ## 9. Library window
 
 `LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one
