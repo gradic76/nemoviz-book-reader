@@ -42,7 +42,17 @@ namespace Nemoviz_Book_Reader
         private CheckBox chkUseMetadata;
 
         // Text Books tab — global TTS defaults (wired to AppSettings).
-        private ComboBox cmbSpeechEngine;
+        // The voice NAMES behind the Voice combo's rows, which are not the same
+        // strings: a stand-in row also names the language it is borrowed from.
+        private readonly List<string> voiceNames = new List<string>();
+        // Language → voice chosen in this visit ("" = the global default). Staged
+        // rather than written through, so several languages can be set up in one
+        // go and Cancel still discards the lot.
+        private readonly Dictionary<string, string> stagedLanguageVoices =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        // True while the combos are being filled: selecting a row then is us, not
+        // the user, and must not be filed as a choice.
+        private bool populating;
         private ComboBox cmbVoice;
         // Voice → engine-group catalog (from the merged backends), for the
         // engine/voice two-combo picker.
@@ -322,14 +332,24 @@ namespace Nemoviz_Book_Reader
                 appSettings.SetMediaKeys(chkUseMultimediaKeys.Checked,
                                          chkUseMultimediaKeysGlobally.Checked);
 
-            // Text Books — the default voice, plus how every voice touched in this
-            // visit is set up (each keeps its own speed / volume / pitch).
-            string voice = cmbVoice != null && cmbVoice.SelectedItem != null
-                ? cmbVoice.SelectedItem.ToString() : (appSettings.TtsVoice ?? "");
+            // Text Books — which voice reads which language, plus how every voice
+            // touched in this visit is set up (each keeps its own speed / volume /
+            // pitch).
             StageCurrentPrefs();
+            if (cmbLanguage != null) stagedLanguageVoices[SelectedLanguageCode()] = SelectedVoiceName();
             foreach (var kv in stagedPrefs.All())
                 appSettings.SetVoicePrefs(kv.Key, kv.Value);
-            appSettings.SetTtsDefaults(voice, (int)numRate.Value, (int)numPitch.Value, (int)numVolume.Value);
+
+            string globalVoice = appSettings.TtsVoice ?? "";
+            foreach (var kv in stagedLanguageVoices)
+            {
+                if (kv.Key.Length == 0) globalVoice = kv.Value;      // "all other languages"
+                else appSettings.SetLanguageVoice(kv.Key, kv.Value);
+            }
+            // The global default's own numbers, not whichever voice happens to be
+            // on screen: the selected row may well be another language's voice.
+            VoicePrefs gp = stagedPrefs.Get(globalVoice, appSettings.PrefsFor(globalVoice));
+            appSettings.SetTtsDefaults(globalVoice, gp.Wpm, gp.Pitch, gp.Volume);
 
             // Device — persist the chosen output card (empty = system default).
             if (cmbSoundCard != null)
@@ -380,43 +400,46 @@ namespace Nemoviz_Book_Reader
             TabPage page = new TabPage(Localization.T("Settings.Tab.TextBooks"));
             page.AutoScroll = true;
 
+            // Everything below the speech group moved up by the 34 units the
+            // engine row used to take.
             page.Controls.Add(BuildSpeechGroup());
-            page.Controls.Add(MakeHint("Settings.TextBooks.Speech.Hint", 14, 292, 480, 32, 1));
-            page.Controls.Add(BuildBrailleGroup(8, 330));
-            page.Controls.Add(MakeHint("Settings.TextBooks.Braille.Hint", 14, 422, 480, 32, 3));
-            page.Controls.Add(BuildVisualGroup(8, 460));
-            page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 690, 480, 32, 5));
+            page.Controls.Add(MakeHint("Settings.TextBooks.Speech.Hint", 14, 258, 480, 32, 1));
+            page.Controls.Add(BuildBrailleGroup(8, 296));
+            page.Controls.Add(MakeHint("Settings.TextBooks.Braille.Hint", 14, 388, 480, 32, 3));
+            page.Controls.Add(BuildVisualGroup(8, 426));
+            page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 656, 480, 32, 5));
             return page;
         }
 
-        // ── Speech: engine → language → voice, then how it sounds ─────────────
+        // ── Speech: language → voice, then how that voice sounds ──────────────
+        // The engine step is gone (Gordan, 2026-07-29). It grouped voices by what
+        // they report as their vendor, which is not a question a reader has an
+        // opinion about — and since CompositeSpeechBackend already merges the
+        // backends and lets the 64-bit copy win a duplicate name, there was
+        // nothing left for the step to disambiguate. Two steps instead of three
+        // is also two Tab stops instead of three, every time.
+        //
+        // What the page sets is now one thing: WHICH VOICE READS WHICH LANGUAGE.
+        // The first entry in the language list is "all other languages" — that is
+        // the global default, the last stop in the chain before nothing.
         private GroupBox BuildSpeechGroup()
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.TextBooks.SpeechGroup");
             box.Location = new Point(8, 6);
-            box.Size = new Size(500, 280);
+            box.Size = new Size(500, 246);
 
             int lx = 14, cx = 214, cw = 272, y = 26, tab = 0;
 
-            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.SpeechEngine"), lx, y + 3));
-            cmbSpeechEngine = MakeCombo(Localization.T("Settings.TextBooks.SpeechEngine"), cx, y, cw, tab++);
-            cmbSpeechEngine.SelectedIndexChanged += (s, e) => PopulateLanguagesForEngine();
-            box.Controls.Add(cmbSpeechEngine);
-
-            y += 34;
-            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Language"), lx, y + 3));
-            cmbLanguage = MakeCombo(Localization.T("Settings.TextBooks.Language"), cx, y, cw, tab++);
-            cmbLanguage.SelectedIndexChanged += (s, e) => PopulateVoicesForSelection();
+            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.BookLanguage"), lx, y + 3));
+            cmbLanguage = MakeCombo(Localization.T("Settings.TextBooks.BookLanguage"), cx, y, cw, tab++);
+            cmbLanguage.SelectedIndexChanged += (s, e) => LanguageChanged();
             box.Controls.Add(cmbLanguage);
 
             y += 34;
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Voice"), lx, y + 3));
             cmbVoice = MakeCombo(Localization.T("Settings.TextBooks.Voice"), cx, y, cw, tab++);
-            // Speed / volume / pitch belong to the VOICE, so picking one shows how
-            // that voice is set up here — never the numbers of the previous voice,
-            // which sound completely different on another engine.
-            cmbVoice.SelectedIndexChanged += (s, e) => LoadPrefsForSelectedVoice();
+            cmbVoice.SelectedIndexChanged += (s, e) => VoiceChanged();
             box.Controls.Add(cmbVoice);
 
             // Numeric fields rather than sliders: a screen reader speaks the value
@@ -460,35 +483,155 @@ namespace Nemoviz_Book_Reader
             btnDict.Click += (s, e) => OpenDictionary();
             box.Controls.Add(btnDict);
 
-            // Fill the cascade and restore the saved default voice.
             try { voiceCatalog = EnsureSpeech().GetVoiceCatalog(); }
             catch { voiceCatalog = new List<(string, string, string)>(); }
 
-            var engines = new List<string>();
-            foreach (var c in voiceCatalog)
-                if (!engines.Contains(c.Engine)) engines.Add(c.Engine);
-            engines.Sort(StringComparer.CurrentCultureIgnoreCase);
-            foreach (string en in engines) cmbSpeechEngine.Items.Add(en);
-
-            string savedVoice = appSettings.TtsVoice ?? "";
-            string savedEngine = null, savedLang = null;
-            foreach (var c in voiceCatalog)
-                if (string.Equals(c.Name, savedVoice, StringComparison.OrdinalIgnoreCase))
-                { savedEngine = c.Engine; savedLang = c.Language; break; }
-
-            int ei = savedEngine != null ? cmbSpeechEngine.Items.IndexOf(savedEngine) : -1;
-            if (ei < 0 && cmbSpeechEngine.Items.Count > 0) ei = 0;
-            if (ei >= 0) cmbSpeechEngine.SelectedIndex = ei;   // cascades to language + voice
-
-            if (savedLang != null)
-            {
-                int li = languageCodes.IndexOf(savedLang);
-                if (li >= 0) cmbLanguage.SelectedIndex = li;   // cascades to voice
-            }
-            int svi = cmbVoice.Items.IndexOf(savedVoice);
-            if (svi >= 0) cmbVoice.SelectedIndex = svi;
-            LoadPrefsForSelectedVoice();
+            PopulateLanguages();
+            cmbLanguage.SelectedIndex = 0;      // "all other languages" — cascades
             return box;
+        }
+
+        /// <summary>Every language a book can be in, not only the ones something
+        /// installed speaks. A language with no voice of its own is exactly the
+        /// case a stand-in exists for — a Bosnian book has to be able to be sent
+        /// to a Croatian voice, and it cannot be if Bosnian is not on the list.
+        /// Index 0 is the global default and carries the empty code.</summary>
+        private void PopulateLanguages()
+        {
+            cmbLanguage.Items.Clear();
+            languageCodes.Clear();
+
+            languageCodes.Add("");
+            cmbLanguage.Items.Add(Localization.T("Settings.TextBooks.AllOtherLanguages"));
+
+            var codes = new List<string>();
+            foreach (var c in voiceCatalog)
+            {
+                string p = LanguageDetector.Primary(c.Language);
+                if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
+            }
+            foreach (string p in LanguageDetector.KnownLanguages())
+                if (!codes.Contains(p)) codes.Add(p);
+            foreach (string p in appSettings.LanguagesWithVoice)
+                if (!codes.Contains(p)) codes.Add(p);
+
+            // "sh" and "cnr" are grouping codes the detector uses internally, and
+            // Windows cannot name either — they came out as "Unknown Language
+            // (cnr) (cnr)", which is not a row anyone should be asked to choose.
+            // Nothing is lost by dropping them: a book detected as one still
+            // resolves, through the stand-ins, to the Serbian or Croatian row.
+            codes.RemoveAll(c => !HasRealName(c));
+
+            codes.Sort((a, b) => string.Compare(LanguageDetector.DisplayName(a),
+                                                LanguageDetector.DisplayName(b),
+                                                StringComparison.CurrentCultureIgnoreCase));
+            foreach (string p in codes)
+            {
+                languageCodes.Add(p);
+                cmbLanguage.Items.Add(LanguageDetector.DisplayName(p) + " (" + p + ")");
+            }
+        }
+
+        /// <summary>Whether Windows can put a name to this code. It answers with
+        /// "Unknown Language (xx)" for one it does not know, and DisplayName hands
+        /// that straight back — so this is the test for a code worth showing.</summary>
+        private static bool HasRealName(string code)
+        {
+            string name = LanguageDetector.DisplayName(code);
+            return name.Length > 0
+                && !string.Equals(name, code, StringComparison.OrdinalIgnoreCase)
+                && name.IndexOf("Unknown", StringComparison.OrdinalIgnoreCase) < 0;
+        }
+
+        /// <summary>The code behind the selected row; empty means the global
+        /// default rather than a real language.</summary>
+        private string SelectedLanguageCode()
+        {
+            int i = cmbLanguage != null ? cmbLanguage.SelectedIndex : -1;
+            return i >= 0 && i < languageCodes.Count ? languageCodes[i] : "";
+        }
+
+        /// <summary>The voice NAME behind the selected row. The row's text is not
+        /// it: a stand-in row carries the language it is borrowed from, and the
+        /// "not set" row carries nothing.</summary>
+        private string SelectedVoiceName()
+        {
+            int i = cmbVoice != null ? cmbVoice.SelectedIndex : -1;
+            return i >= 0 && i < voiceNames.Count ? voiceNames[i] : "";
+        }
+
+        /// <summary>Language picked → the voices that could read it, and whichever
+        /// one is currently set for it.</summary>
+        private void LanguageChanged()
+        {
+            if (cmbVoice == null || voiceCatalog == null) return;
+            string code = SelectedLanguageCode();
+
+            bool wasPopulating = populating;
+            populating = true;
+            cmbVoice.Items.Clear();
+            voiceNames.Clear();
+
+            if (code.Length > 0)
+            {
+                // A language may be left without a voice on purpose: it then falls
+                // through to a related language, or to the global default.
+                voiceNames.Add("");
+                cmbVoice.Items.Add(Localization.T("Settings.TextBooks.VoiceNotSet"));
+            }
+
+            // Voices that speak exactly this language, plainly named.
+            foreach (var c in voiceCatalog)
+            {
+                if (code.Length > 0 && LanguageDetector.Primary(c.Language) != code) continue;
+                voiceNames.Add(c.Name);
+                cmbVoice.Items.Add(c.Name);
+            }
+
+            // Then everything that can READ it without speaking it, each saying
+            // what it actually speaks so the choice is never made blind. Two
+            // sources, one label: SameLanguage (Croatian and Serbian count as one
+            // language, which is why a Croatian voice turns up under Serbian at
+            // all) and StandInsFor (a Czech voice reads them both). Marking these
+            // matters more than it looks — with six voices under Serbian and only
+            // one of them actually Serbian, an unmarked list says the opposite of
+            // the truth.
+            if (code.Length > 0)
+            {
+                var reachable = new List<string>();
+                foreach (var c in voiceCatalog)
+                    if (LanguageDetector.SameLanguage(c.Language, code)) reachable.Add(c.Name);
+                foreach (string neighbour in LanguageDetector.StandInsFor(code))
+                    foreach (var c in voiceCatalog)
+                        if (LanguageDetector.SameLanguage(c.Language, neighbour)
+                            && !reachable.Contains(c.Name))
+                            reachable.Add(c.Name);
+
+                foreach (var c in voiceCatalog)
+                {
+                    if (!reachable.Contains(c.Name) || voiceNames.Contains(c.Name)) continue;
+                    voiceNames.Add(c.Name);
+                    cmbVoice.Items.Add(Localization.T("Settings.TextBooks.VoiceStandIn",
+                        c.Name, LanguageDetector.DisplayName(LanguageDetector.Primary(c.Language))));
+                }
+            }
+
+            string want;
+            if (!stagedLanguageVoices.TryGetValue(code, out want))
+                want = code.Length > 0 ? appSettings.LanguageVoice(code) : (appSettings.TtsVoice ?? "");
+            int wi = voiceNames.IndexOf(want ?? "");
+            cmbVoice.SelectedIndex = wi >= 0 ? wi : 0;
+
+            populating = wasPopulating;
+            LoadPrefsForSelectedVoice();
+        }
+
+        /// <summary>Voice picked → it becomes this language's voice, and the three
+        /// numbers below switch to how that voice is set up.</summary>
+        private void VoiceChanged()
+        {
+            if (!populating) stagedLanguageVoices[SelectedLanguageCode()] = SelectedVoiceName();
+            LoadPrefsForSelectedVoice();
         }
 
         // Voices set up during this visit to the dialog. Held here rather than
@@ -504,7 +647,7 @@ namespace Nemoviz_Book_Reader
         private void LoadPrefsForSelectedVoice()
         {
             if (cmbVoice == null || numRate == null || numVolume == null || numPitch == null) return;
-            string voice = cmbVoice.SelectedItem != null ? cmbVoice.SelectedItem.ToString() : "";
+            string voice = SelectedVoiceName();
             if (string.IsNullOrEmpty(voice) || string.Equals(voice, prefsVoice, StringComparison.OrdinalIgnoreCase))
                 return;
 
@@ -706,43 +849,6 @@ namespace Nemoviz_Book_Reader
             return n;
         }
 
-        /// <summary>Engine chosen → list the languages that engine actually speaks.</summary>
-        private void PopulateLanguagesForEngine()
-        {
-            if (cmbLanguage == null || cmbSpeechEngine == null || voiceCatalog == null) return;
-            string engine = cmbSpeechEngine.SelectedItem as string;
-            cmbLanguage.Items.Clear();
-            languageCodes.Clear();
-            foreach (var c in voiceCatalog)
-            {
-                if (c.Engine != engine) continue;
-                string code = string.IsNullOrEmpty(c.Language) ? "" : c.Language;
-                if (languageCodes.Contains(code)) continue;
-                languageCodes.Add(code);
-                cmbLanguage.Items.Add(LanguageLabel(code));
-            }
-            if (cmbLanguage.Items.Count > 0) cmbLanguage.SelectedIndex = 0;  // cascades to voice
-            else PopulateVoicesForSelection();
-        }
-
-        /// <summary>Engine + language chosen → the voices that match both.</summary>
-        private void PopulateVoicesForSelection()
-        {
-            if (cmbVoice == null || cmbSpeechEngine == null || voiceCatalog == null) return;
-            string engine = cmbSpeechEngine.SelectedItem as string;
-            int li = cmbLanguage != null ? cmbLanguage.SelectedIndex : -1;
-            string lang = (li >= 0 && li < languageCodes.Count) ? languageCodes[li] : null;
-
-            cmbVoice.Items.Clear();
-            foreach (var c in voiceCatalog)
-            {
-                if (c.Engine != engine) continue;
-                if (lang != null && (c.Language ?? "") != lang) continue;
-                cmbVoice.Items.Add(c.Name);
-            }
-            if (cmbVoice.Items.Count > 0) cmbVoice.SelectedIndex = 0;
-        }
-
         /// <summary>"hr-HR" → the language's own name, so the list reads naturally.</summary>
         internal static string LanguageLabel(string code)
         {
@@ -774,8 +880,8 @@ namespace Nemoviz_Book_Reader
             try
             {
                 CompositeSpeechBackend sp = EnsureSpeech();
-                if (cmbVoice != null && cmbVoice.SelectedItem != null)
-                    sp.SelectVoice(cmbVoice.SelectedItem.ToString());
+                string picked = SelectedVoiceName();
+                if (picked.Length > 0) sp.SelectVoice(picked);
                 sp.SetRate(TtsReader.WpmToRate((int)numRate.Value));
                 sp.SetVolume((int)numVolume.Value);
                 sp.SetPitch((int)numPitch.Value * 5);
@@ -793,8 +899,8 @@ namespace Nemoviz_Book_Reader
             try
             {
                 CompositeSpeechBackend sp = EnsureSpeech();
-                if (cmbVoice != null && cmbVoice.SelectedItem != null)
-                    sp.SelectVoice(cmbVoice.SelectedItem.ToString());
+                string picked = SelectedVoiceName();
+                if (picked.Length > 0) sp.SelectVoice(picked);
                 sp.SetRate(TtsReader.WpmToRate((int)numRate.Value));
                 sp.SetVolume((int)numVolume.Value);
                 sp.SetPitch((int)numPitch.Value * 5); // -10..10 → -50..50 %
