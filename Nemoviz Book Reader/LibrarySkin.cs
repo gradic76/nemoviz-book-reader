@@ -53,20 +53,19 @@ namespace Nemoviz_Book_Reader
             if (p.Menu != null)
             {
                 p.Menu.Dock = DockStyle.None;
+                // AutoSize wins over Size, so without this the bar shrinks to the
+                // width of "File View" and the row Gordan asked to run end to end
+                // stops a fifth of the way across.
+                p.Menu.AutoSize = false;
                 p.Menu.SetBounds(Margin, Margin, DialogSkin.W - 2 * Margin, MenuH);
-                // The professional renderer paints its own gradient over
-                // BackColor and ignores it; the system renderer honours it, which
-                // is all that is wanted here — the bar goes dark, the items stay
-                // real menu items with their Alt keys.
-                p.Menu.RenderMode = ToolStripRenderMode.System;
+                // Setting BackColor is not enough and the system render mode did
+                // not take it either — a ToolStrip paints its own background over
+                // both. The colours have to come from a renderer, so it gets one.
+                p.Menu.Renderer = new SkinMenuRenderer();
                 p.Menu.BackColor = NewPlayerSkin.Glass;
                 p.Menu.ForeColor = NewPlayerSkin.Lit;
                 p.Menu.Font = DialogSkin.FBody;
-                foreach (ToolStripItem it in p.Menu.Items)
-                {
-                    it.BackColor = NewPlayerSkin.Glass;
-                    it.ForeColor = NewPlayerSkin.Lit;
-                }
+                foreach (ToolStripItem it in p.Menu.Items) Recolour(it);
                 p.Menu.BringToFront();
             }
 
@@ -159,6 +158,19 @@ namespace Nemoviz_Book_Reader
             v.Columns[1].Width = Math.Max(40, width - label);
         }
 
+        /// <summary>Text and background down a whole menu tree. The renderer draws
+        /// the surfaces; the colour of the writing still comes from the item.</summary>
+        private static void Recolour(ToolStripItem item)
+        {
+            if (item == null) return;
+            item.BackColor = NewPlayerSkin.Glass;
+            item.ForeColor = NewPlayerSkin.Lit;
+            item.Font = DialogSkin.FBody;
+            ToolStripMenuItem mi = item as ToolStripMenuItem;
+            if (mi == null) return;
+            foreach (ToolStripItem child in mi.DropDownItems) Recolour(child);
+        }
+
         private static void Front(Form f, Control c)
         {
             if (c == null) return;
@@ -187,5 +199,58 @@ namespace Nemoviz_Book_Reader
             b.Text = Localization.T(key);
             b.AccessibleName = Localization.T(key + ".Accessible");
         }
+    }
+
+    /// <summary>The menu bar in the panel's colours. A `MenuStrip` has to stay
+    /// (a real Win32 menu bar cannot live on a borderless window — measured, see
+    /// <see cref="LibrarySkin"/>), so the only thing left to change is how it
+    /// paints. Everything about it as a control is untouched: the items, their
+    /// Alt keys, what a screen reader is handed.</summary>
+    internal sealed class SkinMenuRenderer : ToolStripProfessionalRenderer
+    {
+        public SkinMenuRenderer() : base(new SkinMenuColours()) { }
+
+        /// <summary>The highlight has to carry on its own. Colour alone would
+        /// leave the focused item indistinguishable to anyone who cannot separate
+        /// these two darks, so the lit outline goes round it as well — the same
+        /// reasoning as the groove on the player's panel.</summary>
+        protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
+        {
+            bool on = e.Item.Selected || (e.Item as ToolStripMenuItem) != null
+                      && ((ToolStripMenuItem)e.Item).DropDown.Visible;
+            var r = new Rectangle(0, 0, e.Item.Width - 1, e.Item.Height - 1);
+            using (var br = new SolidBrush(on ? DialogSkin.Sticker : NewPlayerSkin.Glass))
+                e.Graphics.FillRectangle(br, 0, 0, e.Item.Width, e.Item.Height);
+            if (on)
+                using (var pen = new Pen(NewPlayerSkin.Lit))
+                    e.Graphics.DrawRectangle(pen, r);
+        }
+    }
+
+    internal sealed class SkinMenuColours : ProfessionalColorTable
+    {
+        private static Color Glass { get { return NewPlayerSkin.Glass; } }
+        private static Color Sticker { get { return DialogSkin.Sticker; } }
+        private static Color Edge { get { return DialogSkin.StickerEdge; } }
+
+        public override Color MenuStripGradientBegin { get { return Glass; } }
+        public override Color MenuStripGradientEnd { get { return Glass; } }
+        public override Color ToolStripDropDownBackground { get { return Glass; } }
+        public override Color MenuBorder { get { return Edge; } }
+        public override Color MenuItemBorder { get { return Edge; } }
+        public override Color MenuItemSelected { get { return Sticker; } }
+        public override Color MenuItemSelectedGradientBegin { get { return Sticker; } }
+        public override Color MenuItemSelectedGradientEnd { get { return Sticker; } }
+        public override Color MenuItemPressedGradientBegin { get { return Sticker; } }
+        public override Color MenuItemPressedGradientMiddle { get { return Sticker; } }
+        public override Color MenuItemPressedGradientEnd { get { return Sticker; } }
+        // The strip down the left of a drop-down, where check marks live.
+        public override Color ImageMarginGradientBegin { get { return Glass; } }
+        public override Color ImageMarginGradientMiddle { get { return Glass; } }
+        public override Color ImageMarginGradientEnd { get { return Glass; } }
+        public override Color SeparatorDark { get { return Edge; } }
+        public override Color SeparatorLight { get { return Edge; } }
+        public override Color CheckBackground { get { return Sticker; } }
+        public override Color CheckSelectedBackground { get { return Sticker; } }
     }
 }
