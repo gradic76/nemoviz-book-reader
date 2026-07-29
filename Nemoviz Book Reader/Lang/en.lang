@@ -14,7 +14,9 @@ Player.Info.PartLabel=Part:
 Player.Info.PageLabel=Page:
 Player.Info.HeadingLabel=Heading:
 Player.Info.BookmarksLabel=Bookmarks:
-Player.Info.SpeechEngineLabel=Speech engine:
+Player.Info.VoiceLabel=Voice:
+; {0} is the book's language. Stands in the voice line while the book has none.
+Player.Info.NoVoiceLabel=No installed voice speaks
 Player.Info.ElapsedSegmentLabel=Part time elapsed:
 Player.Info.ElapsedTotalLabel=Total time elapsed:
 Player.Info.RemainingSegmentLabel=Part time remaining:
@@ -313,6 +315,11 @@ Prop.Text.NoVoiceShort=No installed voice speaks {0} — choose below.
 Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Nothing has been chosen for you — pick a language and a voice above if you want this book read anyway.
 ; {0} is the book's language. Spoken when a book that cannot be read is opened.
 Player.NoVoiceForLanguage=No installed voice speaks {0}. Open Properties with Alt+Enter to choose one.
+NoVoice.Title=No voice for this book
+; {0} is the book's language.
+NoVoice.Message=This book is in {0}, and no installed voice speaks it. Choose a voice to read it with, just this once, or leave it unread until a voice for {0} is installed.
+NoVoice.Read=Read with this voice
+NoVoice.Leave=Leave it unread
 Prop.Text.ReadingIn=Reading in:
 Prop.Text.Language=Detected language:
 Prop.Text.Characters=Characters:

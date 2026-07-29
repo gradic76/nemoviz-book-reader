@@ -2351,11 +2351,25 @@ namespace Nemoviz_Book_Reader
             int bmk = currentBook != null ? currentBook.Bookmarks.Count : 0;
             sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl);
 
-            // Speech engine + voice + reading speed, e.g.
-            // "Speech engine: RHVoice Karmela, 250 WPM".
-            string voice = tts != null && !string.IsNullOrEmpty(tts.CurrentVoice) ? tts.CurrentVoice : dash;
-            sb.Append(Localization.T("Player.Info.SpeechEngineLabel")).Append(' ')
-              .Append(voice).Append(", ").Append(currentWpm).Append(" WPM").Append(nl).Append(nl);
+            // Voice + reading speed, e.g. "Voice: Karmela, 250 WPM". It said
+            // "Speech engine" until the engine stopped being a thing the reader
+            // chooses; the value was always the voice.
+            //
+            // With no voice this is the line that would lie hardest — it would name
+            // whatever spoke last — so it carries the reason instead. The dialog
+            // is the moment; this is the STATE, and it stays for as long as the
+            // book is loaded, for anyone who dismissed the dialog or never heard
+            // it announced.
+            if (textNoVoice)
+                sb.Append(Localization.T("Player.Info.NoVoiceLabel")).Append(' ')
+                  .Append(SettingsForm.LanguageName(LanguageDetector.Primary(
+                      currentBook != null ? currentBook.TextLanguage : ""))).Append(nl).Append(nl);
+            else
+            {
+                string voice = tts != null && !string.IsNullOrEmpty(tts.CurrentVoice) ? tts.CurrentVoice : dash;
+                sb.Append(Localization.T("Player.Info.VoiceLabel")).Append(' ')
+                  .Append(voice).Append(", ").Append(currentWpm).Append(" WPM").Append(nl).Append(nl);
+            }
 
             int total = tts != null ? tts.TotalChars : 0;
             int at = tts != null ? tts.CharPosition : 0;
@@ -2696,10 +2710,12 @@ namespace Nemoviz_Book_Reader
                 else
                 {
                     // Space would otherwise start it reading in whatever voice
-                    // spoke last, which is the very thing the notice is there to
-                    // prevent. Say why again instead — the reader may well have
-                    // pressed it precisely because nothing happened.
-                    if (textNoVoice) { AnnounceNoVoice(); return; }
+                    // spoke last, which is the very thing this is here to prevent.
+                    // Pressing Play on a book you were told cannot be read is a
+                    // change of mind, so it gets the question again rather than
+                    // the same refusal — and only the announcement if the dialog
+                    // itself could not be put.
+                    if (textNoVoice && !AskForVoice()) { AnnounceNoVoice(); return; }
                     tts.Play();
                     SetPlayPauseState(true);
                 }
@@ -3296,19 +3312,38 @@ namespace Nemoviz_Book_Reader
             // Cache the character count for the reading-time estimate.
             currentBook.TextChars = tts.TotalChars;
 
-            UpdateTitleBar();
-            UpdateTextPositionDisplay();
-            appSettings.SetLastOpenedBook(currentBook.FolderPath);
-
             // A book nothing can read does not start reading, however it was
             // opened. Autoplay from the Library is exactly how a Spanish book got
             // read aloud in Croatian before anyone could stop it.
+            //
+            // The question is put ONCE, on the first load. Declining is a decision:
+            // being asked again every time the book was opened would be nagging,
+            // so after that it takes pressing Play to be asked afresh. Deferred a
+            // tick so the player is on screen behind the dialog rather than the
+            // dialog arriving out of nothing.
+            if (textNoVoice && !currentBook.VoiceAsked)
+            {
+                BookData asked = currentBook;
+                BeginInvoke((Action)(() =>
+                {
+                    if (currentBook != asked) return;      // book changed meanwhile
+                    if (AskForVoice() && autoPlay) BtnPlayPause_Click(null, EventArgs.Empty);
+                }));
+            }
+
+            UpdateTitleBar();
+            UpdateTextPositionDisplay();
+
             if (textNoVoice)
             {
+                // NOT the book you are now reading: it cannot be read. It stays
+                // unread in the Library, and NBR does not resume it on the next
+                // start, until something is settled about the voice.
                 SetPlayPauseState(false);
-                BeginInvoke((Action)(() => AnnounceNoVoice()));
                 return;
             }
+
+            appSettings.SetLastOpenedBook(currentBook.FolderPath);
 
             if (autoPlay)
             {
@@ -3394,10 +3429,9 @@ namespace Nemoviz_Book_Reader
         /// chooses, which they do in its Properties.</summary>
         private bool textNoVoice;
 
-        /// <summary>Says, once, that this book cannot be read and what to do about
-        /// it. Through the announcement channel rather than a message box, because
-        /// a modal on top of a book opening from the Library is one more thing to
-        /// dismiss before you can act on it.</summary>
+        /// <summary>Says that this book cannot be read and what to do about it.
+        /// The fallback for when the dialog is not the right answer — the reader
+        /// has already declined once and is only being reminded.</summary>
         private void AnnounceNoVoice()
         {
             string lang = currentBook != null ? currentBook.TextLanguage : "";
@@ -3405,6 +3439,45 @@ namespace Nemoviz_Book_Reader
             tones.Play(300, 150);
             AnnounceToScreenReader(lblAnnounceInfo,
                 Localization.T("Player.NoVoiceForLanguage", name));
+        }
+
+        /// <summary>Puts the question, and acts on the answer. Returns true when a
+        /// voice was chosen and the book can be read after all.
+        /// <para>A dialog rather than an announcement, because this is not news to
+        /// be caught in passing — it is a state that has to be acknowledged, and
+        /// one a reader who cannot hear the announcement would otherwise never
+        /// learn about at all (Gordan, 2026-07-29: universal design).</para></summary>
+        private bool AskForVoice()
+        {
+            if (currentBook == null || tts == null) return false;
+            List<(string Name, string Vendor, string Language)> voices;
+            try { voices = tts.GetVoiceInfos(); }
+            catch { return false; }
+
+            currentBook.VoiceAsked = true;
+            string chosen = "";
+            using (var dlg = new NoVoiceForm(currentBook.TextLanguage, voices))
+                if (dlg.ShowDialog(this) == DialogResult.OK) chosen = dlg.ChosenVoice;
+
+            if (string.IsNullOrEmpty(chosen))
+            {
+                try { currentBook.Save(); } catch { }
+                return false;
+            }
+
+            // Chosen for THIS book, which is the only scope this dialog has.
+            currentBook.TextVoice = chosen;
+            try { currentBook.Save(); } catch { }
+            ApplyTtsSettings();
+            UpdateTitleBar();
+            if (textNoVoice) return false;
+
+            // It can be read now, so it becomes the book you are reading —
+            // the step the load skipped when it could not be read. Both routes
+            // into here need it, which is why it lives here and not at either
+            // call site.
+            appSettings.SetLastOpenedBook(currentBook.FolderPath);
+            return true;
         }
 
         private void ApplyTtsSettings()
