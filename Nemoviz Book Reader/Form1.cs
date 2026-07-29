@@ -3516,7 +3516,16 @@ namespace Nemoviz_Book_Reader
             string s = tts.CurrentText ?? "";
             if (tbReadingSurface.Text == s) return;
             tbReadingSurface.Text = s;
-            tbReadingSurface.Select(0, 0);
+            // NOT Select(0, 0) here, deliberately. Putting the caret back on nought
+            // after every sentence is a caret MOVE as far as the reader is
+            // concerned, and it answers by speaking the character underneath —
+            // which is the first letter of the new sentence, and always a capital.
+            // Gordan heard it as "random capital letters" over the reading.
+            //
+            // It also happens to be the open question about the braille lag: if
+            // braille was only refreshing on that caret event, dropping it will
+            // stop braille following at all, and then we know exactly what drives
+            // it. Either way this tells us something the guessing could not.
         }
 
         /// <summary>Says that this book cannot be read and what to do about it.
