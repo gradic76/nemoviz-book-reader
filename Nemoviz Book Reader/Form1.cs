@@ -3535,8 +3535,13 @@ namespace Nemoviz_Book_Reader
             if (start == lastSurfaceStart) return;
             lastSurfaceStart = start;
             if (start < 0 || start > tbReadingSurface.TextLength) return;
-            int len = Math.Min(s.Length, tbReadingSurface.TextLength - start);
-            tbReadingSurface.Select(start, len);
+            // The CARET moves, nothing is selected. Selecting the sentence did
+            // carry braille perfectly, but a screen reader treats a selection as
+            // news: Gordan heard it reading the marked text out, announcing
+            // "selected" and "not selected", and repeating pieces — over our own
+            // speech. Braille shows the line around the caret either way, so the
+            // output is unchanged and the commentary has nothing to report.
+            tbReadingSurface.Select(start, 0);
             tbReadingSurface.ScrollToCaret();
             // Stamped so the braille lag can be MEASURED rather than guessed from
             // two screenshots. The braille side is read out of NVDA's viewer over
