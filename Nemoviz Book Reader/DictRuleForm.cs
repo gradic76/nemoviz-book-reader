@@ -135,8 +135,7 @@ namespace Nemoviz_Book_Reader
             string problem = rule.Validate();
             if (problem != null)
             {
-                MessageBox.Show(this, problem, Localization.T("Dict.Error.Title"),
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageForm.ShowInfo(this, problem, Localization.T("Dict.Error.Title"));
                 tbPattern.Focus();
                 return;
             }

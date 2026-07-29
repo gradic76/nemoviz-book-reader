@@ -264,6 +264,11 @@ Btn.OK=OK
 Btn.OK.Accessible=Open selected book
 Btn.Cancel=Cancel
 Btn.Cancel.Accessible=Close library
+; The message shell's own Yes/No — plain, the way the system's own MessageBox
+; buttons announce themselves (no per-dialog override; the message text itself,
+; read first, is what supplies the context).
+Btn.Yes=Yes
+Btn.No=No
 
 ; Library - dialogs
 Dialog.Restart.Message=Book has been rewound to the start.
@@ -507,7 +512,6 @@ Settings.Misc.Look.Restart=The look changes when NBR starts again. Restart it no
 ; Per-control help: a ? on each group opens one short explanation. F1 on the
 ; focused control opens the same text without travelling to the button.
 Hint.Button.Accessible=Help for {0}
-Hint.Close=Close
 Hint.Playback=Volume and speed for this book only. They do not change the settings for anything else, and they are heard while you adjust them.
 Hint.RemoveRumble=Cuts the very lowest frequencies — traffic, air conditioning, handling noise. It cannot recover a muddy recording, but it clears the bottom end so speech has room.
 Hint.NoiseRemoval=Reduces steady background hiss, the kind a tape or a cheap microphone leaves behind. Too strong a setting starts to eat the voice with it, so raise it only until the hiss goes.

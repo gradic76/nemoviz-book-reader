@@ -1222,17 +1222,15 @@ namespace Nemoviz_Book_Reader
             int count = books.Count;
             if (count == 0)
             {
-                MessageBox.Show(Localization.T("Dialog.ClearLibrary.Empty"), Localization.T("Dialog.ClearLibrary.Title"));
+                MessageForm.ShowInfo(this, Localization.T("Dialog.ClearLibrary.Empty"), Localization.T("Dialog.ClearLibrary.Title"));
                 return;
             }
 
-            DialogResult result = MessageBox.Show(
+            // Default No — this is destructive.
+            bool yes = MessageForm.ShowConfirm(this,
                 Localization.T("Dialog.ClearLibrary.Message", count),
-                Localization.T("Dialog.ClearLibrary.Title"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);   // default No — this is destructive
-            if (result != DialogResult.Yes) return;
+                Localization.T("Dialog.ClearLibrary.Title"), defaultToNo: true);
+            if (!yes) return;
 
             int deleted = 0, skipped = 0;
             foreach (BookData book in books.ToList())
@@ -1252,7 +1250,7 @@ namespace Nemoviz_Book_Reader
             string msg = Localization.T("Dialog.ClearLibrary.Done", deleted);
             if (skipped > 0)
                 msg += " " + Localization.T("Dialog.ClearLibrary.Skipped", skipped);
-            MessageBox.Show(msg, Localization.T("Dialog.ClearLibrary.Title"));
+            MessageForm.ShowInfo(this, msg, Localization.T("Dialog.ClearLibrary.Title"));
         }
 
         private void DeleteSelectedBook()
@@ -1265,22 +1263,18 @@ namespace Nemoviz_Book_Reader
 
             if (PathsEqual(folderPath, activeBookFolderPath))
             {
-                MessageBox.Show(
+                MessageForm.ShowInfo(this,
                     Localization.T("Dialog.ActiveBook.Message", title),
-                    Localization.T("Dialog.ActiveBook.Title"),
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                    Localization.T("Dialog.ActiveBook.Title"));
                 return;
             }
 
-            DialogResult result = MessageBox.Show(
+            // No explicit default here in the original either — Enter deletes.
+            // Preserved as-is rather than quietly making it safer; see CLAUDE.md.
+            bool yes = MessageForm.ShowConfirm(this,
                 Localization.T("Dialog.ConfirmDelete.Message", title),
-                Localization.T("Dialog.ConfirmDelete.Title"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (result != DialogResult.Yes)
-                return;
+                Localization.T("Dialog.ConfirmDelete.Title"));
+            if (!yes) return;
 
             int oldIdx = listBooks.SelectedItems.Count > 0 ? listBooks.SelectedItems[0].Index : 0;
 
@@ -1295,7 +1289,7 @@ namespace Nemoviz_Book_Reader
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Localization.T("Dialog.DeleteError.Message", ex.Message), Localization.T("Common.Error"));
+                MessageForm.ShowInfo(this, Localization.T("Dialog.DeleteError.Message", ex.Message), Localization.T("Common.Error"));
             }
         }
 
@@ -1531,9 +1525,8 @@ namespace Nemoviz_Book_Reader
                     {
                         if (createdFolder) TryDeleteFolder(destFolder);
                         if (!quiet)
-                            MessageBox.Show(Localization.T("Dialog.DrmProtected.Message"),
-                                Localization.T("Dialog.DrmProtected.Title"),
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageForm.ShowInfo(this, Localization.T("Dialog.DrmProtected.Message"),
+                                Localization.T("Dialog.DrmProtected.Title"));
                         return false;
                     }
                     // Clean here, once, with the heading and page offsets moving
@@ -1594,7 +1587,7 @@ namespace Nemoviz_Book_Reader
                 if (!quiet)
                 {
                     LoadBooks();
-                    MessageBox.Show(Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
+                    MessageForm.ShowInfo(this, Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
                 }
                 return true;
             }
@@ -1609,7 +1602,7 @@ namespace Nemoviz_Book_Reader
             {
                 if (createdFolder) TryDeleteFolder(destFolder);
                 if (!quiet)
-                    MessageBox.Show(Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
+                    MessageForm.ShowInfo(this, Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
                 return false;
             }
         }
@@ -1656,12 +1649,12 @@ namespace Nemoviz_Book_Reader
                 imported.Save();
 
                 LoadBooks();
-                MessageBox.Show(Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
+                MessageForm.ShowInfo(this, Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
             }
             catch (Exception ex)
             {
                 if (created) TryDeleteFolder(destFolder);
-                MessageBox.Show(Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
+                MessageForm.ShowInfo(this, Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
             }
             return true;   // handled either way — don't fall through to generic import
         }
@@ -1696,11 +1689,9 @@ namespace Nemoviz_Book_Reader
             // import — steer the user to Open File, which handles them properly.
             if (LibraryScanner.ContainsArchiveFiles(folderPath))
             {
-                MessageBox.Show(
+                MessageForm.ShowInfo(this,
                     Localization.T("Dialog.ArchiveInFolder.Message"),
-                    Localization.T("Dialog.ArchiveInFolder.Title"),
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                    Localization.T("Dialog.ArchiveInFolder.Title"));
                 return;
             }
 
@@ -1721,16 +1712,15 @@ namespace Nemoviz_Book_Reader
                 int total = textFiles.Count + audioBooks.Count;
                 if (total == 0)
                 {
-                    MessageBox.Show(Localization.T("Dialog.NoBooksFound.Message"), Localization.T("Dialog.NoBooksFound.Title"));
+                    MessageForm.ShowInfo(this, Localization.T("Dialog.NoBooksFound.Message"), Localization.T("Dialog.NoBooksFound.Title"));
                     return;
                 }
                 if (total > 50)
                 {
-                    DialogResult result = MessageBox.Show(
+                    bool proceed = MessageForm.ShowConfirm(this,
                         Localization.T("Dialog.ConfirmManyBooks.Message", total),
-                        Localization.T("Dialog.ConfirmManyBooks.Title"),
-                        MessageBoxButtons.YesNo);
-                    if (result == DialogResult.No) return;
+                        Localization.T("Dialog.ConfirmManyBooks.Title"));
+                    if (!proceed) return;
                 }
 
                 int imported = 0, skipped = 0;
@@ -1766,11 +1756,11 @@ namespace Nemoviz_Book_Reader
                 string msg = Localization.T("Dialog.ImportFolderSuccess.Message", imported);
                 if (skipped > 0)
                     msg += " " + Localization.T("Dialog.ImportFolderSuccess.Skipped", skipped);
-                MessageBox.Show(msg, Localization.T("Dialog.ImportFolderSuccess.Title"));
+                MessageForm.ShowInfo(this, msg, Localization.T("Dialog.ImportFolderSuccess.Title"));
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
+                MessageForm.ShowInfo(this, Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
             }
         }
 

@@ -6,6 +6,10 @@ using System.Windows.Forms;
 
 namespace Nemoviz_Book_Reader
 {
+    /// <summary>Which corner of the PLAYER a working dialog settles against.
+    /// See <see cref="DialogSkin.AnchorToOwner"/>.</summary>
+    internal enum DialogAnchor { BottomRight, BottomLeft }
+
     internal sealed class PropParts
     {
         public TextBox Info;
@@ -67,17 +71,71 @@ namespace Nemoviz_Book_Reader
         /// since there is no title bar to grab.</summary>
         public static DialogCanvas Shell(Form f, int height)
         {
+            return Shell(f, W, height);
+        }
+
+        /// <summary>The same face at any width — for the smaller working dialogs
+        /// (Go To, Sleep Timer, Manage Bookmarks, the archive password prompt),
+        /// which have no business being 960 wide just because Properties is.</summary>
+        public static DialogCanvas Shell(Form f, int width, int height)
+        {
             EnsureFonts();
             f.FormBorderStyle = FormBorderStyle.None;
-            f.ClientSize = new Size(W, height);
+            f.ClientSize = new Size(width, height);
             f.BackColor = NewPlayerSkin.PanelMid;
-            using (var casing = NewPlayerSkin.Round(new RectangleF(0, 0, W, height), NewPlayerSkin.CaseRadius))
+            using (var casing = NewPlayerSkin.Round(new RectangleF(0, 0, width, height), NewPlayerSkin.CaseRadius))
                 f.Region = new Region(casing);
 
             var canvas = new DialogCanvas(f);
             f.Controls.Add(canvas);
             canvas.SendToBack();
             return canvas;
+        }
+
+        /// <summary>A plain read-only, tabbable, word-wrapped TextBox with no
+        /// position or colour yet — the shape a screen reader can walk line by
+        /// line (a Label is never visited by Tab, the lesson the hint boxes and
+        /// the info glass both already learned). Finish it with <see
+        /// cref="AsGlass"/> at whatever rectangle the layout needs.</summary>
+        public static TextBox NewMessageBox(string text)
+        {
+            var t = new TextBox();
+            t.Multiline = true;
+            t.ReadOnly = true;
+            t.TabStop = true;
+            t.WordWrap = true;
+            t.Text = text;
+            t.AccessibleName = text;
+            return t;
+        }
+
+        /// <summary>Where a working dialog settles: not centered, but anchored to
+        /// a corner of the PLAYER itself (Gordan, 2026-07-29) — list dialogs (Go
+        /// To, Manage Bookmarks) to the bottom right, short ones (Sleep Timer, the
+        /// archive password prompt) to the bottom left, so each family always
+        /// opens in its own zone and is learned once. The bottom edge is the one
+        /// thing both families share, which is what keeps this a single
+        /// convention rather than two unrelated ones.
+        /// <para>Clamped to the working area of whichever screen the owner is on,
+        /// so a smaller display never has the dialog land partly off-screen — the
+        /// 13" laptop case in §10b is the one actually measured to be tight.</para>
+        /// </summary>
+        public static void AnchorToOwner(Form dlg, DialogAnchor anchor, int marginX = 24, int marginY = 24)
+        {
+            dlg.StartPosition = FormStartPosition.Manual;
+            dlg.Load += (s, e) =>
+            {
+                Rectangle refRect = dlg.Owner != null ? dlg.Owner.Bounds : Screen.FromControl(dlg).WorkingArea;
+                int x = anchor == DialogAnchor.BottomRight
+                    ? refRect.Right - dlg.Width - marginX
+                    : refRect.Left + marginX;
+                int y = refRect.Bottom - dlg.Height - marginY;
+
+                Rectangle wa = Screen.FromRectangle(refRect).WorkingArea;
+                x = Math.Max(wa.Left, Math.Min(x, wa.Right - dlg.Width));
+                y = Math.Max(wa.Top, Math.Min(y, wa.Bottom - dlg.Height));
+                dlg.Location = new Point(x, y);
+            };
         }
 
         /// <summary>A read-only field turned into display glass. The control is

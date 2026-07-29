@@ -31,16 +31,33 @@ namespace Nemoviz_Book_Reader
         private static readonly List<Button> helpKeys = new List<Button>();
         public static bool IsHelpKey(Button b) { return b != null && helpKeys.Contains(b); }
 
-        /// <summary>Puts a ? on a group and remembers the text behind it.</summary>
+        /// <summary>Puts a ? on a group and remembers the text behind it. The
+        /// button goes in the group's own top-right corner.</summary>
         public static void Attach(GroupBox g, string bodyKey)
         {
             if (g == null) return;
-            hints[g] = bodyKey;
+            Attach(g, bodyKey, g, new Rectangle(g.Width - 30, 4, 22, 22));
+        }
+
+        /// <summary>The general form: a ? for any control, wherever the caller's
+        /// layout wants it, added to a PARENT the caller chooses (the anchor
+        /// itself, when the anchor can hold children — a GroupBox can, a
+        /// CheckBox cannot). Used for hint text that used to sit in its own
+        /// always-visible box beside a single control, e.g. Go To's "start
+        /// playing" checkbox, which has no group of its own to carry a corner
+        /// button.</summary>
+        public static void Attach(Control anchor, string bodyKey, Control parent, Rectangle buttonBounds)
+        {
+            if (anchor == null || parent == null) return;
+            hints[anchor] = bodyKey;
+
+            string forName = (anchor as GroupBox)?.Text;
+            if (string.IsNullOrEmpty(forName)) forName = anchor.AccessibleName ?? anchor.Text ?? "";
 
             var b = new Button();
             b.Text = "?";
-            b.AccessibleName = Localization.T("Hint.Button.Accessible", g.Text);
-            b.SetBounds(g.Width - 30, 4, 22, 22);
+            b.AccessibleName = Localization.T("Hint.Button.Accessible", forName);
+            b.SetBounds(buttonBounds.X, buttonBounds.Y, buttonBounds.Width, buttonBounds.Height);
             b.FlatStyle = FlatStyle.Flat;
             b.FlatAppearance.BorderColor = NewPlayerSkin.Silk;
             b.FlatAppearance.BorderSize = 1;
@@ -56,8 +73,8 @@ namespace Nemoviz_Book_Reader
             // hit a ? on the way into every group. A high index keeps the paint
             // and gives the order back.
             b.TabIndex = 900;
-            b.Click += (s, e) => Show(g, b);
-            g.Controls.Add(b);
+            b.Click += (s, e) => Show(anchor, b);
+            parent.Controls.Add(b);
             b.BringToFront();
             helpKeys.Add(b);
         }
@@ -76,62 +93,20 @@ namespace Nemoviz_Book_Reader
             return false;
         }
 
-        private static void Show(Control group, Control returnTo)
+        private static void Show(Control anchor, Control returnTo)
         {
             string key;
-            if (!hints.TryGetValue(group, out key)) return;
-            string title = group is GroupBox ? group.Text : "";
-            using (var h = new HintForm(title, Localization.T(key)))
-                h.ShowDialog(group.FindForm());
+            if (!hints.TryGetValue(anchor, out key)) return;
+            string title = (anchor as GroupBox)?.Text;
+            if (string.IsNullOrEmpty(title)) title = anchor.AccessibleName ?? anchor.Text ?? "";
+            // One shared design for every "here is a sentence or two, and a way
+            // out" dialog in the app (Gordan, 2026-07-29) — the hint pop-up is
+            // simply MessageForm's info variant with this control's own text.
+            MessageForm.ShowInfo(anchor.FindForm(), Localization.T(key), title);
             // Focus goes back exactly where it came from, or the user is left
             // stranded in the middle of a dialog they did not move through.
             if (returnTo != null && returnTo.CanSelect && !returnTo.IsDisposed)
                 returnTo.Focus();
-        }
-    }
-
-    /// <summary>One explanation, and a way out. The text is a read-only multiline
-    /// TextBox rather than a label because that is the shape a screen reader can
-    /// walk line by line — the pattern this app settled on long ago.</summary>
-    internal sealed class HintForm : Form
-    {
-        public HintForm(string title, string body)
-        {
-            DialogSkin.EnsureFonts();
-            Text = title;
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox = MinimizeBox = ShowInTaskbar = false;
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(440, 240);
-            BackColor = NewPlayerSkin.PanelMid;
-
-            var t = new TextBox();
-            t.Multiline = true;
-            t.ReadOnly = true;
-            t.ScrollBars = ScrollBars.Vertical;
-            t.WordWrap = true;
-            t.BorderStyle = BorderStyle.None;
-            t.BackColor = NewPlayerSkin.Glass;
-            t.ForeColor = NewPlayerSkin.Lit;
-            t.Font = DialogSkin.FBody;
-            t.SetBounds(16, 16, 408, 168);
-            t.TabIndex = 0;
-            t.AccessibleName = title;
-            t.Text = body;
-            t.GotFocus += (s, e) => t.Select(0, 0);
-
-            var close = new Button();
-            close.Text = Localization.T("Hint.Close");
-            close.AccessibleName = Localization.T("Hint.Close");
-            close.SetBounds(312, 196, 112, 32);
-            close.TabIndex = 1;
-            close.DialogResult = DialogResult.OK;
-            DialogSkin.AsKey(close, new Rectangle(312, 196, 112, 32));
-
-            Controls.Add(t);
-            Controls.Add(close);
-            AcceptButton = close;
-            CancelButton = close;   // Esc closes it too
         }
     }
 }

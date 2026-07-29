@@ -3038,7 +3038,7 @@ namespace Nemoviz_Book_Reader
 
         private void BtnHelp_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(Localization.T("Dialog.Help.ComingSoon"), Localization.T("Dialog.Help.Title"));
+            MessageForm.ShowInfo(this, Localization.T("Dialog.Help.ComingSoon"), Localization.T("Dialog.Help.Title"));
         }
 
         private void BtnProperties_Click(object sender, EventArgs e)
@@ -4049,7 +4049,7 @@ namespace Nemoviz_Book_Reader
             catch (Exception ex)
             {
                 if (createdFolder) TryDeleteFolder(destFolder);
-                MessageBox.Show(Localization.T("Dialog.Error.General", ex.Message), Localization.T("Dialog.Error.Title"));
+                MessageForm.ShowInfo(this, Localization.T("Dialog.Error.General", ex.Message), Localization.T("Dialog.Error.Title"));
             }
         }
 
@@ -4148,7 +4148,7 @@ namespace Nemoviz_Book_Reader
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Localization.T("Dialog.Error.General", ex.Message), Localization.T("Dialog.Error.Title"));
+                MessageForm.ShowInfo(this, Localization.T("Dialog.Error.General", ex.Message), Localization.T("Dialog.Error.Title"));
             }
         }
 

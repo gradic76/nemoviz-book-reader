@@ -388,9 +388,8 @@ namespace Nemoviz_Book_Reader
                                                   StringComparison.OrdinalIgnoreCase))
             {
                 appSettings.SetUiTheme(SelectedThemeId());
-                if (MessageBox.Show(this, Localization.T("Settings.Misc.Look.Restart"),
-                                    Localization.T("Settings.Misc.Look.RestartTitle"),
-                                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageForm.ShowConfirm(this, Localization.T("Settings.Misc.Look.Restart"),
+                                           Localization.T("Settings.Misc.Look.RestartTitle")))
                     Application.Restart();
             }
         }
