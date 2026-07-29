@@ -129,6 +129,13 @@ namespace Nemoviz_Book_Reader
                 Front(f, p.Refresh);
                 Front(f, p.Load);
                 Front(f, p.Close);
+                // Re-parenting a button momentarily REMOVES it from the form, and
+                // Form clears AcceptButton / CancelButton when the control they
+                // point at is removed. So moving these onto the metal silently
+                // unbound Enter and Escape — Gordan found Escape no longer closing
+                // the Library. Bind them again, after the move.
+                f.AcceptButton = p.Load;
+                f.CancelButton = p.Close;
             }
 
             Rename(p.Load, "Library.Btn.Load");

@@ -1647,13 +1647,18 @@ idea, 2026-07-29). An image is never announced, so a favorite is *seen and not
 said*, where ", Favorite" was one more tail to listen past on every favorite row;
 and the Favorites filter already answers "which are mine" properly. It could not
 be a character in the text either — the item's text **is** what a reader reads,
-so a heart there comes out as "black heart suit". The badge went from 16 to
-**20 px** because at 16 there is no room for both a dot big enough to read its
-colour and a mark big enough to read at all, and **the colour is what carries the
-status** — the first attempt had the heart swallowing the badge. At 20 px the
-heart reads as a small white mark with a dark outline rather than a crisp heart;
-the outline is needed because white alone vanishes on the yellow badge and dark
-alone vanishes on the blue one.
+so a heart there comes out as "black heart suit".
+
+**The badge does not gain a mark — it changes SHAPE.** A favorite is the same
+badge in the same colour drawn as a **heart instead of a circle**: the shape
+carries "favorite", the colour still carries the status, and neither has to make
+room for the other. That was Gordan's second thought and it is much better than
+the first attempt, a small white mark tucked into the corner — which swallowed
+the dot at 16 px, and at 20 px read as a smudge rather than a heart, because a
+shape squeezed beside another never gets the pixels to be recognisable. A shape
+filling the badge does. (20 px stayed; a heart needs more room than a circle to
+read.) The edge is the same hue darkened, so the outline holds against a selected
+row's highlight without introducing a colour that means nothing.
 
 **The flag is APPENDED, never prefixed, and that is not a presentation choice.**
 A list view jumps to the next item beginning with the typed letter, so a status

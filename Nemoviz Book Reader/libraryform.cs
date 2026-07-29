@@ -688,24 +688,36 @@ namespace Nemoviz_Book_Reader
             {
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 g.Clear(Color.Transparent);
-                // The dot keeps the middle and stays the big thing on the badge.
-                using (Brush br = new SolidBrush(color))
-                    g.FillEllipse(br, 1, 3, 13, 13);
-                if (!favorite) return bmp;
-
-                // A small mark in the bottom-right corner, mostly OFF the dot so
-                // it does not eat the colour. Dark outline first, white fill over
-                // it: white alone vanishes on the yellow badge, dark alone
-                // vanishes on the blue one.
-                using (var path = HeartPath(11f, 10f, 8f, 7.5f))
+                if (!favorite)
                 {
-                    using (var pen = new Pen(Color.FromArgb(220, 20, 20, 20), 1.6f))
-                        g.DrawPath(pen, path);
-                    using (var br = new SolidBrush(Color.White))
+                    using (Brush br = new SolidBrush(color))
+                        g.FillEllipse(br, 2, 3, 14, 14);
+                    return bmp;
+                }
+
+                // A favorite is the SAME badge in the SAME colour, drawn as a
+                // heart instead of a circle (Gordan, 2026-07-29). The shape
+                // carries "favorite", the colour still carries the status, and
+                // neither has to make room for the other — which the first
+                // attempt, a small mark tucked into the corner, could not manage.
+                // A shape filling the badge also reads far better than one
+                // squeezed beside it.
+                using (var path = HeartPath(1.5f, 3f, 17f, 15f))
+                {
+                    using (Brush br = new SolidBrush(color))
                         g.FillPath(br, path);
+                    // A darker edge of the same hue, so the shape holds against a
+                    // selected row's highlight without introducing a new colour.
+                    using (var pen = new Pen(Darken(color, 0.55f), 1.2f))
+                        g.DrawPath(pen, path);
                 }
             }
             return bmp;
+        }
+
+        private static Color Darken(Color c, float f)
+        {
+            return Color.FromArgb(c.A, (int)(c.R * f), (int)(c.G * f), (int)(c.B * f));
         }
 
         private static System.Drawing.Drawing2D.GraphicsPath HeartPath(float x, float y, float w, float h)
