@@ -1677,11 +1677,43 @@ second is the one to remember:
 
 The notice is written **twice**: one line between the controls (`Prop.Text.
 NoVoiceShort`), the full sentence on the info panel (`Prop.Text.
-NoVoiceForLanguage`). It is announced through `AnnounceToScreenReader`, not a
-message box — a modal over a book opening from the Library is one more thing to
-dismiss before you can act on it. **`DialogSkin` now derives pad and gap from
-what is left over** rather than fixed amounts, because the speech group grows
-when it carries the notice and the stack used to run onto the OK button.
+NoVoiceForLanguage`). **`DialogSkin` derives pad and gap from what is left over**
+rather than fixed amounts, because the speech group grows when it carries the
+notice and the stack used to run onto the OK button.
+
+### `NoVoiceForm` — the question, put once (Gordan, 2026-07-29)
+
+An announcement was **not enough, and the reason is universal design**: it was
+gone the moment it was said, so a reader looking away — or one who cannot hear it
+— got no message at all, and a silent player with nothing on screen to explain
+it. This is a **state that has to be acknowledged**, not news to catch in
+passing, so it is a dialog that also offers the way out. (Contrast volume 80→65,
+which genuinely is transient; that belongs on the future transient glass readout,
+a separate job.)
+
+Gordan's rules, exactly:
+
+- **Asked once, on the first load.** Declining is a decision; asking again on
+  every open would be nagging. `[Book] VoiceAsked` records it.
+- **Pressing Play asks again** — that is a change of mind, and the only way back
+  to the question.
+- **The choice is for THIS BOOK.** There is deliberately **no** "use for every
+  book in this language": a French book read by a Romanian voice is fair once and
+  poor as a rule, and *a rule nobody knowingly set is a rule they do not know they
+  have*. Making it a rule is Settings' job and **should take some effort**.
+- **A book with no voice is not "now reading".** It is not recorded as last
+  opened (so NBR does not resume it) and stays **unread** in the Library until
+  something is settled. Choosing a voice is what promotes it — which is why
+  `SetLastOpenedBook` lives in `AskForVoice`, reached by both routes.
+
+**The state, as opposed to the moment, lives in the player's info line.** It read
+"Speech engine:" over what was always a voice name; it is `Player.Info.VoiceLabel`
+now, and while the book has no voice it carries `Player.Info.NoVoiceLabel` plus
+the language instead. That line would otherwise name whatever spoke last, which
+is the hardest lie on the page.
+
+**Still wearing plain Windows chrome:** `NoVoiceForm` and `SettingsForm`.
+`DialogSkin` covers Properties only so far.
 
 **Settings and Properties are the same two combos.** Settings sets the global
 rule (*this language → this voice*), Properties overrides it **for one book** —
