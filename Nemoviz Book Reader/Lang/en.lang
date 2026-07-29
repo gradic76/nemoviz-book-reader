@@ -312,7 +312,7 @@ Prop.Playback.Speed=Speed (×):
 ; the short one sits between the controls it explains and has one line to do it
 ; in, the long one on the info panel where there is room to say why.
 Prop.Text.NoVoiceShort=No installed voice speaks {0} — choose below.
-Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Nothing has been chosen for you — pick a language and a voice above if you want this book read anyway.
+Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Install a voice for {0}, or pick a language and a voice above to read this book with it — that choice belongs to this book alone and to no other.
 ; {0} is the book's language. Spoken when a book that cannot be read is opened.
 Player.NoVoiceForLanguage=No installed voice speaks {0}. Open Properties with Alt+Enter to choose one.
 NoVoice.Title=No voice for this book

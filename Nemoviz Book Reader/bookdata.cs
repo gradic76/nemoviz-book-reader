@@ -82,12 +82,11 @@ namespace Nemoviz_Book_Reader
         /// read with keeps its own in <see cref="TextVoicePrefs"/>.</summary>
         public string TextVoice { get; set; }
 
-        /// <summary>Whether this book has already been asked about, when nothing
-        /// installed speaks its language. The question is put ONCE on loading: a
-        /// reader who declined has decided, and being asked again every time they
-        /// opened the book would be nagging. Pressing Play asks again, because
-        /// that is them changing their mind.</summary>
-        public bool VoiceAsked { get; set; }
+        // There is no "already asked" flag, and there does not need to be. A book
+        // with no voice never becomes the last-opened book, so NBR never resumes
+        // it by itself — every load of one is therefore a deliberate activation
+        // (double-click, Enter, the button, Ctrl+O), and every deliberate
+        // activation gets the question. An empty TextVoice IS "no voice assigned".
         public int TextVolume { get; set; }
         public int TextPitch { get; set; }
         /// <summary>How each voice was set up while reading THIS book, so going
@@ -174,7 +173,6 @@ namespace Nemoviz_Book_Reader
             TextPitch = tpit;
             TextLanguage = ini.Read("Book", "Language", "");
             TextCleaned = ini.Read("Book", "TextCleaned", "0") == "1";
-            VoiceAsked = ini.Read("Book", "VoiceAsked", "0") == "1";
             TextVoicePrefs = new VoicePrefsTable();
             TextVoicePrefs.Load(ini);
             // A book saved before voices were remembered individually has one set
@@ -805,7 +803,6 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextPitch", TextPitch.ToString());
             ini.Write("Book", "Language", TextLanguage ?? "");
             ini.Write("Book", "TextCleaned", TextCleaned ? "1" : "0");
-            ini.Write("Book", "VoiceAsked", VoiceAsked ? "1" : "0");
             TextVoicePrefs.Save(ini);
             ini.Write("Book", "TextChars", TextChars.ToString());
             ini.Write("TextNav", "Count", TextHeadings.Count.ToString());

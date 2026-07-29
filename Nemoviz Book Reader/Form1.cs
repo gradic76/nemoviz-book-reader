@@ -3316,12 +3316,15 @@ namespace Nemoviz_Book_Reader
             // opened. Autoplay from the Library is exactly how a Spanish book got
             // read aloud in Croatian before anyone could stop it.
             //
-            // The question is put ONCE, on the first load. Declining is a decision:
-            // being asked again every time the book was opened would be nagging,
-            // so after that it takes pressing Play to be asked afresh. Deferred a
-            // tick so the player is on screen behind the dialog rather than the
-            // dialog arriving out of nothing.
-            if (textNoVoice && !currentBook.VoiceAsked)
+            // The question is put on EVERY activation, exactly as if it were the
+            // first: declining leaves the book on the shelf unread, and coming
+            // back to it later is another attempt to read it, not a repeat of a
+            // decision already made. Nothing needs remembering for that — a book
+            // with no voice never becomes the last-opened book, so NBR never
+            // resumes one by itself, and every load of one is deliberate.
+            // Deferred a tick so the player is on screen behind the dialog rather
+            // than the dialog arriving out of nothing.
+            if (textNoVoice)
             {
                 BookData asked = currentBook;
                 BeginInvoke((Action)(() =>
@@ -3454,16 +3457,13 @@ namespace Nemoviz_Book_Reader
             try { voices = tts.GetVoiceInfos(); }
             catch { return false; }
 
-            currentBook.VoiceAsked = true;
             string chosen = "";
             using (var dlg = new NoVoiceForm(currentBook.TextLanguage, voices))
                 if (dlg.ShowDialog(this) == DialogResult.OK) chosen = dlg.ChosenVoice;
 
-            if (string.IsNullOrEmpty(chosen))
-            {
-                try { currentBook.Save(); } catch { }
-                return false;
-            }
+            // Declining changes nothing and is written nowhere. The book stays on
+            // the shelf as it was, and asking again next time is the point.
+            if (string.IsNullOrEmpty(chosen)) return false;
 
             // Chosen for THIS book, which is the only scope this dialog has.
             currentBook.TextVoice = chosen;
