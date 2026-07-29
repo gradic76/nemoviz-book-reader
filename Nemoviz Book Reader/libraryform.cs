@@ -160,6 +160,32 @@ namespace Nemoviz_Book_Reader
             BuildSearchRow();
             BuildSplitContainer();
             BuildBottomPanel();
+
+            // Built exactly as before, then handed over — the classic path does
+            // nothing here, the new look restyles and relays out what was built.
+            if (UiTheme.Current.BuildsOwnLayout) LibrarySkin.Apply(this);
+        }
+
+        /// <summary>What the skin is allowed to move and repaint.</summary>
+        internal LibraryParts SkinParts
+        {
+            get
+            {
+                return new LibraryParts
+                {
+                    Menu = menuStrip,
+                    SearchRow = panelSearch,
+                    Search = tbSearch,
+                    Filter = cbFilter,
+                    Split = splitContainer,
+                    Books = listBooks,
+                    Details = listViewDetails,
+                    BottomPanel = panelBottom,
+                    Refresh = btnRefresh,
+                    Load = btnOK,
+                    Close = btnCancel,
+                };
+            }
         }
 
         private void BuildMenuStrip()

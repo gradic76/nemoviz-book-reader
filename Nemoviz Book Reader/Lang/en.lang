@@ -191,6 +191,11 @@ Filter.AllFiles=All files
 
 ; Library window
 Library.Title=Library
+; The Library's own buttons. "OK" and "Cancel" said nothing about a shelf.
+Library.Btn.Load=Load
+Library.Btn.Load.Accessible=Load the selected book
+Library.Btn.Close=Close
+Library.Btn.Close.Accessible=Close the library
 Menu.File=File
 Menu.File.OpenFile=Open file...
 Menu.File.OpenFolder=Open folder...

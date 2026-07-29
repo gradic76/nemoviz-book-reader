@@ -182,6 +182,7 @@
     <Compile Include="VoiceChooser.cs" />
     <Compile Include="NoVoiceForm.cs" />
     <Compile Include="SettingsSkin.cs" />
+    <Compile Include="LibrarySkin.cs" />
     <Compile Include="PlainTextParser.cs" />
     <Compile Include="RtfParser.cs" />
     <Compile Include="WordParser.cs" />
