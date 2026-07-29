@@ -1630,62 +1630,68 @@ rather than whichever row happened to be on screen. Stored in `Settings.ini`
 `[LanguageVoices]` (`Languages=sr` + `sr=Dragana`), keyed by primary code because
 that is a safe INI key where a voice name is not.
 
-**A voice is offered for a language it does not speak, and is labelled as such.**
-Gordan's own listening (2026-07-29): *"srpski i hrvatski mogu se čitati
-međusobno, češki i slovački također jako dobro čitaju hr i sr"*.
-`LanguageDetector.StandInsFor` is that knowledge and it is a **different claim
-from `SameLanguage`** — Czech and Croatian are two languages, but a Czech voice
-reads a Croatian book intelligibly. The table is seeded with what has actually
-been *heard* and is meant to grow one pair at a time; a wrong entry does not fail
-loudly, it just reads a book in an accent nobody asked for.
-**Every reachable voice carries what it actually speaks** ("Karmela — a Croatian
-voice"). That matters more than it looks: Croatian voices reach Serbian through
-`SameLanguage`, not through the stand-in table, so they first arrived unlabelled
-— a list of six voices under Serbian with only one of them Serbian, all looking
-alike, says the opposite of the truth.
+### A LANGUAGE IS ITSELF. Read this before touching any of it.
 
-**The chain, in `VoiceChooser` and nowhere else:** this language's chosen voice →
-a related language's chosen voice → any installed voice that speaks it → any that
-reads it → the global default. **A choice the user made always outranks a
-coincidence of what is installed.** The player and Properties each used to hold
-their own shortened copy of this and had already begun to differ. It still never
-falls through to "the first voice on the machine": that case comes back as
-`VoiceSource.GlobalMismatch` so the caller can say so instead of pretending.
+**Croatian is Croatian, Serbian is Serbian, Czech is Czech** (Gordan,
+2026-07-29). A first build offered voices from languages that read a book *well
+enough* — Serbian and Croatian standing in for each other, Czech and Slovak for
+both — on the strength of Gordan's own listening. He then **rejected the whole
+idea**, and the reasoning is worth keeping because the feature looks helpful
+right up until you use it: NBR does not get to decide on the reader's behalf
+that a near-enough accent will do. If they want a Mandarin voice for a Russian
+book, that is theirs to choose **by hand**; it is never something NBR offers by
+noticing that two languages share an alphabet.
 
-**When a language has no voice at all** (Gordan, 2026-07-29): **a message plus
-the offer to pick one by hand** — never silence, never gibberish. The chain and
-`VoiceSource` are built for it; the **message itself is not written yet** and
-belongs in Properties.
+Two traps if this is ever revisited:
 
-**Settings has no detection, Properties does** — Settings has no book, so there
-is nothing to detect. Settings sets the rule, Properties applies it.
+- **`LanguageDetector.SameLanguage` must not be used to pick a voice.** It
+  groups BCMS (hr/sr/bs/sh/cnr) and that is the right answer to a *different*
+  question — "is this the same language", which is what DETECTION needs. Used
+  for voices it silently pulled five Croatian voices into the Serbian list.
+  Voice matching is on the **primary code** alone.
+- The stand-in table is **gone, not disabled.** Don't reintroduce it as a
+  "smart default".
 
-**Known gap:** a language is listable only if something installed speaks it, the
-detector knows its stopwords, or it is in the stand-in table. A Greek book (found
-by *script*, with no Greek voice installed) therefore has no row to set a default
-on. Harmless today — there would be no voice to choose — but it is why the list
-is built from a union rather than one source.
+**The whole rule, in `VoiceChooser` and nowhere else:** the voice chosen for
+that language in Settings → else the first installed voice that **speaks** it →
+else **nothing**. It never falls through to the first voice on the machine: a
+voice that cannot speak the language does not read the book badly, it reads it
+as noise. The empty answer comes back as `VoiceSource.NoVoice`, which is a
+result the caller must handle, not an error. The player and Properties each used
+to hold their own shortened copy of this rule and had already begun to differ.
 
-**"Set as default" lives in Properties, beside the language picker** (Gordan,
-2026-07-29). You have just chosen a voice for this book; that button promotes it
-to the default for that language, which is how Settings gets filled without
-anyone having to go there. It asks first — "set <voice> as the default voice for
-<language>?" — because it changes a rule that affects **every future book in that
-language**, not the book in front of you, and nothing else in Properties does
-that. **Not built yet** — the storage it writes to (`SetLanguageVoice`) is.
+**When a language has no voice at all:** Properties **says so by name** and
+offers no substitute; the language and voice lists beside the message are the
+reader's free choice, including a bad one. Built; **not yet exercised**, because
+every language on Gordan's machine has a voice.
 
-**Two things the first text-page screenshot exposed (2026-07-29).** The colon is
-**fixed**: the reading page now adds `": "` to Title / Author / Format the way the
-audio page does. The `Details.Field.*` captions carry no colon of their own because
-the Library uses them as column headings, so the separator belongs at the call site
-— and it is not cosmetic, the player's glass renderer splits a line on `": "` to
-tell the silkscreened label from the lit value.
+**Settings and Properties are the same two combos.** Settings sets the global
+rule (*this language → this voice*), Properties overrides it **for one book** —
+"the main character is a man in the first person, so not Karmela for this one".
+Settings has no book, so it has no detection; Properties has both.
 
-**Still open:** the info box and the picker can disagree on the same screen — it
-read "Language: Serbian" while the picker showed Croatian. Confirmed with Gordan
-that the *detection was right* (a Serbian book, read by the nearest voice), which
-is exactly why the two lines need labelling apart — **"detected" versus "reading
-with"** — rather than being made to agree.
+**Both list only languages something installed speaks.** A row for a language
+with no voice under it would be a dead end now that nothing may stand in. That
+also disposed of the "Unknown Language (cnr) (cnr)" rows, since those codes have
+no voices. Settings' list carries one extra first row, *All other languages* =
+the global default, which is what a book whose language could **not** be worked
+out is read with.
+
+**"Set as default" in Properties is still not built** — the storage it would
+write to (`AppSettings.SetLanguageVoice`) is. It promotes this book's voice to
+the default for its language, and must **ask first**, because it changes a rule
+affecting every future book in that language and nothing else in Properties
+does that.
+
+**Both things the first text-page screenshot exposed are now fixed.** The colon:
+the reading page adds `": "` to Title / Author / Format the way the audio page
+does — the `Details.Field.*` captions carry none of their own because the Library
+uses them as column headings, and it is not cosmetic, since the player's glass
+renderer splits a line on `": "` to tell the silkscreened label from the lit
+value. And the apparent disagreement — "Language: Serbian" over a picker showing
+Croatian — was **two different facts wearing one label**. They are now
+**"Detected language:"** and **"Reading in:"**, so a book read by another
+language's voice says so instead of looking like a bug.
 
 **Still to decide before code:** what happens when the detected language has no
 default. The chain is language default → global default → nothing. **Do not fall
