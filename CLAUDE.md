@@ -1735,8 +1735,51 @@ the dialog blocks further down the same stack — but the effect is the wanted o
 to be resized so that while open it **completely covers the player**, as
 Properties does. Not done.
 
-**Still wearing plain Windows chrome:** `NoVoiceForm`. `DialogSkin` covers
-Properties and Settings; the Library is next.
+**Still wearing plain Windows chrome:** `NoVoiceForm`. `DialogSkin` now covers
+Properties, Settings and the Library.
+
+### The Library under the new look — `LibrarySkin.cs` (2026-07-29)
+
+Same 960 × 640 casing. The grid Gordan set: **menu bar full width across the
+top**, then three columns with **A and B joined and C on its own** — search
+across AB with the filter over C, the shelf across AB with the info box under C.
+A column therefore means the same thing all the way down. **Refresh** on the
+metal at the left, **Load** and **Close** at the right; the names are new keys,
+so the classic path still says OK and Cancel ("OK" says nothing about a shelf).
+
+**The shelf's right-click menu is a real Windows menu now.** Gordan's report:
+both readers announced it as a **drop-down list** with nothing selected until he
+arrowed onto something. A `ContextMenuStrip` **is not a menu** — it is a
+`ToolStrip` .NET paints itself, and it is exposed as what it is. A `ContextMenu`
+builds a real HMENU: announced as a menu, first item highlighted the moment it
+opens, behaving like every other Windows menu because it is one. It is *shown*
+rather than attached, so the right-click is caught in **MouseUp** (after the
+click that selects the row), `Popup` cannot cancel the way `Opening` could so
+the empty shelf is caught at the call site, and the keyboard route opens it **at
+the selected row**. The only loss is the shortcut column, which no reader ever
+read.
+
+**The menu BAR could not follow, and this was measured.** A real Win32 menu bar
+(`Form.Menu`) *does* draw on a borderless form — but Windows draws it in the
+window's own top strip, **outside the rounded casing**, in system colours, and
+it takes 15 units of client height with it, shoving the whole skin down. A menu
+bar lives in the non-client area by definition and this window has none. **A
+popup has no such problem**, which is why the popup could change and the bar
+could not. The bar stays a `MenuStrip` and is **repainted** instead
+(`SkinMenuRenderer`), highlight carrying an **outline as well as a colour** —
+two darks a colour apart are not a difference everyone can see.
+
+**Two ToolStrip facts worth keeping:** setting `BackColor` does nothing and
+neither does `ToolStripRenderMode.System` — a ToolStrip paints its own
+background over both, so colours must come from a renderer. And **`AutoSize`
+wins over `Size`**: without turning it off the bar shrinks to the width of
+"File View" instead of running end to end.
+
+**Also learned here:** `BringToFront` is not optional when re-parenting onto a
+skinned form — `Controls.Add` appends, and in WinForms the **end** of the
+collection is the **back** of the z-order, so the three buttons were painting
+underneath the metal. And a two-column list's widths must be **passed in**, less
+the panel padding and the scroll bar, or it grows a horizontal bar under itself.
 
 ### Settings under the new look — `SettingsSkin.cs` (2026-07-29)
 
