@@ -1534,18 +1534,19 @@ because the reasoning still holds — but where it says "lag", read "freeze": th
 apparent movement in earlier screenshots came from focus changes made by the
 clicks that produced them, not from the text updating.
 
-**The price of the free route, and it is not removable from our side.** Braille
-comes from letting the screen reader track a focused control — and a reader that
-tracks you **talks**. A selection is announced as selected text; a caret move is
-announced as the character under it (the sentence's first letter, which is what
-Gordan heard as "random capitals"). Position change and braille refresh are the
-same event to NVDA, so there is no way to ask for one without the other.
+**And it is silent — the caret is what makes it so.** A SELECTION is news to a
+screen reader: it reads the marked text out, says "selected" and "not selected",
+and repeats pieces, all over NBR's own voice. A **caret move made by the
+application** is not: braille refreshes and nothing is spoken. So the reading
+surface moves a zero-length selection, never a range.
 
-**The resolution is the user's, and it is normal practice:** `NVDA+S` cycles
-speech modes and **braille keeps working with speech off**. Reading a book with
-NBR's own voice while the screen reader stays quiet is exactly how a braille
-reader would have it set up anyway. Worth saying in the Help rather than
-engineering around.
+The "random capital letters" heard earlier were **not** this. They came from
+Gordan arrowing through the surface **by hand with playback stopped** — a user
+walking the caret, which a reader announces character by character because that
+is exactly what it should do. Confirmed with the book actually playing: only
+NBR's TTS is heard, NVDA says nothing, and braille follows. (An earlier note here
+claimed the chatter was unavoidable and pointed at `NVDA+S`. It was wrong — the
+test behind it was hand-driven caret movement, not playback.)
 
 **Method note, because it is reusable:** screenshots cannot measure a timing
 relationship — the caret blink alone makes a pixel hash change. Two logs on one
