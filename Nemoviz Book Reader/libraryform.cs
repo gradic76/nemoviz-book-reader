@@ -601,9 +601,15 @@ namespace Nemoviz_Book_Reader
         {
             string name = string.IsNullOrWhiteSpace(b.Author) ? b.Title : b.Author + " — " + b.Title;
             int status = GetShelfStatus(b);
-            // Status first so a screen reader announces it before the title;
-            // Favorite last, after the rest.
-            string text = Localization.T(StatusTextKey(status)) + ", " + name;
+            // The TITLE starts the row, and that is not a presentation choice —
+            // it is what makes first-letter navigation work. A list view jumps to
+            // the next item beginning with the typed letter, so with the status in
+            // front every row began with R, U or N and typing a letter did nothing
+            // useful. On a shelf of thousands that aid matters far more than
+            // hearing "unread" a second earlier, and nothing is lost: the status
+            // is still spoken, at the end of the line, and the coloured badge
+            // still carries it at a glance.
+            string text = name + ", " + Localization.T(StatusTextKey(status));
             if (b.Favorite)
                 text += ", " + Localization.T("Shelf.Favorite");
             ListViewItem item = new ListViewItem(text);

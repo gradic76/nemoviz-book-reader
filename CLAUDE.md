@@ -1640,7 +1640,21 @@ its status two ways: a **spoken text flag** appended to the item name (", Now
 reading" / ", Reading" / ", Read" / ", Unread", then ", Favorite") so screen
 readers announce it, and a **colored badge icon** (`SmallImageList` dots —
 red = unread, yellow = reading, green = read, blue = now reading; drawn at
-runtime by `MakeStatusDot`). The **Now-reading** book (last-opened while still
+runtime by `MakeStatusDot`).
+
+**The flag is APPENDED, never prefixed, and that is not a presentation choice.**
+A list view jumps to the next item beginning with the typed letter, so a status
+in front makes every row start with R, U or N and **first-letter navigation
+dies** — which is what happened when these flags replaced the old groups, and
+what Gordan noticed (2026-07-29). On a shelf of thousands that aid is worth far
+more than hearing "unread" a second earlier, and nothing is lost by moving it:
+the status is still spoken, and the badge still carries it at a glance. Symbols
+in place of the words do not help either — a `ListView` item's accessible name
+**is** its text, so replacing it would need a custom control with a hand-written
+accessibility object, and a symbol at the front blocks the letter jump exactly as
+a word does.
+
+The **Now-reading** book (last-opened while still
 in progress) is **bold** and pinned to the top; otherwise order follows the
 sort menu. The status/**Favorites** filter combo (All / Reading / Unread /
 Read / Favorites) replaces the old group navigation — "sections on demand".
