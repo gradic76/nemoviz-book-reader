@@ -852,21 +852,15 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>The voice a book with no voice of its own opens on: the
         /// Settings default when it speaks the book's language, otherwise the first
-        /// installed voice that does. Mirrors Form1.DefaultVoiceForBook.</summary>
+        /// installed voice that does — the shared rule in VoiceChooser, which the
+        /// player asks with the same book, so the two cannot disagree.</summary>
         private string DefaultVoiceForLanguage()
         {
             string settingsVoice = appSettings != null ? (appSettings.TtsVoice ?? "") : "";
             string lang = book.TextLanguage;
             if (string.IsNullOrEmpty(lang) || textCatalog == null) return settingsVoice;
 
-            foreach (var c in textCatalog)
-                if (string.Equals(c.Name, settingsVoice, StringComparison.OrdinalIgnoreCase)
-                    && LanguageDetector.SameLanguage(c.Language, lang))
-                    return settingsVoice;
-            foreach (var c in textCatalog)
-                if (LanguageDetector.SameLanguage(c.Language, lang))
-                    return c.Name;
-            return settingsVoice;
+            return VoiceChooser.ForLanguage(appSettings, textCatalog, lang);
         }
 
         /// <summary>A voice name without SAPI's " - language" tail, so a name saved

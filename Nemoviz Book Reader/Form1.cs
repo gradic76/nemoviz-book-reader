@@ -3358,19 +3358,12 @@ namespace Nemoviz_Book_Reader
             try { voices = tts.GetVoiceInfos(); }
             catch { return settingsVoice; }
 
-            // Already right? Keep it — the user's default wins whenever it fits.
-            foreach (var v in voices)
-                if (string.Equals(v.Name, settingsVoice, StringComparison.OrdinalIgnoreCase)
-                    && LanguageDetector.SameLanguage(v.Language, lang))
-                    return settingsVoice;
-
-            // Otherwise the first voice that speaks the language. The catalog is
-            // ordered in-process first, so a 64-bit voice wins over the satellite.
-            foreach (var v in voices)
-                if (LanguageDetector.SameLanguage(v.Language, lang))
-                    return v.Name;
-
-            return settingsVoice;   // nothing installed speaks it
+            // The whole rule lives in VoiceChooser, which Properties asks too —
+            // this used to be a second copy of it, and the two had already begun
+            // to differ. This is also where detection finally pays off: the
+            // language worked out at import picks the voice the user chose for it
+            // in Settings.
+            return VoiceChooser.ForLanguage(appSettings, voices, lang);
         }
 
         private void ApplyTtsSettings()

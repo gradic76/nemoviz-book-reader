@@ -179,6 +179,7 @@
     <Compile Include="ITextFormatParser.cs" />
     <Compile Include="TextParsing.cs" />
     <Compile Include="VoicePrefs.cs" />
+    <Compile Include="VoiceChooser.cs" />
     <Compile Include="PlainTextParser.cs" />
     <Compile Include="RtfParser.cs" />
     <Compile Include="WordParser.cs" />
