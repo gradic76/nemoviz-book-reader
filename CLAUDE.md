@@ -1502,7 +1502,22 @@ behind a pan, as expected. **It also follows text rewritten in place**: with the
 book playing and focus never leaving the control, the braille content changed
 from one sentence to the next on its own.
 
-**It does NOT follow a rewrite — it FREEZES.** Measured properly on 2026-07-29
+**SOLVED, and measured both ways (2026-07-29).** The whole book goes into the
+control **once**; after that only the **selection** moves onto the sentence being
+read. Braille then follows essentially instantly — paired logs give **67–170 ms**,
+inside the sampling interval — where rewriting `Text` had left it frozen on one
+sentence for 35 seconds. The selection is the thing a screen reader is built to
+track; replacing text is not.
+
+It buys three more things at no cost: the rest of the book is **really there to
+pan into**, a routing key becomes a **position in the book** rather than an index
+into one lonely sentence, and `HideSelection = false` keeps the reading position
+visible when focus is elsewhere. `TtsReader.FullText` exists for it — cleaned, so
+it shares coordinates with `CharPosition`.
+
+**What it looked like before, kept because the diagnosis is the lesson:**
+
+**Replacing `Text` does NOT reach braille — it FREEZES.** Measured on 2026-07-29
 by pairing two clocks instead of comparing screenshots: the braille viewer read
 out of NVDA over **UI Automation** (its rows are `RICHEDIT50W`, unreadable with
 `GetWindowText` across a process boundary, but their text comes back as the UIA

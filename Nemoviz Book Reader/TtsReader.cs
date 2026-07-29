@@ -50,6 +50,12 @@ namespace Nemoviz_Book_Reader
         {
             get { return (index >= 0 && index < sentenceStart.Count) ? sentenceStart[index] : 0; }
         }
+        /// <summary>The whole book as the reader holds it — cleaned, and so in the
+        /// same character coordinates as CharPosition. The reading surface needs
+        /// it because it shows the book and moves a selection through it rather
+        /// than being handed one sentence at a time.</summary>
+        public string FullText { get { return fullText ?? ""; } }
+
         public string CurrentText
         {
             get { return (index >= 0 && index < sentenceText.Count) ? sentenceText[index] : ""; }

@@ -3331,7 +3331,7 @@ namespace Nemoviz_Book_Reader
             // read aloud in Croatian before anyone could stop it.
             //
             EnsureReadingSurface();
-            UpdateReadingSurface();
+            LoadReadingSurface();
 
             UpdateTitleBar();
             UpdateTextPositionDisplay();
@@ -3475,10 +3475,10 @@ namespace Nemoviz_Book_Reader
             // A focused multiline TextBox selects everything, which a reader
             // announces as a selection and braille shows as a solid block. The
             // caret goes to the start instead — the lesson the info glass taught.
-            tbReadingSurface.GotFocus += (s, e) =>
-            {
-                if (tbReadingSurface.SelectionLength > 0) tbReadingSurface.Select(0, 0);
-            };
+            // The selection IS the reading position now, so it must not be thrown
+            // away on focus and must stay visible when focus is elsewhere.
+            tbReadingSurface.HideSelection = false;
+            tbReadingSurface.ScrollBars = ScrollBars.Vertical;
             // The arrows are GLOBAL in this player — up/down volume, left/right
             // seek — and an edit control claims them for the caret. Gordan's
             // report: left and right stopped navigating and the reader read out
@@ -3505,17 +3505,39 @@ namespace Nemoviz_Book_Reader
             tbReadingSurface.BringToFront();   // the skin's canvas is added last
         }
 
-        /// <summary>Puts the sentence being read into the surface. Rewriting Text
-        /// in place is exactly what is being tested: a reader may follow it, go
-        /// quiet, or re-read the lot — which is what tbInfo did, and why that one
-        /// is a snapshot rather than a ticker.</summary>
+        /// <summary>Puts the WHOLE book in the surface, once. Everything after that
+        /// is a change of selection, not of text.</summary>
+        private void LoadReadingSurface()
+        {
+            if (tbReadingSurface == null || tts == null) return;
+            tbReadingSurface.Text = tts.FullText;
+            lastSurfaceStart = -1;
+            UpdateReadingSurface();
+        }
+
+        private int lastSurfaceStart = -1;
+
+        /// <summary>Moves the selection onto the sentence being read.
+        /// <para><b>Rewriting Text does not reach braille — measured.</b> In 35
+        /// seconds the surface went through some twenty sentences while the
+        /// display sat on the one that was current when focus arrived, and never
+        /// moved. So the text is now written once and only the SELECTION travels:
+        /// that is the thing a screen reader is built to follow, and it is also
+        /// what makes panning meaningful (the rest of the book is really there to
+        /// pan into) and turns a routing key into a position in the book rather
+        /// than an index into one lonely sentence.</para></summary>
         private void UpdateReadingSurface()
         {
             if (tbReadingSurface == null || tts == null) return;
             if (currentBook == null || !currentBook.IsTextBook) return;
             string s = tts.CurrentText ?? "";
-            if (tbReadingSurface.Text == s) return;
-            tbReadingSurface.Text = s;
+            int start = tts.CharPosition;
+            if (start == lastSurfaceStart) return;
+            lastSurfaceStart = start;
+            if (start < 0 || start > tbReadingSurface.TextLength) return;
+            int len = Math.Min(s.Length, tbReadingSurface.TextLength - start);
+            tbReadingSurface.Select(start, len);
+            tbReadingSurface.ScrollToCaret();
             // Stamped so the braille lag can be MEASURED rather than guessed from
             // two screenshots. The braille side is read out of NVDA's viewer over
             // UI Automation; this is the other half, and the two are matched on
