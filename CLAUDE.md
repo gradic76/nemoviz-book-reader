@@ -1494,7 +1494,28 @@ Consequence if it works: panning becomes a **look-away, not a seek**, because th
 reader handles it and we never see it — the opposite of the model above, and not
 because it is better but because it is the only one that route allows.
 
-**Three things to prove. Two are audible, so no hardware is needed for them:**
+**MEASURED 2026-07-29, and the route works.** With the sentence in a real
+focusable read-only TextBox and focus on it, **NVDA put the text on the braille
+display** — read off its Braille Viewer, no display attached, no drivers, nothing
+but an ordinary control. It showed one display width (~36 cells) with the rest
+behind a pan, as expected. **It also follows text rewritten in place**: with the
+book playing and focus never leaving the control, the braille content changed
+from one sentence to the next on its own.
+
+**But it lags.** In the same frame the surface read "Uto ona žena primijeti
+gljive…" while braille still showed "Buco je žalosno pogledao taj toliko f" — a
+sentence or more behind. Whether that is NVDA's own update cadence, our rewrite
+pattern, or the caret never really moving is **not yet known**, and it is the
+next thing to find out. It is a lag, not a freeze.
+
+**Two traps that cost a false result each, worth remembering when testing this
+way:** braille follows **focus**, so the first sampling run measured the *Claude
+window's* prompt box and looked frozen (two hashes alternating — a caret blink);
+and the run after that had the book **paused**, so nothing could change anywhere.
+Always confirm from the same frame that (a) the player shows the pause glyph, and
+(b) the braille content belongs to the book.
+
+**The original three things to prove. Two are audible, so no hardware is needed:**
 
 1. Does the reader follow the control when its content is rewritten in place, or
    does it go quiet / re-read everything — the lesson `tbInfo` already taught?
