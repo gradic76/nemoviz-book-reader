@@ -306,7 +306,10 @@ Prop.Info.Accessible=Book information
 Prop.Playback.Title=Playback
 Prop.Playback.Volume=Volume:
 Prop.Playback.Speed=Speed (×):
-Prop.Text.Language=Language:
+; {0} is the book's language. Shown only when nothing installed speaks it.
+Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Nothing has been chosen for you — pick a language and a voice below if you want this book read anyway.
+Prop.Text.ReadingIn=Reading in:
+Prop.Text.Language=Detected language:
 Prop.Text.Characters=Characters:
 Prop.Text.Headings=Headings:
 Prop.Text.Pages=Pages:

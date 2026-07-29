@@ -77,7 +77,9 @@ namespace Nemoviz_Book_Reader
         // Text tab (per-book reading options; mirrors Settings -> Text Books).
         private TextBox tbTextInfo;
         private NumericUpDown numPlayVolume, numPlaySpeed;
-        private ComboBox cmbTEngine, cmbTLanguage, cmbTVoice;
+        private ComboBox cmbTLanguage, cmbTVoice;
+        // Shown only when nothing installed speaks the book's language.
+        private TextBox tbTNoVoice;
         private NumericUpDown numTWpm, numTVolume, numTPitch;
         private CheckBox chkTBraille; private ComboBox cmbTBrailleTable;
         private CheckBox chkTVisual;
@@ -608,12 +610,10 @@ namespace Nemoviz_Book_Reader
             // ("Reading speed (words per minute):") to be written out in full.
             int lx = 10, cx = 210, cw = 232, yy = 22, tab = 0;
 
-            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.SpeechEngine"), lx, yy + 3));
-            cmbTEngine = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.SpeechEngine"), cx, yy, cw, tab++);
-            cmbTEngine.SelectedIndexChanged += (s, e) => TextLanguagesForEngine();
-            box.Controls.Add(cmbTEngine);
-
-            yy += 30;
+            // Same two steps as Settings, for the same reasons: the engine was a
+            // question about a vendor name, which is nobody's decision. Here it is
+            // "read THIS book with", overriding the global rule for one book —
+            // which is the whole point of the page.
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Language"), lx, yy + 3));
             cmbTLanguage = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Language"), cx, yy, cw, tab++);
             cmbTLanguage.SelectedIndexChanged += (s, e) => TextVoicesForSelection();
@@ -650,41 +650,95 @@ namespace Nemoviz_Book_Reader
             numTPitch.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
             box.Controls.Add(numTPitch);
 
-            // Fill the same engine â†’ language â†’ voice cascade Settings uses.
+            // The one line the reader has to see when their book's language has no
+            // voice at all. It is a read-only TEXTBOX, not a label, for the reason
+            // the hint system already learned the hard way: a screen reader driven
+            // by Tab never visits a label, and this is the message that matters
+            // most on the page.
+            yy += 32;
+            tbTNoVoice = new TextBox();
+            tbTNoVoice.Multiline = true;
+            tbTNoVoice.ReadOnly = true;
+            tbTNoVoice.BorderStyle = BorderStyle.None;
+            tbTNoVoice.BackColor = SystemColors.Control;
+            tbTNoVoice.SetBounds(lx, yy, cw + cx - lx - 4, 34);
+            tbTNoVoice.TabIndex = tab++;
+            tbTNoVoice.Visible = false;
+            tbTNoVoice.TabStop = false;
+            box.Controls.Add(tbTNoVoice);
+
             try { textCatalog = TextSpeech().GetVoiceCatalog(); }
             catch { textCatalog = new List<(string, string, string)>(); }
-            var engines = new List<string>();
-            foreach (var c in textCatalog)
-                if (!engines.Contains(c.Engine)) engines.Add(c.Engine);
-            engines.Sort(StringComparer.CurrentCultureIgnoreCase);
-            foreach (string en in engines) cmbTEngine.Items.Add(en);
+            PopulateTextLanguages();
 
             // The saved name may predate the switch to plain voice names (it could
             // be SAPI's description, "â€¦ - English (United States)"), so fall back
             // to matching the bare name â€” OK then rewrites it in the current form.
-            // With no voice of its own, the book starts on one that speaks its
-            // language — the same choice the player makes.
+            // With no voice of its own, the book starts on the one the player would
+            // have chosen for it — the same rule, asked in the same place.
             string want = !string.IsNullOrEmpty(book.TextVoice) ? book.TextVoice : DefaultVoiceForLanguage();
             foreach (var c in textCatalog)
                 if (!string.Equals(c.Name, want, StringComparison.OrdinalIgnoreCase)
                     && string.Equals(BareVoiceName(c.Name), BareVoiceName(want), StringComparison.OrdinalIgnoreCase))
                 { want = c.Name; break; }
-            string wantEngine = null, wantLang = null;
+
+            // Open on the language of the voice the book will actually be read
+            // with. Where there is none, open on the book's own language so the
+            // message is about the book, and the list beside it is the free choice
+            // the reader is being offered.
+            string wantLang = "";
             foreach (var c in textCatalog)
                 if (string.Equals(c.Name, want, StringComparison.OrdinalIgnoreCase))
-                { wantEngine = c.Engine; wantLang = c.Language; break; }
-            int ei = wantEngine != null ? cmbTEngine.Items.IndexOf(wantEngine) : -1;
-            if (ei < 0 && cmbTEngine.Items.Count > 0) ei = 0;
-            if (ei >= 0) cmbTEngine.SelectedIndex = ei;
-            if (wantLang != null)
-            {
-                int li = textLanguageCodes.IndexOf(wantLang);
-                if (li >= 0) cmbTLanguage.SelectedIndex = li;
-            }
+                { wantLang = LanguageDetector.Primary(c.Language); break; }
+            if (wantLang.Length == 0) wantLang = LanguageDetector.Primary(book.TextLanguage);
+
+            int li2 = textLanguageCodes.IndexOf(wantLang);
+            if (li2 < 0 && textLanguageCodes.Count > 0) li2 = 0;
+            if (li2 >= 0) cmbTLanguage.SelectedIndex = li2;
+
             int vi = cmbTVoice.Items.IndexOf(want);
             if (vi >= 0) cmbTVoice.SelectedIndex = vi;
             LoadPrefsForSelectedVoice();
+            UpdateNoVoiceNotice();
             return box;
+        }
+
+        /// <summary>Every language something installed speaks. Nothing else: a row
+        /// with no voice under it would be a dead end, and no language may stand in
+        /// for another.</summary>
+        private void PopulateTextLanguages()
+        {
+            cmbTLanguage.Items.Clear();
+            textLanguageCodes.Clear();
+            var codes = new List<string>();
+            foreach (var c in textCatalog)
+            {
+                string p = LanguageDetector.Primary(c.Language);
+                if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
+            }
+            codes.Sort((a, b) => string.Compare(SettingsForm.LanguageName(a), SettingsForm.LanguageName(b),
+                                                StringComparison.CurrentCultureIgnoreCase));
+            foreach (string p in codes)
+            {
+                textLanguageCodes.Add(p);
+                cmbTLanguage.Items.Add(SettingsForm.LanguageName(p) + " (" + p + ")");
+            }
+        }
+
+        /// <summary>Says so when nothing installed speaks the book's language, and
+        /// otherwise says nothing at all. NBR does not pick a near-enough language
+        /// on the reader's behalf — it tells them, and the language list beside the
+        /// message is theirs to do as they like with, including badly.</summary>
+        private void UpdateNoVoiceNotice()
+        {
+            if (tbTNoVoice == null) return;
+            string lang = LanguageDetector.Primary(book.TextLanguage);
+            bool none = lang.Length > 0 && VoiceChooser.VoicesFor(textCatalog, lang).Count == 0;
+            tbTNoVoice.Visible = none;
+            tbTNoVoice.TabStop = none;
+            if (none)
+                tbTNoVoice.Text = Localization.T("Prop.Text.NoVoiceForLanguage",
+                                                 SettingsForm.LanguageName(lang));
         }
 
         // Voices adjusted during this visit, staged so several can be set up in one
@@ -832,24 +886,6 @@ namespace Nemoviz_Book_Reader
             RefreshTextInfo();
         }
 
-        private void TextLanguagesForEngine()
-        {
-            if (cmbTLanguage == null || textCatalog == null) return;
-            string engine = cmbTEngine.SelectedItem as string;
-            cmbTLanguage.Items.Clear();
-            textLanguageCodes.Clear();
-            foreach (var c in textCatalog)
-            {
-                if (c.Engine != engine) continue;
-                string code = c.Language ?? "";
-                if (textLanguageCodes.Contains(code)) continue;
-                textLanguageCodes.Add(code);
-                cmbTLanguage.Items.Add(SettingsForm.LanguageLabel(code));
-            }
-            if (cmbTLanguage.Items.Count > 0) cmbTLanguage.SelectedIndex = 0;
-            else TextVoicesForSelection();
-        }
-
         /// <summary>The voice a book with no voice of its own opens on: the
         /// Settings default when it speaks the book's language, otherwise the first
         /// installed voice that does — the shared rule in VoiceChooser, which the
@@ -875,16 +911,11 @@ namespace Nemoviz_Book_Reader
         private void TextVoicesForSelection()
         {
             if (cmbTVoice == null || textCatalog == null) return;
-            string engine = cmbTEngine.SelectedItem as string;
             int li = cmbTLanguage != null ? cmbTLanguage.SelectedIndex : -1;
-            string lang = (li >= 0 && li < textLanguageCodes.Count) ? textLanguageCodes[li] : null;
+            string lang = (li >= 0 && li < textLanguageCodes.Count) ? textLanguageCodes[li] : "";
             cmbTVoice.Items.Clear();
-            foreach (var c in textCatalog)
-            {
-                if (c.Engine != engine) continue;
-                if (lang != null && (c.Language ?? "") != lang) continue;
-                cmbTVoice.Items.Add(c.Name);
-            }
+            foreach (string name in VoiceChooser.VoicesFor(textCatalog, lang))
+                cmbTVoice.Items.Add(name);
             if (cmbTVoice.Items.Count > 0) cmbTVoice.SelectedIndex = 0;
         }
 
@@ -1008,9 +1039,16 @@ namespace Nemoviz_Book_Reader
             // line before each section name is what separates the sections.
             sb.Append(Localization.T("Settings.TextBooks.SpeechGroup")).Append(nl);
             string voice = cmbTVoice != null && cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
-            string engine = cmbTEngine != null && cmbTEngine.SelectedItem != null ? cmbTEngine.SelectedItem.ToString() : "";
             sb.Append(Localization.T("Settings.TextBooks.Voice")).Append(' ').Append(voice).Append(nl);
-            sb.Append(Localization.T("Settings.TextBooks.SpeechEngine")).Append(' ').Append(engine).Append(nl);
+            // What the book IS and what it is being READ IN are two different
+            // facts and used to sit on the same screen looking like a
+            // contradiction — "Language: Serbian" above a picker showing
+            // Croatian. Both are now labelled for what they are, so a book read
+            // by a voice from another language says so instead of looking wrong.
+            int lsel = cmbTLanguage != null ? cmbTLanguage.SelectedIndex : -1;
+            if (lsel >= 0 && lsel < textLanguageCodes.Count)
+                sb.Append(Localization.T("Prop.Text.ReadingIn")).Append(' ')
+                  .Append(SettingsForm.LanguageName(textLanguageCodes[lsel])).Append(nl);
             if (numTWpm != null)
                 sb.Append(Localization.T("Settings.TextBooks.Speed")).Append(' ')
                   .Append((int)numTWpm.Value).Append(" WPM").Append(nl);
