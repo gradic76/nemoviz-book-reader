@@ -1693,10 +1693,20 @@ a separate job.)
 
 Gordan's rules, exactly:
 
-- **Asked once, on the first load.** Declining is a decision; asking again on
-  every open would be nagging. `[Book] VoiceAsked` records it.
-- **Pressing Play asks again** — that is a change of mind, and the only way back
-  to the question.
+- **Asked on EVERY activation**, exactly as if it were the first. Coming back to
+  a title left unread is another attempt to read it, not a repeat of a decision.
+  This needs **no flag**: a book with no voice never becomes the last-opened one,
+  so NBR never resumes one by itself, and every load of one is therefore
+  deliberate (double-click, Enter, the button, Ctrl+O).
+- **Declining does not load the book at all.** The question comes *before*
+  anything is swapped (`EnsureVoiceForBook`, at the top of `LoadBook`), so
+  whatever was loaded stays as it was and the title stays on the shelf. It used
+  to be asked after the load, which left a book nobody could read in the player —
+  the opposite of "not loaded". Answered **off the shelf**, without reading the
+  book: the language is already in `Book.ini`.
+- **Declining from the Library returns you to the SHELF**, not the player —
+  nothing was loaded, so there is nothing to be left looking at.
+  `BtnLibrary_Click` loops for it.
 - **The choice is for THIS BOOK.** There is deliberately **no** "use for every
   book in this language": a French book read by a Romanian voice is fair once and
   poor as a rule, and *a rule nobody knowingly set is a rule they do not know they
