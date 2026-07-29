@@ -349,12 +349,25 @@ namespace Nemoviz_Book_Reader
             // visual — the same status is also spoken as a text flag on the
             // item name, so screen-reader users lose nothing.
             statusIcons = new ImageList();
-            statusIcons.ImageSize = new Size(16, 16);
+            // 20 rather than 16: at 16 there is no room for both a dot big enough
+            // to read its colour and a heart big enough to read its shape — the
+            // first attempt had the heart swallowing the badge, and the COLOUR is
+            // what carries the status.
+            statusIcons.ImageSize = new Size(20, 20);
             statusIcons.ColorDepth = ColorDepth.Depth32Bit;
-            statusIcons.Images.Add("reading", MakeStatusDot(Color.FromArgb(222, 170, 40)));    // yellow
-            statusIcons.Images.Add("unread", MakeStatusDot(Color.FromArgb(210, 66, 66)));      // red
-            statusIcons.Images.Add("read", MakeStatusDot(Color.FromArgb(70, 160, 74)));        // green
-            statusIcons.Images.Add("nowreading", MakeStatusDot(Color.FromArgb(58, 120, 214))); // blue
+            // Each status twice: plain, and with the favorite heart on it.
+            var badges = new (string Key, Color Colour)[]
+            {
+                ("reading",    Color.FromArgb(222, 170, 40)),   // yellow
+                ("unread",     Color.FromArgb(210, 66, 66)),    // red
+                ("read",       Color.FromArgb(70, 160, 74)),    // green
+                ("nowreading", Color.FromArgb(58, 120, 214)),   // blue
+            };
+            foreach (var b in badges)
+            {
+                statusIcons.Images.Add(b.Key, MakeStatusDot(b.Colour, false));
+                statusIcons.Images.Add(b.Key + "+fav", MakeStatusDot(b.Colour, true));
+            }
             listBooks.SmallImageList = statusIcons;
             boldFont = new Font(listBooks.Font, FontStyle.Bold);
             listBooks.AccessibleName = Localization.T("Library.List.Accessible");
@@ -609,12 +622,13 @@ namespace Nemoviz_Book_Reader
             // hearing "unread" a second earlier, and nothing is lost: the status
             // is still spoken, at the end of the line, and the coloured badge
             // still carries it at a glance.
+            // Favorite is NOT in the text — it is the heart on the badge. The word
+            // was one more tail to listen past on every favorite row, and the
+            // Favorites filter already answers "which are mine" properly.
             string text = name + ", " + Localization.T(StatusTextKey(status));
-            if (b.Favorite)
-                text += ", " + Localization.T("Shelf.Favorite");
             ListViewItem item = new ListViewItem(text);
             item.Tag = b;
-            item.ImageKey = StatusIconKey(status);
+            item.ImageKey = StatusIconKey(status) + (b.Favorite ? "+fav" : "");
             if (status == StatusNowReading)
                 item.Font = boldFont;
             return item;
@@ -658,18 +672,52 @@ namespace Nemoviz_Book_Reader
         }
 
         // A 16×16 transparent bitmap with a filled colored circle — the status
-        // badge shown at the left of each shelf row.
-        private static Bitmap MakeStatusDot(Color color)
+        // badge shown at the left of each shelf row — and, for a favorite, a small
+        // heart sitting on it.
+        //
+        // The heart is IN THE PICTURE on purpose. Gordan's idea, and it is the
+        // only place it can go: an image is not announced, so a favorite is seen
+        // and not said, while ", Favorite" on the end of every favorite row was
+        // one more thing to listen past. It could not be a character in the text
+        // either — the item's text IS what a screen reader reads, so a heart there
+        // would come out as "black heart suit".
+        private static Bitmap MakeStatusDot(Color color, bool favorite)
         {
-            Bitmap bmp = new Bitmap(16, 16);
+            Bitmap bmp = new Bitmap(20, 20);
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 g.Clear(Color.Transparent);
+                // The dot keeps the middle and stays the big thing on the badge.
                 using (Brush br = new SolidBrush(color))
-                    g.FillEllipse(br, 3, 3, 10, 10);
+                    g.FillEllipse(br, 1, 3, 13, 13);
+                if (!favorite) return bmp;
+
+                // A small mark in the bottom-right corner, mostly OFF the dot so
+                // it does not eat the colour. Dark outline first, white fill over
+                // it: white alone vanishes on the yellow badge, dark alone
+                // vanishes on the blue one.
+                using (var path = HeartPath(11f, 10f, 8f, 7.5f))
+                {
+                    using (var pen = new Pen(Color.FromArgb(220, 20, 20, 20), 1.6f))
+                        g.DrawPath(pen, path);
+                    using (var br = new SolidBrush(Color.White))
+                        g.FillPath(br, path);
+                }
             }
             return bmp;
+        }
+
+        private static System.Drawing.Drawing2D.GraphicsPath HeartPath(float x, float y, float w, float h)
+        {
+            var p = new System.Drawing.Drawing2D.GraphicsPath();
+            float lobe = w / 2f;
+            p.AddArc(x, y, lobe, lobe * 0.9f, 180, 180);                 // left lobe
+            p.AddArc(x + lobe, y, lobe, lobe * 0.9f, 180, 180);          // right lobe
+            p.AddLine(x + w, y + lobe * 0.45f, x + w / 2f, y + h);       // down to the point
+            p.AddLine(x + w / 2f, y + h, x, y + lobe * 0.45f);           // and back up
+            p.CloseFigure();
+            return p;
         }
 
         /// <summary>Returns the selected book, or null if nothing is selected.</summary>

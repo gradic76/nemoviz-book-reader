@@ -1642,6 +1642,19 @@ readers announce it, and a **colored badge icon** (`SmallImageList` dots —
 red = unread, yellow = reading, green = read, blue = now reading; drawn at
 runtime by `MakeStatusDot`).
 
+**Favorite is NOT in the text at all — it is a heart on the badge** (Gordan's
+idea, 2026-07-29). An image is never announced, so a favorite is *seen and not
+said*, where ", Favorite" was one more tail to listen past on every favorite row;
+and the Favorites filter already answers "which are mine" properly. It could not
+be a character in the text either — the item's text **is** what a reader reads,
+so a heart there comes out as "black heart suit". The badge went from 16 to
+**20 px** because at 16 there is no room for both a dot big enough to read its
+colour and a mark big enough to read at all, and **the colour is what carries the
+status** — the first attempt had the heart swallowing the badge. At 20 px the
+heart reads as a small white mark with a dark outline rather than a crisp heart;
+the outline is needed because white alone vanishes on the yellow badge and dark
+alone vanishes on the blue one.
+
 **The flag is APPENDED, never prefixed, and that is not a presentation choice.**
 A list view jumps to the next item beginning with the typed letter, so a status
 in front makes every row start with R, U or N and **first-letter navigation
