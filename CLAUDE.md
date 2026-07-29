@@ -1609,27 +1609,62 @@ decided.**
 
 ---
 
-## 10c. Choosing a voice — the flow, agreed 2026-07-29
+## 10c. Choosing a voice — BUILT 2026-07-29
 
-**Language → Platform → Voice.** Not vendor: the **platform** is the thing that
-actually changes behaviour (in-process or through the 32-bit satellite, SAPI or
-OneCore), while Acapela or Ivona is only a name inside it. So the vendor stays
-part of the voice's display name and is not a step. The platform list is
-**Microsoft Speech, SAPI 5**, with SAPI 4 and a built-in eSpeak as possible
-later entries.
+**Language → Voice. There is no middle step.** The platform step the first
+design called for was dropped by Gordan once it was looked at properly: it
+grouped voices by what they *report as their vendor*, which is not a question a
+reader has an opinion about, and `CompositeSpeechBackend` already merges the
+backends and lets the 64-bit copy win a duplicate name — so there was nothing
+left for the step to disambiguate. Two combos instead of three is also one Tab
+stop fewer, every visit. (Bitness was never a user concept; if the *same voice*
+ever turns up on two platforms, that is the one case a label is needed, and the
+merge already prevents it.)
 
-**Bitness is not a user concept.** 32- or 64-bit is our routing problem, not
-theirs; it is shown only if the *same voice* turns up in both, where it becomes
-disambiguation — the same problem the duplicated Zira was.
+**Per-language default voices are the point of the whole thing, and they are in.**
+Settings → Text Books is now two combos: **"Books in this language"** (first row
+= *All other languages*, i.e. the global default) and **Voice**. Choices are
+staged, so several languages can be set up in one visit and Cancel discards them
+all; on save the global default keeps **its own** voice's speed/volume/pitch
+rather than whichever row happened to be on screen. Stored in `Settings.ini`
+`[LanguageVoices]` (`Languages=sr` + `sr=Dragana`), keyed by primary code because
+that is a safe INI key where a voice name is not.
 
-**Per-language default voices are the point of the whole thing.** Settings holds
-one default voice per language. Language detection currently has nowhere to send
-its answer; with this, opening a book becomes *detect → look up that language's
-default → set it into the book's Properties*, which is what finally makes the
-detector a feature rather than a fact.
+**A voice is offered for a language it does not speak, and is labelled as such.**
+Gordan's own listening (2026-07-29): *"srpski i hrvatski mogu se čitati
+međusobno, češki i slovački također jako dobro čitaju hr i sr"*.
+`LanguageDetector.StandInsFor` is that knowledge and it is a **different claim
+from `SameLanguage`** — Czech and Croatian are two languages, but a Czech voice
+reads a Croatian book intelligibly. The table is seeded with what has actually
+been *heard* and is meant to grow one pair at a time; a wrong entry does not fail
+loudly, it just reads a book in an accent nobody asked for.
+**Every reachable voice carries what it actually speaks** ("Karmela — a Croatian
+voice"). That matters more than it looks: Croatian voices reach Serbian through
+`SameLanguage`, not through the stand-in table, so they first arrived unlabelled
+— a list of six voices under Serbian with only one of them Serbian, all looking
+alike, says the opposite of the truth.
+
+**The chain, in `VoiceChooser` and nowhere else:** this language's chosen voice →
+a related language's chosen voice → any installed voice that speaks it → any that
+reads it → the global default. **A choice the user made always outranks a
+coincidence of what is installed.** The player and Properties each used to hold
+their own shortened copy of this and had already begun to differ. It still never
+falls through to "the first voice on the machine": that case comes back as
+`VoiceSource.GlobalMismatch` so the caller can say so instead of pretending.
+
+**When a language has no voice at all** (Gordan, 2026-07-29): **a message plus
+the offer to pick one by hand** — never silence, never gibberish. The chain and
+`VoiceSource` are built for it; the **message itself is not written yet** and
+belongs in Properties.
 
 **Settings has no detection, Properties does** — Settings has no book, so there
 is nothing to detect. Settings sets the rule, Properties applies it.
+
+**Known gap:** a language is listable only if something installed speaks it, the
+detector knows its stopwords, or it is in the stand-in table. A Greek book (found
+by *script*, with no Greek voice installed) therefore has no row to set a default
+on. Harmless today — there would be no voice to choose — but it is why the list
+is built from a union rather than one source.
 
 **"Set as default" lives in Properties, beside the language picker** (Gordan,
 2026-07-29). You have just chosen a voice for this book; that button promotes it
@@ -1637,7 +1672,7 @@ to the default for that language, which is how Settings gets filled without
 anyone having to go there. It asks first — "set <voice> as the default voice for
 <language>?" — because it changes a rule that affects **every future book in that
 language**, not the book in front of you, and nothing else in Properties does
-that.
+that. **Not built yet** — the storage it writes to (`SetLanguageVoice`) is.
 
 **Two things the first text-page screenshot exposed (2026-07-29).** The colon is
 **fixed**: the reading page now adds `": "` to Title / Author / Format the way the
