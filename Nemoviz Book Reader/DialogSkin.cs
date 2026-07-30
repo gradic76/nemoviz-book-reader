@@ -313,8 +313,20 @@ namespace Nemoviz_Book_Reader
     /// switch with Bypass and Reset on the metal beneath it, then the six stages
     /// as stickers three and three, and the buttons on the metal at the foot.
     ///
-    /// <para>A hybrid book still has two tabs and the agreed layout has nowhere to
-    /// put a tab strip, so those keep the classic dialog until that is decided.</para>
+    /// <para><b>A hybrid book (two tabs) drops to the classic dialog</b> — and
+    /// that is unreachable today, not merely undone. Two tabs need
+    /// <c>IsTextBook</c> AND <c>Chapters.Count &gt; 0</c>, but a book is only
+    /// called a text book when its folder has NO audio, and chapters are built
+    /// from audio. The condition contradicts itself, and §8c has text+audio DAISY
+    /// importing as plain audio with its text unused, so no such book exists.
+    /// Measured across a real 15-book library: every one is audio-only or
+    /// text-only, none both.</para>
+    ///
+    /// <para><b>Whoever makes hybrids possible has to do this in the same
+    /// breath</b>, or Properties will silently look like a different application
+    /// the first time one is opened. It is not a small change: both paths below
+    /// MOVE their controls off the tab page onto the form and hide the strip, so
+    /// a hybrid needs versions that lay out INSIDE a page instead.</para>
     /// </summary>
     internal static class PropertiesSkin
     {

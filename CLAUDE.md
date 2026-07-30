@@ -1894,9 +1894,27 @@ an owner-drawn control, and the bar has to stay reachable for a long title.
 
 **Not done yet:** the tabs above (needs a commit-without-close path, which is
 new behaviour, not paint); tightening the innards now that the cells grew from
-112 to 138; and **hybrid books, which still have two tabs — the agreed layout has
-nowhere to put a tab strip, so those keep the classic dialog until that is
-decided.**
+112 to 138.
+
+**HYBRID BOOKS DO NOT EXIST YET — that, not Properties, is the blocker**
+(measured 2026-07-29). The note that used to sit here said hybrid books "still
+have two tabs" and kept the classic dialog. That reads as though Properties were
+behind; it is not. **Two tabs are currently impossible by construction:** they
+need `IsTextBook` **and** `Chapters.Count > 0`, but `DetectTextBook` only calls a
+book a text book when its folder has **no audio**, and chapters are built *from*
+audio — the condition contradicts itself. On top of that §8c has text+audio DAISY
+importing as **plain audio with its text unused**. Checked across a real 15-book
+library: every book is audio-only or text-only, none both, so `hasAudio &&
+hasText` never fires and the single-tab path is doing the right thing.
+
+So the order is: **make hybrids possible first** (the multi-modal text+audio DAISY
+work already open in §8c), *then* lay out their Properties — designing that page
+now would mean building, and guessing at, a layout no book on earth can currently
+open. But the two must land together: `PropertiesSkin.Apply` bails on
+`TabPages.Count != 1`, so the first hybrid ever opened would silently get the
+plain Windows dialog. And it is not a repaint — both existing paths **move** their
+controls off the tab page onto the form and hide the strip, so a hybrid needs
+versions that lay out *inside* a page.
 
 ---
 
