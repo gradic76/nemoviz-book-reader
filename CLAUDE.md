@@ -2026,8 +2026,54 @@ the dialog blocks further down the same stack — but the effect is the wanted o
 to be resized so that while open it **completely covers the player**, as
 Properties does. Not done.
 
-**Still wearing plain Windows chrome:** `NoVoiceForm`. `DialogSkin` now covers
-Properties, Settings and the Library.
+**Still wearing plain Windows chrome:** `NoVoiceForm`, `SpeechDictionaryForm`,
+`DictRuleForm`, `TextHelpForm`, the rename prompt. `DialogSkin` now covers
+Properties, Settings, the Library, the four working dialogs and every message.
+
+### Three shells, one per KIND of dialog (Gordan, 2026-07-29)
+
+The windows were being reskinned one at a time until Gordan pointed out they are
+not N windows but **three kinds**, and that the hint pop-ups and the message
+boxes are each *one design with the text swapped*. That reframing is what made
+the remaining work small — and it dissolved the objection to replacing
+`MessageBox`, which was "21 replacements each having to re-earn what the system
+dialog gives free". One shell earns it **once**.
+
+| shell | size | who |
+|---|---|---|
+| `MessageForm` | grows with its text | every hint pop-up, all 21 former `MessageBox.Show` |
+| `WorkDialogSkin` large | 580 × 600 | Go To, Manage Bookmarks |
+| `WorkDialogSkin` small | 420 × 360 | Sleep Timer, archive password |
+| `DialogSkin` | 960 × 640 | Properties, Settings, Library |
+
+**The message shell grows DIAGONALLY, then only taller** (Gordan's call). Width
+and height scale together up to a width capped at a comfortable reading line;
+past that only the height grows. Most confirmations never reach the cap, so they
+all come out the same size — it is only the rare long message that goes tall
+rather than wide, which is also the right way round for reading.
+
+**Under the classic theme every message falls straight back to a real
+`MessageBox`.** The well-tested classic path, and every screen reader's built-in
+handling of a genuine system dialog, is untouched; only the new look gets the
+skinned version. **Default buttons were preserved per call site, not made
+uniform:** clearing the library already defaulted Enter to *No* and still does
+(`defaultToNo`), while the single-book delete still defaults to *Yes* — a
+pre-existing inconsistency left alone rather than fixed as a drive-by. Escape is
+always No.
+
+**Two size families, not one and not four.** Lists need height, a handful of
+radio buttons does not. One size would leave the short dialogs rattling; four
+would be four things to learn. **The large family anchors bottom-right of the
+player, the small family bottom-left** — same bottom edge, so it stays one
+convention, but each family holds its own zone. `DialogSkin.AnchorToOwner`
+clamps to the working area, and that already matters: at 600 tall the large
+family cannot fit above the player's bottom edge on this screen, so it rides the
+screen top rather than walking off it.
+
+**`WidenLabels` exists because a caption sized by hand for a narrower dialog
+just gets cut off** — the sleep timer's third option was reading "…close the
+program and shut". It widens only radios and checks that own their row, so the
+Custom radio sitting beside its spin box is left where it is.
 
 ### The Library under the new look — `LibrarySkin.cs` (2026-07-29)
 
