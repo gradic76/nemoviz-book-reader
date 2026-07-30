@@ -109,6 +109,25 @@ namespace Nemoviz_Book_Reader
             // Enter anywhere = OK, Escape anywhere = Cancel.
             this.AcceptButton = btnOK;
             this.CancelButton = btnCancel;
+
+            // Built exactly as before, then handed over — the classic path does
+            // nothing here, the new look restyles and relays out what was built.
+            if (UiTheme.Current.BuildsOwnLayout) WorkDialogSkin.ApplyGoTo(this);
+        }
+
+        internal GoToParts SkinParts
+        {
+            get
+            {
+                return new GoToParts
+                {
+                    List = lstParts,
+                    AutoPlay = chkAutoPlay,
+                    AutoPlayHint = tbAutoPlayHint,
+                    OK = btnOK,
+                    Cancel = btnCancel,
+                };
+            }
         }
     }
 }

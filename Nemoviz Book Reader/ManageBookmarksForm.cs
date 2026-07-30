@@ -112,6 +112,24 @@ namespace Nemoviz_Book_Reader
             this.CancelButton = btnCancel;
 
             RefreshList(working.Count > 0 ? 0 : -1);
+
+            // Built exactly as before, then handed over — the classic path does
+            // nothing here, the new look restyles and relays out what was built.
+            if (UiTheme.Current.BuildsOwnLayout) WorkDialogSkin.ApplyBookmarks(this);
+        }
+
+        internal BookmarksParts SkinParts
+        {
+            get
+            {
+                return new BookmarksParts
+                {
+                    List = lstBookmarks,
+                    Delete = btnDelete,
+                    OK = btnOK,
+                    Cancel = btnCancel,
+                };
+            }
         }
 
         private void LstBookmarks_KeyDown(object sender, KeyEventArgs e)
