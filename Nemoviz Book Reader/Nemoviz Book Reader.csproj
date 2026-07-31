@@ -187,6 +187,7 @@
     <Compile Include="WorkDialogSkin.cs" />
     <Compile Include="DaisySync.cs" />
     <Compile Include="BookInfo.cs" />
+    <Compile Include="ReadingWindow.cs" />
     <Compile Include="PlainTextParser.cs" />
     <Compile Include="RtfParser.cs" />
     <Compile Include="WordParser.cs" />
