@@ -160,7 +160,12 @@ namespace Nemoviz_Book_Reader
         private static void FitColumns(ListView v, int width)
         {
             if (v == null || v.Columns.Count != 2 || width <= 0) return;
-            int label = (int)(width * 0.38);
+            // Wide enough for the longest caption there IS, not a fixed share of
+            // the width: a flat 38 % came to 108 units and cut "Sound processing"
+            // down to "Sound proc…". Clamped so a long caption cannot squeeze the
+            // value column, which has its own long strings to show.
+            int label = BookInfoBuilder.WidestLabel(v.Font) + 12;
+            label = Math.Max((int)(width * 0.30), Math.Min(label, (int)(width * 0.50)));
             v.Columns[0].Width = label;
             v.Columns[1].Width = Math.Max(40, width - label);
         }

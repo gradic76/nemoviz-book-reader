@@ -421,14 +421,17 @@ namespace Nemoviz_Book_Reader
             string dash = Localization.T("Common.Dash");
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(Localization.T("Details.Field.Title") + ": " +
-                (string.IsNullOrWhiteSpace(book.Title) ? dash : book.Title));
-            if (!string.IsNullOrWhiteSpace(book.Author))
-                sb.AppendLine(Localization.T("Details.Field.Author") + ": " + book.Author);
-            sb.AppendLine(Localization.T("Details.Field.Format") + ": " +
-                (string.IsNullOrWhiteSpace(book.Format) ? dash : book.Format));
-            sb.AppendLine(Localization.T("Details.Field.Duration") + ": " +
-                (string.IsNullOrWhiteSpace(book.Duration) ? dash : book.Duration));
+            // The book's own facts, in the order every info box uses — see
+            // BookInfo.cs. The processing read-out below is this page's business
+            // and follows after them.
+            var info = new BookInfoBuilder();
+            info.AddAlways(BookInfoField.Title, book.Title, dash);
+            info.Add(BookInfoField.Author, book.Author);
+            info.Add(BookInfoField.Publisher, BookData.NormalizeProducer(book.Publisher));
+            info.Add(BookInfoField.Producer, BookData.NormalizeProducer(book.Producer));
+            info.AddAlways(BookInfoField.Format, book.Format, dash);
+            info.AddAlways(BookInfoField.Time, book.Duration, dash);
+            sb.Append(info.ToText(Environment.NewLine));
             sb.AppendLine();
 
             if (!chkMaster.Checked)
@@ -1032,26 +1035,27 @@ namespace Nemoviz_Book_Reader
             string nl = Environment.NewLine;
             var sb = new StringBuilder();
 
-            // The Details.Field.* captions carry no colon of their own — the
-            // Library uses them as column headings — so the separator is added
-            // here, exactly as the audio page does it. The Prop.Text.* ones
-            // below already end in a colon and only need the space. Getting
-            // this wrong is not merely untidy: the player's glass splits a line
-            // on ": " to tell the silkscreened label from the lit value, so a
-            // line without one has no label at all.
-            sb.Append(Localization.T("Details.Field.Title")).Append(": ").Append(book.Title ?? "").Append(nl);
-            if (!string.IsNullOrWhiteSpace(book.Author))
-                sb.Append(Localization.T("Details.Field.Author")).Append(": ").Append(book.Author).Append(nl);
-            sb.Append(Localization.T("Details.Field.Format")).Append(": ").Append(book.Format ?? "").Append(nl);
-            if (!string.IsNullOrEmpty(book.TextLanguage))
-                sb.Append(Localization.T("Prop.Text.Language")).Append(' ')
-                  .Append(LanguageDetector.DisplayName(book.TextLanguage)).Append(nl);
-            if (book.TextChars > 0)
-                sb.Append(Localization.T("Prop.Text.Characters")).Append(' ').Append(book.TextChars.ToString("N0")).Append(nl);
-            if (book.TextHeadings.Count > 0)
-                sb.Append(Localization.T("Prop.Text.Headings")).Append(' ').Append(book.TextHeadings.Count).Append(nl);
+            // The book's own facts, in the order every info box uses — see
+            // BookInfo.cs. The separator is added by the builder, and that is not
+            // merely tidiness: the player's glass splits a line on ": " to tell
+            // the silkscreened label from the lit value, so a line without one
+            // has no label at all. The reading settings below are this page's own
+            // business and follow after them.
+            var info = new BookInfoBuilder();
+            info.AddAlways(BookInfoField.Title, book.Title, "");
+            info.Add(BookInfoField.Author, book.Author);
+            info.Add(BookInfoField.Publisher, BookData.NormalizeProducer(book.Publisher));
+            info.Add(BookInfoField.Producer, BookData.NormalizeProducer(book.Producer));
+            info.AddAlways(BookInfoField.Format, book.Format, "");
             if (book.TextPages.Count > 0)
-                sb.Append(Localization.T("Prop.Text.Pages")).Append(' ').Append(book.TextPages.Count).Append(nl);
+                info.Add(BookInfoField.Pages, book.TextPages.Count.ToString());
+            if (book.TextHeadings.Count > 0)
+                info.Add(BookInfoField.Headings, book.TextHeadings.Count.ToString());
+            if (book.TextChars > 0)
+                info.Add(BookInfoField.Characters, book.TextChars.ToString("N0"));
+            if (!string.IsNullOrEmpty(book.TextLanguage))
+                info.Add(BookInfoField.Language, LanguageDetector.DisplayName(book.TextLanguage));
+            sb.Append(info.ToText(nl));
             sb.Append(nl);
 
             // No indent under the section names. The column is 262 units wide,

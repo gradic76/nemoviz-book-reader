@@ -102,7 +102,7 @@ namespace Nemoviz_Book_Reader
         /// (<c>Annual_report_1997</c>) lands here and is right to: its SMIL points
         /// at <c>ncc.html</c> rather than at any text, so it is an ordinary audio
         /// DAISY and comes back false.</para></summary>
-        public static bool SetupHybrid(BookData book, string folder)
+        public static bool SetupHybrid(BookData book, string folder, DaisyBook daisy = null)
         {
             if (book == null || folder == null) return false;
             try
@@ -136,6 +136,13 @@ namespace Nemoviz_Book_Reader
                 book.TextCleaned = true;
                 book.SetTextHeadings(doc.Headings);
                 book.SetTextPages(doc.Pages);
+                // A hybrid needs its language too, even though the narrator does
+                // the reading: it is what picks the voice for a word looked up on
+                // demand, and what braille and the on-screen text are shaped by.
+                // Same rule as everywhere else — the words outrank the producer's
+                // claim, which is wrong in 17 % of the samples (§8e).
+                book.TextLanguage = LanguageDetector.Resolve(
+                    daisy != null ? daisy.Language : null, doc.Text);
                 book.SaveSyncMap(map);
                 return true;
             }

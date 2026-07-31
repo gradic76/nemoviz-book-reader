@@ -90,8 +90,8 @@ SleepTimer.Duration.Custom=Custom:
 SleepTimer.Custom.Accessible=Custom duration in minutes
 SleepTimer.Action.Group=When the time expires
 SleepTimer.Action.Stop=Stop playback
-SleepTimer.Action.StopClose=Stop playback and close the program
-SleepTimer.Action.StopShutdown=Stop playback, close the program and shut down the computer
+SleepTimer.Action.StopClose=Stop and close the program
+SleepTimer.Action.StopShutdown=Stop, close and shut down the computer
 SleepTimer.Start=Start
 SleepTimer.Start.Accessible=Start sleep timer
 SleepTimer.CancelBtn=Cancel
@@ -240,10 +240,14 @@ Library.Details.Accessible=Book details
 Details.Field.Title=Title
 Details.Format.PlainText=Plain text
 Details.Estimated=(estimated)
+; One caption per field, and ONE field per fact. These are the names
+; BookInfoField uses, and they are shared by the Library's columns and by the
+; info glass in Properties, so none of them carries a colon of its own — the
+; glass adds ": " itself, and splits on it to tell label from value.
+; Duration and Listened were removed: they said "Time" and "Elapsed" under a
+; second name, which is how the three info boxes came to disagree.
 Details.Field.Author=Author
 Details.Field.Format=Format
-Details.Field.Duration=Duration
-Details.Field.Listened=Elapsed
 Details.Field.Speed=Speed
 Details.Field.Added=Added
 Details.Field.Producer=Producer
@@ -253,6 +257,9 @@ Details.Field.Elapsed=Elapsed
 Details.Field.Remaining=Remaining
 Details.Field.Read=Read
 Details.Field.Pages=Pages
+Details.Field.Headings=Headings
+Details.Field.Characters=Characters
+Details.Field.Language=Detected language
 Details.Field.SoundProcessing=Sound processing
 Details.Sound.On=On
 Details.Sound.Off=Off
@@ -400,7 +407,7 @@ Settings.General.Browse=Browse...
 Settings.General.Browse.Accessible=Browse for library folder
 Settings.General.Language=Language:
 Settings.WorkInProgress=Work in progress.
-Settings.Audio.UseMetadata=Use embedded metadata for title and author when available
+Settings.Audio.UseMetadata=Use embedded metadata
 Settings.Audio.UseMetadata.Hint=When on, audio uses the Album as title and Artist as author, and EPUB/DAISY use their embedded title, author and publisher. When off, the folder or file name is used. Plain text documents always use the file name.
 Settings.TextBooks.Language=Language:
 Settings.TextBooks.SpeechEngine=Speech engine:
@@ -411,7 +418,7 @@ Settings.TextBooks.VoiceNotSet=(no voice chosen)
 ; the list because the library holds a book in it.
 Settings.TextBooks.LanguageNoVoice={0} — no voice installed
 Settings.TextBooks.Voice=Voice:
-Settings.TextBooks.Speed=Reading speed (words per minute):
+Settings.TextBooks.Speed=Reading speed:
 Settings.TextBooks.Test=Test voice
 Settings.TextBooks.TestSample=This is a sample of the selected voice.
 Settings.TextBooks.Volume=Volume:
@@ -420,11 +427,11 @@ Settings.TextBooks.ComingSoon=Additional options for low-vision and dyslexic rea
 Settings.TextBooks.SpeechGroup=Speech
 Settings.TextBooks.LanguageUnknown=(language not reported)
 Settings.TextBooks.BrailleGroup=Braille output
-Settings.TextBooks.UseBraille=Use braille output (send the text to the braille display)
+Settings.TextBooks.UseBraille=Use braille output
 Settings.TextBooks.BrailleTable=Braille table:
 Settings.TextBooks.BrailleTableAuto=Detect from the book
 Settings.TextBooks.VisualGroup=Visual output
-Settings.TextBooks.UseVisual=Use visual output (show the text on screen while reading)
+Settings.TextBooks.UseVisual=Use visual output
 Settings.TextBooks.VisualMode=Display mode:
 Settings.TextBooks.VisualMode.TwoRows=Two text rows (subtitle style)
 Settings.TextBooks.VisualMode.FullInstant=Full screen text (instant switch)

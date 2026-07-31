@@ -858,79 +858,66 @@ namespace Nemoviz_Book_Reader
 
             listViewDetails.BeginUpdate();
             listViewDetails.Items.Clear();
-            AddDetailRow(Localization.T("Details.Field.Title"), book.Title);
 
-            if (book.IsTextBook)
-                ShowTextDetails(book, dash);
-            else
-                ShowAudioDetails(book, dash);
+            // What this book has to say, in whatever order is convenient here —
+            // BookInfoBuilder puts it in the canonical one (see BookInfo.cs).
+            // Before this, the Library, the audio Properties and the reading
+            // Properties each had an order of their own.
+            var info = new BookInfoBuilder();
+            info.AddAlways(BookInfoField.Title, book.Title, dash);
+            info.AddAlways(BookInfoField.Author, book.Author, dash);
+            info.AddAlways(BookInfoField.Added,
+                book.DateAdded.ToString(Localization.T("Common.DateFormatLong")), dash);
 
+            if (book.IsTextBook) AddTextDetails(info, book);
+            else AddAudioDetails(info, book);
+
+            foreach (InfoRow r in info.Rows()) AddDetailRow(r.Label, r.Value);
             listViewDetails.EndUpdate();
         }
 
-        // Library details for an audio / DAISY book:
-        // TITLE / AUTHOR / PRODUCER / TIME / ELAPSED / REMAINING / READ /
-        // FORMAT / [PAGES for DAISY] / SOUND PROCESSING / ADDED.
-        private void ShowAudioDetails(BookData book, string dash)
+        // The audio / DAISY book's own fields. Producer keeps its row even when
+        // empty (unknown, per spec); Publisher appears only when there is one —
+        // DAISY has both, plain audio has neither.
+        private void AddAudioDetails(BookInfoBuilder info, BookData book)
         {
-            AddDetailRow(Localization.T("Details.Field.Author"),
-                string.IsNullOrWhiteSpace(book.Author) ? dash : book.Author);
-            // Producer always shown (empty = unknown, per spec); Publisher only
-            // when present (DAISY has both; plain audio has neither).
-            AddDetailRow(Localization.T("Details.Field.Producer"),
-                BookData.NormalizeProducer(book.Producer));
-            string pub = BookData.NormalizeProducer(book.Publisher);
-            if (!string.IsNullOrEmpty(pub))
-                AddDetailRow(Localization.T("Details.Field.Publisher"), pub);
+            info.AddAlways(BookInfoField.Producer, BookData.NormalizeProducer(book.Producer), "");
+            info.Add(BookInfoField.Publisher, BookData.NormalizeProducer(book.Publisher));
 
             double totalSec = ParseDetailTime(book.Duration);
             double elapsedSec = ParseDetailTime(book.LastPosition);
             double remaining = totalSec - elapsedSec;
             if (remaining < 0) remaining = 0;
 
-            AddDetailRow(Localization.T("Details.Field.Time"), book.Duration);
-            AddDetailRow(Localization.T("Details.Field.Elapsed"), FormatDetailTime(elapsedSec));
-            AddDetailRow(Localization.T("Details.Field.Remaining"), "-" + FormatDetailTime(remaining));
-            string readPct = totalSec > 0
+            info.Add(BookInfoField.Time, book.Duration);
+            info.Add(BookInfoField.Elapsed, FormatDetailTime(elapsedSec));
+            info.Add(BookInfoField.Remaining, "-" + FormatDetailTime(remaining));
+            info.Add(BookInfoField.Read, (totalSec > 0
                 ? (100.0 * elapsedSec / totalSec).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)
-                : book.PercentListened.ToString();
-            AddDetailRow(Localization.T("Details.Field.Read"), readPct + "%");
-            AddDetailRow(Localization.T("Details.Field.Format"), book.Format);
-            if (book.IsDaisy)
-                // Empty (unknown), not "0", when the book declares no pages —
-                // "0" would wrongly read as "zero pages".
-                AddDetailRow(Localization.T("Details.Field.Pages"),
-                    book.DaisyPages.Count > 0 ? book.DaisyPages.Count.ToString() : "");
-            AddDetailRow(Localization.T("Details.Field.SoundProcessing"),
+                : book.PercentListened.ToString()) + "%");
+            info.Add(BookInfoField.Format, book.Format);
+            // Empty (unknown), not "0", when a DAISY book declares no pages —
+            // "0" would wrongly read as "zero pages".
+            if (book.IsDaisy && book.DaisyPages.Count > 0)
+                info.Add(BookInfoField.Pages, book.DaisyPages.Count.ToString());
+            info.Add(BookInfoField.SoundProcessing,
                 Localization.T(book.Sound != null && book.Sound.Enabled ? "Details.Sound.On" : "Details.Sound.Off"));
-            AddDetailRow(Localization.T("Details.Field.Added"),
-                book.DateAdded.ToString(Localization.T("Common.DateFormatLong")));
         }
 
-        // Library details for a text book: real source format, reading speed in
-        // WPM, estimated reading time, and author/producer when present.
-        private void ShowTextDetails(BookData book, string dash)
+        // The text book's own fields: real source format, estimated reading time
+        // and the speed that estimate is based on.
+        private void AddTextDetails(BookInfoBuilder info, BookData book)
         {
-            AddDetailRow(Localization.T("Details.Field.Author"),
-                string.IsNullOrWhiteSpace(book.Author) ? dash : book.Author);
-            string prod = BookData.NormalizeProducer(book.Producer);
-            if (!string.IsNullOrEmpty(prod))
-                AddDetailRow(Localization.T("Details.Field.Producer"), prod);
-            string pub = BookData.NormalizeProducer(book.Publisher);
-            if (!string.IsNullOrEmpty(pub))
-                AddDetailRow(Localization.T("Details.Field.Publisher"), pub);
+            info.Add(BookInfoField.Producer, BookData.NormalizeProducer(book.Producer));
+            info.Add(BookInfoField.Publisher, BookData.NormalizeProducer(book.Publisher));
 
             int wpm = book.TextWpm >= 0 ? book.TextWpm : appSettings.TtsWpm;
-            AddDetailRow(Localization.T("Details.Field.Format"), book.Format);
-            // Page count between Format and Time, when the book has page markers.
+            info.Add(BookInfoField.Time, "≈" + book.EstimatedReadingTime(wpm));
+            info.Add(BookInfoField.Read, book.PercentListened + "%");
+            info.Add(BookInfoField.Format, book.Format);
             if (book.TextPages.Count > 0)
-                AddDetailRow(Localization.T("Details.Field.Pages"), book.TextPages.Count.ToString());
-            AddDetailRow(Localization.T("Details.Field.Time"),
-                "≈" + book.EstimatedReadingTime(wpm));
-            AddDetailRow(Localization.T("Details.Field.Speed"), Localization.T("Details.Speed.Wpm", wpm));
-            AddDetailRow(Localization.T("Details.Field.Read"), book.PercentListened + "%");
-            AddDetailRow(Localization.T("Details.Field.Added"),
-                book.DateAdded.ToString(Localization.T("Common.DateFormatLong")));
+                info.Add(BookInfoField.Pages, book.TextPages.Count.ToString());
+            info.Add(BookInfoField.Speed, Localization.T("Details.Speed.Wpm", wpm));
         }
 
         // Fills a book's title/author from an audio file's Album/Artist tags
@@ -1461,7 +1448,7 @@ namespace Nemoviz_Book_Reader
                         LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
                         imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
                         // Text+audio DAISY: keep the text as a second output too.
-                        DaisyTextExtractor.SetupHybrid(imported, destFolder);
+                        DaisyTextExtractor.SetupHybrid(imported, destFolder, daisy);
                     }
                     else
                     {
@@ -1647,7 +1634,7 @@ namespace Nemoviz_Book_Reader
                 {
                     LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
                     imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
-                    DaisyTextExtractor.SetupHybrid(imported, destFolder);
+                    DaisyTextExtractor.SetupHybrid(imported, destFolder, daisy);
                 }
                 imported.Save();
 

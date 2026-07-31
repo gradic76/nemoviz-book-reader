@@ -2363,6 +2363,78 @@ and a message.
 
 ---
 
+## 10d. One order for a book's information (Gordan, 2026-07-30)
+
+Gordan's report: the info boxes did not agree with each other. Measured across
+the three, they did not — **Format was third** in Properties, **ninth** in the
+Library's audio details and **fifth** in its text details; **Publisher and
+Producer** sat third and fourth in the Library and were **absent from Properties
+altogether**; Pages came after Format in one place and after Headings in another.
+Each box had grown its own order by being written on a different day. Two pairs
+of keys even said the same thing under different names — `Duration`/`Time` and
+`Listened`/`Elapsed` — which is how the drift got started.
+
+**The fix is not to re-sort three lists but to remove the opportunity.**
+`BookInfo.cs` owns the order; a caller says *which* fields it has and
+`BookInfoBuilder` decides *where* they go, so the boxes cannot drift again even
+when someone adds a field to only one of them. The Library now has a **single**
+`AddDetailRow` call site.
+
+**The order follows the player's glass** (§8k), which was settled first and does
+not change:
+
+| band | fields |
+|---|---|
+| identity | Title · Author |
+| where you are | Time · Elapsed · Remaining · Read |
+| where it came from, what it is made of | Publisher · Producer · Format · Pages · Headings · Characters · Language |
+| how it is read | Speed · Sound processing |
+| the library entry, not the book | Added |
+
+The player's live-only slots (chapter, page, bookmarks) have no equivalent in a
+dialog and simply do not appear. **A field with nothing to say is not shown** —
+the player's rule, and it matters more to a screen reader than to the eye: a
+value is always in the same place, so it is found by counting rather than by
+reading everything above it. A box that would rather keep a row and show a dash
+says so at the call site (`AddAlways`), which is presentation, not order.
+
+Two things fell out of doing it. **Properties now shows Publisher and Producer**,
+which it never had. And the Library's label column is sized to **the longest
+caption there is**, measured over every field rather than over the rows on
+screen — the column is fitted once while the list is still empty, but its rows
+change with every book, so a flat 38 % share cut "Sound processing" to "Sound
+proc…". **Still true and accepted:** the *value* column truncates a long title or
+format string, because a `ListView` cell cannot wrap; Properties shows those in
+full.
+
+### Control captions are short; the explanation is in the hint
+
+**A control's caption is at most about 30 characters** (Gordan, 2026-07-30, after
+seeing "Use visual output (show the text on screen while readi" cut off). A
+sentence on a control is a hint that landed in the wrong place — the `?` and `F1`
+are where an explanation belongs, and they cost a corner instead of a third of
+the page (§ SettingsSkin).
+
+**The long form is deliberately NOT moved into `AccessibleName`.** That would
+sound the explanation on every Tab past the control, which is exactly the noise
+the hint system was built to remove. Accessible names stay short too — they carry
+the *shortcut*, not the manual.
+
+Trimmed: `Settings.TextBooks.UseVisual` and `.UseBraille` (57 → 17/18),
+`Settings.Audio.UseMetadata` (57 → 21), `SleepTimer.Action.StopClose` and
+`.StopShutdown` (35/59 → 23/37 — the group legend "When the time expires" already
+supplies the rest, but "the computer" stays, because "shut down" alone could mean
+the app), and `Settings.TextBooks.Speed` (33 → 14): "Reading speed (words per
+minute):" became "Reading speed:", the unit moving to the value ("175 WPM"),
+which also un-did a redundancy in the info glass. **That one paid twice** — §10b
+recorded it as the caption pushing the whole reading page's value column right,
+and the values moved back left when it went.
+
+**Left long on purpose:** messages and notices (they are prose), combo-box items
+(values, not captions), the folder-browser prompt, and accessible names.
+
+---
+
 ## 11. TODO (open items)
 
 - **A key fires but a keyboard SHORTCUT does not light it.** The backlight is
