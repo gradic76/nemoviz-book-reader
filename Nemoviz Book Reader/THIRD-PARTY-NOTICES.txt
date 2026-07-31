@@ -1,0 +1,69 @@
+NEMOVIZ BOOK READER — THIRD-PARTY COMPONENTS
+============================================
+
+NBR uses the components below. Each is used as a SEPARATE, DYNAMICALLY LOADED
+library or as an unmodified package; none is statically linked into NBR itself,
+and each can be replaced by the user with a compatible build. That is what the
+LGPL asks for, and it is why NBR can be distributed under its own terms.
+
+Last verified: 2026-07-30.
+
+
+libmpv (mpv) — audio playback engine
+------------------------------------
+File     : libmpv-2.dll
+Build    : mpv-dev-lgpl-x86_64-20260730-git-74356c0fc6
+Source   : https://github.com/zhongfly/mpv-winbuild  (LGPL variant)
+Upstream : https://github.com/mpv-player/mpv
+Licence  : LGPL v2.1 or later (mpv built with -Dgpl=false).
+           The FFmpeg it links is stated by the build to be LGPL v3.
+
+IMPORTANT — this must stay an LGPL build. The ordinary Windows builds of libmpv
+are GPL: they link libx264 and libdvdnav/libdvdread, which are GPL-2, and that
+would make NBR's own distribution a GPL matter. NBR needs none of it — it plays
+audio. Verified on this build by scanning the binary: no libx264 (the "x264 -
+core" strings that remain are FFmpeg's H.264 SEI *parser*, reading the tag an
+encoder left behind, and libx264/x264_encoder_open are absent), no libdvdnav,
+libdvdread, dvd://, cdda://, libx265, librubberband or libsmbclient.
+
+
+liblouis — braille translation
+------------------------------
+Files    : liblouis.dll, louis/tables/*
+Upstream : http://liblouis.io/
+Licence  : LGPL v2.1 or later (library); the tables carry their own copyright
+           notices, also LGPL v2.1 or later.
+Note     : The Croatian tables hr-old.ctb and hr-2020.ctb were written for NBR
+           from the official standard and are NBR's own; see CLAUDE.md 8i.
+
+
+NVDA Controller Client — speech through the NVDA screen reader
+--------------------------------------------------------------
+File     : nvdaControllerClient.dll
+Upstream : https://github.com/nvaccess/nvda
+Licence  : LGPL v2.1 — full text in nvdaControllerClient-license.txt
+
+
+TagLib# (TagLibSharp) 2.3.0 — audio metadata and durations
+-----------------------------------------------------------
+Upstream : https://github.com/mono/taglib-sharp
+Licence  : LGPL v2.1
+
+
+SharpCompress 0.49.1 — zip / rar / 7z import
+---------------------------------------------
+Upstream : https://github.com/adamhathcock/sharpcompress
+Licence  : MIT
+
+
+System.Text.Encoding.CodePages — legacy code pages (windows-1250 and friends)
+------------------------------------------------------------------------------
+Upstream : https://github.com/dotnet/runtime
+Licence  : MIT
+
+
+STILL TO DO BEFORE ANY RELEASE
+------------------------------
+The verbatim licence texts (LGPL v2.1, LGPL v3, MIT) must ship ALONGSIDE this
+file. Naming a licence is not the same as providing it, and the LGPL asks for a
+copy. Only nvdaControllerClient's text is present today.

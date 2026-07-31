@@ -2435,6 +2435,85 @@ and the values moved back left when it went.
 
 ---
 
+## 10e. libmpv is an LGPL build now — keep it that way (2026-07-30)
+
+**The vendored libmpv was a GPL build, and that was a real problem for a closed
+application** — Store or plain installer, it makes no difference. Found by
+scanning the binary rather than by reading a label: it carried libx264's own
+banner (`x264 - core`, `videolan.org/x264`, the `libx264 — H.264 / AVC` encoder
+registration) and mpv's DVD code with libdvdnav linked (`libdvdnav: %s`,
+`dvdnav error: %s`, the `dvd://` protocol). **libx264 and libdvdnav/libdvdread
+are GPL-2**, and FFmpeg with x264 requires `--enable-gpl`.
+
+**Replaced with `mpv-dev-lgpl-x86_64` from
+[zhongfly/mpv-winbuild](https://github.com/zhongfly/mpv-winbuild)** (mpv
+`-Dgpl=false`). shinchiro, the usual source of Windows builds, has no LGPL
+variant — the request has been open since January 2024. **93.6 MB against the
+old 114.8 MB**, and mpv's own `Copyright` file confirms the diagnosis from the
+other side: DVD navigation and CDDA are GPL-only and are dropped automatically
+in LGPL mode, which is exactly what the scan found in the old DLL.
+
+**Verified, not assumed, and both ways round.** The new DLL: no libx264
+(`x264 - core` survives twice, but in FFmpeg's H.264 **SEI parser**, next to
+"Mastering Display Metadata" — it reads the tag an encoder left in the
+bitstream; `libx264` and `x264_encoder_open` are absent), no libdvdnav /
+libdvdread / `dvd://` / `cdda://` / libx265 / librubberband / libsmbclient. Every
+filter in the §8d chain, `scaletempo2`, WASAPI and the codecs are all still
+there. Then the whole §8d chain was **handed to mpv through the real C API** with
+every stage switched on at once, over the eleven `misc audio` samples: accepted
+11/11, and duration + decode identical to the old DLL at 10/11 — the one failure
+being the APE with a non-standard ID3v2 tag prepended that §8h already documents.
+
+**A trap that cost a false result, worth remembering:** `Marshal.
+StringToHGlobalAnsi` converts to the system code page, but **mpv takes UTF-8,
+always**. Three samples with `Č` and `Đ` in their names failed to load and looked
+exactly like unsupported formats. What exposed it was running the OLD DLL as a
+control and seeing it fail on the same three files and no others — a difference
+you cannot see without a control run.
+
+**The rule from here on: any libmpv update must be the LGPL artifact, and must be
+scanned before it is committed.** The probe is trivial to redo — read the DLL as
+ASCII and count `x264 - core`, `videolan.org/x264`, `libx264`, `libdvdnav`,
+`dvd://`, `cdda://`.
+
+**Still open — an audio-only build.** Nobody publishes one; mpv has no "disable
+video" switch, so it is cut at the FFmpeg level (`--disable-decoders` plus an
+explicit audio list, `--disable-hwaccels`, `--disable-encoders`,
+`--disable-devices`), which means forking the winbuild CI. Worth it only if
+93.6 MB → ~45 MB matters. **One thing to remember before cutting:** an M4B's
+cover art is a real MP4 **video** track (§8f). It is ignored today (`vid=no`) and
+NBR shows no cover anywhere — but with video fully stripped it could never be
+decoded, so MJPEG and PNG should be kept explicitly if covers are ever wanted.
+
+**The visual reading display must NOT go through mpv** (researched 2026-07-30),
+which is what makes an audio-only build free. mpv's OSD renders **pixels**, and
+§8l's braille route works precisely because the text sits in a real focusable
+control that the screen reader tracks — measured at 67–170 ms, silent, with
+routing keys landing as caret positions. Through mpv, braille and visual would
+split back into two features. Two more reasons point the same way: an OSD needs a
+video output window, undoing the `vid=no` that keeps cover art from popping one;
+and libass has its own font handling and ignores the Windows high-contrast
+setting that §8k says outranks everything. A borderless custom-painted WinForms
+overlay gives the fonts, colours and highlight Properties already offers, and NBR
+already animates at that level.
+
+**Licences (all verified on disk 2026-07-30, recorded in
+`THIRD-PARTY-NOTICES.txt`, which ships with the app):** SharpCompress MIT,
+System.Text.Encoding.CodePages MIT (both read from their nuspec), liblouis and
+its tables LGPL 2.1+ (read from a table header), nvdaControllerClient LGPL 2.1
+(text present), TagLib# LGPL 2.1, libmpv LGPL 2.1+ with FFmpeg stated as LGPL v3.
+**Not done:** the verbatim licence texts must ship alongside the notices —
+naming a licence is not providing it.
+
+**One wrinkle for MSIX specifically:** FFmpeg here is LGPL **v3**, which wants
+the user to be able to relink or replace the library. A signed MSIX package puts
+the DLL inside `WindowsApps` where it cannot be replaced. Worth checking whether
+the build uses `--enable-version3` and what needs it, since FFmpeg is LGPL 2.1+
+by default. NBR decodes AMR natively, so the usual reason for version3
+(libopencore-amr, encoding only) probably does not apply.
+
+---
+
 ## 11. TODO (open items)
 
 - **A key fires but a keyboard SHORTCUT does not light it.** The backlight is
