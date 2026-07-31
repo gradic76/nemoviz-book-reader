@@ -1072,6 +1072,15 @@ namespace Nemoviz_Book_Reader
                 // situation a reader is most likely to be in. F1 is Help by
                 // convention; F9 and F10 are left alone (F10 activates a menu
                 // bar), as is Alt+F4.
+                // Escape leaves the info box as well as a third F8 — walking out
+                // of somewhere with Escape is a habit, and a habit that fails is
+                // worse than one that was never offered. Guarded on the box
+                // actually having focus, so Escape means nothing elsewhere in
+                // the player and cannot swallow a key some other control wants.
+                case Keys.Escape:
+                    if (infoBoxHasFocus) { ToggleInfoBoxFocus(); return true; }
+                    break;
+
                 case Keys.F1:
                     BtnHelp_Click(null, EventArgs.Empty);
                     return true;
