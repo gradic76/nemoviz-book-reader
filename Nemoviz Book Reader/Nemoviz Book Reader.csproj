@@ -185,6 +185,7 @@
     <Compile Include="LibrarySkin.cs" />
     <Compile Include="MessageForm.cs" />
     <Compile Include="WorkDialogSkin.cs" />
+    <Compile Include="DaisySync.cs" />
     <Compile Include="PlainTextParser.cs" />
     <Compile Include="RtfParser.cs" />
     <Compile Include="WordParser.cs" />
