@@ -824,6 +824,41 @@ linear amplitudes (threshold/makeup/limit via `10^(dB/20)`).
   re-applied (OK saved new, Cancel kept old). From the library there's no audio,
   so no preview.
 
+**An auto-analyser belongs at IMPORT, not on the fly** (settled 2026-07-31 after
+reading a comparable tool, `D:\Test Naslovi\SlušajKnjigu_Portable` — a
+PyInstaller app whose whole configuration is in plain sight in
+`_internal\config.json`).
+
+Its approach is worth taking: sample the audio, then **decide which stages to
+switch on** from measured thresholds — SNR 14 dB for denoise, spectral centroid
+1500 Hz for "bright", clipping peak 0.96 with a 1 % ratio, low-frequency ratio
+0.55 for muddiness. That is exactly the "I measure, Gordan judges by ear" split
+this section has been waiting for, and those numbers are a free starting point
+rather than something to derive from nothing. (Its own processing is a different
+school — RMS normalisation, a three-band EQ as plain multipliers, Wiener denoise
+in SciPy — not better, just not ours.)
+
+**But it is a measurement of the recording, not real-time processing**, and that
+decides where it goes:
+
+- Changing filters mid-playback makes mpv rebuild the `af` graph, and that is
+  **heard as a break** — at the start of a book, where the listener is paying
+  most attention.
+- The measurements need seconds to settle, so the opening moments would give the
+  wrong answer.
+- The book's settings are already per-book in `Book.ini [Sound]`, and import
+  already walks every file for durations. The analysis costs one more pass.
+
+**Sample several files spread through the book, not 20 s from one place.** This
+section already records that level varies "between files recorded on different
+days"; a single sample would set the whole book from one of them.
+
+**Text sync does NOT help here** (asked, and worth writing down so it is not
+re-asked): knowing where speech is would let the noise floor be measured in the
+gaps between sentences, which is where it really lives — but ordinary voice
+activity detection gives that from the audio alone, with no text and no sync. A
+bonus if sync happens to exist, never a reason to build it.
+
 **Open items** (Session 12, deferred until "critical" sample recordings exist):
 tune the preset values by ear; finalize the normalization method (the
 speechnorm/dynaudnorm chooser is temporary — likely lock to speechnorm and drop
