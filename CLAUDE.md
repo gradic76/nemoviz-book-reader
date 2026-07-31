@@ -1975,7 +1975,58 @@ an owner-drawn control, and the bar has to stay reachable for a long title.
 new behaviour, not paint); tightening the innards now that the cells grew from
 112 to 138.
 
-**Hybrid books exist as of 2026-07-30 — the two-tab page is now the open item.**
+**The hybrid two-tab page is BUILT and rendered (2026-07-30).** Both pages lay
+themselves out **inside** their tab page, unlike the two single-page paths which
+move their controls onto the form and hide the strip — here the strip has
+something to show. Each page gets its **own `DialogCanvas`**, because a TabPage
+paints its own background over whatever is behind it, so the metal has to be
+drawn on the page; the canvas still takes the form as owner, so dragging the
+window by the metal keeps working. Which page is which is decided by **what is on
+it** (`p.TextInfo`), not by index.
+
+**The reading tab is not decoration on a book that plays itself** (Gordan): even
+where the narration sets the pace, the voice, pitch and volume decide how a word
+looked up on demand is spoken, and braille and on-screen output are switched on
+there. **The condition is `IsHybrid`** — `IsTextBook && Chapters > 0` still
+cannot both be true and never will be.
+
+- **`DialogSkin.PropGeom.For(w, contentH, rowsBottom)` computes the layout
+  instead of a second set of constants being written down.** The hand-tuned
+  numbers turn out to derive from one another exactly, and `For(960, 628, 570)`
+  reproduces **every one of them to the unit** — verified by a probe before the
+  hybrid page was built on top of it, so the tested audio layout is provably
+  untouched. A tab page costs ~32 units of width and ~100 of height, giving
+  columns of 292 and stage cells of 117.
+- **Rows are as tall as what stands in them.** Five of the six audio cells hold
+  one combo; Tone holds three spin rows. One height for all six clipped Treble
+  off the bottom of the page. Each cell is asked what it needs by measuring its
+  own children — the 112 they were all *built* at is the same number for every
+  cell and so cannot tell them apart.
+- **Do NOT test `c.Visible` when measuring inside `SuspendLayout`.** On a page
+  that is not the selected one every child answers false, every row measures
+  empty, and the six cells collapse to a stack of title bars. Measured, seen,
+  fixed.
+- **A check box built at a hand-picked width cuts its own caption off** — "…show
+  the text on screen while readi". It was not overflowing anything, so widening
+  is the fix, not wrapping. **This was wrong on the text-only page too, all
+  along**, and is fixed there in the same change.
+- **`DialogSkin.StyleTabStrip` is now shared with `SettingsSkin`** rather than
+  each owning a copy of the owner-drawn strip.
+
+**Rendered and checked on all three kinds** (a hybrid, an audio-only and a
+text-only book): the hybrid shows both tabs with no scroll bars and every group's
+bottom edge intact, and the two single-tab layouts are unchanged.
+
+**Method note, because synthetic input failed again:** keys stopped reaching the
+running player entirely this session (no focus groove moved, `Alt+Enter` and Tab
+both dead) — so the dialog was built and shown by a small harness instead, which
+is a better test anyway. Two traps in doing that: `DrawToBitmap` comes back as
+**bare metal with every control missing**, because a TabControl does not honour
+`WM_PRINT` for its pages; and the capture must be taken from a **DPI-aware**
+process, since the app is DPI-unaware and every coordinate it can see — including
+`GetWindowRect` — is virtualized to 1280×720 while the screen is 1920×1080.
+
+**Hybrid books exist as of 2026-07-30.**
 The note that stood here said hybrid Properties was not the blocker because
 hybrids were impossible by construction, and that was right at the time: two tabs
 needed `IsTextBook` **and** `Chapters.Count > 0`, while `DetectTextBook` only

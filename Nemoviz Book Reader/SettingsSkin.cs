@@ -38,7 +38,6 @@ namespace Nemoviz_Book_Reader
     internal static class SettingsSkin
     {
         private const int Margin = 12;
-        private const int TabW = 168, TabH = 30;
 
         public static void Apply(SettingsForm f)
         {
@@ -69,12 +68,7 @@ namespace Nemoviz_Book_Reader
             TabControl tabs = p.Tabs;
             tabs.SetBounds(Margin, Margin, DialogSkin.W - 2 * Margin,
                            DialogSkin.ButtonsY - 2 * Margin);
-            tabs.SizeMode = TabSizeMode.Fixed;
-            tabs.ItemSize = new Size(TabW, TabH);
-            tabs.DrawMode = TabDrawMode.OwnerDrawFixed;
-            tabs.DrawItem -= PaintTab;
-            tabs.DrawItem += PaintTab;
-            tabs.Font = DialogSkin.FBody;
+            DialogSkin.StyleTabStrip(tabs);
             tabs.TabIndex = 0;
 
             // The page size is worked out from the TabControl, NOT read off the
@@ -82,7 +76,7 @@ namespace Nemoviz_Book_Reader
             // ClientSize still answers with what they were built at — which laid
             // the groups out barely half a page wide and clipped every value off
             // the right-hand edge. 4 units of border each side, the strip on top.
-            int pw = tabs.Width - 8, ph = tabs.Height - TabH - 8;
+            int pw = tabs.Width - 8, ph = tabs.Height - DialogSkin.TabH - 8;
 
             HintSystem.Clear();
             foreach (TabPage page in tabs.TabPages) LayOutPage(page, pw, ph);
@@ -229,27 +223,5 @@ namespace Nemoviz_Book_Reader
             return new string[0];
         }
 
-        private static void PaintTab(object sender, DrawItemEventArgs e)
-        {
-            var tabs = sender as TabControl;
-            if (tabs == null || e.Index < 0 || e.Index >= tabs.TabPages.Count) return;
-
-            Graphics g = e.Graphics;
-            bool on = e.Index == tabs.SelectedIndex;
-            Rectangle r = e.Bounds;
-
-            using (var br = new SolidBrush(on ? DialogSkin.Sticker : NewPlayerSkin.Glass))
-                g.FillRectangle(br, r);
-            using (var pen = new Pen(DialogSkin.StickerEdge))
-                g.DrawRectangle(pen, r.X, r.Y, r.Width - 1, r.Height - 1);
-
-            // The selected tab is lit, the rest silkscreened — the same two levels
-            // the display glass uses, so the page you are on reads at a glance
-            // without colour being the only thing carrying it.
-            NewPlayerSkin.DrawString(g, tabs.TabPages[e.Index].Text,
-                new RectangleF(r.X, r.Y, r.Width, r.Height),
-                DialogSkin.FBody, on ? NewPlayerSkin.Lit : NewPlayerSkin.Silk,
-                StringAlignment.Center, StringAlignment.Center);
-        }
     }
 }

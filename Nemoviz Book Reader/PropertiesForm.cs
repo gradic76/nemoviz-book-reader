@@ -255,8 +255,12 @@ namespace Nemoviz_Book_Reader
             // A book's properties are grouped by what it IS: sound processing for
             // anything with audio, reading options for anything with text. A hybrid
             // book (audio and text together) simply shows both tabs.
+            // A HYBRID gets both, and its reading page is not decoration: even
+            // where the narration sets the pace, the voice, pitch and volume still
+            // decide how a word looked up on demand is spoken, and the braille and
+            // visual outputs are switched on there (Gordan, 2026-07-30).
             bool hasAudio = book.Chapters.Count > 0 || !book.IsTextBook;
-            bool hasText = book.IsTextBook;
+            bool hasText = book.IsTextBook || book.IsHybrid;
 
             tabs = new TabControl();
             tabs.Location = new Point(8, 8);

@@ -51,6 +51,102 @@ namespace Nemoviz_Book_Reader
         public const int StageH = 138;
         public const int ButtonsY = 578, ButtonW = 112, ButtonH = 36;
 
+        /// <summary>Where everything on a Properties AUDIO page goes, worked out
+        /// from the space available rather than written down twice.
+        ///
+        /// <para>The hand-tuned constants above turn out to derive from one
+        /// another exactly — the info column is a fixed 296 because it was
+        /// measured against real book text, and the two control columns then split
+        /// what is left; the stage rows fill the height between the strip and the
+        /// buttons. <c>For(960, 628, 570)</c> reproduces every constant above to
+        /// the unit, which is what makes it safe to compute the numbers for a
+        /// NARROWER space instead of guessing a second set.</para>
+        ///
+        /// <para>That narrower space is a hybrid book's tab page: the strip and
+        /// the page border cost about 32 units of width and 100 of height, so the
+        /// six stage cells come out at 117 rather than 138. They were built at 112
+        /// and grew to 138 without their contents being re-tightened (§10b), so
+        /// 117 is still room to spare — the page is where the un-tightened slack
+        /// gets spent, not where something has to be cut.</para></summary>
+        public struct PropGeom
+        {
+            public Rectangle InfoPanel, InfoGlass, Playback;
+            public int ColA, ColB, ColW, StripY, StripH, StageH;
+            public int[] StageRowY;
+
+            /// <param name="w">Width of the space being laid out in.</param>
+            /// <param name="contentH">Where the content ends — the info column runs
+            /// the whole way down to it.</param>
+            /// <param name="rowsBottom">Where the last stage row must end. On the
+            /// form that is above the buttons; on a page there are no buttons, so
+            /// it is simply the foot of the page.</param>
+            public static PropGeom For(int w, int contentH, int rowsBottom)
+            {
+                var g = new PropGeom();
+                const int m = 12, infoW = 296, playH = 76, gap = 8, rowGap = 10;
+                g.InfoPanel = new Rectangle(m, m, infoW, contentH - m);
+                g.InfoGlass = new Rectangle(m + 17, m + 17, infoW - 34, contentH - m - 34);
+
+                g.ColA = m + infoW + m;
+                int colsW = (w - m) - g.ColA;
+                g.ColW = (colsW - m) / 2;
+                g.ColB = g.ColA + g.ColW + m;
+
+                g.Playback = new Rectangle(g.ColA, m, colsW, playH);
+                g.StripY = m + playH + gap;
+                g.StripH = 32;
+
+                int firstRow = g.StripY + g.StripH + gap;
+                g.StageH = Math.Max(96, ((rowsBottom - firstRow) - rowGap * 2) / 3);
+                g.StageRowY = new[] { firstRow,
+                                      firstRow + g.StageH + rowGap,
+                                      firstRow + 2 * (g.StageH + rowGap) };
+                return g;
+            }
+        }
+
+        /// <summary>The owner-drawn tab strip, shared by Settings and by a hybrid
+        /// book's Properties so the two cannot drift apart. The
+        /// <see cref="TabControl"/> underneath stays a real one: a drawn strip
+        /// would take away the tab role, the arrow navigation, and the "page 2 of
+        /// 2" a screen reader announces.</summary>
+        public const int TabW = 168, TabH = 30;
+
+        public static void StyleTabStrip(TabControl tabs)
+        {
+            if (tabs == null) return;
+            EnsureFonts();
+            tabs.SizeMode = TabSizeMode.Fixed;
+            tabs.ItemSize = new Size(TabW, TabH);
+            tabs.DrawMode = TabDrawMode.OwnerDrawFixed;
+            tabs.DrawItem -= PaintTab;
+            tabs.DrawItem += PaintTab;
+            tabs.Font = FBody;
+        }
+
+        private static void PaintTab(object sender, DrawItemEventArgs e)
+        {
+            var tabs = sender as TabControl;
+            if (tabs == null || e.Index < 0 || e.Index >= tabs.TabPages.Count) return;
+
+            Graphics g = e.Graphics;
+            bool on = e.Index == tabs.SelectedIndex;
+            Rectangle r = e.Bounds;
+
+            using (var br = new SolidBrush(on ? Sticker : NewPlayerSkin.Glass))
+                g.FillRectangle(br, r);
+            using (var pen = new Pen(StickerEdge))
+                g.DrawRectangle(pen, r.X, r.Y, r.Width - 1, r.Height - 1);
+
+            // The selected tab is lit, the rest silkscreened — the same two levels
+            // the display glass uses, so the page you are on reads at a glance
+            // without colour being the only thing carrying it.
+            NewPlayerSkin.DrawString(g, tabs.TabPages[e.Index].Text,
+                new RectangleF(r.X, r.Y, r.Width, r.Height),
+                FBody, on ? NewPlayerSkin.Lit : NewPlayerSkin.Silk,
+                StringAlignment.Center, StringAlignment.Center);
+        }
+
         // The sticker: a translucent panel laid on the glass, a shade lighter than
         // it, with its name printed along the top edge.
         public static readonly Color Sticker = Color.FromArgb(0x19, 0x20, 0x1C);
@@ -333,7 +429,8 @@ namespace Nemoviz_Book_Reader
         public static void Apply(PropertiesForm f)
         {
             PropParts p = f.SkinParts;
-            if (p == null || p.Tabs == null || p.Tabs.TabPages.Count != 1) return;
+            if (p == null || p.Tabs == null || p.Tabs.TabPages.Count == 0) return;
+            if (p.Tabs.TabPages.Count > 1) { ApplyHybrid(f, p); return; }
 
             // Which page is the single one? A text-only book has no playback group
             // and its stage cells were built but never put on a page — running the
@@ -421,6 +518,276 @@ namespace Nemoviz_Book_Reader
             canvas.Rebuild();
         }
 
+        /// <summary>A HYBRID book — narrated audio plus the same words as text —
+        /// gets both pages, and unlike the two single-page paths it lays them out
+        /// <b>inside</b> the tab pages instead of moving the controls onto the
+        /// form. The strip has something to show here, so it stays.
+        ///
+        /// <para>The reading page is not decoration on a book that plays itself
+        /// (Gordan, 2026-07-30): the voice, pitch and volume still decide how a
+        /// word looked up on demand is spoken, and braille and on-screen output
+        /// are switched on there. So both pages carry their full contents.</para>
+        ///
+        /// <para>Each page gets its own <see cref="DialogCanvas"/> rather than
+        /// showing the form's: a TabPage paints its own background over whatever
+        /// is behind it, so the metal has to be drawn <i>on the page</i>. The
+        /// canvas still takes the form as its owner, so dragging the window by the
+        /// metal keeps working inside a page.</para></summary>
+        private static void ApplyHybrid(PropertiesForm f, PropParts p)
+        {
+            DialogSkin.EnsureFonts();
+            f.SuspendLayout();
+            DialogCanvas shell = DialogSkin.Shell(f, DialogSkin.H);
+
+            TabControl tabs = p.Tabs;
+            tabs.SetBounds(DialogSkin.Rim, DialogSkin.Rim,
+                           DialogSkin.W - 2 * DialogSkin.Rim,
+                           DialogSkin.ButtonsY - 2 * DialogSkin.Rim);
+            DialogSkin.StyleTabStrip(tabs);
+            tabs.TabIndex = 0;
+
+            // From the TabControl, never off a TabPage: inside SuspendLayout the
+            // pages have not been resized yet and still answer with what they were
+            // built at — the mistake that laid every Settings group out half a page
+            // wide with its values clipped off the edge.
+            int pw = tabs.Width - 8, ph = tabs.Height - DialogSkin.TabH - 8;
+            var geom = DialogSkin.PropGeom.For(pw, ph, ph - 8);
+
+            HintSystem.Clear();
+            foreach (TabPage page in tabs.TabPages)
+            {
+                page.UseVisualStyleBackColor = false;
+                page.BackColor = NewPlayerSkin.PanelMid;
+                page.AutoScroll = false;   // the room is made below; nothing scrolls
+                var canvas = new DialogCanvas(f);
+                page.Controls.Add(canvas);
+                canvas.SendToBack();
+
+                // Which page is which is decided by what is ON it, not by index —
+                // the same rule the single-page path uses, and it survives someone
+                // adding a page or changing the order later.
+                if (p.TextInfo != null && page.Controls.Contains(p.TextInfo))
+                    LayOutReadingPage(p, page, canvas, geom, ph);
+                else
+                    LayOutAudioPage(p, page, canvas, geom, ph - 8);
+                canvas.Rebuild();
+            }
+
+            DialogSkin.AsKey(p.Cancel, new Rectangle(836, DialogSkin.ButtonsY,
+                DialogSkin.ButtonW, DialogSkin.ButtonH));
+            DialogSkin.AsKey(p.OK, new Rectangle(716, DialogSkin.ButtonsY,
+                DialogSkin.ButtonW, DialogSkin.ButtonH));
+            p.OK.TabIndex = 21;
+            p.Cancel.TabIndex = 22;
+            p.OK.BringToFront();
+            p.Cancel.BringToFront();
+
+            // Focus starts on the tab strip, not inside a page: on a book that has
+            // two, which one you are on is the first thing to know.
+            f.Shown += (s, e) => { f.ActiveControl = tabs; };
+
+            f.ResumeLayout();
+            shell.Rebuild();
+        }
+
+        /// <summary>The audio page laid out where it stands, on the tab page.
+        /// Same shapes as the full-form version at the geometry the narrower space
+        /// allows.</summary>
+        private static void LayOutAudioPage(PropParts p, TabPage page, DialogCanvas canvas,
+                                            DialogSkin.PropGeom geom, int pageBottom)
+        {
+            if (p.Stages == null || p.Playback == null || p.Info == null) return;
+
+            canvas.Wells.Add(geom.InfoPanel);
+            DialogSkin.AsGlass(p.Info, geom.InfoGlass);
+
+            DialogSkin.AsSticker(p.Playback, geom.Playback);
+
+            // ROWS ARE AS TALL AS WHAT STANDS IN THEM — not all alike, which is
+            // what the full-form layout can afford and a tab page cannot. Five of
+            // the six cells hold a title and one combo; Tone holds three spin
+            // rows. Giving all six the same height cost the page 20 units it did
+            // not have and clipped Treble off the bottom edge.
+            //
+            // Each cell is asked what it needs by measuring its own children,
+            // rather than trusting the 112 they were all built at — that number
+            // is the same for every cell and so cannot tell them apart.
+            int rows = (p.Stages.Length + 1) / 2;
+            var rowH = new int[rows];
+            for (int i = 0; i < p.Stages.Length; i++)
+            {
+                int bottom = 0;
+                foreach (Control c in p.Stages[i].Controls)
+                {
+                    // NOT c.Visible: this runs inside SuspendLayout on a page that
+                    // is not the selected one, and Visible reports the whole
+                    // chain — every child answers false, every row measures empty,
+                    // and the six cells collapse to a stack of title bars.
+                    Button b = c as Button;
+                    if (b == null || !HintSystem.IsHelpKey(b))
+                        bottom = Math.Max(bottom, c.Bottom);
+                }
+                rowH[i / 2] = Math.Max(rowH[i / 2], bottom + 14);
+            }
+
+            int gap = 10, used = 0;
+            foreach (int h in rowH) used += h;
+            int avail = pageBottom - geom.StageRowY[0];
+            if (used + gap * (rows - 1) > avail) gap = 6;
+            // Still over: take it off the tallest row rather than off all of them,
+            // since the short ones have nothing left to give.
+            int over = (used + gap * (rows - 1)) - avail;
+            while (over > 0)
+            {
+                int t = 0;
+                for (int r = 1; r < rows; r++) if (rowH[r] > rowH[t]) t = r;
+                int take = Math.Min(over, Math.Max(1, rowH[t] / 20));
+                rowH[t] -= take;
+                over -= take;
+            }
+
+            // Slack goes into the GAPS, not into the boxes — growing a box does not
+            // move anything inside it, so it only buys a band of dead glass under
+            // its last row. The same rule the reading page already follows.
+            int spare = avail - (used + gap * (rows - 1));
+            if (spare > 0 && rows > 1) gap += Math.Min(24, spare / (rows - 1));
+
+            int y = geom.StageRowY[0];
+            for (int r = 0; r < rows; r++)
+            {
+                for (int i = r * 2; i < p.Stages.Length && i < r * 2 + 2; i++)
+                    DialogSkin.AsSticker(p.Stages[i], new Rectangle(
+                        i % 2 == 0 ? geom.ColA : geom.ColB, y, geom.ColW, rowH[r]));
+                y += rowH[r] + gap;
+            }
+
+            Reflow(p.Playback, true);
+            foreach (GroupBox g in p.Stages) Reflow(g, false);
+
+            OnMetal(p.Master);
+            p.Master.SetBounds(geom.ColA, geom.StripY, 292, geom.StripH);
+            int right = geom.ColB + geom.ColW;
+            DialogSkin.AsSwitch(p.Bypass, new Rectangle(right - 312, geom.StripY, 200, geom.StripH));
+            DialogSkin.AsKey(p.ResetAll, new Rectangle(right - 112, geom.StripY, 112, geom.StripH));
+
+            p.Playback.TabIndex = 0;
+            p.Master.TabIndex = 1;
+            p.ResetAll.TabIndex = 2;
+            p.Bypass.TabIndex = 3;
+            for (int i = 0; i < p.Stages.Length; i++) p.Stages[i].TabIndex = 4 + i;
+            p.Info.TabIndex = 20;
+
+            EventHandler gate = (s, e) =>
+            {
+                p.ResetAll.TabStop = p.Master.Checked;
+                p.Bypass.TabStop = p.Master.Checked;
+            };
+            p.Master.CheckedChanged += gate;
+            gate(null, EventArgs.Empty);
+
+            HintSystem.Attach(p.Playback, "Hint.Playback");
+            string[] stageHints = { "Hint.RemoveRumble", "Hint.NoiseRemoval", "Hint.SoftenSibilance",
+                                    "Hint.EvenOutSpeech", "Hint.Tone", "Hint.AutomaticLoudness" };
+            for (int i = 0; i < p.Stages.Length && i < stageHints.Length; i++)
+                HintSystem.Attach(p.Stages[i], stageHints[i]);
+        }
+
+        /// <summary>The reading page laid out where it stands. Same stacking rule
+        /// as the full-form version — snug boxes, slack into the gaps — measured
+        /// against the page's height rather than the form's.</summary>
+        private static void LayOutReadingPage(PropParts p, TabPage page, DialogCanvas canvas,
+                                              DialogSkin.PropGeom geom, int ph)
+        {
+            var groups = new List<GroupBox>();
+            foreach (Control c in page.Controls)
+            {
+                GroupBox g = c as GroupBox;
+                if (g != null) groups.Add(g);
+            }
+
+            canvas.Wells.Add(geom.InfoPanel);
+            DialogSkin.AsGlass(p.TextInfo, geom.InfoGlass);
+
+            int width = geom.ColB + geom.ColW - geom.ColA;
+
+            // "Use visual output (show the text on screen while reading)" came out
+            // as "…while readi". It was NOT overflowing the group — the check box
+            // was built at a fixed width sized by hand for a narrower dialog, and
+            // simply cuts its own caption off. So it is WIDENED to its row, the
+            // same fix WidenLabels makes in the working dialogs, and only where
+            // nothing else shares the row.
+            foreach (GroupBox g in groups)
+            {
+                foreach (Control c in g.Controls)
+                {
+                    CheckBox cb = c as CheckBox;
+                    if (cb == null || cb.AutoSize) continue;
+                    bool alone = true;
+                    foreach (Control other in g.Controls)
+                        if (other != cb && !(other is Button)
+                            && other.Top < cb.Bottom && cb.Top < other.Bottom) { alone = false; break; }
+                    if (alone) cb.Width = width - cb.Left - 14;
+                }
+            }
+
+            // Height comes from what each group HOLDS, not from the height it was
+            // built at — the built number is padding the page cannot afford, and
+            // measuring recovers enough of it that nothing has to be cut.
+            var need = new int[groups.Count];
+            int content = 0;
+            for (int i = 0; i < groups.Count; i++)
+            {
+                int bottom = 0;
+                foreach (Control c in groups[i].Controls)
+                {
+                    Button b = c as Button;
+                    if (b == null || !HintSystem.IsHelpKey(b)) bottom = Math.Max(bottom, c.Bottom);
+                }
+                need[i] = Math.Min(groups[i].Height, bottom + 14);
+                content += need[i];
+            }
+            int n = Math.Max(1, groups.Count);
+
+            // Even measured, three groups can be a little more than the page
+            // holds. Take it off the TALLEST rather than off all of them — the
+            // short ones have nothing left to give — so the last box keeps its
+            // bottom edge instead of running off the foot of the page.
+            int over = (12 + content + 6 * (n - 1)) - (ph - 8);
+            while (over > 0)
+            {
+                int t = 0;
+                for (int i = 1; i < n; i++) if (need[i] > need[t]) t = i;
+                int take = Math.Min(over, Math.Max(1, need[t] / 20));
+                need[t] -= take;
+                content -= take;
+                over -= take;
+            }
+
+            int slack = (ph - 12) - 24 - content;
+            int pad = Math.Max(0, Math.Min(10, slack / (n * 2)));
+            slack -= pad * n;
+            int gap = n > 1 ? Math.Max(6, slack / (n - 1)) : 12;
+            int y = 12;
+            for (int i = 0; i < groups.Count; i++)
+            {
+                int h = need[i] + pad;
+                DialogSkin.AsSticker(groups[i], new Rectangle(geom.ColA, y, width, h));
+                foreach (Control c in groups[i].Controls) DialogSkin.OnGlass(c);
+                y += h + gap;
+            }
+
+            int column = 0;
+            foreach (GroupBox g in groups) column = Math.Max(column, LabelColumn(g));
+            foreach (GroupBox g in groups) PlaceValues(g, column);
+
+            for (int i = 0; i < groups.Count; i++)
+            {
+                groups[i].TabIndex = i;
+                HintSystem.Attach(groups[i], "Hint.Text" + i);
+            }
+            p.TextInfo.TabIndex = 20;
+        }
+
         /// <summary>The reading page: the same shell, the same glass down the left
         /// third, and the reading groups as stickers down the other two. There is
         /// no master switch here — nothing on this page gates anything else — so
@@ -470,6 +837,25 @@ namespace Nemoviz_Book_Reader
             // and 12 the stack simply ran past the bottom of the dialog and sat on
             // the OK button. Breathing room is the first thing to give up when
             // there is no room to breathe.
+            // A check box built at a hand-picked width cuts its own caption off —
+            // "…show the text on screen while readi". Widen the ones that own
+            // their row, the same fix the hybrid page and the working dialogs
+            // make. Found on the hybrid page and true here all along.
+            const int textPageW = 628;
+            foreach (GroupBox g in groups)
+            {
+                foreach (Control c in g.Controls)
+                {
+                    CheckBox cb = c as CheckBox;
+                    if (cb == null || cb.AutoSize) continue;
+                    bool alone = true;
+                    foreach (Control other in g.Controls)
+                        if (other != cb && !(other is Button)
+                            && other.Top < cb.Bottom && cb.Top < other.Bottom) { alone = false; break; }
+                    if (alone) cb.Width = textPageW - cb.Left - 14;
+                }
+            }
+
             int content = 0;
             foreach (GroupBox g in groups) content += g.Height;
             int n = Math.Max(1, groups.Count);
