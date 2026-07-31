@@ -2476,14 +2476,41 @@ scanned before it is committed.** The probe is trivial to redo — read the DLL 
 ASCII and count `x264 - core`, `videolan.org/x264`, `libx264`, `libdvdnav`,
 `dvd://`, `cdda://`.
 
-**Still open — an audio-only build.** Nobody publishes one; mpv has no "disable
-video" switch, so it is cut at the FFmpeg level (`--disable-decoders` plus an
-explicit audio list, `--disable-hwaccels`, `--disable-encoders`,
-`--disable-devices`), which means forking the winbuild CI. Worth it only if
-93.6 MB → ~45 MB matters. **One thing to remember before cutting:** an M4B's
-cover art is a real MP4 **video** track (§8f). It is ignored today (`vid=no`) and
-NBR shows no cover anywhere — but with video fully stripped it could never be
-decoded, so MJPEG and PNG should be kept explicitly if covers are ever wanted.
+**Audio-only build — prepared, not yet built (`tools/mpv-build/`).** Gordan's
+call (2026-07-30): cut to audio, **no image or video decoding at all** — the
+Library shows format icons, not cover art, so an M4B's cover (a real MP4 video
+track, §8f) is deliberately given up.
+
+**The rule he set, and it shapes everything: keep every audio format and filter
+available, do not narrow it to what NBR currently uses.** A hand-picked list can
+silently drop the one codec a reader's book needs, and it surfaces on their
+machine rather than ours. So the list is **derived mechanically from FFmpeg's own
+classification**: `libavcodec/codec_desc.c` assigns each codec an
+`AVMEDIA_TYPE`, 223 are `AUDIO`, and the DLL's own `decoder-list` turns those
+into **214 decoders to enable**. Measured on the current DLL: **510 decoders, 296
+of them video or image.**
+
+Two traps found while preparing it, both recorded in the folder's README:
+`allcodecs.c`'s `/* audio codecs */` marker is **not** usable as a classifier —
+its "video" block is really an alphabetical list, and `rka` and `dvaudio` are
+audio codecs sitting inside it. And **mpv's driver spelling is not FFmpeg's
+symbol name** in eleven cases (`8svx_exp` → `eightsvx_exp`, `g722` →
+`adpcm_g722`, `real_144` → `ra_144`, …); every final name is checked to exist as
+`ff_<name>_decoder` before it goes in the configure line.
+
+**Two dependencies cannot be removed**, confirmed in mpv's `meson.build`:
+`libass` (`dependency('libass', version: '>= 0.12.2')` — no `required:`, no
+feature option) and `libplacebo` (required since
+[f5ca11e](https://github.com/mpv-player/mpv/commit/f5ca11e12bc5)). They and
+freetype/harfbuzz stay, so the estimate is **~28–32 MB, not the ~20 MB it first
+looked like** — worth saying because the installer maths was based on the smaller
+number. libplacebo can at least be built with Vulkan, OpenGL, D3D11, shaderc and
+glslang all off, which is where the big saving is.
+
+**Not done:** the build itself. It means forking the winbuild CI (a local mingw
+toolchain is a much larger lift for the same artifact), and `gh` is not installed
+on this machine. `tools/mpv-build/` holds the enable-list, the decoder oracle the
+new build must match, and both verification harnesses.
 
 **The visual reading display must NOT go through mpv** (researched 2026-07-30),
 which is what makes an audio-only build free. mpv's OSD renders **pixels**, and
