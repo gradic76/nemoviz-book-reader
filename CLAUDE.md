@@ -1663,6 +1663,34 @@ and the run after that had the book **paused**, so nothing could change anywhere
 Always confirm from the same frame that (a) the player shows the pause glyph, and
 (b) the braille content belongs to the book.
 
+**CONFIRMED ON JAWS TOO (2026-07-31), which was the real gap** — every
+measurement above had been NVDA, and §2 makes JAWS the primary reader. With
+focus on the reading surface and the book playing, JAWS put the text on the
+display and followed it:
+
+| | braille line |
+|---|---|
+| t = 0 | `318p │ if she collared clients for thieves. But` |
+| t = 14 s | `323p │ to dispel their own fears of him. But` |
+
+The highlighted cell sat on the caret both times. It also confirmed the
+focus constraint literally: while focus was on a key the display read
+`btn Pause, Space`, and after one Tab `btn Forward, Shift+Right` — the same
+strings NVDA gives.
+
+**Two method notes, because the JAWS side is harder to measure than NVDA's.**
+JAWS's *Braille and Text Viewer* is **opaque to UI Automation** — one `Pane`,
+zero descendants, no `TextPattern`, where NVDA's viewer rows come back as UIA
+`Name`. The only way in is a screenshot of the top strip of the screen, read by
+eye. And the reading surface is **tab stop 16**, whose UIA `Name` is the entire
+book (585 110 characters here), so it is found by the *length* of the name, not
+by matching "Reading surface".
+
+**Synthetic input, which had failed all morning, started working the moment
+Gordan clicked into the player himself.** Worth remembering before concluding
+that input is broken: the app needs a genuine foreground activation, and
+`SetForegroundWindow` from a script does not always supply one.
+
 **Status: braille output is solved and verified, bar one item.** It reaches the
 display with no drivers, follows the reading at 67–170 ms, stays silent, and the
 player's keys (Space, volume, sentence stepping) all work from inside the
@@ -1684,6 +1712,33 @@ rest**: it shows on screen exactly what would be on the display, as text — so 
 can be screenshotted and read like any other window. JAWS has its own under
 Utilities. Real hardware is then only a confirmation pass, at the equipped
 locations Gordan has in mind.
+
+### Hiding the reading surface from the eye but not from the reader
+
+Gordan's question (2026-07-31): how does the text stay off the screen while the
+screen readers still catch it and put it on the display?
+
+**Not with `Visible = false`, and not with `Enabled = false`.** A hidden control
+is taken out of the accessibility tree altogether — no reader sees it, so there
+is nothing to braille. A disabled one is announced as unavailable and cannot
+take focus, and focus is precisely what braille follows.
+
+**The trick NBR already uses is the answer** (§8k): park it **outside the client
+area** — `y = H + 4` and downwards, exactly what the read-only fields and the
+`lblAnnounce*` labels have always done. The control stays `Visible = true` as far
+as Windows is concerned, keeps its place in the tab order, and still reports its
+text; the window simply never paints that region.
+
+**Measured caveat, and it is a real one:** today's JAWS run had the surface
+**visible** at the foot of the player. Parking it has not been measured *for
+braille*. It is proven for announcements, which are a different channel, so the
+off-screen version needs the same paired-log check before it is relied on.
+
+**And it should be ONE control with two placements, not two controls.** When
+visual output is off, the surface is parked; when it is on, the same control is
+sized, styled and placed as the display. That keeps braille behaving identically
+either way, and it is what makes visual and braille "one feature, not two" as
+this section hoped rather than two things that must be kept in step.
 
 ### Still open
 
