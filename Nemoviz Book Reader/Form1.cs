@@ -1487,7 +1487,7 @@ namespace Nemoviz_Book_Reader
             btnLibrary.Text = Localization.T("Btn.Library");
             btnLibrary.Size = new Size(140, 40);
             btnLibrary.Location = new Point(10, 8);
-            btnLibrary.AccessibleName = Localization.T("Btn.Library");
+            btnLibrary.AccessibleName = Localization.T("Btn.Library.Accessible");
             btnLibrary.TabIndex = 0;
             btnLibrary.Click += BtnLibrary_Click;
 
@@ -1495,7 +1495,7 @@ namespace Nemoviz_Book_Reader
             btnSettings.Text = Localization.T("Btn.Settings");
             btnSettings.Size = new Size(140, 40);
             btnSettings.Location = new Point(10, 61);
-            btnSettings.AccessibleName = Localization.T("Btn.Settings");
+            btnSettings.AccessibleName = Localization.T("Btn.Settings.Accessible");
             btnSettings.TabIndex = 1;
             btnSettings.Click += BtnSettings_Click;
 
@@ -1520,7 +1520,7 @@ namespace Nemoviz_Book_Reader
             btnHelp.Text = Localization.T("Btn.Help");
             btnHelp.Size = new Size(140, 40);
             btnHelp.Location = new Point(10, 167);
-            btnHelp.AccessibleName = Localization.T("Btn.Help");
+            btnHelp.AccessibleName = Localization.T("Btn.Help.Accessible");
             btnHelp.TabIndex = 3;
             btnHelp.Click += BtnHelp_Click;
 
@@ -1666,7 +1666,7 @@ namespace Nemoviz_Book_Reader
             btnManageBookmarks.Text = Localization.T("Btn.ManageBookmarks");
             btnManageBookmarks.Size = new Size(140, 40);
             btnManageBookmarks.Location = new Point(490, 167);
-            btnManageBookmarks.AccessibleName = Localization.T("Btn.ManageBookmarks");
+            btnManageBookmarks.AccessibleName = Localization.T("Btn.ManageBookmarks.Accessible");
             btnManageBookmarks.TabIndex = 14;
             btnManageBookmarks.Click += BtnManageBookmarks_Click;
 

@@ -41,9 +41,12 @@ Player.TitleBar.Paused= — paused
 
 ; Player - buttons
 Btn.Library=Library
+Btn.Library.Accessible=Library, F3
 Btn.Settings=Settings
+Btn.Settings.Accessible=Settings, F2
 Btn.Timer=Sleep Timer
 Btn.Help=Help
+Btn.Help.Accessible=Help, F1
 Btn.Back.Accessible=Back, Shift+Left
 Btn.Forward.Accessible=Forward, Shift+Right
 Btn.Play.Accessible=Play, Space
@@ -68,6 +71,7 @@ Btn.GoTo.Accessible=Go To, F4
 Btn.SetBookmark=Set Bookmark
 Btn.SetBookmark.Accessible=Set Bookmark, F5
 Btn.ManageBookmarks=Manage Bookmarks
+Btn.ManageBookmarks.Accessible=Manage Bookmarks, F6
 
 ; Player - sleep timer button
 ; Btn.Timer.Accessible is the idle-state screen reader announcement
