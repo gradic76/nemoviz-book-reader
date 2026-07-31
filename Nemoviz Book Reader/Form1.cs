@@ -3128,7 +3128,9 @@ namespace Nemoviz_Book_Reader
 
         private void BtnHelp_Click(object sender, EventArgs e)
         {
-            MessageForm.ShowInfo(this, Localization.T("Dialog.Help.ComingSoon"), Localization.T("Dialog.Help.Title"));
+            // One way in for the manual, shared with F1 everywhere else, so the
+            // Help key and the Help key cannot come to mean different things.
+            HintSystem.OpenManual(this);
         }
 
         private void BtnProperties_Click(object sender, EventArgs e)

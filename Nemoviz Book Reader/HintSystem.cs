@@ -81,7 +81,13 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>F1 anywhere in the dialog: find the group the focus is sitting
         /// in and open its help. Walking up the parents means it works from a
-        /// combo inside a group just as well as from the group itself.</summary>
+        /// combo inside a group just as well as from the group itself.
+        ///
+        /// <para><b>Otherwise it opens the manual</b> (Gordan, 2026-07-31): F1
+        /// means help in the player and in every window, and only a group that
+        /// has something specific to say gets to answer instead. That way the
+        /// key never does nothing — the failure people actually notice is
+        /// pressing F1 and getting silence, not getting the wrong page.</para></summary>
         public static bool HandleF1(Form f)
         {
             Control c = f.ActiveControl;
@@ -90,7 +96,33 @@ namespace Nemoviz_Book_Reader
                 if (hints.ContainsKey(c)) { Show(c, f.ActiveControl); return true; }
                 c = c.Parent;
             }
-            return false;
+            OpenManual(f);
+            return true;
+        }
+
+        /// <summary>The manual, in the reader's OWN browser (Gordan's call, and
+        /// the accessible one): they get heading navigation, find-on-page, their
+        /// own fonts and colours, and their screen reader set up the way they
+        /// like it — none of which a window we drew ourselves would match.
+        ///
+        /// <para>A local file, so it works with no internet. If it is missing the
+        /// user is told rather than left wondering why F1 did nothing.</para></summary>
+        public static void OpenManual(IWin32Window owner)
+        {
+            try
+            {
+                string dir = System.IO.Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetExecutingAssembly().Location);
+                string page = System.IO.Path.Combine(dir, "Help", "index.html");
+                if (System.IO.File.Exists(page))
+                {
+                    System.Diagnostics.Process.Start(page);
+                    return;
+                }
+            }
+            catch { }
+            MessageForm.ShowInfo(owner, Localization.T("Dialog.Help.ComingSoon"),
+                                 Localization.T("Dialog.Help.Title"));
         }
 
         private static void Show(Control anchor, Control returnTo)
