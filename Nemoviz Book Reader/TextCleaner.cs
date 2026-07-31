@@ -193,6 +193,12 @@ namespace Nemoviz_Book_Reader
             var offsets = new List<int>();
             foreach (var h in doc.Headings) offsets.Add(h.Offset);
             foreach (var p in doc.Pages) offsets.Add(p.Offset);
+            // The sync ids ride along for the same reason the other two do: they
+            // were taken on the raw text, and a book aligned to audio drifts out
+            // of step with its own narration if they are not moved.
+            var syncKeys = doc.SyncIds == null ? null : new List<string>(doc.SyncIds.Keys);
+            if (syncKeys != null)
+                foreach (string k in syncKeys) offsets.Add(doc.SyncIds[k]);
 
             doc.Text = CleanWithOffsets(doc.Text, offsets);
 
@@ -201,6 +207,8 @@ namespace Nemoviz_Book_Reader
                 doc.Headings[i] = (doc.Headings[i].Level, doc.Headings[i].Title, offsets[at]);
             for (int i = 0; i < doc.Pages.Count; i++, at++)
                 doc.Pages[i] = (doc.Pages[i].Label, offsets[at]);
+            if (syncKeys != null)
+                foreach (string k in syncKeys) doc.SyncIds[k] = offsets[at++];
         }
 
         public static string Clean(string text) { return Clean(text, true); }

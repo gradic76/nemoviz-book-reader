@@ -97,6 +97,7 @@ namespace Nemoviz_Book_Reader
                 StringBuilder full = new StringBuilder();
                 var headings = new List<(int Level, string Title, int Offset)>();
                 var pages = new List<(string Label, int Offset)>();
+                var syncIds = new Dictionary<string, int>();
                 int pageSeq = 0;
                 foreach (string cf in contentFiles)
                 {
@@ -111,7 +112,7 @@ namespace Nemoviz_Book_Reader
                         string label = RxTags.Replace(m.Groups[1].Value, "").Trim();
                         string id = "__nbrpage" + (pageSeq++) + "__";
                         pageLabels[id] = label;
-                        return "<span id=\"" + id + "\"></span>";
+                        return Placeholder(id, m.Value);
                     });
                     // The DAISY 2.02 spelling of the same thing.
                     raw = RxPageSpan.Replace(raw, m =>
@@ -119,7 +120,7 @@ namespace Nemoviz_Book_Reader
                         string label = RxTags.Replace(m.Groups[3].Value, "").Trim();
                         string id = "__nbrpage" + (pageSeq++) + "__";
                         pageLabels[id] = label;
-                        return "<span id=\"" + id + "\"></span>";
+                        return Placeholder(id, m.Value);
                     });
 
                     TextParsing.Assemble(TextParsing.HtmlBlocks(raw), out string text, out var heads, out var ids);
@@ -129,11 +130,18 @@ namespace Nemoviz_Book_Reader
                     foreach (var kv in pageLabels)
                         if (ids.TryGetValue(kv.Key, out int off))
                             pages.Add((kv.Value, start + off));
+                    // Every id, kept: a SMIL par points at one of these, so this is
+                    // the text half of the text↔audio join. The page anchors this
+                    // method invented are left out — they name nothing in the book.
+                    foreach (var kv in ids)
+                        if (!kv.Key.StartsWith("__nbrpage") && !syncIds.ContainsKey(kv.Key))
+                            syncIds[kv.Key] = start + kv.Value;
                     full.Append(text).Append("\n\n");
                 }
                 doc.Text = full.ToString().TrimEnd('\n');
                 doc.Headings = headings;
                 doc.Pages = pages.OrderBy(p => p.Offset).ToList();
+                doc.SyncIds = syncIds;
 
                 // Same global structure-vs-flat rule as the file parsers.
                 if (doc.Headings.Count < TextExtractor.MinStructureHeadings)
@@ -141,6 +149,26 @@ namespace Nemoviz_Book_Reader
             }
             catch { return new TextDoc(); }
             return doc;
+        }
+
+        private static readonly Regex RxOwnId =
+            new Regex("\\bid\\s*=\\s*[\"']([^\"']+)[\"']", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        /// <summary>The empty anchor that replaces a page marker — plus, when the
+        /// marker carried an id of its own, a second anchor keeping it.
+        ///
+        /// <para>The page element's id is not decoration: in a text+audio DAISY a
+        /// SMIL par points straight at it, so throwing it away silently unjoins
+        /// one sync point per printed page (153 of 524 in the Annie John sample).
+        /// Two anchors rather than one attribute because the placeholder id has to
+        /// stay unique and findable, and both land on the same offset anyway.</para></summary>
+        private static string Placeholder(string placeholderId, string originalTag)
+        {
+            string keep = "";
+            Match own = RxOwnId.Match(originalTag);
+            if (own.Success && !own.Groups[1].Value.StartsWith("__nbrpage"))
+                keep = "<span id=\"" + own.Groups[1].Value + "\"></span>";
+            return keep + "<span id=\"" + placeholderId + "\"></span>";
         }
 
         // ── Locate the content document(s) ────────────────────────────────────

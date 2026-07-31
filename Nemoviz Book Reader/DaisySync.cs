@@ -52,6 +52,36 @@ namespace Nemoviz_Book_Reader
     /// <c>audioStart</c> comes from <c>BookData.Offsets</c> for exactly this
     /// reason.</para>
     /// </summary>
+    /// <summary>The finished join, held in BOTH orders.
+    ///
+    /// <para>One list cannot serve both directions, and assuming it can is a
+    /// silent way to put the reading position in the wrong place. Measured over
+    /// 22 real hybrid books: in most, character offset and time run forwards
+    /// together and one sorted list would do — but four disagree. Three of them
+    /// (worst: a Plato edition, 738 of 6099 pars) genuinely read their text in a
+    /// different order from their audio; in the fourth the SMIL's
+    /// <c>clipBegin</c> ran past where the audio file was measured to end, which
+    /// is a duration problem, not an alignment one (TagLib under-reads a VBR MP3
+    /// with no Xing header — the same reason <c>BuildChaptersFromFolder</c> keeps
+    /// the <c>MpvDuration</c> fallback).</para>
+    ///
+    /// <para>Whatever the cause, a binary search over a list that is not sorted
+    /// on the key being searched does not return a near miss — it returns
+    /// nonsense. So each direction gets a list sorted on its own key, and neither
+    /// point is thrown away: the producer's alignment is reported as it is.</para>
+    /// </summary>
+    public class SyncMap
+    {
+        /// <summary>Sorted by character offset, one point per offset — the text
+        /// asking where the audio is.</summary>
+        public List<SyncPoint> ByChar = new List<SyncPoint>();
+        /// <summary>Sorted by second, one point per instant — the audio asking
+        /// where the text is. This is the one that runs on every tick.</summary>
+        public List<SyncPoint> ByTime = new List<SyncPoint>();
+        public int Count { get { return ByChar.Count; } }
+        public bool IsEmpty { get { return ByChar.Count == 0; } }
+    }
+
     public static class DaisySync
     {
         private const RegexOptions RO = RegexOptions.IgnoreCase | RegexOptions.Singleline;
@@ -135,13 +165,14 @@ namespace Nemoviz_Book_Reader
         /// not read aloud (page numbers are lifted out of the flow, see §8c), and
         /// inventing an offset for one would put the highlight in the wrong
         /// place.</para></summary>
-        public static List<SyncPoint> Build(List<Pair> pairs,
-                                            Dictionary<string, int> idOffsets,
-                                            Func<string, double> audioStart)
+        public static SyncMap Build(List<Pair> pairs,
+                                    Dictionary<string, int> idOffsets,
+                                    Func<string, double> audioStart)
         {
-            var points = new List<SyncPoint>();
-            if (pairs == null || idOffsets == null || audioStart == null) return points;
+            var map = new SyncMap();
+            if (pairs == null || idOffsets == null || audioStart == null) return map;
 
+            var points = new List<SyncPoint>();
             foreach (Pair p in pairs)
             {
                 if (!idOffsets.TryGetValue(p.TextId, out int off)) continue;
@@ -151,52 +182,64 @@ namespace Nemoviz_Book_Reader
             }
 
             // Sorted by offset AND THEN BY TIME. Ties are everywhere — 524 pars
-            // in the sample collapse onto 369 offsets — and List.Sort is
-            // unstable, so without the second key which par survives the
-            // de-duplication below is arbitrary and can change between runs.
-            // Earliest audio wins a tie: the first clip that speaks a place is
-            // where following along should start, not whichever one sorted last.
+            // in the Annie John sample collapse onto 369 offsets — and List.Sort
+            // is unstable, so without the second key which par survives the
+            // de-duplication is arbitrary and can change between runs. Earliest
+            // audio wins a tie: the first clip that speaks a place is where
+            // following along should start, not whichever one sorted last.
             points.Sort((a, b) => a.CharOffset != b.CharOffset
                 ? a.CharOffset.CompareTo(b.CharOffset)
                 : a.Seconds.CompareTo(b.Seconds));
             // Several pars land on one offset whenever the blocks between them
             // cleaned down to nothing; the earliest keeps the place.
-            var trimmed = new List<SyncPoint>(points.Count);
             foreach (SyncPoint p in points)
-                if (trimmed.Count == 0 || p.CharOffset != trimmed[trimmed.Count - 1].CharOffset)
-                    trimmed.Add(p);
-            return trimmed;
+                if (map.ByChar.Count == 0 || p.CharOffset != map.ByChar[map.ByChar.Count - 1].CharOffset)
+                    map.ByChar.Add(p);
+
+            // And the same points again by time, on the same rule: where two
+            // clips start at the same instant, the earlier place in the text is
+            // the one to show.
+            points.Sort((a, b) => a.Seconds != b.Seconds
+                ? a.Seconds.CompareTo(b.Seconds)
+                : a.CharOffset.CompareTo(b.CharOffset));
+            foreach (SyncPoint p in points)
+                if (map.ByTime.Count == 0 || p.Seconds != map.ByTime[map.ByTime.Count - 1].Seconds)
+                    map.ByTime.Add(p);
+
+            return map;
         }
 
         /// <summary>The second being spoken at a character offset — the text side
         /// asking the audio where it is.</summary>
-        public static double SecondsAt(List<SyncPoint> map, int charOffset)
+        public static double SecondsAt(SyncMap map, int charOffset)
         {
-            if (map == null || map.Count == 0) return 0;
-            int lo = 0, hi = map.Count - 1, best = 0;
+            if (map == null || map.ByChar.Count == 0) return 0;
+            var list = map.ByChar;
+            int lo = 0, hi = list.Count - 1, best = 0;
             while (lo <= hi)
             {
                 int mid = (lo + hi) / 2;
-                if (map[mid].CharOffset <= charOffset) { best = mid; lo = mid + 1; }
+                if (list[mid].CharOffset <= charOffset) { best = mid; lo = mid + 1; }
                 else hi = mid - 1;
             }
-            return map[best].Seconds;
+            return list[best].Seconds;
         }
 
         /// <summary>The character offset being spoken at a second — the audio side
         /// asking the text where it is. This is the direction that drives
         /// following along, so it runs on every position tick.</summary>
-        public static int CharAt(List<SyncPoint> map, double seconds)
+        public static int CharAt(SyncMap map, double seconds)
         {
-            if (map == null || map.Count == 0) return 0;
-            int lo = 0, hi = map.Count - 1, best = 0;
+            if (map == null || map.ByTime.Count == 0) return 0;
+            var list = map.ByTime;
+            int lo = 0, hi = list.Count - 1, best = 0;
             while (lo <= hi)
             {
                 int mid = (lo + hi) / 2;
-                if (map[mid].Seconds <= seconds) { best = mid; lo = mid + 1; }
+                if (list[mid].Seconds <= seconds) { best = mid; lo = mid + 1; }
                 else hi = mid - 1;
             }
-            return map[best].CharOffset;
+            return list[best].CharOffset;
         }
 
         private static string FindFile(string folder, string name)

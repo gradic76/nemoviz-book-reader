@@ -705,9 +705,54 @@ special">`): the number is taken out of the reading flow — nobody wants "247"
 read out mid-sentence — but its position is recorded, so the book navigates by
 its real printed pages (Page seek step). Measured on the samples: 67–712 pages in
 the DAISY 3 books; the three 2.02 samples genuinely carry no page markers at all,
-which is why they show none. **Still open:** **text+audio DAISY multi-modal** (follow/​highlight
-text while the audio plays — currently a text+audio DAISY imports & plays as
-plain audio, text unused; that's the Phase-3 on-screen-display work).
+which is why they show none.
+
+**Text+audio DAISY — the sync map is built and measured (`DaisySync.cs`,
+2026-07-30).** A hybrid DAISY already carries its own alignment: every SMIL
+`<par>` pairs a `<text src="dtbook.xml#id">` with an `<audio src clipBegin>`.
+Both halves existed here and had simply never been introduced — `TextParsing.
+Assemble` hands back `idOffsets`, `DaisyParser` already resolves a fragment to
+(file, clipBegin). What was missing was reading the par's **text src** rather
+than its internal ids. SMIL is walked tag by tag in document order, not as XML,
+for the reason the rest of the DAISY code is: declared encodings that lie and
+doctypes pointing at dead URLs.
+
+**Measured across all 22 hybrid samples** (`D:\Test Naslovi\Daisy text + Audio`
+— DAISY 2.02 and 3.0, French, Portuguese, Vietnamese, Thai, Sinhala, English;
+39 to 17 557 pars each): **21 of 22 join essentially completely**, most of them
+exactly, the rest missing under ten pars out of thousands. `Annual_report_1997`
+is the one that joins nothing, and correctly — its SMIL points at `ncc.html`,
+so it is an ordinary **audio** DAISY, not a hybrid.
+
+- **`TextDoc.SyncIds` carries the text half**, and it is cleaned *with* the text
+  by `TextCleaner.CleanDoc`, exactly as the heading and page offsets are. These
+  are raw-text coordinates; re-deriving them after the clean is the drift §8e
+  already paid for once.
+- **A page marker's own id has to survive.** `Extract` replaces `<pagenum>` with
+  an empty anchor, which threw the element's id away — silently unjoining one
+  par per printed page (153 of 524 in Annie John). The placeholder now emits the
+  original id alongside its own.
+- **The map is held in BOTH orders** (`SyncMap.ByChar` / `ByTime`), and this is
+  not defensive coding. Four books' text and audio do not run strictly together:
+  three genuinely read out of order (worst, a Plato edition, 738 of 6099 pars),
+  and one had `clipBegin` running past where TagLib measured the audio to end —
+  a *duration* problem, the same one `MpvDuration` exists for, not an alignment
+  one. A binary search over a list not sorted on its own key does not return a
+  near miss, it returns nonsense. With one list per direction the **round trip**
+  (follow the audio to a point, ask where the text is, ask that text where the
+  audio is) comes back exact in **18 of 22** books and within 7 points in three
+  more; Plato keeps 41 of 755, which is the book, not the parser.
+- **The timeline must come from real durations.** A probe that gave every file
+  the sample's own 59.7 s average reported 59 of 368 steps going backwards —
+  entirely its own doing, since a file longer than the placeholder pushes its
+  `clipBegin` past the start of the next one. That measurement said nothing at
+  all about the parser, and a first diagnosis blaming unstable `List.Sort` on
+  tied offsets was wrong.
+
+**Still open:** nothing consumes the map yet. `Book.ini` has to persist it,
+hybrid books have to become possible at all (`DetectTextBook` still requires a
+folder with **no** audio, so `IsTextBook && Chapters.Count > 0` cannot happen —
+see §10b), and only then the two-tab Properties page, which must land with it.
 
 ---
 
