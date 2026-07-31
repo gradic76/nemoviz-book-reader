@@ -1748,6 +1748,128 @@ can be screenshotted and read like any other window. JAWS has its own under
 Utilities. Real hardware is then only a confirmation pass, at the equipped
 locations Gordan has in mind.
 
+### The visual output — settled with Gordan 2026-07-31/08-01, nothing built yet
+
+**A separate window, never a modified player window.** The player is a fixed
+borderless casing with a `Region` clip; resizing it does not enlarge the text, it
+breaks the drawing. A second window also gives **two Alt+Tab entries**, so a
+reader has "player" and "reading" as two places rather than one window that
+changes identity underneath them.
+
+**One window, three behaviours** — not a subtitle mode inside the player plus a
+separate full-screen one, which would be two implementations to keep in step:
+
+| Display mode | the same window, differently |
+|---|---|
+| Two text rows (subtitle) | **fixed 960 × 480 at the player's own position**, so it reads as the player having *become* a display. The player is really behind it. Deliberately NOT responsive — stretching it breaks the illusion. |
+| Full screen, instant | fills the **working area** |
+| Full screen, scrolling | fills the working area, text scrolls |
+
+**Size from `Screen.WorkingArea`, not a fixed number.** A fixed 1200 is a bet on
+16:9 and overflows anything narrower; the working area is also the only thing
+that knows about the taskbar. Measured here: 1280 × **690** of a 1280 × 720
+drawing space (§8k).
+
+**The text column is 60 characters, centred, whatever the window size.** That is
+the number the reading-difficulty guidance converges on (45–75); long lines are
+hard to track back to the start of the next one. It has a consequence that is
+easy to get wrong: **line length in characters and font size are not
+independent.** At 960 units wide, 60 characters means roughly 26 pt — at 12 pt
+the same width holds about 130. So `+`/`−` must change the font **and** narrow or
+widen the column to hold 60, rather than changing how much text is on a line.
+The empty margins are not wasted space; they are part of the help.
+
+**There IS a frame, and it costs nothing.** Since the column is capped, the rim
+and controls occupy margin that was going to be empty anyway — dropping the frame
+buys not one extra character. It earns its place three times: the controls have
+somewhere to live (no auto-hiding OSD imitation, which is a lot of machinery for
+a mouse user who is not the primary audience), the window looks like a window so
+`Escape` is expected, and text that touches the screen edge reads worse than text
+in a bounded field.
+
+**But quieter than the player's panel.** That one is deliberately rich because it
+is an instrument read once from across the room; a reading surface wants the eye
+on the *text*. Same materials, calmer: thin rim, no ornament in the field of
+view, and **controls along the bottom edge only** — the top competes with the
+return sweep of the eye to each new line. Controls are the three transport keys,
+`+`/`−`, and the font picker.
+
+**`Escape` closes it.** Standard Windows convention — dialogs close on Escape,
+main windows do not — and this is dialog-class. No clash with the info box, which
+is a different window (Gordan).
+
+**In high contrast the casing gets out of the way entirely** (§8k). There the
+user has told the system what they need; our colours, chosen or not, yield.
+
+### Fonts — measured, not taken from the specimen pages
+
+**Same policy as languages and voices** (§10c): a global preferred font in
+Settings, a per-book override that is remembered, and if nothing suits the
+book's script, the **system font**. Fonts differ from voices in one way that
+must not be copied across: **a font can never block anything.** A voice that
+cannot speak the language produces noise, which is why `NoVoice` is a real state
+that stops a book loading. A missing glyph is not noise — Windows font-links to a
+fallback and the text stays readable. So there is no "no font" state, no dialog,
+and no unread book.
+
+**Suitability is measured against the book's ACTUAL characters**, not a
+language→script table. `content.txt` already exists; take its distinct characters
+and test them against the font. A Croatian book can quote Greek, and a table
+would say everything was fine while the reader saw boxes. Same principle as §8e
+refusing to trust a declared `dc:language`.
+
+**Transliteration was considered and DROPPED.** It solves a problem that does not
+arise — Windows has a system font for every script it supports — and it would
+break §8j's rule that the book's own text is never rewritten, only the string
+handed to the synthesiser. A blind reader on braille would get one thing and a
+sighted reader another, and a Serbian reader who chose Cyrillic would silently be
+handed Latin. As a *deliberate, opt-in reading aid* it would be legitimate — and
+Serbian is the ideal first case, its two scripts being a true bijection — but it
+has no place in a font fallback chain.
+
+**Measured coverage (2026-08-01), and it contradicts the marketing:**
+
+| font | glyphs | hr | sr Cyrillic | ru | Greek | Vietnamese | Thai/Sinhala/Arabic |
+|---|---|---|---|---|---|---|---|
+| **Andika** | **2 448** | yes | yes | yes | yes | yes | no |
+| Lexend | 685 | yes | no | no | no | yes | no |
+| **Atkinson Hyperlegible Next** | **362** | yes | **no** | **no** | **no** | **no** | no |
+
+Atkinson's specimen pages advertise "150+ languages including Cyrillic, Greek,
+Arabic, CJK and Devanagari". **The file contains 362 glyphs and Latin only** —
+and upstream, `googlefonts/atkinson-hyperlegible-next` issue #10 ("Are there any
+plans to add Cyrillic?") is still **open**. Google Fonts has no per-script
+Atkinson families either, only `atkinsonhyperlegible`, `…mono` and `…next`. The
+claim is not quite false — 362 glyphs really does cover a hundred-odd Latin
+languages — but it misleads anyone who does not open the file. **Verify coverage
+from the `cmap`, never from the specimen page** (`System.Windows.Media.
+GlyphTypeface.CharacterToGlyphMap` gives it in one line).
+
+So **Andika is the important one**: the only assistive face covering Cyrillic,
+Greek and Vietnamese, which is a good part of this library. Atkinson stays, but
+is offered to Latin books only — the coverage filter does that by itself.
+
+**Bundled, never installed.** Installing modifies the user's Windows and NBR is
+portable; load them privately in-process (`PrivateFontCollection` /
+`AddFontMemResourceEx`). Only **regular and bold** — reading has no use for seven
+weights, which keeps the whole set to a couple of MB.
+
+**The user's own installed fonts are offered too**, on the §10c pattern: the
+**curated short list in Properties** (picking for one book, in passing), **every
+installed font that passes the filters in Settings** (where the rule is set
+deliberately). Three filters, none of them a matter of our taste:
+
+1. the book's own characters, as above — this alone removes Wingdings, Marlett
+   and most symbol and decorative faces, since they have no `č`;
+2. **PANOSE family type = 2 (Latin Text)**, which the font's own author wrote
+   into the file, so "made for reading text" is the author's claim, not our
+   opinion. Keep this filter **soft** — behind a "show all" — because a fair
+   number of fonts carry it empty or wrong;
+3. skip bitmap (non-scalable) faces, which fall apart on `+`.
+
+Nothing needs saying when a globally chosen font does not suit a later book: the
+per-book filter simply does not offer it and the system font takes over.
+
 ### Hiding the reading surface from the eye but not from the reader
 
 Gordan's question (2026-07-31): how does the text stay off the screen while the
