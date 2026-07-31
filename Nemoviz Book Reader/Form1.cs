@@ -195,6 +195,9 @@ namespace Nemoviz_Book_Reader
         private Label lblAnnounceProgress;
         private Label lblAnnounceSpeed;
         private Label lblAnnounceInfo;
+        // F8 twice in quick succession walks into the info box; see ProcessCmdKey.
+        private DateTime lastInfoKey = DateTime.MinValue;
+        private Control infoBoxCameFrom;
 
         // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // The new look's way in
@@ -988,11 +991,25 @@ namespace Nemoviz_Book_Reader
                     if (!infoBoxHasFocus) { ArrowSeek(-1); return true; }
                     break;
 
-                case Keys.I:
+                case Keys.F8:
                     // Read out fresh playback info from anywhere in the
                     // player, via the off-screen announcement label. The
-                    // info box itself is not touched â€” no text change, no
+                    // info box itself is not touched — no text change, no
                     // echo.
+                    //
+                    // Pressed TWICE in quick succession it instead moves focus
+                    // into the info box, and a third press brings it back where
+                    // it came from. The box is parked off the client area and
+                    // out of the tab order (§8k), so this is the only way in —
+                    // and the way out matters just as much, or a reader who
+                    // walked in has nowhere to walk back to.
+                    if (DateTime.UtcNow - lastInfoKey < TimeSpan.FromMilliseconds(600))
+                    {
+                        lastInfoKey = DateTime.MinValue;   // a third press is a fresh single
+                        ToggleInfoBoxFocus();
+                        return true;
+                    }
+                    lastInfoKey = DateTime.UtcNow;
                     AnnounceToScreenReader(lblAnnounceInfo, BuildCurrentInfoText());
                     return true;
 
@@ -1043,8 +1060,46 @@ namespace Nemoviz_Book_Reader
                     BtnSetBookmark_Click(null, EventArgs.Empty);
                     return true;
 
+                // Properties stays on Alt+Enter — that is the Windows convention
+                // for it and Gordan kept it deliberately.
                 case Keys.Alt | Keys.Enter:
                     BtnProperties_Click(null, EventArgs.Empty);
+                    return true;
+
+                // The function-key set (Gordan, 2026-07-31). Letter keys had to
+                // go: the seek combo swallows them as type-ahead whenever it has
+                // focus, so `I` for the info box was unreliable in exactly the
+                // situation a reader is most likely to be in. F1 is Help by
+                // convention; F9 and F10 are left alone (F10 activates a menu
+                // bar), as is Alt+F4.
+                case Keys.F1:
+                    BtnHelp_Click(null, EventArgs.Empty);
+                    return true;
+
+                case Keys.F2:
+                    BtnSettings_Click(null, EventArgs.Empty);
+                    return true;
+
+                case Keys.F3:
+                    BtnLibrary_Click(null, EventArgs.Empty);
+                    return true;
+
+                case Keys.F4:
+                    // Swallowed before anything else can see it: F4 on a focused
+                    // ComboBox drops its list open, and cmbSeek is focusable.
+                    BtnGoTo_Click(null, EventArgs.Empty);
+                    return true;
+
+                case Keys.F5:
+                    BtnSetBookmark_Click(null, EventArgs.Empty);
+                    return true;
+
+                case Keys.F6:
+                    BtnManageBookmarks_Click(null, EventArgs.Empty);
+                    return true;
+
+                case Keys.F7:
+                    BtnTimer_Click(null, EventArgs.Empty);
                     return true;
 
                 case Keys.Enter:
@@ -2951,6 +3006,32 @@ namespace Nemoviz_Book_Reader
             {
                 isLibraryOpen = false;
             }
+        }
+
+        /// <summary>Walks focus into the playback info box and back out again.
+        ///
+        /// <para>The box is parked below the client area and kept out of the tab
+        /// order (§8k), so there is no other way in — and no way out either,
+        /// which is why this remembers where focus came from rather than just
+        /// focusing something sensible. It also refreshes the text first: the
+        /// box is a snapshot, and arriving at a stale one is worse than not
+        /// arriving at all.</para></summary>
+        private void ToggleInfoBoxFocus()
+        {
+            if (tbInfo == null) return;
+            if (this.ActiveControl == tbInfo)
+            {
+                Control back = infoBoxCameFrom;
+                infoBoxCameFrom = null;
+                if (back != null && back.CanSelect && !back.IsDisposed) back.Focus();
+                else SelectNextControl(tbInfo, true, true, true, true);
+                return;
+            }
+            infoBoxCameFrom = this.ActiveControl;
+            tbInfo.Text = BuildCurrentInfoText();
+            tbInfo.TabStop = true;          // reachable while we are standing in it
+            tbInfo.Select(0, 0);
+            tbInfo.Focus();
         }
 
         private void BtnSettings_Click(object sender, EventArgs e)

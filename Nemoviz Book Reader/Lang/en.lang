@@ -32,7 +32,7 @@ Player.Info.RemainingLabel=Time remaining:
 Player.Info.TimeLabel=Time:
 Player.Info.TotalLabel=Total time:
 Player.Info.Estimated=(estimated)
-Player.Info.AccessibleName=Playback information, I
+Player.Info.AccessibleName=Playback information, F8
 
 ; Player - title bar
 Player.TitleBar.Chapter= — {0}/{1}
@@ -64,9 +64,9 @@ Btn.ManageBookmarks.Legend=Bookmarks
 Btn.Properties=Properties
 Btn.Properties.Accessible=Properties, Alt+Enter
 Btn.GoTo=Go To...
-Btn.GoTo.Accessible=Go To, Ctrl+G
+Btn.GoTo.Accessible=Go To, F4
 Btn.SetBookmark=Set Bookmark
-Btn.SetBookmark.Accessible=Set Bookmark, Ctrl+B
+Btn.SetBookmark.Accessible=Set Bookmark, F5
 Btn.ManageBookmarks=Manage Bookmarks
 
 ; Player - sleep timer button
@@ -75,7 +75,7 @@ Btn.ManageBookmarks=Manage Bookmarks
 ; button text while a timer runs ({0} = mm:ss, or h:mm:ss above 60 min).
 ; The Accessible.Active variant is announced on focus during a countdown;
 ; activating the button then stops playback and cancels the timer.
-Btn.Timer.Accessible=Sleep Timer, Ctrl+T
+Btn.Timer.Accessible=Sleep Timer, F7
 Btn.Timer.Countdown=Sleep Timer {0}
 Btn.Timer.Accessible.Active=Sleep Timer, {0} remaining, activate to stop playback and cancel the timer
 Btn.Timer.Accessible.LessThanMinute=Sleep Timer, less than a minute remaining
@@ -152,9 +152,9 @@ Tip.Back=Back (Shift+Left)
 Tip.PlayPause=Play/Pause (Space)
 Tip.Forward=Forward (Shift+Right)
 Tip.Seek=Change with Shift+Up and Shift+Down; jump with Shift+Left and Shift+Right (also Back/Forward)
-Tip.GoTo=Ctrl+G
+Tip.GoTo=F4
 Tip.Properties=Alt+Enter
-Tip.Timer=Ctrl+T
+Tip.Timer=F7
 Tip.Volume=Up and Down arrows
 Tip.Speed=Ctrl+Left and Ctrl+Right
 Tip.Progress=Ctrl+1–9: jump to 10–90%
