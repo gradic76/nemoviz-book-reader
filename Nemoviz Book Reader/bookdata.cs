@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Nemoviz_Book_Reader
 {
@@ -114,6 +115,31 @@ namespace Nemoviz_Book_Reader
         // character offset into content.txt. Empty when the book has no pages.
         public List<(string Label, int Offset)> TextPages { get; private set; }
 
+        /// <summary>A book that is BOTH: narrated audio and the same words as
+        /// text, joined point by point by its producer (a text+audio DAISY; EPUB
+        /// media overlays later). It is <b>not</b> an <see cref="IsTextBook"/> —
+        /// the narration is the reading, so the transport, the position and the
+        /// seek steps all stay exactly what an audio book's are. The text is a
+        /// second OUTPUT, driven by where the audio is, which is what §8l calls
+        /// one position with several renderers windowing it.
+        ///
+        /// <para>Making a hybrid a text book instead would hand the transport to
+        /// TTS and silence the narrator, which is the one thing the reader came
+        /// for.</para></summary>
+        public bool IsHybrid { get; private set; }
+
+        /// <summary>Where the audio is ↔ where the text is, read from the SMIL at
+        /// import and kept beside <c>content.txt</c>. Null until
+        /// <see cref="LoadSyncMap"/> is called — it is bulk data (up to ~12 000
+        /// points in the samples), so nothing pays for it unless it is used.</summary>
+        public SyncMap Sync { get; private set; }
+
+        /// <summary>The sync map's file, beside the book's text. Deliberately NOT
+        /// in <c>Book.ini</c>: an INI is a settings file written key by key, and
+        /// the biggest sample carries 11 953 points. This is bulk data and gets a
+        /// file of its own.</summary>
+        public string SyncFilePath { get { return Path.Combine(FolderPath, "sync.map"); } }
+
         public BookData(string folderPath)
         {
             FolderPath = folderPath;
@@ -196,7 +222,9 @@ namespace Nemoviz_Book_Reader
         {
             TextHeadings.Clear();
             TextPages.Clear();
-            if (!IsTextBook) return;
+            // A hybrid has text structure too — its headings and printed pages are
+            // navigated in the text even though the transport is the audio.
+            if (!IsTextBook && !IsHybrid) return;
             int.TryParse(ini.Read("TextNav", "Count", "0"), out int n);
             for (int i = 0; i < n; i++)
             {
@@ -218,6 +246,76 @@ namespace Nemoviz_Book_Reader
         public void SetTextHeadings(List<(int Level, string Label, int Offset)> headings)
         {
             TextHeadings = headings ?? new List<(int, string, int)>();
+        }
+
+        /// <summary>Writes the text↔audio join beside the book's text and makes it
+        /// current. Called once, at import, from whatever read the producer's
+        /// alignment; after that the book carries its own map and nothing re-reads
+        /// hundreds of SMIL files on every load (one sample ships 385 of them).
+        ///
+        /// <para>One point per line, <c>charOffset seconds</c>, invariant culture
+        /// — a decimal comma here would be read back as a different number on a
+        /// machine set to another locale, which is how a book would open in sync
+        /// on one computer and not on the next.</para></summary>
+        public void SaveSyncMap(SyncMap map)
+        {
+            Sync = map;
+            try
+            {
+                if (map == null || map.IsEmpty)
+                {
+                    if (File.Exists(SyncFilePath)) File.Delete(SyncFilePath);
+                    return;
+                }
+                var sb = new StringBuilder(map.ByChar.Count * 16);
+                foreach (SyncPoint p in map.ByChar)
+                    sb.Append(p.CharOffset).Append(' ')
+                      .Append(p.Seconds.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture))
+                      .Append('\n');
+                File.WriteAllText(SyncFilePath, sb.ToString(), new UTF8Encoding(false));
+            }
+            catch { }   // a book's folder can vanish under a background timer
+        }
+
+        /// <summary>Reads the join back, building both orders the way
+        /// <see cref="DaisySync.Build"/> does. Safe to call more than once; a
+        /// missing or unreadable file leaves <see cref="Sync"/> null, which every
+        /// caller has to treat as "this book does not follow along".</summary>
+        public SyncMap LoadSyncMap()
+        {
+            if (Sync != null) return Sync;
+            try
+            {
+                if (!File.Exists(SyncFilePath)) return null;
+                var map = new SyncMap();
+                var points = new List<SyncPoint>();
+                foreach (string line in File.ReadAllLines(SyncFilePath))
+                {
+                    int sp = line.IndexOf(' ');
+                    if (sp <= 0) continue;
+                    if (!int.TryParse(line.Substring(0, sp), out int off)) continue;
+                    if (!double.TryParse(line.Substring(sp + 1),
+                            System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out double sec)) continue;
+                    points.Add(new SyncPoint(off, sec));
+                }
+                if (points.Count == 0) return null;
+
+                // The file is written in character order; that is one of the two
+                // orders and can be taken as it stands. The other is sorted here
+                // rather than stored twice — see SyncMap for why both are needed.
+                map.ByChar.AddRange(points);
+                points.Sort((a, b) => a.Seconds != b.Seconds
+                    ? a.Seconds.CompareTo(b.Seconds)
+                    : a.CharOffset.CompareTo(b.CharOffset));
+                foreach (SyncPoint p in points)
+                    if (map.ByTime.Count == 0 || p.Seconds != map.ByTime[map.ByTime.Count - 1].Seconds)
+                        map.ByTime.Add(p);
+
+                Sync = map;
+                return Sync;
+            }
+            catch { return null; }
         }
 
         /// <summary>Sets the page-marker structure (from the import extractor) so
@@ -303,8 +401,26 @@ namespace Nemoviz_Book_Reader
         private void DetectTextBook()
         {
             IsTextBook = false;
+            IsHybrid = false;
             TextFilePath = null;
-            if (IsDaisy || Chapters.Count > 0) return;
+            // Audio AND text is a HYBRID, not a text book: the text is a second
+            // output, the narration is still the reading. TextFilePath is set so
+            // the text can be shown and navigated, but IsTextBook stays false so
+            // nothing switches the transport over to TTS.
+            if (IsDaisy || Chapters.Count > 0)
+            {
+                try
+                {
+                    string text = Path.Combine(FolderPath, "content.txt");
+                    if (File.Exists(text) && File.Exists(SyncFilePath))
+                    {
+                        IsHybrid = true;
+                        TextFilePath = text;
+                    }
+                }
+                catch { }
+                return;
+            }
             try
             {
                 // content.txt is the reading text written by import (text formats,
@@ -336,7 +452,11 @@ namespace Nemoviz_Book_Reader
             {
                 // A text DAISY was flattened to content.txt at import; it reads as a
                 // text book, so skip the (potentially heavy) DAISY re-parse here.
-                if (File.Exists(Path.Combine(FolderPath, "content.txt"))) return;
+                // A HYBRID also has content.txt but must still get its DAISY nav —
+                // it is played, not read aloud by TTS — and the sync map beside the
+                // text is what tells the two apart without re-parsing anything.
+                if (File.Exists(Path.Combine(FolderPath, "content.txt"))
+                    && !File.Exists(SyncFilePath)) return;
                 if (!DaisyParser.IsDaisy(FolderPath)) return;
                 DaisyBook db = DaisyParser.TryParse(FolderPath);
                 if (db == null) return;

@@ -1460,6 +1460,8 @@ namespace Nemoviz_Book_Reader
                     {
                         LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
                         imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
+                        // Text+audio DAISY: keep the text as a second output too.
+                        DaisyTextExtractor.SetupHybrid(imported, destFolder);
                     }
                     else
                     {
@@ -1645,6 +1647,7 @@ namespace Nemoviz_Book_Reader
                 {
                     LibraryScanner.FlattenDaisyToRoot(destFolder, daisy.ContentRoot);
                     imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
+                    DaisyTextExtractor.SetupHybrid(imported, destFolder);
                 }
                 imported.Save();
 

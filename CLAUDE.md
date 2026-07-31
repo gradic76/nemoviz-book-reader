@@ -749,10 +749,44 @@ so it is an ordinary **audio** DAISY, not a hybrid.
   all about the parser, and a first diagnosis blaming unstable `List.Sort` on
   tied offsets was wrong.
 
-**Still open:** nothing consumes the map yet. `Book.ini` has to persist it,
-hybrid books have to become possible at all (`DetectTextBook` still requires a
-folder with **no** audio, so `IsTextBook && Chapters.Count > 0` cannot happen —
-see §10b), and only then the two-tab Properties page, which must land with it.
+**Hybrid books now exist (`BookData.IsHybrid`, 2026-07-30).** A hybrid is an
+**audio** book that also has the text — deliberately **not** an `IsTextBook`.
+Making it one would hand the transport to TTS and silence the narrator, which is
+the one thing the reader came for. So the transport, the position and the seek
+steps stay exactly an audio book's, and the text is the *second output* §8l
+describes: one position, several renderers windowing it. `DetectTextBook` gives
+a folder that has audio **and** `content.txt` **and** `sync.map` the hybrid flag
+instead of returning early, `BuildDaisyNav` no longer bails on `content.txt`
+alone, and `LoadTextNav` runs for a hybrid so its headings and printed pages
+come back too.
+
+- **The map lives in `sync.map` beside `content.txt`, not in `Book.ini`.** An
+  INI is a settings file written key by key and the biggest sample carries
+  **11 953 points**; this is bulk data. One point per line, `offset seconds`,
+  **invariant culture** — a decimal comma would read back as a different number
+  on a differently-configured machine, so a book would be in sync on one
+  computer and not the next. Written once at import, because rebuilding it means
+  re-reading every SMIL file and one sample ships 385 of them.
+- **`sync.map` is also what tells a hybrid from a TEXT DAISY**, which is why
+  `SetupHybrid` writes **nothing at all** unless a real map comes out:
+  `content.txt` with no map beside it is exactly how a text DAISY is recognised,
+  so writing the text alone would turn a narrated book into a silent one.
+
+**Measured end to end through the real import path and then a COLD reload** — a
+fresh `BookData` built off the disk, which is what the app does next time it
+starts, since a hybrid that only works before the app closes is not a hybrid.
+Of the 22 samples: **21 come back as hybrids, 1 as plain audio, none broken.**
+Every one keeps `IsDaisy`, stays out of `IsTextBook`, rebuilds its chapters, and
+reloads its map; the round trip is exact in 19 of 21 (Origin of Species and one
+Vietnamese textbook lose a point each, Plato 31 of 755).
+**Rainbow Readers' 7 bad points disappeared here**, which confirms the earlier
+diagnosis: through `BookData` the durations come with the `MpvDuration` fallback
+the probe did not have, so those were mis-measured audio lengths and not
+alignment at all.
+
+**Still open:** nothing *consumes* the map yet — the player does not show or
+follow the text of a hybrid, and Properties still needs the two-tab page (§10b),
+which is now unblocked.
 
 ---
 
@@ -1941,25 +1975,23 @@ an owner-drawn control, and the bar has to stay reachable for a long title.
 new behaviour, not paint); tightening the innards now that the cells grew from
 112 to 138.
 
-**HYBRID BOOKS DO NOT EXIST YET — that, not Properties, is the blocker**
-(measured 2026-07-29). The note that used to sit here said hybrid books "still
-have two tabs" and kept the classic dialog. That reads as though Properties were
-behind; it is not. **Two tabs are currently impossible by construction:** they
-need `IsTextBook` **and** `Chapters.Count > 0`, but `DetectTextBook` only calls a
-book a text book when its folder has **no audio**, and chapters are built *from*
-audio — the condition contradicts itself. On top of that §8c has text+audio DAISY
-importing as **plain audio with its text unused**. Checked across a real 15-book
-library: every book is audio-only or text-only, none both, so `hasAudio &&
-hasText` never fires and the single-tab path is doing the right thing.
+**Hybrid books exist as of 2026-07-30 — the two-tab page is now the open item.**
+The note that stood here said hybrid Properties was not the blocker because
+hybrids were impossible by construction, and that was right at the time: two tabs
+needed `IsTextBook` **and** `Chapters.Count > 0`, while `DetectTextBook` only
+called a book a text book when its folder had **no** audio. §8c has since built
+the text+audio DAISY join, and a hybrid is now its **own** thing
+(`BookData.IsHybrid`) rather than a text book with audio — measured across 22
+real samples, 21 import and cold-reload as hybrids.
 
-So the order is: **make hybrids possible first** (the multi-modal text+audio DAISY
-work already open in §8c), *then* lay out their Properties — designing that page
-now would mean building, and guessing at, a layout no book on earth can currently
-open. But the two must land together: `PropertiesSkin.Apply` bails on
-`TabPages.Count != 1`, so the first hybrid ever opened would silently get the
-plain Windows dialog. And it is not a repaint — both existing paths **move** their
-controls off the tab page onto the form and hide the strip, so a hybrid needs
-versions that lay out *inside* a page.
+**So the condition to branch on is `IsHybrid`, NOT `IsTextBook && Chapters > 0`**
+— that pair still cannot both be true and never will be, by design.
+
+What was already true and still is: `PropertiesSkin.Apply` bails on
+`TabPages.Count != 1`, so the first hybrid opened gets the plain Windows dialog
+until the page is built. And it is not a repaint job — both existing paths
+**move** their controls off the tab page onto the form and hide the strip, so a
+hybrid needs versions that lay out *inside* a page.
 
 ---
 

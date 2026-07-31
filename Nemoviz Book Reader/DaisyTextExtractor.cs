@@ -84,6 +84,64 @@ namespace Nemoviz_Book_Reader
             imported.Format = "DAISY " + ver + "— Digital Accessible Information System";
         }
 
+        /// <summary>Gives an already-built audio DAISY its text as well, when the
+        /// producer aligned the two: writes <c>content.txt</c>, records the heading
+        /// and page structure, and saves the text↔audio join beside it. The book
+        /// stays an AUDIO book — see <see cref="BookData.IsHybrid"/> — this only
+        /// adds the second output.
+        ///
+        /// <para>Must be called AFTER <see cref="BookData.BuildChaptersFromDaisy"/>:
+        /// the join's timeline is the book's own <c>Offsets</c>, so a sync point
+        /// and a bookmark speak the same units.</para>
+        ///
+        /// <para>Returns false, and writes nothing at all, unless a real map comes
+        /// out. That is not just tidiness: <c>content.txt</c> with no
+        /// <c>sync.map</c> beside it is precisely how a TEXT DAISY is recognised,
+        /// so writing the text on its own would turn a narrated book into a
+        /// silent one read by TTS. Measured on 22 hybrid samples, one
+        /// (<c>Annual_report_1997</c>) lands here and is right to: its SMIL points
+        /// at <c>ncc.html</c> rather than at any text, so it is an ordinary audio
+        /// DAISY and comes back false.</para></summary>
+        public static bool SetupHybrid(BookData book, string folder)
+        {
+            if (book == null || folder == null) return false;
+            try
+            {
+                TextDoc doc = Extract(folder);
+                if (doc == null || string.IsNullOrEmpty(doc.Text)
+                    || doc.SyncIds == null || doc.SyncIds.Count == 0) return false;
+
+                var smils = Directory.GetFiles(folder, "*.smil", SearchOption.AllDirectories)
+                                     .Select(Path.GetFileName)
+                                     .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                                     .ToList();
+                List<DaisySync.Pair> pairs = DaisySync.ReadPairs(folder, smils);
+                if (pairs.Count == 0) return false;
+
+                // Clean once, here, with every offset — headings, pages AND the
+                // sync ids — moving with the text, so what is written is what the
+                // reader reads and nothing points past its target.
+                TextCleaner.CleanDoc(doc);
+
+                var start = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < book.Chapters.Count && i < book.Offsets.Count; i++)
+                    start[book.Chapters[i].FileName] = book.Offsets[i];
+
+                SyncMap map = DaisySync.Build(pairs, doc.SyncIds,
+                    f => start.TryGetValue(f, out double s) ? s : -1);
+                if (map.IsEmpty) return false;
+
+                File.WriteAllText(Path.Combine(folder, "content.txt"),
+                    doc.Text, new UTF8Encoding(false));
+                book.TextCleaned = true;
+                book.SetTextHeadings(doc.Headings);
+                book.SetTextPages(doc.Pages);
+                book.SaveSyncMap(map);
+                return true;
+            }
+            catch { return false; }
+        }
+
         /// <summary>Extracts text + headings from a text DAISY folder. Never throws;
         /// an unreadable book yields an empty TextDoc.</summary>
         public static TextDoc Extract(string folder)
