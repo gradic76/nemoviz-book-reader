@@ -4321,21 +4321,51 @@ namespace Nemoviz_Book_Reader
             return cpm > 0 ? chars * 60.0 / cpm : 0;
         }
 
+        private DateTime lastTextDisplay = DateTime.MinValue;
+        private string lastTextPosText;
+
+        /// <summary>Progress, caption and info box for a text book.
+        ///
+        /// <para><b>Throttled, and it matters more than it looks.</b> This is
+        /// driven by PositionChanged, so it used to run once per SENTENCE — and
+        /// it does not merely read: it assigns to a text box, an accessible name,
+        /// a label, the window caption, and it rebuilds the WHOLE info box and
+        /// assigns that too. Every one of those raises a UI Automation property
+        /// change that the screen reader collects, across a process boundary, in
+        /// the same instant the next sentence is starting. NBR's own voice comes
+        /// from the 32-bit satellite over IPC and needs the message pump right
+        /// then; Gordan heard the beginning of sentences being stolen.</para>
+        ///
+        /// <para>The display is in whole seconds, so once a second is all it can
+        /// show anyway — a sentence takes two or three. The identical-text guards
+        /// are worth as much again: an assignment of the SAME string still raises
+        /// the event, and the info box in particular is a long string that
+        /// usually has not changed.</para></summary>
         private void UpdateTextPositionDisplay()
         {
             if (tts == null || currentBook == null || !currentBook.IsTextBook) return;
+            DateTime now = DateTime.UtcNow;
+            if ((now - lastTextDisplay).TotalMilliseconds < 900) return;
+            lastTextDisplay = now;
+
             int percent = tts.TotalChars > 0 ? (int)(100.0 * tts.CharPosition / tts.TotalChars) : 0;
             string posText = Localization.T("Player.Position.Text",
                 FormatTime(TextSeconds(tts.CharPosition)), FormatTime(TextSeconds(tts.TotalChars)));
-            tbProgress.Text = posText;
-            tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
-            lblProgress.Text = posText;
-
-            // Live title bar + info box (same rule as audio: caption always,
-            // info box only while unfocused) so text progress advances visibly.
-            UpdateTitleBar();
-            if (this.ActiveControl != tbInfo)
-                tbInfo.Text = BuildCurrentInfoText();
+            if (posText != lastTextPosText)
+            {
+                lastTextPosText = posText;
+                tbProgress.Text = posText;
+                tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
+                lblProgress.Text = posText;
+                // Live title bar + info box (same rule as audio: caption always,
+                // info box only while unfocused) so text progress advances visibly.
+                UpdateTitleBar();
+                if (this.ActiveControl != tbInfo)
+                {
+                    string info = BuildCurrentInfoText();
+                    if (info != tbInfo.Text) tbInfo.Text = info;
+                }
+            }
         }
 
         private void LoadBook(BookData book, bool autoPlay)

@@ -335,9 +335,25 @@ namespace Nemoviz_Book_Reader
                 return;
             }
             reading = true;
-            RaisePosition();
-            if (silent) { RestartPace(); return; }
+            if (silent) { RaisePosition(); RestartPace(); return; }
+
+            // SPEAK FIRST, then say the position moved. The order used to be the
+            // other way round, and it cost the start of every sentence.
+            //
+            // PositionChanged is what drives the reading surface, and everything
+            // hanging off it — the caret move, a ScrollToCaret over a whole book
+            // of text, the braille push, the screen-reader announcement. Raised
+            // BEFORE the utterance was handed to the backend, all of that landed
+            // in the instant between deciding to speak and speaking, and NBR's
+            // voice comes from the 32-bit satellite over IPC, which needs the
+            // message pump in exactly that instant. Gordan heard it as the
+            // beginning of sentences being stolen.
+            //
+            // Nothing downstream wants the earlier order: the position is more
+            // truthful raised here anyway, since it now means "this sentence has
+            // started" rather than "is about to".
             backend.Speak(Spoken(sentenceText[index]));
+            RaisePosition();
             // Hint the next sentence so a backend that renders before playing can
             // have it ready — otherwise every sentence starts with a synthesis gap.
             if (index + 1 < sentenceText.Count)
