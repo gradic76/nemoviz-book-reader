@@ -2993,6 +2993,61 @@ See §11.
 
 ---
 
+## 10g. Braille files are not one format (2026-08-01, the `!New` samples)
+
+86 files in `Test naslovi\!New`, and they disproved the assumption the parser was
+built on — that a `.brf`/`.brl` is braille ASCII and that is that.
+
+**What the extensions actually contain.**
+
+| | files | what it is | now |
+|---|---|---|---|
+| `.brf` | 58 | braille ASCII, four conventions | read |
+| `.i55` | 11 | braille ASCII under another producer's extension | read |
+| `.brl` | 5 | **Braillo Text — ordinary text, not braille** | own parser |
+| `.dxb` | 10 | Duxbury, binary, `FF D S I` header | refused |
+| `.smb` | 2 | embosser stream | refused |
+| `.bopf` | 2 | XML package descriptor, not a book | — |
+
+**Braille ASCII comes in at least four conventions**, and files do not say which:
+lowercase NABCC; UPPERCASE cells (`17722v01.brf`); a Vietnamese mapping; and
+**French, which writes é è à ê ç and the diaeresis as the Latin-1 characters
+themselves**. That last one was losing **5.18% of every cell** — 19 068 in one
+book — because a byte outside 7-bit ASCII was skipped as "not a cell", silently.
+The dot patterns are now read out of `fr-bfu-comp6.utb`, which we already ship,
+and the loss falls to 0.09%. **Read the table, never write dot patterns from
+memory.** Line width is 31, 39 or 41 depending on producer — nothing may assume
+40.
+
+**A percentage test cannot identify a format.** Genuine `.brf` runs from 0.00% to
+**13.96%** non-cell bytes; Duxbury starts at **2.95%**. The ranges overlap, so any
+threshold that refused Duxbury would refuse real books. Hence two tests: a wide
+threshold (20%) that catches Braillo at 90% and `.smb` at 49%, plus **signatures**
+for the formats we have identified. Verified on all 86: 58/58 and 11/11 accepted,
+17/17 refused.
+
+**Refusing beats guessing.** Braillo through the BRF parser produced *fluent-
+looking nonsense* from the tenth of its bytes that happened to map, and a reader
+cannot tell that from a badly transcribed book. `BrfParser` returns **null**, not
+an empty document: "I cannot read this" and "this book is empty" are different
+answers and only one is true.
+
+**Braillo Text, measured (no specification available).** A `Braillo Text` header,
+a title, a binary block, then the body as **16-bit units — low byte the character,
+high byte an attribute** (`0x03` in running text); CR/LF ends a line; each page
+sits in a frame of ordinary ASCII letters 36 columns apart. The body is found by
+anchoring on three running-text attributes in a row, not a fixed offset. The code
+page is **scored per file**, not assumed — the samples are Cyrillic under 1251,
+but that is what these files happened to be. The frame is stripped by LINE, since
+it is drawn with letters and cannot be removed character by character without
+eating text.
+
+**Still open:** Duxbury (10 books, binary, its own translation tables); `.smb`;
+the last stray bytes (`0x60` in French integral files, `0x7C`/`0xA4` in one
+abridged, `{ | } ~` in `.i55` — probably 8-dot cells).
+
+---
+
 ## 11. TODO (open items)
 
 - **A key fires but a keyboard SHORTCUT does not light it.** The backlight is
