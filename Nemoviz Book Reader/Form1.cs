@@ -1138,6 +1138,17 @@ namespace Nemoviz_Book_Reader
                 // key from the highlight toggle so the recording can be taken
                 // during ordinary reading, with no aid running and nothing else
                 // in the way.
+                // TEMPORARY: the tester marks the instant they HEARD something
+                // wrong. The recording of the audio path came back completely
+                // clean over a whole minute — every utterance played its full
+                // length — so either the fault did not happen while it was being
+                // recorded, or it happens somewhere the player cannot see. A mark
+                // in the same timeline settles which, and points at the sentence.
+                case Keys.Control | Keys.Shift | Keys.M:
+                    ReadingDiagnostics.Note("******** HEARD A CUT HERE ********");
+                    tones.Play(1200, 60);
+                    return true;
+
                 case Keys.Control | Keys.Shift | Keys.L:
                     string where = ReadingDiagnostics.Dump();
                     tones.Play(where != null ? 880 : 300, 150);
