@@ -819,7 +819,20 @@ namespace Nemoviz_Book_Reader
             chkTBraille.Location = new Point(14, 20);
             chkTBraille.Size = new Size(424, 24);
             chkTBraille.TabIndex = 0;
-            chkTBraille.CheckedChanged += (s, e) => UpdateTextEnabled();
+            chkTBraille.CheckedChanged += (s, e) =>
+            {
+                // Done HERE, on the transition, and not in UpdateTextEnabled: that
+                // one runs on every refresh, so setting the mode there would snap
+                // the choice back to two rows each time anything else was touched.
+                // Ticking braille SETS the smallest form; it does not nail it down.
+                if (chkTBraille.Checked)
+                {
+                    if (chkTVisual != null) chkTVisual.Checked = true;
+                    if (cmbTVisualMode != null && cmbTVisualMode.Items.Count > 0)
+                        cmbTVisualMode.SelectedIndex = 0;      // two rows, the subtitle strip
+                }
+                UpdateTextEnabled();
+            };
             box.Controls.Add(chkTBraille);
 
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.BrailleTable"), 10, 51));
@@ -910,10 +923,41 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Each switch gates what belongs to it: the book only overrides the
         /// Settings defaults while "custom" is on, and the braille / visual options
-        /// only matter while their own output is on.</summary>
+        /// only matter while their own output is on.
+        ///
+        /// <para><b>Braille takes the visual switch with it</b> (Gordan,
+        /// 2026-08-01). The two are not independent outputs, because the braille
+        /// display is fed by the screen reader FOLLOWING FOCUS into the reading
+        /// surface — so the window is not merely how braille is preferably done,
+        /// it is the only way it happens at all. Ticking braille therefore turns
+        /// the window on, drops it to the smallest form (two rows, the subtitle
+        /// strip), and DISABLES the visual box so it cannot be turned off
+        /// underneath. Untick braille and the box is handed back, still ticked,
+        /// for the user to do as they like with.</para>
+        ///
+        /// <para>The reverse does NOT hold, deliberately. Visual on with braille
+        /// off is an ordinary sighted setting and opens no braille channel of
+        /// ours. Note that a reader who HAS a display will still get braille from
+        /// it, because that is the screen reader's doing and not something we
+        /// could switch off if we wanted to — which is exactly why there is no
+        /// check box claiming to.</para></summary>
         private void UpdateTextEnabled()
         {
-            SettingsForm.SetEnabled(chkTBraille != null && chkTBraille.Checked, cmbTBrailleTable);
+            bool braille = chkTBraille != null && chkTBraille.Checked;
+            if (chkTVisual != null)
+            {
+                // Repairs an inconsistent book as well as enforcing the rule. The
+                // braille group is BUILT BEFORE the visual one, so on load the
+                // transition handler above fires while chkTVisual is still null
+                // and cannot do this; and a book stored while the two switches
+                // were independent can carry braille on with visual off. Either
+                // way the dialog would show braille ticked beside an unticked,
+                // greyed visual box — a state the rule says cannot exist.
+                if (braille && !chkTVisual.Checked) chkTVisual.Checked = true;
+                chkTVisual.Enabled = !braille;
+            }
+
+            SettingsForm.SetEnabled(braille, cmbTBrailleTable);
             SettingsForm.SetEnabled(chkTVisual != null && chkTVisual.Checked,
                                     cmbTVisualMode, cmbTHighlight, cmbTHighlightColour,
                                     cmbTTextColour, cmbTBackColour);
@@ -1123,6 +1167,13 @@ namespace Nemoviz_Book_Reader
 
             sb.Append(Localization.T("Settings.TextBooks.VisualGroup")).Append(": ")
               .Append(Localization.T(chkTVisual != null && chkTVisual.Checked ? "Prop.On" : "Prop.Off")).Append(nl);
+            // Why it is on, when the user did not turn it on. The visual box is
+            // DISABLED while braille is ticked, and Windows skips a disabled
+            // control in the tab order — so a screen-reader user never lands on
+            // it and would otherwise have no way at all to learn that it is set,
+            // let alone by what. The glass is the one place they will hear it.
+            if (chkTBraille != null && chkTBraille.Checked)
+                sb.Append(Localization.T("Settings.TextBooks.VisualForBraille")).Append(nl);
             if (chkTVisual != null && chkTVisual.Checked && cmbTVisualMode != null && cmbTVisualMode.SelectedItem != null)
                 sb.Append(cmbTVisualMode.SelectedItem).Append(nl);
 

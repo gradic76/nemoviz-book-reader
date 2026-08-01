@@ -436,6 +436,7 @@ Settings.TextBooks.BrailleTable=Braille table:
 Settings.TextBooks.BrailleTableAuto=Detect from the book
 Settings.TextBooks.VisualGroup=Visual output
 Settings.TextBooks.UseVisual=Use visual output
+Settings.TextBooks.VisualForBraille=Required by braille output
 Settings.TextBooks.VisualMode=Display mode:
 Settings.TextBooks.VisualMode.TwoRows=Two text rows (subtitle style)
 Settings.TextBooks.VisualMode.FullInstant=Full screen text (instant switch)
