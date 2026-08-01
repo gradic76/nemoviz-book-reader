@@ -2829,6 +2829,25 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // Buttons
         // ──────────────────────────────────────────────
+        /// <summary>The human-readable name of a card, from the id NBR stores.
+        /// The keep-alive reaches the sound card through waveOut, which knows
+        /// devices by a product name and not by mpv's WASAPI id, so the two have
+        /// to be introduced somewhere — and this is the only place that has
+        /// mpv's list to hand. Empty for "auto", which is a request for the
+        /// default device and needs no name.</summary>
+        private string DeviceDescriptionFor(string mpvDeviceId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(mpvDeviceId) || mpvDeviceId == "auto") return null;
+                if (mpvHandle == IntPtr.Zero) return null;
+                foreach (MpvAudioDevices.Device d in MpvAudioDevices.Get(mpvHandle))
+                    if (d.Name == mpvDeviceId) return d.Description;
+            }
+            catch { }
+            return null;
+        }
+
         private void SetPlayPauseState(bool playing)
         {
             isPlaying = playing;
@@ -2854,7 +2873,7 @@ namespace Nemoviz_Book_Reader
                     if (keepAlive == null)
                     {
                         keepAlive = new AudioKeepAlive();
-                        keepAlive.SetDevice(appSettings.AudioDevice);
+                        keepAlive.SetDeviceDescription(DeviceDescriptionFor(appSettings.AudioDevice));
                     }
                     keepAlive.Start();
                 }
@@ -3325,7 +3344,7 @@ namespace Nemoviz_Book_Reader
             tts?.SetAudioDevice(device);
             // The keep-alive follows the card too, or it would be holding the
             // one nobody is listening to open and letting the chosen one sleep.
-            keepAlive?.SetDevice(device);
+            keepAlive?.SetDeviceDescription(DeviceDescriptionFor(device));
             tones.SetDevice(device);   // the app's own beeps follow the book
         }
 
