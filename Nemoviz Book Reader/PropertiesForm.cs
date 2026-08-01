@@ -957,6 +957,14 @@ namespace Nemoviz_Book_Reader
             SettingsForm.SetEnabled(!noSpeech, numTVolume, numTPitch);
 
             bool braille = chkTBraille != null && chkTBraille.Checked;
+            // Say it ON THE CONTROL as well as on the glass. Gordan looked beside
+            // the control first, which is where anyone would look — the glass is
+            // where NBR puts state, but a consequence of ticking THIS box belongs
+            // to this box. And it is the only control in the pair Tab can still
+            // reach once the whole visual group is disabled.
+            if (chkTBraille != null)
+                chkTBraille.AccessibleDescription = braille
+                    ? Localization.T("Settings.TextBooks.VisualForBraille") : null;
             if (chkTVisual != null)
             {
                 // Repairs an inconsistent book as well as enforcing the rule. The
