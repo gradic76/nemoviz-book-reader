@@ -3233,6 +3233,27 @@ namespace Nemoviz_Book_Reader
                 Activate();
             };
             readingWindow.Show(this);
+            // …and then take the foreground, one message cycle later.
+            //
+            // Show(owner) activates, but this is now called from the middle of
+            // the PLAY path, and what follows it puts focus back on the player's
+            // own controls — so the window came up behind and without focus, and
+            // Gordan had to press F9 twice to get it back. Braille and the aid
+            // both follow FOCUS, so a window nobody is standing in is a window
+            // that does nothing.
+            //
+            // Deferred rather than called here: the rest of the play path has to
+            // finish first, or it simply overwrites this too.
+            ReadingWindow w = readingWindow;
+            try
+            {
+                BeginInvoke((Action)(() =>
+                {
+                    if (w == null || w.IsDisposed) return;
+                    try { w.Activate(); w.FocusSurface(); } catch { }
+                }));
+            }
+            catch { }
         }
 
         /// <summary>The distinct characters of the book, for filtering the font

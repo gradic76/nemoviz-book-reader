@@ -144,10 +144,7 @@ namespace Nemoviz_Book_Reader
                 // braille shows a solid block. The reading position is a caret,
                 // never a range (§8l) — so put it back where it was the instant
                 // focus lands, before anything can announce it.
-                int at = surface.SelectionStart;
-                surface.Focus();
-                surface.Select(at, 0);
-                surface.ScrollToCaret();
+                FocusSurface();
             };
             FormClosed += (s, e) => GiveSurfaceBack();
         }
@@ -514,6 +511,25 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Hands the surface back where it came from. Without this the
         /// player loses its reading surface for good, and with it braille.</summary>
+        /// <summary>Puts the caret in the reading surface, which is where braille
+        /// and the screen reader both look. Called on Shown, and again by the
+        /// player once the play path has finished putting focus wherever it
+        /// wanted it.
+        ///
+        /// <para>Focusing a multiline TextBox SELECTS ALL of it, and a selection
+        /// is news to a screen reader: it reads the marked text out and braille
+        /// shows a solid block. The reading position is a caret, never a range
+        /// (§8l) — so it is put back where it was the instant focus lands, before
+        /// anything can announce it.</para></summary>
+        public void FocusSurface()
+        {
+            if (surface == null || surface.IsDisposed) return;
+            int at = surface.SelectionStart;
+            surface.Focus();
+            surface.Select(at, 0);
+            surface.ScrollToCaret();
+        }
+
         private void GiveSurfaceBack()
         {
             if (surface == null) return;
