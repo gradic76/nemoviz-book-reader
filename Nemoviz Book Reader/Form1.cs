@@ -3613,10 +3613,16 @@ namespace Nemoviz_Book_Reader
                     || !System.IO.File.Exists(currentBook.TextFilePath)) return;
                 readingText = System.IO.File.ReadAllText(currentBook.TextFilePath,
                                                          System.Text.Encoding.UTF8);
+                // LOAD it. Sync is filled by LoadSyncMap and nothing else, and
+                // nothing else was calling it — so it was null for every hybrid
+                // ever opened, this method bailed every time, and the window
+                // never came up. Testing the property without asking for the
+                // data is a check that can only fail.
+                SyncMap sync = currentBook.LoadSyncMap();
                 // A hybrid with no sync map has text and audio that do not know
                 // about each other; the caret would sit at nought while the
                 // narrator read on, which is worse than no window at all.
-                if (currentBook.Sync == null || currentBook.Sync.IsEmpty) { readingText = null; return; }
+                if (sync == null || sync.IsEmpty) { readingText = null; return; }
 
                 if (currentBook.OpensReadingWindow && readingWindow == null)
                     BeginInvoke((Action)(() =>
@@ -4115,8 +4121,11 @@ namespace Nemoviz_Book_Reader
             string s; int start;
             if (currentBook.IsHybrid)
             {
-                if (currentBook.Sync == null || currentBook.Sync.IsEmpty) return;
-                start = DaisySync.CharAt(currentBook.Sync, GetVirtualPosition());
+                // Through LoadSyncMap, which returns the cached map after the
+                // first call — reading the property alone was the bug above.
+                SyncMap sync = currentBook.LoadSyncMap();
+                if (sync == null || sync.IsEmpty) return;
+                start = DaisySync.CharAt(sync, GetVirtualPosition());
                 s = SentenceAround(readingText, start);
             }
             else if (currentBook.IsTextBook && tts != null)

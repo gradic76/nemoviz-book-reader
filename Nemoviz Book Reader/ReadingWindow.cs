@@ -432,6 +432,23 @@ namespace Nemoviz_Book_Reader
             // it from the keyboard. Nothing to build for that; it just has to not
             // be swallowed. Simple, modifier-free keys are the easy ones to map,
             // which is a second reason the F-key set earns its place.
+            // …but not out from under a control that needs them itself. The font
+            // picker is a closed combo: its whole operation is Up and Down, and
+            // those were being taken for volume before they ever reached it, so
+            // the list could be opened and not moved through (Gordan). Space is
+            // in the same position — it opens a combo and presses a button — and
+            // a control that wants a bare arrow or a bare space is exactly a
+            // control the player must keep its hands off.
+            Control focused = ActiveControl;
+            bool ownsKeys = focused is ComboBox || focused is Button;
+            if (ownsKeys)
+            {
+                Keys plain = keyData & ~Keys.Shift;
+                if (plain == Keys.Up || plain == Keys.Down || plain == Keys.Space ||
+                    keyData == Keys.Left || keyData == Keys.Right)
+                    return base.ProcessCmdKey(ref msg, keyData);
+            }
+
             switch (keyData)
             {
                 case Keys.Space:
