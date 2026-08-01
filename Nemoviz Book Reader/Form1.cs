@@ -3163,7 +3163,25 @@ namespace Nemoviz_Book_Reader
             // Tested on the TEXT, not on tts: a hybrid has words to show and no
             // synthesiser, and requiring one was what made F9 beep at the one
             // kind of book whose text is already joined to its audio.
-            if (currentBook == null || readingText == null) { tones.Play(300, 150); return; }
+            if (currentBook == null || readingText == null)
+            {
+                // The beep says "no" and nothing else, and there are four
+                // different reasons for it. Recorded here rather than guessed at:
+                // this happens on a key press, not per sentence, so it costs
+                // nothing that matters.
+                ReadingDiagnostics.Note(string.Format(
+                    "F9 REFUSED: book={0} textbook={1} hybrid={2} textFile={3} sync={4} readingText={5}",
+                    currentBook == null ? "null" : "ok",
+                    currentBook != null && currentBook.IsTextBook,
+                    currentBook != null && currentBook.IsHybrid,
+                    currentBook == null || string.IsNullOrEmpty(currentBook.TextFilePath)
+                        ? "none" : (System.IO.File.Exists(currentBook.TextFilePath) ? "exists" : "MISSING"),
+                    currentBook == null || currentBook.Sync == null ? "null"
+                        : (currentBook.Sync.IsEmpty ? "empty" : currentBook.Sync.Count.ToString()),
+                    readingText == null ? "null" : readingText.Length.ToString()));
+                tones.Play(300, 150);
+                return;
+            }
             EnsureReadingSurface();
             LoadReadingSurface();
 
