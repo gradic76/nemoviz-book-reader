@@ -1886,10 +1886,37 @@ area** — `y = H + 4` and downwards, exactly what the read-only fields and the
 as Windows is concerned, keeps its place in the tab order, and still reports its
 text; the window simply never paints that region.
 
-**Measured caveat, and it is a real one:** today's JAWS run had the surface
-**visible** at the foot of the player. Parking it has not been measured *for
-braille*. It is proven for announcements, which are a different channel, so the
-off-screen version needs the same paired-log check before it is relied on.
+**MEASURED AND SETTLED 2026-08-01: parking it WORKS.** With the surface at
+`y = ClientSize.Height + 4` — invisible on screen — and a real book playing in
+the real player, NVDA put the text on the braille display and followed it
+sentence by sentence: 13 changes in 20 samples over 48 seconds, reading
+"a job that demanded a hardened hide", "such a trade.", "she was formidable.",
+"In the dark cities of the drow elves" and on through the book. Focus was
+confirmed on the surface from the same frame (its UIA name is the whole book —
+585 110 characters).
+
+**So the old note in `Form1.cs` was wrong**, and it has been corrected there:
+it claimed parking had been tried and "showed an empty braille viewer", and
+concluded braille goes through the reader's *screen* model. It does not.
+
+**The old failure was almost certainly the focus trap, which caught this project
+three more times in one afternoon** and is worth listing, because each looked
+exactly like a real negative result:
+
+1. Two runs read the **braille viewer's own check box** back — the test window
+   never took the foreground, and `SetForegroundWindow` from a script returns
+   false. Only a human clicking the window lifted it.
+2. A third read a **stale line**: the harness was doing `Controls.Clear()` and
+   re-adding on every switch, which destroys and recreates the control's window
+   handle — to a screen reader, the object vanishing and a new one appearing.
+   Moving the control and changing its z-order leaves the handle alone.
+3. And the first attempt at reading the viewer took its **last** UIA row, which
+   is the viewer's own UI. The braille text is row **[2]** — row [1] is the dots,
+   [3] and [4] are its check boxes.
+
+**Always keep a control placement in the test.** A run where the visible case
+also fails is a broken harness, not a finding — that is what caught every one of
+these.
 
 **And it should be ONE control with two placements, not two controls.** When
 visual output is off, the surface is parked; when it is on, the same control is

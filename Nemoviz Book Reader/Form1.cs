@@ -994,13 +994,13 @@ namespace Nemoviz_Book_Reader
                 case Keys.F8:
                     // Read out fresh playback info from anywhere in the
                     // player, via the off-screen announcement label. The
-                    // info box itself is not touched — no text change, no
+                    // info box itself is not touched ï¿½ no text change, no
                     // echo.
                     //
                     // Pressed TWICE in quick succession it instead moves focus
                     // into the info box, and a third press brings it back where
                     // it came from. The box is parked off the client area and
-                    // out of the tab order (§8k), so this is the only way in —
+                    // out of the tab order (ï¿½8k), so this is the only way in ï¿½
                     // and the way out matters just as much, or a reader who
                     // walked in has nowhere to walk back to.
                     if (DateTime.UtcNow - lastInfoKey < TimeSpan.FromMilliseconds(600))
@@ -1060,7 +1060,7 @@ namespace Nemoviz_Book_Reader
                     BtnSetBookmark_Click(null, EventArgs.Empty);
                     return true;
 
-                // Properties stays on Alt+Enter — that is the Windows convention
+                // Properties stays on Alt+Enter ï¿½ that is the Windows convention
                 // for it and Gordan kept it deliberately.
                 case Keys.Alt | Keys.Enter:
                     BtnProperties_Click(null, EventArgs.Empty);
@@ -1072,7 +1072,7 @@ namespace Nemoviz_Book_Reader
                 // situation a reader is most likely to be in. F1 is Help by
                 // convention; F9 and F10 are left alone (F10 activates a menu
                 // bar), as is Alt+F4.
-                // Escape leaves the info box as well as a third F8 — walking out
+                // Escape leaves the info box as well as a third F8 ï¿½ walking out
                 // of somewhere with Escape is a habit, and a habit that fails is
                 // worse than one that was never offered. Guarded on the box
                 // actually having focus, so Escape means nothing elsewhere in
@@ -3024,7 +3024,7 @@ namespace Nemoviz_Book_Reader
         /// <summary>Walks focus into the playback info box and back out again.
         ///
         /// <para>The box is parked below the client area and kept out of the tab
-        /// order (§8k), so there is no other way in — and no way out either,
+        /// order (ï¿½8k), so there is no other way in ï¿½ and no way out either,
         /// which is why this remembers where focus came from rather than just
         /// focusing something sensible. It also refreshes the text first: the
         /// box is a snapshot, and arriving at a stale one is worse than not
@@ -3045,7 +3045,7 @@ namespace Nemoviz_Book_Reader
         /// Settings' job and should take some effort.</para>
         ///
         /// <para>A toggle rather than two commands because it is one place you
-        /// are either in or not — Escape works too, but only
+        /// are either in or not ï¿½ Escape works too, but only
         /// once focus is inside it.</para>
         ///
         /// <para>The window BORROWS <see cref="tbReadingSurface"/> and returns it
@@ -3071,9 +3071,9 @@ namespace Nemoviz_Book_Reader
             readingWindow.FormClosed += (s, e) =>
             {
                 readingWindow = null;
-                // Back on the player it is parked, not shown: §8l wants it out of
+                // Back on the player it is parked, not shown: ï¿½8l wants it out of
                 // the way of the eye but still in the accessibility tree, which is
-                // what the off-client-area trick gives (§8k).
+                // what the off-client-area trick gives (ï¿½8k).
                 if (tbReadingSurface != null)
                     tbReadingSurface.SetBounds(12, ClientSize.Height + 4, ClientSize.Width - 24, 44);
                 Activate();
@@ -3083,7 +3083,7 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>The distinct characters of the book, for filtering the font
         /// list. Measured on the real text rather than derived from the language,
-        /// because a Croatian book can quote Greek (§8l).</summary>
+        /// because a Croatian book can quote Greek (ï¿½8l).</summary>
         private char[] DistinctBookChars()
         {
             var set = new System.Collections.Generic.HashSet<char>();
@@ -3493,7 +3493,7 @@ namespace Nemoviz_Book_Reader
             ApplyTtsSettings();
             tts.SeekToChar(currentBook.TextPosition);
 
-            // The book's own setting decides whether the reading view appears —
+            // The book's own setting decides whether the reading view appears ï¿½
             // F9 is the way BACK after Escape, not the way in (Gordan). Deferred
             // a tick so the player has finished coming up before a second window
             // takes the foreground.
@@ -3624,14 +3624,27 @@ namespace Nemoviz_Book_Reader
         // sentence appearing there and changing as it reads â€” and listen for
         // whether Space and the arrows still work while this control has focus.
         //
-        // It is ON SCREEN, and that was not the first attempt. It was parked below
-        // the client area to begin with, the way the announce labels are â€” but
-        // those are read through the SPEECH channel, where being off screen costs
-        // nothing. Braille goes through the reader's screen model, and a reader
-        // may treat an object outside the visible area as not being there: the
-        // first run showed an empty braille viewer. So for as long as this is an
-        // experiment it sits over the panel, plainly, where nothing about its
-        // visibility can be the reason it fails.
+        // It is PARKED below the client area, the way the announce labels are.
+        //
+        // An earlier note here said that had been tried and failed - "the first
+        // run showed an empty braille viewer" - and concluded that braille goes
+        // through the reader's screen model, which would not see an object
+        // outside the visible area. MEASURED AGAIN 2026-08-01 and that is WRONG:
+        // with the surface parked, NVDA put its text on the braille display,
+        // plainly and completely.
+        //
+        // The old failure was almost certainly the trap this project has now
+        // fallen into three separate times: braille follows FOCUS, and a window
+        // that never took the foreground brailles nothing. Two runs today read
+        // the braille viewer's own check box back while proving nothing at all,
+        // and a third read a stale line because the harness was destroying and
+        // recreating the control's window handle on every switch, which to a
+        // reader is the object vanishing.
+        //
+        // How to re-run it: open a text book, open NVDA's Braille Viewer (NVDA
+        // menu ï¿½ Tools), press Play, and watch the line change as it reads.
+        // Confirm from the SAME frame that the player really has focus - a
+        // measurement taken while something else does is worth nothing.
         private TextBox tbReadingSurface;
 
         private void EnsureReadingSurface()
@@ -3642,7 +3655,9 @@ namespace Nemoviz_Book_Reader
             tbReadingSurface.ReadOnly = true;
             tbReadingSurface.WordWrap = true;
             tbReadingSurface.ScrollBars = ScrollBars.None;
-            tbReadingSurface.SetBounds(12, ClientSize.Height - 56, ClientSize.Width - 24, 44);
+            // Parked below the client area: out of the eye's way, still in the
+            // accessibility tree, and measured to reach braille (see above).
+            tbReadingSurface.SetBounds(12, ClientSize.Height + 4, ClientSize.Width - 24, 44);
             tbReadingSurface.BackColor = NewPlayerSkin.Glass;
             tbReadingSurface.ForeColor = NewPlayerSkin.Lit;
             tbReadingSurface.BorderStyle = BorderStyle.FixedSingle;
