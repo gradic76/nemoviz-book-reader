@@ -56,6 +56,9 @@ namespace Nemoviz_Book_Reader
 
         private Button btnBack, btnPlay, btnForward, btnSmaller, btnBigger;
         private ComboBox cmbFont;
+        /// <summary>Holds off applying a font until the reader stops moving
+        /// through the list — see the picker's handler for why that matters.</summary>
+        private Timer fontApply;
         private Panel metal, glass;
         private float fontSize = 26f;        // 60 chars across a 960-wide window
         private string fontFamily = "Segoe UI";
@@ -202,7 +205,12 @@ namespace Nemoviz_Book_Reader
             // Andika, with no error to notice.
             try { f = BundledFonts.Make(fontFamily, fontSize); }
             catch { f = new Font(FontFamily.GenericSansSerif, fontSize); }
+            // The one it is replacing goes back. A Font holds a GDI handle, and
+            // arrowing down a list of a hundred faces was leaving one behind per
+            // keystroke.
+            Font old = surface.Font;
             surface.Font = f;
+            if (old != null && !ReferenceEquals(old, f)) try { old.Dispose(); } catch { }
 
             // Measured on a real sample rather than assumed: character width
             // varies enormously between faces at the same point size, which is
@@ -251,7 +259,24 @@ namespace Nemoviz_Book_Reader
             cmbFont.SelectedIndexChanged += (s, e) =>
             {
                 fontFamily = cmbFont.SelectedItem as string ?? fontFamily;
-                ApplyFont();
+                // NOT applied on the keystroke. Setting Font on the surface makes
+                // WinForms re-wrap everything in it, and everything in it is the
+                // WHOLE BOOK — 155 000 characters in the sample Gordan reads. One
+                // arrow key is one re-layout of a novel; holding the arrow down
+                // took the machine to its knees, fan and all.
+                //
+                // So the name is spoken at once, because that is what the reader
+                // is choosing by, and the face itself follows a third of a second
+                // after they stop moving. Browsing a hundred faces costs one
+                // re-layout instead of a hundred.
+                if (fontApply == null)
+                {
+                    fontApply = new Timer();
+                    fontApply.Interval = 350;
+                    fontApply.Tick += (s2, e2) => { fontApply.Stop(); ApplyFont(); };
+                }
+                fontApply.Stop();
+                fontApply.Start();
                 // NVDA does not announce a closed combo changed with the arrows
                 // (§11); JAWS does, so this is a no-op there and never doubles up.
                 NvdaController.Speak(fontFamily);

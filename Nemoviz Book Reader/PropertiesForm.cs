@@ -1207,15 +1207,20 @@ namespace Nemoviz_Book_Reader
             if (chkTBraille != null && chkTBraille.Checked && cmbTBrailleTable != null && cmbTBrailleTable.SelectedItem != null)
                 sb.Append(cmbTBrailleTable.SelectedItem).Append(nl);
 
+            // Why it is on, when the user did not turn it on. The visual group is
+            // DISABLED while braille is ticked — all of it now, not just the check
+            // box — and Windows skips a disabled control in the tab order, so a
+            // screen-reader user never lands on any of it and would otherwise have
+            // no way at all to learn that it is set, let alone by what.
+            //
+            // ON the line it qualifies, not under it. It was a line of its own and
+            // Gordan went through both dialogs without meeting it; a reason tacked
+            // onto the statement it explains cannot be passed over separately.
             sb.Append(Localization.T("Settings.TextBooks.VisualGroup")).Append(": ")
-              .Append(Localization.T(chkTVisual != null && chkTVisual.Checked ? "Prop.On" : "Prop.Off")).Append(nl);
-            // Why it is on, when the user did not turn it on. The visual box is
-            // DISABLED while braille is ticked, and Windows skips a disabled
-            // control in the tab order — so a screen-reader user never lands on
-            // it and would otherwise have no way at all to learn that it is set,
-            // let alone by what. The glass is the one place they will hear it.
+              .Append(Localization.T(chkTVisual != null && chkTVisual.Checked ? "Prop.On" : "Prop.Off"));
             if (chkTBraille != null && chkTBraille.Checked)
-                sb.Append(Localization.T("Settings.TextBooks.VisualForBraille")).Append(nl);
+                sb.Append(" — ").Append(Localization.T("Settings.TextBooks.VisualForBraille"));
+            sb.Append(nl);
             if (chkTVisual != null && chkTVisual.Checked && cmbTVisualMode != null && cmbTVisualMode.SelectedItem != null)
                 sb.Append(cmbTVisualMode.SelectedItem).Append(nl);
 
