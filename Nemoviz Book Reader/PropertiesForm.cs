@@ -826,12 +826,16 @@ namespace Nemoviz_Book_Reader
             cmbTBrailleTable = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.BrailleTable"), 210, 48, 232, 1);
             cmbTBrailleTable.Items.Add(Localization.T("Settings.TextBooks.BrailleTableAuto"));
             foreach (BrailleTableInfo t in BrailleTables.All) cmbTBrailleTable.Items.Add(t.Display);
-            // A braille book remembers the table it was read with â€” show that one.
+            // The table this book was last sent to the display with. Deliberately
+            // NOT book.BrailleTable: that one back-translates a .brf being READ,
+            // and this one forward-translates a text book being WRITTEN out. Same
+            // library, opposite directions, no reason they should agree.
             int bi = 0;
             for (int i = 0; i < BrailleTables.All.Length; i++)
-                if (string.Equals(BrailleTables.All[i].Id, book.BrailleTable, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(BrailleTables.All[i].Id, book.TextBrailleTable, StringComparison.OrdinalIgnoreCase))
                 { bi = i + 1; break; }
             cmbTBrailleTable.SelectedIndex = bi;
+            chkTBraille.Checked = book.TextBraille;
             box.Controls.Add(cmbTBrailleTable);
             return box;
         }
@@ -973,6 +977,14 @@ namespace Nemoviz_Book_Reader
             book.TextVisual = chkTVisual != null && chkTVisual.Checked;
             book.TextVisualMode = cmbTVisualMode != null && cmbTVisualMode.SelectedIndex >= 0
                 ? cmbTVisualMode.SelectedIndex : 0;
+            // Braille was scaffolding in exactly the same way. Index 0 of the table
+            // list is "automatic", which is stored as an empty id so that a book
+            // set to automatic keeps following its language if that language later
+            // gains a better table.
+            book.TextBraille = chkTBraille != null && chkTBraille.Checked;
+            book.TextBrailleTable = cmbTBrailleTable != null && cmbTBrailleTable.SelectedIndex > 0
+                && cmbTBrailleTable.SelectedIndex <= BrailleTables.All.Length
+                ? BrailleTables.All[cmbTBrailleTable.SelectedIndex - 1].Id : "";
             // File the numbers under the voice they were set for — every voice this
             // book has been read with keeps its own, so coming back to one restores
             // it instead of inheriting whatever was used last.

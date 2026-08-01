@@ -99,6 +99,20 @@ namespace Nemoviz_Book_Reader
         /// last one chose.</para></summary>
         public bool TextVisual { get; set; }
         public int TextVisualMode { get; set; }
+        /// <summary>Send this book's text to a braille display while it is read,
+        /// and which liblouis table to translate it with (empty = the one the
+        /// book's language picks).
+        ///
+        /// <para>Braille rides on the reading window rather than on a hidden
+        /// control: a screen reader brailles what has FOCUS, so the text has to
+        /// be somewhere the user can actually be. That makes this flag a second
+        /// reason to open the window — see <c>OpensReadingWindow</c>.</para></summary>
+        public bool TextBraille { get; set; }
+        public string TextBrailleTable { get; set; }
+        /// <summary>True when the book asks for the reading window, whichever of
+        /// the two reasons it is. Both callers used to test <c>TextVisual</c>
+        /// alone, which left a braille reader with no window and so no braille.</summary>
+        public bool OpensReadingWindow { get { return TextVisual || TextBraille; } }
         /// <summary>How each voice was set up while reading THIS book, so going
         /// back to a voice restores the speed/volume/pitch it was read at rather
         /// than inheriting the previous voice's.</summary>
@@ -209,6 +223,8 @@ namespace Nemoviz_Book_Reader
             TextVisual = ini.Read("Settings", "TextVisual", "0") == "1";
             int.TryParse(ini.Read("Settings", "TextVisualMode", "0"), out int tvm);
             TextVisualMode = tvm >= 0 && tvm <= 2 ? tvm : 0;
+            TextBraille = ini.Read("Settings", "TextBraille", "0") == "1";
+            TextBrailleTable = ini.Read("Settings", "TextBrailleTable", "");
             TextLanguage = ini.Read("Book", "Language", "");
             // Reading a book off the shelf registers its language too, not only
             // saving one. Without this an existing library stays invisible to
@@ -941,6 +957,8 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextPitch", TextPitch.ToString());
             ini.Write("Settings", "TextVisual", TextVisual ? "1" : "0");
             ini.Write("Settings", "TextVisualMode", TextVisualMode.ToString());
+            ini.Write("Settings", "TextBraille", TextBraille ? "1" : "0");
+            ini.Write("Settings", "TextBrailleTable", TextBrailleTable ?? "");
             ini.Write("Book", "Language", TextLanguage ?? "");
             // Tell Settings this language exists in the library, so a voice can be
             // chosen for it even when nothing installed speaks it.

@@ -3497,8 +3497,13 @@ namespace Nemoviz_Book_Reader
             // F9 is the way BACK after Escape, not the way in (Gordan). Deferred
             // a tick so the player has finished coming up before a second window
             // takes the foreground.
-            if (currentBook.TextVisual && readingWindow == null)
-                BeginInvoke((Action)(() => { if (currentBook != null && currentBook.TextVisual) ToggleReadingWindow(); }));
+            //
+            // Braille opens it too. A screen reader brailles whatever holds FOCUS,
+            // so the text has to live in a control the user can be in; the reading
+            // window IS that control. Asking for braille and getting no window
+            // would be asking for braille and getting nothing.
+            if (currentBook.OpensReadingWindow && readingWindow == null)
+                BeginInvoke((Action)(() => { if (currentBook != null && currentBook.OpensReadingWindow) ToggleReadingWindow(); }));
 
             // Cache the character count for the reading-time estimate.
             currentBook.TextChars = tts.TotalChars;
