@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -31,12 +31,12 @@ namespace Nemoviz_Book_Reader
         [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern int mpv_get_property(IntPtr ctx, string name, int format, ref double data);
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Multimedia keys (WM_APPCOMMAND)
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Handled locally (WM_APPCOMMAND): the keys work while any NBR window
-        // control has focus. Settings â†’ General switches them off, or claims them
-        // system-wide (RegisterHotKey â†’ WM_HOTKEY) so they work from anywhere.
+        // control has focus. Settings → General switches them off, or claims them
+        // system-wide (RegisterHotKey → WM_HOTKEY) so they work from anywhere.
         private const int WM_APPCOMMAND = 0x0319;
         private const int APPCOMMAND_MEDIA_NEXTTRACK = 11;
         private const int APPCOMMAND_MEDIA_PREVIOUSTRACK = 12;
@@ -62,7 +62,7 @@ namespace Nemoviz_Book_Reader
 
         // Every beep the player makes goes through this, so the feedback comes out
         // of the same card as the book rather than wherever Windows sends system
-        // sounds â€” on headphones or a second card those are different rooms.
+        // sounds — on headphones or a second card those are different rooms.
         private readonly SignalTones tones = new SignalTones();
 
         private IntPtr mpvHandle = IntPtr.Zero;
@@ -88,7 +88,7 @@ namespace Nemoviz_Book_Reader
         private bool isLoadingBook = false;
 
         // Set in the constructor when there's no book to resume (first run,
-        // empty library, deleted folder, or the last book was finished) â€”
+        // empty library, deleted folder, or the last book was finished) —
         // the app then starts in the Library window instead of the player.
         private bool openLibraryOnStartup = false;
 
@@ -96,10 +96,10 @@ namespace Nemoviz_Book_Reader
         // a book finishes while the library is already open.
         private bool isLibraryOpen = false;
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Sleep timer state
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        // The timer is COUPLED TO PLAYBACK â€” it exists because someone is
+        // ──────────────────────────────────────────────
+        // The timer is COUPLED TO PLAYBACK — it exists because someone is
         // listening and plans to fall asleep, it is not a standalone
         // shutdown scheduler. The rules:
         //   * A timer can only be set with something loaded in the player;
@@ -108,12 +108,12 @@ namespace Nemoviz_Book_Reader
         //   * A MANUAL pause (Space, X, on-screen button, media keys)
         //     cancels the timer, with an announcement. Programmatic pauses
         //     (cross-file seeks, book loading, the timer's own expiry
-        //     action) do NOT â€” they never route through BtnPlayPause_Click,
+        //     action) do NOT — they never route through BtnPlayPause_Click,
         //     which is the only place the cancel hook lives.
         //   * Changing the book (library pick or Ctrl+O) cancels the timer,
         //     with the same announcement.
         //   * Seeking, volume, speed, part navigation and Go To don't touch
-        //     the timer â€” adjusting things while drifting off is expected.
+        //     the timer — adjusting things while drifting off is expected.
         //   * If the book ends by itself before the deadline, the chosen
         //     action fires immediately (see FinishCurrentBook): for Stop
         //     the "stop playback" part already happened naturally, so the
@@ -121,25 +121,25 @@ namespace Nemoviz_Book_Reader
         //     runs right away, earlier than the deadline.
         // Audible signals: a series of three beeps at -5 min (skipped for
         // timers of 5 minutes or less), then a smooth volume FADEOUT over
-        // the last 45 seconds. The fade only touches the mpv volume â€” the
+        // the last 45 seconds. The fade only touches the mpv volume — the
         // user's set volume (currentVolume, the Volume field, Book.ini)
         // stays untouched and is restored when the timer ends or is
         // cancelled.
         // While active, the countdown itself is wall-clock (a DateTime
         // deadline, not accumulated ticks), so a busy UI thread can't make
-        // it drift; playback speed has no effect. Nothing is persisted â€”
+        // it drift; playback speed has no effect. Nothing is persisted —
         // a timer is a one-shot, session-only thing.
         private System.Windows.Forms.Timer sleepTimer;
         private DateTime sleepDeadline;
         private SleepTimerAction sleepAction;
         private bool sleepTimerActive = false;
         // True once the -5 min warning series has fired (or when the timer
-        // was started with 5 minutes or less â€” no point beeping instantly).
+        // was started with 5 minutes or less — no point beeping instantly).
         private bool sleepWarned5Min = false;
         // Seconds before the deadline at which the fadeout starts.
         private const int SleepFadeSeconds = 45;
 
-        // UI controls â€” 3Ă—4 grid, columns A (160) / B (320) / C (160)
+        // UI controls — 3×4 grid, columns A (160) / B (320) / C (160)
         private Panel panelTop;
         private TextBox tbInfo;
         private Panel panelBottom;
@@ -155,10 +155,10 @@ namespace Nemoviz_Book_Reader
         private ComboBox cmbSeek;
         // The seek dropdown is dynamic: time steps are always there, Part only
         // for plain audio, Heading/Page only for a DAISY book that has them,
-        // Bookmark only while the book has â‰Ą1 bookmark. DAISY headings follow
-        // the standard talking-book model â€” one step per heading depth present
-        // ("Heading 1", "Heading 2", â€¦), where level N stops at every heading
-        // of depth â‰¤ N. This list runs parallel to cmbSeek.Items (one entry
+        // Bookmark only while the book has ≥1 bookmark. DAISY headings follow
+        // the standard talking-book model — one step per heading depth present
+        // ("Heading 1", "Heading 2", …), where level N stops at every heading
+        // of depth ≤ N. This list runs parallel to cmbSeek.Items (one entry
         // per row) so the selected step is known without fixed indices.
         // New kinds are appended (never reordered) so the persisted ordinal in
         // Book.ini stays valid across versions.
@@ -187,7 +187,7 @@ namespace Nemoviz_Book_Reader
         private Button btnSetBookmark;
         private Button btnManageBookmarks;
 
-        // Tooltips â€” mouse-hover hints with the keyboard shortcuts
+        // Tooltips — mouse-hover hints with the keyboard shortcuts
         private ToolTip toolTip;
 
         // Off-screen labels for screen reader announcements
@@ -199,11 +199,11 @@ namespace Nemoviz_Book_Reader
         private DateTime lastInfoKey = DateTime.MinValue;
         private Control infoBoxCameFrom;
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // The new look's way in
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // NewPlayerSkin lays the redesigned player out and paints it, but the
-        // controls and the commands stay here where they have always been â€” the
+        // controls and the commands stay here where they have always been — the
         // skin only rearranges and repaints what BuildUI already made, so roles,
         // names, tab order and every handler are untouched. None of this runs
         // under the classic theme.
@@ -233,14 +233,14 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        /// <summary>Progress through the book, 0â€“1000, for the skin's bar.</summary>
+        /// <summary>Progress through the book, 0–1000, for the skin's bar.</summary>
         internal int SkinProgress { get { return currentProgress; } }
 
-        /// <summary>True while something is actually playing â€” the skin's seconds
+        /// <summary>True while something is actually playing — the skin's seconds
         /// marker steps only then, which is what makes it a state indicator.</summary>
         internal bool SkinIsPlaying { get { return isPlaying; } }
 
-        /// <summary>True while a sleep timer is counting down â€” the panel's lamp
+        /// <summary>True while a sleep timer is counting down — the panel's lamp
         /// breathes instead of burning steady, which is the only place that state
         /// is visible to someone who is not using a screen reader.</summary>
         internal bool SkinSleepActive { get { return sleepTimerActive; } }
@@ -249,7 +249,7 @@ namespace Nemoviz_Book_Reader
         internal void SkinSpeed(int delta) { ChangeSpeed(delta); }
         internal void SkinArrowSeek(int dir) { ArrowSeek(dir); }
 
-        /// <summary>Speed in whatever unit this book counts it in â€” words a minute
+        /// <summary>Speed in whatever unit this book counts it in — words a minute
         /// for a text book, hundredths of a multiplier for audio. Both step by 5,
         /// so the skin's knob can work in the same numbers the keyboard does and
         /// the two can never land between steps.</summary>
@@ -260,7 +260,7 @@ namespace Nemoviz_Book_Reader
 
         internal bool SkinTextBook { get { return currentBook != null && currentBook.IsTextBook; } }
 
-        /// <summary>Where the progress blade was dropped, 0â€“1 of the whole book.
+        /// <summary>Where the progress blade was dropped, 0–1 of the whole book.
         /// Called once on mouse-up, never during the drag: seeking on every pixel
         /// would hammer mpv and the speech engine for a gesture the user has not
         /// finished making.</summary>
@@ -291,12 +291,12 @@ namespace Nemoviz_Book_Reader
             DecideStartupView();
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Startup flow
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         /// <summary>
         /// Decides where the app starts: the player with the last-read book
-        /// resumed (normal case), or the Library window â€” on first run, when
+        /// resumed (normal case), or the Library window — on first run, when
         /// the library is empty, when the last book's folder is gone, or
         /// when the last book was finished on the previous run.
         /// </summary>
@@ -344,13 +344,13 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        // Multimedia keys â€” WM_APPCOMMAND
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
+        // Multimedia keys — WM_APPCOMMAND
+        // ──────────────────────────────────────────────
         // WM_APPCOMMAND bubbles up from the focused child control to the
         // form via DefWindowProc, so handling it here covers the whole
-        // window. With no book loaded â€” or with the keys switched off in
-        // Settings â€” the message is passed through to the system
+        // window. With no book loaded — or with the keys switched off in
+        // Settings — the message is passed through to the system
         // (base.WndProc), so pressing Play/Pause doesn't pop up the Open File
         // dialog and other media apps still react.
         //
@@ -407,7 +407,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Claims (or releases) the media keys system-wide, to match
-        /// Settings. Safe to call at any time and as often as you like â€” it always
+        /// Settings. Safe to call at any time and as often as you like — it always
         /// releases what it registered before. A key another app has already
         /// claimed simply fails to register; NBR then still gets it while focused,
         /// through WM_APPCOMMAND.</summary>
@@ -428,9 +428,9 @@ namespace Nemoviz_Book_Reader
             catch { }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Screen reader announcement
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         //
         // Transient values (volume, speed, timer, info-on-demand, bookmark
         // set, seek step...) are announced through a UIA *notification event*
@@ -438,13 +438,13 @@ namespace Nemoviz_Book_Reader
         // moving focus, which fixes the two problems the old off-screen-label
         // approach had:
         //   * it briefly stole focus to a hidden label and restored it 150 ms
-        //     later â€” rapid key repeats overlapped those focus shuffles and
+        //     later — rapid key repeats overlapped those focus shuffles and
         //     choked the reader, and
         //   * NVDA (unlike JAWS) largely ignored the programmatic focus to an
         //     off-screen label, so pressing volume/speed keys while focus was
         //     on a button produced no feedback at all.
         // NotificationProcessing.MostRecent tells the reader to drop pending
-        // older notifications and speak only the latest, so holding/â€‹repeating
+        // older notifications and speak only the latest, so holding/​repeating
         // a key no longer backs up a queue of stale values.
         //
         // The announceLabel parameter is kept so the many call sites don't
@@ -520,7 +520,7 @@ namespace Nemoviz_Book_Reader
             catch
             {
                 // UiaRaiseNotificationEvent needs Windows 10 1709+. On older
-                // systems the export is missing and the first call throws â€”
+                // systems the export is missing and the first call throws —
                 // stop trying so we don't throw on every keystroke.
                 uiaNotifyUnavailable = true;
             }
@@ -530,7 +530,7 @@ namespace Nemoviz_Book_Reader
          InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         private interface IRawElementProviderSimple
         {
-            // Never called from managed code â€” we only obtain the provider
+            // Never called from managed code — we only obtain the provider
             // from the OS and hand it back to UiaRaiseNotificationEvent, so no
             // members need to be declared for the pointer to marshal.
         }
@@ -564,17 +564,17 @@ namespace Nemoviz_Book_Reader
             [MarshalAs(UnmanagedType.BStr)] string displayString,
             [MarshalAs(UnmanagedType.BStr)] string activityId);
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Seek step (from the seek dropdown)
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Navigation is layered in four levels:
-        //   1. Left/Right arrows  â€” plain 5 s seek, like any other player.
-        //   2. Ctrl+1..9          â€” percentage jumps across the whole book.
+        //   1. Left/Right arrows  — plain 5 s seek, like any other player.
+        //   2. Ctrl+1..9          — percentage jumps across the whole book.
         //   3. Shift+Left / Shift+Right, media Next/Prev, and the on-screen
-        //      Back/Forward buttons â€” jump by the step selected in the seek
+        //      Back/Forward buttons — jump by the step selected in the seek
         //      dropdown (time steps / whole Part / Bookmark). Shift+Up/Down
         //      change which step is selected.
-        //   4. Go To... (Ctrl+G)  â€” pick a named target from a list; for
+        //   4. Go To... (Ctrl+G)  — pick a named target from a list; for
         //      plain audio that's the book's parts.
         /// <summary>The step currently selected in the seek dropdown.</summary>
         private SeekStep CurrentSeekStep()
@@ -583,8 +583,8 @@ namespace Nemoviz_Book_Reader
             return (i >= 0 && i < seekSteps.Count) ? seekSteps[i] : new SeekStep(SeekStepKind.Sec15);
         }
 
-        // Persist a step to Book.ini as a single int: heading depth L â†’ 100+L,
-        // any other kind â†’ its enum ordinal. Kept compact so [Settings] SeekStep
+        // Persist a step to Book.ini as a single int: heading depth L → 100+L,
+        // any other kind → its enum ordinal. Kept compact so [Settings] SeekStep
         // stays a plain number across sessions.
         private int EncodeSeekStep(SeekStep step)
         {
@@ -613,14 +613,14 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // One rule for every seek, in every kind of book: a step that CAN'T move
         // says so with the "no go" beep, a step that moves is silent. Each seek
         // helper below reports whether it went anywhere and beeps for nobody; the
         // two dispatchers here own the sound. That way "there is nothing further
         // that way" feels the same whether the step is Heading 1 or 15 seconds,
         // and whether the book is audio, text or a hybrid.
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void SeekStepForward()
         {
             SeekStep step = CurrentSeekStep();
@@ -723,7 +723,7 @@ namespace Nemoviz_Book_Reader
             return levels;
         }
 
-        // Character offsets of the text headings at depth â‰¤ maxLevel, ascending.
+        // Character offsets of the text headings at depth ≤ maxLevel, ascending.
         private System.Collections.Generic.List<int> TextHeadingOffsets(int maxLevel)
         {
             var list = new System.Collections.Generic.List<int>();
@@ -735,7 +735,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Heading navigation for a structured text book: jump to the
-        /// next/previous heading of depth â‰¤ maxLevel, with a small grace so Back
+        /// next/previous heading of depth ≤ maxLevel, with a small grace so Back
         /// from just inside a heading rewinds to its start.</summary>
         private void TextHeadingSeek(int maxLevel, int dir)
         {
@@ -758,7 +758,7 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        /// <summary>Go To for a structured text book â€” pick a heading from the
+        /// <summary>Go To for a structured text book — pick a heading from the
         /// list (indented by depth) and jump the reader there.</summary>
         private void TextGoTo()
         {
@@ -809,7 +809,7 @@ namespace Nemoviz_Book_Reader
         /// <summary>Rebuilds the seek dropdown to show exactly the steps the
         /// current book supports: the four time steps and Part are always
         /// present; Heading and Page appear only for a DAISY book that has
-        /// them; Bookmark appears only while the book has â‰Ą1 bookmark. The
+        /// them; Bookmark appears only while the book has ≥1 bookmark. The
         /// previously selected kind is preserved across the rebuild when it
         /// still exists, otherwise selection falls back to the first step.
         /// Called whenever the book, its bookmarks, or its structure change.</summary>
@@ -824,12 +824,12 @@ namespace Nemoviz_Book_Reader
             PlayerType type = GetPlayerType();
 
             // Structural unit(s) first (coarsest), then time steps (finest last),
-            // then Bookmark (dynamic â€” only when the book has bookmarks). Per type:
+            // then Bookmark (dynamic — only when the book has bookmarks). Per type:
             //   Single audio:  30m,15m,10m,5m,60s,30s,15s,[Bookmark]
             //   Multi audio:   Part, 30m,15m,10m,5m,60s,30s,15s,[Bookmark]
-            //   DAISY:         H1,H2,â€¦,Page, 15m,10m,5m,60s,30s,15s,[Bookmark]
+            //   DAISY:         H1,H2,…,Page, 15m,10m,5m,60s,30s,15s,[Bookmark]
             //   Flat text:     Standard page, 15m,10m,5m,60s,30s,15s,[Bookmark]
-            //   Structured:    H1,H2,â€¦,Page, 15m,10m,5m,60s,30s,15s
+            //   Structured:    H1,H2,…,Page, 15m,10m,5m,60s,30s,15s
             switch (type)
             {
                 case PlayerType.MultiAudio:
@@ -851,7 +851,7 @@ namespace Nemoviz_Book_Reader
                     break;
 
                 case PlayerType.M4b:
-                    // Chapter, then 15 min â†’ 15 s, then Bookmark (dynamic).
+                    // Chapter, then 15 min → 15 s, then Bookmark (dynamic).
                     AddSeekStep(new SeekStep(SeekStepKind.Chapter), Localization.T("Seek.Item.Chapter"));
                     AddTimeSteps15DownWithBookmark();
                     break;
@@ -882,7 +882,7 @@ namespace Nemoviz_Book_Reader
             cmbSeek.EndUpdate();
         }
 
-        /// <summary>Appends the shared time steps 15 min â†’ 15 s, then a Bookmark
+        /// <summary>Appends the shared time steps 15 min → 15 s, then a Bookmark
         /// step when the current book has any bookmarks.</summary>
         private void AddTimeSteps15DownWithBookmark()
         {
@@ -902,7 +902,7 @@ namespace Nemoviz_Book_Reader
             cmbSeek.Items.Add(label);
         }
 
-        /// <summary>Distinct DAISY heading depths present, ascending â€” one seek
+        /// <summary>Distinct DAISY heading depths present, ascending — one seek
         /// step is offered per depth.</summary>
         private System.Collections.Generic.List<int> HeadingLevelsPresent()
         {
@@ -935,7 +935,7 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Generic "next structural mark" jump (headings or pages),
         /// mirroring BookmarkForward: seeks to the first mark past the current
-        /// position. False when there is none â€” the caller makes the sound.
+        /// position. False when there is none — the caller makes the sound.
         /// Positions are assumed ascending (reading order).</summary>
         private bool StructForward(System.Collections.Generic.List<double> positions)
         {
@@ -966,9 +966,9 @@ namespace Nemoviz_Book_Reader
             return true;
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // ProcessCmdKey
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             bool infoBoxHasFocus = this.ActiveControl == tbInfo;
@@ -994,13 +994,13 @@ namespace Nemoviz_Book_Reader
                 case Keys.F8:
                     // Read out fresh playback info from anywhere in the
                     // player, via the off-screen announcement label. The
-                    // info box itself is not touched — no text change, no
+                    // info box itself is not touched � no text change, no
                     // echo.
                     //
                     // Pressed TWICE in quick succession it instead moves focus
                     // into the info box, and a third press brings it back where
                     // it came from. The box is parked off the client area and
-                    // out of the tab order (§8k), so this is the only way in —
+                    // out of the tab order (�8k), so this is the only way in �
                     // and the way out matters just as much, or a reader who
                     // walked in has nowhere to walk back to.
                     if (DateTime.UtcNow - lastInfoKey < TimeSpan.FromMilliseconds(600))
@@ -1013,7 +1013,7 @@ namespace Nemoviz_Book_Reader
                     AnnounceToScreenReader(lblAnnounceInfo, BuildCurrentInfoText());
                     return true;
 
-                // Speed â€” Ctrl+Left/Right (replaced Page Up/Down). Ctrl is
+                // Speed — Ctrl+Left/Right (replaced Page Up/Down). Ctrl is
                 // fine on Left/Right (unlike Up/Down, which the shell/JAWS grab
                 // for vertical navigation).
                 case Keys.Control | Keys.Left:
@@ -1024,7 +1024,7 @@ namespace Nemoviz_Book_Reader
                     ChangeSpeed(+10);
                     return true;
 
-                // Seek jump by the selected step â€” Shift+Left/Right.
+                // Seek jump by the selected step — Shift+Left/Right.
                 case Keys.Shift | Keys.Left:
                     SeekStepBackward();
                     return true;
@@ -1033,8 +1033,8 @@ namespace Nemoviz_Book_Reader
                     SeekStepForward();
                     return true;
 
-                // Change the seek step (the dropdown value) â€” Shift+Up/Down.
-                // Down moves down the list (H1 â†’ â€¦ â†’ 15 sec), Up back toward H1,
+                // Change the seek step (the dropdown value) — Shift+Up/Down.
+                // Down moves down the list (H1 → … → 15 sec), Up back toward H1,
                 // matching the visual order and arrow direction.
                 case Keys.Shift | Keys.Up:
                     ChangeSeekStep(-1);
@@ -1060,7 +1060,7 @@ namespace Nemoviz_Book_Reader
                     BtnSetBookmark_Click(null, EventArgs.Empty);
                     return true;
 
-                // Properties stays on Alt+Enter — that is the Windows convention
+                // Properties stays on Alt+Enter � that is the Windows convention
                 // for it and Gordan kept it deliberately.
                 case Keys.Alt | Keys.Enter:
                     BtnProperties_Click(null, EventArgs.Empty);
@@ -1072,7 +1072,7 @@ namespace Nemoviz_Book_Reader
                 // situation a reader is most likely to be in. F1 is Help by
                 // convention; F9 and F10 are left alone (F10 activates a menu
                 // bar), as is Alt+F4.
-                // Escape leaves the info box as well as a third F8 — walking out
+                // Escape leaves the info box as well as a third F8 � walking out
                 // of somewhere with Escape is a habit, and a habit that fails is
                 // worse than one that was never offered. Guarded on the box
                 // actually having focus, so Escape means nothing elsewhere in
@@ -1151,9 +1151,9 @@ namespace Nemoviz_Book_Reader
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        // KeyDown â€” Space = Play/Pause
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
+        // KeyDown — Space = Play/Pause
+        // ──────────────────────────────────────────────
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Space)
@@ -1164,9 +1164,9 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Volume
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void ChangeVolume(int delta)
         {
             int newVol = Math.Max(0, Math.Min(100, currentVolume + delta));
@@ -1176,7 +1176,7 @@ namespace Nemoviz_Book_Reader
             {
                 if (tts != null) tts.SetVolume(currentVolume);
                 // For a text book the Volume field IS the speech volume, so the
-                // book's own TextVolume follows it â€” the two are one number, and
+                // book's own TextVolume follows it — the two are one number, and
                 // Properties must never show a different one from the player. It
                 // is filed under the voice in use, so it comes back with it.
                 RememberCurrentVoicePrefs();
@@ -1188,7 +1188,7 @@ namespace Nemoviz_Book_Reader
             lblVolume.Text = text;
             // Volume uses the Up/Down arrows, which a reader treats as edit
             // caret navigation and so speaks the focused field's current line
-            // on every press â€” regardless of the field's accessible role
+            // on every press — regardless of the field's accessible role
             // (JAWS keys off the underlying Edit window class). We can't stop
             // that read, so we make it the SINGLE feedback: keep the field's
             // Text current (so the line spoken is the right value) and, while
@@ -1208,13 +1208,13 @@ namespace Nemoviz_Book_Reader
                 tones.Play(1200, 150);
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Speed
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void ChangeSpeed(int delta)
         {
             // Text book: the speed control is words-per-minute, not an mpv
-            // multiplier. Step Â±5 WPM, beep when passing the Settings default.
+            // multiplier. Step ±5 WPM, beep when passing the Settings default.
             if (currentBook != null && currentBook.IsTextBook)
             {
                 int step = delta > 0 ? 5 : -5;
@@ -1245,7 +1245,7 @@ namespace Nemoviz_Book_Reader
             string speedStr = (currentSpeed / 100.0).ToString("0.0");
             string text = Localization.T("Player.Speed.Text", speedStr);
             lblSpeed.Text = text;
-            // Focus echo guard â€” see ChangeVolume.
+            // Focus echo guard — see ChangeVolume.
             if (!tbSpeed.Focused)
             {
                 tbSpeed.Text = text;
@@ -1258,11 +1258,11 @@ namespace Nemoviz_Book_Reader
                 tones.Play(new[] { (800, 120), (800, 120) });
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Seek
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Seek arrows (Left/Right): 5 s in audio, one sentence in a text book.
-        /// <summary>The plain arrows â€” five seconds of audio, one sentence of text.
+        /// <summary>The plain arrows — five seconds of audio, one sentence of text.
         /// Deliberately SILENT at the edges: this is the small, constant nudge you
         /// use continuously while listening, and a beep every time you nudge past
         /// the end of the book would be noise. The audible "that is as far as it
@@ -1286,7 +1286,7 @@ namespace Nemoviz_Book_Reader
         /// as it goes this way".
         ///
         /// <para>A time step is not like a heading: there is always somewhere to
-        /// go until the very edge, so "it moved" is the wrong test â€” near the end
+        /// go until the very edge, so "it moved" is the wrong test — near the end
         /// the step is simply cut short, and without this the player would move
         /// two seconds and say nothing.</para>
         /// </summary>
@@ -1317,9 +1317,9 @@ namespace Nemoviz_Book_Reader
             return Math.Abs(clamped - want) < 0.05;
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Virtual timeline
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private double GetVirtualPosition()
         {
             if (currentBook == null || currentBook.Chapters.Count == 0)
@@ -1366,10 +1366,10 @@ namespace Nemoviz_Book_Reader
             }
             else
             {
-                // Different file â€” playlist-play-index, then seek once it loads.
+                // Different file — playlist-play-index, then seek once it loads.
                 // Pause *through* the switch even when playing: a freshly loaded
                 // file starts at position 0 and would be audible for the ~300 ms
-                // until the seek lands (the "blip" â€” you hear the file's opening
+                // until the seek lands (the "blip" — you hear the file's opening
                 // before it jumps to the heading). Resume only after the seek.
                 bool wasPlaying = isPlaying;
                 MpvCommand("playlist-play-index", targetIndex.ToString());
@@ -1390,9 +1390,9 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Building the UI
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void BuildUI()
         {
             this.Text = Localization.T("App.Name");
@@ -1413,7 +1413,7 @@ namespace Nemoviz_Book_Reader
             progressTimer.Interval = 500;
             progressTimer.Tick += ProgressTimer_Tick;
 
-            // Sleep timer â€” 1 s tick while a countdown is running.
+            // Sleep timer — 1 s tick while a countdown is running.
             sleepTimer = new System.Windows.Forms.Timer();
             sleepTimer.Interval = 1000;
             sleepTimer.Tick += SleepTimer_Tick;
@@ -1428,7 +1428,7 @@ namespace Nemoviz_Book_Reader
             panelTop.TabStop = false;
 
             // The info box is a plain multiline read-only TextBox (EDIT
-            // control) â€” deliberately NOT a RichTextBox. JAWS handles rich
+            // control) — deliberately NOT a RichTextBox. JAWS handles rich
             // edit controls specially and kept re-reading the box's content
             // when tabbing to neighboring controls; the borderless,
             // form-colored look also made it register as static text tied
@@ -1451,7 +1451,7 @@ namespace Nemoviz_Book_Reader
             // rich edit controls specially and re-reads their content when
             // the text keeps changing (which made it repeat the whole box
             // when tabbing to neighboring controls). So the periodic
-            // refresh is gone entirely â€” the text is rebuilt only at the
+            // refresh is gone entirely — the text is rebuilt only at the
             // moment the box receives focus (below), on part change, and
             // on demand via the I key. Live position stays in the Position
             // field.
@@ -1478,8 +1478,8 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>
-        /// Bottom panel â€” 3Ă—4 grid.
-        /// Columns: A = x 0â€“160, B = x 160â€“480 (double width), C = x 480â€“640.
+        /// Bottom panel — 3×4 grid.
+        /// Columns: A = x 0–160, B = x 160–480 (double width), C = x 480–640.
         /// Rows (each ~55 px within the 220 px panel):
         ///   1: Library      | Seek dropdown            | Properties
         ///   2: Settings     | Back / Play / Forward    | Go To...
@@ -1495,7 +1495,7 @@ namespace Nemoviz_Book_Reader
             panelBottom.BorderStyle = BorderStyle.FixedSingle;
             panelBottom.TabStop = false;
 
-            // â”€â”€ Column A (x=10, width 140) â”€â”€
+            // ── Column A (x=10, width 140) ──
             btnLibrary = new Button();
             btnLibrary.Text = Localization.T("Btn.Library");
             btnLibrary.Size = new Size(140, 40);
@@ -1537,7 +1537,7 @@ namespace Nemoviz_Book_Reader
             btnHelp.TabIndex = 3;
             btnHelp.Click += BtnHelp_Click;
 
-            // â”€â”€ Column B (x=170, width 300) â”€â”€
+            // ── Column B (x=170, width 300) ──
             // Row 1: seek dropdown
             lblSeek = new Label();
             lblSeek.Text = Localization.T("Player.Seek.Label");
@@ -1551,7 +1551,7 @@ namespace Nemoviz_Book_Reader
             cmbSeek.Size = new Size(300, 24);
             cmbSeek.TabIndex = 4;
             cmbSeek.AccessibleName = Localization.T("Player.Seek.Accessible");
-            // Populate the steps for the current (no) book â€” time steps + Part.
+            // Populate the steps for the current (no) book — time steps + Part.
             RebuildSeekSteps();
             // Keyboard-inert display: the step is changed only with
             // Shift+Up/Down (from anywhere) or the mouse. Swallowing KeyDown
@@ -1562,7 +1562,7 @@ namespace Nemoviz_Book_Reader
 
             // Row 2: transport buttons
             btnBack = new Button();
-            btnBack.Text = "âŹ®";
+            btnBack.Text = "⏮";
             btnBack.Size = new Size(95, 45);
             btnBack.Location = new Point(170, 58);
             btnBack.AccessibleName = Localization.T("Btn.Back.Accessible");
@@ -1571,7 +1571,7 @@ namespace Nemoviz_Book_Reader
             btnBack.Click += BtnBack_Click;
 
             btnPlayPause = new Button();
-            btnPlayPause.Text = "â–¶";
+            btnPlayPause.Text = "▶";
             btnPlayPause.Size = new Size(95, 45);
             btnPlayPause.Location = new Point(270, 58);
             btnPlayPause.AccessibleName = Localization.T("Btn.Play.Accessible");
@@ -1580,7 +1580,7 @@ namespace Nemoviz_Book_Reader
             btnPlayPause.Click += BtnPlayPause_Click;
 
             btnForward = new Button();
-            btnForward.Text = "âŹ­";
+            btnForward.Text = "⏭";
             btnForward.Size = new Size(95, 45);
             btnForward.Location = new Point(370, 58);
             btnForward.AccessibleName = Localization.T("Btn.Forward.Accessible");
@@ -1608,7 +1608,7 @@ namespace Nemoviz_Book_Reader
             // Up/Down arrows, which a reader otherwise treats as edit caret
             // navigation and speaks the field's current line on every press
             // (on top of our announcement). As static text the arrows are
-            // inert here and the announcement is the single feedback â€” the
+            // inert here and the announcement is the single feedback — the
             // same clean behaviour Speed already gets from Page Up/Down.
             tbVolume.AccessibleRole = AccessibleRole.StaticText;
             tbVolume.Enter += (s, e) => SyncVolumeField();
@@ -1650,7 +1650,7 @@ namespace Nemoviz_Book_Reader
             tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", 0);
             tbProgress.BackColor = SystemColors.Window;
 
-            // â”€â”€ Column C (x=490, width 140) â”€â”€
+            // ── Column C (x=490, width 140) ──
             btnProperties = new Button();
             btnProperties.Text = Localization.T("Btn.Properties");
             btnProperties.Size = new Size(140, 40);
@@ -1683,7 +1683,7 @@ namespace Nemoviz_Book_Reader
             btnManageBookmarks.TabIndex = 14;
             btnManageBookmarks.Click += BtnManageBookmarks_Click;
 
-            // â”€â”€ Off-screen announcement labels â”€â”€
+            // ── Off-screen announcement labels ──
             lblAnnounceVolume = new Label();
             lblAnnounceVolume.Text = "";
             lblAnnounceVolume.Location = new Point(-600, -600);
@@ -1736,7 +1736,7 @@ namespace Nemoviz_Book_Reader
             panelBottom.Controls.Add(lblAnnounceProgress);
             panelBottom.Controls.Add(lblAnnounceInfo);
 
-            // Tooltips â€” hover hints for mouse/visual mode, listing the
+            // Tooltips — hover hints for mouse/visual mode, listing the
             // keyboard shortcuts. Screen reader flow is unaffected (info
             // lives in AccessibleName as before).
             toolTip = new ToolTip();
@@ -1762,9 +1762,9 @@ namespace Nemoviz_Book_Reader
             UiTheme.Current.Apply(this);
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // MPV event timer
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void EventTimer_Tick(object sender, EventArgs e)
         {
             if (mpvHandle == IntPtr.Zero) return;
@@ -1776,8 +1776,8 @@ namespace Nemoviz_Book_Reader
                 int eventId = Marshal.ReadInt32(eventPtr);
                 if (eventId == 0) break;
 
-                // Text book â†’ mpv is not the engine. Drain its events (idle,
-                // end-of-file from a previous audio book, â€¦) but ignore them:
+                // Text book → mpv is not the engine. Drain its events (idle,
+                // end-of-file from a previous audio book, …) but ignore them:
                 // acting on IDLE would flip isPlaying off (killing the autoplay)
                 // or wrongly "finish" the book. TTS drives text playback.
                 if (currentBook != null && currentBook.IsTextBook) continue;
@@ -1798,7 +1798,7 @@ namespace Nemoviz_Book_Reader
 
                     UpdateTitleBar();
 
-                    // Refresh the info box snapshot on part change â€” but
+                    // Refresh the info box snapshot on part change — but
                     // never while the screen reader is reading it.
                     if (this.ActiveControl != tbInfo)
                         tbInfo.Text = BuildCurrentInfoText();
@@ -1807,7 +1807,7 @@ namespace Nemoviz_Book_Reader
                 if (eventId == 7) // MPV_EVENT_END_FILE
                 {
                     // Don't save if this is the END_FILE of the OLD book caused
-                    // by "loadfile replace" when switching to a new book â€”
+                    // by "loadfile replace" when switching to a new book —
                     // at that point currentBook already points to the NEW book,
                     // so we'd write the old file's position/percent into it.
                     if (!isLoadingBook)
@@ -1816,7 +1816,7 @@ namespace Nemoviz_Book_Reader
 
                 if (eventId == 11) // MPV_EVENT_IDLE
                 {
-                    // Natural end of the playlist while a book was playing â€”
+                    // Natural end of the playlist while a book was playing —
                     // the whole book has been listened to.
                     if (currentBook != null && !isLoadingBook && isPlaying)
                         FinishCurrentBook();
@@ -1830,9 +1830,9 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Progress timer
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void ProgressTimer_Tick(object sender, EventArgs e)
         {
             // Text books update their position from the TTS reader's events.
@@ -1862,7 +1862,7 @@ namespace Nemoviz_Book_Reader
                 tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
                 lblProgress.Text = posText;
 
-                // Title bar counts down live (window caption â€” a sighted user
+                // Title bar counts down live (window caption — a sighted user
                 // sees remaining time / percent advance during playback, not
                 // only on pause / part change).
                 UpdateTitleBar();
@@ -1877,9 +1877,9 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Sleep timer
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Spec (Session 5 + playback-coupling revision, Session 8):
         // presets 15/30/45/60 min + custom; expiry actions Stop /
         // Stop+close / Stop+close+shutdown; pressing the button (Ctrl+T)
@@ -1890,7 +1890,7 @@ namespace Nemoviz_Book_Reader
 
         private void BtnTimer_Click(object sender, EventArgs e)
         {
-            // The timer is tied to a listening session â€” with an empty
+            // The timer is tied to a listening session — with an empty
             // player there is nothing to time. Same audible feedback as
             // Ctrl+G without a book: a short low beep. The test is the BOOK,
             // not a current file: a text book is read by the speech engine and
@@ -1905,7 +1905,7 @@ namespace Nemoviz_Book_Reader
             // While a timer is ACTIVE, the button (or Ctrl+T) acts as a
             // one-press "good night is over" switch: playback stops and
             // the timer is cancelled, with the usual announcement. No new
-            // dialog opens â€” to set another timer, press the (now idle)
+            // dialog opens — to set another timer, press the (now idle)
             // button again; starting it will resume playback anyway.
             // Pause first, cancel second: the cancel also restores a
             // possible fadeout volume, which must happen while inaudible.
@@ -1938,7 +1938,7 @@ namespace Nemoviz_Book_Reader
             sleepAction = action;
             sleepTimerActive = true;
             // For timers of 5 minutes or less, the -5 min series would fire
-            // immediately after closing the dialog â€” pointless noise, skip it.
+            // immediately after closing the dialog — pointless noise, skip it.
             sleepWarned5Min = minutes <= 5;
 
             UpdateSleepTimerButton(true);
@@ -1953,8 +1953,8 @@ namespace Nemoviz_Book_Reader
                 Localization.T("SleepTimer.Announce.Set", minutes));
         }
 
-        /// <summary>Pauses whatever is playing â€” mpv for an audio book, the speech
-        /// reader for a text one â€” WITHOUT the user-pause semantics: these are the
+        /// <summary>Pauses whatever is playing — mpv for an audio book, the speech
+        /// reader for a text one — WITHOUT the user-pause semantics: these are the
         /// sleep timer's own programmatic pauses, which must not cancel the timer
         /// (see the coupling rules in section 7 of the brief).</summary>
         private void PausePlaybackQuietly()
@@ -1983,8 +1983,8 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>
-        /// Stops the countdown, restores the button and â€” if the fadeout
-        /// had already started â€” brings the mpv volume back to the user's
+        /// Stops the countdown, restores the button and — if the fadeout
+        /// had already started — brings the mpv volume back to the user's
         /// set value. Announcing is optional: silent when the cancel is
         /// part of executing the expiry action or of the natural end of
         /// the book.
@@ -2003,8 +2003,8 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>
         /// Puts the mpv volume back to the user's set value (currentVolume).
-        /// The fadeout only ever touches mpv directly â€” currentVolume, the
-        /// Volume field and Book.ini never see the faded values â€” so this
+        /// The fadeout only ever touches mpv directly — currentVolume, the
+        /// Volume field and Book.ini never see the faded values — so this
         /// one call fully undoes it. Harmless when no fade was in progress.
         /// </summary>
         private void RestorePlaybackVolume()
@@ -2039,14 +2039,14 @@ namespace Nemoviz_Book_Reader
 
             // Final stretch: a smooth volume fadeout over the last
             // SleepFadeSeconds (45 s). Linear ramp from the user's set
-            // volume down to 0 at the deadline, applied straight to mpv â€”
+            // volume down to 0 at the deadline, applied straight to mpv —
             // currentVolume and the UI stay untouched, so the saved volume
             // and the Volume field never see the faded values. One step
             // per tick (1 s) is plenty smooth for a ~45-step ramp.
             // A text book fades the same way, through the speech engine. Speech
             // volume only takes effect on the NEXT sentence (changing it mid-
             // utterance would mean re-speaking the sentence), so there the fade
-            // steps down sentence by sentence rather than second by second â€”
+            // steps down sentence by sentence rather than second by second —
             // still a fade, just coarser, and the last minute of a book is
             // exactly where sentences are short.
             if (sec <= SleepFadeSeconds && isPlaying)
@@ -2064,7 +2064,7 @@ namespace Nemoviz_Book_Reader
         /// <summary>
         /// Refreshes the countdown on the timer button (text + spoken
         /// AccessibleName). While the button has FOCUS, per-tick updates are
-        /// skipped (force=false) â€” the same JAWS echo guard as the info box;
+        /// skipped (force=false) — the same JAWS echo guard as the info box;
         /// a changing control under the screen reader cursor causes chatter.
         /// One forced refresh happens on the button's Enter event, so the
         /// value announced on focus is current.
@@ -2093,7 +2093,7 @@ namespace Nemoviz_Book_Reader
         /// <summary>
         /// Compact countdown in minutes and seconds ("60:00", "29:59");
         /// the hour part appears only while more than 60 minutes remain
-        /// ("1:29:59" â†’ ... â†’ "1:00:01", "60:00", "59:59", ...).
+        /// ("1:29:59" → ... → "1:00:01", "60:00", "59:59", ...).
         /// </summary>
         private string FormatCountdown(TimeSpan t)
         {
@@ -2103,11 +2103,11 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>
-        /// Executes the chosen expiry action â€” on the deadline, or earlier
+        /// Executes the chosen expiry action — on the deadline, or earlier
         /// if the book ends by itself (see FinishCurrentBook). All three
         /// actions start the same way: pause playback (if anything is
         /// playing), then undo the fadeout and save progress. Pausing FIRST
-        /// matters â€” restoring the volume while still audible would end the
+        /// matters — restoring the volume while still audible would end the
         /// gentle fade with a full-volume blip.
         /// </summary>
         private void ExecuteSleepTimerAction()
@@ -2135,7 +2135,7 @@ namespace Nemoviz_Book_Reader
                 case SleepTimerAction.StopCloseShutdown:
                     // Shutdown with a few seconds of grace so NBR (and the
                     // system) can finish closing cleanly. No long safety
-                    // countdown by design â€” the user asked for this action.
+                    // countdown by design — the user asked for this action.
                     try
                     {
                         Process.Start("shutdown", "/s /t 5");
@@ -2143,7 +2143,7 @@ namespace Nemoviz_Book_Reader
                     catch
                     {
                         // If the shutdown command can't start (unlikely),
-                        // still close the app â€” playback is already stopped
+                        // still close the app — playback is already stopped
                         // and progress saved.
                     }
                     this.Close();
@@ -2151,10 +2151,10 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Info box
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        // Player book type â€” drives title bar, info box, seek steps and Go To.
+        // ──────────────────────────────────────────────
+        // Player book type — drives title bar, info box, seek steps and Go To.
         // M4B currently falls through to the audio branches (fallback = single-
         // file) until a dedicated chapter parser exists.
         private enum PlayerType { SingleAudio, MultiAudio, Daisy, M4b, FlatText, StructuredText }
@@ -2170,12 +2170,12 @@ namespace Nemoviz_Book_Reader
             // one with none falls through to single-file audio.
             if (currentBook.IsM4b && currentBook.M4bChapters.Count > 0)
                 return PlayerType.M4b;
-            // DAISY with no headings, or plain audio â†’ single vs multi by parts.
+            // DAISY with no headings, or plain audio → single vs multi by parts.
             return currentBook.Chapters.Count > 1 ? PlayerType.MultiAudio : PlayerType.SingleAudio;
         }
 
         // Short format name for the info box (MP3 Audio / Daisy Audio 3 / Apple
-        // Book M4B / EPUB / MS Word Docx â€¦).
+        // Book M4B / EPUB / MS Word Docx …).
         private string PlayerFormatLabel()
         {
             if (currentBook == null) return Localization.T("Common.Dash");
@@ -2187,9 +2187,9 @@ namespace Nemoviz_Book_Reader
             int comma = fmt.IndexOf(',');
             string head = (comma >= 0 ? fmt.Substring(0, comma) : fmt).Trim();
             // DAISY carries its version instead of an extension; give it the same
-            // "TAG â€” Official Name" shape as FriendlyFormatName produces.
+            // "TAG — Official Name" shape as FriendlyFormatName produces.
             if (currentBook.IsDaisy && head.StartsWith("Daisy", StringComparison.OrdinalIgnoreCase))
-                return "DAISY " + head.Substring(5).Trim() + " â€” Digital Accessible Information System";
+                return "DAISY " + head.Substring(5).Trim() + " — Digital Accessible Information System";
             return string.IsNullOrWhiteSpace(head) ? Localization.T("Common.Dash") : head;
         }
 
@@ -2364,7 +2364,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>
-        /// Builds the info text for the current playback moment â€” used by
+        /// Builds the info text for the current playback moment — used by
         /// the on-focus snapshot and the I key. Returns the placeholder
         /// when nothing is loaded.
         /// </summary>
@@ -2423,8 +2423,8 @@ namespace Nemoviz_Book_Reader
             // "Speech engine" until the engine stopped being a thing the reader
             // chooses; the value was always the voice.
             //
-            // With no voice this is the line that would lie hardest â€” it would name
-            // whatever spoke last â€” so it carries the reason instead. The dialog
+            // With no voice this is the line that would lie hardest — it would name
+            // whatever spoke last — so it carries the reason instead. The dialog
             // is the moment; this is the STATE, and it stays for as long as the
             // book is loaded, for anyone who dismissed the dialog or never heard
             // it announced.
@@ -2444,7 +2444,7 @@ namespace Nemoviz_Book_Reader
             double elapsed = TextSeconds(at);
             double totalSec = TextSeconds(total);
 
-            // Elapsed/remaining carry no "â‰" â€” the approximation mark is reserved
+            // Elapsed/remaining carry no "≈" — the approximation mark is reserved
             // for the total-time figure (shown only in the Library info box).
             sb.Append(Localization.T("Player.Info.ElapsedLabel")).Append(' ')
               .Append(FormatTime(elapsed)).Append("  ").Append(TextPercentString()).Append('%').Append(nl);
@@ -2493,9 +2493,9 @@ namespace Nemoviz_Book_Reader
             return 0;
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Title bar
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void UpdateTitleBar()
         {
             string appName = Localization.T("App.Name");
@@ -2505,22 +2505,22 @@ namespace Nemoviz_Book_Reader
                 if (currentFile != null)
                 {
                     string st = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
-                    this.Text = appName + " â€” " + System.IO.Path.GetFileNameWithoutExtension(currentFile) + st;
+                    this.Text = appName + " — " + System.IO.Path.GetFileNameWithoutExtension(currentFile) + st;
                 }
                 else this.Text = appName;
                 return;
             }
 
             string stateText = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
-            const string sep = " â€” ";
+            const string sep = " — ";
             PlayerType type = GetPlayerType();
             string title = currentBook.Title;
             string body;
 
             if (type == PlayerType.FlatText || type == PlayerType.StructuredText)
             {
-                // Text: per TTS speed. Structured â†’ Title / Chapter / Page (or
-                // -remaining if no pages); flat â†’ Title / X.Y% / -remaining.
+                // Text: per TTS speed. Structured → Title / Chapter / Page (or
+                // -remaining if no pages); flat → Title / X.Y% / -remaining.
                 double elapsed = tts != null ? TextSeconds(tts.CharPosition) : 0;
                 double total = tts != null ? TextSeconds(tts.TotalChars) : 0;
                 string remaining = "-" + FormatTime(total - elapsed);
@@ -2542,9 +2542,9 @@ namespace Nemoviz_Book_Reader
                 else
                 {
                     // Flat text. With real print pages (a paged PDF/EPUB that has
-                    // no chapters) the page is the natural locator â†’
-                    // "Title â€” Page: N â€” X.Y%"; a plain .txt (no pages) keeps
-                    // "Title â€” X.Y% â€” -remaining".
+                    // no chapters) the page is the natural locator →
+                    // "Title — Page: N — X.Y%"; a plain .txt (no pages) keeps
+                    // "Title — X.Y% — -remaining".
                     string pct = (tts != null && tts.TotalChars > 0) ? TextPercentString() : "0.0";
                     if (currentBook.TextPages.Count > 0)
                     {
@@ -2602,18 +2602,18 @@ namespace Nemoviz_Book_Reader
                 }
             }
 
-            this.Text = appName + " â€” " + body + stateText;
+            this.Text = appName + " — " + body + stateText;
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Saving progress
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void SaveCurrentBookProgress()
         {
             if (currentBook == null) return;
             try
             {
-                // Text book â†’ remember the character offset and percentage.
+                // Text book → remember the character offset and percentage.
                 if (currentBook.IsTextBook)
                 {
                     if (tts != null)
@@ -2649,14 +2649,14 @@ namespace Nemoviz_Book_Reader
                 currentBook.Volume = currentVolume;
                 currentBook.Speed = currentSpeed;
                 // Persist the step *kind* (and heading depth), not the row
-                // index â€” the row layout varies per book (Part vs Heading/Page/
+                // index — the row layout varies per book (Part vs Heading/Page/
                 // Bookmark come and go).
                 currentBook.SeekStep = EncodeSeekStep(CurrentSeekStep());
                 currentBook.Save();
             }
             catch (Exception)
             {
-                // Silently ignore â€” e.g. if the book's folder was deleted while
+                // Silently ignore — e.g. if the book's folder was deleted while
                 // it was active (Form1's background timers keep running while
                 // the modal Library window is open).
             }
@@ -2664,10 +2664,10 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>
         /// Called when a book plays to its natural end: marks it as finished
-        /// (100%, position reset â€” the "Read" shelf group), unloads it from
+        /// (100%, position reset — the "Read" shelf group), unloads it from
         /// the player (so it's no longer "active" and can be deleted), and
-        /// opens the Library so the next step â€” pick another book, delete
-        /// the finished one â€” is right at hand.
+        /// opens the Library so the next step — pick another book, delete
+        /// the finished one — is right at hand.
         /// With an active sleep timer, the natural end counts as the end of
         /// the listening session and triggers the chosen action early.
         /// </summary>
@@ -2684,10 +2684,10 @@ namespace Nemoviz_Book_Reader
             }
             catch (Exception)
             {
-                // Silently ignore â€” folder may have been deleted meanwhile.
+                // Silently ignore — folder may have been deleted meanwhile.
             }
 
-            // Unload â€” the player returns to its empty state. With
+            // Unload — the player returns to its empty state. With
             // currentBook == null, no later SaveCurrentBookProgress can
             // overwrite the saved 100% with a stale position.
             currentBook = null;
@@ -2704,14 +2704,14 @@ namespace Nemoviz_Book_Reader
                 if (sleepAction == SleepTimerAction.Stop)
                 {
                     // The "stop playback" part has already happened
-                    // naturally â€” quietly drop the timer and continue with
+                    // naturally — quietly drop the timer and continue with
                     // the normal finish flow (library opens below).
                     CancelSleepTimer(false);
                 }
                 else
                 {
                     // Close/shutdown: execute right away. The library is
-                    // deliberately NOT opened first â€” no point in a modal
+                    // deliberately NOT opened first — no point in a modal
                     // window for an app that's about to close (and Close()
                     // under a fresh modal dialog would be fragile anyway).
                     // BeginInvoke: let the MPV event loop finish this tick
@@ -2729,7 +2729,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>
-        /// Unloads the active book without touching its saved progress â€” used
+        /// Unloads the active book without touching its saved progress — used
         /// when the user marks the currently-playing book as read from the
         /// Library (which already persisted it at 100%). Stops playback and
         /// returns the player to its empty state.
@@ -2739,7 +2739,7 @@ namespace Nemoviz_Book_Reader
             SetPlayPauseState(false);
             if (tts != null) tts.Stop();
             // "stop" unloads the current file and clears the playlist, so mpv
-            // releases its handle on the audio â€” otherwise the folder can't be
+            // releases its handle on the audio — otherwise the folder can't be
             // deleted while it's still open (the reason a marked-read active book
             // couldn't be deleted until another book was loaded).
             MpvCommand("stop");
@@ -2753,20 +2753,20 @@ namespace Nemoviz_Book_Reader
             UpdateTitleBar();
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Buttons
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void SetPlayPauseState(bool playing)
         {
             isPlaying = playing;
-            btnPlayPause.Text = playing ? "âŹ¸" : "â–¶";
+            btnPlayPause.Text = playing ? "⏸" : "▶";
             btnPlayPause.AccessibleName = playing ? Localization.T("Btn.Pause.Accessible") : Localization.T("Btn.Play.Accessible");
             UpdateTitleBar();
         }
 
         private void BtnPlayPause_Click(object sender, EventArgs e)
         {
-            // Text book â†’ drive the TTS reader instead of mpv.
+            // Text book → drive the TTS reader instead of mpv.
             if (currentBook != null && currentBook.IsTextBook)
             {
                 if (isPlaying)
@@ -2781,7 +2781,7 @@ namespace Nemoviz_Book_Reader
                     // spoke last, which is the very thing this is here to prevent.
                     // Pressing Play on a book you were told cannot be read is a
                     // change of mind, so it gets the question again rather than
-                    // the same refusal â€” and only the announcement if the dialog
+                    // the same refusal — and only the announcement if the dialog
                     // itself could not be put.
                     if (textNoVoice && !AskForVoice()) { AnnounceNoVoice(); return; }
                     tts.Play();
@@ -2801,7 +2801,7 @@ namespace Nemoviz_Book_Reader
                 mpv_set_property_string(mpvHandle, "pause", "yes");
                 SetPlayPauseState(false);
 
-                // A MANUAL pause ends the listening session â€” an active
+                // A MANUAL pause ends the listening session — an active
                 // sleep timer is cancelled, with an announcement. This is
                 // the only place the cancel hook lives: every user-initiated
                 // pause (Space, X, on-screen button, media keys) routes
@@ -2821,7 +2821,7 @@ namespace Nemoviz_Book_Reader
         }
 
         // On-screen Back/Forward buttons are the mouse/visual-mode
-        // equivalent of Shift+Left/Shift+Right and the media keys â€” all of
+        // equivalent of Shift+Left/Shift+Right and the media keys — all of
         // them are navigation level 3 and follow the step selected in the
         // seek dropdown.
         private void BtnBack_Click(object sender, EventArgs e)
@@ -2878,7 +2878,7 @@ namespace Nemoviz_Book_Reader
         /// earlier). Both preserve the current play/pause state, same as
         /// any other virtual-position seek.
         /// </summary>
-        // â”€â”€ Positions in the book's own unit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Positions in the book's own unit ──────────────────────────────
         // An audio book is measured in seconds on the virtual timeline, a text
         // book in characters. Bookmarks are stored in whichever unit the book
         // uses, so these three keep the bookmark code identical for both.
@@ -2907,8 +2907,8 @@ namespace Nemoviz_Book_Reader
         /// <summary>How a bookmark's position reads in the Manage Bookmarks list.
         /// An audio book shows the clock time it sits at. A text book's position is
         /// a character offset, which tells the user nothing, so it shows how far
-        /// into the book it is â€” and then **the words it sits on**, which is what
-        /// actually identifies the place ("41,7 %, Tada je Perica shvatio daâ€¦").</summary>
+        /// into the book it is — and then **the words it sits on**, which is what
+        /// actually identifies the place ("41,7 %, Tada je Perica shvatio da…").</summary>
         private string FormatBookmarkPosition(double position)
         {
             if (currentBook != null && currentBook.IsTextBook)
@@ -2990,7 +2990,7 @@ namespace Nemoviz_Book_Reader
             {
                 // Declining a book with no voice for its language puts you back on
                 // the SHELF, not into the player: nothing was loaded, so there is
-                // nothing to be left looking at. Hence the loop â€” the Library
+                // nothing to be left looking at. Hence the loop — the Library
                 // reopens and you pick something else. Asking here rather than
                 // letting LoadBook do it costs nothing: a voice chosen is written
                 // to the book, so LoadBook's own check then passes silently and
@@ -3024,7 +3024,7 @@ namespace Nemoviz_Book_Reader
         /// <summary>Walks focus into the playback info box and back out again.
         ///
         /// <para>The box is parked below the client area and kept out of the tab
-        /// order (§8k), so there is no other way in — and no way out either,
+        /// order (�8k), so there is no other way in � and no way out either,
         /// which is why this remembers where focus came from rather than just
         /// focusing something sensible. It also refreshes the text first: the
         /// box is a snapshot, and arriving at a stale one is worse than not
@@ -3033,9 +3033,19 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Opens or closes the on-screen reading view (F9).
         ///
-        /// <para>It is a toggle rather than two commands because it is one place
-        /// you are either in or not, and because a reader who opened it by
-        /// accident needs the same key to get back — Escape works too, but only
+        /// <para><b>The book's own setting is what decides whether the view
+        /// appears</b>, at load. This key is the way BACK, not the way in: Escape
+        /// closes the window by convention, and without F9 that would be a dead
+        /// end reachable only through Properties (Gordan, 2026-08-01).</para>
+        ///
+        /// <para><b>It deliberately does NOT change the setting.</b> Opening the
+        /// view by hand on a book with visual output off is a look, not a
+        /// decision - the same rule 10c applies to borrowing a voice in
+        /// NoVoiceForm: for this book, this time, and making it a rule is
+        /// Settings' job and should take some effort.</para>
+        ///
+        /// <para>A toggle rather than two commands because it is one place you
+        /// are either in or not � Escape works too, but only
         /// once focus is inside it.</para>
         ///
         /// <para>The window BORROWS <see cref="tbReadingSurface"/> and returns it
@@ -3061,9 +3071,9 @@ namespace Nemoviz_Book_Reader
             readingWindow.FormClosed += (s, e) =>
             {
                 readingWindow = null;
-                // Back on the player it is parked, not shown: §8l wants it out of
+                // Back on the player it is parked, not shown: �8l wants it out of
                 // the way of the eye but still in the accessibility tree, which is
-                // what the off-client-area trick gives (§8k).
+                // what the off-client-area trick gives (�8k).
                 if (tbReadingSurface != null)
                     tbReadingSurface.SetBounds(12, ClientSize.Height + 4, ClientSize.Width - 24, 44);
                 Activate();
@@ -3073,7 +3083,7 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>The distinct characters of the book, for filtering the font
         /// list. Measured on the real text rather than derived from the language,
-        /// because a Croatian book can quote Greek (§8l).</summary>
+        /// because a Croatian book can quote Greek (�8l).</summary>
         private char[] DistinctBookChars()
         {
             var set = new System.Collections.Generic.HashSet<char>();
@@ -3132,7 +3142,7 @@ namespace Nemoviz_Book_Reader
             if (tts != null && currentBook != null && currentBook.IsTextBook)
                 tts.Dictionaries = SpeechDictionaries.Active(tts.CurrentVoice, currentBook.TextLanguage);
             // A book that has chosen its own voice in Properties is NEVER touched by
-            // a Settings change â€” that is the whole point of the per-book setting.
+            // a Settings change — that is the whole point of the per-book setting.
             // A book that has not is simply reading with the default, so when the
             // default changes it follows, voice and all: its speed/volume/pitch
             // come from what that voice was last read with here (ApplyTtsSettings),
@@ -3167,7 +3177,7 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Hears a volume / speed edit from the Properties dialog straight
         /// away, the same way the processing stages preview. Only playback is
-        /// touched â€” the player's own fields are settled when the dialog closes, so
+        /// touched — the player's own fields are settled when the dialog closes, so
         /// Cancel simply restores what the book had.</summary>
         private void PreviewPlayback(int volume, int speedPercent)
         {
@@ -3179,8 +3189,8 @@ namespace Nemoviz_Book_Reader
                     .ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
-        /// <summary>Switch libmpv's output device live (empty â†’ "auto", the
-        /// system default). Used for the Settings â†’ Device live preview and to
+        /// <summary>Switch libmpv's output device live (empty → "auto", the
+        /// system default). Used for the Settings → Device live preview and to
         /// re-apply the persisted choice when the dialog closes.</summary>
         private void SetAudioDeviceLive(string device)
         {
@@ -3210,12 +3220,12 @@ namespace Nemoviz_Book_Reader
                 return;
             }
             // Volume and speed live in the player's own fields until progress is
-            // saved, so hand the CURRENT values to the dialog â€” otherwise it would
+            // saved, so hand the CURRENT values to the dialog — otherwise it would
             // show the last-saved ones and look stale.
             currentBook.Volume = currentVolume;
             currentBook.Speed = currentSpeed;
             // The speech settings live in the player's own fields until progress is
-            // saved, so file the LIVE ones under the voice in use â€” that is what the
+            // saved, so file the LIVE ones under the voice in use — that is what the
             // dialog will show for it.
             if (currentBook.IsTextBook) RememberCurrentVoicePrefs();
 
@@ -3229,7 +3239,7 @@ namespace Nemoviz_Book_Reader
             if (currentBook == null) return;
 
             // Settle on the persisted state (OK saved the new values; Cancel
-            // kept the old ones) â€” either way re-apply the book's settings.
+            // kept the old ones) — either way re-apply the book's settings.
             ApplySoundProcessing(currentBook.Sound, false);
 
             // The dialog may have changed volume / speed / the reading voice; take
@@ -3268,7 +3278,7 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
-            // Text book â†’ navigate by headings (structured) or a low beep (flat,
+            // Text book → navigate by headings (structured) or a low beep (flat,
             // nothing to jump to).
             if (currentBook.IsTextBook)
             {
@@ -3278,7 +3288,7 @@ namespace Nemoviz_Book_Reader
             }
 
             // Single-file audio (and the M4B single-file fallback) have no parts
-            // or chapters to list â€” Go To is inactive (low beep).
+            // or chapters to list — Go To is inactive (low beep).
             if (GetPlayerType() == PlayerType.SingleAudio)
             {
                 tones.Play(300, 150);
@@ -3287,7 +3297,7 @@ namespace Nemoviz_Book_Reader
 
             if (currentBook.Chapters.Count == 0)
             {
-                // No playable content â€” a short low beep as audible feedback.
+                // No playable content — a short low beep as audible feedback.
                 tones.Play(300, 150);
                 return;
             }
@@ -3337,7 +3347,7 @@ namespace Nemoviz_Book_Reader
             }
 
             // Both DAISY headings and plain-audio parts list as bare names now
-            // (no "N/M â€”" prefix â€” the name/file already self-numbers).
+            // (no "N/M —" prefix — the name/file already self-numbers).
             using (GoToForm dlg = new GoToForm(names, preselect, appSettings.GoToAutoPlay, true))
             {
                 if (dlg.ShowDialog(this) == DialogResult.OK &&
@@ -3371,17 +3381,17 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
-            // Stored in the book's own unit â€” seconds for audio, the character
+            // Stored in the book's own unit — seconds for audio, the character
             // offset for a text book, which is what its position is.
             currentBook.AddBookmark(BookPosition());
             RebuildSeekSteps();
 
-            // Ascending series of five short beeps (~1 second total) â€” a
+            // Ascending series of five short beeps (~1 second total) — a
             // bit more attention-grabbing than the plain "no go" beep, since
             // this confirms a successful action rather than a blocked one.
             tones.Play(new[] { (500, 200), (650, 200), (800, 200), (950, 200), (1100, 200) });
 
-            // Deliberately no position/percent details here â€” TMI for a
+            // Deliberately no position/percent details here — TMI for a
             // one-key command; the Manage Bookmarks list is where that
             // detail belongs.
             AnnounceToScreenReader(lblAnnounceInfo, Localization.T("Bookmark.Announce.Set"));
@@ -3396,7 +3406,7 @@ namespace Nemoviz_Book_Reader
             }
 
             // Opening the dialog pauses playback (if running), same coupling
-            // as the Sleep Timer dialog â€” a programmatic pause, so it does not
+            // as the Sleep Timer dialog — a programmatic pause, so it does not
             // touch an active Sleep Timer. Works for both engines.
             bool wasPlaying = isPlaying;
             if (wasPlaying) PausePlaybackQuietly();
@@ -3426,12 +3436,12 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Loading a book (from the library or at startup)
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
+        // ──────────────────────────────────────────────
         // Text books (TTS)
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private void EnsureTts()
         {
             if (tts != null) return;
@@ -3449,7 +3459,7 @@ namespace Nemoviz_Book_Reader
                 if (IsDisposed) return;
                 try { BeginInvoke((Action)(() => { SetPlayPauseState(false); FinishCurrentBook(); })); } catch { }
             };
-            // Start on the output device chosen in Settings â†’ Device.
+            // Start on the output device chosen in Settings → Device.
             tts.SetAudioDevice(appSettings.AudioDevice);
         }
 
@@ -3483,6 +3493,13 @@ namespace Nemoviz_Book_Reader
             ApplyTtsSettings();
             tts.SeekToChar(currentBook.TextPosition);
 
+            // The book's own setting decides whether the reading view appears �
+            // F9 is the way BACK after Escape, not the way in (Gordan). Deferred
+            // a tick so the player has finished coming up before a second window
+            // takes the foreground.
+            if (currentBook.TextVisual && readingWindow == null)
+                BeginInvoke((Action)(() => { if (currentBook != null && currentBook.TextVisual) ToggleReadingWindow(); }));
+
             // Cache the character count for the reading-time estimate.
             currentBook.TextChars = tts.TotalChars;
 
@@ -3498,7 +3515,7 @@ namespace Nemoviz_Book_Reader
 
             if (textNoVoice)
             {
-                // Only reachable when a book that WAS readable stops being so â€”
+                // Only reachable when a book that WAS readable stops being so —
                 // the language was worked out just now, or a voice was uninstalled
                 // mid-session. NOT the book you are now reading: it stays unread
                 // in the Library and NBR does not resume it on the next start.
@@ -3512,7 +3529,7 @@ namespace Nemoviz_Book_Reader
             {
                 SetPlayPauseState(true);
                 // Defer the first Play one tick so any pending SAPI cancel from
-                // loading has settled â€” otherwise it swallows this utterance and
+                // loading has settled — otherwise it swallows this utterance and
                 // playback silently doesn't start (needed two Spaces to begin).
                 BeginInvoke((Action)(() =>
                 {
@@ -3537,7 +3554,7 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>How a voice should sound here: what this book was last read
         /// with using that voice, else how the voice is set up in Settings, else
-        /// the neutral default â€” never the settings of the voice used before it.</summary>
+        /// the neutral default — never the settings of the voice used before it.</summary>
         private VoicePrefs ResolveVoicePrefs(string voice)
         {
             VoicePrefs global = appSettings.PrefsFor(voice);
@@ -3572,7 +3589,7 @@ namespace Nemoviz_Book_Reader
             try { voices = tts.GetVoiceInfos(); }
             catch { return settingsVoice; }
 
-            // The whole rule lives in VoiceChooser, which Properties asks too â€”
+            // The whole rule lives in VoiceChooser, which Properties asks too —
             // this used to be a second copy of it, and the two had already begun
             // to differ. This is also where detection finally pays off: the
             // language worked out at import picks the voice the user chose for it
@@ -3592,23 +3609,23 @@ namespace Nemoviz_Book_Reader
         /// chooses, which they do in its Properties.</summary>
         private bool textNoVoice;
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        // The reading surface â€” an EXPERIMENT, not a feature yet (2026-07-29)
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
+        // The reading surface — an EXPERIMENT, not a feature yet (2026-07-29)
+        // ──────────────────────────────────────────────
         // The question it exists to answer: if the sentence being read sits in a
         // real, focusable, read-only control, does the SCREEN READER put it on the
         // braille display by its own ordinary tracking? If it does, braille output
         // costs no drivers and works with every display the reader supports, and
         // the visual and braille outputs turn out to be one feature rather than
-        // two. See CLAUDE.md Â§8l for the whole model and for what has to be proved.
+        // two. See CLAUDE.md §8l for the whole model and for what has to be proved.
         //
         // How to run it: open a text book, Tab to the end of the player, open
-        // NVDA's Braille Viewer (NVDA menu â†’ Tools) and press Play. Watch for the
-        // sentence appearing there and changing as it reads â€” and listen for
+        // NVDA's Braille Viewer (NVDA menu → Tools) and press Play. Watch for the
+        // sentence appearing there and changing as it reads — and listen for
         // whether Space and the arrows still work while this control has focus.
         //
         // It is ON SCREEN, and that was not the first attempt. It was parked below
-        // the client area to begin with, the way the announce labels are â€” but
+        // the client area to begin with, the way the announce labels are — but
         // those are read through the SPEECH channel, where being off screen costs
         // nothing. Braille goes through the reader's screen model, and a reader
         // may treat an object outside the visible area as not being there: the
@@ -3634,20 +3651,20 @@ namespace Nemoviz_Book_Reader
             tbReadingSurface.AccessibleName = Localization.T("Player.ReadingSurface.Accessible");
             // A focused multiline TextBox selects everything, which a reader
             // announces as a selection and braille shows as a solid block. The
-            // caret goes to the start instead â€” the lesson the info glass taught.
+            // caret goes to the start instead — the lesson the info glass taught.
             // The selection IS the reading position now, so it must not be thrown
             // away on focus and must stay visible when focus is elsewhere.
             tbReadingSurface.HideSelection = false;
             tbReadingSurface.ScrollBars = ScrollBars.Vertical;
-            // The arrows are GLOBAL in this player â€” up/down volume, left/right
-            // seek â€” and an edit control claims them for the caret. Gordan's
+            // The arrows are GLOBAL in this player — up/down volume, left/right
+            // seek — and an edit control claims them for the caret. Gordan's
             // report: left and right stopped navigating and the reader read out
             // gibberish instead, which is the caret crawling a character at a
             // time. Same rule the volume and speed fields already live by, and
             // the same reason the seek combo is keyboard-inert: nothing on this
             // window may swallow an arrow.
             //
-            // Harmless where ProcessCmdKey already wins â€” it runs first, and when
+            // Harmless where ProcessCmdKey already wins — it runs first, and when
             // it consumes the key this handler is never reached at all.
             tbReadingSurface.KeyDown += (s, e) =>
             {
@@ -3665,7 +3682,7 @@ namespace Nemoviz_Book_Reader
             tbReadingSurface.BringToFront();   // the skin's canvas is added last
 
             // Watches for a caret WE did not move. A routing key on a braille
-            // display â€” or the viewer's "route to cell by hovering" â€” moves the
+            // display — or the viewer's "route to cell by hovering" — moves the
             // caret through the screen reader, so no mouse or key event ever
             // reaches us; polling is the only way to see it. This is how the
             // third open question gets answered without a display: if the caret
@@ -3711,7 +3728,7 @@ namespace Nemoviz_Book_Reader
         private int lastSurfaceStart = -1;
 
         /// <summary>Moves the selection onto the sentence being read.
-        /// <para><b>Rewriting Text does not reach braille â€” measured.</b> In 35
+        /// <para><b>Rewriting Text does not reach braille — measured.</b> In 35
         /// seconds the surface went through some twenty sentences while the
         /// display sat on the one that was current when focus arrived, and never
         /// moved. So the text is now written once and only the SELECTION travels:
@@ -3731,7 +3748,7 @@ namespace Nemoviz_Book_Reader
             // The CARET moves, nothing is selected. Selecting the sentence did
             // carry braille perfectly, but a screen reader treats a selection as
             // news: Gordan heard it reading the marked text out, announcing
-            // "selected" and "not selected", and repeating pieces â€” over our own
+            // "selected" and "not selected", and repeating pieces — over our own
             // speech. Braille shows the line around the caret either way, so the
             // output is unchanged and the commentary has nothing to report.
             tbReadingSurface.Select(start, 0);
@@ -3744,7 +3761,7 @@ namespace Nemoviz_Book_Reader
             SurfaceLog("SENT  " + s);
             // NOT Select(0, 0) here, deliberately. Putting the caret back on nought
             // after every sentence is a caret MOVE as far as the reader is
-            // concerned, and it answers by speaking the character underneath â€”
+            // concerned, and it answers by speaking the character underneath —
             // which is the first letter of the new sentence, and always a capital.
             // Gordan heard it as "random capital letters" over the reading.
             //
@@ -3755,7 +3772,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Says that this book cannot be read and what to do about it.
-        /// The fallback for when the dialog is not the right answer â€” the reader
+        /// The fallback for when the dialog is not the right answer — the reader
         /// has already declined once and is only being reminded.</summary>
         private void AnnounceNoVoice()
         {
@@ -3767,11 +3784,11 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Whether this book can be read, asking about it if it cannot.
-        /// Returns false only when the reader declined â€” and then nothing has been
+        /// Returns false only when the reader declined — and then nothing has been
         /// touched, so the caller must simply not load it.
         /// <para>Answered without loading anything: the language comes off the
         /// shelf with the book. A book imported before languages were detected has
-        /// none recorded yet, so it is let through and worked out during the load â€”
+        /// none recorded yet, so it is let through and worked out during the load —
         /// once, since the load then saves it.</para></summary>
         private bool EnsureVoiceForBook(BookData book)
         {
@@ -3803,11 +3820,11 @@ namespace Nemoviz_Book_Reader
             return true;
         }
 
-        /// <summary>Puts the question for the book ALREADY loaded â€” the safety net
+        /// <summary>Puts the question for the book ALREADY loaded — the safety net
         /// for a voice that goes away mid-session, and for pressing Play on a book
         /// that cannot be read. Returns true when a voice was chosen.</summary>
         /// <para>A dialog rather than an announcement, because this is not news to
-        /// be caught in passing â€” it is a state that has to be acknowledged, and
+        /// be caught in passing — it is a state that has to be acknowledged, and
         /// one a reader who cannot hear the announcement would otherwise never
         /// learn about at all (Gordan, 2026-07-29: universal design).</para></summary>
         private bool AskForVoice()
@@ -3832,7 +3849,7 @@ namespace Nemoviz_Book_Reader
             UpdateTitleBar();
             if (textNoVoice) return false;
 
-            // It can be read now, so it becomes the book you are reading â€”
+            // It can be read now, so it becomes the book you are reading —
             // the step the load skipped when it could not be read. Both routes
             // into here need it, which is why it lives here and not at either
             // call site.
@@ -3844,8 +3861,8 @@ namespace Nemoviz_Book_Reader
         {
             if (tts == null) return;
             // A book can carry its own voice (its Properties); where it doesn't, the
-            // Settings default applies â€” unless the book is in a language that
-            // default doesn't speak. The speed/volume/pitch then follow THAT voice â€”
+            // Settings default applies — unless the book is in a language that
+            // default doesn't speak. The speed/volume/pitch then follow THAT voice —
             // remembered per voice, so a change of voice or engine never drags the
             // previous one's numbers along.
             string voice;
@@ -3875,11 +3892,11 @@ namespace Nemoviz_Book_Reader
 
             tts.SetVoice(voice);
             // Whatever the user has put in their own dictionary for this voice and
-            // this language â€” nothing at all unless they wrote it themselves.
+            // this language — nothing at all unless they wrote it themselves.
             tts.Dictionaries = SpeechDictionaries.Active(
                 !string.IsNullOrEmpty(tts.CurrentVoice) ? tts.CurrentVoice : voice,
                 currentBook != null ? currentBook.TextLanguage : "");
-            tts.SetPitch(currentTextPitch * 5); // -10..10 â†’ -50..50 %
+            tts.SetPitch(currentTextPitch * 5); // -10..10 → -50..50 %
             tts.SetVolume(currentVolume);
             tts.SetRate(TtsReader.WpmToRate(currentWpm));
 
@@ -3929,7 +3946,7 @@ namespace Nemoviz_Book_Reader
         }
 
         // Estimated reading time (seconds) for a character offset at the current
-        // reading speed (nominal words-per-minute â†’ characters per minute).
+        // reading speed (nominal words-per-minute → characters per minute).
         private double TextSeconds(int chars)
         {
             int cpm = TtsReader.CharsPerMinute(currentWpm);
@@ -3963,7 +3980,7 @@ namespace Nemoviz_Book_Reader
             // nobody could read sitting in the player.
             if (!EnsureVoiceForBook(book)) return;
 
-            // Changing the book ends the previous listening session â€” an
+            // Changing the book ends the previous listening session — an
             // active sleep timer is cancelled, with the same announcement
             // as a manual pause. (At startup no timer can be active, so
             // this only ever fires on a library pick.)
@@ -3978,7 +3995,7 @@ namespace Nemoviz_Book_Reader
             // Restore the book's saved seek step by kind (and heading depth).
             // A never-chosen book (SeekStep < 0) or one whose saved step no
             // longer exists (e.g. Bookmark, but the book now has none) falls
-            // back to the first â€” and largest â€” step (H1 / Part).
+            // back to the first — and largest — step (H1 / Part).
             int savedIdx = -1;
             if (currentBook.SeekStep >= 0)
             {
@@ -4006,7 +4023,7 @@ namespace Nemoviz_Book_Reader
             mpv_set_property_string(mpvHandle, "speed",
                 speed.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
-            // Text book â†’ read it with TTS instead of building an mpv playlist.
+            // Text book → read it with TTS instead of building an mpv playlist.
             if (currentBook.IsTextBook)
             {
                 LoadTextBookPlayback(autoPlay);
@@ -4019,7 +4036,7 @@ namespace Nemoviz_Book_Reader
             // Play in the book's chapter order, not a fresh alphabetical sort:
             // for plain audiobooks the two match, but DAISY audio is ordered by
             // its navigation (BuildChaptersFromDaisy), which is not always the
-            // filename order â€” and playback must match the virtual timeline the
+            // filename order — and playback must match the virtual timeline the
             // headings/pages are positioned against.
             if (currentBook.Chapters.Count > 0)
             {
@@ -4051,7 +4068,7 @@ namespace Nemoviz_Book_Reader
 
             currentPlaylistIndex = 0;
             isLoadingBook = true;
-            // Always start paused â€” prevents an audible "plays then jumps"
+            // Always start paused — prevents an audible "plays then jumps"
             // while we look for the remembered position.
             LoadPlaylist(playlist.ToArray(), false);
             // Apply this book's saved sound processing (no-op when it's off).
@@ -4090,9 +4107,9 @@ namespace Nemoviz_Book_Reader
             UpdateTitleBar();
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // Loading a playlist
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private string BuildFileFilter()
         {
             return
@@ -4137,7 +4154,7 @@ namespace Nemoviz_Book_Reader
         /// <summary>Ctrl+O given an archive: extracting it in place and
         /// trying to "play" it makes no sense, so instead it gets extracted
         /// straight into its own permanent library folder (named from the
-        /// archive's file name â€” no temp staging) and loaded like any other
+        /// archive's file name — no temp staging) and loaded like any other
         /// book. The source archive is left untouched, since it was picked
         /// from an arbitrary external location via the file dialog.
         /// LoadBook already cancels an active Sleep Timer, same as any other
@@ -4204,7 +4221,7 @@ namespace Nemoviz_Book_Reader
             }
             catch (OperationCanceledException)
             {
-                // User cancelled the archive password prompt â€” undo the empty
+                // User cancelled the archive password prompt — undo the empty
                 // folder, no error dialog.
                 if (createdFolder) TryDeleteFolder(destFolder);
             }
@@ -4243,9 +4260,9 @@ namespace Nemoviz_Book_Reader
             progressTimer.Start();
         }
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         // MPV helpers
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ──────────────────────────────────────────────
         private static IntPtr StringToUtf8(string s)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(s + "\0");
@@ -4300,11 +4317,11 @@ namespace Nemoviz_Book_Reader
                 // Audio-only player: never open a video window. "audio-display"
                 // suppresses attached-picture cover art (MP3/FLAC), but an M4B/MP4
                 // cover is a real video track, so also disable video-track
-                // selection outright â€” otherwise mpv pops a window showing the
+                // selection outright — otherwise mpv pops a window showing the
                 // cover image.
                 mpv_set_property_string(mpvHandle, "audio-display", "no");
                 mpv_set_property_string(mpvHandle, "vid", "no");
-                // Output device chosen in Settings â†’ Device (empty = mpv "auto").
+                // Output device chosen in Settings → Device (empty = mpv "auto").
                 if (appSettings != null && !string.IsNullOrEmpty(appSettings.AudioDevice))
                     mpv_set_property_string(mpvHandle, "audio-device", appSettings.AudioDevice);
             }
