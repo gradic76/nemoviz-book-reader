@@ -3800,8 +3800,50 @@ namespace Nemoviz_Book_Reader
 
         private int lastCaretSet = -1;
 
+        /// <summary>Speaks a sentence for the TEMPORARY test aid, from the window
+        /// that actually has the user's attention.
+        ///
+        /// <para><b>Why this is not just AnnounceToScreenReader.</b> That one
+        /// caches a UIA provider taken from the PLAYER's handle, which is right
+        /// for what it was built for — volume and speed announced while the
+        /// player is in front. During a reading test the front window is the
+        /// reading window, a different top level, and a notification raised on a
+        /// window that is not the focused one is not announced. That, and not the
+        /// selection, is why the first two attempts at this aid were silent.</para>
+        ///
+        /// <para>No caching: the target changes as the reading window opens and
+        /// closes, and a cached provider for the wrong window is exactly the bug
+        /// being fixed. A fresh provider per sentence is more work than the
+        /// shipping path would accept, which is one more reason this is an
+        /// aid.</para></summary>
+        private void DiagnosticAnnounce(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            NvdaController.Speak(text);          // NVDA; silent under JAWS
+            if (uiaNotifyUnavailable) return;
+            try
+            {
+                IntPtr hwnd = readingWindow != null && !readingWindow.IsDisposed
+                              ? readingWindow.Handle : this.Handle;
+                IRawElementProviderSimple provider;
+                if (UiaHostProviderFromHwnd(hwnd, out provider) != 0 || provider == null) return;
+                UiaRaiseNotificationEvent(provider, NotificationKind.Other,
+                                          NotificationProcessing.MostRecent, text, string.Empty);
+            }
+            catch { uiaNotifyUnavailable = true; }
+        }
+
+        /// <summary>Left over from the braille-lag measurement, and now behind the
+        /// diagnostics switch.
+        ///
+        /// <para>It appends to a file on disk, synchronously, on the UI thread,
+        /// once per sentence — for every reader, forever, whether anyone was
+        /// measuring or not. Gordan heard the speech start to chop. Scaffolding
+        /// from a finished experiment should not be doing I/O in everybody's
+        /// playback.</para></summary>
         private void SurfaceLog(string line)
         {
+            if (!ReadingDiagnostics.Highlight) return;
             try
             {
                 System.IO.File.AppendAllText(
@@ -3933,7 +3975,7 @@ namespace Nemoviz_Book_Reader
             // to the reader, not the reader picking it up by following focus. It
             // shows WHAT would reach a display and WHEN — which is the question
             // being asked — but it is not itself the focus path.
-            if (ReadingDiagnostics.Highlight) AnnounceToScreenReader(null, s);
+            if (ReadingDiagnostics.Highlight) DiagnosticAnnounce(s);
             lastCaretSet = tbReadingSurface.SelectionStart;   // ours, not a routing key
             // Stamped so the braille lag can be MEASURED rather than guessed from
             // two screenshots. The braille side is read out of NVDA's viewer over
