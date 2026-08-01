@@ -73,6 +73,8 @@ class TtsHost32
             Type t = Type.GetTypeFromProgID("SAPI.SpVoice");
             synth = Activator.CreateInstance(t);
             player = new SapiWavPlayer();
+            SapiWavPlayer.Log = HostLog;      // TEMPORARY, see HostLog
+            HostLog("---- host started ----");
         }
         catch { Emit("READY"); return 1; }
 
@@ -104,12 +106,35 @@ class TtsHost32
         return 0;
     }
 
+    /// <summary>TEMPORARY. The host is a separate process, so the player's
+    /// in-memory recorder cannot see it — and the player's own recording showed
+    /// the reading happening HERE, with no events to look at. Writing to a file
+    /// costs nothing that matters: it is not the process whose message pump the
+    /// speech depends on.</summary>
+    private static readonly object logLock = new object();
+    internal static void HostLog(string s)
+    {
+        try
+        {
+            lock (logLock)
+                File.AppendAllText(Path.Combine(Path.GetTempPath(), "NBR-host32.log"),
+                    DateTime.Now.ToString("HH:mm:ss.fff") + "  " + s + "\r\n");
+        }
+        catch { }
+    }
+
     // Returns false to quit.
     private static bool Handle(string line)
     {
         int tab = line.IndexOf('\t');
         string cmd = tab >= 0 ? line.Substring(0, tab) : line;
         string arg = tab >= 0 ? line.Substring(tab + 1) : "";
+        // Every command the parent sends, so it is plain whether a sentence is cut
+        // from OUTSIDE (a CANCEL arriving mid-utterance) or from within the host.
+        if (cmd != "PRERENDER")
+            HostLog("CMD " + cmd + (cmd == "SPEAK" ? "  (" + DecodeB64(arg).Length + " chars)" : ""));
+        else
+            HostLog("CMD PRERENDER");
         switch (cmd)
         {
             // Everything that changes how the text will sound has to (a) drop the
