@@ -3846,11 +3846,19 @@ namespace Nemoviz_Book_Reader
         /// handle it was made for, it is built once per window and correct.</para></summary>
         private IntPtr diagProviderHwnd;
         private object diagProvider;
+        private bool diagAnnouncedOnce;
 
         private void DiagnosticAnnounce(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
-            bool nvda = NvdaController.Speak(text);   // NVDA; silent under JAWS
+            // QUEUED, not cancelling. Both channels were inherited from the
+            // volume/speed announcement, where replacing the previous utterance
+            // is exactly right — stepping volume twice should say the second
+            // number, not both. For consecutive sentences of a book it is the
+            // opposite: each new sentence guillotines the one still being spoken.
+            // That is what Gordan heard as chopping and lost words, and it was
+            // the reader being cut off, not the player.
+            bool nvda = NvdaController.SpeakQueued(text);   // NVDA; silent under JAWS
             if (uiaNotifyUnavailable) { ReadingDiagnostics.Trace("  UIA marked unavailable"); return; }
             try
             {
@@ -3869,11 +3877,22 @@ namespace Nemoviz_Book_Reader
                     diagProviderHwnd = hwnd;
                 }
                 IRawElementProviderSimple provider = (IRawElementProviderSimple)diagProvider;
+                // All, not MostRecent: MostRecent tells the reader to DISCARD
+                // notifications still pending, which for a run of sentences means
+                // every sentence killing its predecessor mid-word.
                 int raise = UiaRaiseNotificationEvent(provider, NotificationKind.Other,
-                                          NotificationProcessing.MostRecent, text, string.Empty);
-                ReadingDiagnostics.Trace(string.Format(
-                    "  announced: nvda={0} window={1} raiseHr=0x{2:x}",
-                    nvda, ownWindow ? "reading" : "player", raise));
+                                          NotificationProcessing.All, text, string.Empty);
+                // Only the FIRST success is recorded, and only if something looks
+                // wrong afterwards do the failure traces above matter. Logging
+                // every sentence is a disk write per sentence, which is the fault
+                // this whole round has been chasing.
+                if (!diagAnnouncedOnce)
+                {
+                    diagAnnouncedOnce = true;
+                    ReadingDiagnostics.Trace(string.Format(
+                        "  announcing: nvda={0} window={1} raiseHr=0x{2:x}",
+                        nvda, ownWindow ? "reading" : "player", raise));
+                }
             }
             catch (Exception ex)
             {
@@ -4036,16 +4055,16 @@ namespace Nemoviz_Book_Reader
             // to the reader, not the reader picking it up by following focus. It
             // shows WHAT would reach a display and WHEN — which is the question
             // being asked — but it is not itself the focus path.
-            ReadingDiagnostics.Trace(string.Format("SENTENCE at {0}, highlight={1}: {2}",
-                start, ReadingDiagnostics.Highlight,
-                s.Length > 40 ? s.Substring(0, 40) + "..." : s));
+            // No per-sentence trace any more. It found what it was for — that the
+            // chain WAS being reached — and while the aid is on is precisely when
+            // a disk write per sentence hurts, which is the whole complaint.
             if (ReadingDiagnostics.Highlight) DiagnosticAnnounce(s);
             lastCaretSet = tbReadingSurface.SelectionStart;   // ours, not a routing key
-            // Stamped so the braille lag can be MEASURED rather than guessed from
-            // two screenshots. The braille side is read out of NVDA's viewer over
-            // UI Automation; this is the other half, and the two are matched on
-            // the clock afterwards. Goes with the experiment.
-            SurfaceLog("SENT  " + s);
+            // The per-sentence "SENT" stamp is gone. It belonged to the braille-lag
+            // experiment, which is finished, and it is a file opened, appended and
+            // closed inside the sentence loop — the exact cost that has been
+            // chopping the speech. SurfaceLog survives for routing keys, which
+            // happen when a hand moves, not four times a minute.
             PushBrailleIfFocusLeft(s);
             // NOT Select(0, 0) here, deliberately. Putting the caret back on nought
             // after every sentence is a caret MOVE as far as the reader is

@@ -107,14 +107,13 @@ namespace Nemoviz_Book_Reader
         public static void Place(TextBox surface, int start, string sentence)
         {
             if (surface == null) return;
-            int length = 0;
-            if (Highlight && !string.IsNullOrEmpty(sentence))
-            {
-                length = sentence.Length;
-                if (start + length > surface.TextLength) length = surface.TextLength - start;
-                if (length < 0) length = 0;
-            }
-            surface.Select(start, length);
+            // The caret, always — the same thing the shipping build does, and now
+            // the same in both states. Selecting the sentence was in here on the
+            // theory that a reader announces a selection; it does not (that is
+            // what the explicit announcement is for), and all it added was a
+            // second thing for the reader to talk about over the first. A braille
+            // display follows the caret anyway, so nothing is lost.
+            surface.Select(start, 0);
             surface.ScrollToCaret();
         }
     }

@@ -40,6 +40,29 @@ namespace Nemoviz_Book_Reader
         /// does nothing. Cancels any in-progress speech first so a fast key
         /// repeat announces only the latest value instead of queueing stale
         /// ones (the NVDA equivalent of the UIA MostRecent behaviour).</summary>
+        /// <summary>Speaks without cancelling what is already being said, so
+        /// consecutive utterances QUEUE instead of cutting each other off.
+        ///
+        /// <para><see cref="Speak"/> cancels first, which is right for a value
+        /// that replaces the last one — volume stepped twice should say the
+        /// second number, not both. It is wrong for consecutive sentences of a
+        /// book: each new one guillotines the one still being spoken, and what
+        /// comes out is chopped and missing words.</para></summary>
+        public static bool SpeakQueued(string text)
+        {
+            if (dllUnavailable || string.IsNullOrEmpty(text)) return false;
+            try
+            {
+                if (nvdaController_testIfRunning() != 0) return false;
+                nvdaController_speakText(text);      // deliberately no cancel
+                return true;
+            }
+            catch (DllNotFoundException) { dllUnavailable = true; }
+            catch (EntryPointNotFoundException) { dllUnavailable = true; }
+            catch { }
+            return false;
+        }
+
         /// <returns>True if the text was actually handed to a running NVDA.
         /// Callers that ignore it are unaffected; it exists because "nothing was
         /// spoken" and "NVDA was not there to speak it" look identical from the
