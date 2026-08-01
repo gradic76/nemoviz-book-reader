@@ -1965,6 +1965,30 @@ keystroke arrives and **nothing in the application can tell it from the
 keyboard**. Equally, an application cannot request or configure any of it — the
 mapping belongs to the reader, and to the user.
 
+**Confirmed in the installed NVDA user guide** (better than a web search — it is
+the version Gordan runs): *"NVDA supports inputting keyboard shortcuts and
+emulating keypresses using the braille display… Commonly-used keys, such as the
+arrow keys or pressing Alt to reach menus, can be mapped directly"*, and **"the
+driver for each Braille display comes pre-equipped with some of these
+assignments"** — so arrows arrive with no user setup at all. Modifiers go through
+**virtual modifier keys**: toggle Shift, then press the key. Two steps, not a
+chord, and the guide warns it interacts with contracted braille.
+
+Which lands well for NBR without anyone having planned it: the things used
+*constantly while reading* — **volume (Up/Down) and the small nudge
+(Left/Right)** — are bare arrows and work in one stroke. The occasional ones
+(seek step, speed) carry a modifier and cost two.
+
+**Capability varies enormously by model, and Gordan's call is therefore that
+braille shortcuts simply FOLLOW the keyboard ones — no braille-specific
+duplicates.** The range runs from a display with only routing and thumb keys
+(reader maps them), through one with a braille keyboard (virtual modifiers), to
+one that **is** a keyboard: the Baum Pronto! 40 ships with two interchangeable
+physical keyboards, braille and full QWERTY, swappable without rebooting, and the
+APH/HumanWare Mantis Q40 does the same. On those, our shortcuts arrive as
+ordinary keystrokes with nothing mapped at all. A braille-specific key set would
+be redundant on one end of that range and no help on the other.
+
 So the only two things in our hands are these:
 
 - **Keep the shortcuts simple enough to be worth mapping.** Modifier-free
