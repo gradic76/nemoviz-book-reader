@@ -188,6 +188,8 @@
     <Compile Include="DaisySync.cs" />
     <Compile Include="BookInfo.cs" />
     <Compile Include="BundledFonts.cs" />
+    <!-- TEMPORARY test aid; remove this line with the file. -->
+    <Compile Include="ReadingDiagnostics.cs" />
     <Compile Include="ReadingWindow.cs" />
     <Compile Include="PlainTextParser.cs" />
     <Compile Include="RtfParser.cs" />

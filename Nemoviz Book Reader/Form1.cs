@@ -1130,6 +1130,25 @@ namespace Nemoviz_Book_Reader
                     ToggleReadingWindow();
                     return true;
 
+                // TEMPORARY test aid — see ReadingDiagnostics. Deliberately on a
+                // combination nothing else uses and nothing documents, so it
+                // cannot be reached by accident and leaves no trace when the file
+                // and these three lines go.
+                case Keys.Control | Keys.Shift | Keys.H:
+                    string diag = ReadingDiagnostics.Toggle();
+                    // A tone as well as the words: NvdaController.Speak is NVDA's
+                    // channel and says nothing under JAWS (§11), and JAWS is the
+                    // primary reader here — so the state has to be audible either
+                    // way. Rising for on, falling for off.
+                    tones.Play(ReadingDiagnostics.Highlight ? 880 : 440, 120);
+                    NvdaController.Speak(diag);
+                    // Take effect now rather than at the next sentence: paused, or
+                    // in a slow passage, nothing would call the surface for a
+                    // while and the switch would seem not to have worked.
+                    lastSurfaceStart = -1;
+                    UpdateReadingSurface();
+                    return true;
+
                 case Keys.Enter:
                     if (this.ActiveControl is Button btn)
                         btn.PerformClick();
@@ -3897,8 +3916,12 @@ namespace Nemoviz_Book_Reader
             // "selected" and "not selected", and repeating pieces — over our own
             // speech. Braille shows the line around the caret either way, so the
             // output is unchanged and the commentary has nothing to report.
-            tbReadingSurface.Select(start, 0);
-            tbReadingSurface.ScrollToCaret();
+            // Normally the caret alone, exactly as before. ReadingDiagnostics is a
+            // TEMPORARY test aid (see that file) which selects the sentence
+            // instead, so a tester with no braille display can HEAR the mechanism
+            // through their screen reader. Off unless switched on; delete the file
+            // and this line to remove it.
+            ReadingDiagnostics.Place(tbReadingSurface, start, s);
             lastCaretSet = tbReadingSurface.SelectionStart;   // ours, not a routing key
             // Stamped so the braille lag can be MEASURED rather than guessed from
             // two screenshots. The braille side is read out of NVDA's viewer over

@@ -445,6 +445,10 @@ namespace Nemoviz_Book_Reader
                 case Keys.Control | Keys.O:
                 case Keys.Control | Keys.G: case Keys.Control | Keys.T:
                 case Keys.Control | Keys.B:
+                // TEMPORARY test aid — see ReadingDiagnostics. Forwarded from
+                // here too because the surface is where a tester will be standing
+                // when they want to switch it. Remove with the file.
+                case Keys.Control | Keys.Shift | Keys.H:
                     forwardKey?.Invoke(keyData);
                     return true;
             }
