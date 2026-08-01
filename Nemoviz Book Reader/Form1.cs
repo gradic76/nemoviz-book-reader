@@ -71,6 +71,21 @@ namespace Nemoviz_Book_Reader
         private BookData currentBook = null;
         // Text-book playback engine (TTS). Created lazily on the first text book.
         private TtsReader tts = null;
+        /// <summary>The words the reading window shows, kept apart from
+        /// <see cref="tts"/> on purpose.
+        ///
+        /// <para>The surface used to read its text straight off the TTS reader,
+        /// which tied the whole visual and braille output to speech. That left a
+        /// HYBRID with nothing: its narration is audio, so no TtsReader is ever
+        /// made for it, and both the automatic open and F9 fell through — the
+        /// switches sat there in Properties saving a setting that could not
+        /// happen. It was worse than dead, too: <c>tts</c> outlives a book
+        /// change, so opening a text book and then a hybrid left the reader
+        /// holding the PREVIOUS book, and F9 would have shown that one's text
+        /// under this one's title.</para>
+        ///
+        /// <para>Cleared on every book load, so a stale one cannot survive.</para></summary>
+        private string readingText = null;
         private AppSettings appSettings;
         private System.Windows.Forms.Timer eventTimer;
         private System.Windows.Forms.Timer progressTimer;
@@ -1857,6 +1872,12 @@ namespace Nemoviz_Book_Reader
 
                 int percent = (int)(virtualPos / totalDur * 100);
 
+                // On a hybrid the narration is what moves the text, so the caret
+                // is stepped from this same tick. Cheap: UpdateReadingSurface
+                // returns immediately unless the mapped offset actually changed.
+                if (currentBook != null && currentBook.IsHybrid && readingWindow != null)
+                    UpdateReadingSurface();
+
                 string posText = Localization.T("Player.Position.Text", FormatTime(virtualPos), FormatTime(totalDur));
                 tbProgress.Text = posText;
                 tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
@@ -3059,7 +3080,10 @@ namespace Nemoviz_Book_Reader
                 return;
             }
             // Same low "no go" beep the other book keys give on an empty player.
-            if (currentBook == null || tts == null) { tones.Play(300, 150); return; }
+            // Tested on the TEXT, not on tts: a hybrid has words to show and no
+            // synthesiser, and requiring one was what made F9 beep at the one
+            // kind of book whose text is already joined to its audio.
+            if (currentBook == null || readingText == null) { tones.Play(300, 150); return; }
             EnsureReadingSurface();
             LoadReadingSurface();
 
@@ -3463,6 +3487,36 @@ namespace Nemoviz_Book_Reader
             tts.SetAudioDevice(appSettings.AudioDevice);
         }
 
+        /// <summary>Reads a hybrid's text in for the reading window and opens it
+        /// if the book asks for it.
+        ///
+        /// <para>No <see cref="TtsReader"/> is made. That would start the 32-bit
+        /// speech satellite for a book nothing is going to synthesise, and worse,
+        /// it would put a second voice behind a narrator — the one thing §8c says
+        /// a hybrid reader did not come for. The text is loaded, and the audio
+        /// clock moves the caret through it.</para></summary>
+        private void LoadHybridReadingText()
+        {
+            try
+            {
+                if (currentBook == null || string.IsNullOrEmpty(currentBook.TextFilePath)
+                    || !System.IO.File.Exists(currentBook.TextFilePath)) return;
+                readingText = System.IO.File.ReadAllText(currentBook.TextFilePath,
+                                                         System.Text.Encoding.UTF8);
+                // A hybrid with no sync map has text and audio that do not know
+                // about each other; the caret would sit at nought while the
+                // narrator read on, which is worse than no window at all.
+                if (currentBook.Sync == null || currentBook.Sync.IsEmpty) { readingText = null; return; }
+
+                if (currentBook.OpensReadingWindow && readingWindow == null)
+                    BeginInvoke((Action)(() =>
+                    {
+                        if (currentBook != null && currentBook.OpensReadingWindow) ToggleReadingWindow();
+                    }));
+            }
+            catch { readingText = null; }
+        }
+
         private void LoadTextBookPlayback(bool autoPlay)
         {
             EnsureTts();
@@ -3479,6 +3533,10 @@ namespace Nemoviz_Book_Reader
             currentBook.CleanTextFileOnce();
             string bookText = TtsReader.ReadFile(currentBook.TextFilePath);
             tts.LoadText(bookText, currentBook.TextCleaned);
+            // What the reading window will show. Taken from the reader rather
+            // than from bookText because LoadText normalises, and the surface
+            // offsets have to be the SAME offsets the reader reports.
+            readingText = tts.FullText;
             // A book imported before NBR could tell languages apart gets told now,
             // once, so it too is read by a voice that speaks it.
             if (string.IsNullOrEmpty(currentBook.TextLanguage))
@@ -3739,8 +3797,8 @@ namespace Nemoviz_Book_Reader
         /// is a change of selection, not of text.</summary>
         private void LoadReadingSurface()
         {
-            if (tbReadingSurface == null || tts == null) return;
-            tbReadingSurface.Text = tts.FullText;
+            if (tbReadingSurface == null || readingText == null) return;
+            tbReadingSurface.Text = readingText;
             lastSurfaceStart = -1;
             UpdateReadingSurface();
         }
@@ -3792,12 +3850,44 @@ namespace Nemoviz_Book_Reader
             catch { }
         }
 
+        /// <summary>The sentence the given offset falls in. A hybrid has no TTS
+        /// reader to ask, and the braille push and the log both want the words
+        /// rather than the number. Sentence enough for that: the surface caret is
+        /// what actually carries the reading, and this only has to describe
+        /// it.</summary>
+        private static string SentenceAround(string text, int at)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            if (at < 0) at = 0;
+            if (at >= text.Length) at = text.Length - 1;
+            int from = text.LastIndexOfAny(new[] { '.', '!', '?', '\n' }, at) + 1;
+            int to = text.IndexOfAny(new[] { '.', '!', '?', '\n' }, at);
+            if (to < 0) to = text.Length - 1;
+            return text.Substring(from, to - from + 1).Trim();
+        }
+
         private void UpdateReadingSurface()
         {
-            if (tbReadingSurface == null || tts == null) return;
-            if (currentBook == null || !currentBook.IsTextBook) return;
-            string s = tts.CurrentText ?? "";
-            int start = tts.CharPosition;
+            if (tbReadingSurface == null || readingText == null || currentBook == null) return;
+
+            // Where the reading IS, asked of whatever is doing the reading. For a
+            // text book that is the TTS engine. For a hybrid it is the narration:
+            // the audio clock through the book's own sync map, which is what that
+            // map was built for (§8c) and the reason a hybrid can show text at
+            // all without a synthesiser in the picture.
+            string s; int start;
+            if (currentBook.IsHybrid)
+            {
+                if (currentBook.Sync == null || currentBook.Sync.IsEmpty) return;
+                start = DaisySync.CharAt(currentBook.Sync, GetVirtualPosition());
+                s = SentenceAround(readingText, start);
+            }
+            else if (currentBook.IsTextBook && tts != null)
+            {
+                s = tts.CurrentText ?? "";
+                start = tts.CharPosition;
+            }
+            else return;
             if (start == lastSurfaceStart) return;
             lastSurfaceStart = start;
             if (start < 0 || start > tbReadingSurface.TextLength) return;
@@ -4080,12 +4170,21 @@ namespace Nemoviz_Book_Reader
             mpv_set_property_string(mpvHandle, "speed",
                 speed.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
+            // Whatever the last book left behind is not this book. Cleared before
+            // either branch so no path can forget to.
+            readingText = null;
+
             // Text book → read it with TTS instead of building an mpv playlist.
             if (currentBook.IsTextBook)
             {
                 LoadTextBookPlayback(autoPlay);
                 return;
             }
+
+            // A hybrid keeps the audio transport but has the words too, so the
+            // reading window works here exactly as it does for a text book — the
+            // narration drives it instead of a synthesiser.
+            if (currentBook.IsHybrid) LoadHybridReadingText();
 
             string[] audioExts = { ".mp3", ".ogg", ".flac", ".m4a", ".m4b", ".wav", ".opus", ".aac", ".wma" };
             var playlist = new List<string>();
