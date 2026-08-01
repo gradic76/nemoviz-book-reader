@@ -33,6 +33,7 @@ namespace Nemoviz_Book_Reader
         private bool started;                // SpeakStream issued
         private bool sawPlaying;             // SAPI reached the speaking state
         private int startTick;
+        private int audioMs;                 // length of this utterance, 0 if unknown
 
         private string desiredDeviceId = "";
         private string appliedDeviceId = null;
@@ -88,8 +89,16 @@ namespace Nemoviz_Book_Reader
         /// <paramref name="deleteWhenDone"/> is for a temp file we own.</summary>
         public bool PlayFile(string wavPath, bool deleteWhenDone)
         {
+            return PlayFile(wavPath, deleteWhenDone, 0);
+        }
+
+        /// <param name="knownDurationMs">How long the audio actually is, when the
+        /// caller knows (it just rendered it). Nought means unknown.</param>
+        public bool PlayFile(string wavPath, bool deleteWhenDone, int knownDurationMs)
+        {
             lock (gate)
             {
+                audioMs = knownDurationMs;
                 StopLocked();
                 try
                 {
@@ -126,7 +135,27 @@ namespace Nemoviz_Book_Reader
                 File.WriteAllBytes(path, wav);
             }
             catch { return false; }
-            return PlayFile(path, true);
+            return PlayFile(path, true, WavDurationMs(wav));
+        }
+
+        /// <summary>How many milliseconds of audio a rendered WAV holds, from its
+        /// own header. Used by <see cref="IsPlaying"/> to know that an utterance
+        /// CANNOT be finished yet — see the note there. Nought if the header is
+        /// not the plain PCM shape we write.</summary>
+        private static int WavDurationMs(byte[] wav)
+        {
+            try
+            {
+                if (wav == null || wav.Length < 44) return 0;
+                // Byte rate lives at offset 28 of a canonical RIFF/WAVE header.
+                int byteRate = wav[28] | (wav[29] << 8) | (wav[30] << 16) | (wav[31] << 24);
+                if (byteRate <= 0) return 0;
+                long data = wav.Length - 44;
+                if (data <= 0) return 0;
+                long ms = data * 1000L / byteRate;
+                return ms > 0 && ms < 3600000 ? (int)ms : 0;
+            }
+            catch { return 0; }
         }
 
         /// <summary>True while audio is still coming out. False once SAPI has left
@@ -142,7 +171,29 @@ namespace Nemoviz_Book_Reader
                     int rs;
                     try { rs = (int)voice.Status.RunningState; } catch { return false; }
                     if (rs == SRSEIsSpeaking) { sawPlaying = true; return true; }
-                    if (!sawPlaying && Environment.TickCount - startTick < 400) return true;
+
+                    // NOT speaking, and we have never seen it speak. That means
+                    // "has not started yet", NOT "has finished" — and the two are
+                    // indistinguishable from SAPI's running state alone.
+                    //
+                    // This used to be a flat 400 ms of grace, and that is the bug
+                    // Gordan spent an afternoon hearing. Starting an utterance
+                    // means writing the WAV to a temp file and having SAPI open it
+                    // as a stream, and on a LONG sentence that is a bigger file
+                    // and takes longer. Past 400 ms the player declared the
+                    // sentence finished before a sound had come out: the caller's
+                    // wait loop fell straight through, ReleaseFinished deleted the
+                    // very file SAPI was about to read, and the parent moved to
+                    // the next sentence — which purged this one. What survived was
+                    // the tail. The first word was gone.
+                    //
+                    // The audio's own length settles it: an utterance cannot be
+                    // finished before it could physically have played. Where the
+                    // caller rendered the WAV it tells us how long it is, and the
+                    // old 400 ms remains only as the floor for the file-open, and
+                    // as the whole answer when the length is unknown.
+                    if (!sawPlaying)
+                        return Environment.TickCount - startTick < 400 + audioMs;
                     return false;
                 }
             }
