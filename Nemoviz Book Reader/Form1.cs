@@ -3751,6 +3751,42 @@ namespace Nemoviz_Book_Reader
         /// what makes panning meaningful (the rest of the book is really there to
         /// pan into) and turns a routing key into a position in the book rather
         /// than an index into one lonely sentence.</para></summary>
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        /// <summary>Keeps the book on the braille display when focus has wandered
+        /// off the reading surface but is still somewhere in NBR.
+        ///
+        /// <para>Braille follows FOCUS — that is the platform's model, not our
+        /// workaround, and it is what gives the surface panning and routing keys.
+        /// But it means a stray Tab onto a player key leaves speech reading on
+        /// while the display sits on "Forward, Shift+Right" (Gordan's example).
+        /// While the surface holds focus this does nothing: the reader is already
+        /// doing a better job of it and pushing over the top would only
+        /// flicker.</para>
+        ///
+        /// <para><b>Only while NBR is the foreground application.</b> When a
+        /// Windows Update prompt or anything else takes over, winning the display
+        /// back would stop the reader reading the thing that just interrupted
+        /// them — which is exactly what they need at that moment. So that case is
+        /// deliberately left alone; it is not an oversight.</para>
+        ///
+        /// <para>NVDA only, and silently nothing on JAWS, which has no public
+        /// braille call. There, focus tracking remains the whole story.</para></summary>
+        private void PushBrailleIfFocusLeft(string sentence)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(sentence)) return;
+                if (GetForegroundWindow() != Handle
+                    && (readingWindow == null || readingWindow.IsDisposed
+                        || GetForegroundWindow() != readingWindow.Handle)) return;
+                if (tbReadingSurface != null && tbReadingSurface.Focused) return;
+                NvdaController.Braille(sentence);
+            }
+            catch { }
+        }
+
         private void UpdateReadingSurface()
         {
             if (tbReadingSurface == null || tts == null) return;
@@ -3774,6 +3810,7 @@ namespace Nemoviz_Book_Reader
             // UI Automation; this is the other half, and the two are matched on
             // the clock afterwards. Goes with the experiment.
             SurfaceLog("SENT  " + s);
+            PushBrailleIfFocusLeft(s);
             // NOT Select(0, 0) here, deliberately. Putting the caret back on nought
             // after every sentence is a caret MOVE as far as the reader is
             // concerned, and it answers by speaking the character underneath —
