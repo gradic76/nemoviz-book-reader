@@ -259,9 +259,36 @@ class TtsHost32
         }
     }
 
+    /// <summary>TEMPORARY. Keeps a copy of what was actually handed to the sound
+    /// card, with the sentence beside it.
+    ///
+    /// <para>Everything measurable so far says the reading is intact: the text
+    /// tiles the book with no gaps, the audio's length matches the text, and
+    /// every utterance plays to its end with nothing cancelling it. The one
+    /// thing never examined is the CONTENT of the buffer — whether the words are
+    /// all in there. Measuring where its first audible sample sits, against the
+    /// sentence it claims to be, settles that without another listening
+    /// session.</para></summary>
+    private static int wavSeq;
+    private static void KeepWav(byte[] wav, string text)
+    {
+        try
+        {
+            string dir = Path.Combine(Path.GetTempPath(), "NBR-wavs");
+            Directory.CreateDirectory(dir);
+            if (wavSeq >= 14) return;                 // a handful is plenty
+            int n = wavSeq++;
+            File.WriteAllBytes(Path.Combine(dir, string.Format("{0:00}.wav", n)), wav);
+            File.WriteAllText(Path.Combine(dir, string.Format("{0:00}.txt", n)), text,
+                              Encoding.UTF8);
+        }
+        catch { }
+    }
+
     private static void SpeakWorker(string text, int myGen)
     {
         byte[] wav = TakeAhead(text) ?? Render(text);
+        if (wav != null) KeepWav(wav, text);
         if (wav != null && IsCurrent(myGen))
         {
             bool started;
