@@ -1,0 +1,51 @@
+FONTS BUNDLED WITH NEMOVIZ BOOK READER
+======================================
+
+NBR ships five type families for its reading window. They are loaded PRIVATELY,
+into this process only, and are never installed into Windows: NBR is portable
+and has no business changing the machine it runs from.
+
+Every copyright line below was read out of the font file's own name table
+(name IDs 0, 1 and 14) rather than copied from a download page, so it says what
+the shipped binary says.
+
+Full licence texts accompany this file: OFL-1.1.txt and CC-BY-4.0.txt.
+
+
+Andika                        SIL Open Font License 1.1
+  Copyright (c) 2004-2022 SIL International
+  Reserved Font Name: Andika
+  http://scripts.sil.org/OFL
+  Files: Andika-Regular.ttf, Andika-Bold.ttf
+
+Atkinson Hyperlegible Next    SIL Open Font License 1.1
+  Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors
+  https://github.com/googlefonts/atkinson-hyperlegible-next
+  Files: AtkinsonHyperlegibleNext-Variable.ttf
+
+Lexend                        SIL Open Font License 1.1
+  Copyright 2019 The Lexend Project Authors
+  https://github.com/googlefonts/lexend
+  Files: Lexend-Variable.ttf
+
+Luciole                       Creative Commons Attribution 4.0 International
+  Luciole (c) Laurent Bourcellier & Jonathan Perez - 2019
+  https://creativecommons.org/licenses/by/4.0/legalcode.fr
+  Files: Luciole-Regular.ttf, Luciole-Bold.ttf
+
+OpenDyslexic                  SIL Open Font License 1.1
+  Copyright (c) 2019-07-29, Abbie Gonzalez, with Reserved Font Name OpenDyslexic
+  Copyright (c) 12/2012 - 2019
+  https://github.com/antijingoist/opendyslexic
+  Files: OpenDyslexic-Regular.otf, OpenDyslexic-Bold.otf
+
+  NOTE: this family's own name table declares "All rights reserved" and carries
+  no licence URL, which reads as proprietary and is not what it is. Its upstream
+  repository ships OFL.txt stating SIL Open Font License 1.1 for exactly these
+  files. The metadata is stale, not the licence; recorded here so nobody has to
+  re-establish it later.
+
+
+NONE OF THESE FONTS HAVE BEEN MODIFIED. They are shipped byte for byte as
+published, which keeps the Reserved Font Name clauses satisfied without further
+thought: an OFL Reserved Font Name only binds a MODIFIED version.

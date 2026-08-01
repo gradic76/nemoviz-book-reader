@@ -195,7 +195,12 @@ namespace Nemoviz_Book_Reader
         {
             if (surface == null) return;
             Font f;
-            try { f = new Font(fontFamily, fontSize); }
+            // Through BundledFonts, not new Font(name, size): the shipped faces
+            // are private to this process, and GDI+ resolving a name it does not
+            // know hands back a SUBSTITUTE carrying the requested name — so
+            // picking Andika would silently give you something else called
+            // Andika, with no error to notice.
+            try { f = BundledFonts.Make(fontFamily, fontSize); }
             catch { f = new Font(FontFamily.GenericSansSerif, fontSize); }
             surface.Font = f;
 
@@ -311,10 +316,19 @@ namespace Nemoviz_Book_Reader
         public static List<string> FontsFor(char[] chars)
         {
             var result = new List<string>();
-            foreach (FontFamily f in FontFamily.Families)
+            // The bundled faces come first in the sweep, not because they are
+            // ranked above the installed ones — the list is sorted afterwards
+            // anyway — but so that a family NBR ships and the user also happens
+            // to have installed appears once, as ours. FontFamily.Families never
+            // lists a privately loaded face, so there is no double entry to
+            // remove; the Contains check guards the reverse case.
+            var sweep = new List<FontFamily>(BundledFonts.Faces);
+            sweep.AddRange(FontFamily.Families);
+            foreach (FontFamily f in sweep)
             {
                 try
                 {
+                    if (result.Contains(f.Name)) continue;
                     if (!f.IsStyleAvailable(FontStyle.Regular)) continue;
                     if (chars != null && chars.Length > 0 && !CanRender(f, chars)) continue;
                     result.Add(f.Name);

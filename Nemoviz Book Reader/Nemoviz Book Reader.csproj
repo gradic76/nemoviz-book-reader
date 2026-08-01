@@ -187,6 +187,7 @@
     <Compile Include="WorkDialogSkin.cs" />
     <Compile Include="DaisySync.cs" />
     <Compile Include="BookInfo.cs" />
+    <Compile Include="BundledFonts.cs" />
     <Compile Include="ReadingWindow.cs" />
     <Compile Include="PlainTextParser.cs" />
     <Compile Include="RtfParser.cs" />
@@ -228,6 +229,27 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
+    <!-- The reading-window faces, embedded rather than copied next to the exe:
+         a portable player should not have loose files it needs in order to be
+         readable. Loaded privately at startup, never installed (BundledFonts).
+         Licences under Fonts\Licences; none of the files is modified. -->
+    <EmbeddedResource Include="Fonts\Andika-Regular.ttf" />
+    <EmbeddedResource Include="Fonts\Andika-Bold.ttf" />
+    <EmbeddedResource Include="Fonts\AtkinsonHyperlegibleNext-Variable.ttf" />
+    <EmbeddedResource Include="Fonts\Lexend-Variable.ttf" />
+    <EmbeddedResource Include="Fonts\Luciole-Regular.ttf" />
+    <EmbeddedResource Include="Fonts\Luciole-Bold.ttf" />
+    <EmbeddedResource Include="Fonts\OpenDyslexic-Regular.otf" />
+    <EmbeddedResource Include="Fonts\OpenDyslexic-Bold.otf" />
+    <Content Include="Fonts\Licences\NOTICE.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\Licences\OFL-1.1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\Licences\CC-BY-4.0.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
