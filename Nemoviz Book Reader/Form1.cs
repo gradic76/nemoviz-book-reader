@@ -3999,9 +3999,49 @@ namespace Nemoviz_Book_Reader
         }
 
         private int lastCaretSet = -1;
-        /// <summary>The last sentence handed to the screen reader by the test
-        /// aid, so moving inside a sentence does not say it again.</summary>
-        private string lastAnnounced;
+        /// <summary>How far through the book the test aid has already spoken, as
+        /// a character offset. −1 before anything.</summary>
+        private int announcedTo = -1;
+
+        /// <summary>Everything the caret has PASSED since the aid last spoke,
+        /// rather than the sentence it happens to be sitting in.
+        ///
+        /// <para>This is the difference between an instrument and an impression.
+        /// Reporting the current sentence skips any sentence shorter than the gap
+        /// between two sync points — and a hybrid's points are seconds apart, so
+        /// short ones vanished. Gordan cannot check the caret any other way; the
+        /// aid IS how he sees it, so it has to account for every character it
+        /// travelled over, neither skipping nor repeating.</para>
+        ///
+        /// <para>Falls back to the sentence when the position has gone BACKWARDS
+        /// — a seek, or a new book — since there is no span to report then, and
+        /// resyncs from there.</para></summary>
+        private string TraversedSince(int start, string current)
+        {
+            const int Sane = 2000;      // a seek should not read a chapter aloud
+            try
+            {
+                if (readingText == null) return current;
+                if (announcedTo < 0 || start <= announcedTo || start - announcedTo > Sane)
+                {
+                    announcedTo = start;
+                    return current;
+                }
+                // Whole words only. A sync point lands wherever the producer put
+                // it, which is often mid-word, and "je k" followed by "ratka."
+                // is not something anyone can check a reading against. The tail
+                // is left where it is and goes out with the next span, so nothing
+                // is lost by waiting.
+                int end = start;
+                while (end > announcedTo && !char.IsWhiteSpace(readingText[end - 1])) end--;
+                if (end <= announcedTo) return null;     // not a whole word yet
+
+                string span = readingText.Substring(announcedTo, end - announcedTo).Trim();
+                announcedTo = end;
+                return span.Length == 0 ? null : span;
+            }
+            catch { announcedTo = start; return current; }
+        }
 
         /// <summary>Speaks a sentence for the TEMPORARY test aid, from the window
         /// that actually has the user's attention.
@@ -4279,10 +4319,10 @@ namespace Nemoviz_Book_Reader
             //
             // The caret still moves on every point, which is what braille and the
             // reading position want. Only the speaking is deduplicated.
-            if (ReadingDiagnostics.Highlight && s != lastAnnounced)
+            if (ReadingDiagnostics.Highlight)
             {
-                lastAnnounced = s;
-                DiagnosticAnnounce(s);
+                string say = TraversedSince(start, s);
+                if (!string.IsNullOrEmpty(say)) DiagnosticAnnounce(say);
             }
             lastCaretSet = tbReadingSurface.SelectionStart;   // ours, not a routing key
             // The per-sentence "SENT" stamp is gone. It belonged to the braille-lag
