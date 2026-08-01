@@ -86,6 +86,47 @@ namespace Nemoviz_Book_Reader
         ///
         /// <para>Goes to <c>%TEMP%\NBR-diagnostics.log</c>; deleted with the rest
         /// of this file.</para></summary>
+        // ── In-memory recorder ────────────────────────────────────────────────
+        /// <summary>Records timings without touching the disk while the book is
+        /// being read.
+        ///
+        /// <para>Writing a line per event to a file is what has been chopping the
+        /// speech all afternoon, twice, so the one thing a recorder in the audio
+        /// path must not do is exactly that. Lines go to a capped list in memory
+        /// and are written out only when the tester asks, by which time nothing
+        /// is being timed.</para></summary>
+        private static readonly System.Collections.Generic.List<string> notes =
+            new System.Collections.Generic.List<string>();
+
+        public static void Note(string line)
+        {
+            lock (notes)
+            {
+                if (notes.Count > 4000) return;      // a minute of reading is far less
+                notes.Add(System.DateTime.Now.ToString("HH:mm:ss.fff") + "  " + line);
+            }
+        }
+
+        /// <summary>Writes what has been recorded and clears it. Returns where it
+        /// went, or null if there was nothing.</summary>
+        public static string Dump()
+        {
+            string path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NBR-timing.log");
+            try
+            {
+                string[] lines;
+                lock (notes)
+                {
+                    if (notes.Count == 0) return null;
+                    lines = notes.ToArray();
+                    notes.Clear();
+                }
+                System.IO.File.WriteAllLines(path, lines);
+                return path;
+            }
+            catch { return null; }
+        }
+
         public static void Trace(string line)
         {
             if (!Highlight) return;

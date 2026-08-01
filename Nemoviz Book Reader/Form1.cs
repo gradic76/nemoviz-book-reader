@@ -1134,6 +1134,16 @@ namespace Nemoviz_Book_Reader
                 // combination nothing else uses and nothing documents, so it
                 // cannot be reached by accident and leaves no trace when the file
                 // and these three lines go.
+                // TEMPORARY: writes out the recorded audio-path timings. Separate
+                // key from the highlight toggle so the recording can be taken
+                // during ordinary reading, with no aid running and nothing else
+                // in the way.
+                case Keys.Control | Keys.Shift | Keys.L:
+                    string where = ReadingDiagnostics.Dump();
+                    tones.Play(where != null ? 880 : 300, 150);
+                    NvdaController.Speak(where != null ? "Timing written" : "Nothing recorded");
+                    return true;
+
                 case Keys.Control | Keys.Shift | Keys.H:
                     string diag = ReadingDiagnostics.Toggle();
                     // A tone as well as the words: NvdaController.Speak is NVDA's
@@ -3515,11 +3525,20 @@ namespace Nemoviz_Book_Reader
         {
             if (tts != null) return;
             tts = new TtsReader();
+            // TEMPORARY: record the audio path's own timings, in memory. Costs a
+            // null check per event when nobody has asked for them, and this is
+            // the one part of the reading nobody has actually measured yet.
+            SapiWavPlayer.Log = ReadingDiagnostics.Note;
             // SAPI raises SpeakCompleted on a background thread, so marshal UI
             // updates back to the form.
             tts.PositionChanged += () =>
             {
                 if (IsDisposed) return;
+                if (tts != null)
+                    ReadingDiagnostics.Note(string.Format(
+                        "SENTENCE #{0} at char {1}, {2} chars",
+                        tts.CurrentSentence, tts.CharPosition,
+                        (tts.CurrentText ?? "").Length));
                 try { BeginInvoke((Action)UpdateTextPositionDisplay); } catch { }
                 try { BeginInvoke((Action)UpdateReadingSurface); } catch { }
             };

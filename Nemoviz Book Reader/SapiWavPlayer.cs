@@ -35,6 +35,21 @@ namespace Nemoviz_Book_Reader
         private int startTick;
         private int audioMs;                 // length of this utterance, 0 if unknown
 
+        /// <summary>TEMPORARY diagnostic hook. Null unless someone is measuring,
+        /// and a null check is the entire cost when nobody is — which matters,
+        /// because these points sit in the audio path. Set by the player to an
+        /// in-memory recorder; left null in the 32-bit host, which compiles this
+        /// same file. Remove with the rest of the diagnostics.</summary>
+        internal static Action<string> Log;
+        private void L(string what)
+        {
+            Action<string> f = Log;
+            if (f == null) return;
+            try { f(string.Format("PLAYER {0,-16} +{1,5} ms  audio={2} ms  sawPlaying={3}",
+                                  what, Environment.TickCount - startTick, audioMs, sawPlaying)); }
+            catch { }
+        }
+
         private string desiredDeviceId = "";
         private string appliedDeviceId = null;
 
@@ -111,6 +126,7 @@ namespace Nemoviz_Book_Reader
                     sawPlaying = false;
                     startTick = Environment.TickCount;
                     voice.SpeakStream(fs, SVSFlagsAsync);
+                    L("SpeakStream");
                     return true;
                 }
                 catch
@@ -170,7 +186,11 @@ namespace Nemoviz_Book_Reader
                     if (!started) return false;
                     int rs;
                     try { rs = (int)voice.Status.RunningState; } catch { return false; }
-                    if (rs == SRSEIsSpeaking) { sawPlaying = true; return true; }
+                    if (rs == SRSEIsSpeaking)
+                    {
+                        if (!sawPlaying) { sawPlaying = true; L("first-speaking"); }
+                        return true;
+                    }
 
                     // NOT speaking, and we have never seen it speak. That means
                     // "has not started yet", NOT "has finished" — and the two are
@@ -193,7 +213,12 @@ namespace Nemoviz_Book_Reader
                     // old 400 ms remains only as the floor for the file-open, and
                     // as the whole answer when the length is unknown.
                     if (!sawPlaying)
-                        return Environment.TickCount - startTick < 400 + audioMs;
+                    {
+                        bool waiting = Environment.TickCount - startTick < 400 + audioMs;
+                        if (!waiting) L("gave-up-waiting");
+                        return waiting;
+                    }
+                    L("ended");          // SAPI has left the speaking state
                     return false;
                 }
             }
@@ -206,6 +231,7 @@ namespace Nemoviz_Book_Reader
         {
             if (started)
             {
+                L("PURGE");
                 try { voice.Speak("", SVSFPurgeBeforeSpeak | SVSFlagsAsync); } catch { }
                 started = false;
             }
@@ -232,6 +258,7 @@ namespace Nemoviz_Book_Reader
         {
             lock (gate)
             {
+                L("ReleaseFinished");
                 started = false;
                 CloseStreamLocked();
             }
