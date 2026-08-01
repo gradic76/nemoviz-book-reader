@@ -59,6 +59,9 @@ namespace Nemoviz_Book_Reader
         /// <summary>Holds off applying a font until the reader stops moving
         /// through the list — see the picker's handler for why that matters.</summary>
         private Timer fontApply;
+        /// <summary>The font THIS window made, so it can be released without
+        /// touching one it merely inherited.</summary>
+        private Font ownFont;
         private Panel metal, glass;
         private float fontSize = 26f;        // 60 chars across a 960-wide window
         private string fontFamily = "Segoe UI";
@@ -205,12 +208,18 @@ namespace Nemoviz_Book_Reader
             // Andika, with no error to notice.
             try { f = BundledFonts.Make(fontFamily, fontSize); }
             catch { f = new Font(FontFamily.GenericSansSerif, fontSize); }
-            // The one it is replacing goes back. A Font holds a GDI handle, and
-            // arrowing down a list of a hundred faces was leaving one behind per
-            // keystroke.
-            Font old = surface.Font;
+            // Only ever OUR OWN previous font goes back — never surface.Font.
+            // That property returns the AMBIENT font when the control has not
+            // been given one of its own, so on the first pass it hands back the
+            // form's font, and disposing that destroys a GDI handle every other
+            // control on the window is still drawing with. It broke the whole
+            // output the moment it shipped. A Font is still worth releasing —
+            // arrowing a long list was leaving one behind per keystroke — but
+            // only one we made.
+            Font mine = ownFont;
+            ownFont = f;
             surface.Font = f;
-            if (old != null && !ReferenceEquals(old, f)) try { old.Dispose(); } catch { }
+            if (mine != null && !ReferenceEquals(mine, f)) try { mine.Dispose(); } catch { }
 
             // Measured on a real sample rather than assumed: character width
             // varies enormously between faces at the same point size, which is
@@ -510,6 +519,12 @@ namespace Nemoviz_Book_Reader
             if (surface == null) return;
             if (surface.Parent != null) surface.Parent.Controls.Remove(surface);
             if (returnTo != null && !returnTo.IsDisposed) returnTo.Controls.Add(surface);
+            // Hand it back on the player's own font, THEN release ours. The other
+            // order would leave the surface drawing with a disposed handle, and
+            // keeping ours alive would leak one per open and close.
+            try { surface.Font = null; } catch { }
+            if (ownFont != null) { try { ownFont.Dispose(); } catch { } ownFont = null; }
+            if (fontApply != null) { try { fontApply.Stop(); fontApply.Dispose(); } catch { } fontApply = null; }
         }
 
         protected override void OnPaint(PaintEventArgs e)
