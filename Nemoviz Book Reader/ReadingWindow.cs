@@ -521,6 +521,14 @@ namespace Nemoviz_Book_Reader
         /// shows a solid block. The reading position is a caret, never a range
         /// (§8l) — so it is put back where it was the instant focus lands, before
         /// anything can announce it.</para></summary>
+        /// <summary>True once the reading surface really holds focus — which is
+        /// the only state in which braille and the screen reader follow the
+        /// book. Asked by the player, which keeps trying until it is.</summary>
+        public bool SurfaceHasFocus
+        {
+            get { return surface != null && !surface.IsDisposed && surface.Focused; }
+        }
+
         public void FocusSurface()
         {
             if (surface == null || surface.IsDisposed) return;

@@ -3244,16 +3244,28 @@ namespace Nemoviz_Book_Reader
             //
             // Deferred rather than called here: the rest of the play path has to
             // finish first, or it simply overwrites this too.
+            // Tried repeatedly, not once. One deferred attempt was not enough:
+            // Gordan still had to fetch the window with F9 after several plays.
+            // The play path does not finish in a single message cycle — the TTS
+            // engine, the device and the player's own controls all take focus at
+            // their own pace — so this keeps asking for about three quarters of a
+            // second and stops the moment the surface actually has it.
             ReadingWindow w = readingWindow;
-            try
+            var grab = new Timer { Interval = 120 };
+            int tries = 0;
+            grab.Tick += (s, e) =>
             {
-                BeginInvoke((Action)(() =>
+                tries++;
+                if (w == null || w.IsDisposed || tries > 6) { grab.Stop(); grab.Dispose(); return; }
+                try
                 {
-                    if (w == null || w.IsDisposed) return;
-                    try { w.Activate(); w.FocusSurface(); } catch { }
-                }));
-            }
-            catch { }
+                    w.Activate();
+                    w.FocusSurface();
+                    if (w.SurfaceHasFocus) { grab.Stop(); grab.Dispose(); }
+                }
+                catch { grab.Stop(); grab.Dispose(); }
+            };
+            grab.Start();
         }
 
         /// <summary>The distinct characters of the book, for filtering the font
@@ -4756,9 +4768,9 @@ namespace Nemoviz_Book_Reader
         {
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc|" +
-                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.brf;*.brl;*.bra|" +
+                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.brf;*.brl;*.bra;*.i55;*.dxb|" +
                 Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
-                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc;*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.brf;*.brl;*.bra;*.zip;*.rar;*.7z;*.001;*.z01|" +
+                Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc;*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.brf;*.brl;*.bra;*.i55;*.dxb;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
         }
 
@@ -4999,5 +5011,6 @@ namespace Nemoviz_Book_Reader
         }
     }
 }
+
 
 

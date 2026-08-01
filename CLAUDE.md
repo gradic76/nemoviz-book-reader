@@ -2008,6 +2008,34 @@ is meant to live in. It now forwards the whole set.
 half of the story — a cell tap moving the reading position — and the detection is
 built but has never been exercised.
 
+### The reading window opens on PLAY (Gordan, 2026-08-01)
+
+Opening the player says nothing about what the reader means to do — continue this
+book, pick another, or something else — so it must not put a second window in
+front of them before they have decided. **Play is the decision**, and it brings
+the book's properties with it. Once per book, so closing the window is not undone
+by the next pause and resume.
+
+Two traps met on the way, both worth keeping:
+
+- **A failed window must not destroy the reading it was for.** `BeginInvoke`
+  throws when the form has no handle yet — which is exactly the case while a book
+  loads at start-up — and the call sat inside the `try` that read the text, so
+  the throw landed in a catch meaning "the text could not be read" and wiped it.
+  F9 then refused with the text read, the sync map loaded and 3 674 points in
+  hand. A catch that names one failure must not be able to catch another.
+- **Taking focus is the hard part, and is NOT settled.** The window appears but
+  the play path keeps putting focus back on the player's own controls, so Gordan
+  repeatedly had to fetch it with F9 — and a window nobody is standing in does
+  nothing at all, since braille and the test aid both follow FOCUS. One deferred
+  attempt was not enough; it now retries every 120 ms for about three quarters of
+  a second, stopping as soon as the surface really has it (`SurfaceHasFocus`).
+  **Still reported unreliable — needs another look.**
+
+Also open: **hybrid sync cannot be judged by ear.** Gordan tried the French and
+the Darwin and could not tell whether narrator and text stay together. This needs
+someone sighted watching the caret, and no amount of instrument work replaces it.
+
 ### What is left on the three outputs (Gordan's list, 2026-08-01)
 
 1. ~~**Make braille output open the reading window**~~ **— DONE** (`186dfff`).
@@ -3042,9 +3070,39 @@ but that is what these files happened to be. The frame is stripped by LINE, sinc
 it is drawn with letters and cannot be removed character by character without
 eating text.
 
-**Still open:** Duxbury (10 books, binary, its own translation tables); `.smb`;
-the last stray bytes (`0x60` in French integral files, `0x7C`/`0xA4` in one
-abridged, `{ | } ~` in `.i55` — probably 8-dot cells).
+**Duxbury (`.dxb`) turned out to be braille in an envelope**, not a new format:
+past the `FF D S I` header and a variable-length block of table names, 97.6% of
+the file is printable contracted braille ASCII with markup inline as
+`0x1C name 0x1F`. The parser strips the envelope and hands the cells to
+`BrfParser` — one translator, not two that can disagree. Dropping a tag without
+leaving a space welds two records into one word (`decemberthe`,
+`volumesvolume`); the braille either side is fine, only the join is lost.
+
+**`.smb` and `.bopf` are not books.** Both are companions to `.brf` files we
+already read (`4137A-7.smb` beside `4137A-7.brf`, `17722.bopf` beside
+`17722v01.brf`), so skipping them costs nothing.
+
+**Confirmed by import, 2026-08-02.** Ukrainian Braillo comes out clean; French
+keeps its accents (`adapté`, `Médiathèque`, `abrégé`), so the Latin-1 fix works
+end to end; and **Duxbury's *Faithful Place* reads the same as the `.doc` set of
+the same book** — two independent formats agreeing, which is the strongest check
+available and needs nobody to know the language.
+
+### Fine tuning still owed (2026-08-02)
+
+- **The English table is auto-detected wrongly.** `Smith_Chuck…BRF` reads "**Have**
+  can a man be Born Again" — `h` alone is the contraction for *have*, so the
+  chosen standard is not the one the file was written in (UEB vs EBAE). Same
+  cause as `Publishs` for *Publishing*. Formats are right; the table choice is
+  not. Per book it can be corrected in Properties.
+- French `<auteur>` markup arrives as text (`chauteuroi`), and `Haüy` comes out
+  `Haouy`.
+- `.i55` decorative rules survive as `\5/∷∷∷∷∷:` — the `{ | } ~` bytes, probably
+  8-dot cells.
+- Stray bytes not yet mapped: `0x60` in French integral files, `0x7C`/`0xA4` in
+  one abridged.
+- **More samples wanted** in languages not yet tested — Gordan's own sources are
+  exhausted, so free download sites are worth finding when there is time.
 
 ---
 
