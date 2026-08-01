@@ -7,13 +7,27 @@ namespace Nemoviz_Book_Reader
     /// <para><b>What it is for.</b> Braille output and the reading window are one
     /// mechanism: a screen reader shows whatever holds FOCUS. Without a braille
     /// display there is no way to see that mechanism working — which is exactly
-    /// the position we are in while testing. This makes the same mechanism
-    /// AUDIBLE instead: with it on, the reading surface SELECTS the sentence
-    /// being read rather than only moving the caret to it, and a screen reader
-    /// treats a selection as news and speaks it. Put a different voice in the
-    /// screen reader from the one in the player and it becomes obvious which
-    /// channel is saying what — the player's own speech, or the reading surface
-    /// going through the reader exactly as it would go to a display.</para>
+    /// the position we are in while testing. This makes it AUDIBLE instead: with
+    /// the aid on, each sentence is spoken by the SCREEN READER as it becomes
+    /// current. Put a different voice in the reader from the one in the player
+    /// and it is immediately obvious which channel is saying what.</para>
+    ///
+    /// <para><b>Selecting the sentence is not enough — measured.</b> The first
+    /// version of this aid only moved the selection, on the strength of §8l's
+    /// note that a selection is "news" a reader announces. It is not, here: the
+    /// surface's text is written ONCE now and only the selection travels, so
+    /// there is no change of the kind that spoke last time. Nothing was read.
+    /// So the sentence is now announced explicitly, through the two channels §11
+    /// already uses — a UIA notification, which JAWS hears, and the NVDA client,
+    /// which NVDA hears; each is a no-op under the other reader, so neither
+    /// double-speaks. The selection is kept anyway, since it is what a display
+    /// would be showing.</para>
+    ///
+    /// <para><b>Be clear about what this proves.</b> It is NBR pushing text to
+    /// the reader, not the reader collecting it by following focus. It answers
+    /// WHAT would reach a display and WHEN, which is the question being asked
+    /// while there is no display — but it is not the focus path itself, and a
+    /// pass here is not a substitute for trying real hardware.</para>
     ///
     /// <para><b>Why this is not simply how the surface works.</b> Because it was,
     /// and it was wrong. §8l records the measurement: selecting carried braille
@@ -23,12 +37,13 @@ namespace Nemoviz_Book_Reader
     /// deliberately reintroduces a fault, because for a hearing test the
     /// commentary IS the signal.</para>
     ///
-    /// <para><b>To remove it</b> — delete this file and the three call sites that
-    /// name <c>ReadingDiagnostics</c>: the one in <c>Form1.UpdateReadingSurface</c>,
-    /// the Ctrl+Shift+H case in <c>Form1.ProcessCmdKey</c>, and the forwarding
-    /// entry in <c>ReadingWindow.ProcessCmdKey</c>. Nothing else refers to it and
-    /// nothing persists it, so a removed build behaves as though it never
-    /// existed.</para>
+    /// <para><b>To remove it</b> — delete this file and every line that names
+    /// <c>ReadingDiagnostics</c>: two in <c>Form1.UpdateReadingSurface</c> (the
+    /// placement and the announcement), the Ctrl+Shift+H case in
+    /// <c>Form1.ProcessCmdKey</c>, the forwarding entry in
+    /// <c>ReadingWindow.ProcessCmdKey</c>, and the <c>Compile</c> line in the
+    /// csproj. Nothing else refers to it and nothing persists it, so a removed
+    /// build behaves as though it never existed.</para>
     ///
     /// <para><b>Its strings are English literals, on purpose.</b> §10 makes
     /// en.lang the single source of user-visible text, and this is the one

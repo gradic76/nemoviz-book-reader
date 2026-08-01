@@ -3922,6 +3922,18 @@ namespace Nemoviz_Book_Reader
             // through their screen reader. Off unless switched on; delete the file
             // and this line to remove it.
             ReadingDiagnostics.Place(tbReadingSurface, start, s);
+            // Selecting the sentence does NOT make a reader announce it — measured,
+            // and the reason is that the text is written once now and only the
+            // selection travels, so there is no change event of the kind that
+            // spoke last time. The aid therefore SAYS the sentence, through the
+            // same two channels §11 already uses (UIA notification for JAWS, the
+            // NVDA client for NVDA), each a no-op under the other reader.
+            //
+            // Note what this does and does not prove: it is NBR pushing the text
+            // to the reader, not the reader picking it up by following focus. It
+            // shows WHAT would reach a display and WHEN — which is the question
+            // being asked — but it is not itself the focus path.
+            if (ReadingDiagnostics.Highlight) AnnounceToScreenReader(null, s);
             lastCaretSet = tbReadingSurface.SelectionStart;   // ours, not a routing key
             // Stamped so the braille lag can be MEASURED rather than guessed from
             // two screenshots. The braille side is read out of NVDA's viewer over
