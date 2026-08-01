@@ -2857,6 +2857,20 @@ namespace Nemoviz_Book_Reader
                         keepAlive.SetDevice(appSettings.AudioDevice);
                     }
                     keepAlive.Start();
+
+                    // The reading window comes up on PLAY, not on load (Gordan,
+                    // 2026-08-01). Opening the player says nothing about what you
+                    // mean to do — continue this book, pick another, or something
+                    // else entirely — so it must not put a second window in front
+                    // of you before you have decided. Play IS the decision, and it
+                    // brings the book's properties with it, this one among them.
+                    //
+                    // Once per book: closing the window should not be undone by
+                    // the next pause and resume.
+                    if (!readingWindowOffered && currentBook != null && currentBook.OpensReadingWindow)
+                    {
+                        readingWindowOffered = true;
+                    }
                 }
                 else if (keepAlive != null) keepAlive.Stop();
             }
@@ -3630,6 +3644,10 @@ namespace Nemoviz_Book_Reader
         /// fault for a silent one — the book that asked for a window would open
         /// without it and say nothing. So it waits for the handle instead, once,
         /// and unsubscribes itself.</para></summary>
+        /// <summary>False until this book's window has been offered once, so
+        /// closing it is not undone by the next pause and resume.</summary>
+        private bool readingWindowOffered;
+
         private void OpenReadingWindowWhenReady()
         {
             if (currentBook == null || !currentBook.OpensReadingWindow) return;
@@ -3693,7 +3711,6 @@ namespace Nemoviz_Book_Reader
             // which is precisely the "it turned up on its own" Gordan saw.
             //
             // A failure to raise the window must not destroy the reading.
-            OpenReadingWindowWhenReady();
         }
 
         private void LoadTextBookPlayback(bool autoPlay)
@@ -3743,7 +3760,6 @@ namespace Nemoviz_Book_Reader
             // and a book loaded at start-up has none. Here the throw would have
             // escaped into whatever called this rather than merely losing the
             // window — the same trap, one step worse.
-            OpenReadingWindowWhenReady();
 
             // Cache the character count for the reading-time estimate.
             currentBook.TextChars = tts.TotalChars;
@@ -4577,6 +4593,7 @@ namespace Nemoviz_Book_Reader
             double speed = currentSpeed / 100.0;
             mpv_set_property_string(mpvHandle, "speed",
                 speed.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            readingWindowOffered = false;
 
             // Whatever the last book left behind is not this book. Cleared before
             // either branch so no path can forget to.
@@ -4921,4 +4938,5 @@ namespace Nemoviz_Book_Reader
         }
     }
 }
+
 
