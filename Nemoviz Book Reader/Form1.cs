@@ -1111,6 +1111,10 @@ namespace Nemoviz_Book_Reader
                     BtnTimer_Click(null, EventArgs.Empty);
                     return true;
 
+                case Keys.F9:
+                    ToggleReadingWindow();
+                    return true;
+
                 case Keys.Enter:
                     if (this.ActiveControl is Button btn)
                         btn.PerformClick();
@@ -3025,6 +3029,70 @@ namespace Nemoviz_Book_Reader
         /// focusing something sensible. It also refreshes the text first: the
         /// box is a snapshot, and arriving at a stale one is worse than not
         /// arriving at all.</para></summary>
+        private ReadingWindow readingWindow;
+
+        /// <summary>Opens or closes the on-screen reading view (F9).
+        ///
+        /// <para>It is a toggle rather than two commands because it is one place
+        /// you are either in or not, and because a reader who opened it by
+        /// accident needs the same key to get back — Escape works too, but only
+        /// once focus is inside it.</para>
+        ///
+        /// <para>The window BORROWS <see cref="tbReadingSurface"/> and returns it
+        /// on close, so the text a screen reader tracks is the same control in
+        /// both places. Nothing here duplicates it.</para></summary>
+        private void ToggleReadingWindow()
+        {
+            if (readingWindow != null && !readingWindow.IsDisposed)
+            {
+                readingWindow.Close();
+                return;
+            }
+            // Same low "no go" beep the other book keys give on an empty player.
+            if (currentBook == null || tts == null) { tones.Play(300, 150); return; }
+            EnsureReadingSurface();
+            LoadReadingSurface();
+
+            var mode = (VisualMode)(currentBook.TextVisualMode >= 0 && currentBook.TextVisualMode <= 2
+                                    ? currentBook.TextVisualMode : 0);
+            readingWindow = new ReadingWindow(this, tbReadingSurface, mode,
+                () => DistinctBookChars(),
+                k => { Message m = new Message(); ProcessCmdKey(ref m, k); });
+            readingWindow.FormClosed += (s, e) =>
+            {
+                readingWindow = null;
+                // Back on the player it is parked, not shown: §8l wants it out of
+                // the way of the eye but still in the accessibility tree, which is
+                // what the off-client-area trick gives (§8k).
+                if (tbReadingSurface != null)
+                    tbReadingSurface.SetBounds(12, ClientSize.Height + 4, ClientSize.Width - 24, 44);
+                Activate();
+            };
+            readingWindow.Show(this);
+        }
+
+        /// <summary>The distinct characters of the book, for filtering the font
+        /// list. Measured on the real text rather than derived from the language,
+        /// because a Croatian book can quote Greek (§8l).</summary>
+        private char[] DistinctBookChars()
+        {
+            var set = new System.Collections.Generic.HashSet<char>();
+            try
+            {
+                string t = tts != null ? tts.FullText : null;
+                if (string.IsNullOrEmpty(t)) return new char[0];
+                // A sample is enough and keeps this instant on a long book; the
+                // opening pages carry the script and the accented letters.
+                int take = Math.Min(t.Length, 20000);
+                for (int i = 0; i < take; i++)
+                    if (!char.IsWhiteSpace(t[i]) && !char.IsControl(t[i])) set.Add(t[i]);
+            }
+            catch { }
+            var arr = new char[set.Count];
+            set.CopyTo(arr);
+            return arr;
+        }
+
         private void ToggleInfoBoxFocus()
         {
             if (tbInfo == null) return;

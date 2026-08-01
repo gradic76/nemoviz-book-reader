@@ -859,7 +859,9 @@ namespace Nemoviz_Book_Reader
             cmbTVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.TwoRows"));
             cmbTVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.FullInstant"));
             cmbTVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.FullScrolling"));
-            cmbTVisualMode.SelectedIndex = 0;
+            cmbTVisualMode.SelectedIndex = book.TextVisualMode >= 0 && book.TextVisualMode < 3
+                ? book.TextVisualMode : 0;
+            chkTVisual.Checked = book.TextVisual;
             box.Controls.Add(cmbTVisualMode);
 
             yy += 30;
@@ -965,6 +967,12 @@ namespace Nemoviz_Book_Reader
             book.TextWpm = numTWpm != null ? (int)numTWpm.Value : -1;
             book.TextVolume = numTVolume != null ? (int)numTVolume.Value : -1;
             book.TextPitch = numTPitch != null ? (int)numTPitch.Value : -99;
+            // The visual-output controls were scaffolding until now: they were
+            // built, shown and read by nobody, so every visit forgot the last
+            // choice. They are per book, like the voice.
+            book.TextVisual = chkTVisual != null && chkTVisual.Checked;
+            book.TextVisualMode = cmbTVisualMode != null && cmbTVisualMode.SelectedIndex >= 0
+                ? cmbTVisualMode.SelectedIndex : 0;
             // File the numbers under the voice they were set for — every voice this
             // book has been read with keeps its own, so coming back to one restores
             // it instead of inheriting whatever was used last.

@@ -538,6 +538,7 @@ Hint.Text2=How the text looks on screen while it is read: what is highlighted, a
 ; Captions stay short; the explanation belongs in the hint, per the 30-character
 ; rule. The three buttons repeat the player's transport, which still owns it.
 Reading.Title=Reading
+Btn.Reading.Accessible=Reading view, F9
 Reading.Back=Back
 Reading.Back.Accessible=Back one step
 Reading.PlayPause=Play/Pause

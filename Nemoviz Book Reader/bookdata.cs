@@ -90,6 +90,15 @@ namespace Nemoviz_Book_Reader
         // activation gets the question. An empty TextVoice IS "no voice assigned".
         public int TextVolume { get; set; }
         public int TextPitch { get; set; }
+        /// <summary>Show this book's text on screen while it is read, and how —
+        /// 0 two rows, 1 full screen instant, 2 full screen scrolling. Per book,
+        /// like the voice: what suits a novel need not suit a textbook.
+        ///
+        /// <para>The Properties controls for these existed as scaffolding for a
+        /// while and were never written anywhere, so every visit forgot what the
+        /// last one chose.</para></summary>
+        public bool TextVisual { get; set; }
+        public int TextVisualMode { get; set; }
         /// <summary>How each voice was set up while reading THIS book, so going
         /// back to a voice restores the speed/volume/pitch it was read at rather
         /// than inheriting the previous voice's.</summary>
@@ -197,6 +206,9 @@ namespace Nemoviz_Book_Reader
             TextVolume = tvol;
             int.TryParse(ini.Read("Settings", "TextPitch", "-99"), out int tpit);
             TextPitch = tpit;
+            TextVisual = ini.Read("Settings", "TextVisual", "0") == "1";
+            int.TryParse(ini.Read("Settings", "TextVisualMode", "0"), out int tvm);
+            TextVisualMode = tvm >= 0 && tvm <= 2 ? tvm : 0;
             TextLanguage = ini.Read("Book", "Language", "");
             // Reading a book off the shelf registers its language too, not only
             // saving one. Without this an existing library stays invisible to
@@ -927,6 +939,8 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextVoice", TextVoice ?? "");
             ini.Write("Settings", "TextVolume", TextVolume.ToString());
             ini.Write("Settings", "TextPitch", TextPitch.ToString());
+            ini.Write("Settings", "TextVisual", TextVisual ? "1" : "0");
+            ini.Write("Settings", "TextVisualMode", TextVisualMode.ToString());
             ini.Write("Book", "Language", TextLanguage ?? "");
             // Tell Settings this language exists in the library, so a voice can be
             // chosen for it even when nothing installed speaks it.
