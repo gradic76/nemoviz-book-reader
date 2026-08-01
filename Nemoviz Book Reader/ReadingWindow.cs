@@ -396,8 +396,28 @@ namespace Nemoviz_Book_Reader
             // Escape, main windows do not — and this is dialog-class (Gordan).
             if (keyData == Keys.Escape) { Close(); return true; }
 
-            // Everything else the player owns goes back to the player: it decides
-            // playback, and nothing about reading is decided in this window.
+            // The two keys this window owns.
+            switch (keyData)
+            {
+                case Keys.Oemplus: case Keys.Add:
+                    ChangeSize(+2); return true;
+                case Keys.OemMinus: case Keys.Subtract:
+                    ChangeSize(-2); return true;
+            }
+
+            // EVERYTHING ELSE the player owns goes back to the player — the whole
+            // shortcut set, not just the transport. If this window is where a
+            // braille reader lives (see §8l), then from inside it they must still
+            // reach the Library, Go To, the bookmarks and the timer; forwarding
+            // only Space and the arrows made it a room with no doors.
+            //
+            // It also happens to be what makes a braille display's own keys work.
+            // A display sends commands to the SCREEN READER, not to Windows, and
+            // both readers can map one of its keys to "emulate a system key" — at
+            // which point an ordinary keystroke arrives here and nothing can tell
+            // it from the keyboard. Nothing to build for that; it just has to not
+            // be swallowed. Simple, modifier-free keys are the easy ones to map,
+            // which is a second reason the F-key set earns its place.
             switch (keyData)
             {
                 case Keys.Space:
@@ -405,12 +425,20 @@ namespace Nemoviz_Book_Reader
                 case Keys.Shift | Keys.Left: case Keys.Shift | Keys.Right:
                 case Keys.Shift | Keys.Up: case Keys.Shift | Keys.Down:
                 case Keys.Control | Keys.Left: case Keys.Control | Keys.Right:
+                case Keys.F1: case Keys.F2: case Keys.F3: case Keys.F4:
+                case Keys.F5: case Keys.F6: case Keys.F7: case Keys.F8:
+                case Keys.Alt | Keys.Enter:
+                case Keys.Control | Keys.O:
+                case Keys.Control | Keys.G: case Keys.Control | Keys.T:
+                case Keys.Control | Keys.B:
                     forwardKey?.Invoke(keyData);
                     return true;
-                case Keys.Oemplus: case Keys.Add:
-                    ChangeSize(+2); return true;
-                case Keys.OemMinus: case Keys.Subtract:
-                    ChangeSize(-2); return true;
+            }
+            // Ctrl+1..9 — the percentage jumps.
+            if ((keyData & Keys.Control) == Keys.Control)
+            {
+                Keys k = keyData & Keys.KeyCode;
+                if (k >= Keys.D1 && k <= Keys.D9) { forwardKey?.Invoke(keyData); return true; }
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }

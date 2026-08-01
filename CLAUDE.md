@@ -1954,6 +1954,36 @@ is what §8l hoped for when it said the two "may then be one feature, not two".
   own controls (transport, size, font), so focus can still wander off the text
   *inside* it. That is exactly the gap it covers.
 
+### A braille display's own keys already work — there is nothing to build
+
+Gordan asked whether a display's keyboard emulation could drive NBR's navigation.
+It largely already does, and the reason is worth knowing: **a display does not
+send keystrokes to Windows.** It sends commands to the SCREEN READER over its own
+protocol, and both NVDA and JAWS offer "emulate a system key" as an assignable
+action. Once the user maps one of their display's keys to, say, F9, an ordinary
+keystroke arrives and **nothing in the application can tell it from the
+keyboard**. Equally, an application cannot request or configure any of it — the
+mapping belongs to the reader, and to the user.
+
+So the only two things in our hands are these:
+
+- **Keep the shortcuts simple enough to be worth mapping.** Modifier-free
+  function keys are the easy case. Moving off letter keys (§11) was done because
+  the seek combo swallows them as type-ahead — that it is also the best possible
+  choice for display emulation is a happy accident, but it is a reason to keep
+  them that way.
+- **Document them**, since the user has to know what is worth mapping. That goes
+  in the HTML manual.
+
+**And it exposed a real gap, now fixed:** the reading window forwarded only the
+transport keys, so from inside it the Library, Go To, the bookmarks and the timer
+were unreachable — a room with no doors, and precisely the room a braille reader
+is meant to live in. It now forwards the whole set.
+
+**Still unproven and still needing hardware: routing keys.** Those are the other
+half of the story — a cell tap moving the reading position — and the detection is
+built but has never been exercised.
+
 ### What is left on the three outputs (Gordan's list, 2026-08-01)
 
 1. **Make braille output open the reading window**, per the decision above.
