@@ -2014,8 +2014,39 @@ built but has never been exercised.
    `TextBraille` and `TextBrailleTable` persist beside `TextVisual` /
    `TextVisualMode`, and `BookData.OpensReadingWindow` is what the player now
    tests, so either switch brings the window up. Focus already landed in the
-   surface on `Shown`, so nothing was needed there. The two switches read as:
-   **braille = the window opens; visual = how it looks.**
+   surface on `Shown`, so nothing was needed there.
+
+   **The convention the two switches follow (Gordan, 2026-08-01, `563d290`).**
+   The starting question was whether visual should imply braille or whether
+   braille stays a separate tick. The answer turned on a fact worth stating
+   plainly: **visual output gives braille whether we ask for it or not.** The
+   display is fed by the screen reader following FOCUS into the reading surface,
+   so nothing in NBR enables it and nothing in NBR could disable it. A check box
+   claiming to switch braille on or off would be a lie the display would
+   immediately contradict. So they are not two outputs — they are one output and
+   one declaration about the reader.
+
+   - **Use visual stands alone.** On, off, an ordinary sighted setting; opens no
+     braille channel of ours. A reader who *has* a display still gets braille,
+     and that is the platform working, not a leak.
+   - **Use braille brings visual with it.** Ticking it turns the window on,
+     drops it to the smallest form (two rows, the subtitle strip) and
+     **disables** the visual box so it cannot be pulled out from under. Untick
+     braille and the box comes back, still ticked, to do as one likes with.
+
+   Two implementation notes that are easy to get wrong: the mode is set on the
+   **transition**, in the check box's own handler — doing it in
+   `UpdateTextEnabled` would snap the choice back to two rows every time
+   anything else on the page was touched. And `UpdateTextEnabled` **repairs** as
+   well as enforces, because the braille group is built *before* the visual one
+   (on load the transition handler fires while `chkTVisual` is still `null`) and
+   because a book stored while the switches were independent can carry braille
+   on with visual off.
+
+   Accessibility consequence, handled: **Windows skips a disabled control in the
+   tab order**, so a screen-reader user never lands on the greyed visual box and
+   would have no way to learn it is on, let alone why. The glass says *"Required
+   by braille output"* under it — the one place they will hear it.
 
    The table combo deliberately does **not** reuse `book.BrailleTable`: that one
    back-translates a `.brf` being *read*, this one describes a text book being
