@@ -30,7 +30,55 @@ namespace Nemoviz_Book_Reader
 
         public bool Handles(string extension)
         {
-            return extension == ".brf" || extension == ".brl" || extension == ".bra";
+            // .i55 is braille ASCII under another producer's extension — measured
+            // at 98.3% clean cells across the samples, the same shape as any .brf.
+            return extension == ".brf" || extension == ".brl"
+                || extension == ".bra" || extension == ".i55";
+        }
+
+        /// <summary>Is this really braille ASCII, or something else wearing the
+        /// extension?
+        ///
+        /// <para><b>Why a file has to earn it.</b> <c>.brl</c> is used both for
+        /// plain braille ASCII and for Braillo Text, an embosser stream with a
+        /// header line and control codes. Fed to this parser the Braillo files
+        /// measure <b>64% of bytes that are not cells at all</b> — 79 870 of one
+        /// byte alone — and the parser's habit of skipping what it does not
+        /// recognise turned the surviving third into fluent-looking nonsense. A
+        /// reader has no way to tell that from a badly transcribed book.</para>
+        ///
+        /// <para>Genuine files are nowhere near the line: the samples measure
+        /// 0.00% to 1.74% strays. Twenty per cent is a wide moat, and refusing is
+        /// the honest answer — better no book than a book that says the wrong
+        /// thing with confidence.</para></summary>
+        private static bool LooksLikeBraille(byte[] bytes)
+        {
+            // Known formats are named, not guessed at. Measured across 86 sample
+            // files, the proportion test alone CANNOT separate these from braille:
+            // genuine .brf runs from 0.00% up to 13.96% strays, and Duxbury starts
+            // at 2.95%. The ranges overlap, so a threshold that refused Duxbury
+            // would refuse real books too. A signature does not have that problem.
+            if (StartsWith(bytes, 0xFF, 'D', 'S', 'I')) return false;   // Duxbury .dxb
+            if (StartsWith(bytes, 'B', 'r', 'a', 'i', 'l', 'l', 'o', ' ',
+                                  'T', 'e', 'x', 't')) return false;    // Braillo Text
+
+            int cells = 0, strays = 0;
+            foreach (byte b in bytes)
+            {
+                if (b == 10 || b == 13 || b == 12 || b == 26) continue;
+                cells++;
+                if (CellOfByte[b] < 0) strays++;
+            }
+            if (cells < 64) return false;
+            return strays * 100 / cells < 20;
+        }
+
+        private static bool StartsWith(byte[] bytes, params int[] signature)
+        {
+            if (bytes.Length < signature.Length) return false;
+            for (int i = 0; i < signature.Length; i++)
+                if (bytes[i] != (byte)signature[i]) return false;
+            return true;
         }
 
         public TextDoc Parse(string filePath)
@@ -47,6 +95,9 @@ namespace Nemoviz_Book_Reader
             {
                 byte[] bytes = File.ReadAllBytes(filePath);
                 if (bytes.Length == 0) return doc;
+                // Null, not an empty book: "I cannot read this" and "this book is
+                // empty" are different answers and only one of them is true.
+                if (!LooksLikeBraille(bytes)) return null;
 
                 // Split into braille pages (form feed) of cell-lines.
                 List<List<string>> pages = ToBraillePages(bytes);

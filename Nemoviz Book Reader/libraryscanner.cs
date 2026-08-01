@@ -22,7 +22,7 @@ namespace Nemoviz_Book_Reader
               ".aiff", ".aif", ".ac3", ".amr", ".weba", ".webm", ".au", ".voc" };
         public static readonly string[] TextExtensions =
             { ".epub", ".txt", ".pdf", ".fb2", ".mobi", ".azw", ".azw3", ".doc",
-              ".brf", ".brl", ".bra" };
+              ".brf", ".brl", ".bra", ".i55" };
         public static readonly string[] ArchiveExtensions =
             { ".zip", ".rar", ".7z" };
 
