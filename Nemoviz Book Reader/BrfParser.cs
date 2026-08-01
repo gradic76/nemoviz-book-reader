@@ -90,11 +90,24 @@ namespace Nemoviz_Book_Reader
         /// null auto-detects.</summary>
         public TextDoc Parse(string filePath, string tableId)
         {
+            try { return ParseBytes(File.ReadAllBytes(filePath), tableId); }
+            catch { return new TextDoc(); }
+        }
+
+        /// <summary>The braille pipeline, from bytes rather than from a path.
+        ///
+        /// <para>Exposed so a container format can hand over the braille it was
+        /// carrying — Duxbury wraps ordinary braille ASCII in a binary envelope
+        /// with markup, and once that is off, what is left is a .brf in every
+        /// respect. Re-implementing the cell mapping, the page splitting, the
+        /// table detection and the box-frame handling for each such wrapper is
+        /// how they come to disagree with each other.</para></summary>
+        internal TextDoc ParseBytes(byte[] bytes, string tableId)
+        {
             var doc = new TextDoc();
             try
             {
-                byte[] bytes = File.ReadAllBytes(filePath);
-                if (bytes.Length == 0) return doc;
+                if (bytes == null || bytes.Length == 0) return doc;
                 // Null, not an empty book: "I cannot read this" and "this book is
                 // empty" are different answers and only one of them is true.
                 if (!LooksLikeBraille(bytes)) return null;

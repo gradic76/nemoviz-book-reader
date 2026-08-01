@@ -202,6 +202,7 @@
     <Compile Include="MobiParser.cs" />
     <Compile Include="DocParser.cs" />
     <Compile Include="LibLouis.cs" />
+    <Compile Include="DuxburyParser.cs" />
     <Compile Include="BrailloParser.cs" />
     <Compile Include="BrfParser.cs" />
     <Compile Include="MpvAudioDevices.cs" />
@@ -321,5 +322,6 @@
     <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets'))" />
   </Target>
 </Project>
+
 
 

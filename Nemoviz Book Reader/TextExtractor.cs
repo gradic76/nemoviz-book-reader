@@ -56,6 +56,7 @@ namespace Nemoviz_Book_Reader
             new PdfParser(),
             new MobiParser(),
             new DocParser(),
+            new DuxburyParser(),
             new BrailloParser(),
             new BrfParser(),
         };
@@ -114,4 +115,5 @@ namespace Nemoviz_Book_Reader
         }
     }
 }
+
 
