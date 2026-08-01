@@ -1924,6 +1924,24 @@ sized, styled and placed as the display. That keeps braille behaving identically
 either way, and it is what makes visual and braille "one feature, not two" as
 this section hoped rather than two things that must be kept in step.
 
+### What is left on the three outputs (Gordan's list, 2026-08-01)
+
+1. **Finish joining braille and visual.** The window and the parked placement are
+   both built and measured; what is missing is the **braille switch**.
+   `chkTBraille` in Properties is still scaffolding exactly as the visual pair
+   was until today — built, shown, read by nobody. And "braille on" means one
+   concrete thing: **does the reading surface take focus**, because that is what
+   braille follows. Persist it beside `TextVisual` / `TextVisualMode`.
+2. **Bundle the fonts.** Measured and licence-checked already (see above);
+   the work left is dropping regular + bold into the tree and loading them
+   **privately** (`PrivateFontCollection` / `AddFontMemResourceEx`) — installing
+   them would modify the user's Windows, and NBR is portable.
+3. **Test the four combinations on a real book**: speech alone, speech+braille,
+   speech+visual, speech+braille+visual. Note that the first two differ *only in
+   where focus sits*, which is precisely the thing worth watching.
+
+Still scaffolding after that: highlight, and the three colour pickers.
+
 ### Still open
 
 - **The WPM floor.** 80 WPM was chosen for *speech*; driving **fingers** it is
