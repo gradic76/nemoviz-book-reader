@@ -111,7 +111,57 @@ namespace Nemoviz_Book_Reader
                 // .brf files are conventionally uppercase, but accept lowercase too.
                 if (c >= 'A' && c <= 'Z') map[char.ToLowerInvariant(c)] = dots;
             }
+            AddLatin1Cells(map);
             return map;
+        }
+
+        /// <summary>Adds the accented letters that French braille files write as
+        /// themselves, taken from the liblouis table NBR already ships.
+        ///
+        /// <para><b>Why they were being lost.</b> Braille ASCII is a 7-bit
+        /// convention, and a byte outside it is skipped as "not a cell". French
+        /// producers write é, è, à, ê, ç and the diaeresis as the Latin-1
+        /// characters themselves, so those cells were silently dropped — measured
+        /// at <b>5.0% of every cell</b> in the sample files, 19 068 of them in one
+        /// book, and the reader would never know: the text simply came out with
+        /// its accented letters missing.</para>
+        ///
+        /// <para><b>Read, not invented.</b> The dot patterns come out of
+        /// <c>fr-bfu-comp6.utb</c>, the French table already in
+        /// <c>louis\tables</c> — é is 123456, è is 2346, à is 12356, ê is 126,
+        /// the diaeresis 46. Writing those from memory is exactly the kind of
+        /// thing that looks right and is not.</para>
+        ///
+        /// <para><b>Safe for every other file.</b> These are bytes 0x80 and up,
+        /// which braille ASCII never uses: the American, Vietnamese and
+        /// upper-case samples measured zero of them. Nothing that parses today
+        /// can parse differently tomorrow.</para></summary>
+        private static void AddLatin1Cells(int[] map)
+        {
+            try
+            {
+                string path = LibLouis.TablePath("fr-bfu-comp6.utb");
+                if (path == null || !File.Exists(path)) return;
+                var rx = new System.Text.RegularExpressions.Regex(
+                    @"^\s*(?:base\s+)?(?:lowercase|uppercase|letter|sign|punctuation|math)\s+\\x00([0-9A-Fa-f]{2})\s+([0-8]+)",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                foreach (string line in File.ReadAllLines(path))
+                {
+                    var m = rx.Match(line);
+                    if (!m.Success) continue;
+                    int b = Convert.ToInt32(m.Groups[1].Value, 16);
+                    if (b < 0x80 || b > 0xFF || map[b] >= 0) continue;   // never overwrite ASCII
+                    int dots = 0;
+                    bool ok = true;
+                    foreach (char d in m.Groups[2].Value)
+                    {
+                        if (d < '1' || d > '6') { ok = false; break; }   // 7/8-dot: not our cells
+                        dots |= 1 << (d - '1');
+                    }
+                    if (ok && dots > 0) map[b] = dots;
+                }
+            }
+            catch { }   // a missing table is a file that keeps parsing as it did
         }
 
         /// <summary>Converts the file to pages of lines, each line a string of Unicode
