@@ -3615,6 +3615,44 @@ namespace Nemoviz_Book_Reader
             tts.SetAudioDevice(appSettings.AudioDevice);
         }
 
+        /// <summary>Raises the reading window for a book that asks for it — now,
+        /// or as soon as the player is in a state to raise anything.
+        ///
+        /// <para>Both callers used to do this inline with a bare
+        /// <c>BeginInvoke</c>, and that throws when the form has no handle yet,
+        /// which is exactly the case while a book is being loaded at start-up.
+        /// On the hybrid path the throw was caught by the surrounding handler and
+        /// wiped the text that had just been read; the window then turned up
+        /// later, when something else reloaded the book with a handle in place,
+        /// which is the "it appeared on its own" Gordan described.</para>
+        ///
+        /// <para>Simply skipping when there is no handle would trade a visible
+        /// fault for a silent one — the book that asked for a window would open
+        /// without it and say nothing. So it waits for the handle instead, once,
+        /// and unsubscribes itself.</para></summary>
+        private void OpenReadingWindowWhenReady()
+        {
+            if (currentBook == null || !currentBook.OpensReadingWindow) return;
+            if (readingWindow != null) return;
+
+            if (!IsHandleCreated)
+            {
+                EventHandler once = null;
+                once = (s, e) => { HandleCreated -= once; OpenReadingWindowWhenReady(); };
+                HandleCreated += once;
+                return;
+            }
+            try
+            {
+                BeginInvoke((Action)(() =>
+                {
+                    if (currentBook != null && currentBook.OpensReadingWindow && readingWindow == null)
+                        ToggleReadingWindow();
+                }));
+            }
+            catch { }
+        }
+
         /// <summary>Reads a hybrid's text in for the reading window and opens it
         /// if the book asks for it.
         ///
@@ -3642,13 +3680,20 @@ namespace Nemoviz_Book_Reader
                 // narrator read on, which is worse than no window at all.
                 if (sync == null || sync.IsEmpty) { readingText = null; return; }
 
-                if (currentBook.OpensReadingWindow && readingWindow == null)
-                    BeginInvoke((Action)(() =>
-                    {
-                        if (currentBook != null && currentBook.OpensReadingWindow) ToggleReadingWindow();
-                    }));
             }
-            catch { readingText = null; }
+            catch { readingText = null; return; }
+
+            // The automatic open is a SEPARATE try, and this is why. It used to
+            // sit inside the one above, and BeginInvoke throws when the form has
+            // no handle yet — which is exactly the case while a book is being
+            // loaded at start-up. The throw landed in that catch, which wiped
+            // readingText, and F9 then refused with the text read, the sync map
+            // loaded and 3 674 points in hand. The window only appeared later,
+            // after something else had reloaded the book with a handle in place,
+            // which is precisely the "it turned up on its own" Gordan saw.
+            //
+            // A failure to raise the window must not destroy the reading.
+            OpenReadingWindowWhenReady();
         }
 
         private void LoadTextBookPlayback(bool autoPlay)
@@ -3694,8 +3739,11 @@ namespace Nemoviz_Book_Reader
             // so the text has to live in a control the user can be in; the reading
             // window IS that control. Asking for braille and getting no window
             // would be asking for braille and getting nothing.
-            if (currentBook.OpensReadingWindow && readingWindow == null)
-                BeginInvoke((Action)(() => { if (currentBook != null && currentBook.OpensReadingWindow) ToggleReadingWindow(); }));
+            // Guarded like the hybrid one: BeginInvoke throws with no handle yet,
+            // and a book loaded at start-up has none. Here the throw would have
+            // escaped into whatever called this rather than merely losing the
+            // window — the same trap, one step worse.
+            OpenReadingWindowWhenReady();
 
             // Cache the character count for the reading-time estimate.
             currentBook.TextChars = tts.TotalChars;
