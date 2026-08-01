@@ -40,18 +40,24 @@ namespace Nemoviz_Book_Reader
         /// does nothing. Cancels any in-progress speech first so a fast key
         /// repeat announces only the latest value instead of queueing stale
         /// ones (the NVDA equivalent of the UIA MostRecent behaviour).</summary>
-        public static void Speak(string text)
+        /// <returns>True if the text was actually handed to a running NVDA.
+        /// Callers that ignore it are unaffected; it exists because "nothing was
+        /// spoken" and "NVDA was not there to speak it" look identical from the
+        /// outside, and telling them apart is the difference between fixing the
+        /// right thing and fixing three wrong ones.</returns>
+        public static bool Speak(string text)
         {
             if (dllUnavailable || string.IsNullOrEmpty(text))
-                return;
+                return false;
 
             try
             {
                 if (nvdaController_testIfRunning() != 0)
-                    return; // NVDA not running
+                    return false; // NVDA not running
 
                 nvdaController_cancelSpeech();
                 nvdaController_speakText(text);
+                return true;
             }
             catch (DllNotFoundException)
             {
@@ -65,6 +71,7 @@ namespace Nemoviz_Book_Reader
             {
                 // Transient RPC hiccup (e.g. NVDA closing mid-call) — ignore.
             }
+            return false;
         }
 
         /// <summary>Puts a line on the braille display without caring what has

@@ -60,9 +60,36 @@ namespace Nemoviz_Book_Reader
         public static string Toggle()
         {
             Highlight = !Highlight;
+            Trace("TOGGLE -> " + (Highlight ? "ON" : "OFF"));
             return Highlight
                 ? "Reading highlight on. The screen reader will speak each sentence."
                 : "Reading highlight off. Caret only.";
+        }
+
+        /// <summary>An ALWAYS-ON trace, so the next failure is read rather than
+        /// guessed at.
+        ///
+        /// <para>Three attempts at making this audible have failed, and each was
+        /// a fix to a different link in the chain — selection, then the channel,
+        /// then which window the notification came from. Guessing which link is
+        /// broken is what has been wrong: the chain has to say so itself. This
+        /// records the key press, whether the surface update is reached at all,
+        /// and what each speech channel returned.</para>
+        ///
+        /// <para>Unlike <see cref="Highlight"/> this is not switched off, because
+        /// the most likely explanation for total silence is that the switch never
+        /// came on — and a trace that only runs once the switch is on could not
+        /// report that. It goes to <c>%TEMP%\NBR-diagnostics.log</c> and is
+        /// deleted with the rest of this file.</para></summary>
+        public static void Trace(string line)
+        {
+            try
+            {
+                System.IO.File.AppendAllText(
+                    System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NBR-diagnostics.log"),
+                    System.DateTime.Now.ToString("HH:mm:ss.fff") + "  " + line + "\r\n");
+            }
+            catch { }
         }
 
         /// <summary>Puts the reading position on the surface: a selection while

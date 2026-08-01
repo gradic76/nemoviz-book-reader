@@ -3819,18 +3819,30 @@ namespace Nemoviz_Book_Reader
         private void DiagnosticAnnounce(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
-            NvdaController.Speak(text);          // NVDA; silent under JAWS
-            if (uiaNotifyUnavailable) return;
+            bool nvda = NvdaController.Speak(text);   // NVDA; silent under JAWS
+            if (uiaNotifyUnavailable) { ReadingDiagnostics.Trace("  UIA marked unavailable"); return; }
             try
             {
-                IntPtr hwnd = readingWindow != null && !readingWindow.IsDisposed
-                              ? readingWindow.Handle : this.Handle;
+                bool ownWindow = readingWindow != null && !readingWindow.IsDisposed;
+                IntPtr hwnd = ownWindow ? readingWindow.Handle : this.Handle;
                 IRawElementProviderSimple provider;
-                if (UiaHostProviderFromHwnd(hwnd, out provider) != 0 || provider == null) return;
-                UiaRaiseNotificationEvent(provider, NotificationKind.Other,
+                int hr = UiaHostProviderFromHwnd(hwnd, out provider);
+                if (hr != 0 || provider == null)
+                {
+                    ReadingDiagnostics.Trace(string.Format("  provider FAILED hr=0x{0:x}", hr));
+                    return;
+                }
+                int raise = UiaRaiseNotificationEvent(provider, NotificationKind.Other,
                                           NotificationProcessing.MostRecent, text, string.Empty);
+                ReadingDiagnostics.Trace(string.Format(
+                    "  announced: nvda={0} window={1} raiseHr=0x{2:x}",
+                    nvda, ownWindow ? "reading" : "player", raise));
             }
-            catch { uiaNotifyUnavailable = true; }
+            catch (Exception ex)
+            {
+                uiaNotifyUnavailable = true;
+                ReadingDiagnostics.Trace("  UIA THREW: " + ex.Message);
+            }
         }
 
         /// <summary>Left over from the braille-lag measurement, and now behind the
@@ -3929,7 +3941,19 @@ namespace Nemoviz_Book_Reader
 
         private void UpdateReadingSurface()
         {
-            if (tbReadingSurface == null || readingText == null || currentBook == null) return;
+            // TEMPORARY trace — the first link in the chain, and the one that
+            // would explain total silence: if the surface does not exist, or the
+            // book has no text loaded, this returns before anything can speak and
+            // every fix downstream is a fix to something that never runs.
+            if (tbReadingSurface == null || readingText == null || currentBook == null)
+            {
+                ReadingDiagnostics.Trace(string.Format(
+                    "UpdateReadingSurface EARLY RETURN: surface={0} text={1} book={2}",
+                    tbReadingSurface == null ? "null" : "ok",
+                    readingText == null ? "null" : readingText.Length.ToString(),
+                    currentBook == null ? "null" : "ok"));
+                return;
+            }
 
             // Where the reading IS, asked of whatever is doing the reading. For a
             // text book that is the TTS engine. For a hybrid it is the narration:
@@ -3975,6 +3999,9 @@ namespace Nemoviz_Book_Reader
             // to the reader, not the reader picking it up by following focus. It
             // shows WHAT would reach a display and WHEN — which is the question
             // being asked — but it is not itself the focus path.
+            ReadingDiagnostics.Trace(string.Format("SENTENCE at {0}, highlight={1}: {2}",
+                start, ReadingDiagnostics.Highlight,
+                s.Length > 40 ? s.Substring(0, 40) + "..." : s));
             if (ReadingDiagnostics.Highlight) DiagnosticAnnounce(s);
             lastCaretSet = tbReadingSurface.SelectionStart;   // ours, not a routing key
             // Stamped so the braille lag can be MEASURED rather than guessed from
