@@ -2875,6 +2875,42 @@ and the values moved back left when it went.
 
 ---
 
+## 10e′. The audio-only libmpv is in: 93.6 MB → 30.2 MB (2026-08-02)
+
+Built from our own fork, `gradic76/mpv-winbuild`, carrying one patch. **Seven CI
+runs**, and the failures are the lesson:
+
+- an option written from memory that mpv does not have (`-Dsdl2`; it has
+  `sdl2-audio`, `sdl2-video`, `sdl2-gamepad`) — an hour to find out;
+- the same option passed twice, because `mpv.cmake` expands a variable that
+  already carries it as a PAIR, so a line-matcher never saw it;
+- **and the big one: 43 video options left at their default `auto`.** Auto means
+  "on if the dependency is present", the build image has them, and mpv compiled
+  D3D11 and VAAPI sources into an audio-only build — until every one was named.
+
+The generator now reads mpv's own `meson.options` and refuses to emit a patch
+containing a name that does not exist there, or any option passed twice. Both
+earlier failures would have been caught in a second rather than an hour. **Never
+add a build option without checking it against the project's own option list.**
+
+FFmpeg is cut by CATEGORY, not by what NBR happens to use: every decoder FFmpeg
+marks audio, every filter it marks `A->A`, derived mechanically from
+`codec_desc.c` — never from `LibraryScanner.AudioExtensions`. A hand-picked list
+would silently drop the one codec a reader's book needs, and §8d could not reach
+for a filter without a rebuild.
+
+**Verified on the shipped file**, not on the artifact: GPL markers clean; 214 of
+214 audio decoders present and no video or image decoder at all, compared name by
+name; 14 of 14 sample books read for duration, decoded, and the whole §8d chain
+accepted through the real C API. Names needed normalising to compare — mpv
+reports libavcodec driver names (`8svx_exp`, `atrac3plus`, `real_144`, `g722`)
+where the enable-list carries FFmpeg's configure names (`eightsvx_exp`,
+`atrac3p`, `ra_144`, `adpcm_g722`).
+
+**Not yet checked by ear.** Rollback is one file: the 93.6 MB build is in git.
+
+---
+
 ## 10e. libmpv is an LGPL build now — keep it that way (2026-07-30)
 
 **The vendored libmpv was a GPL build, and that was a real problem for a closed

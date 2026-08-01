@@ -11,12 +11,39 @@ Last verified: 2026-07-30.
 
 libmpv (mpv) — audio playback engine
 ------------------------------------
-File     : libmpv-2.dll
-Build    : mpv-dev-lgpl-x86_64-20260730-git-74356c0fc6
-Source   : https://github.com/zhongfly/mpv-winbuild  (LGPL variant)
+File     : libmpv-2.dll   (30.2 MB)
+Build    : mpv-dev-x86_64-20260801-git-1d15686142
+Built by : NBR, from gradic76/mpv-winbuild — a fork of zhongfly/mpv-winbuild
+           carrying one patch, patch/0099-NBR-LGPL-audio-only.patch
 Upstream : https://github.com/mpv-player/mpv
 Licence  : LGPL v2.1 or later (mpv built with -Dgpl=false).
            The FFmpeg it links is stated by the build to be LGPL v3.
+
+AUDIO ONLY. This build decodes no picture of any kind — no video, no images, no
+cover art (the Library shows format icons instead). FFmpeg is configured with
+--disable-everything plus an enable-list derived MECHANICALLY from FFmpeg's own
+classification: every decoder it marks as audio, every filter it marks A->A.
+Nothing is hand-picked from what NBR happens to use today, so a book in a codec
+nobody anticipated still plays, and the sound-processing work can reach for a
+filter without needing another build.
+
+mpv itself is built with every video, GPU and hardware-decode option disabled BY
+NAME — all 48 of them. Leaving them at their default "auto" is not the same
+thing: auto means "on if the dependency is present", the build image has those
+dependencies, and mpv duly compiled D3D11 and VAAPI sources into an audio-only
+build until they were each named.
+
+Result: 93.6 MB -> 30.2 MB, a third of the size.
+
+Verified on the shipped file, not on the artifact:
+  - no libx264, libdvdnav/libdvdread, dvd://, cdda://, libx265, librubberband
+    or libsmbclient. The one remaining "x264 - core" string is FFmpeg's H.264
+    SEI parser reading a tag an encoder left behind — it is a reader, not an
+    encoder, and the same string is in every LGPL build.
+  - 214 of 214 audio decoders present, and NO video or image decoder at all,
+    compared name by name against the enable-list.
+  - 14 of 14 sample books: duration read, audio decoded, and the whole §8d
+    filter chain accepted by the real C API.
 
 IMPORTANT — this must stay an LGPL build. The ordinary Windows builds of libmpv
 are GPL: they link libx264 and libdvdnav/libdvdread, which are GPL-2, and that
