@@ -3997,7 +3997,15 @@ namespace Nemoviz_Book_Reader
                     && (readingWindow == null || readingWindow.IsDisposed
                         || GetForegroundWindow() != readingWindow.Handle)) return;
                 if (tbReadingSurface != null && tbReadingSurface.Focused) return;
-                NvdaController.Braille(sentence);
+                // Off the UI thread, for the same reason the announcement is.
+                // nvdaController_brailleMessage is an RPC into NVDA's process, and
+                // this runs ONCE PER SENTENCE — with the aid off as well, which is
+                // why turning the aid off did not stop the chopping. NBR's own
+                // speech comes from the 32-bit satellite over IPC and needs the
+                // message pump; anything that blocks the pump between sentences
+                // comes out of the reading.
+                System.Threading.ThreadPool.QueueUserWorkItem(
+                    _ => { try { NvdaController.Braille(sentence); } catch { } });
             }
             catch { }
         }
