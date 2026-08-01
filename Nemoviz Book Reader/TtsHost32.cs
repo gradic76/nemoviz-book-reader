@@ -269,26 +269,13 @@ class TtsHost32
     /// all in there. Measuring where its first audible sample sits, against the
     /// sentence it claims to be, settles that without another listening
     /// session.</para></summary>
-    private static int wavSeq;
-    private static void KeepWav(byte[] wav, string text)
-    {
-        try
-        {
-            string dir = Path.Combine(Path.GetTempPath(), "NBR-wavs");
-            Directory.CreateDirectory(dir);
-            if (wavSeq >= 14) return;                 // a handful is plenty
-            int n = wavSeq++;
-            File.WriteAllBytes(Path.Combine(dir, string.Format("{0:00}.wav", n)), wav);
-            File.WriteAllText(Path.Combine(dir, string.Format("{0:00}.txt", n)), text,
-                              Encoding.UTF8);
-        }
-        catch { }
-    }
-
     private static void SpeakWorker(string text, int myGen)
     {
+        // The buffer is kept for inspection by SapiWavPlayer itself, which both
+        // this host and the in-process backends share — the host was the wrong
+        // place for it, since the reading may never come through here at all.
         byte[] wav = TakeAhead(text) ?? Render(text);
-        if (wav != null) KeepWav(wav, text);
+        if (wav != null) HostLog("RENDERED " + wav.Length + " bytes for " + text.Length + " chars");
         if (wav != null && IsCurrent(myGen))
         {
             bool started;
