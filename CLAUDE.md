@@ -2953,6 +2953,46 @@ by default. NBR decodes AMR natively, so the usual reason for version3
 
 ---
 
+## 10f. The sound card can eat the start of every sentence (2026-08-01)
+
+**Gordan's finding, after most of a day chasing it in software.** Reading was
+losing the first word of sentence after sentence. It was not NBR. His HDMI
+output — an Ace Magic mini PC feeding a TV — powers down almost the instant the
+signal stops, and it had been kept awake all along by NVDA and JAWS, which have
+their own settings for exactly this and were on the same output. The moment the
+screen readers were moved to a Creative card (to tell the two voices apart while
+testing the reading window), nothing was holding HDMI open any more, and the
+endpoint slept in the gap between utterances. Moving a reader back onto HDMI
+fixed it instantly.
+
+**Why no amount of measuring found it, and what that cost.** Every log was
+clean, and correctly so: the utterance was handed to SAPI, SAPI reported
+speaking, and it played for its full length — 7 266 ms against 7 201 ms of
+audio, sentence after sentence. Nothing purged, nothing cancelled, the sentences
+tiled the book contiguously, and the rendered WAV even carried 96 ms of its own
+lead-in. **The loss happened past the last point software can see.** Chasing it
+produced four wrong diagnoses in a row (disk writes per sentence, UIA
+notifications, thread affinity, a look-ahead race) before Gordan recognised what
+had changed in his own setup.
+
+Two lessons worth keeping:
+
+- **When every measurement says the software is correct and the user can hear
+  that it is not, stop tightening the software.** Ask what changed outside it.
+  The question "what did you change about your machine?" was worth more than any
+  of the instrumentation.
+- **Bisecting on the first report, not the fifth**, would have shown within one
+  round that a build from three days earlier behaved identically — and therefore
+  that nothing we had written was responsible. It was Gordan who suggested it.
+
+**What NBR must do about it.** A player cannot depend on a screen reader to keep
+its output device awake — a sighted user has no screen reader, and a braille
+reader may well put speech on another card, which is precisely the arrangement
+that exposed this. NBR needs its own keep-alive on whichever device it is using.
+See §11.
+
+---
+
 ## 11. TODO (open items)
 
 - **A key fires but a keyboard SHORTCUT does not light it.** The backlight is

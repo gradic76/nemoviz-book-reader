@@ -151,37 +151,7 @@ namespace Nemoviz_Book_Reader
                 File.WriteAllBytes(path, wav);
             }
             catch { return false; }
-            KeepForInspection(wav);
             return PlayFile(path, true, WavDurationMs(wav));
-        }
-
-        /// <summary>TEMPORARY. Keeps the first few buffers actually handed to the
-        /// sound card, so their CONTENT can be measured.
-        ///
-        /// <para>It lives HERE, not in the 32-bit host where it was first put,
-        /// because that was the wrong side: the host received no SPEAK at all
-        /// during the run, the voice in use being an in-process one. This file is
-        /// compiled into both, so wherever the reading goes, the audio is
-        /// caught.</para>
-        ///
-        /// <para>The file name carries the process id, so the two cannot collide
-        /// and it is plain which side produced which.</para></summary>
-        private static int keptCount;
-        private static void KeepForInspection(byte[] wav)
-        {
-            try
-            {
-                if (keptCount >= 14) return;
-                int n = keptCount++;
-                string dir = Path.Combine(Path.GetTempPath(), "NBR-wavs");
-                Directory.CreateDirectory(dir);
-                string name = string.Format("{0:00}-pid{1}.wav", n,
-                    System.Diagnostics.Process.GetCurrentProcess().Id);
-                File.WriteAllBytes(Path.Combine(dir, name), wav);
-                Action<string> f = Log;
-                if (f != null) try { f("KEPT " + name + "  " + WavDurationMs(wav) + " ms"); } catch { }
-            }
-            catch { }
         }
 
         /// <summary>How many milliseconds of audio a rendered WAV holds, from its

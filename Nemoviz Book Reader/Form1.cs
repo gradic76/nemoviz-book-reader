@@ -86,6 +86,11 @@ namespace Nemoviz_Book_Reader
         ///
         /// <para>Cleared on every book load, so a stale one cannot survive.</para></summary>
         private string readingText = null;
+        /// <summary>Keeps the output device awake while anything is playing —
+        /// see §10f and <see cref="AudioKeepAlive"/>. Not tied to text books:
+        /// an audio book pauses too, and the same endpoint sleeps in the
+        /// same way.</summary>
+        private AudioKeepAlive keepAlive;
         private AppSettings appSettings;
         private System.Windows.Forms.Timer eventTimer;
         private System.Windows.Forms.Timer progressTimer;
@@ -2829,6 +2834,33 @@ namespace Nemoviz_Book_Reader
             isPlaying = playing;
             btnPlayPause.Text = playing ? "⏸" : "▶";
             btnPlayPause.AccessibleName = playing ? Localization.T("Btn.Pause.Accessible") : Localization.T("Btn.Play.Accessible");
+            // The one place that knows whether anything is sounding, so the one
+            // place the device keep-alive belongs (§10f). It is deliberately NOT
+            // limited to text books: an audio book pauses too, and the same
+            // endpoint sleeps the same way — the first seconds after a resume
+            // would go the same way as the first word of a sentence.
+            //
+            // Stopped on pause rather than left running: holding a sound card
+            // open for a book nobody is listening to would keep an amplifier
+            // awake all night, and the reason to be careful here is the same
+            // reason NBR is portable — it should not quietly change the machine
+            // it is running on.
+            try
+            {
+                if (playing)
+                {
+                    // Made here, not with the TTS reader: an audio book never
+                    // creates one of those and would have gone without.
+                    if (keepAlive == null)
+                    {
+                        keepAlive = new AudioKeepAlive();
+                        keepAlive.SetDevice(appSettings.AudioDevice);
+                    }
+                    keepAlive.Start();
+                }
+                else if (keepAlive != null) keepAlive.Stop();
+            }
+            catch { }
             UpdateTitleBar();
         }
 
@@ -3291,6 +3323,9 @@ namespace Nemoviz_Book_Reader
                 mpv_set_property_string(mpvHandle, "audio-device",
                     string.IsNullOrEmpty(device) ? "auto" : device);
             tts?.SetAudioDevice(device);
+            // The keep-alive follows the card too, or it would be holding the
+            // one nobody is listening to open and letting the chosen one sleep.
+            keepAlive?.SetDevice(device);
             tones.SetDevice(device);   // the app's own beeps follow the book
         }
 

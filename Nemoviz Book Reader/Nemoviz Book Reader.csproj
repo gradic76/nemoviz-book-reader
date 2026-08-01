@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -113,9 +113,9 @@
     <Reference Include="TagLibSharp, Version=2.3.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <HintPath>..\packages\TagLibSharp.2.3.0\lib\net462\TagLibSharp.dll</HintPath>
     </Reference>
-    <!-- PdfPig (Apache-2.0) — PDF text extraction; net471 build for .NET 4.8.
+    <!-- PdfPig (Apache-2.0) â€” PDF text extraction; net471 build for .NET 4.8.
          Split across several assemblies, all needed at runtime; System.HashCode
-         polyfill via Microsoft.Bcl.HashCode. Other deps (System.Memory/Buffers/…)
+         polyfill via Microsoft.Bcl.HashCode. Other deps (System.Memory/Buffers/â€¦)
          are already vendored above via SharpCompress. -->
     <Reference Include="UglyToad.PdfPig">
       <HintPath>..\packages\PdfPig.0.1.15\lib\net471\UglyToad.PdfPig.dll</HintPath>
@@ -187,6 +187,7 @@
     <Compile Include="WorkDialogSkin.cs" />
     <Compile Include="DaisySync.cs" />
     <Compile Include="BookInfo.cs" />
+    <Compile Include="AudioKeepAlive.cs" />
     <Compile Include="BundledFonts.cs" />
     <!-- TEMPORARY test aid; remove this line with the file. -->
     <Compile Include="ReadingDiagnostics.cs" />
@@ -283,7 +284,7 @@
     <Content Include="libmpv-2.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <!-- liblouis (LGPL 2.1+) — braille back-translation, plus its table set.
+    <!-- liblouis (LGPL 2.1+) â€” braille back-translation, plus its table set.
          The tables are data files resolved at runtime from louis\tables. -->
     <Content Include="liblouis.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -319,3 +320,4 @@
     <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets'))" />
   </Target>
 </Project>
+
