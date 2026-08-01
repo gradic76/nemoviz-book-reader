@@ -3110,7 +3110,25 @@ namespace Nemoviz_Book_Reader
                                     ? currentBook.TextVisualMode : 0);
             readingWindow = new ReadingWindow(this, tbReadingSurface, mode,
                 () => DistinctBookChars(),
-                k => { Message m = new Message(); ProcessCmdKey(ref m, k); });
+                k =>
+                {
+                    // Space is the exception, and it took sitting in the window to
+                    // notice. The player handles Space in Form1_KeyDown, NOT in
+                    // ProcessCmdKey — every other shortcut is in ProcessCmdKey,
+                    // which is why forwarding worked for all of them and silently
+                    // did nothing for this one. Play/pause from the reading
+                    // window has therefore never worked, nor has the window's own
+                    // Play button, which sends the same key. Gordan had to Escape
+                    // out of the window to stop the reading.
+                    //
+                    // Handled HERE rather than by adding a Space case to
+                    // ProcessCmdKey: that runs before normal key handling for the
+                    // whole player, so a Space case there would stop Space
+                    // activating whichever button has focus — trading one dead
+                    // key for a broken convention everywhere else.
+                    if (k == Keys.Space) { BtnPlayPause_Click(null, EventArgs.Empty); return; }
+                    Message m = new Message(); ProcessCmdKey(ref m, k);
+                });
             readingWindow.FormClosed += (s, e) =>
             {
                 readingWindow = null;
