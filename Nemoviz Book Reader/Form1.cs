@@ -4007,6 +4007,19 @@ namespace Nemoviz_Book_Reader
         private void ApplyTtsSettings()
         {
             if (tts == null) return;
+
+            // Silent reading, chosen in Properties. Nothing about a voice applies,
+            // and asking for one would start the 32-bit speech host to say
+            // nothing. Speed still applies — it is what paces the reading now.
+            if (currentBook != null && currentBook.TextNoSpeech)
+            {
+                tts.SilentWpm = currentBook.TextWpm >= 0 ? currentBook.TextWpm : appSettings.TtsWpm;
+                tts.Silent = true;
+                textNoVoice = false;      // not a failure to find a voice: a choice
+                return;
+            }
+            tts.Silent = false;
+
             // A book can carry its own voice (its Properties); where it doesn't, the
             // Settings default applies — unless the book is in a language that
             // default doesn't speak. The speed/volume/pitch then follow THAT voice —
@@ -4030,6 +4043,23 @@ namespace Nemoviz_Book_Reader
             // voice, it leaves whatever spoke last, which is how a Spanish book
             // came to be read aloud in Croatian the moment it was opened. The
             // book waits, and LoadTextBookPlayback says why.
+            //
+            // Unless the book has an output that is not speech. Then silence is a
+            // working way to read rather than a dead end: the words are on the
+            // screen or under the fingers, and all that was missing was something
+            // to turn the page. So the player takes No speech itself, which is
+            // the automatic half of what that option is for (Gordan).
+            //
+            // Deliberately NOT done when there is no such output: a book with no
+            // voice and nothing else showing it would advance through silence
+            // with nothing to show for it, and there the existing question —
+            // borrow a voice? — is the right answer and stays.
+            if (textNoVoice && currentBook != null && currentBook.OpensReadingWindow)
+            {
+                tts.SilentWpm = currentBook.TextWpm >= 0 ? currentBook.TextWpm : appSettings.TtsWpm;
+                tts.Silent = true;
+                return;
+            }
             if (textNoVoice) return;
 
             VoicePrefs p = ResolveVoicePrefs(voice);

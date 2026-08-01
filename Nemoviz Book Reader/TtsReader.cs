@@ -36,6 +36,42 @@ namespace Nemoviz_Book_Reader
         private bool reading;   // actively speaking (not paused/stopped)
         private int rate;       // remembered for time-seek estimation
 
+        // ── Silent reading ────────────────────────────────────────────────
+        /// <summary>Read without speaking: the position still walks the book,
+        /// sentence by sentence, paced by <see cref="SilentWpm"/> instead of by a
+        /// synthesiser finishing an utterance.
+        ///
+        /// <para>For a reader on braille or on the screen who does not want a
+        /// voice over their reading, and for a book NO installed voice can speak
+        /// — where the alternative was a book that opens and then refuses to
+        /// move.</para>
+        ///
+        /// <para>It lives here rather than as a timer in the player because
+        /// everything upstream — play, pause, seek, the position events the
+        /// reading window and braille follow — then goes on working untouched.
+        /// The one thing that changes is what marks a sentence finished: a clock
+        /// rather than the backend.</para></summary>
+        public bool Silent
+        {
+            get { return silent; }
+            set
+            {
+                if (silent == value) return;
+                silent = value;
+                // Whichever way it just switched, the old mechanism is mid-flight.
+                bool wasReading = reading;
+                Stop();
+                if (wasReading) SpeakCurrent();
+            }
+        }
+        private bool silent;
+
+        /// <summary>Words per minute for silent reading. Fingers and eyes are not
+        /// ears, so this is not the speech rate and does not travel with it.</summary>
+        public int SilentWpm { get { return silentWpm; } set { silentWpm = value; RestartPace(); } }
+        private int silentWpm = 180;
+        private System.Windows.Forms.Timer pace;
+
         /// <summary>Raised whenever the current sentence changes (read the
         /// position properties for the new values).</summary>
         public event Action PositionChanged;
@@ -135,6 +171,7 @@ namespace Nemoviz_Book_Reader
         {
             if (!reading) return;
             reading = false;
+            if (pace != null) pace.Stop();
             // Cancel rather than SAPI-pause: the sentence index stays put, so
             // the next Play re-speaks this sentence from its start.
             backend.Cancel();
@@ -148,7 +185,11 @@ namespace Nemoviz_Book_Reader
             // to stop.
             bool active = reading || backend.IsPaused;
             reading = false;
-            if (active) backend.Cancel();
+            if (pace != null) pace.Stop();
+            // Nothing was ever handed to the backend in silent mode, so there is
+            // nothing there to cancel — and cancelling an idle synth is exactly
+            // the autoplay race this guard exists to avoid.
+            if (active && !silent) backend.Cancel();
         }
 
         // ── Navigation (keeps play/pause state) ───────────────────────────
@@ -295,6 +336,7 @@ namespace Nemoviz_Book_Reader
             }
             reading = true;
             RaisePosition();
+            if (silent) { RestartPace(); return; }
             backend.Speak(Spoken(sentenceText[index]));
             // Hint the next sentence so a backend that renders before playing can
             // have it ready — otherwise every sentence starts with a synthesis gap.
@@ -315,6 +357,44 @@ namespace Nemoviz_Book_Reader
                 return;
             }
             SpeakCurrent();
+        }
+
+        /// <summary>How long the current sentence should be left on screen, and
+        /// the timer that ends it.
+        ///
+        /// <para>Timed by WORDS, not by characters: words per minute is the unit
+        /// the reader is given and the one every reading-speed figure they know
+        /// is quoted in. A sentence of one word still gets a floor, or a book of
+        /// short lines would flicker past faster than anything could be read from
+        /// a display, and the last thing a braille reader needs is a line that
+        /// leaves before their hand arrives.</para></summary>
+        private void RestartPace()
+        {
+            if (pace != null) pace.Stop();
+            if (!silent || !reading) return;
+            if (index < 0 || index >= sentenceText.Count) return;
+
+            int words = 0;
+            foreach (string w in sentenceText[index].Split((char[])null,
+                                                           StringSplitOptions.RemoveEmptyEntries))
+                if (w.Length > 0) words++;
+            if (words < 1) words = 1;
+
+            int wpm = silentWpm > 0 ? silentWpm : 180;
+            int ms = (int)(words * 60000.0 / wpm);
+            if (ms < 400) ms = 400;
+
+            if (pace == null)
+            {
+                pace = new System.Windows.Forms.Timer();
+                // The backend raises completion on the UI thread and everything
+                // downstream assumes that; a Forms timer keeps the promise, where
+                // a threading timer would move sentence changes onto a pool
+                // thread and put the reading surface at risk.
+                pace.Tick += (s, e) => { pace.Stop(); OnCompleted(false); };
+            }
+            pace.Interval = ms;
+            pace.Start();
         }
 
         private void RaisePosition() { PositionChanged?.Invoke(); }
@@ -401,6 +481,7 @@ namespace Nemoviz_Book_Reader
 
         public void Dispose()
         {
+            try { if (pace != null) { pace.Stop(); pace.Dispose(); pace = null; } } catch { }
             try { backend.Dispose(); } catch { }
         }
     }

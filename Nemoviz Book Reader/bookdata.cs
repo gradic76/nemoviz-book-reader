@@ -109,6 +109,18 @@ namespace Nemoviz_Book_Reader
         /// reason to open the window — see <c>OpensReadingWindow</c>.</para></summary>
         public bool TextBraille { get; set; }
         public string TextBrailleTable { get; set; }
+        /// <summary>Read this book without a voice, the position paced by
+        /// <see cref="TextWpm"/> instead (Gordan, 2026-08-01).
+        ///
+        /// <para>Two ways in. The reader chooses it because they do not want
+        /// speech over their braille or their screen; or the player falls back to
+        /// it because nothing installed can speak the book's language — which
+        /// used to leave a book that opened and then would not move.</para>
+        ///
+        /// <para>Kept apart from <see cref="TextVoice"/> rather than stored as a
+        /// magic voice name, so that turning speech back on restores the voice
+        /// the book was last read with instead of losing it.</para></summary>
+        public bool TextNoSpeech { get; set; }
         /// <summary>True when the book asks for the reading window, whichever of
         /// the two reasons it is. Both callers used to test <c>TextVisual</c>
         /// alone, which left a braille reader with no window and so no braille.</summary>
@@ -225,6 +237,7 @@ namespace Nemoviz_Book_Reader
             TextVisualMode = tvm >= 0 && tvm <= 2 ? tvm : 0;
             TextBraille = ini.Read("Settings", "TextBraille", "0") == "1";
             TextBrailleTable = ini.Read("Settings", "TextBrailleTable", "");
+            TextNoSpeech = ini.Read("Settings", "TextNoSpeech", "0") == "1";
             TextLanguage = ini.Read("Book", "Language", "");
             // Reading a book off the shelf registers its language too, not only
             // saving one. Without this an existing library stays invisible to
@@ -959,6 +972,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextVisualMode", TextVisualMode.ToString());
             ini.Write("Settings", "TextBraille", TextBraille ? "1" : "0");
             ini.Write("Settings", "TextBrailleTable", TextBrailleTable ?? "");
+            ini.Write("Settings", "TextNoSpeech", TextNoSpeech ? "1" : "0");
             ini.Write("Book", "Language", TextLanguage ?? "");
             // Tell Settings this language exists in the library, so a voice can be
             // chosen for it even when nothing installed speaks it.

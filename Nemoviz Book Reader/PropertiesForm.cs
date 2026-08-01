@@ -633,7 +633,13 @@ namespace Nemoviz_Book_Reader
             // this book was last read with using it, else how that voice is set up
             // in Settings, else the neutral default — never the numbers of the
             // voice being left behind.
-            cmbTVoice.SelectedIndexChanged += (s, e) => { LoadPrefsForSelectedVoice(); RefreshTextInfo(); PreviewText(); };
+            cmbTVoice.SelectedIndexChanged += (s, e) =>
+            {
+                // No speech has no preferences to load and nothing to preview —
+                // previewing it would start the 32-bit speech host to say nothing.
+                if (cmbTVoice.SelectedIndex == 0) { UpdateTextEnabled(); RefreshTextInfo(); return; }
+                LoadPrefsForSelectedVoice(); UpdateTextEnabled(); RefreshTextInfo(); PreviewText();
+            };
             box.Controls.Add(cmbTVoice);
 
             yy += 34;
@@ -943,6 +949,13 @@ namespace Nemoviz_Book_Reader
         /// check box claiming to.</para></summary>
         private void UpdateTextEnabled()
         {
+            // No speech keeps the SPEED and loses the rest. Speed still means
+            // something — it is what paces the walk through the book, and the one
+            // number a reader on braille or on the screen is steering with
+            // (Gordan). Volume and pitch describe a voice that is not there.
+            bool noSpeech = cmbTVoice != null && cmbTVoice.SelectedIndex == 0;
+            SettingsForm.SetEnabled(!noSpeech, numTVolume, numTPitch);
+
             bool braille = chkTBraille != null && chkTBraille.Checked;
             if (chkTVisual != null)
             {
@@ -992,9 +1005,24 @@ namespace Nemoviz_Book_Reader
             int li = cmbTLanguage != null ? cmbTLanguage.SelectedIndex : -1;
             string lang = (li >= 0 && li < textLanguageCodes.Count) ? textLanguageCodes[li] : "";
             cmbTVoice.Items.Clear();
+            // "No speech" heads the list, and is a real choice rather than an
+            // absence of one: the book is still read, the position still walks it
+            // sentence by sentence, only nothing is spoken. It is where a reader
+            // on braille or on the screen goes when they do not want a voice over
+            // their reading — and where the player itself lands when no installed
+            // voice can speak the book, which used to mean a book that opened and
+            // then would not move.
+            cmbTVoice.Items.Add(Localization.T("Settings.TextBooks.NoSpeech"));
             foreach (string name in VoiceChooser.VoicesFor(textCatalog, lang))
                 cmbTVoice.Items.Add(name);
-            if (cmbTVoice.Items.Count > 0) cmbTVoice.SelectedIndex = 0;
+
+            // Never silently land on No speech just because it happens to be
+            // first. It is chosen, or it is what is left when there is no voice.
+            int want = book.TextNoSpeech ? 0 : -1;
+            if (want < 0 && !string.IsNullOrEmpty(book.TextVoice))
+                want = cmbTVoice.Items.IndexOf(book.TextVoice);
+            if (want < 0) want = cmbTVoice.Items.Count > 1 ? 1 : 0;
+            cmbTVoice.SelectedIndex = want;
         }
 
         /// <summary>The voice catalog for the pickers. Created on demand (it starts
@@ -1010,8 +1038,13 @@ namespace Nemoviz_Book_Reader
         private void PersistTextOptions()
         {
             if (cmbTVoice == null) return;   // no Text tab on this book
-            book.TextVoice = cmbTVoice != null && cmbTVoice.SelectedItem != null
-                ? cmbTVoice.SelectedItem.ToString() : "";
+            // Index 0 is No speech. TextVoice is deliberately left ALONE in that
+            // case rather than blanked: switching speech back on should return
+            // the voice the book was last read with, not lose it.
+            book.TextNoSpeech = cmbTVoice.SelectedIndex == 0;
+            if (!book.TextNoSpeech)
+                book.TextVoice = cmbTVoice.SelectedItem != null
+                    ? cmbTVoice.SelectedItem.ToString() : "";
             book.TextWpm = numTWpm != null ? (int)numTWpm.Value : -1;
             book.TextVolume = numTVolume != null ? (int)numTVolume.Value : -1;
             book.TextPitch = numTPitch != null ? (int)numTPitch.Value : -99;
