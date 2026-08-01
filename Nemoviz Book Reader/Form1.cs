@@ -3962,6 +3962,9 @@ namespace Nemoviz_Book_Reader
         }
 
         private int lastCaretSet = -1;
+        /// <summary>The last sentence handed to the screen reader by the test
+        /// aid, so moving inside a sentence does not say it again.</summary>
+        private string lastAnnounced;
 
         /// <summary>Speaks a sentence for the TEMPORARY test aid, from the window
         /// that actually has the user's attention.
@@ -4229,7 +4232,21 @@ namespace Nemoviz_Book_Reader
             // No per-sentence trace any more. It found what it was for â€” that the
             // chain WAS being reached â€” and while the aid is on is precisely when
             // a disk write per sentence hurts, which is the whole complaint.
-            if (ReadingDiagnostics.Highlight) DiagnosticAnnounce(s);
+            // Announce a SENTENCE once, however many times the position moves
+            // inside it. A hybrid's caret steps on every sync point — 3 674 of
+            // them in Gordan's French book, one every second or two — and each
+            // step was queueing the whole sentence again. Queued rather than
+            // cancelling (which is right, or they cut each other off), the queue
+            // simply grew, and what came out was a few words every few seconds,
+            // further behind the narrator every time.
+            //
+            // The caret still moves on every point, which is what braille and the
+            // reading position want. Only the speaking is deduplicated.
+            if (ReadingDiagnostics.Highlight && s != lastAnnounced)
+            {
+                lastAnnounced = s;
+                DiagnosticAnnounce(s);
+            }
             lastCaretSet = tbReadingSurface.SelectionStart;   // ours, not a routing key
             // The per-sentence "SENT" stamp is gone. It belonged to the braille-lag
             // experiment, which is finished, and it is a file opened, appended and
