@@ -1924,14 +1924,43 @@ sized, styled and placed as the display. That keeps braille behaving identically
 either way, and it is what makes visual and braille "one feature, not two" as
 this section hoped rather than two things that must be kept in step.
 
+### Braille output IS the reading window (Gordan, 2026-08-01) — decided, not built
+
+**A hidden surface creates an invisible dependency**, and that is the objection
+that settles the design. Braille stops, and the reader has no idea why or what
+they changed. A window is the opposite: a **place you are either in or out of**,
+with its own Alt+Tab entry, that Escape leaves. When you leave it you know you
+left it.
+
+**The principle, in Gordan's words and worth applying beyond this case:** *if we
+cannot automate something to the point where the user need not think about it,
+then the user has to be told what it depends on.* A hidden mechanism that quietly
+stops working is worse than a visible condition they understand.
+
+**And the window's appearance is irrelevant to a braille reader** — to them it is
+not a picture but a place, and a place works the same whether it looks like a box
+for fifteen words or our styled scroll. So braille needs no separate surface and
+no separate design: it is the same window the visual output already uses, which
+is what §8l hoped for when it said the two "may then be one feature, not two".
+
+**What this changes:**
+
+- Braille output stops being its own switch and becomes **the reading window
+  being open**. Turn it on → the window opens → focus lives there.
+- The parked surface stays only as the control's home **while no window is
+  open** — and then there is no braille, which is now stated rather than
+  silently true.
+- `NvdaController.Braille` keeps its job but a smaller one: the window has its
+  own controls (transport, size, font), so focus can still wander off the text
+  *inside* it. That is exactly the gap it covers.
+
 ### What is left on the three outputs (Gordan's list, 2026-08-01)
 
-1. **Finish joining braille and visual.** The window and the parked placement are
-   both built and measured; what is missing is the **braille switch**.
-   `chkTBraille` in Properties is still scaffolding exactly as the visual pair
-   was until today — built, shown, read by nobody. And "braille on" means one
-   concrete thing: **does the reading surface take focus**, because that is what
-   braille follows. Persist it beside `TextVisual` / `TextVisualMode`.
+1. **Make braille output open the reading window**, per the decision above.
+   `chkTBraille` is still scaffolding exactly as the visual pair was — built,
+   shown, read by nobody. It should persist beside `TextVisual` /
+   `TextVisualMode` and, when on, open the window and put focus in it. The two
+   switches then mean: braille = the window opens; visual = how it looks.
 2. **Bundle the fonts.** Measured and licence-checked already (see above);
    the work left is dropping regular + bold into the tree and loading them
    **privately** (`PrivateFontCollection` / `AddFontMemResourceEx`) — installing
