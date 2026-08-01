@@ -1,10 +1,11 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Nemoviz_Book_Reader
 {
-    /// <summary>Holds the chosen sound card awake, so it cannot power down
-    /// between sentences and swallow the start of the next one.
+    /// <summary>Holds the card the player is using awake, so it cannot power
+    /// down between sentences and swallow the start of the next one.
     ///
     /// <para><b>Why this exists (2026-08-01, §10f).</b> Gordan lost the first
     /// word of sentence after sentence, and every measurement said the software
@@ -14,104 +15,68 @@ namespace Nemoviz_Book_Reader
     /// protection and the endpoint began sleeping in the gaps. A player must not
     /// depend on a screen reader for this.</para>
     ///
-    /// <para><b>Why waveOut and not SAPI.</b> The first version rode on the same
-    /// <see cref="SapiWavPlayer"/> the reading uses, and Gordan heard it
-    /// immediately: it took TURNS with the reading instead of lying underneath
-    /// it — a keep-alive inserted between sentences rather than mixed with them.
-    /// Two SAPI voices pointed at one output token queue behind each other
-    /// rather than mixing, so anything built on SAPI would do the same. waveOut
-    /// opens a stream of its own that the Windows mixer combines with everything
-    /// else, which is the whole requirement.</para>
+    /// <para><b>It goes to the card the player plays on, always.</b> That is the
+    /// requirement (Gordan) and it is what killed the two previous attempts.
+    /// The first rode on <see cref="SapiWavPlayer"/>: two SAPI voices pointed at
+    /// one output token queue behind each other instead of mixing, so it was
+    /// heard inserting itself BETWEEN sentences. The second opened its own
+    /// waveOut stream, which mixes properly — but waveOut knows cards by a
+    /// product name truncated to 31 characters, and matching that against mpv's
+    /// id is guesswork that falls back to the default device. On a machine with
+    /// one card that is right by luck; on Gordan's, with several, it can hold
+    /// the wrong one open and let the right one sleep, which is worse than doing
+    /// nothing because it looks like it is working.</para>
     ///
-    /// <para><b>One buffer, looped by the driver.</b> <c>WHDR_BEGINLOOP</c> with
-    /// an infinite loop count means the audio never stops and nothing has to
-    /// re-queue it — no timer, and no seam that could itself become the gap
-    /// being prevented.</para>
+    /// <para>So it runs on <b>mpv</b>, in a context of its own, with
+    /// <c>audio-device</c> set to the very string the player is using. No
+    /// matching, no fallback, no name: the same id, so it cannot land anywhere
+    /// else. libmpv is already loaded, and a second context playing one second
+    /// of tone on a loop costs nothing worth counting.</para>
     ///
     /// <para><b>Not digital silence.</b> A run of zeroes is, to a device deciding
-    /// whether anything is happening, indistinguishable from nothing at all. This
-    /// is a 40 Hz sine at one part in 4 000 of full scale — around −72 dBFS and
-    /// below 50 Hz, so it is real signal on the wire and under the floor of
-    /// anything a person would hear a book through.</para></summary>
+    /// whether anything is happening, indistinguishable from nothing at all.
+    /// This is a 40 Hz sine at one part in 4 000 — around −72 dBFS, real signal
+    /// on the wire and under the floor of anything a person hears a book
+    /// through.</para></summary>
     internal sealed class AudioKeepAlive : IDisposable
     {
-        private const int Rate = 8000;          // plenty for a sub-bass tone
-        private const int Seconds = 1;          // the driver loops it forever
+        private const string L = "libmpv-2.dll";
+        [DllImport(L, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr mpv_create();
+        [DllImport(L, CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_initialize(IntPtr ctx);
+        [DllImport(L, CallingConvention = CallingConvention.Cdecl)] private static extern void mpv_terminate_destroy(IntPtr ctx);
+        [DllImport(L, CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_set_option_string(IntPtr ctx, byte[] name, byte[] data);
+        [DllImport(L, CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_set_property_string(IntPtr ctx, byte[] name, byte[] data);
+        [DllImport(L, CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_command(IntPtr ctx, IntPtr args);
 
-        [DllImport("winmm.dll")] private static extern int waveOutOpen(
-            out IntPtr hwo, int deviceId, byte[] fmt, IntPtr cb, IntPtr inst, int flags);
-        [DllImport("winmm.dll")] private static extern int waveOutPrepareHeader(IntPtr hwo, IntPtr hdr, int size);
-        [DllImport("winmm.dll")] private static extern int waveOutUnprepareHeader(IntPtr hwo, IntPtr hdr, int size);
-        [DllImport("winmm.dll")] private static extern int waveOutWrite(IntPtr hwo, IntPtr hdr, int size);
-        [DllImport("winmm.dll")] private static extern int waveOutReset(IntPtr hwo);
-        [DllImport("winmm.dll")] private static extern int waveOutClose(IntPtr hwo);
-        [DllImport("winmm.dll")] private static extern int waveOutGetNumDevs();
-        [DllImport("winmm.dll", CharSet = CharSet.Unicode)]
-        private static extern int waveOutGetDevCapsW(IntPtr id, out WAVEOUTCAPS caps, int size);
+        private const int Rate = 8000;
 
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        private struct WAVEOUTCAPS
-        {
-            public short wMid, wPid;
-            public int vDriverVersion;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string szPname;
-            public int dwFormats;
-            public short wChannels;
-            public short wReserved1;
-            public int dwSupport;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct WAVEHDR
-        {
-            public IntPtr lpData;
-            public int dwBufferLength, dwBytesRecorded;
-            public IntPtr dwUser;
-            public int dwFlags, dwLoops;
-            public IntPtr lpNext, reserved;
-        }
-
-        private const int WAVE_MAPPER = -1;
-        private const int WHDR_BEGINLOOP = 0x00000004, WHDR_ENDLOOP = 0x00000008;
-
-        private IntPtr device, header, audio;
-        private string deviceDescription;
+        private IntPtr ctx;
+        private string deviceId = "auto";
+        private string tonePath;
         private bool running;
 
-        /// <summary>The card to hold open, named the way the rest of NBR names
-        /// one. waveOut knows devices by index and by a product name truncated to
-        /// 31 characters, so the match is by name against what mpv reported —
-        /// imperfect by construction, and it falls back to the default device,
-        /// which is the right answer when there is only one.</summary>
-        public void SetDeviceDescription(string description)
+        /// <summary>UTF-8 with the terminator mpv's C API expects. NOT
+        /// <c>StringToHGlobalAnsi</c>: that mangled Č and Đ once already and cost
+        /// a whole probe run to find (§10e).</summary>
+        private static byte[] Z(string s)
         {
-            string want = string.IsNullOrEmpty(description) ? null : description;
-            if (deviceDescription == want) return;
-            deviceDescription = want;
-            if (running) { Stop(); Start(); }        // move it to the new card
+            var raw = System.Text.Encoding.UTF8.GetBytes(s ?? "");
+            var z = new byte[raw.Length + 1];
+            Buffer.BlockCopy(raw, 0, z, 0, raw.Length);
+            return z;
         }
 
-        private int FindDevice()
+        /// <summary>The card the player is on, as mpv names it — exactly the
+        /// string handed to mpv's own <c>audio-device</c>. Applied live, so a
+        /// change of card in Settings takes the keep-alive with it rather than
+        /// leaving it holding the one nobody is listening to.</summary>
+        public void SetDevice(string mpvDeviceId)
         {
-            if (string.IsNullOrEmpty(deviceDescription)) return WAVE_MAPPER;
-            try
-            {
-                int n = waveOutGetNumDevs();
-                for (int i = 0; i < n; i++)
-                {
-                    WAVEOUTCAPS c;
-                    if (waveOutGetDevCapsW((IntPtr)i, out c, Marshal.SizeOf(typeof(WAVEOUTCAPS))) != 0) continue;
-                    string name = c.szPname ?? "";
-                    // waveOut truncates to 31 characters, so compare on the part
-                    // that survives rather than expecting the two to be equal.
-                    if (name.Length > 0 &&
-                        (deviceDescription.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                         name.IndexOf(deviceDescription, StringComparison.OrdinalIgnoreCase) >= 0))
-                        return i;
-                }
-            }
-            catch { }
-            return WAVE_MAPPER;
+            string id = string.IsNullOrEmpty(mpvDeviceId) ? "auto" : mpvDeviceId;
+            if (id == deviceId) return;
+            deviceId = id;
+            if (ctx != IntPtr.Zero)
+                try { mpv_set_property_string(ctx, Z("audio-device"), Z(deviceId)); } catch { }
         }
 
         public void Start()
@@ -119,27 +84,24 @@ namespace Nemoviz_Book_Reader
             if (running) return;
             try
             {
-                byte[] fmt = WaveFormat(Rate);
-                if (waveOutOpen(out device, FindDevice(), fmt, IntPtr.Zero, IntPtr.Zero, 0) != 0)
-                { device = IntPtr.Zero; return; }
+                if (tonePath == null) tonePath = WriteTone();
+                if (tonePath == null) return;
 
-                byte[] pcm = BuildTone();
-                audio = Marshal.AllocHGlobal(pcm.Length);
-                Marshal.Copy(pcm, 0, audio, pcm.Length);
+                ctx = mpv_create();
+                if (ctx == IntPtr.Zero) return;
 
-                WAVEHDR h = new WAVEHDR
-                {
-                    lpData = audio,
-                    dwBufferLength = pcm.Length,
-                    dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP,
-                    dwLoops = int.MaxValue,          // the driver repeats it; we never re-queue
-                };
-                header = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(WAVEHDR)));
-                Marshal.StructureToPtr(h, header, false);
+                mpv_set_option_string(ctx, Z("audio-device"), Z(deviceId));
+                mpv_set_option_string(ctx, Z("vid"), Z("no"));          // audio only, §10e
+                mpv_set_option_string(ctx, Z("video"), Z("no"));
+                mpv_set_option_string(ctx, Z("loop-file"), Z("inf"));   // never ends
+                mpv_set_option_string(ctx, Z("keep-open"), Z("yes"));
+                mpv_set_option_string(ctx, Z("terminal"), Z("no"));
+                // Left at full volume on purpose: the tone is already −72 dBFS,
+                // and turning it down further risks a device deciding the signal
+                // is not worth staying awake for.
+                if (mpv_initialize(ctx) < 0) { Cleanup(); return; }
 
-                int size = Marshal.SizeOf(typeof(WAVEHDR));
-                if (waveOutPrepareHeader(device, header, size) != 0) { Cleanup(); return; }
-                if (waveOutWrite(device, header, size) != 0) { Cleanup(); return; }
+                Command("loadfile", tonePath);
                 running = true;
             }
             catch { Cleanup(); }
@@ -147,54 +109,71 @@ namespace Nemoviz_Book_Reader
 
         public void Stop()
         {
-            if (!running && device == IntPtr.Zero) return;
             running = false;
             Cleanup();
         }
 
         private void Cleanup()
         {
-            try { if (device != IntPtr.Zero) waveOutReset(device); } catch { }
+            try { if (ctx != IntPtr.Zero) mpv_terminate_destroy(ctx); } catch { }
+            ctx = IntPtr.Zero;
+        }
+
+        private void Command(params string[] args)
+        {
+            IntPtr[] p = new IntPtr[args.Length + 1];
+            var pinned = new System.Collections.Generic.List<IntPtr>();
             try
             {
-                if (device != IntPtr.Zero && header != IntPtr.Zero)
-                    waveOutUnprepareHeader(device, header, Marshal.SizeOf(typeof(WAVEHDR)));
+                for (int i = 0; i < args.Length; i++)
+                {
+                    byte[] raw = Z(args[i]);
+                    IntPtr u = Marshal.AllocHGlobal(raw.Length);
+                    Marshal.Copy(raw, 0, u, raw.Length);
+                    p[i] = u;
+                    pinned.Add(u);
+                }
+                p[args.Length] = IntPtr.Zero;
+                var h = GCHandle.Alloc(p, GCHandleType.Pinned);
+                try { mpv_command(ctx, h.AddrOfPinnedObject()); }
+                finally { h.Free(); }
             }
             catch { }
-            try { if (device != IntPtr.Zero) waveOutClose(device); } catch { }
-            try { if (header != IntPtr.Zero) Marshal.FreeHGlobal(header); } catch { }
-            try { if (audio != IntPtr.Zero) Marshal.FreeHGlobal(audio); } catch { }
-            device = header = audio = IntPtr.Zero;
+            finally { foreach (IntPtr q in pinned) try { Marshal.FreeHGlobal(q); } catch { } }
         }
 
-        /// <summary>WAVEFORMATEX for 16-bit mono PCM, as the 18 bytes waveOutOpen
-        /// wants.</summary>
-        private static byte[] WaveFormat(int rate)
-        {
-            var b = new byte[18];
-            BitConverter.GetBytes((short)1).CopyTo(b, 0);        // WAVE_FORMAT_PCM
-            BitConverter.GetBytes((short)1).CopyTo(b, 2);        // mono
-            BitConverter.GetBytes(rate).CopyTo(b, 4);
-            BitConverter.GetBytes(rate * 2).CopyTo(b, 8);        // byte rate
-            BitConverter.GetBytes((short)2).CopyTo(b, 12);       // block align
-            BitConverter.GetBytes((short)16).CopyTo(b, 14);      // bits
-            BitConverter.GetBytes((short)0).CopyTo(b, 16);       // cbSize
-            return b;
-        }
-
-        /// <summary>A whole number of 40 Hz cycles, so the loop joins without a
+        /// <summary>One second of 40 Hz, written once to a temp file. A whole
+        /// number of cycles, so mpv's loop joins from zero to zero without a
         /// click.</summary>
-        internal static byte[] BuildTone()
+        private static string WriteTone()
         {
-            int samples = Rate * Seconds;
-            var pcm = new byte[samples * 2];
-            for (int i = 0; i < samples; i++)
+            try
             {
-                short v = (short)(8.0 * Math.Sin(2.0 * Math.PI * 40.0 * i / Rate));
-                pcm[i * 2] = (byte)(v & 0xFF);
-                pcm[i * 2 + 1] = (byte)((v >> 8) & 0xFF);
+                string path = Path.Combine(Path.GetTempPath(), "nbr-keepalive.wav");
+                int samples = Rate;
+                int dataLen = samples * 2;
+                using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
+                using (var b = new BinaryWriter(fs))
+                {
+                    b.Write(new char[] { 'R', 'I', 'F', 'F' });
+                    b.Write(36 + dataLen);
+                    b.Write(new char[] { 'W', 'A', 'V', 'E' });
+                    b.Write(new char[] { 'f', 'm', 't', ' ' });
+                    b.Write(16);
+                    b.Write((short)1);            // PCM
+                    b.Write((short)1);            // mono
+                    b.Write(Rate);
+                    b.Write(Rate * 2);
+                    b.Write((short)2);
+                    b.Write((short)16);
+                    b.Write(new char[] { 'd', 'a', 't', 'a' });
+                    b.Write(dataLen);
+                    for (int i = 0; i < samples; i++)
+                        b.Write((short)(8.0 * Math.Sin(2.0 * Math.PI * 40.0 * i / Rate)));
+                }
+                return path;
             }
-            return pcm;
+            catch { return null; }
         }
 
         public void Dispose() { Stop(); }
