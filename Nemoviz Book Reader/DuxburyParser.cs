@@ -90,6 +90,15 @@ namespace Nemoviz_Book_Reader
                     {
                         outBuf.Add(13); outBuf.Add(10);
                     }
+                    // Every OTHER tag leaves a space behind. A tag separates two
+                    // records, and removing it without trace welded them into one
+                    // word: "decemberthe", "plantierbymichael", "volumesvolume".
+                    // The braille either side is complete; only the join was lost.
+                    else if (outBuf.Count > 0 && outBuf[outBuf.Count - 1] != (byte)' '
+                             && outBuf[outBuf.Count - 1] != 10)
+                    {
+                        outBuf.Add((byte)' ');
+                    }
                     continue;
                 }
                 if (b == 0) continue;                   // padding between records
