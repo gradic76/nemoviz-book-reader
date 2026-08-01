@@ -62,6 +62,31 @@ Upstream : https://github.com/dotnet/runtime
 Licence  : MIT
 
 
+Reading fonts — five families for the reading window
+------------------------------------------------------
+Files    : embedded in the assembly; see Fonts\Licences\NOTICE.txt
+Licences : SIL Open Font License 1.1 — Andika, Atkinson Hyperlegible Next,
+           Lexend, OpenDyslexic
+           Creative Commons Attribution 4.0 — Luciole
+Texts    : Fonts\Licences\OFL-1.1.txt, Fonts\Licences\CC-BY-4.0.txt
+
+Unlike the components above, these are not loaded as separate files: they are
+carried inside the assembly and registered PRIVATELY, into the running process
+only. Nothing is installed into Windows — NBR is portable, and a player run from
+a stick should leave nothing behind on the machine.
+
+None of the five is modified. That matters: an OFL Reserved Font Name binds only
+a MODIFIED version, so shipping them byte for byte as published keeps those
+clauses satisfied without a renaming exercise. Any future change to a font file
+would put the Reserved Font Name back in play and needs a rename first.
+
+Each copyright line in NOTICE.txt was read out of the font's own name table
+rather than copied from a download page. That found one discrepancy worth
+knowing about: OpenDyslexic's metadata says "All rights reserved" and gives no
+licence URL, while its upstream repository ships OFL.txt covering exactly these
+files. The metadata is stale; the licence is OFL 1.1.
+
+
 STILL TO DO BEFORE ANY RELEASE
 ------------------------------
 The verbatim licence texts (LGPL v2.1, LGPL v3, MIT) must ship ALONGSIDE this

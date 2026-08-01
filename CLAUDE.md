@@ -2010,18 +2010,59 @@ built but has never been exercised.
 
 ### What is left on the three outputs (Gordan's list, 2026-08-01)
 
-1. **Make braille output open the reading window**, per the decision above.
-   `chkTBraille` is still scaffolding exactly as the visual pair was — built,
-   shown, read by nobody. It should persist beside `TextVisual` /
-   `TextVisualMode` and, when on, open the window and put focus in it. The two
-   switches then mean: braille = the window opens; visual = how it looks.
-2. **Bundle the fonts.** Measured and licence-checked already (see above);
-   the work left is dropping regular + bold into the tree and loading them
-   **privately** (`PrivateFontCollection` / `AddFontMemResourceEx`) — installing
-   them would modify the user's Windows, and NBR is portable.
+1. ~~**Make braille output open the reading window**~~ **— DONE** (`186dfff`).
+   `TextBraille` and `TextBrailleTable` persist beside `TextVisual` /
+   `TextVisualMode`, and `BookData.OpensReadingWindow` is what the player now
+   tests, so either switch brings the window up. Focus already landed in the
+   surface on `Shown`, so nothing was needed there. The two switches read as:
+   **braille = the window opens; visual = how it looks.**
+
+   The table combo deliberately does **not** reuse `book.BrailleTable`: that one
+   back-translates a `.brf` being *read*, this one describes a text book being
+   written *out*. Same library, opposite directions. **Open:** with the screen
+   reader doing the translation, our table choice does not actually reach the
+   display — it is stored and remembered, which beats forgetting, but whether
+   NBR should translate cells itself is Gordan's call, not something to wire
+   silently.
+2. ~~**Bundle the fonts.**~~ **— DONE** (`6c88cd0`). Andika, Atkinson
+   Hyperlegible Next, Lexend, Luciole and OpenDyslexic, 2.3 MB, embedded in the
+   assembly and registered into the process only. Three things had to be
+   measured rather than assumed, and every one of them changed the code:
+
+   - **`PrivateFontCollection.AddMemoryFont` keeps only the FIRST FAMILY.** Give
+     one collection several families and the rest are dropped — no exception, no
+     failed return, they are simply not there. The first build registered Andika
+     and silently lost four. Two faces of the *same* family are fine, so the
+     fonts are grouped **one collection per family**. `AddFontFile` does not
+     behave this way but wants the files loose on disk, which is the thing
+     embedding was meant to avoid.
+   - **Register with GDI+ *and* GDI.** GDI+ renders; GDI is what `CanRender`
+     reaches through `Font.ToHfont`, and it cannot see a GDI+ private font. One
+     way only and `GetFontUnicodeRanges` answers for whatever face GDI
+     **substituted** — our font judged on a stand-in's coverage. With
+     `AddFontMemResourceEx` alongside, the probe reads the real ranges; all five
+     cover the full Croatian set.
+   - **`new Font("Andika", 26f)` does not give you Andika.** GDI+ resolves the
+     name against *installed* fonts and returns Microsoft Sans Serif — shown
+     side by side in the check. A private family must be built from the
+     `FontFamily` the collection owns. That is what `BundledFonts.Make` is for,
+     and why `ApplyFont` goes through it.
+
+   The two variable fonts arrive as a shelf of weight families (Lexend eight,
+   Atkinson five, several chopped at GDI+'s 31-character family-name limit).
+   That is a weight axis wearing family clothing, so only base families reach
+   the picker — kept by rule (*a name that is another name plus a suffix is a
+   variant*), not by the order GDI+ happens to return them in.
+
+   Licences in `Fonts\Licences`, each copyright line read out of the font's own
+   name table rather than a download page. OpenDyslexic's metadata claims "All
+   rights reserved" with no licence URL; its upstream repo ships OFL.txt for
+   exactly these files, so the **metadata is stale, not the licence**. No font
+   is modified, which satisfies the Reserved Font Name clauses outright.
 3. **Test the four combinations on a real book**: speech alone, speech+braille,
    speech+visual, speech+braille+visual. Note that the first two differ *only in
-   where focus sits*, which is precisely the thing worth watching.
+   where focus sits*, which is precisely the thing worth watching. **This is the
+   one left, and it needs Gordan** — hardware and ears.
 
 Still scaffolding after that: highlight, and the three colour pickers.
 
