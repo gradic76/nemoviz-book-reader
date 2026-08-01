@@ -971,7 +971,16 @@ namespace Nemoviz_Book_Reader
             }
 
             SettingsForm.SetEnabled(braille, cmbTBrailleTable);
-            SettingsForm.SetEnabled(chkTVisual != null && chkTVisual.Checked,
+            // The WHOLE visual group goes with the check box, not just the check
+            // box (Gordan, 2026-08-01). A braille reader has no use for a display
+            // mode, a highlight or three colours, and the form is already pinned
+            // to the smallest one — the subtitle strip — so there is nothing left
+            // to choose. Leaving them live was mine, on the theory that someone
+            // might still want full screen for a sighted companion; his answer is
+            // that it is clutter in the one place a braille reader has to work,
+            // and that reusing this box at its smallest is the point of putting
+            // braille in it rather than drawing another.
+            SettingsForm.SetEnabled(!braille && chkTVisual != null && chkTVisual.Checked,
                                     cmbTVisualMode, cmbTHighlight, cmbTHighlightColour,
                                     cmbTTextColour, cmbTBackColour);
             RefreshTextInfo();
