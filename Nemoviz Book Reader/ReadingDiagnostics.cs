@@ -60,7 +60,7 @@ namespace Nemoviz_Book_Reader
         public static string Toggle()
         {
             Highlight = !Highlight;
-            Trace("TOGGLE -> " + (Highlight ? "ON" : "OFF"));
+            if (Highlight) Trace("TOGGLE -> ON");   // the OFF press is the last thing not logged
             return Highlight
                 ? "Reading highlight on. The screen reader will speak each sentence."
                 : "Reading highlight off. Caret only.";
@@ -76,13 +76,19 @@ namespace Nemoviz_Book_Reader
         /// records the key press, whether the surface update is reached at all,
         /// and what each speech channel returned.</para>
         ///
-        /// <para>Unlike <see cref="Highlight"/> this is not switched off, because
-        /// the most likely explanation for total silence is that the switch never
-        /// came on — and a trace that only runs once the switch is on could not
-        /// report that. It goes to <c>%TEMP%\NBR-diagnostics.log</c> and is
-        /// deleted with the rest of this file.</para></summary>
+        /// <para>It was briefly always-on, to answer whether the switch was ever
+        /// coming on. It has answered that, and being always-on cost what disk
+        /// I/O on the UI thread always costs here: a file opened, appended and
+        /// closed once per sentence, and speech that chops in the gaps. That is
+        /// the second time the same mistake has been made in this file's short
+        /// life, the first being SurfaceLog. So it follows the switch now — while
+        /// the aid is off, nothing writes anything.</para>
+        ///
+        /// <para>Goes to <c>%TEMP%\NBR-diagnostics.log</c>; deleted with the rest
+        /// of this file.</para></summary>
         public static void Trace(string line)
         {
+            if (!Highlight) return;
             try
             {
                 System.IO.File.AppendAllText(

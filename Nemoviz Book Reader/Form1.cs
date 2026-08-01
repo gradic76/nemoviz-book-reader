@@ -2014,6 +2014,13 @@ namespace Nemoviz_Book_Reader
             if (currentBook != null && currentBook.IsTextBook)
             {
                 SetPlayPauseState(true);
+                // Resuming re-speaks the SAME sentence from its start, so the
+                // position does not change and the surface's "has it moved?"
+                // guard skips it — the sentence you are hearing again is the one
+                // sentence not put out again. Harmless for the caret, which is
+                // already in the right place, but it made the test aid look as
+                // though it had switched itself off after every pause.
+                lastSurfaceStart = -1;
                 if (tts != null) tts.Play();
                 return;
             }
@@ -2824,6 +2831,7 @@ namespace Nemoviz_Book_Reader
                     // the same refusal — and only the announcement if the dialog
                     // itself could not be put.
                     if (textNoVoice && !AskForVoice()) { AnnounceNoVoice(); return; }
+                    lastSurfaceStart = -1;      // same reason as ResumePlaybackQuietly
                     tts.Play();
                     SetPlayPauseState(true);
                 }
@@ -3829,11 +3837,16 @@ namespace Nemoviz_Book_Reader
         /// window that is not the focused one is not announced. That, and not the
         /// selection, is why the first two attempts at this aid were silent.</para>
         ///
-        /// <para>No caching: the target changes as the reading window opens and
-        /// closes, and a cached provider for the wrong window is exactly the bug
-        /// being fixed. A fresh provider per sentence is more work than the
-        /// shipping path would accept, which is one more reason this is an
-        /// aid.</para></summary>
+        /// <para>The provider is cached PER WINDOW, not globally. Globally cached
+        /// was the original bug — the player's provider used while the reading
+        /// window had focus. Rebuilt every sentence was the overcorrection:
+        /// UiaHostProviderFromHwnd is a call into the reader's world, and doing
+        /// it once a sentence on the UI thread delayed the start of the next
+        /// one, which is what Gordan heard as the speech being cut. Keyed on the
+        /// handle it was made for, it is built once per window and correct.</para></summary>
+        private IntPtr diagProviderHwnd;
+        private object diagProvider;
+
         private void DiagnosticAnnounce(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
@@ -3843,13 +3856,19 @@ namespace Nemoviz_Book_Reader
             {
                 bool ownWindow = readingWindow != null && !readingWindow.IsDisposed;
                 IntPtr hwnd = ownWindow ? readingWindow.Handle : this.Handle;
-                IRawElementProviderSimple provider;
-                int hr = UiaHostProviderFromHwnd(hwnd, out provider);
-                if (hr != 0 || provider == null)
+                if (diagProvider == null || diagProviderHwnd != hwnd)
                 {
-                    ReadingDiagnostics.Trace(string.Format("  provider FAILED hr=0x{0:x}", hr));
-                    return;
+                    IRawElementProviderSimple made;
+                    int mhr = UiaHostProviderFromHwnd(hwnd, out made);
+                    if (mhr != 0 || made == null)
+                    {
+                        ReadingDiagnostics.Trace(string.Format("  provider FAILED hr=0x{0:x}", mhr));
+                        return;
+                    }
+                    diagProvider = made;
+                    diagProviderHwnd = hwnd;
                 }
+                IRawElementProviderSimple provider = (IRawElementProviderSimple)diagProvider;
                 int raise = UiaRaiseNotificationEvent(provider, NotificationKind.Other,
                                           NotificationProcessing.MostRecent, text, string.Empty);
                 ReadingDiagnostics.Trace(string.Format(
