@@ -3851,6 +3851,31 @@ namespace Nemoviz_Book_Reader
         private void DiagnosticAnnounce(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
+            // OFF the UI thread. Both of these are calls into the screen reader's
+            // own process — UiaRaiseNotificationEvent especially, which is
+            // cross-process COM and can block for as long as the reader feels
+            // like taking. Done inline, once per sentence, that stalls the
+            // message pump; and NBR's speech comes from the 32-bit satellite over
+            // IPC, which needs that pump. So the player's own voice was being
+            // chopped by the act of telling the reader what it was saying.
+            //
+            // Nothing here touches a control: the surface has already been placed
+            // by the caller, and these two calls take a string and a provider
+            // pointer. UIA is free-threaded, so the provider travels.
+            // The handle is read HERE, on the UI thread. Touching Control.Handle
+            // from a pool thread is the classic way to turn one bug into two.
+            bool own = readingWindow != null && !readingWindow.IsDisposed;
+            IntPtr hwnd = own ? readingWindow.Handle : this.Handle;
+            System.Threading.ThreadPool.QueueUserWorkItem(_ => AnnounceOffThread(text, hwnd, own));
+        }
+
+        private void AnnounceOffThread(string text, IntPtr hwnd, bool ownWindow)
+        {
+            try { AnnounceOffThreadCore(text, hwnd, ownWindow); } catch { }
+        }
+
+        private void AnnounceOffThreadCore(string text, IntPtr hwnd, bool ownWindow)
+        {
             // QUEUED, not cancelling. Both channels were inherited from the
             // volume/speed announcement, where replacing the previous utterance
             // is exactly right — stepping volume twice should say the second
@@ -3862,8 +3887,6 @@ namespace Nemoviz_Book_Reader
             if (uiaNotifyUnavailable) { ReadingDiagnostics.Trace("  UIA marked unavailable"); return; }
             try
             {
-                bool ownWindow = readingWindow != null && !readingWindow.IsDisposed;
-                IntPtr hwnd = ownWindow ? readingWindow.Handle : this.Handle;
                 if (diagProvider == null || diagProviderHwnd != hwnd)
                 {
                     IRawElementProviderSimple made;
