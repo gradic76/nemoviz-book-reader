@@ -3142,6 +3142,48 @@ available and needs nobody to know the language.
 
 ---
 
+## 10h. EPUB 3 Media Overlays — built, and what is left (2026-08-02)
+
+A narrated EPUB imports as a **hybrid**, not a document: read as a document it
+came in as text and was handed a synthesiser, with the narrator sealed in the
+zip. `EpubOverlayImporter` unpacks it and hands the join to `DaisySync`, because
+the SMIL is structurally identical to DAISY 3 — `<par>` pairing a `<text src>`
+fragment with `<audio clipBegin clipEnd>`. The text side is
+`TextParsing.Assemble`, which was always generic HTML.
+
+Three things EPUB does differently, all in the packaging: reading order is the
+**OPF spine**, each document names its overlay through a **`media-overlay`**
+attribute, and the audio must be **moved to the book folder root** — a chapter is
+stored as a bare file name and the player looks for it beside `Book.ini`, so an
+EPUB's `EPUB/audio/` subfolder meant a book that imported perfectly and would not
+play a note.
+
+**`media:duration` is unusable.** One sample declares `00:00:07.299` for an 80 MB
+book, the other `00:00:00`. Durations come from the files (§8c's rule again).
+
+**Verified** on *O Universo Explicado aos meus Netos*: 602 sync points — exactly
+the `<par>` count measured before any of it was written — 25 chapters, 10 674 s,
+pt-PT, 126 230 characters. It plays, and the text follows the narrator.
+
+### Open
+
+1. **Go To and the seek step offer `aud001`, `aud002`.** Both samples yield
+   **zero** `h1…h6`, so there is nothing to place on the timeline —
+   `BookData.BuildHybridNavFromText` already turns a heading's character offset
+   into seconds through the sync map, and is waiting for headings to exist. The
+   source is the **EPUB nav document** (`epub:type="toc"`), which points at
+   fragments this code already resolves. **Clear, bounded, and first.**
+2. **Granta Portugal's text side is nearly empty** — 21 sync points and 377
+   characters against 2.2 MB of SMIL, so its ids do not match what the XHTML
+   yields. Audio and duration are correct. Needs investigation, not a fix.
+3. **The surface stops refreshing after a large seek** (Gordan: ~15 minutes in).
+   Not diagnosed.
+4. `Ctrl+C` in the reading surface copies nothing, because the surface never
+   SELECTS anything by design (§8l — a selection is read aloud over NBR's own
+   voice). Decide whether a bare Copy should take the current paragraph.
+
+---
+
 ## 11. TODO (open items)
 
 - **A key fires but a keyboard SHORTCUT does not light it.** The backlight is
