@@ -90,7 +90,7 @@ namespace Nemoviz_Book_Reader
 
         private bool suppressAnnounce;
         // True while the dialog is still being built: filling the pickers fires
-        // change events, and those must not be mistaken for the user editing â€”
+        // change events, and those must not be mistaken for the user editing —
         // otherwise opening Properties would immediately push its starting values
         // onto live playback.
         private bool initialising = true;
@@ -140,7 +140,7 @@ namespace Nemoviz_Book_Reader
             this.ShowInTaskbar = false;
             this.StartPosition = FormStartPosition.CenterParent;
 
-            // Column A â€” full-height info + live technical read-out.
+            // Column A — full-height info + live technical read-out.
             tbInfo = new TextBox();
             tbInfo.Multiline = true;
             tbInfo.ReadOnly = true;
@@ -191,7 +191,7 @@ namespace Nemoviz_Book_Reader
             cmbNrmType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbNrmType.Location = new Point(10, 40);
             cmbNrmType.Size = new Size(CellW - 24, 24);
-            cmbNrmType.AccessibleName = gNrm.Text + " â€” " + Localization.T("Prop.Normalize.Method");
+            cmbNrmType.AccessibleName = gNrm.Text + " — " + Localization.T("Prop.Normalize.Method");
             cmbNrmType.TabIndex = 1;
             cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Speech"));   // 0 â†’ speechnorm
             cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Dynamic"));  // 1 â†’ dynaudnorm
@@ -202,7 +202,7 @@ namespace Nemoviz_Book_Reader
             cmbNrm.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbNrm.Location = new Point(10, 70);
             cmbNrm.Size = new Size(CellW - 24, 24);
-            cmbNrm.AccessibleName = gNrm.Text + " â€” " + Localization.T("Prop.Stage.Level");
+            cmbNrm.AccessibleName = gNrm.Text + " — " + Localization.T("Prop.Stage.Level");
             cmbNrm.TabIndex = 2;
             foreach (string k in L5) cmbNrm.Items.Add(Localization.T(k));
             cmbNrm.SelectedIndex = Clamp(s.NormalizeLevel, 0, L5.Length - 1);
@@ -365,7 +365,7 @@ namespace Nemoviz_Book_Reader
 
         private CheckBox StageEnable(GroupBox g)
         {
-            // No "Use" label â€” the group already names the stage and the check
+            // No "Use" label — the group already names the stage and the check
             // state alone says whether it is on. Accessible name = the stage
             // name so a screen reader reads e.g. "Soften sibilance, checkbox".
             CheckBox c = new CheckBox();
@@ -384,7 +384,7 @@ namespace Nemoviz_Book_Reader
             cb.DropDownStyle = ComboBoxStyle.DropDownList;
             cb.Location = new Point(10, 46);
             cb.Size = new Size(CellW - 24, 24);
-            cb.AccessibleName = g.Text + " â€” " + Localization.T("Prop.Stage.Level");
+            cb.AccessibleName = g.Text + " — " + Localization.T("Prop.Stage.Level");
             cb.TabIndex = 1;
             foreach (string k in itemKeys) cb.Items.Add(Localization.T(k));
             cb.SelectedIndex = Clamp(selected, 0, itemKeys.Length - 1);
@@ -533,7 +533,7 @@ namespace Nemoviz_Book_Reader
 
         private static string ShelfName(BookData b)
         {
-            return string.IsNullOrWhiteSpace(b.Author) ? b.Title : b.Author + " â€” " + b.Title;
+            return string.IsNullOrWhiteSpace(b.Author) ? b.Title : b.Author + " — " + b.Title;
         }
 
         private static int Clamp(int v, int lo, int hi)
@@ -708,8 +708,8 @@ namespace Nemoviz_Book_Reader
             PopulateTextLanguages();
 
             // The saved name may predate the switch to plain voice names (it could
-            // be SAPI's description, "â€¦ - English (United States)"), so fall back
-            // to matching the bare name â€” OK then rewrites it in the current form.
+            // be SAPI's description, "… - English (United States)"), so fall back
+            // to matching the bare name — OK then rewrites it in the current form.
             // With no voice of its own, the book starts on the one the player would
             // have chosen for it — the same rule, asked in the same place.
             string want = !string.IsNullOrEmpty(book.TextVoice) ? book.TextVoice : DefaultVoiceForLanguage();
@@ -1108,7 +1108,7 @@ namespace Nemoviz_Book_Reader
             StageTextPrefs();
             foreach (var kv in stagedTextPrefs.All()) book.TextVoicePrefs.Set(kv.Key, kv.Value);
             // A text book has no playback volume of its own: the player's Volume
-            // field IS this speech volume, so keep the two the same number â€” the
+            // field IS this speech volume, so keep the two the same number — the
             // player reads book.Volume back when the dialog closes. (On a hybrid
             // book the Audio tab's own field is written afterwards and wins.)
             if (book.TextVolume >= 0) book.Volume = book.TextVolume;
@@ -1122,7 +1122,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Per-book playback level and speed, alongside the processing
-        /// stages â€” they are what the book sounds like just as much as the filters.
+        /// stages — they are what the book sounds like just as much as the filters.
         /// The player writes these back as the user adjusts them live, so the dialog
         /// simply shows and edits the stored values.</summary>
         private GroupBox BuildPlaybackGroup(int x, int y)
@@ -1164,7 +1164,7 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>The Text tab's read-out: what this book will actually be read
-        /// with, and where each value comes from â€” the book's own setting, or the
+        /// with, and where each value comes from — the book's own setting, or the
         /// Settings default it inherits.</summary>
         private void RefreshTextInfo()
         {
