@@ -14,7 +14,12 @@ namespace Nemoviz_Book_Reader
     /// </summary>
     public class TextHelpForm : Form
     {
-        public TextHelpForm(string title, string body)
+        /// <summary><paramref name="wrap"/> decides which kind of page this is.
+        /// Prose wraps to the window; a page whose lines are laid out in columns
+        /// (a table of symbols, examples lined up under each other) must not, or
+        /// the columns fold into each other at the first narrow window. The caller
+        /// knows which it wrote, so the caller says.</summary>
+        public TextHelpForm(string title, string body, bool wrap = false)
         {
             this.Text = title;
             this.ClientSize = new Size(620, 460);
@@ -27,9 +32,10 @@ namespace Nemoviz_Book_Reader
             TextBox text = new TextBox();
             text.Multiline = true;
             text.ReadOnly = true;
-            text.ScrollBars = ScrollBars.Both;
-            text.WordWrap = false;          // the examples are laid out in columns
-            text.Font = new Font(FontFamily.GenericMonospace, 9);
+            text.ScrollBars = wrap ? ScrollBars.Vertical : ScrollBars.Both;
+            text.WordWrap = wrap;
+            text.Font = wrap ? SystemFonts.MessageBoxFont
+                             : new Font(FontFamily.GenericMonospace, 9);
             text.BackColor = SystemColors.Window;
             text.Location = new Point(10, 10);
             text.Size = new Size(600, 400);
@@ -41,11 +47,24 @@ namespace Nemoviz_Book_Reader
             text.Text = (body ?? "").Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             text.Select(0, 0);
 
+            // Wrapped prose is measured and the window closes down onto it, up to
+            // the full page. A column-formatted page keeps the full height,
+            // because measuring it would only ever say "as tall as it is".
+            if (wrap)
+            {
+                Size need = TextRenderer.MeasureText(text.Text, text.Font,
+                                                     new Size(text.Width - 24, int.MaxValue),
+                                                     TextFormatFlags.WordBreak);
+                int h = Math.Max(120, Math.Min(400, need.Height + 16));
+                text.Height = h;
+                this.ClientSize = new Size(620, h + 70);
+            }
+
             Button close = new Button();
             close.Text = Localization.T("Btn.Close");
             close.AccessibleName = Localization.T("Btn.Close");
             close.Size = new Size(100, 32);
-            close.Location = new Point(510, 418);
+            close.Location = new Point(510, text.Bottom + 8);
             close.TabIndex = 1;
             close.DialogResult = DialogResult.Cancel;
 

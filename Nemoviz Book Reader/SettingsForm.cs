@@ -506,13 +506,10 @@ namespace Nemoviz_Book_Reader
             btnDict.Size = new Size(150, 30);
             btnDict.TabIndex = tab++;
             btnDict.Click += (s, e) => OpenDictionary();
-            // NOTE: Settings.TextBooks.Dictionary.Hint exists in en.lang and is
-            // attached to nothing — F1 on this button finds no hint. It cannot
-            // hang off this group (that hint is about voices, a different
-            // subject) and there is no room for a second ? button here: the row
-            // already uses 482 of the 486 units the box has. It probably belongs
-            // inside the dictionary window itself, where a reader is when they
-            // want it. Left deliberately, not forgotten.
+            // Settings.TextBooks.Dictionary.Hint no longer looks for a home here:
+            // it is at the top of the window this button opens, in plain sight
+            // (Gordan, 2026-08-03). A second ? never would have fitted anyway —
+            // the row already uses 482 of the 486 units the box has.
             box.Controls.Add(btnDict);
 
             try { voiceCatalog = EnsureSpeech().GetVoiceCatalog(); }
@@ -869,17 +866,21 @@ namespace Nemoviz_Book_Reader
             catch { return code; }
         }
 
-        /// <summary>Opens the user's speech dictionary for the voice and language
-        /// currently picked here, so a rule lands where they are looking. The "Try
-        /// it" box speaks through the same voice.</summary>
+        /// <summary>Opens the user's dictionary for the language picked here, and
+        /// hands it <b>every</b> voice that speaks that language — not only the one
+        /// selected. A voice mangles a name whether or not it is the voice in use,
+        /// and having to adopt a voice before correcting it would be a strange
+        /// price to pay. "Try it" then speaks in the voice whose rules are open.</summary>
         private void OpenDictionary()
         {
-            string voice = cmbVoice != null && cmbVoice.SelectedItem != null
-                ? cmbVoice.SelectedItem.ToString() : "";
             int li = cmbLanguage != null ? cmbLanguage.SelectedIndex : -1;
             string lang = (li >= 0 && li < languageCodes.Count) ? languageCodes[li] : "";
 
-            using (var dlg = new SpeechDictionaryForm(lang, voice, SpeakSample))
+            List<string> voices = VoiceChooser.VoicesFor(voiceCatalog, lang);
+            if (lang.Length > 0 && voices.Count == 0)
+                voices = VoiceChooser.VoicesFor(voiceCatalog, "");
+
+            using (var dlg = new SpeechDictionaryForm(lang, voices, SpeakSample))
                 dlg.ShowDialog(this);
             // Whatever was edited takes effect from the next sentence read.
             SpeechDictionaries.Reload();
@@ -887,12 +888,15 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Says a line with the voice selected here — used by the
         /// dictionary's "Try it".</summary>
-        private void SpeakSample(string text)
+        private void SpeakSample(string voice, string text)
         {
             try
             {
                 CompositeSpeechBackend sp = EnsureSpeech();
-                string picked = SelectedVoiceName();
+                // The caller's voice when it named one — the dictionary tries a
+                // rule out in the voice that rule was written for. Nothing named,
+                // and it falls back to whatever is selected here.
+                string picked = string.IsNullOrEmpty(voice) ? SelectedVoiceName() : voice;
                 if (picked.Length > 0) sp.SelectVoice(picked);
                 sp.SetRate(TtsReader.WpmToRate((int)numRate.Value));
                 sp.SetVolume((int)numVolume.Value);

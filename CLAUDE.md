@@ -1261,6 +1261,14 @@ which voice they use. NBR supplies the tool, the user supplies the content.
   global rule is the user's own habit. Each is its own plain-text file in
   `Dictionaries\` (`voice-<name>.dic`, `lang-hr.dic`, `global.dic`) so a
   dictionary can be backed up or passed to someone else.
+  **The window offers two of the three** (Gordan, 2026-08-03): the language, and
+  every voice that speaks it. There is no "all languages" line — standing inside
+  one language and calling a scope "everything" read as a promise, and the file
+  behind it belongs to languages the reader is not looking at. It is not
+  unreachable: when Settings is on *All other languages* there is no language to
+  name, and that first line **is** `global.dic`, which is also the one scope
+  `ForLanguage` answers `null` for. Rules already in `global.dic` keep running
+  either way — `Active()` is untouched.
 - **A rule** is: pattern, match (whole word / anywhere / regular expression),
   case-sensitive yes-no, "say this instead" or "say nothing at all", plus an
   on/off switch and the user's own note. Rules apply in list order, each once over
@@ -1269,11 +1277,31 @@ which voice they use. NBR supplies the tool, the user supplies the content.
   50 ms `MatchTimeout` and validated when saved (a bad one is explained on the
   spot, not swallowed while reading). Measured: a deliberately catastrophic
   pattern gives up after ~60 ms and reading continues.
-- **UI**: Settings → Text Books → "Speech dictionary…" (`SpeechDictionaryForm` +
-  `DictRuleForm`). The **Try it** box is not decoration — without it a blind user
+- **UI**: Settings → Text Books → "Pronunciation dictionary…" (`SpeechDictionaryForm`
+  + `DictRuleForm`). The **Try it** box is not decoration — without it a blind user
   would have to find the right place in a book to hear whether a rule works; it
-  runs the rules *as currently edited* and speaks the result in the selected
-  voice. Space toggles a rule on/off in the list, Delete removes, Enter edits.
+  runs the rules *as currently edited* and speaks the result **in the scope's own
+  voice**, so a rule written for Ivan is not judged in Dragana's mouth
+  (`SpeakSample` takes the voice from the caller now). Space toggles a rule
+  on/off in the list, Delete removes, Enter edits.
+- **Gone from the window on 2026-08-03, all Gordan's calls.** *Move up / Move
+  down*: order still decides what each rule sees, but rules that step on each
+  other are rare enough that two buttons were not worth the row — reorder by
+  removing and adding again. *"Would be read as"*: the try box already speaks the
+  answer, and a written copy of it suggested the dictionary touches the text,
+  which it does not. *The regex primer*: replaced by a short page that says what
+  regular expressions are and advises leaving them alone unless you already know
+  (`TextHelpForm` gained a `wrap` flag for it — prose wraps and the window closes
+  down onto the text; a page laid out in columns must not). In the rule dialog,
+  "Capital letters must match too" and "Say nothing at all" became **Case
+  sensitive** and **Skip**, which are the conventions and say it in two words.
+- **The hint is at the top of the window, visible, not behind a `?`.** It is the
+  one place in the app where that is true, and it is right here: this window is
+  opened on purpose by someone who may never have met a pronunciation dictionary,
+  and there was room once Move up/down and the result row left. Read-only and
+  tabbable, the shape every hint has. The window does **not** open focused on it —
+  focus starts on the scope combo, or a reader who came to add a rule would sit
+  through four sentences first.
 
 ---
 
