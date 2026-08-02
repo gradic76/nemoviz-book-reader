@@ -4390,9 +4390,15 @@ namespace Nemoviz_Book_Reader
             // instead, so a tester with no braille display can HEAR the mechanism
             // through their screen reader. Off unless switched on; delete the file
             // and this line to remove it.
-            // The surface holds a CHUNK, so the caret is a position within it.
+            // The surface holds a CHUNK, so the caret is a position within it —
+            // and if no chunk is loaded there is no position to place, which is
+            // not the same as placing it at nought.
             EnsureChunkFor(start);
-            ReadingDiagnostics.Place(tbReadingSurface, start - chunkStart, s);
+            if (chunkStart < 0) return;
+            int inChunk = start - chunkStart;
+            if (inChunk < 0) inChunk = 0;
+            if (inChunk > tbReadingSurface.TextLength) inChunk = tbReadingSurface.TextLength;
+            ReadingDiagnostics.Place(tbReadingSurface, inChunk, s);
             // Selecting the sentence does NOT make a reader announce it â€” measured,
             // and the reason is that the text is written once now and only the
             // selection travels, so there is no change event of the kind that
