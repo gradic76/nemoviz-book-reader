@@ -36,9 +36,14 @@ namespace Nemoviz_Book_Reader
         private const int Gap = 16;        // well to the button row
         private const int ButtonGap = 12;
 
-        /// <summary>One button, "OK". Used for both the hint pop-up and every
-        /// plain notice that used to be an OK-only MessageBox.</summary>
-        public static void ShowInfo(IWin32Window owner, string text, string title)
+        /// <summary>A HINT: the skinned box, with the text in a field the reader
+        /// can walk through.
+        ///
+        /// <para>This is what the shell was really for (Gordan, 2026-08-02). A
+        /// hint is several sentences that may want reading slowly, twice, or a
+        /// line at a time — so it belongs in a readable field rather than in a
+        /// system dialog that speaks once and expects an answer.</para></summary>
+        public static void ShowHint(IWin32Window owner, string text, string title)
         {
             if (!UiTheme.Current.BuildsOwnLayout)
             {
@@ -47,6 +52,21 @@ namespace Nemoviz_Book_Reader
             }
             using (Form f = Build(text, title, false))
                 f.ShowDialog(owner);
+        }
+
+        /// <summary>A NOTICE: an ordinary system message box, always.
+        ///
+        /// <para>"Book added", "book deleted", an import that failed — a sentence
+        /// you hear once and dismiss. Putting those in a readable field was going
+        /// too far (Gordan): there is nothing to study, and a real MessageBox is
+        /// what every screen reader already handles best, announced and dismissed
+        /// without anyone having to learn a new shape.</para>
+        ///
+        /// <para>The distinction is what is being said, not how it looks. A hint
+        /// is material; a notice is an event.</para></summary>
+        public static void ShowInfo(IWin32Window owner, string text, string title)
+        {
+            MessageBox.Show(owner, text, title, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>Yes/No. Returns true for Yes — matches the boolean the
@@ -58,15 +78,11 @@ namespace Nemoviz_Book_Reader
         /// something to flatten quietly while only changing how this looks.</summary>
         public static bool ShowConfirm(IWin32Window owner, string text, string title, bool defaultToNo = false)
         {
-            if (!UiTheme.Current.BuildsOwnLayout)
-            {
-                var def = defaultToNo ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1;
-                return MessageBox.Show(owner, text, title, MessageBoxButtons.YesNo,
-                    MessageBoxIcon.None, def) == DialogResult.Yes;
-            }
-
-            using (Form f = Build(text, title, true, defaultToNo))
-                return f.ShowDialog(owner) == DialogResult.Yes;
+            // A question is a notice too, and the same reasoning applies: "are you
+            // sure?" is answered, not studied. Always the real thing.
+            var def = defaultToNo ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1;
+            return MessageBox.Show(owner, text, title, MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question, def) == DialogResult.Yes;
         }
 
         private static Form Build(string text, string title, bool confirm, bool defaultToNo = false)
