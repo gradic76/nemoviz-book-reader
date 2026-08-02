@@ -520,6 +520,45 @@ namespace Nemoviz_Book_Reader
             {
                 // Malformed DAISY must never break loading a book.
             }
+
+            BuildHybridNavFromText();
+        }
+
+        /// <summary>Puts a hybrid's HEADINGS on the audio timeline, for a book
+        /// whose navigation did not come with times.
+        ///
+        /// <para>A DAISY names its headings in the NCX with the audio file and
+        /// offset beside each one. A narrated EPUB does not: its headings are in
+        /// the text, and what ties the text to the clock is the sync map. So each
+        /// heading's character offset is asked of the map and comes back as a
+        /// position in seconds — the same list, arrived at from the other
+        /// side.</para>
+        ///
+        /// <para>Without this, Go To offered the audio file names — "aud001",
+        /// "aud002" — and the seek step could only say "Part". A reader cannot
+        /// navigate a book by the producer's file numbering, and it is the one
+        /// thing a narrated book is supposed to be good at.</para>
+        ///
+        /// <para>Computed at load rather than stored: the map and the headings are
+        /// both on disk already, and a second copy of a thing derived from them is
+        /// a second copy to go stale.</para></summary>
+        private void BuildHybridNavFromText()
+        {
+            try
+            {
+                if (DaisyHeadings.Count > 0) return;         // it named its own
+                if (!IsHybrid || TextHeadings == null || TextHeadings.Count == 0) return;
+                SyncMap map = LoadSyncMap();
+                if (map == null || map.IsEmpty) return;
+
+                foreach (var h in TextHeadings)
+                {
+                    double at = DaisySync.SecondsAt(map, h.Offset);
+                    if (at >= 0) DaisyHeadings.Add((h.Level, h.Label, at));
+                }
+                DaisyHeadings.Sort((x, y) => x.Position.CompareTo(y.Position));
+            }
+            catch { }
         }
 
         /// <summary>Builds the virtual timeline for a DAISY book in reading
