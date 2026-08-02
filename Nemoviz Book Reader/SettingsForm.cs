@@ -938,6 +938,15 @@ namespace Nemoviz_Book_Reader
             return appSettings.AudioDevice ?? "";
         }
 
+        /// <summary>Ctrl+Tab, Ctrl+Shift+Tab and Ctrl+1…9 move between the pages,
+        /// cyclically — see <see cref="TabKeys"/> for why a TabControl does not
+        /// do this by itself once focus is inside a page.</summary>
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (TabKeys.Handle(tabSettings, keyData)) return true;
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);

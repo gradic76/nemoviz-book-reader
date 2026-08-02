@@ -209,6 +209,7 @@
     <Compile Include="M4bParser.cs" />
     <Compile Include="MpvDuration.cs" />
     <Compile Include="TextCleaner.cs" />
+    <Compile Include="TabKeys.cs" />
     <Compile Include="TextExtractor.cs" />
     <Compile Include="libraryform.cs">
       <SubType>Form</SubType>
@@ -322,6 +323,7 @@
     <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets'))" />
   </Target>
 </Project>
+
 
 
 

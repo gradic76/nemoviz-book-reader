@@ -315,6 +315,10 @@ namespace Nemoviz_Book_Reader
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.F1 && HintSystem.HandleF1(this)) return true;
+            // Ctrl+Tab, Ctrl+Shift+Tab and Ctrl+1…9, cyclic — a hybrid's two
+            // pages are the only place NBR has real tabs, and they should feel
+            // like anyone else's (see TabKeys for why WinForms does not).
+            if (TabKeys.Handle(tabs, keyData)) return true;
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
