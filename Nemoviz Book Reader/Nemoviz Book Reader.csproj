@@ -197,6 +197,7 @@
     <Compile Include="WordParser.cs" />
     <Compile Include="HtmlParser.cs" />
     <Compile Include="Fb2Parser.cs" />
+    <Compile Include="EpubOverlayImporter.cs" />
     <Compile Include="EpubParser.cs" />
     <Compile Include="PdfParser.cs" />
     <Compile Include="MobiParser.cs" />
@@ -323,6 +324,7 @@
     <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets'))" />
   </Target>
 </Project>
+
 
 
 

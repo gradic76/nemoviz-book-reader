@@ -1379,6 +1379,47 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        /// <summary>Unpacks an EPUB that carries media overlays and sets it up as
+        /// a hybrid. False — having changed nothing — for an ordinary EPUB, which
+        /// then takes the plain document path.
+        ///
+        /// <para>It has to be unpacked rather than read in place: the audio is
+        /// inside the zip, and mpv plays files. Everything comes out, not only
+        /// the sound, because the SMILs and the XHTML are what the join is built
+        /// from and a reader may want the rest of the package later.</para></summary>
+        private bool ImportNarratedEpub(string filePath, string destFolder, BookData imported)
+        {
+            if (!string.Equals(System.IO.Path.GetExtension(filePath), ".epub",
+                               StringComparison.OrdinalIgnoreCase)) return false;
+            try
+            {
+                // Peek before unpacking eighty megabytes to find out it was a
+                // novel: an overlay book has SMIL beside its audio.
+                bool narrated = false;
+                using (var z = System.IO.Compression.ZipFile.OpenRead(filePath))
+                {
+                    bool smil = false, audio = false;
+                    foreach (var e in z.Entries)
+                    {
+                        string x = System.IO.Path.GetExtension(e.FullName).ToLowerInvariant();
+                        if (x == ".smil") smil = true;
+                        else if (x == ".mp3" || x == ".m4a" || x == ".mp4" || x == ".ogg") audio = true;
+                        if (smil && audio) { narrated = true; break; }
+                    }
+                }
+                if (!narrated) return false;
+
+                System.IO.Compression.ZipFile.ExtractToDirectory(filePath, destFolder);
+                if (EpubOverlayImporter.Setup(imported, destFolder)) return true;
+
+                // Unpacked but not joinable — a book with overlays we could not
+                // follow. Leave the folder as it is and let the document path
+                // have it, so at least the words arrive.
+                return false;
+            }
+            catch { return false; }
+        }
+
         private void ImportFile(string filePath)
         {
             ImportFileCore(filePath, false);
@@ -1528,6 +1569,16 @@ namespace Nemoviz_Book_Reader
                         if (m4b != null && m4b.HasChapters)
                             imported.SetM4bChapters(m4b.Chapters);
                     }
+                }
+                else if (isTextImport && ImportNarratedEpub(filePath, destFolder, imported))
+                {
+                    // An EPUB with media overlays is a narrated book, not a
+                    // document: it carries the recording AND the words, joined
+                    // point by point, exactly as a text+audio DAISY does. Read as
+                    // a document it would have come in as text and been given a
+                    // synthesiser, with the narrator left sealed in the zip — the
+                    // one thing its reader came for. Handled above the plain text
+                    // branch for that reason; everything after this is done.
                 }
                 else if (isTextImport)
                 {
