@@ -155,7 +155,15 @@ namespace Nemoviz_Book_Reader
             // news to a screen reader — it reads the marked text out and braille
             // shows a solid block. The reading position is a caret, never a
             // range (§8l), so it is put back the instant focus lands.
-            Shown += (s, e) => FocusSurface();
+            Shown += (s, e) =>
+            {
+                // Aggressive on purpose, and only once, on the way up. A window
+                // the reader cannot find is worse than no window, and F9 having
+                // to fetch it has cost a whole evening.
+                try { TopMost = true; BringToFront(); Activate(); TopMost = false; } catch { }
+                try { SetForegroundWindow(Handle); } catch { }
+                FocusSurface();
+            };
             Activated += (s, e) => FocusSurface();
             FormClosed += (s, e) => GiveSurfaceBack();
         }
@@ -535,6 +543,9 @@ namespace Nemoviz_Book_Reader
         /// <summary>True once the reading surface really holds focus — which is
         /// the only state in which braille and the screen reader follow the
         /// book. Asked by the player, which keeps trying until it is.</summary>
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
         public bool SurfaceHasFocus
         {
             get { return surface != null && !surface.IsDisposed && surface.Focused; }

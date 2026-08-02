@@ -3168,10 +3168,21 @@ namespace Nemoviz_Book_Reader
         /// both places. Nothing here duplicates it.</para></summary>
         private void ToggleReadingWindow()
         {
-            if (readingWindow != null && !readingWindow.IsDisposed)
+            // A window that exists but has not been SHOWN yet is not open. It is
+            // made here and shown one message cycle later (ShowDialog blocks, so
+            // it cannot be called from inside the play path), and in that gap
+            // this used to treat it as open and close it — closing a form that
+            // was never shown, which raises no FormClosed, so readingWindow
+            // stayed non-null for good and every later F9 did nothing at all.
+            if (readingWindow != null && !readingWindow.IsDisposed && readingWindow.Visible)
             {
                 readingWindow.Close();
                 return;
+            }
+            if (readingWindow != null && !readingWindow.IsDisposed)
+            {
+                ReadingDiagnostics.Note("F9 while the window was made but not yet shown — ignored");
+                return;                       // it is on its way; let it arrive
             }
             // Same low "no go" beep the other book keys give on an empty player.
             // Tested on the TEXT, not on tts: a hybrid has words to show and no
@@ -3250,7 +3261,10 @@ namespace Nemoviz_Book_Reader
             {
                 ReadingWindow modal = readingWindow;
                 if (modal == null || modal.IsDisposed) return;
-                try { modal.ShowDialog(this); } catch { }
+                ReadingDiagnostics.Note("READING WINDOW opening (modal)");
+                try { modal.ShowDialog(this); }
+                catch (Exception ex) { ReadingDiagnostics.Note("ShowDialog THREW " + ex.Message); }
+                ReadingDiagnostics.Note("READING WINDOW closed");
                 // ShowDialog does not dispose the form the way Show does.
                 try { modal.Dispose(); } catch { }
             }));
