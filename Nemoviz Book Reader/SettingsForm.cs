@@ -122,7 +122,6 @@ namespace Nemoviz_Book_Reader
             tabSettings.TabIndex = 1;
 
             tabSettings.TabPages.Add(BuildGeneralTab());
-            tabSettings.TabPages.Add(BuildAudioBooksTab());
             tabSettings.TabPages.Add(BuildTextBooksTab());
             tabSettings.TabPages.Add(BuildDeviceTab());
             tabSettings.TabPages.Add(BuildMiscTab());
@@ -279,6 +278,22 @@ namespace Nemoviz_Book_Reader
             page.Controls.Add(lblLanguage);
             page.Controls.Add(cmbLanguage);
             page.Controls.Add(MakeHint("Settings.General.Language.Hint", 10, 266, 470, 32, 8));
+
+            // Moved here from Audio Books (Gordan, 2026-08-02), and he is right
+            // that it never belonged there: it decides where a book's title and
+            // author come from for DAISY and EPUB exactly as much as for audio.
+            // A setting on a page called Audio Books is a setting a reader of
+            // text books never goes looking for.
+            chkUseMetadata = new CheckBox();
+            chkUseMetadata.Text = Localization.T("Settings.General.UseMetadata");
+            chkUseMetadata.AccessibleName = Localization.T("Settings.General.UseMetadata");
+            chkUseMetadata.Location = new Point(10, 306);
+            chkUseMetadata.Size = new Size(470, 24);
+            chkUseMetadata.TabIndex = 9;
+            chkUseMetadata.Checked = appSettings.UseMetadata;
+            page.Controls.Add(chkUseMetadata);
+            page.Controls.Add(MakeHint("Settings.General.UseMetadata.Hint", 28, 332, 452, 44, 10));
+
             UpdateMediaKeyEnabled();
             return page;
         }
@@ -394,22 +409,11 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        private TabPage BuildAudioBooksTab()
-        {
-            TabPage page = new TabPage(Localization.T("Settings.Tab.AudioBooks"));
-
-            chkUseMetadata = new CheckBox();
-            chkUseMetadata.Text = Localization.T("Settings.Audio.UseMetadata");
-            chkUseMetadata.AccessibleName = Localization.T("Settings.Audio.UseMetadata");
-            chkUseMetadata.Location = new Point(10, 20);
-            chkUseMetadata.Size = new Size(430, 44);
-            chkUseMetadata.TabIndex = 0;
-            chkUseMetadata.Checked = appSettings.UseMetadata;
-
-            page.Controls.Add(chkUseMetadata);
-            page.Controls.Add(MakeHint("Settings.Audio.UseMetadata.Hint", 28, 66, 460, 60, 1));
-            return page;
-        }
+        // The Audio Books tab is GONE. Its only control — "use embedded
+        // metadata" — moved to General, where it belongs, and a tab with nothing
+        // on it is worse than no tab: a reader tabs onto it, finds an empty page
+        // and has to work out whether that is a fault. If an audio-only setting
+        // ever appears, the tab comes back with something to say.
 
         // Text Books is three groups: how the text is SPOKEN, how it goes to a
         // BRAILLE display, and how it is SHOWN. Speech is live; the other two are
@@ -502,6 +506,13 @@ namespace Nemoviz_Book_Reader
             btnDict.Size = new Size(150, 30);
             btnDict.TabIndex = tab++;
             btnDict.Click += (s, e) => OpenDictionary();
+            // NOTE: Settings.TextBooks.Dictionary.Hint exists in en.lang and is
+            // attached to nothing — F1 on this button finds no hint. It cannot
+            // hang off this group (that hint is about voices, a different
+            // subject) and there is no room for a second ? button here: the row
+            // already uses 482 of the 486 units the box has. It probably belongs
+            // inside the dictionary window itself, where a reader is when they
+            // want it. Left deliberately, not forgotten.
             box.Controls.Add(btnDict);
 
             try { voiceCatalog = EnsureSpeech().GetVoiceCatalog(); }
@@ -1008,7 +1019,10 @@ namespace Nemoviz_Book_Reader
 
             page.Controls.Add(lblSoundCard);
             page.Controls.Add(cmbSoundCard);
-            page.Controls.Add(MakeHint("Settings.Device.Hint", 10, 52, 480, 32, 1));
+            // No hint here (Gordan, 2026-08-02). A list of sound cards under a
+            // label that says which sound card explains itself, and a hint that
+            // only restates the caption costs a reader the same time to hear as
+            // one that tells them something.
             return page;
         }
 
