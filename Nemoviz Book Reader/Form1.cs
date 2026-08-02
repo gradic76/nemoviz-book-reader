@@ -2867,9 +2867,13 @@ namespace Nemoviz_Book_Reader
                     //
                     // Once per book: closing the window should not be undone by
                     // the next pause and resume.
+                    ReadingDiagnostics.Note(string.Format("PLAY: offered={0} opens={1}",
+                        readingWindowOffered,
+                        currentBook != null && currentBook.OpensReadingWindow));
                     if (!readingWindowOffered && currentBook != null && currentBook.OpensReadingWindow)
                     {
                         readingWindowOffered = true;
+                        OpenReadingWindowWhenReady();
                     }
                 }
                 else if (keepAlive != null) keepAlive.Stop();
@@ -3686,6 +3690,17 @@ namespace Nemoviz_Book_Reader
 
         private void OpenReadingWindowWhenReady()
         {
+            // Every way out is recorded. "Nothing recorded" told us more than any
+            // of the fixes did: the window code was never reached at all, so the
+            // decision fails before it, and a silent early return cannot be told
+            // from a decision that was never taken.
+            ReadingDiagnostics.Note(string.Format(
+                "OPEN? book={0} opens={1} window={2} handle={3}",
+                currentBook == null ? "null" : "ok",
+                currentBook != null && currentBook.OpensReadingWindow,
+                readingWindow == null ? "null" : (readingWindow.Visible ? "visible" : "made"),
+                IsHandleCreated));
+
             if (currentBook == null || !currentBook.OpensReadingWindow) return;
             if (readingWindow != null) return;
 
