@@ -136,16 +136,27 @@ namespace Nemoviz_Book_Reader
             }
 
             ResumeLayout();
-            Shown += (s, e) =>
-            {
-                if (surface == null) return;
-                // Focusing a multiline TextBox SELECTS ALL of it, and a selection
-                // is news to a screen reader: it reads the marked text out and
-                // braille shows a solid block. The reading position is a caret,
-                // never a range (§8l) — so put it back where it was the instant
-                // focus lands, before anything can announce it.
-                FocusSurface();
-            };
+
+            // Said BEFORE the window is shown, which is the whole point.
+            //
+            // Every previous attempt set focus AFTER the window appeared —
+            // from Shown, then from the player a message cycle later, then on a
+            // retry timer — and each was a race against the play path, which
+            // puts focus back on the player's own controls at its own pace.
+            // Gordan kept having to fetch the window with F9.
+            //
+            // ActiveControl is not a request to move focus; it is the window
+            // telling WinForms where focus BELONGS. The system then hands it
+            // over as part of activating the window, with nothing to race.
+            if (surface != null) ActiveControl = surface;
+
+            // Still done on Shown as well, for the caret rather than the focus:
+            // focusing a multiline TextBox SELECTS ALL of it, and a selection is
+            // news to a screen reader — it reads the marked text out and braille
+            // shows a solid block. The reading position is a caret, never a
+            // range (§8l), so it is put back the instant focus lands.
+            Shown += (s, e) => FocusSurface();
+            Activated += (s, e) => FocusSurface();
             FormClosed += (s, e) => GiveSurfaceBack();
         }
 

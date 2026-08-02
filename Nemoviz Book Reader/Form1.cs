@@ -3256,7 +3256,16 @@ namespace Nemoviz_Book_Reader
             grab.Tick += (s, e) =>
             {
                 tries++;
-                if (w == null || w.IsDisposed || tries > 6) { grab.Stop(); grab.Dispose(); return; }
+                if (w == null || w.IsDisposed || tries > 6)
+                {
+                    // If it never took, say so rather than leaving Gordan to
+                    // notice. Once per opening, on a key press, so it costs
+                    // nothing in the reading path.
+                    if (w != null && !w.IsDisposed && !w.SurfaceHasFocus)
+                        ReadingDiagnostics.Note("READING WINDOW never took focus after "
+                                                + tries + " tries");
+                    grab.Stop(); grab.Dispose(); return;
+                }
                 try
                 {
                     w.Activate();
