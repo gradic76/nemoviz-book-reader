@@ -1064,8 +1064,19 @@ namespace Nemoviz_Book_Reader
                     ChangeSeekStep(+1);
                     return true;
 
+                // Both open a book by putting it on the SHELF first, rather than
+                // loading it straight into the transport (Gordan, 2026-08-02).
+                // A book that arrives in the player without passing through the
+                // library is a book with no Book.ini, no remembered position and
+                // no properties — it plays once and is gone. Opening it "as
+                // though from the shelf" is the same act with a home to come
+                // back to.
                 case Keys.Control | Keys.O:
-                    OpenFile();
+                    OpenIntoLibrary(LibraryForm.StartWith.OpenFile);
+                    return true;
+
+                case Keys.Control | Keys.Shift | Keys.O:
+                    OpenIntoLibrary(LibraryForm.StartWith.OpenFolder);
                     return true;
 
                 // Ctrl+G, Ctrl+T and Ctrl+B are GONE (Gordan, 2026-08-02). They
@@ -2908,9 +2919,15 @@ namespace Nemoviz_Book_Reader
                 return;
             }
 
+            // Play with nothing loaded does NOT go looking for something to play
+            // (Gordan, 2026-08-02). It used to open a file dialog, which is a
+            // transport key answering with a filing question — and now that Play
+            // also brings up a book's reading window, "Play" has to mean one
+            // thing only. Nothing loaded, nothing to play: the same low refusal
+            // every other book key gives on an empty player.
             if (mpvHandle == IntPtr.Zero || currentFile == null)
             {
-                OpenFile();
+                tones.Play(300, 150);
                 return;
             }
 
@@ -3097,6 +3114,23 @@ namespace Nemoviz_Book_Reader
             return false;   // already past the last bookmark
         }
 
+        /// <summary>Opens the Library and sets it straight to importing — the
+        /// player's Ctrl+O and Ctrl+Shift+O.
+        ///
+        /// <para>It goes through the shelf rather than doing its own opening so
+        /// that a book arrives with a home: a Book.ini, a remembered position,
+        /// properties of its own. Loaded straight into the transport it played
+        /// once and was gone. Everything about importing — archives, DRM, the
+        /// progress dialog, the notice at the end — is the Library's, unchanged,
+        /// because it IS the Library's.</para></summary>
+        private void OpenIntoLibrary(LibraryForm.StartWith what)
+        {
+            pendingLibraryAction = what;
+            BtnLibrary_Click(null, EventArgs.Empty);
+        }
+
+        private LibraryForm.StartWith pendingLibraryAction = LibraryForm.StartWith.Nothing;
+
         private void BtnLibrary_Click(object sender, EventArgs e)
         {
             if (isLibraryOpen) return;
@@ -3123,6 +3157,8 @@ namespace Nemoviz_Book_Reader
                     using (LibraryForm libraryForm = new LibraryForm(appSettings,
                         currentBook != null ? currentBook.FolderPath : null, UnloadActiveBook))
                     {
+                        libraryForm.StartAction = pendingLibraryAction;
+                        pendingLibraryAction = LibraryForm.StartWith.Nothing;
                         libraryForm.ShowDialog(this);
 
                         if (libraryForm.DialogResult == DialogResult.OK && libraryForm.SelectedBook != null)

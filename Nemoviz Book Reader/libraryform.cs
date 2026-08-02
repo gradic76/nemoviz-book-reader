@@ -96,12 +96,37 @@ namespace Nemoviz_Book_Reader
             LoadBooks();
         }
 
+        /// <summary>What to start doing the moment the shelf is up, if anything.
+        ///
+        /// <para>Ctrl+O and Ctrl+Shift+O in the PLAYER open a book by putting it
+        /// on the shelf first, rather than loading it straight into the transport
+        /// (Gordan, 2026-08-02) — "as though it had been opened from here". This
+        /// is how the player says so: it raises the Library and hands over the
+        /// job. Nothing about importing is reimplemented, so archives, DRM,
+        /// progress and the notice at the end all behave exactly as they do when
+        /// the shelf is used directly, because they ARE that.</para></summary>
+        public enum StartWith { Nothing, OpenFile, OpenFolder }
+        public StartWith StartAction { get; set; }
+
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
             // Default tab order would land on the search box first;
             // the shelf is the natural starting point.
             listBooks.Focus();
+
+            // Posted, not called: the shelf must finish coming up before a modal
+            // file dialog opens on top of it, or focus lands somewhere neither
+            // window expects — the same reason the player defers opening this
+            // window at start-up.
+            if (StartAction == StartWith.Nothing) return;
+            StartWith what = StartAction;
+            StartAction = StartWith.Nothing;          // once, not on every Shown
+            BeginInvoke((Action)(() =>
+            {
+                if (what == StartWith.OpenFile) MenuFileOpenFile_Click(null, EventArgs.Empty);
+                else MenuFileOpenFolder_Click(null, EventArgs.Empty);
+            }));
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
