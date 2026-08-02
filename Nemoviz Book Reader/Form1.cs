@@ -3212,8 +3212,12 @@ namespace Nemoviz_Book_Reader
                 return;
             }
             EnsureReadingSurface();
-            LoadReadingSurface();
-
+            // The text goes in AFTER the window has styled the surface, not
+            // before. Measured on Gordan's 1.2 MB hybrid: filling the surface
+            // costs 1.4 s and a single font change on a box that full costs
+            // 5.6 s — and doing it in this order paid BOTH, one whole re-layout
+            // of the book to load it and another to style it. Styling an empty
+            // box is free, so the text is laid out once.
             var mode = (VisualMode)(currentBook.TextVisualMode >= 0 && currentBook.TextVisualMode <= 2
                                     ? currentBook.TextVisualMode : 0);
             readingWindow = new ReadingWindow(this, tbReadingSurface, mode,
@@ -3265,6 +3269,7 @@ namespace Nemoviz_Book_Reader
             {
                 ReadingWindow modal = readingWindow;
                 if (modal == null || modal.IsDisposed) return;
+                LoadReadingSurface();          // styled and empty until now
                 ReadingDiagnostics.Note("READING WINDOW opening (modal)");
                 try { modal.ShowDialog(this); }
                 catch (Exception ex) { ReadingDiagnostics.Note("ShowDialog THREW " + ex.Message); }
