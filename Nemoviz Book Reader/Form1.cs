@@ -2061,7 +2061,10 @@ namespace Nemoviz_Book_Reader
                 return;
             }
             if (mpvHandle != IntPtr.Zero)
+            {
+                RewindOnResume();
                 mpv_set_property_string(mpvHandle, "pause", "no");
+            }
             SetPlayPauseState(true);
         }
 
@@ -2886,7 +2889,15 @@ namespace Nemoviz_Book_Reader
                     if (currentBook != null && currentBook.OpensReadingWindow)
                         OpenReadingWindowWhenReady();
                 }
-                else if (keepAlive != null) keepAlive.Stop();
+                else
+                {
+                    if (keepAlive != null) keepAlive.Stop();
+                    // When the pause began — the one place that knows. Stamped
+                    // here rather than at each of the seven calls that pause mpv,
+                    // because a pause reached by a route nobody remembered is
+                    // exactly how a resume ends up not rewinding.
+                    pausedAt = DateTime.UtcNow;
+                }
             }
             catch { }
             UpdateTitleBar();
@@ -2950,9 +2961,45 @@ namespace Nemoviz_Book_Reader
             }
             else
             {
+                RewindOnResume();
                 mpv_set_property_string(mpvHandle, "pause", "no");
                 SetPlayPauseState(true);
             }
+        }
+
+        /// <summary>Steps back a few seconds when an audio book resumes.
+        ///
+        /// <para>The convention of every audiobook player, and the same thing NBR
+        /// already does for a text book without anyone having asked — a paused
+        /// TtsReader restarts the SENTENCE it stopped in rather than resuming
+        /// mid-word. You come back to a book having lost the thread, and the last
+        /// few seconds are what gives it back. Gordan: a default, no setting
+        /// needed.</para>
+        ///
+        /// <para>Only after a real pause. Tapping pause and play back — checking
+        /// something, answering a word — would otherwise walk the book backwards
+        /// three seconds at a time, and that is a fault, not a courtesy.</para></summary>
+        private DateTime pausedAt = DateTime.MinValue;
+        private const double RewindSeconds = 3.0;
+
+        private void RewindOnResume()
+        {
+            try
+            {
+                if (mpvHandle == IntPtr.Zero) return;
+                if (pausedAt == DateTime.MinValue) return;
+                if ((DateTime.UtcNow - pausedAt).TotalSeconds < 5) return;   // a tap, not a break
+                pausedAt = DateTime.MinValue;
+
+                double at = 0;
+                mpv_get_property(mpvHandle, "time-pos", 5, ref at);
+                double back = at - RewindSeconds;
+                if (back < 0) back = 0;
+                if (at - back < 0.1) return;
+                mpv_set_property_string(mpvHandle, "time-pos",
+                    back.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+            catch { }
         }
 
         // On-screen Back/Forward buttons are the mouse/visual-mode
