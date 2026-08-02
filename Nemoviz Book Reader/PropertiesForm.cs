@@ -193,8 +193,8 @@ namespace Nemoviz_Book_Reader
             cmbNrmType.Size = new Size(CellW - 24, 24);
             cmbNrmType.AccessibleName = gNrm.Text + " — " + Localization.T("Prop.Normalize.Method");
             cmbNrmType.TabIndex = 1;
-            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Speech"));   // 0 â†’ speechnorm
-            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Dynamic"));  // 1 â†’ dynaudnorm
+            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Speech"));   // 0 → speechnorm
+            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Dynamic"));  // 1 → dynaudnorm
             cmbNrmType.SelectedIndex =
                 string.Equals(s.NormalizeType, "dynaudnorm", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
             gNrm.Controls.Add(cmbNrmType);
@@ -352,7 +352,7 @@ namespace Nemoviz_Book_Reader
             onPreview?.Invoke(BuildCurrent(), chkBypass.Checked);
         }
 
-        // â”€â”€ Cell builders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Cell builders ─────────────────────────────────────────────────
         private GroupBox StageBox(string titleKey, int x, int y, int tabIndex)
         {
             GroupBox g = new GroupBox();
@@ -438,7 +438,7 @@ namespace Nemoviz_Book_Reader
                     p.Enabled = master && st.Enable.Checked;
         }
 
-        // â”€â”€ Info column (live technical read-out) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Info column (live technical read-out) ─────────────────────────
         private void RefreshInfo()
         {
             string dash = Localization.T("Common.Dash");
@@ -597,7 +597,7 @@ namespace Nemoviz_Book_Reader
             base.OnFormClosed(e);
         }
 
-        // â”€â”€ Text tab: the SAME options as Settings â†’ Text Books, but for THIS book.
+        // ── Text tab: the SAME options as Settings → Text Books, but for THIS book.
         // Settings holds the defaults; a book only departs from them when the user
         // says so, which is what the "custom" switch at the top means. Left off, the
         // book simply follows Settings and every control below is dimmed and out of

@@ -6,12 +6,12 @@ namespace Nemoviz_Book_Reader
 {
     /// <summary>The result of extracting a document: the reading text, its
     /// heading structure (level, title, character offset), title/author
-    /// metadata, and a DRM flag (content encrypted â†’ can't read).</summary>
+    /// metadata, and a DRM flag (content encrypted → can't read).</summary>
     public class TextDoc
     {
         public string Text = "";
         public List<(int Level, string Title, int Offset)> Headings = new List<(int, string, int)>();
-        // Print-page markers (EPUB page-list / NCX pageList) â†’ character offsets.
+        // Print-page markers (EPUB page-list / NCX pageList) → character offsets.
         public List<(string Label, int Offset)> Pages = new List<(string, int)>();
         public string Title = "";
         public string Author = "";
@@ -20,7 +20,7 @@ namespace Nemoviz_Book_Reader
         // book remembers it and the user can correct the choice later.
         public string BrailleTable = "";
         public string Publisher = "";  // dc:publisher (EPUB print/edition publisher)
-        /// <summary>Element id â†’ character offset, for formats whose AUDIO is
+        /// <summary>Element id → character offset, for formats whose AUDIO is
         /// aligned to named points in the text: a DAISY SMIL par names a DTBook
         /// id, an EPUB media overlay names an XHTML id. Empty for everything
         /// else. <see cref="DaisySync.Build"/> is what turns it into a sync map.
@@ -29,7 +29,7 @@ namespace Nemoviz_Book_Reader
         /// offsets are in RAW-text coordinates and have to be moved by
         /// <see cref="TextCleaner.CleanDoc"/> along with the headings and pages —
         /// re-deriving them after the clean would put every one of them slightly
-        /// too far into the book, which is the drift Â§8e already paid for
+        /// too far into the book, which is the drift §8e already paid for
         /// once.</para></summary>
         public Dictionary<string, int> SyncIds = new Dictionary<string, int>();
         /// <summary>The language the FILE claims (dc:language, FB2 &lt;lang&gt;,
