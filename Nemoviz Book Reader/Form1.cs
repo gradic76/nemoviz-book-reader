@@ -3232,50 +3232,30 @@ namespace Nemoviz_Book_Reader
                     tbReadingSurface.SetBounds(12, ClientSize.Height + 4, ClientSize.Width - 24, 44);
                 Activate();
             };
-            readingWindow.Show(this);
-            // …and then take the foreground, one message cycle later.
+            // MODAL, like the Library, Settings and Properties dialogs — Gordan's
+            // observation, and it is the answer. Those hold focus absolutely and
+            // the player cannot be reached while they are up, because ShowDialog
+            // runs its own message loop and the owner takes no input until it
+            // ends. Every attempt with Show() was ASKING for focus and then
+            // defending it against the play path. A modal window does not ask.
             //
-            // Show(owner) activates, but this is now called from the middle of
-            // the PLAY path, and what follows it puts focus back on the player's
-            // own controls — so the window came up behind and without focus, and
-            // Gordan had to press F9 twice to get it back. Braille and the aid
-            // both follow FOCUS, so a window nobody is standing in is a window
-            // that does nothing.
+            // Deferred, because this is called from the MIDDLE of the play path:
+            // ShowDialog blocks its caller, so calling it here would leave the
+            // play half-finished. Posted, it opens once that has returned.
             //
-            // Deferred rather than called here: the rest of the play path has to
-            // finish first, or it simply overwrites this too.
-            // Tried repeatedly, not once. One deferred attempt was not enough:
-            // Gordan still had to fetch the window with F9 after several plays.
-            // The play path does not finish in a single message cycle — the TTS
-            // engine, the device and the player's own controls all take focus at
-            // their own pace — so this keeps asking for about three quarters of a
-            // second and stops the moment the surface actually has it.
-            ReadingWindow w = readingWindow;
-            var grab = new Timer { Interval = 120 };
-            int tries = 0;
-            grab.Tick += (s, e) =>
+            // Playback is unaffected. The nested loop runs on the same thread,
+            // so Form1's timers go on ticking, mpv goes on playing, and every key
+            // the window forwards still reaches the player's own handlers.
+            BeginInvoke((Action)(() =>
             {
-                tries++;
-                if (w == null || w.IsDisposed || tries > 6)
-                {
-                    // If it never took, say so rather than leaving Gordan to
-                    // notice. Once per opening, on a key press, so it costs
-                    // nothing in the reading path.
-                    if (w != null && !w.IsDisposed && !w.SurfaceHasFocus)
-                        ReadingDiagnostics.Note("READING WINDOW never took focus after "
-                                                + tries + " tries");
-                    grab.Stop(); grab.Dispose(); return;
-                }
-                try
-                {
-                    w.Activate();
-                    w.FocusSurface();
-                    if (w.SurfaceHasFocus) { grab.Stop(); grab.Dispose(); }
-                }
-                catch { grab.Stop(); grab.Dispose(); }
-            };
-            grab.Start();
+                ReadingWindow modal = readingWindow;
+                if (modal == null || modal.IsDisposed) return;
+                try { modal.ShowDialog(this); } catch { }
+                // ShowDialog does not dispose the form the way Show does.
+                try { modal.Dispose(); } catch { }
+            }));
         }
+
 
         /// <summary>The distinct characters of the book, for filtering the font
         /// list. Measured on the real text rather than derived from the language,
