@@ -4034,6 +4034,67 @@ namespace Nemoviz_Book_Reader
         }
 
         private int lastCaretSet = -1;
+
+        // ── The reading surface holds a CHUNK, not the book ───────────────────
+        /// <summary>Where the text now in the surface begins, as an offset into
+        /// <see cref="readingText"/>. −1 when nothing is loaded.</summary>
+        private int chunkStart = -1;
+        private int chunkEnd = -1;
+
+        /// <summary>About three pages. Gordan's figure, and his reason: a whole
+        /// book in the surface made his own machine — 32 GB of it — start to
+        /// labour, and a weaker one would simply give up. Measured on his 1.2 MB
+        /// hybrid, filling the surface cost 1.4 s and a single font change on it
+        /// 5.6 s.</summary>
+        private const int ChunkChars = 5000;
+
+        /// <summary>Puts the reading position's neighbourhood in the surface,
+        /// and only reloads when the position leaves it.
+        ///
+        /// <para>The chunk is re-cut when the caret comes within a quarter of the
+        /// end, not when it falls off — reloading exactly at the edge would
+        /// reload on every sentence once the reader got there.</para>
+        ///
+        /// <para>Edges are moved to a line break where one is near, so a chunk
+        /// does not begin or end mid-sentence: braille and the screen reader both
+        /// read what is around the caret, and half a sentence is worse than a
+        /// slightly wider chunk.</para></summary>
+        private void EnsureChunkFor(int at)
+        {
+            if (tbReadingSurface == null || readingText == null) return;
+            if (at < 0) at = 0;
+            if (at > readingText.Length) at = readingText.Length;
+
+            int margin = ChunkChars / 4;
+            if (chunkStart >= 0 && at >= chunkStart + margin && at <= chunkEnd - margin) return;
+            if (chunkStart == 0 && at < margin && chunkEnd >= readingText.Length) return;
+
+            int from = Math.Max(0, at - ChunkChars / 2);
+            int to = Math.Min(readingText.Length, from + ChunkChars);
+            from = SnapToBreak(from, -1);
+            to = SnapToBreak(to, +1);
+
+            chunkStart = from;
+            chunkEnd = to;
+            tbReadingSurface.Text = readingText.Substring(from, to - from);
+            lastCaretSet = -1;
+        }
+
+        /// <summary>The nearest line break within 400 characters, or the offset
+        /// unchanged. A chunk boundary that lands mid-word reads as a word cut in
+        /// two on a braille display.</summary>
+        private int SnapToBreak(int at, int direction)
+        {
+            const int Look = 400;
+            if (at <= 0 || at >= readingText.Length) return at;
+            for (int i = 0; i < Look; i++)
+            {
+                int p = at + i * direction;
+                if (p <= 0 || p >= readingText.Length) break;
+                if (readingText[p] == '\n') return direction < 0 ? p + 1 : p;
+            }
+            return at;
+        }
         /// <summary>How far through the book the test aid has already spoken, as
         /// a character offset. −1 before anything.</summary>
         private int announcedTo = -1;
@@ -4202,7 +4263,7 @@ namespace Nemoviz_Book_Reader
         private void LoadReadingSurface()
         {
             if (tbReadingSurface == null || readingText == null) return;
-            tbReadingSurface.Text = readingText;
+            chunkStart = -1;                     // force the first chunk to load
             lastSurfaceStart = -1;
             UpdateReadingSurface();
         }
@@ -4329,7 +4390,9 @@ namespace Nemoviz_Book_Reader
             // instead, so a tester with no braille display can HEAR the mechanism
             // through their screen reader. Off unless switched on; delete the file
             // and this line to remove it.
-            ReadingDiagnostics.Place(tbReadingSurface, start, s);
+            // The surface holds a CHUNK, so the caret is a position within it.
+            EnsureChunkFor(start);
+            ReadingDiagnostics.Place(tbReadingSurface, start - chunkStart, s);
             // Selecting the sentence does NOT make a reader announce it â€” measured,
             // and the reason is that the text is written once now and only the
             // selection travels, so there is no change event of the kind that

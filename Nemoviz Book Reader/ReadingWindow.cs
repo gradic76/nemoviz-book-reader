@@ -284,27 +284,30 @@ namespace Nemoviz_Book_Reader
             cmbFont.SelectedIndexChanged += (s, e) =>
             {
                 fontFamily = cmbFont.SelectedItem as string ?? fontFamily;
-                // NOT applied on the keystroke. Setting Font on the surface makes
-                // WinForms re-wrap everything in it, and everything in it is the
-                // WHOLE BOOK — 155 000 characters in the sample Gordan reads. One
-                // arrow key is one re-layout of a novel; holding the arrow down
-                // took the machine to its knees, fan and all.
+                // NOT applied here at all any more — not even after a pause.
+                // Setting Font on the surface re-wraps everything in it, which is
+                // seconds on a real book, and a timer only meant the machine
+                // seized a third of a second after each key instead of during it
+                // (Gordan). Browsing a list must cost nothing.
                 //
-                // So the name is spoken at once, because that is what the reader
-                // is choosing by, and the face itself follows a third of a second
-                // after they stop moving. Browsing a hundred faces costs one
-                // re-layout instead of a hundred.
-                if (fontApply == null)
-                {
-                    fontApply = new Timer();
-                    fontApply.Interval = 350;
-                    fontApply.Tick += (s2, e2) => { fontApply.Stop(); ApplyFont(); };
-                }
-                fontApply.Stop();
-                fontApply.Start();
+                // The name is still spoken on the keystroke, because that is what
+                // the reader is choosing BY. The face itself waits for the choice
+                // to be made — Enter, or closing the list.
                 // NVDA does not announce a closed combo changed with the arrows
                 // (§11); JAWS does, so this is a no-op there and never doubles up.
                 NvdaController.Speak(fontFamily);
+            };
+            // The choice is made when the list closes or Enter is pressed, and
+            // only then is the book re-laid-out. Leaving the picker without
+            // choosing applies whatever is showing, which is the same thing a
+            // combo box means everywhere else.
+            cmbFont.DropDownClosed += (s, e) => ApplyFont();
+            cmbFont.Leave += (s, e) => ApplyFont();
+            cmbFont.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode != Keys.Enter) return;
+                e.Handled = true; e.SuppressKeyPress = true;
+                ApplyFont();
             };
             metal.Controls.Add(cmbFont);
 
