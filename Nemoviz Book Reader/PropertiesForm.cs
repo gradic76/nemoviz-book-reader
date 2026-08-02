@@ -43,7 +43,7 @@ namespace Nemoviz_Book_Reader
         private CheckBox chkDs; private ComboBox cmbDs;
         private CheckBox chkCmp; private ComboBox cmbCmp;
         private CheckBox chkEq; private NumericUpDown numBass, numVoice, numTreble;
-        private CheckBox chkNrm; private ComboBox cmbNrmType; private ComboBox cmbNrm;
+        private CheckBox chkNrm; private ComboBox cmbNrm;
 
         private Button btnResetAll;
         private CheckBox chkBypass;
@@ -185,28 +185,14 @@ namespace Nemoviz_Book_Reader
             numVoice = EqBand(gEq, "Prop.Eq.Voice", 64, s.EqVoice);
             numTreble = EqBand(gEq, "Prop.Eq.Treble", 88, s.EqTreble);
 
+            // One method, not a choice of two (Gordan, decided long before
+            // 2026-08-03 and settled here): speech normalisation is what a
+            // spoken recording wants, and the music-safe alternative was a
+            // question asked of a reader who has no way to answer it. The cell
+            // is now shaped like every other stage — a switch and a level.
             GroupBox gNrm = StageBox("Prop.Normalize.Title", xC, y3, 7);
             chkNrm = StageEnable(gNrm); chkNrm.Checked = s.NormalizeEnabled;
-            cmbNrmType = new ComboBox();
-            cmbNrmType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbNrmType.Location = new Point(10, 40);
-            cmbNrmType.Size = new Size(CellW - 24, 24);
-            cmbNrmType.AccessibleName = gNrm.Text + " — " + Localization.T("Prop.Normalize.Method");
-            cmbNrmType.TabIndex = 1;
-            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Speech"));   // 0 → speechnorm
-            cmbNrmType.Items.Add(Localization.T("Prop.Normalize.Type.Dynamic"));  // 1 → dynaudnorm
-            cmbNrmType.SelectedIndex =
-                string.Equals(s.NormalizeType, "dynaudnorm", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
-            gNrm.Controls.Add(cmbNrmType);
-            cmbNrm = new ComboBox();
-            cmbNrm.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbNrm.Location = new Point(10, 70);
-            cmbNrm.Size = new Size(CellW - 24, 24);
-            cmbNrm.AccessibleName = gNrm.Text + " — " + Localization.T("Prop.Stage.Level");
-            cmbNrm.TabIndex = 2;
-            foreach (string k in L5) cmbNrm.Items.Add(Localization.T(k));
-            cmbNrm.SelectedIndex = Clamp(s.NormalizeLevel, 0, L5.Length - 1);
-            gNrm.Controls.Add(cmbNrm);
+            cmbNrm = LevelCombo(gNrm, L5, s.NormalizeLevel);
 
             stageCells = new[] { gHp, gDn, gDs, gCmp, gEq, gNrm };
             stages = new List<(CheckBox, Control[])>
@@ -216,7 +202,7 @@ namespace Nemoviz_Book_Reader
                 (chkDs, new Control[] { cmbDs }),
                 (chkCmp, new Control[] { cmbCmp }),
                 (chkEq, new Control[] { numBass, numVoice, numTreble }),
-                (chkNrm, new Control[] { cmbNrmType, cmbNrm }),
+                (chkNrm, new Control[] { cmbNrm }),
             };
 
             btnResetAll = new Button();
@@ -298,7 +284,7 @@ namespace Nemoviz_Book_Reader
             foreach (var st in stages)
                 st.Enable.CheckedChanged += (s2, e) => { UpdateEnabledStates(); OnAnyChange(); };
             WireCombo(cmbHp); WireCombo(cmbDn); WireCombo(cmbDs); WireCombo(cmbCmp);
-            WireCombo(cmbNrmType); WireCombo(cmbNrm);
+            WireCombo(cmbNrm);
             numBass.ValueChanged += (s2, e) => OnAnyChange();
             numVoice.ValueChanged += (s2, e) => OnAnyChange();
             numTreble.ValueChanged += (s2, e) => OnAnyChange();
@@ -488,10 +474,9 @@ namespace Nemoviz_Book_Reader
                 ", treble " + Sign((int)numTreble.Value) + " dB");
 
             int nl = cmbNrm.SelectedIndex;
-            string nrmTech = cmbNrmType.SelectedIndex == 1
-                ? "dynaudnorm, " + cmbNrm.Text + " (max " + SoundSettings.DynaudnormMaxGain[nl] + " dB)"
-                : "speechnorm, " + cmbNrm.Text + " (e=" + SoundSettings.SpeechnormExpansion[nl].ToString("0.0") + ")";
-            AppendStage(sb, "Prop.Normalize.Title", chkNrm.Checked, nrmTech);
+            AppendStage(sb, "Prop.Normalize.Title", chkNrm.Checked,
+                "speechnorm, " + cmbNrm.Text +
+                " (e=" + SoundSettings.SpeechnormExpansion[nl].ToString("0.0") + ")");
 
             sb.AppendLine(Localization.T("Prop.Info.Protection") + ": " +
                 SoundSettings.LimiterCeilingDb.ToString("0.0") + " dB");
@@ -517,7 +502,6 @@ namespace Nemoviz_Book_Reader
             chkEq.Checked = d.EqEnabled;
             numBass.Value = d.EqBass; numVoice.Value = d.EqVoice; numTreble.Value = d.EqTreble;
             chkNrm.Checked = d.NormalizeEnabled;
-            cmbNrmType.SelectedIndex = 0; // speechnorm
             cmbNrm.SelectedIndex = d.NormalizeLevel;
 
             suppressAnnounce = false;
@@ -566,7 +550,6 @@ namespace Nemoviz_Book_Reader
             s.EqTreble = (int)numTreble.Value;
 
             s.NormalizeEnabled = chkNrm.Checked;
-            s.NormalizeType = cmbNrmType.SelectedIndex == 1 ? "dynaudnorm" : "speechnorm";
             s.NormalizeLevel = cmbNrm.SelectedIndex;
         }
 

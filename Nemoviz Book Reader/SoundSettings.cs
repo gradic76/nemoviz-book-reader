@@ -36,10 +36,11 @@ namespace Nemoviz_Book_Reader
             (-26, 6.0, 6,  5, 150),
         };
 
-        // Normalization aggressiveness per level. For speechnorm the expansion
-        // factor; for dynaudnorm the max gain (dB). Five levels.
+        // Normalization aggressiveness per level: the speechnorm expansion
+        // factor. Five levels. Speech normalisation is the only method there is
+        // (Gordan) - a book is a voice, and the music-safe alternative asked the
+        // reader a question they had no way to answer.
         public static readonly double[] SpeechnormExpansion = { 1.5, 2.0, 2.5, 3.0, 3.5 };
-        public static readonly int[] DynaudnormMaxGain = { 5, 8, 11, 15, 20 };
 
         // EQ band centre frequencies (Hz), just for the technical read-out.
         public const int EqBassHz = 120;
@@ -71,7 +72,6 @@ namespace Nemoviz_Book_Reader
         public int EqTreble;            // dB
 
         public bool NormalizeEnabled;
-        public string NormalizeType;    // "speechnorm" | "dynaudnorm" (chooser is temporary)
         public int NormalizeLevel;      // 0..4
 
         public SoundSettings()
@@ -101,7 +101,6 @@ namespace Nemoviz_Book_Reader
             EqTreble = 0;
 
             NormalizeEnabled = true;
-            NormalizeType = "speechnorm";
             NormalizeLevel = 2;         // Medium
         }
 
@@ -128,7 +127,6 @@ namespace Nemoviz_Book_Reader
             EqTreble = ReadInt(ini, "EqTreble", EqTreble);
 
             NormalizeEnabled = ReadBool(ini, "NormalizeEnabled", NormalizeEnabled);
-            NormalizeType = ini.Read("Sound", "NormalizeType", NormalizeType);
             NormalizeLevel = ClampLevel(ReadInt(ini, "NormalizeLevel", NormalizeLevel), SpeechnormExpansion.Length);
         }
 
@@ -154,7 +152,6 @@ namespace Nemoviz_Book_Reader
             WriteInt(ini, "EqTreble", EqTreble);
 
             WriteBool(ini, "NormalizeEnabled", NormalizeEnabled);
-            ini.Write("Sound", "NormalizeType", NormalizeType ?? "speechnorm");
             WriteInt(ini, "NormalizeLevel", NormalizeLevel);
         }
 
@@ -216,15 +213,7 @@ namespace Nemoviz_Book_Reader
             if (s.NormalizeEnabled)
             {
                 int nl = ClampLevel(s.NormalizeLevel, SpeechnormExpansion.Length);
-                if (string.Equals(s.NormalizeType, "dynaudnorm", StringComparison.OrdinalIgnoreCase))
-                {
-                    double m = Math.Pow(10.0, DynaudnormMaxGain[nl] / 20.0); // dB → max gain factor
-                    f.Add("dynaudnorm=p=0.95:m=" + m.ToString("0.##", ic));
-                }
-                else
-                {
-                    f.Add("speechnorm=e=" + SpeechnormExpansion[nl].ToString("0.0", ic) + ":p=0.95");
-                }
+                f.Add("speechnorm=e=" + SpeechnormExpansion[nl].ToString("0.0", ic) + ":p=0.95");
             }
 
             // Always-on safety limiter (level=false so it only caps peaks and

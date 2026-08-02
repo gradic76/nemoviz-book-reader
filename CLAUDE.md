@@ -799,7 +799,7 @@ in Book.ini `[Sound]`).
 
 **Chain** (`SoundSettings.BuildAf` → mpv `af` as one `lavfi=[…]` graph, applied
 by `Form1.ApplySoundProcessing`): highpass → afftdn (denoise) → deesser →
-acompressor → EQ (bass/equalizer/treble) → speechnorm|dynaudnorm → alimiter.
+acompressor → EQ (bass/equalizer/treble) → speechnorm → alimiter.
 Verified working against the vendored libmpv (statically-linked ffmpeg, Lavf62;
 all needed filters confirmed present by grepping the DLL). All numbers formatted
 `InvariantCulture` (ffmpeg needs `.`); friendly dB units convert to ffmpeg's
@@ -859,10 +859,24 @@ gaps between sentences, which is where it really lives — but ordinary voice
 activity detection gives that from the audio alone, with no text and no sync. A
 bonus if sync happens to exist, never a reason to build it.
 
+**Settled 2026-08-03, from `docs/Audio properties.txt`.** The normalisation
+method is **speechnorm, full stop** — the chooser, the `dynaudnorm` branch, the
+`DynaudnormMaxGain` table and the `NormalizeType` field are all gone. A book is a
+voice, and asking a reader to pick between two ffmpeg filters was asking a
+question they have no way to answer. **Noise removal → Noise reduction.**
+**Playback lost its `?`** ("jasno i trogodišnjaku") and **Sound processing gained
+one**, standing on the strip beside the master switch: it is the only control
+there with anything to explain, and the six stages below are what it explains.
+Its width is now worked out backwards from where Bypass starts
+(`DialogSkin.MasterWithHelpKey` / `HelpKeyBounds`), because the same code lays
+out a hybrid's narrower page and a fixed 264 collided there. The help key's name
+comes from `Prop.SoundProcessing`, not the caption — "Help for Use sound
+processing" reads like an instruction, not a subject, so `HintSystem.Attach`
+takes an optional one.
+
 **Open items** (Session 12, deferred until "critical" sample recordings exist):
-tune the preset values by ear; finalize the normalization method (the
-speechnorm/dynaudnorm chooser is temporary — likely lock to speechnorm and drop
-it); English-name review for the stage titles (flagged in `en.lang`). Objective
+tune the preset values by ear; English-name review for the stage titles
+(*Even out speech* is the one Gordan has left for later). Objective
 analysis of user-supplied samples (LUFS/peak/noise-floor/spectral via a static
 ffmpeg — "option A") will guide the tuning; **I measure, Gordan judges by ear.**
 

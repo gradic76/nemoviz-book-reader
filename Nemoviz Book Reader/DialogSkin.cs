@@ -112,6 +112,23 @@ namespace Nemoviz_Book_Reader
         /// 2" a screen reader announces.</summary>
         public const int TabW = 168, TabH = 30;
 
+        /// <summary>Lays the master switch along the strip and leaves room at its
+        /// end for the help key that goes beside it: the key sits 12 clear of
+        /// whatever comes next, and the switch takes everything before it. Where
+        /// the key ITSELF goes is <see cref="HelpKeyBounds"/>, so the two cannot
+        /// disagree.</summary>
+        public static void MasterWithHelpKey(Control master, int x, int y, int h, int nextLeft)
+        {
+            if (master == null) return;
+            master.SetBounds(x, y, Math.Max(120, HelpKeyBounds(nextLeft, y).X - 6 - x), h);
+        }
+
+        /// <summary>The 22-unit help key, standing 12 clear of what follows it.</summary>
+        public static Rectangle HelpKeyBounds(int nextLeft, int stripY)
+        {
+            return new Rectangle(nextLeft - 12 - 22, stripY + 5, 22, 22);
+        }
+
         public static void StyleTabStrip(TabControl tabs)
         {
             if (tabs == null) return;
@@ -471,8 +488,14 @@ namespace Nemoviz_Book_Reader
             foreach (GroupBox g in p.Stages) Reflow(g, false);
 
             // The strip on the metal between the playback sticker and the stages.
+            // The switch gives up the end of its run so its ? can stand beside it
+            // — it is the only control on the strip with anything to explain, and
+            // the six stages under it are what it explains. The width is worked
+            // out backwards from where Bypass starts, not written down, because
+            // the same code lays out a hybrid's narrower page.
             OnMetal(p.Master);
-            p.Master.SetBounds(DialogSkin.ColA, DialogSkin.StripY, 292, DialogSkin.StripH);
+            DialogSkin.MasterWithHelpKey(p.Master, DialogSkin.ColA, DialogSkin.StripY,
+                                         DialogSkin.StripH, 624);
             DialogSkin.AsSwitch(p.Bypass, new Rectangle(624, DialogSkin.StripY, 200, DialogSkin.StripH));
             DialogSkin.AsKey(p.ResetAll, new Rectangle(836, DialogSkin.StripY, 112, DialogSkin.StripH));
 
@@ -505,8 +528,12 @@ namespace Nemoviz_Book_Reader
             gate(null, EventArgs.Empty);
 
             // One ? per group, and F1 as the second way to the same text.
+            // Playback has none: volume and speed for this book, and Gordan's
+            // ruling is that a three-year-old would work that out.
             HintSystem.Clear();
-            HintSystem.Attach(p.Playback, "Hint.Playback");
+            HintSystem.Attach(p.Master, "Hint.SoundProcessing", p.Master.Parent,
+                              DialogSkin.HelpKeyBounds(624, DialogSkin.StripY),
+                              Localization.T("Prop.SoundProcessing"));
             string[] stageHints = { "Hint.RemoveRumble", "Hint.NoiseRemoval", "Hint.SoftenSibilance",
                                     "Hint.EvenOutSpeech", "Hint.Tone", "Hint.AutomaticLoudness" };
             for (int i = 0; i < p.Stages.Length && i < stageHints.Length; i++)
@@ -665,8 +692,8 @@ namespace Nemoviz_Book_Reader
             foreach (GroupBox g in p.Stages) Reflow(g, false);
 
             OnMetal(p.Master);
-            p.Master.SetBounds(geom.ColA, geom.StripY, 292, geom.StripH);
             int right = geom.ColB + geom.ColW;
+            DialogSkin.MasterWithHelpKey(p.Master, geom.ColA, geom.StripY, geom.StripH, right - 312);
             DialogSkin.AsSwitch(p.Bypass, new Rectangle(right - 312, geom.StripY, 200, geom.StripH));
             DialogSkin.AsKey(p.ResetAll, new Rectangle(right - 112, geom.StripY, 112, geom.StripH));
 
@@ -685,7 +712,11 @@ namespace Nemoviz_Book_Reader
             p.Master.CheckedChanged += gate;
             gate(null, EventArgs.Empty);
 
-            HintSystem.Attach(p.Playback, "Hint.Playback");
+            // The same set as the single-page audio path, and for the same
+            // reasons — a hybrid's audio page is that page.
+            HintSystem.Attach(p.Master, "Hint.SoundProcessing", p.Master.Parent,
+                              DialogSkin.HelpKeyBounds(right - 312, geom.StripY),
+                              Localization.T("Prop.SoundProcessing"));
             string[] stageHints = { "Hint.RemoveRumble", "Hint.NoiseRemoval", "Hint.SoftenSibilance",
                                     "Hint.EvenOutSpeech", "Hint.Tone", "Hint.AutomaticLoudness" };
             for (int i = 0; i < p.Stages.Length && i < stageHints.Length; i++)

@@ -24,7 +24,11 @@ namespace Nemoviz_Book_Reader
         // Which group explains what, and where its text lives.
         private static readonly Dictionary<Control, string> hints = new Dictionary<Control, string>();
 
-        public static void Clear() { hints.Clear(); helpKeys.Clear(); }
+        // What each hint is ABOUT, which is what the ? is called and what the
+        // pop-up is titled. Usually the control's own name; see Attach.
+        private static readonly Dictionary<Control, string> titles = new Dictionary<Control, string>();
+
+        public static void Clear() { hints.Clear(); titles.Clear(); helpKeys.Clear(); }
 
         // The ? buttons this system created, so a layout pass can tell them from
         // the dialog's own buttons — theirs move, this one is pinned to a corner.
@@ -46,13 +50,20 @@ namespace Nemoviz_Book_Reader
         /// always-visible box beside a single control, e.g. Go To's "start
         /// playing" checkbox, which has no group of its own to carry a corner
         /// button.</summary>
-        public static void Attach(Control anchor, string bodyKey, Control parent, Rectangle buttonBounds)
+        public static void Attach(Control anchor, string bodyKey, Control parent, Rectangle buttonBounds,
+                                  string subject = null)
         {
             if (anchor == null || parent == null) return;
             hints[anchor] = bodyKey;
 
-            string forName = (anchor as GroupBox)?.Text;
+            // A group names itself, and a control usually does too. But a caption
+            // written as an instruction to the user makes a clumsy name for the
+            // help behind it — "Help for Use sound processing" — so the caller
+            // may say what the subject IS instead of what its switch does.
+            string forName = subject;
+            if (string.IsNullOrEmpty(forName)) forName = (anchor as GroupBox)?.Text;
             if (string.IsNullOrEmpty(forName)) forName = anchor.AccessibleName ?? anchor.Text ?? "";
+            titles[anchor] = forName;
 
             var b = new Button();
             b.Text = "?";
@@ -129,8 +140,12 @@ namespace Nemoviz_Book_Reader
         {
             string key;
             if (!hints.TryGetValue(anchor, out key)) return;
-            string title = (anchor as GroupBox)?.Text;
-            if (string.IsNullOrEmpty(title)) title = anchor.AccessibleName ?? anchor.Text ?? "";
+            string title;
+            if (!titles.TryGetValue(anchor, out title) || string.IsNullOrEmpty(title))
+            {
+                title = (anchor as GroupBox)?.Text;
+                if (string.IsNullOrEmpty(title)) title = anchor.AccessibleName ?? anchor.Text ?? "";
+            }
             // One shared design for every "here is a sentence or two, and a way
             // out" dialog in the app (Gordan, 2026-07-29) — the hint pop-up is
             // simply MessageForm's info variant with this control's own text.
