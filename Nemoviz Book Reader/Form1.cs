@@ -2867,14 +2867,14 @@ namespace Nemoviz_Book_Reader
                     //
                     // Once per book: closing the window should not be undone by
                     // the next pause and resume.
-                    ReadingDiagnostics.Note(string.Format("PLAY: offered={0} opens={1}",
-                        readingWindowOffered,
-                        currentBook != null && currentBook.OpensReadingWindow));
-                    if (!readingWindowOffered && currentBook != null && currentBook.OpensReadingWindow)
-                    {
-                        readingWindowOffered = true;
+                    // EVERY Play, not once per book. "Once" was mine, on the
+                    // theory that closing the window is a decision the next
+                    // resume should not undo — but Gordan closed it with Escape,
+                    // pressed Play to get it back, and got nothing. Play is what
+                    // brings the book's properties up, and this is one of them;
+                    // a reader who does not want it turns it off in Properties.
+                    if (currentBook != null && currentBook.OpensReadingWindow)
                         OpenReadingWindowWhenReady();
-                    }
                 }
                 else if (keepAlive != null) keepAlive.Stop();
             }
@@ -3689,9 +3689,6 @@ namespace Nemoviz_Book_Reader
         /// fault for a silent one — the book that asked for a window would open
         /// without it and say nothing. So it waits for the handle instead, once,
         /// and unsubscribes itself.</para></summary>
-        /// <summary>False until this book's window has been offered once, so
-        /// closing it is not undone by the next pause and resume.</summary>
-        private bool readingWindowOffered;
 
         private void OpenReadingWindowWhenReady()
         {
@@ -4059,6 +4056,25 @@ namespace Nemoviz_Book_Reader
         /// does not begin or end mid-sentence: braille and the screen reader both
         /// read what is around the caret, and half a sentence is worse than a
         /// slightly wider chunk.</para></summary>
+        /// <summary>Where the reading is, as an offset into the book — whichever
+        /// kind of book it is. Nought when nothing can say.</summary>
+        private int CurrentReadingOffset()
+        {
+            try
+            {
+                if (currentBook == null) return 0;
+                if (currentBook.IsHybrid)
+                {
+                    SyncMap sync = currentBook.LoadSyncMap();
+                    if (sync == null || sync.IsEmpty) return 0;
+                    return DaisySync.CharAt(sync, GetVirtualPosition());
+                }
+                if (tts != null) return tts.CharPosition;
+            }
+            catch { }
+            return 0;
+        }
+
         private void EnsureChunkFor(int at)
         {
             if (tbReadingSurface == null || readingText == null) return;
@@ -4265,6 +4281,11 @@ namespace Nemoviz_Book_Reader
             if (tbReadingSurface == null || readingText == null) return;
             chunkStart = -1;                     // force the first chunk to load
             lastSurfaceStart = -1;
+            // Filled HERE, not left to UpdateReadingSurface. That method has
+            // several early returns — no sync map, no reader, the position not
+            // having moved — and any one of them left the surface empty, which
+            // is what Gordan saw: a window with no text in it.
+            EnsureChunkFor(CurrentReadingOffset());
             UpdateReadingSurface();
         }
 
@@ -4758,7 +4779,6 @@ namespace Nemoviz_Book_Reader
             double speed = currentSpeed / 100.0;
             mpv_set_property_string(mpvHandle, "speed",
                 speed.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            readingWindowOffered = false;
 
             // Whatever the last book left behind is not this book. Cleared before
             // either branch so no path can forget to.
@@ -5103,6 +5123,7 @@ namespace Nemoviz_Book_Reader
         }
     }
 }
+
 
 
 
