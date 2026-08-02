@@ -512,9 +512,10 @@ namespace Nemoviz_Book_Reader
                 case Keys.F1: case Keys.F2: case Keys.F3: case Keys.F4:
                 case Keys.F5: case Keys.F6: case Keys.F7: case Keys.F8:
                 case Keys.Alt | Keys.Enter:
+                // Ctrl+G, Ctrl+T and Ctrl+B are no longer forwarded: the player
+                // no longer has them. Everything they did is on the F-keys, which
+                // this window already forwards.
                 case Keys.Control | Keys.O:
-                case Keys.Control | Keys.G: case Keys.Control | Keys.T:
-                case Keys.Control | Keys.B:
                 // TEMPORARY test aid — see ReadingDiagnostics. Forwarded from
                 // here too because the surface is where a tester will be standing
                 // when they want to switch it. Remove with the file.

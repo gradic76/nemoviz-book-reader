@@ -1068,17 +1068,16 @@ namespace Nemoviz_Book_Reader
                     OpenFile();
                     return true;
 
-                case Keys.Control | Keys.G:
-                    BtnGoTo_Click(null, EventArgs.Empty);
-                    return true;
-
-                case Keys.Control | Keys.T:
-                    BtnTimer_Click(null, EventArgs.Empty);
-                    return true;
-
-                case Keys.Control | Keys.B:
-                    BtnSetBookmark_Click(null, EventArgs.Empty);
-                    return true;
+                // Ctrl+G, Ctrl+T and Ctrl+B are GONE (Gordan, 2026-08-02). They
+                // were Go To, the timer and Set Bookmark before those moved to
+                // F4, F7 and F5, and they stayed behind as duplicates nobody
+                // documented. A shortcut that still works but is not taught is
+                // not a kindness: it holds a key against some future use — Ctrl+B
+                // is wanted for Bypass in Properties — and it means two answers
+                // to "what does this do", one of which is out of date.
+                //
+                // Ctrl+O stays. It is not a leftover but the Windows convention
+                // for Open, kept for the same reason Alt+Enter keeps Properties.
 
                 // Properties stays on Alt+Enter ďż˝ that is the Windows convention
                 // for it and Gordan kept it deliberately.
