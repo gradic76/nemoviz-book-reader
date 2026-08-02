@@ -229,7 +229,10 @@ namespace Nemoviz_Book_Reader
 
             chkBypass = new CheckBox();
             chkBypass.Text = Localization.T("Prop.Bypass");
+            // The shortcut is named on the control, so it can be found by anyone
+            // who lands on it rather than only by whoever read the manual.
             chkBypass.AccessibleName = Localization.T("Prop.Bypass");
+            chkBypass.AccessibleDescription = Localization.T("Prop.Bypass.Shortcut");
             chkBypass.Size = new Size(90, 30);
             chkBypass.Location = new Point(352, 404);
             chkBypass.TabIndex = 9;
@@ -319,6 +322,22 @@ namespace Nemoviz_Book_Reader
             // pages are the only place NBR has real tabs, and they should feel
             // like anyone else's (see TabKeys for why WinForms does not).
             if (TabKeys.Handle(tabs, keyData)) return true;
+
+            // Ctrl+B toggles Bypass from anywhere on the audio page (Gordan,
+            // 2026-08-02). Tuning sound is A against B: you change a stage, then
+            // want to hear it against the untouched signal, then change it again.
+            // Walking back across a hillside of controls to a check box each
+            // time is the whole reason nobody does that comparison as often as
+            // they should. The processing is previewed live, so the switch is
+            // heard the instant it is pressed — the sound IS the confirmation,
+            // and the spoken line is for anyone whose reader will carry it.
+            if (keyData == (Keys.Control | Keys.B) && chkBypass != null && chkBypass.Enabled)
+            {
+                chkBypass.Checked = !chkBypass.Checked;
+                NvdaController.Speak(Localization.T("Prop.Bypass") + ": " +
+                    Localization.T(chkBypass.Checked ? "Prop.On" : "Prop.Off"));
+                return true;
+            }
             return base.ProcessCmdKey(ref msg, keyData);
         }
 

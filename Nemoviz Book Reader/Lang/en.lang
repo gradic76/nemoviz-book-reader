@@ -375,6 +375,7 @@ Prop.Level.Strong=Strong
 Prop.Level.Maximum=Maximum
 Prop.ResetAll=Reset all
 Prop.Bypass=Bypass
+Prop.Bypass.Shortcut=Control B switches this on and off from anywhere on this page
 ; Info column read-out
 Prop.Info.ProcessingOff=Sound processing: off
 Prop.Info.ProcessingOn=Sound processing: on
