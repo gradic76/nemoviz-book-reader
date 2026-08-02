@@ -133,12 +133,24 @@ namespace Nemoviz_Book_Reader
                 }
                 if (order.Count == 0) return false;
 
+                // The audio is moved to the ROOT of the book folder. A chapter is
+                // stored as a bare file name and the player looks for it beside
+                // Book.ini, but an EPUB keeps its audio in a subfolder — so the
+                // playlist pointed at files that were not there, and the book
+                // imported perfectly and would not play a note.
                 var ordered = new List<string>();
                 foreach (string name in order)
                 {
                     string path = Directory.EnumerateFiles(folder, name, SearchOption.AllDirectories)
                                            .FirstOrDefault();
-                    if (path != null) ordered.Add(path);
+                    if (path == null) continue;
+                    string root = Path.Combine(folder, name);
+                    if (!string.Equals(path, root, StringComparison.OrdinalIgnoreCase))
+                    {
+                        try { if (!File.Exists(root)) File.Move(path, root); }
+                        catch { root = path; }        // keep the one that exists
+                    }
+                    ordered.Add(root);
                 }
                 if (ordered.Count == 0) return false;
                 // The same builder a DAISY uses, which reads each file's real
@@ -162,16 +174,35 @@ namespace Nemoviz_Book_Reader
                 book.TextCleaned = true;
                 book.SetTextHeadings(doc.Headings);
                 book.TextLanguage = LanguageDetector.Resolve(MetaLanguage(xml), doc.Text);
+
+                // The book's own name and author, which nothing else on this path
+                // fills in — the document branch does it and this one skips past
+                // it, so the shelf and the info box had nothing to show.
+                string title = Meta(xml, "title");
+                string author = Meta(xml, "creator");
+                if (!string.IsNullOrWhiteSpace(title)) book.Title = title;
+                if (!string.IsNullOrWhiteSpace(author)) book.Author = author;
+                string pub = Meta(xml, "publisher");
+                if (!string.IsNullOrWhiteSpace(pub)) book.Publisher = pub;
+                book.Format = BookData.FriendlyFormatName(".epub");
+
                 book.SaveSyncMap(map);
                 return true;
             }
             catch { return false; }
         }
 
-        private static string MetaLanguage(string opfXml)
+        private static string MetaLanguage(string opfXml) { return Meta(opfXml, "language"); }
+
+        /// <summary>A Dublin Core field from the package document. Matches with or
+        /// without the dc: prefix — both are met in the wild.</summary>
+        private static string Meta(string opfXml, string name)
         {
-            Match m = Regex.Match(opfXml, @"<dc:language[^>]*>([^<]+)<", RegexOptions.IgnoreCase);
-            return m.Success ? m.Groups[1].Value.Trim() : null;
+            Match m = Regex.Match(opfXml, @"<(?:dc:)?" + name + @"\b[^>]*>([^<]+)<",
+                                  RegexOptions.IgnoreCase);
+            if (!m.Success) return null;
+            string v = System.Net.WebUtility.HtmlDecode(m.Groups[1].Value).Trim();
+            return v.Length == 0 ? null : v;
         }
 
         private static Dictionary<string, string> Attrs(string tag)
