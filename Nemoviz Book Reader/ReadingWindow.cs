@@ -48,7 +48,7 @@ namespace Nemoviz_Book_Reader
         private const int BarH = 52;         // the control strip along the foot
         private const int TargetChars = 60;
 
-        private readonly TextBox surface;
+        private readonly RichTextBox surface;
         private readonly Control returnTo;   // where the surface came from
         private readonly VisualMode mode;
         private readonly Func<char[]> bookChars;
@@ -78,7 +78,7 @@ namespace Nemoviz_Book_Reader
         /// <param name="textColour">Index into <see cref="ReadingColours"/> — the
         /// book's own choice, or -1 to keep the skin's dark glass.</param>
         /// <param name="backColour">Likewise, for what it is printed on.</param>
-        public ReadingWindow(Form owner, TextBox surface, VisualMode mode,
+        public ReadingWindow(Form owner, RichTextBox surface, VisualMode mode,
                              Func<char[]> bookChars, Action<Keys> forwardKey,
                              int textColour = -1, int backColour = -1)
         {
@@ -211,7 +211,8 @@ namespace Nemoviz_Book_Reader
             surface.WordWrap = true;
             surface.ReadOnly = true;
             surface.HideSelection = false;
-            surface.ScrollBars = mode == VisualMode.FullScrolling ? ScrollBars.Vertical : ScrollBars.None;
+            surface.ScrollBars = mode == VisualMode.FullScrolling
+                ? RichTextBoxScrollBars.Vertical : RichTextBoxScrollBars.None;
             // High contrast outranks everything (§8k): there the user has told the
             // system what they need, and our colours — chosen or not — yield.
             // Below that, the BOOK's pair outranks the skin, because a reader who

@@ -87,6 +87,11 @@ namespace Nemoviz_Book_Reader
 
         private static Form Build(string text, string title, bool confirm, bool defaultToNo = false)
         {
+            // A multiline TextBox breaks lines on CRLF and NOTHING else: a bare
+            // \n out of a language file draws a box glyph and runs the paragraphs
+            // together. Done here, before the text is both measured and shown, so
+            // the two cannot disagree about how many lines there are.
+            text = (text ?? "").Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             DialogSkin.EnsureFonts();
             Size size = ComputeSize(text);
             int w = size.Width, h = size.Height;

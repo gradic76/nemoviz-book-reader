@@ -897,9 +897,10 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Highlight"), lx, yy + 3));
             cmbTHighlight = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Highlight"), cx, yy, cw, tab++);
             cmbTHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.None"));
-            cmbTHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Word"));
+            cmbTHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Line"));
             cmbTHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Sentence"));
-            cmbTHighlight.SelectedIndex = 2;
+            cmbTHighlight.SelectedIndex = book.TextHighlight >= 0 && book.TextHighlight <= 2
+                ? book.TextHighlight : 1;
             box.Controls.Add(cmbTHighlight);
 
             yy += 30;
@@ -929,7 +930,7 @@ namespace Nemoviz_Book_Reader
             }
             // From the BOOK, not from a constant — these went back to yellow on
             // black at every visit, whatever the reader had chosen last time.
-            cmbTHighlightColour.SelectedIndex = ReadingColours.DefaultHighlight;
+            cmbTHighlightColour.SelectedIndex = ReadingColours.Clamp(book.TextHighlightColour);
             cmbTTextColour.SelectedIndex = ReadingColours.Clamp(book.TextColour);
             cmbTBackColour.SelectedIndex = ReadingColours.Clamp(book.TextBackColour);
             return box;
@@ -1083,6 +1084,10 @@ namespace Nemoviz_Book_Reader
                 book.TextColour = cmbTTextColour.SelectedIndex;
             if (cmbTBackColour != null && cmbTBackColour.SelectedIndex >= 0)
                 book.TextBackColour = cmbTBackColour.SelectedIndex;
+            if (cmbTHighlight != null && cmbTHighlight.SelectedIndex >= 0)
+                book.TextHighlight = cmbTHighlight.SelectedIndex;
+            if (cmbTHighlightColour != null && cmbTHighlightColour.SelectedIndex >= 0)
+                book.TextHighlightColour = cmbTHighlightColour.SelectedIndex;
             // Braille was scaffolding in exactly the same way. Index 0 of the table
             // list is "automatic", which is stored as an empty id so that a book
             // set to automatic keeps following its language if that language later

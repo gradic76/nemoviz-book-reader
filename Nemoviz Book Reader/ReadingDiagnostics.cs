@@ -145,7 +145,7 @@ namespace Nemoviz_Book_Reader
         /// <para>Returns nothing and decides nothing else — the caller's own
         /// behaviour is unchanged in the off case, which is what keeps this
         /// removable.</para></summary>
-        public static void Place(TextBox surface, int start, string sentence)
+        public static void Place(RichTextBox surface, int start, string sentence)
         {
             if (surface == null) return;
             // The caret, always — the same thing the shipping build does, and now

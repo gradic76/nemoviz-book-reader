@@ -2174,24 +2174,47 @@ a reader who went into Properties and chose yellow on black meant it. Round trip
 verified, including a hand-corrupted index. Defaults are what the dialog always
 showed before anyone could choose: yellow on black.
 
-**Still scaffolding: the highlight pair** (none / word / sentence, and its
-colour). Neither is wiring, and the reasons are worth writing down before anyone
-promises them in a hint:
+**The highlight works too, since 2026-08-03, and what unlocked it was Gordan
+saying what it is for:** *"ne trebaju ti boundaries po strukturnim dijelovima
+teksta nego caption iz samog prikaza"* — the unit is **the display's line**, not
+a unit of the text. "Current word" had been offered in the combo and could never
+have been kept: marking a word needs the engine to report which word it is
+speaking, and no backend NBR uses does. **The item is now "Current line"**, with
+"Current sentence" beside it, and both are things the control itself can answer
+for at any font size and any wrapping.
 
-- **A `TextBox` cannot colour a range.** The surface is one, and what marks the
-  current sentence today is the travelling *selection*, whose colour belongs to
-  the system. A chosen highlight colour therefore means a `RichTextBox` — and
-  braille rides on that selection through a path that was *measured* (see the
-  note on rewriting `Text` never reaching the display). Swapping the control is
-  a risk only Gordan can clear, with a display in his hands.
-- **"Current word" needs word-boundary events from the speech backends, and
-  nothing in NBR has them** — no `WordBoundary`, no `SpeakProgress`, nothing in
-  the 32-bit host protocol. Sentence granularity is all the clock currently
-  gives.
+- **The surface is now a `RichTextBox`**, for the one reason that a plain edit
+  control cannot colour a range. Everything the braille path was measured on is
+  the same underneath: a real, focusable, read-only edit control whose CARET the
+  reader follows. No rich text comes from the book — the text still goes in
+  plain.
+- **The selection is borrowed and given straight back.** Colouring a range is a
+  selection-based API, so the selection exists for the length of two calls and
+  the caret is restored. Verified: after painting, `SelectionLength` is **0** —
+  a standing selection is exactly what made a screen reader read over NBR's own
+  voice when this was tried by selecting the sentence.
+- **Verified by reading the colour back off the text**, not by eye:
+  `SelectionBackColor` inside the marked line is the chosen blue, the characters
+  either side of it are the background.
 
-**The same four controls are dead on the Settings side too** — `AppSettings`
-knows none of them, so there is no global default for a new book to inherit; it
-gets `ReadingColours`' own.
+**The three modes are three modes now.** They used to differ only by whether a
+scroll bar was drawn — both full modes let `ScrollToCaret` do the work, which
+scrolls the least it can and therefore sat still until the reading hit the
+bottom edge and then jumped. Now: **two rows and instant switch turn pages**
+(the band is divided into frames and the frame holding the reading is shown
+whole — measured stepping 0, 0, 2, 2, 4, 4 through a two-row window), and
+**scrolling keeps the line in the middle**, so text rises past it steadily.
+`EM_GETFIRSTVISIBLELINE` / `EM_LINESCROLL`, because `ScrollToCaret` cannot
+express either.
+
+**Still not carried anywhere: the reading window's font and size.** They are
+fields on the window, reset to Segoe UI 26 every time it opens, so a chosen face
+does not survive closing it. Gordan's call (2026-08-03) is that the font stays
+in the reading window and out of Properties — but it should still be remembered.
+
+**The same four controls are dead on the Settings side** — `AppSettings` knows
+none of them, so there is no global default for a new book to inherit; it gets
+`ReadingColours`' own (yellow on black, marked blue, the line).
 
 ### Still open
 

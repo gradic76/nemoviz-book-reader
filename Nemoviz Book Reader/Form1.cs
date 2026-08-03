@@ -4043,16 +4043,23 @@ namespace Nemoviz_Book_Reader
         // menu — Tools), press Play, and watch the line change as it reads.
         // Confirm from the SAME frame that the player really has focus - a
         // measurement taken while something else does is worth nothing.
-        private TextBox tbReadingSurface;
+        /// <summary>A <see cref="RichTextBox"/> rather than a TextBox, for one
+        /// reason: a plain edit control cannot colour a RANGE, so it can never
+        /// mark the line being read. Everything the braille path was measured on
+        /// is unchanged underneath — a real, focusable, read-only edit control
+        /// whose CARET a screen reader follows, one control for both outputs.
+        /// Nothing here uses rich text for anything else: no styles come from the
+        /// book, and the text still goes in as plain text.</summary>
+        private RichTextBox tbReadingSurface;
 
         private void EnsureReadingSurface()
         {
             if (tbReadingSurface != null) return;
-            tbReadingSurface = new TextBox();
+            tbReadingSurface = new RichTextBox();
             tbReadingSurface.Multiline = true;
             tbReadingSurface.ReadOnly = true;
             tbReadingSurface.WordWrap = true;
-            tbReadingSurface.ScrollBars = ScrollBars.None;
+            tbReadingSurface.ScrollBars = RichTextBoxScrollBars.None;
             // Parked below the client area: out of the eye's way, still in the
             // accessibility tree, and measured to reach braille (see above).
             tbReadingSurface.SetBounds(12, ClientSize.Height + 4, ClientSize.Width - 24, 44);
@@ -4068,7 +4075,7 @@ namespace Nemoviz_Book_Reader
             // The selection IS the reading position now, so it must not be thrown
             // away on focus and must stay visible when focus is elsewhere.
             tbReadingSurface.HideSelection = false;
-            tbReadingSurface.ScrollBars = ScrollBars.Vertical;
+            tbReadingSurface.ScrollBars = RichTextBoxScrollBars.Vertical;
             // The arrows are GLOBAL in this player — up/down volume, left/right
             // seek — and an edit control claims them for the caret. Gordan's
             // report: left and right stopped navigating and the reader read out
@@ -4178,6 +4185,9 @@ namespace Nemoviz_Book_Reader
             chunkEnd = to;
             tbReadingSurface.Text = readingText.Substring(from, to - from);
             lastCaretSet = -1;
+            // New text, so any colouring went with it — and a stale range would
+            // have the next repaint scrub a line that was never marked.
+            markStart = -1; markLength = 0;
         }
 
         /// <summary>The nearest line break within 400 characters, or the offset
@@ -4375,6 +4385,118 @@ namespace Nemoviz_Book_Reader
 
         private int lastSurfaceStart = -1;
 
+        // The range currently wearing the highlight, so it can be taken off again
+        // without repainting the whole chunk. -1 means nothing is marked.
+        private int markStart = -1, markLength;
+
+        /// <summary>Paints the reading mark: the line the reading is on, or the
+        /// whole sentence, in the colour the book chose.
+        ///
+        /// <para><b>The unit is the DISPLAY's, not the text's</b> (Gordan,
+        /// 2026-08-03). That is what makes it possible at all — marking a WORD
+        /// would need the speech engine to report which word it is speaking, and
+        /// no backend NBR uses does. A line is something the control itself can
+        /// answer for, at any font size, in any wrapping.</para>
+        ///
+        /// <para><b>The selection is borrowed and given straight back.</b>
+        /// Colouring a range in a RichTextBox is a selection-based API, so the
+        /// selection moves for the length of two calls and the caret is put back
+        /// where it was. The caret is what the braille display follows and what
+        /// the reading position IS, so it must end where it started — and a
+        /// selection left standing is exactly what made a screen reader talk over
+        /// NBR's own voice the last time this was tried.</para></summary>
+        private void MarkReadingPlace(int caretInChunk, string sentence)
+        {
+            if (tbReadingSurface == null || currentBook == null) return;
+
+            int want = currentBook.TextHighlight;   // 0 none, 1 line, 2 sentence
+            int from = -1, len = 0;
+            if (want == 1)
+            {
+                int line = tbReadingSurface.GetLineFromCharIndex(caretInChunk);
+                from = tbReadingSurface.GetFirstCharIndexFromLine(line);
+                if (from < 0) return;
+                int next = tbReadingSurface.GetFirstCharIndexFromLine(line + 1);
+                len = (next > from ? next : tbReadingSurface.TextLength) - from;
+            }
+            else if (want == 2 && !string.IsNullOrEmpty(sentence))
+            {
+                from = caretInChunk;
+                len = Math.Min(sentence.Length, tbReadingSurface.TextLength - from);
+            }
+
+            if (from == markStart && len == markLength) return;   // already there
+
+            // Repainting is two brush strokes at most, never the whole chunk:
+            // taking the old mark off, and putting the new one on.
+            Color plain = tbReadingSurface.BackColor;
+            Color mark = ReadingColours.At(currentBook.TextHighlightColour);
+            int caret = tbReadingSurface.SelectionStart;
+
+            tbReadingSurface.SuspendLayout();
+            if (markStart >= 0 && markStart <= tbReadingSurface.TextLength)
+                PaintRange(markStart, markLength, plain);
+            if (from >= 0 && len > 0 && !SystemInformation.HighContrast)
+                PaintRange(from, len, mark);
+            tbReadingSurface.Select(caret, 0);
+            tbReadingSurface.ResumeLayout();
+
+            markStart = from; markLength = len;
+        }
+
+        private void PaintRange(int from, int length, Color back)
+        {
+            int max = tbReadingSurface.TextLength;
+            if (from < 0 || from >= max || length <= 0) return;
+            tbReadingSurface.Select(from, Math.Min(length, max - from));
+            tbReadingSurface.SelectionBackColor = back;
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+        private const int EM_GETFIRSTVISIBLELINE = 0x00CE;
+        private const int EM_LINESCROLL = 0x00B6;
+
+        /// <summary>Moves the text under the reading, in the way the book's mode
+        /// asks for. <c>ScrollToCaret</c> alone cannot do this: it scrolls the
+        /// least it can to bring the caret into view, which is why the two full
+        /// modes have until now been the same thing with and without a scroll bar.
+        ///
+        /// <para><b>Two rows and instant switch turn PAGES.</b> The visible band
+        /// is divided into frames and the frame holding the reading is shown
+        /// whole — so the text stands still until it is finished with, and then
+        /// changes at once. That is what "instant" meant, and in two-row mode it
+        /// is what makes a subtitle a subtitle rather than a slot with words
+        /// creeping through it.</para>
+        ///
+        /// <para><b>Scrolling keeps the line in the MIDDLE</b>, so the text rises
+        /// past it steadily and there is always as much to come as has gone. Left
+        /// to <c>ScrollToCaret</c> the page sat still until the reading reached
+        /// the bottom edge and then jumped, which is the opposite of end
+        /// credits.</para></summary>
+        private void ScrollSurfaceForMode(int caretInChunk)
+        {
+            if (tbReadingSurface == null || currentBook == null) return;
+            if (!tbReadingSurface.IsHandleCreated) return;
+
+            int lineH = tbReadingSurface.Font != null ? tbReadingSurface.Font.Height : 0;
+            if (lineH <= 0) return;
+            int visible = Math.Max(1, tbReadingSurface.ClientSize.Height / lineH);
+
+            int caretLine = tbReadingSurface.GetLineFromCharIndex(caretInChunk);
+            if (caretLine < 0) return;
+
+            int want;
+            if ((VisualMode)currentBook.TextVisualMode == VisualMode.FullScrolling)
+                want = Math.Max(0, caretLine - visible / 2);
+            else
+                want = caretLine - (caretLine % visible);   // the frame it belongs to
+
+            int top = SendMessage(tbReadingSurface.Handle, EM_GETFIRSTVISIBLELINE, 0, 0);
+            if (want != top)
+                SendMessage(tbReadingSurface.Handle, EM_LINESCROLL, 0, want - top);
+        }
+
         /// <summary>Moves the selection onto the sentence being read.
         /// <para><b>Rewriting Text does not reach braille — measured.</b> In 35
         /// seconds the surface went through some twenty sentences while the
@@ -4504,6 +4626,11 @@ namespace Nemoviz_Book_Reader
             if (inChunk < 0) inChunk = 0;
             if (inChunk > tbReadingSurface.TextLength) inChunk = tbReadingSurface.TextLength;
             ReadingDiagnostics.Place(tbReadingSurface, inChunk, s);
+            MarkReadingPlace(inChunk, s);
+            // After the mark, not before: painting borrows the selection, and
+            // ScrollToCaret inside Place has already put the caret in view — this
+            // then places the whole frame the way the mode wants it.
+            if (readingWindow != null) ScrollSurfaceForMode(inChunk);
             // Selecting the sentence does NOT make a reader announce it — measured,
             // and the reason is that the text is written once now and only the
             // selection travels, so there is no change event of the kind that

@@ -445,7 +445,10 @@ Settings.TextBooks.VisualMode.FullInstant=Full screen text (instant switch)
 Settings.TextBooks.VisualMode.FullScrolling=Full screen text (scrolling)
 Settings.TextBooks.Highlight=Highlight:
 Settings.TextBooks.Highlight.None=No highlight
-Settings.TextBooks.Highlight.Word=Current word
+; "Current word" was offered and could never be kept: marking a word needs the
+; speech engine to say which word it is on, and no backend NBR uses reports that.
+; The line is what a reader is looking for anyway — it is the display's own unit.
+Settings.TextBooks.Highlight.Line=Current line
 Settings.TextBooks.Highlight.Sentence=Current sentence
 Settings.TextBooks.HighlightColour=Highlight colour:
 Settings.TextBooks.TextColour=Text colour:
@@ -529,9 +532,9 @@ Hint.SoftenSibilance=Takes the edge off sharp S and Š sounds. Useful on close-m
 Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a whisper and a shout end up closer together. This is the one to reach for when you keep adjusting the volume.
 Hint.Tone=Bass, voice and treble, in decibels. Small moves go a long way; anything past a few dB usually means another stage is the real fix.
 Hint.AutomaticLoudness=Holds the overall level steady across a whole book, including between files recorded on different days. It follows the voice rather than the whole signal, which is what a spoken recording asks for.
-Hint.Text0=Which engine and voice reads this book, how fast, how loud and at what pitch. Every voice remembers its own settings, so switching voice brings its numbers back rather than carrying the last one's over.
-Hint.Text1=Sends the text to a braille display through the screen reader. The table decides how the text is contracted; pick the one your reader is used to rather than the newest.
-Hint.Text2=How the text looks on screen while it is read: what is highlighted, and in which colours. This changes nothing about the speech.
+Hint.Text0=Here you can choose the language and voice for reading this book. You can have different settings for each individual book in the Library. Every voice remembers its own settings — speed, volume and pitch — so there is no need to set them again after switching back from another voice.\n\nRemember that you can select "No speech" if you want to read visually or on the braille display without hearing audio.
+Hint.Text1=Sends the text to a braille display through the screen reader. The braille table decides how the text is contracted; pick the one your reader is used to rather than the newest.\n\nBraille output does not work without visual output, so switching braille on switches that on as well.
+Hint.Text2=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like film end credits, or instant page changes. You can also choose the background, text and highlight colours, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
 
 ; Reading window - the on-screen visual output (CLAUDE.md 8l).
 ; Captions stay short; the explanation belongs in the hint, per the 30-character

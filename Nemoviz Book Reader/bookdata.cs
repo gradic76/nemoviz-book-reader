@@ -111,6 +111,14 @@ namespace Nemoviz_Book_Reader
         /// default at the next visit and reached no renderer at all.</para></summary>
         public int TextColour { get; set; }
         public int TextBackColour { get; set; }
+
+        /// <summary>How the window marks where the reading has got to: 0 not at
+        /// all, 1 the line it is on, 2 the whole sentence. The unit is the
+        /// DISPLAY's, not the text's (Gordan, 2026-08-03) — which is also what
+        /// makes it possible, since no speech backend NBR uses will say which
+        /// word it is speaking.</summary>
+        public int TextHighlight { get; set; }
+        public int TextHighlightColour { get; set; }
         /// <summary>Send this book's text to a braille display while it is read,
         /// and which liblouis table to translate it with (empty = the one the
         /// book's language picks).
@@ -253,6 +261,11 @@ namespace Nemoviz_Book_Reader
             int.TryParse(ini.Read("Settings", "TextBackColour",
                 ReadingColours.DefaultBack.ToString()), out int tbg);
             TextBackColour = ReadingColours.Clamp(tbg);
+            int.TryParse(ini.Read("Settings", "TextHighlight", "1"), out int thl);
+            TextHighlight = thl >= 0 && thl <= 2 ? thl : 1;
+            int.TryParse(ini.Read("Settings", "TextHighlightColour",
+                ReadingColours.DefaultHighlight.ToString()), out int thc);
+            TextHighlightColour = ReadingColours.Clamp(thc);
             TextBraille = ini.Read("Settings", "TextBraille", "0") == "1";
             TextBrailleTable = ini.Read("Settings", "TextBrailleTable", "");
             TextNoSpeech = ini.Read("Settings", "TextNoSpeech", "0") == "1";
@@ -1029,6 +1042,8 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextVisualMode", TextVisualMode.ToString());
             ini.Write("Settings", "TextColour", TextColour.ToString());
             ini.Write("Settings", "TextBackColour", TextBackColour.ToString());
+            ini.Write("Settings", "TextHighlight", TextHighlight.ToString());
+            ini.Write("Settings", "TextHighlightColour", TextHighlightColour.ToString());
             ini.Write("Settings", "TextBraille", TextBraille ? "1" : "0");
             ini.Write("Settings", "TextBrailleTable", TextBrailleTable ?? "");
             ini.Write("Settings", "TextNoSpeech", TextNoSpeech ? "1" : "0");
