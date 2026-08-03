@@ -927,9 +927,11 @@ namespace Nemoviz_Book_Reader
             {
                 cmbTHighlightColour.Items.Add(c); cmbTTextColour.Items.Add(c); cmbTBackColour.Items.Add(c);
             }
-            cmbTHighlightColour.SelectedIndex = 3;
-            cmbTTextColour.SelectedIndex = 2;
-            cmbTBackColour.SelectedIndex = 1;
+            // From the BOOK, not from a constant — these went back to yellow on
+            // black at every visit, whatever the reader had chosen last time.
+            cmbTHighlightColour.SelectedIndex = ReadingColours.DefaultHighlight;
+            cmbTTextColour.SelectedIndex = ReadingColours.Clamp(book.TextColour);
+            cmbTBackColour.SelectedIndex = ReadingColours.Clamp(book.TextBackColour);
             return box;
         }
 
@@ -1077,6 +1079,10 @@ namespace Nemoviz_Book_Reader
             book.TextVisual = chkTVisual != null && chkTVisual.Checked;
             book.TextVisualMode = cmbTVisualMode != null && cmbTVisualMode.SelectedIndex >= 0
                 ? cmbTVisualMode.SelectedIndex : 0;
+            if (cmbTTextColour != null && cmbTTextColour.SelectedIndex >= 0)
+                book.TextColour = cmbTTextColour.SelectedIndex;
+            if (cmbTBackColour != null && cmbTBackColour.SelectedIndex >= 0)
+                book.TextBackColour = cmbTBackColour.SelectedIndex;
             // Braille was scaffolding in exactly the same way. Index 0 of the table
             // list is "automatic", which is stored as an empty id so that a book
             // set to automatic keeps following its language if that language later

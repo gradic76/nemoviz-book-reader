@@ -3304,6 +3304,7 @@ namespace Nemoviz_Book_Reader
                                     ? currentBook.TextVisualMode : 0);
             readingWindow = new ReadingWindow(this, tbReadingSurface, mode,
                 () => DistinctBookChars(),
+                // The book's colours travel with it: see ReadingColours.
                 k =>
                 {
                     // Space is the exception, and it took sitting in the window to
@@ -3322,7 +3323,8 @@ namespace Nemoviz_Book_Reader
                     // key for a broken convention everywhere else.
                     if (k == Keys.Space) { BtnPlayPause_Click(null, EventArgs.Empty); return; }
                     Message m = new Message(); ProcessCmdKey(ref m, k);
-                });
+                },
+                currentBook.TextColour, currentBook.TextBackColour);
             readingWindow.FormClosed += (s, e) =>
             {
                 readingWindow = null;

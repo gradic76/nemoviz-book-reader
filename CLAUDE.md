@@ -2165,7 +2165,33 @@ someone sighted watching the caret, and no amount of instrument work replaces it
    where focus sits*, which is precisely the thing worth watching. **This is the
    one left, and it needs Gordan** — hardware and ears.
 
-Still scaffolding after that: highlight, and the three colour pickers.
+**Two of the three colour pickers are real as of 2026-08-03.** Text colour and
+background colour are stored per book (`BookData.TextColour` /
+`TextBackColour`, `[Settings]` in Book.ini, indices into the new
+`ReadingColours`) and the reading window paints with them. **High contrast still
+outranks them**, and below that the book's pair outranks the skin's dark glass —
+a reader who went into Properties and chose yellow on black meant it. Round trip
+verified, including a hand-corrupted index. Defaults are what the dialog always
+showed before anyone could choose: yellow on black.
+
+**Still scaffolding: the highlight pair** (none / word / sentence, and its
+colour). Neither is wiring, and the reasons are worth writing down before anyone
+promises them in a hint:
+
+- **A `TextBox` cannot colour a range.** The surface is one, and what marks the
+  current sentence today is the travelling *selection*, whose colour belongs to
+  the system. A chosen highlight colour therefore means a `RichTextBox` — and
+  braille rides on that selection through a path that was *measured* (see the
+  note on rewriting `Text` never reaching the display). Swapping the control is
+  a risk only Gordan can clear, with a display in his hands.
+- **"Current word" needs word-boundary events from the speech backends, and
+  nothing in NBR has them** — no `WordBoundary`, no `SpeakProgress`, nothing in
+  the 32-bit host protocol. Sentence granularity is all the clock currently
+  gives.
+
+**The same four controls are dead on the Settings side too** — `AppSettings`
+knows none of them, so there is no global default for a new book to inherit; it
+gets `ReadingColours`' own.
 
 ### Still open
 

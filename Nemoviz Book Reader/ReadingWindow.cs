@@ -65,6 +65,9 @@ namespace Nemoviz_Book_Reader
         private Panel metal, glass;
         private float fontSize = 26f;        // 60 chars across a 960-wide window
         private string fontFamily = "Segoe UI";
+        // The book's colours, as indices; -1 means it has none and the skin's own
+        // glass stands.
+        private readonly int textColour = -1, backColour = -1;
 
         /// <param name="surface">The player's reading surface. It is re-parented
         /// in and given back when this window closes.</param>
@@ -72,14 +75,20 @@ namespace Nemoviz_Book_Reader
         /// for filtering the font list — see <see cref="FontsFor"/>.</param>
         /// <param name="forwardKey">Transport keys go back to the player, which
         /// owns playback. Nothing about reading is decided here.</param>
+        /// <param name="textColour">Index into <see cref="ReadingColours"/> — the
+        /// book's own choice, or -1 to keep the skin's dark glass.</param>
+        /// <param name="backColour">Likewise, for what it is printed on.</param>
         public ReadingWindow(Form owner, TextBox surface, VisualMode mode,
-                             Func<char[]> bookChars, Action<Keys> forwardKey)
+                             Func<char[]> bookChars, Action<Keys> forwardKey,
+                             int textColour = -1, int backColour = -1)
         {
             this.surface = surface;
             this.returnTo = surface != null ? surface.Parent : null;
             this.mode = mode;
             this.bookChars = bookChars;
             this.forwardKey = forwardKey;
+            this.textColour = textColour;
+            this.backColour = backColour;
 
             Owner = owner;
             FormBorderStyle = FormBorderStyle.None;
@@ -205,8 +214,20 @@ namespace Nemoviz_Book_Reader
             surface.ScrollBars = mode == VisualMode.FullScrolling ? ScrollBars.Vertical : ScrollBars.None;
             // High contrast outranks everything (§8k): there the user has told the
             // system what they need, and our colours — chosen or not — yield.
-            surface.BackColor = hc ? SystemColors.Window : NewPlayerSkin.Glass;
-            surface.ForeColor = hc ? SystemColors.WindowText : NewPlayerSkin.Lit;
+            // Below that, the BOOK's pair outranks the skin, because a reader who
+            // went into Properties and chose yellow on black meant it.
+            if (hc)
+            {
+                surface.BackColor = SystemColors.Window;
+                surface.ForeColor = SystemColors.WindowText;
+            }
+            else
+            {
+                surface.BackColor = backColour >= 0
+                    ? ReadingColours.At(backColour) : NewPlayerSkin.Glass;
+                surface.ForeColor = textColour >= 0
+                    ? ReadingColours.At(textColour) : NewPlayerSkin.Lit;
+            }
             ApplyFont();
         }
 
@@ -590,5 +611,36 @@ namespace Nemoviz_Book_Reader
             using (var p = new Pen(NewPlayerSkin.GrooveShadow, 2))
                 e.Graphics.DrawRectangle(p, r);
         }
+    }
+
+    /// <summary>The six reading colours, in the order the combo boxes list them,
+    /// and the only place that knows which colour each name means. The names live
+    /// in <c>en.lang</c> (<c>Settings.Colour.*</c>) and what a book stores is the
+    /// INDEX, so a book set up on an English NBR is painted the same by a
+    /// translated one.
+    ///
+    /// <para>Flat and saturated rather than a palette: the point is contrast that
+    /// survives a bad screen in a bright room, and which pairs with which is the
+    /// reader's to decide — including the combinations a designer would not
+    /// choose.</para></summary>
+    internal static class ReadingColours
+    {
+        private static readonly Color[] All =
+        {
+            Color.White, Color.Black, Color.Yellow,
+            Color.FromArgb(0x00, 0x33, 0xCC),   // blue
+            Color.FromArgb(0x00, 0x80, 0x00),   // green
+            Color.FromArgb(0xCC, 0x00, 0x00),   // red
+        };
+
+        // What the dialog has always shown before anyone chose: yellow on black,
+        // and blue behind the reading mark.
+        public const int DefaultText = 2;
+        public const int DefaultBack = 1;
+        public const int DefaultHighlight = 3;
+
+        public static int Count { get { return All.Length; } }
+        public static int Clamp(int i) { return i < 0 || i >= All.Length ? 0 : i; }
+        public static Color At(int i) { return All[Clamp(i)]; }
     }
 }

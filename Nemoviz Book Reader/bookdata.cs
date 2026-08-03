@@ -99,6 +99,18 @@ namespace Nemoviz_Book_Reader
         /// last one chose.</para></summary>
         public bool TextVisual { get; set; }
         public int TextVisualMode { get; set; }
+
+        /// <summary>What the reading window is painted in — indices into
+        /// <see cref="ReadingColours"/>. Per book for the same reason the voice
+        /// is: one reader's eyes want yellow on black for a long novel and
+        /// something quieter for a reference book they dip into.
+        ///
+        /// <para>These four were the scaffolding that outlived the note above:
+        /// the combos were built, announced and tabbable, and on OK only the
+        /// display mode was written. Everything else went back to a hard-coded
+        /// default at the next visit and reached no renderer at all.</para></summary>
+        public int TextColour { get; set; }
+        public int TextBackColour { get; set; }
         /// <summary>Send this book's text to a braille display while it is read,
         /// and which liblouis table to translate it with (empty = the one the
         /// book's language picks).
@@ -235,6 +247,12 @@ namespace Nemoviz_Book_Reader
             TextVisual = ini.Read("Settings", "TextVisual", "0") == "1";
             int.TryParse(ini.Read("Settings", "TextVisualMode", "0"), out int tvm);
             TextVisualMode = tvm >= 0 && tvm <= 2 ? tvm : 0;
+            int.TryParse(ini.Read("Settings", "TextColour",
+                ReadingColours.DefaultText.ToString()), out int tfg);
+            TextColour = ReadingColours.Clamp(tfg);
+            int.TryParse(ini.Read("Settings", "TextBackColour",
+                ReadingColours.DefaultBack.ToString()), out int tbg);
+            TextBackColour = ReadingColours.Clamp(tbg);
             TextBraille = ini.Read("Settings", "TextBraille", "0") == "1";
             TextBrailleTable = ini.Read("Settings", "TextBrailleTable", "");
             TextNoSpeech = ini.Read("Settings", "TextNoSpeech", "0") == "1";
@@ -1009,6 +1027,8 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextPitch", TextPitch.ToString());
             ini.Write("Settings", "TextVisual", TextVisual ? "1" : "0");
             ini.Write("Settings", "TextVisualMode", TextVisualMode.ToString());
+            ini.Write("Settings", "TextColour", TextColour.ToString());
+            ini.Write("Settings", "TextBackColour", TextBackColour.ToString());
             ini.Write("Settings", "TextBraille", TextBraille ? "1" : "0");
             ini.Write("Settings", "TextBrailleTable", TextBrailleTable ?? "");
             ini.Write("Settings", "TextNoSpeech", TextNoSpeech ? "1" : "0");
