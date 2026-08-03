@@ -2294,10 +2294,13 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 > of this, because most of what looks like an obvious improvement was already
 > tried against a real disk of 1622 books and found to be wrong.
 >
-> Known and deliberately left: `LibraryScanner` still carries its unpacking
-> inside `ScanFolder`, so the safety of the import path rests on `ownsFolder`
-> defaulting to false rather than on the scan being read-only by construction.
-> The debt is written up in that same document.
+> **`LibraryScanner.Scan` reads and never writes** (2026-08-03). Unpacking used
+> to live inside it, which is why "Open folder" first refused any folder holding
+> an archive and then leaned on a flag defaulting to safe — both of which worked
+> by somebody remembering. It is now `LibraryScanner.AbsorbArchives()`, called by
+> name, and called only on the library. There is no flag left to set wrongly.
+> **That one method is the only thing in NBR that deletes a user's file**, and it
+> may never be pointed anywhere but the library.
 
 ### Now reading is its own place (2026-08-03)
 

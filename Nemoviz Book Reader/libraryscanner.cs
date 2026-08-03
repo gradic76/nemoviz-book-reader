@@ -29,30 +29,11 @@ namespace Nemoviz_Book_Reader
         private string libraryPath;
         private bool createBookIni;
 
-        /// <param name="ownsFolder">Whether the folder being scanned BELONGS to
-        /// the library. Only then may an archive found in it be unpacked in
-        /// place and its volumes then DELETED — the rule being that NBR copies
-        /// into the library and never touches the source (Gordan). Deleting is
-        /// for one case only: a user filling the library through Explorer, where
-        /// the archive is already inside library-owned space and there is
-        /// nothing left to keep.
-        ///
-        /// <para><b>It defaults to false on purpose.</b> The dangerous behaviour
-        /// is the one that has to be asked for by name, so a caller who forgets
-        /// gets the safe scan instead of eating somebody's disk. This flag was
-        /// added on 2026-08-03, when "Open folder" stopped refusing folders that
-        /// hold archives — up to then the refusal was, without saying so, the
-        /// only thing standing between the import and the user's own
-        /// files.</para></param>
-        public LibraryScanner(string libraryPath, bool createBookIni = false,
-                              bool ownsFolder = false)
+        public LibraryScanner(string libraryPath, bool createBookIni = false)
         {
             this.libraryPath = libraryPath;
             this.createBookIni = createBookIni;
-            this.ownsFolder = ownsFolder;
         }
-
-        private readonly bool ownsFolder;
 
         public List<BookData> Scan()
         {
@@ -68,26 +49,19 @@ namespace Nemoviz_Book_Reader
         // recurse without bound.
         private const int MaxArchiveDepth = 3;
 
+        /// <summary><b>Scanning READS. It does not write, move or delete
+        /// anything</b> — and that is a property of the method, not a promise a
+        /// caller has to keep (Gordan, 2026-08-03: whatever is more bulletproof).
+        ///
+        /// <para>Unpacking archives used to live right here, which meant a scan
+        /// pointed at somebody's own folder would unpack their archives into it
+        /// and delete the originals. It was held off first by refusing such
+        /// folders outright, then by a flag that defaulted to safe. Both worked
+        /// by someone remembering. It now lives in <see cref="AbsorbArchives"/>,
+        /// which has to be called by name and is only ever called on the
+        /// library.</para></summary>
         private void ScanFolder(string folderPath, List<BookData> books, int archiveDepth = 0)
         {
-            foreach (string file in Directory.GetFiles(folderPath))
-            {
-                string fn = Path.GetFileName(file);
-                // A multi-volume set is extracted once, from its first part;
-                // the continuation volumes (.r00, .z01, .002…) are pulled in by
-                // GetFileParts, so don't treat them as archives of their own.
-                if (IsVolumeContinuation(fn)) continue;
-                if (IsExtractableArchive(fn))
-                {
-                    // Not ours to unpack or delete — the caller is looking at a
-                    // folder the user picked, and imports its archives itself.
-                    if (!ownsFolder) continue;
-                    // Cap archive-in-archive recursion (see MaxArchiveDepth).
-                    if (archiveDepth >= MaxArchiveDepth) continue;
-                    ExtractAndScan(file, folderPath, books, archiveDepth);
-                }
-            }
-
             bool hasMediaFiles = false;
             foreach (string file in Directory.GetFiles(folderPath))
             {
@@ -141,36 +115,61 @@ namespace Nemoviz_Book_Reader
             return "Unknown";
         }
 
-        /// <summary>Background-scan extraction: a loose archive found sitting
-        /// inside a folder being scanned (e.g. dropped into the library via
-        /// Explorer). Extracts next to itself, recurses into the result, then
-        /// deletes the original — the archive is fully owned by the library
-        /// at this point, so nothing is left to keep. Corrupt or
-        /// password-protected archives are skipped silently so one bad file
-        /// doesn't stop the whole scan.</summary>
-        private void ExtractAndScan(string archivePath, string destinationFolder, List<BookData> books, int archiveDepth = 0)
+        /// <summary><b>Takes into the library the archives that are already lying
+        /// in it</b> — somebody filling the shelf through Explorer. Each is
+        /// unpacked beside itself and every volume of it removed, because at that
+        /// point the archive is inside library-owned space and there is nothing
+        /// left to keep.
+        ///
+        /// <para>This is the ONLY thing in NBR that deletes a user's file, and it
+        /// is why it stands alone with a name that says what it does, instead of
+        /// hiding inside a scan. <b>It must never be pointed anywhere but the
+        /// library.</b> The rule it serves is Gordan's: importing copies into the
+        /// library and leaves the source exactly as it is — so anything that is
+        /// not the library is somebody's source.</para>
+        ///
+        /// <para>Corrupt or password-protected archives are skipped silently: no
+        /// prompt is possible here, and one bad file must not stop the shelf from
+        /// loading.</para></summary>
+        public void AbsorbArchives()
         {
+            if (!Directory.Exists(libraryPath)) return;
+            Absorb(libraryPath, 0);
+        }
+
+        private void Absorb(string folder, int depth)
+        {
+            if (depth > MaxArchiveDepth) return;
+            string[] files;
+            try { files = Directory.GetFiles(folder); }
+            catch { return; }
+
+            foreach (string file in files)
+            {
+                string fn = Path.GetFileName(file);
+                // A multi-volume set is taken once, from its first part; the
+                // continuations are pulled in by GetFileParts.
+                if (IsVolumeContinuation(fn) || !IsExtractableArchive(fn)) continue;
+                try
+                {
+                    string extractPath = Path.Combine(folder, BaseArchiveName(file));
+                    if (Directory.Exists(extractPath)) continue;
+                    Directory.CreateDirectory(extractPath);
+                    ExtractArchive(file, extractPath);
+                    // An archive may hold further archives.
+                    Absorb(extractPath, depth + 1);
+                    foreach (FileInfo v in GetArchiveVolumes(file))
+                        try { v.Delete(); } catch { }
+                }
+                catch { }
+            }
+
             try
             {
-                string extractPath = Path.Combine(destinationFolder, BaseArchiveName(archivePath));
-                if (Directory.Exists(extractPath))
-                    return;
-                Directory.CreateDirectory(extractPath);
-                // No password provider here: an encrypted archive dropped into
-                // the library can't be prompted for mid-scan, so it's skipped
-                // (ArchivePasswordRequiredException) like any other unreadable
-                // one — the whole scan must not stall on a single bad file.
-                ExtractArchive(archivePath, extractPath);
-                ScanFolder(extractPath, books, archiveDepth + 1);
-                // The set is fully owned by the library now — remove every
-                // volume, not just the first part.
-                foreach (FileInfo v in GetArchiveVolumes(archivePath))
-                    try { v.Delete(); } catch { }
+                foreach (string d in Directory.GetDirectories(folder))
+                    Absorb(d, depth + 1);
             }
-            catch
-            {
-                // Corrupt, encrypted, unsupported split layout — skip silently.
-            }
+            catch { }
         }
 
         public static bool IsArchive(string ext)

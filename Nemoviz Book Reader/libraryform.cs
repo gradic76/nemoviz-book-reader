@@ -734,11 +734,12 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         private void LoadBooks()
         {
-            // ownsFolder: TRUE, and this is the only place that may say so. The
-            // library is NBR's own space, so an archive dropped in there through
-            // Explorer is unpacked and the original removed — that one case is
-            // what the deleting was ever for.
-            LibraryScanner scanner = new LibraryScanner(appSettings.LibraryPath, true, true);
+            LibraryScanner scanner = new LibraryScanner(appSettings.LibraryPath, true);
+            // The ONE call in NBR that may delete a user's file, and the only
+            // place allowed to make it: an archive dropped into the library
+            // through Explorer is unpacked there and the original removed,
+            // because that folder is NBR's own. Scanning itself never writes.
+            scanner.AbsorbArchives();
             books = scanner.Scan();
             RebuildShelf(null);
         }
@@ -2097,10 +2098,13 @@ namespace Nemoviz_Book_Reader
             // entry point, IsVolumeContinuation skips the rest, GetFileParts
             // gathers the set) has always worked, and the background scan uses
             // it on every start. What it was really protecting against is one
-            // line further down — LibraryScanner unpacks an archive INTO the
-            // folder it is scanning and then deletes every volume of it. Right
-            // for library-owned space, and destruction of the user's own disk
-            // here. Hence the extractArchives:false below.
+            // line that used to sit inside the scan — LibraryScanner unpacked an
+            // archive INTO the folder it was scanning and then deleted every
+            // volume of it. Right for library-owned space, destruction of the
+            // user's own disk here. That is no longer something a caller has to
+            // avoid: scanning cannot write at all now, and the unpacking lives
+            // in LibraryScanner.AbsorbArchives, which is called by name and only
+            // ever on the library.
             try
             {
                 // Everything is worked out first, and nothing is copied until the
