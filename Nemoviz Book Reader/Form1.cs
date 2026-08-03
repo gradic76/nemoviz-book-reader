@@ -4464,27 +4464,41 @@ namespace Nemoviz_Book_Reader
 
             // Repainting is two brush strokes at most, never the whole chunk:
             // taking the old mark off, and putting the new one on.
+            // Under high contrast the reader's CHOSEN colour is not ours to use —
+            // the theme decides the palette. But the mark used to be skipped
+            // altogether there, and that quietly removed one of the three
+            // channels: ear, eye and finger are supposed to be on the same words,
+            // and a high-contrast reader with usable sight was left with two.
+            // The theme's own selection pair is the right answer — guaranteed
+            // legible by the theme itself, which is the whole point of it.
+            bool hc = SystemInformation.HighContrast;
             Color plain = tbReadingSurface.BackColor;
-            Color mark = ReadingColours.At(currentBook.TextHighlightColour);
+            Color mark = hc ? SystemColors.Highlight
+                            : ReadingColours.At(currentBook.TextHighlightColour);
             int caret = tbReadingSurface.SelectionStart;
 
             tbReadingSurface.SuspendLayout();
             if (markStart >= 0 && markStart <= tbReadingSurface.TextLength)
-                PaintRange(markStart, markLength, plain);
-            if (from >= 0 && len > 0 && !SystemInformation.HighContrast)
-                PaintRange(from, len, mark);
+                PaintRange(markStart, markLength, plain,
+                           hc ? (Color?)tbReadingSurface.ForeColor : null);
+            if (from >= 0 && len > 0)
+                PaintRange(from, len, mark, hc ? (Color?)SystemColors.HighlightText : null);
             tbReadingSurface.Select(caret, 0);
             tbReadingSurface.ResumeLayout();
 
             markStart = from; markLength = len;
         }
 
-        private void PaintRange(int from, int length, Color back)
+        /// <summary><paramref name="fore"/> is set only when the theme owns the
+        /// palette (high contrast). Otherwise the reader's own text colour stands
+        /// and only the background carries the mark, as before.</summary>
+        private void PaintRange(int from, int length, Color back, Color? fore = null)
         {
             int max = tbReadingSurface.TextLength;
             if (from < 0 || from >= max || length <= 0) return;
             tbReadingSurface.Select(from, Math.Min(length, max - from));
             tbReadingSurface.SelectionBackColor = back;
+            if (fore.HasValue) tbReadingSurface.SelectionColor = fore.Value;
         }
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
