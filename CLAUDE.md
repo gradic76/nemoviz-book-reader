@@ -1719,6 +1719,39 @@ display families.
 > lists every release, and a mention of "NVDA 2024.1 and above" was taken for the
 > installed version. It is 2026.1.1. Read `nvda.exe`'s `VersionInfo`.
 
+### JAWS is not symmetric with NVDA (checked 2026-08-04)
+
+Both readers are on Gordan's machine — **NVDA 2026.1.1 and JAWS 2025**
+(`jfw.exe` 2025.2508.120.400) — so the deep test can be run on both. It has to
+be, because the two are not the same bet.
+
+**The API route is a dead end on JAWS, and the code already said so.** FSAPI is
+installed (`…\Shared\FSAPI\1.0\FSAPI.dll`, both bitnesses) and the COM object
+`FreedomSci.JawsApi` is registered, so the API is *there*. But its surface is
+`RunFunction(BSTR FunctionName) as Bool` and `RunScript(BSTR ScriptName) as
+Bool` — **a name, with no arguments** — plus `SayString` for speech and nothing
+for braille. JAWS's `BrailleString()` lives in the scripting language, reachable
+only from a script. So arbitrary text to the display means shipping a script
+into the user's version-specific JAWS settings folder AND having that script
+fetch the text itself, since we cannot pass it. Exactly what
+`NvdaController.cs:118` predicted; treat it as settled.
+
+**On BRLTTY, the either/or that was WRONG for NVDA is right for JAWS.** NVDA
+ships a BRLTTY driver and keeps its BrlAPI current; JAWS does not — it uses
+vendor drivers. BRLTTY's Windows page mentions JAWS only under
+`--release-device`, which is **taking turns with the device, not BrlAPI
+multiplexing**. `display → BRLTTY → {JAWS, NBR}` does not exist.
+
+**The risk that matters, and it is specific: the reading surface is a
+`RichTextBox`.** The whole braille bet is that a focusable control gets brailled
+and panned by the reader itself — which needs no API on either reader, and is
+why the surface choice suddenly matters. But `Form1.cs:1527` records that the
+info box was **deliberately moved OFF a RichTextBox** because *"JAWS handles
+rich edit controls specially and kept re-reading the box's content when tabbing
+to neighboring controls"*. The surface has to stay rich — colours and highlight
+need it. So the JAWS half carries an already-observed hazard the NVDA half does
+not, and **an NVDA result does not transfer to JAWS.**
+
 **Through the screen reader, speech and braille are different channels.** Sending
 text to NVDA's `speakText` or JAWS's `SayString` — what PotPlayer and Screen Reader
 for Kodi do, and what NBR already does — puts **nothing** on a display. Braille is
