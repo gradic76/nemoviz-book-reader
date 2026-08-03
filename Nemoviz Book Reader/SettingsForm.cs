@@ -38,29 +38,11 @@ namespace Nemoviz_Book_Reader
         private CheckBox chkUseMultimediaKeysGlobally;
         private readonly List<TextBox> hints = new List<TextBox>();
 
-        /// <summary>Controls that have an explanation but no GROUP to hang it on.
-        /// General and Misc are laid out as loose controls, so their help keys
-        /// cannot be attached the way a group's is, and for a long time they
-        /// simply were not attached at all: the texts sat in en.lang and no
-        /// <c>?</c> ever appeared beside them (Gordan noticed while writing the
-        /// Help, 2026-08-03).
-        ///
-        /// <para>Recorded here as the pages are built, because this is the only
-        /// place the controls are in scope by name; the new look walks the list
-        /// and hangs a key on each. Anchor, the text's key, and what the help is
-        /// ABOUT — the last because a caption written as an instruction ("Use
-        /// embedded metadata") makes a poor name for the help behind it.</para></summary>
-        internal sealed class LooseHint
-        {
-            public Control Anchor; public string BodyKey; public string Subject;
-        }
-        internal readonly List<LooseHint> LooseHints = new List<LooseHint>();
-
-        private void NoteHint(Control anchor, string bodyKey, string subject)
-        {
-            if (anchor == null) return;
-            LooseHints.Add(new LooseHint { Anchor = anchor, BodyKey = bodyKey, Subject = subject });
-        }
+        // The loose-hint machinery that used to live here is gone with the loose
+        // controls (2026-08-03). General is five GROUPS now and Misc no longer
+        // exists, so every explanation in this dialog hangs off a group the
+        // ordinary way — which is also why a reader now hears "Library location"
+        // before the path instead of a bare text box.
 
         // Audio Books tab — use embedded metadata for title/author.
         private CheckBox chkUseMetadata;
@@ -148,7 +130,6 @@ namespace Nemoviz_Book_Reader
             tabSettings.TabPages.Add(BuildGeneralTab());
             tabSettings.TabPages.Add(BuildTextBooksTab());
             tabSettings.TabPages.Add(BuildDeviceTab());
-            tabSettings.TabPages.Add(BuildMiscTab());
 
             btnOK = new Button();
             btnOK.Text = Localization.T("Btn.OK");
@@ -225,115 +206,137 @@ namespace Nemoviz_Book_Reader
             return tb;
         }
 
+        /// <summary>General, as five groups rather than a column of loose
+        /// controls (Gordan, 2026-08-03): <b>Language, Library location, Media
+        /// keys, Metadata, Look</b> — and that is the tab order too, which the
+        /// old page did not have in any recognisable sequence.
+        ///
+        /// <para>Making them GROUPS is what earns the rest. A group carries its
+        /// own <c>?</c> the ordinary way, so the loose-hint machinery this page
+        /// needed goes away; a group is announced on the way in, so a reader
+        /// hears "Library location" before the path; and the new look already
+        /// knows how to arrange groups into columns, so the three-across layout
+        /// costs nothing here.</para>
+        ///
+        /// <para>Built at the CLASSIC width and stacked. The 560-wide dialog
+        /// cannot hold three columns; the 960-wide one can, and rearranging them
+        /// is the skin's job — the same way Text Books has always worked.</para>
+        ///
+        /// <para><b>Look moved here from Misc</b>, which is gone. It stopped
+        /// being a temporary switch the moment themes became a real choice.</para></summary>
         private TabPage BuildGeneralTab()
         {
             TabPage page = new TabPage(Localization.T("Settings.Tab.General"));
+            // Read by the skin: these five are short and of a kind, so they go
+            // three across and wrap, rather than down one side of a 960-wide
+            // page (Gordan). The classic look ignores it and stacks them.
+            page.Tag = "grid3";
 
-            chkUseMultimediaKeys = new CheckBox();
-            chkUseMultimediaKeys.Text = Localization.T("Settings.General.UseMultimediaKeys");
-            chkUseMultimediaKeys.AccessibleName = Localization.T("Settings.General.UseMultimediaKeys");
-            chkUseMultimediaKeys.Location = new Point(10, 16);
-            chkUseMultimediaKeys.Size = new Size(470, 24);
-            chkUseMultimediaKeys.TabIndex = 0;
-            chkUseMultimediaKeys.Checked = appSettings.MediaKeys;
-            chkUseMultimediaKeys.CheckedChanged += (s, e) => UpdateMediaKeyEnabled();
+            const int GW = 500, LX = 14, CX = 150, CW = 330;
+            int y = 8, tab = 0;
 
-            chkUseMultimediaKeysGlobally = new CheckBox();
-            chkUseMultimediaKeysGlobally.Text = Localization.T("Settings.General.UseMultimediaKeysGlobally");
-            chkUseMultimediaKeysGlobally.AccessibleName = Localization.T("Settings.General.UseMultimediaKeysGlobally");
-            chkUseMultimediaKeysGlobally.Location = new Point(28, 78);
-            chkUseMultimediaKeysGlobally.Size = new Size(452, 24);
-            chkUseMultimediaKeysGlobally.TabIndex = 2;
-            chkUseMultimediaKeysGlobally.Checked = appSettings.MediaKeysGlobal;
+            // ── 1. Language ──────────────────────────────────────────────
+            GroupBox gLang = MakeGroup(Localization.T("Settings.General.LanguageGroup"), y, GW, 62);
+            gLang.Controls.Add(MakeLabel(Localization.T("Settings.General.Language"), LX, 26));
+            // NOT cmbLanguage — that field is the BOOK's language over on Speech
+            // and Braille, and reusing it here would have quietly taken that page
+            // apart. This one is the language NBR speaks to the user in.
+            ComboBox cmbUiLanguage = MakeCombo(Localization.T("Settings.General.Language"), CX, 22, CW, tab++);
+            // Only English exists until the app is feature-complete (hr.lang is a
+            // final translation pass), so the combo lists the one language and is
+            // not yet wired to AppSettings.SetLanguage — there is nothing to
+            // switch to.
+            cmbUiLanguage.Items.Add(Localization.T("LanguageName"));
+            cmbUiLanguage.SelectedIndex = 0;
+            gLang.Controls.Add(cmbUiLanguage);
+            page.Controls.Add(gLang);
+            y += gLang.Height + 8;
 
-            Label lblLibraryLocation = new Label();
-            lblLibraryLocation.Text = Localization.T("Settings.General.LibraryLocation");
-            lblLibraryLocation.Location = new Point(10, 148);
-            lblLibraryLocation.Size = new Size(420, 18);
-            lblLibraryLocation.TabStop = false;
-
-            // Read-only so the path can only be changed via Browse, but
-            // tabbable + carrying the folder as its value so a screen reader
-            // reads the current location.
+            // ── 2. Library location ──────────────────────────────────────
+            GroupBox gLib = MakeGroup(Localization.T("Settings.General.LibraryGroup"), y, GW, 62);
+            // Read-only so the path can only be changed through Browse, but
+            // tabbable and carrying the folder as its value, so a reader hears
+            // where the library is.
             tbLibraryLocation = new TextBox();
             tbLibraryLocation.ReadOnly = true;
             tbLibraryLocation.TabStop = true;
-            tbLibraryLocation.Location = new Point(10, 168);
-            tbLibraryLocation.Size = new Size(330, 23);
+            tbLibraryLocation.SetBounds(LX, 24, 340, 23);
             tbLibraryLocation.Text = stagedLibraryPath;
             tbLibraryLocation.AccessibleName = Localization.T("Settings.General.LibraryLocation");
-            tbLibraryLocation.TabIndex = 4;
+            tbLibraryLocation.TabIndex = tab++;
+            gLib.Controls.Add(tbLibraryLocation);
 
             Button btnBrowse = new Button();
             btnBrowse.Text = Localization.T("Settings.General.Browse");
             btnBrowse.AccessibleName = Localization.T("Settings.General.Browse.Accessible");
-            btnBrowse.Location = new Point(348, 167);
-            btnBrowse.Size = new Size(90, 26);
-            btnBrowse.TabIndex = 5;
+            btnBrowse.SetBounds(LX + 350, 23, 90, 26);
+            btnBrowse.TabIndex = tab++;
             btnBrowse.Click += (s, e) => BrowseLibraryLocation();
+            gLib.Controls.Add(btnBrowse);
+            page.Controls.Add(gLib);
+            y += gLib.Height + 8;
 
-            Label lblLanguage = new Label();
-            lblLanguage.Text = Localization.T("Settings.General.Language");
-            lblLanguage.Location = new Point(10, 240);
-            lblLanguage.Size = new Size(160, 20);
-            lblLanguage.TabStop = false;
+            // ── 3. Media keys ────────────────────────────────────────────
+            GroupBox gKeys = MakeGroup(Localization.T("Settings.General.MediaKeysGroup"), y, GW, 84);
+            chkUseMultimediaKeys = new CheckBox();
+            chkUseMultimediaKeys.Text = Localization.T("Settings.General.UseMultimediaKeys");
+            chkUseMultimediaKeys.AccessibleName = Localization.T("Settings.General.UseMultimediaKeys");
+            chkUseMultimediaKeys.SetBounds(LX, 22, GW - 30, 24);
+            chkUseMultimediaKeys.TabIndex = tab++;
+            chkUseMultimediaKeys.Checked = appSettings.MediaKeys;
+            chkUseMultimediaKeys.CheckedChanged += (s, e) => UpdateMediaKeyEnabled();
+            gKeys.Controls.Add(chkUseMultimediaKeys);
 
-            // App UI language. Only English exists until the app is
-            // feature-complete (hr.lang is a final translation pass), so the
-            // combo currently lists just the one language; not yet wired to
-            // AppSettings.SetLanguage since there is nothing to switch to.
-            ComboBox cmbLanguage = new ComboBox();
-            cmbLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbLanguage.Location = new Point(180, 237);
-            cmbLanguage.Size = new Size(240, 24);
-            cmbLanguage.AccessibleName = Localization.T("Settings.General.Language");
-            cmbLanguage.TabIndex = 7;
-            cmbLanguage.Items.Add(Localization.T("LanguageName"));
-            cmbLanguage.SelectedIndex = 0;
+            chkUseMultimediaKeysGlobally = new CheckBox();
+            chkUseMultimediaKeysGlobally.Text = Localization.T("Settings.General.UseMultimediaKeysGlobally");
+            chkUseMultimediaKeysGlobally.AccessibleName = Localization.T("Settings.General.UseMultimediaKeysGlobally");
+            chkUseMultimediaKeysGlobally.SetBounds(LX + 18, 50, GW - 48, 24);
+            chkUseMultimediaKeysGlobally.TabIndex = tab++;
+            chkUseMultimediaKeysGlobally.Checked = appSettings.MediaKeysGlobal;
+            gKeys.Controls.Add(chkUseMultimediaKeysGlobally);
+            page.Controls.Add(gKeys);
+            y += gKeys.Height + 8;
 
-            page.Controls.Add(chkUseMultimediaKeys);
-            page.Controls.Add(MakeHint("Settings.General.UseMultimediaKeys.Hint", 28, 42, 470, 32, 1));
-            page.Controls.Add(chkUseMultimediaKeysGlobally);
-            page.Controls.Add(MakeHint("Settings.General.UseMultimediaKeysGlobally.Hint", 46, 104, 452, 32, 3));
-            page.Controls.Add(lblLibraryLocation);
-            page.Controls.Add(tbLibraryLocation);
-            page.Controls.Add(btnBrowse);
-            page.Controls.Add(MakeHint("Settings.General.LibraryLocation.Hint", 10, 196, 470, 32, 6));
-            page.Controls.Add(lblLanguage);
-            page.Controls.Add(cmbLanguage);
-            page.Controls.Add(MakeHint("Settings.General.Language.Hint", 10, 266, 470, 32, 8));
-
-            // Moved here from Audio Books (Gordan, 2026-08-02), and he is right
-            // that it never belonged there: it decides where a book's title and
-            // author come from for DAISY and EPUB exactly as much as for audio.
-            // A setting on a page called Audio Books is a setting a reader of
-            // text books never goes looking for.
+            // ── 4. Metadata ──────────────────────────────────────────────
+            // Moved out of Audio Books on 2026-08-02 and it never belonged
+            // there: it decides where a book's title and author come from for
+            // DAISY and EPUB exactly as much as for audio, and a reader of text
+            // books never goes looking on a page called Audio Books.
+            GroupBox gMeta = MakeGroup(Localization.T("Settings.General.MetadataGroup"), y, GW, 56);
             chkUseMetadata = new CheckBox();
             chkUseMetadata.Text = Localization.T("Settings.General.UseMetadata");
             chkUseMetadata.AccessibleName = Localization.T("Settings.General.UseMetadata");
-            chkUseMetadata.Location = new Point(10, 306);
-            chkUseMetadata.Size = new Size(470, 24);
-            chkUseMetadata.TabIndex = 9;
+            chkUseMetadata.SetBounds(LX, 22, GW - 30, 24);
+            chkUseMetadata.TabIndex = tab++;
             chkUseMetadata.Checked = appSettings.UseMetadata;
-            page.Controls.Add(chkUseMetadata);
-            page.Controls.Add(MakeHint("Settings.General.UseMetadata.Hint", 28, 332, 452, 44, 10));
+            gMeta.Controls.Add(chkUseMetadata);
+            page.Controls.Add(gMeta);
+            y += gMeta.Height + 8;
 
-            // The same five explanations the classic look shows in boxes, so the
-            // new look can hang a ? on each. Subjects are nouns, not the
-            // instructions the captions are.
-            NoteHint(chkUseMultimediaKeys, "Settings.General.UseMultimediaKeys.Hint",
-                     Localization.T("Settings.General.UseMultimediaKeys"));
-            NoteHint(chkUseMultimediaKeysGlobally, "Settings.General.UseMultimediaKeysGlobally.Hint",
-                     Localization.T("Settings.General.UseMultimediaKeysGlobally"));
-            NoteHint(tbLibraryLocation, "Settings.General.LibraryLocation.Hint",
-                     Localization.T("Settings.General.LibraryLocation").TrimEnd(':'));
-            NoteHint(cmbLanguage, "Settings.General.Language.Hint",
-                     Localization.T("Settings.General.Language").TrimEnd(':'));
-            NoteHint(chkUseMetadata, "Settings.General.UseMetadata.Hint",
-                     Localization.T("Settings.General.UseMetadata"));
+            // ── 5. Look ──────────────────────────────────────────────────
+            GroupBox gLook = MakeGroup(Localization.T("Settings.General.LookGroup"), y, GW, 62);
+            gLook.Controls.Add(MakeLabel(Localization.T("Settings.Misc.Look"), LX, 26));
+            cmbLook = MakeCombo(Localization.T("Settings.Misc.Look"), CX, 22, CW, tab++);
+            cmbLook.Items.Add(Localization.T("Settings.Misc.Look.Classic"));
+            cmbLook.Items.Add(Localization.T("Settings.Misc.Look.New"));
+            cmbLook.SelectedIndex =
+                string.Equals(appSettings.UiTheme, UiTheme.NewId, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+            gLook.Controls.Add(cmbLook);
+            page.Controls.Add(gLook);
 
             UpdateMediaKeyEnabled();
             return page;
+        }
+
+        /// <summary>A group box at the page's left margin, sized by its caller —
+        /// the classic layout stacks them and the skin rearranges them.</summary>
+        private static GroupBox MakeGroup(string text, int y, int w, int h)
+        {
+            GroupBox g = new GroupBox();
+            g.Text = text;
+            g.AccessibleName = text;
+            g.SetBounds(10, y, w, h);
+            return g;
         }
 
         /// <summary>The global switch only means anything while the media keys are
@@ -1083,27 +1086,10 @@ namespace Nemoviz_Book_Reader
             return page;
         }
 
-        // Misc — for now the one thing that lives here is the temporary switch
-        // between the look the app has always had and the redesign in progress.
-        private TabPage BuildMiscTab()
-        {
-            TabPage page = new TabPage(Localization.T("Settings.Tab.Misc"));
-
-            page.Controls.Add(MakeLabel(Localization.T("Settings.Misc.Look"), 10, 22));
-            cmbLook = MakeCombo(Localization.T("Settings.Misc.Look"), 150, 18, 340, 0);
-            cmbLook.Items.Add(Localization.T("Settings.Misc.Look.Classic"));
-            cmbLook.Items.Add(Localization.T("Settings.Misc.Look.New"));
-            cmbLook.SelectedIndex =
-                string.Equals(appSettings.UiTheme, UiTheme.NewId, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
-            page.Controls.Add(cmbLook);
-            page.Controls.Add(MakeHint("Settings.Misc.Look.Hint", 10, 52, 480, 46, 1));
-            NoteHint(cmbLook, "Settings.Misc.Look.Hint",
-                     Localization.T("Settings.Misc.Look").TrimEnd(':'));
-
-            page.Controls.Add(BuildPlaceholder(Localization.T("Settings.WorkInProgress"),
-                new Point(10, 110), new Size(480, 30)));
-            return page;
-        }
+        // Misc is GONE (Gordan, 2026-08-03). It never held anything but the look
+        // switch and a "work in progress" placeholder — a tab that existed to
+        // have somewhere to put one control. The look moved to General, where it
+        // is a setting among settings instead of a leftover.
 
         /// <summary>The chosen look, as an id for AppSettings.</summary>
         private string SelectedThemeId()

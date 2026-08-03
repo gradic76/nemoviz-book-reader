@@ -432,10 +432,19 @@ Common.DateFormatLong=dd. MMMM yyyy
 ; Settings dialog (Session 9 — UI shell only, nothing wired up yet)
 Settings.ShowHints=Show help hints
 Settings.Tab.General=General
-Settings.Tab.AudioBooks=Audio Books
-Settings.Tab.TextBooks=Text Books
+; General is five groups now, in this order: what NBR speaks to you in, where it
+; keeps your books, the keys it answers, where a book's details come from, and
+; how it looks.
+Settings.General.LanguageGroup=Language
+Settings.General.LibraryGroup=Library location
+Settings.General.MediaKeysGroup=Media keys
+Settings.General.MetadataGroup=Book details
+Settings.General.LookGroup=Look
+; "Text Books" stopped being true when the Audio Books tab went: the page never
+; set anything about books, it sets how they are SPOKEN and SHOWN. Speech,
+; braille and the screen (Gordan, 2026-08-03).
+Settings.Tab.TextBooks=Speech and Braille
 Settings.Tab.Device=Device
-Settings.Tab.Misc=Misc
 Settings.General.UseMultimediaKeys=Use keyboard multimedia keys
 Settings.General.UseMultimediaKeysGlobally=Use multimedia keys globally
 Settings.General.LibraryLocation=Library location:

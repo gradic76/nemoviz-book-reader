@@ -80,7 +80,6 @@ namespace Nemoviz_Book_Reader
 
             HintSystem.Clear();
             foreach (TabPage page in tabs.TabPages) LayOutPage(page, pw, ph);
-            AttachLooseHints(f as SettingsForm, pw);
 
             DialogSkin.AsKey(p.OK, new Rectangle(596, DialogSkin.ButtonsY,
                 DialogSkin.ButtonW, DialogSkin.ButtonH));
@@ -122,32 +121,32 @@ namespace Nemoviz_Book_Reader
             foreach (GroupBox g in groups) content += g.Height;
             int n = groups.Count;
 
-            // One column while it fits; TWO when it does not. Text Books is the
-            // page that needs it — Speech, Braille and Visual come to more than a
-            // 640-tall dialog has, and the old answer was a scroll bar. Dropping
-            // the info column bought the width to solve it properly instead
-            // (Gordan: "ako je stalo u Properties uz infobox, mora stati i ovdje").
-            // Nothing is ever cut off and nothing scrolls.
-            var columns = new List<List<GroupBox>>();
-            if (content + 12 * (n - 1) > avail && n > 1)
+            // A page can ask for a GRID: three across, wrapping — which is what
+            // General wants, five short groups of a kind. Left to right and then
+            // down is also the order they were added, so what a reader hears is
+            // what a reader sees (Gordan, 2026-08-03).
+            if ((page.Tag as string) == "grid3")
             {
-                // Balanced by height, in the order the groups were added — which
-                // is the order they are read in, and that order must survive.
-                var left = new List<GroupBox>();
-                var right = new List<GroupBox>();
-                int half = content / 2, run = 0;
-                foreach (GroupBox g in groups)
-                {
-                    if (run > 0 && run + g.Height / 2 > half) right.Add(g);
-                    else { left.Add(g); run += g.Height; }
-                }
-                if (right.Count == 0) { right.Add(left[left.Count - 1]); left.RemoveAt(left.Count - 1); }
-                columns.Add(left);
-                columns.Add(right);
+                LayOutGrid(groups, 3, width, avail);
+                // NOT a return — the help keys are attached at the foot of this
+                // method, and jumping out took every ? off the page. Found by the
+                // audit, which is the whole reason it counts them.
+                AttachGroupHints(page, groups);
+                return;
             }
-            else columns.Add(groups);
 
-            int colW = columns.Count > 1 ? (width - Margin) / 2 : width;
+            // Otherwise: as FEW columns as the height allows, up to three. One
+            // while everything fits; two for Speech and Braille, whose three
+            // groups come to more than a 640-tall dialog has and whose old answer
+            // was a scroll bar. Nothing is cut off and nothing scrolls, and the
+            // ORDER the groups were added survives.
+            int wanted = 1;
+            while (wanted < 3 && wanted < n && !FitsInColumns(groups, wanted, avail)) wanted++;
+
+            var columns = SplitIntoColumns(groups, wanted, content);
+
+            int colW = columns.Count > 1
+                ? (width - Margin * (columns.Count - 1)) / columns.Count : width;
             for (int ci = 0; ci < columns.Count; ci++)
             {
                 List<GroupBox> col = columns[ci];
@@ -177,6 +176,14 @@ namespace Nemoviz_Book_Reader
                 foreach (GroupBox g in col) { PropertiesSkin.PlaceValues(g, column); PullButtonsIn(g); }
             }
 
+            AttachGroupHints(page, groups);
+        }
+
+        /// <summary>One <c>?</c> per group, in the order the groups were added.
+        /// Called from BOTH layouts — a page laid out as a grid needs its help
+        /// keys exactly as much as one laid out in columns.</summary>
+        private static void AttachGroupHints(TabPage page, List<GroupBox> groups)
+        {
             string[] keys = HintKeys(page);
             for (int i = 0; i < groups.Count; i++)
             {
@@ -210,29 +217,88 @@ namespace Nemoviz_Book_Reader
             foreach (Button b in buttons) b.Left = Math.Max(14, b.Left - over);
         }
 
-        /// <summary>Hangs a <c>?</c> on the pages whose controls stand loose —
-        /// General and Misc, which have no groups to carry one. Their
-        /// explanations were written and then never appeared: every hint text in
-        /// en.lang existed, and six of the ten had nothing to open them (Gordan
-        /// found it while writing the Help, 2026-08-03).
-        ///
-        /// <para>The keys line up in a column at the right-hand edge rather than
-        /// beside each control, because the controls are of every width — a
-        /// checkbox, a text box with a Browse button, a combo — and keys chasing
-        /// their right edges would read as scatter. Each one is still ABOUT its
-        /// own row: it sits at that row's height and its name says which setting
-        /// it explains.</para></summary>
-        private static void AttachLooseHints(SettingsForm f, int pw)
+        /// <summary>Groups laid left to right, <paramref name="across"/> to a
+        /// row, wrapping. Every group in a row is given the height of the tallest
+        /// in it, so the rows line up and a short group does not leave a step in
+        /// the edge beside a tall one.</summary>
+        private static void LayOutGrid(List<GroupBox> groups, int across, int width, int avail)
         {
-            if (f == null) return;
-            foreach (SettingsForm.LooseHint h in f.LooseHints)
+            int colW = (width - Margin * (across - 1)) / across;
+            int y = Margin;
+            for (int i = 0; i < groups.Count; i += across)
             {
-                Control a = h.Anchor;
-                if (a == null || a.Parent == null) continue;
-                int y = a.Top + Math.Max(0, (a.Height - 22) / 2);
-                HintSystem.Attach(a, h.BodyKey, a.Parent,
-                                  new Rectangle(pw - Margin - 22, y, 22, 22), h.Subject);
+                int rowH = 0;
+                for (int k = i; k < groups.Count && k < i + across; k++)
+                    rowH = Math.Max(rowH, groups[k].Height);
+
+                for (int k = i; k < groups.Count && k < i + across; k++)
+                {
+                    int x = Margin + (k - i) * (colW + Margin);
+                    DialogSkin.AsSticker(groups[k], new Rectangle(x, y, colW, rowH));
+                    foreach (Control c in groups[k].Controls) DialogSkin.OnGlass(c);
+                    groups[k].TabIndex = k;
+                }
+
+                int column = 0;
+                for (int k = i; k < groups.Count && k < i + across; k++)
+                    column = Math.Max(column, PropertiesSkin.LabelColumn(groups[k]));
+                for (int k = i; k < groups.Count && k < i + across; k++)
+                { PropertiesSkin.PlaceValues(groups[k], column); PullButtonsIn(groups[k]); }
+
+                y += rowH + Margin;
             }
+        }
+
+        /// <summary>Would these groups fit if they were dealt into this many
+        /// columns, keeping their order? Height only — the width is whatever is
+        /// left after the split.</summary>
+        private static bool FitsInColumns(List<GroupBox> groups, int count, int avail)
+        {
+            int total = 0;
+            foreach (GroupBox g in groups) total += g.Height;
+            foreach (List<GroupBox> col in SplitIntoColumns(groups, count, total))
+            {
+                int used = 0;
+                foreach (GroupBox g in col) used += g.Height;
+                if (used + 12 * (col.Count - 1) > avail) return false;
+            }
+            return true;
+        }
+
+        /// <summary>Deals the groups into columns <b>in the order they were
+        /// added</b>, filling each until it has had its share of the total
+        /// height. Reading order is the one thing that must not be rearranged for
+        /// the sake of a tidier picture.</summary>
+        private static List<List<GroupBox>> SplitIntoColumns(List<GroupBox> groups, int count, int content)
+        {
+            var columns = new List<List<GroupBox>>();
+            if (count <= 1) { columns.Add(new List<GroupBox>(groups)); return columns; }
+
+            int share = Math.Max(1, content / count);
+            var col = new List<GroupBox>();
+            int run = 0;
+            foreach (GroupBox g in groups)
+            {
+                if (col.Count > 0 && columns.Count < count - 1 && run + g.Height / 2 > share)
+                {
+                    columns.Add(col);
+                    col = new List<GroupBox>();
+                    run = 0;
+                }
+                col.Add(g);
+                run += g.Height;
+            }
+            columns.Add(col);
+            // A column left empty by rounding takes the last group of the one
+            // before it, rather than being drawn as a blank stripe.
+            while (columns.Count < count && columns[columns.Count - 1].Count > 1)
+            {
+                var last = columns[columns.Count - 1];
+                var moved = new List<GroupBox> { last[last.Count - 1] };
+                last.RemoveAt(last.Count - 1);
+                columns.Add(moved);
+            }
+            return columns;
         }
 
         /// <summary>The help text behind each group's <c>?</c>, in the order the
@@ -246,6 +312,15 @@ namespace Nemoviz_Book_Reader
                 return new[] { "Settings.TextBooks.Speech.Hint",
                                "Settings.TextBooks.Braille.Hint",
                                "Settings.TextBooks.Visual.Hint" };
+            // General, in the order Gordan set: Language, Library location,
+            // Media keys, Metadata, Look. Five groups now, where five loose
+            // controls used to need machinery of their own to carry a key.
+            if (name == Localization.T("Settings.Tab.General"))
+                return new[] { "Settings.General.Language.Hint",
+                               "Settings.General.LibraryLocation.Hint",
+                               "Settings.General.UseMultimediaKeys.Hint",
+                               "Settings.General.UseMetadata.Hint",
+                               "Settings.Misc.Look.Hint" };
             return new string[0];
         }
 
