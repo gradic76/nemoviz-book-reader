@@ -2100,24 +2100,18 @@ namespace Nemoviz_Book_Reader
             // here. Hence the extractArchives:false below.
             try
             {
-                // A DAISY book (ncc.html / OPF+NCX anywhere under the folder) is
-                // imported as ONE book with its navigation, not as loose audio.
-                if (ImportDaisyFolder(folderPath)) return;
+                // Everything is worked out first, and nothing is copied until the
+                // reader has seen the numbers and said yes. PlanImport carries the
+                // whole of the agreed grouping — including DAISY at every level,
+                // which the old single call at the top of this method missed.
+                var plan = new ImportPlan();
+                PlanImport(folderPath, plan);
+                List<string> entryPoints, orphanVolumes;
+                CollectArchives(folderPath, out entryPoints, out orphanVolumes);
+                plan.Archives.Clear();
+                plan.Archives.AddRange(entryPoints);
 
-                // Two kinds of content need opposite grouping:
-                //  • loose TEXT-book files (pdf/mobi/epub/doc/…) — a folder of
-                //    ebooks is a COLLECTION, so each file is its own book;
-                //  • loose AUDIO files — a folder of audio is ONE book (its parts).
-                var textFiles = EnumerateTextBookFiles(folderPath);
-                // ownsFolder stays false — this folder is the USER'S. Without
-                // that, the scan would unpack their archives into their own
-                // folder and delete the originals.
-                var audioBooks = new LibraryScanner(folderPath).Scan()
-                    .Where(b => FolderHasAudio(b.FolderPath)).ToList();
-                List<string> archives, orphanVolumes;
-                CollectArchives(folderPath, out archives, out orphanVolumes);
-
-                int total = textFiles.Count + audioBooks.Count + archives.Count;
+                int total = plan.Books;
                 if (total == 0)
                 {
                     MessageForm.ShowInfo(this, Localization.T("Dialog.NoBooksFound.Message"), Localization.T("Dialog.NoBooksFound.Title"));
@@ -2143,11 +2137,13 @@ namespace Nemoviz_Book_Reader
                 }
                 else
                 {
-                    int special = CountSpecialFormats(textFiles);
+                    // Special formats are DAISY, a narrated EPUB and braille —
+                    // the three that are not plain documents and not plain audio.
+                    int special = plan.Daisy.Count + CountSpecialFormats(plan.TextFiles);
                     if (!MessageForm.ShowContinue(this,
                             Localization.T("Dialog.ConfirmImport.Message", total,
-                                audioBooks.Count, textFiles.Count - special, special,
-                                archives.Count, appSettings.LibraryPath),
+                                plan.AudioBooks, plan.TextFiles.Count - (special - plan.Daisy.Count),
+                                special, plan.Archives.Count, appSettings.LibraryPath),
                             Localization.T("Dialog.ConfirmImport.Title")))
                         return;
                 }
@@ -2164,46 +2160,32 @@ namespace Nemoviz_Book_Reader
                     skipped.Add(System.IO.Path.GetFileName(v) + " — " +
                                 Localization.T("Dialog.Skipped.MissingFirstVolume"));
 
-                // Each archive is its own book, entry points only — the volumes
-                // behind them are pulled in by SharpCompress from the first part.
-                foreach (string a in archives)
-                {
-                    string why;
-                    if (ImportFileCore(a, true, out why)) imported++;
-                    else skipped.Add(System.IO.Path.GetFileName(a) +
-                                     (string.IsNullOrEmpty(why) ? "" : " — " + why));
-                }
+                // Archives and single files, each its own book, through the same
+                // path Open file uses. Entry points only — the volumes behind
+                // them are pulled in by SharpCompress from the first part.
+                foreach (string f in plan.Archives)
+                    if (ImportOne(f, skipped)) imported++;
+                foreach (string f in plan.TextFiles)
+                    if (ImportOne(f, skipped)) imported++;
+                foreach (string f in plan.AudioOrphans)
+                    if (ImportOne(f, skipped)) imported++;
 
-                // Each text-book file → its own book (quiet, no per-file dialogs).
-                // A file that can't be imported (DRM-protected, unreadable) is
-                // counted so the summary can tell the user some were left out.
-                foreach (string tf in textFiles)
-                {
-                    string why;
-                    if (ImportFileCore(tf, true, out why)) imported++;
-                    else skipped.Add(System.IO.Path.GetFileName(tf) +
-                                     (string.IsNullOrEmpty(why) ? "" : " — " + why));
-                }
+                // A DAISY book comes in whole, with its navigation. Found at
+                // every level now, not only on the folder that was picked.
+                foreach (string d in plan.Daisy)
+                    if (ImportDaisyFolder(d)) imported++;
+                    else skipped.Add(System.IO.Path.GetFileName(d));
 
-                // Each audio folder → one book (copy its files, as before, but not
-                // the text files handled above).
-                foreach (BookData book in audioBooks)
+                // A folder of audio is one book: its own files.
+                foreach (string bookFolder in plan.AudioFolders)
+                    if (CopyAudioInto(BookFolderFor(bookFolder), new[] { bookFolder })) imported++;
+
+                // A book split across discs is ALSO one book — every disc's files
+                // into a single folder, named after the folder that holds them.
+                foreach (string[] discs in plan.DiscSets)
                 {
-                    string destFolder = System.IO.Path.Combine(
-                        appSettings.LibraryPath,
-                        System.IO.Path.GetFileName(book.FolderPath));
-                    if (!System.IO.Directory.Exists(destFolder))
-                        System.IO.Directory.CreateDirectory(destFolder);
-                    foreach (string file in System.IO.Directory.GetFiles(book.FolderPath))
-                    {
-                        string fn = System.IO.Path.GetFileName(file);
-                        if (fn.ToLower() == "book.ini") continue;
-                        if (IsTextBookFile(file)) continue;   // it's its own book
-                        string destFile = System.IO.Path.Combine(destFolder, fn);
-                        if (!System.IO.File.Exists(destFile))
-                            System.IO.File.Copy(file, destFile);
-                    }
-                    imported++;
+                    string parent = System.IO.Path.GetDirectoryName(discs[0]);
+                    if (CopyAudioInto(BookFolderFor(parent), discs)) imported++;
                 }
 
                 LoadBooks();
@@ -2230,6 +2212,241 @@ namespace Nemoviz_Book_Reader
             {
                 MessageForm.ShowInfo(this, Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
             }
+        }
+
+        /// <summary>One file, one book, quietly — and the reason it did not go in
+        /// added to the list by name when it did not.</summary>
+        private bool ImportOne(string file, List<string> skipped)
+        {
+            string why;
+            if (ImportFileCore(file, true, out why)) return true;
+            skipped.Add(System.IO.Path.GetFileName(file) +
+                        (string.IsNullOrEmpty(why) ? "" : " — " + why));
+            return false;
+        }
+
+        private string BookFolderFor(string sourceFolder)
+        {
+            return System.IO.Path.Combine(appSettings.LibraryPath,
+                                          System.IO.Path.GetFileName(sourceFolder));
+        }
+
+        /// <summary>Copies the audio of one or more source folders into a single
+        /// book folder. More than one source is a book split across discs; the
+        /// discs' files land side by side and the order comes from their names,
+        /// which is why a disc set names its files with the disc in them.
+        ///
+        /// <para>Text files are left behind on purpose: beside audio they are a
+        /// note about the book, not part of it.</para></summary>
+        private bool CopyAudioInto(string destFolder, string[] sources)
+        {
+            try
+            {
+                bool any = false;
+                if (!System.IO.Directory.Exists(destFolder))
+                    System.IO.Directory.CreateDirectory(destFolder);
+                foreach (string src in sources)
+                    foreach (string file in System.IO.Directory.GetFiles(src))
+                    {
+                        string fn = System.IO.Path.GetFileName(file);
+                        if (string.Equals(fn, "book.ini", StringComparison.OrdinalIgnoreCase)) continue;
+                        if (IsTextBookFile(file)) continue;
+                        string destFile = System.IO.Path.Combine(destFolder, fn);
+                        if (!System.IO.File.Exists(destFile)) System.IO.File.Copy(file, destFile);
+                        any = true;
+                    }
+                return any;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>What a folder import found, sorted into what each thing will
+        /// become. Worked out in full BEFORE anything is copied, because the
+        /// warning has to be able to say how many of each kind there are, and
+        /// because a reader who sees a number they did not expect must be able
+        /// to cancel before a single file moves.</summary>
+        private sealed class ImportPlan
+        {
+            public readonly List<string> Daisy = new List<string>();       // folder → one book
+            public readonly List<string> AudioFolders = new List<string>();// folder → one book
+            public readonly List<string[]> DiscSets = new List<string[]>();// folders → ONE book
+            public readonly List<string> AudioOrphans = new List<string>();// file → one book
+            public readonly List<string> TextFiles = new List<string>();   // file → one book
+            public readonly List<string> Archives = new List<string>();    // file → one book
+            public readonly List<string> OrphanVolumes = new List<string>();
+
+            public int Books
+            {
+                get
+                {
+                    return Daisy.Count + AudioFolders.Count + DiscSets.Count
+                         + AudioOrphans.Count + TextFiles.Count + Archives.Count;
+                }
+            }
+            public int AudioBooks
+            {
+                get { return AudioFolders.Count + DiscSets.Count + AudioOrphans.Count; }
+            }
+        }
+
+        /// <summary>Reads a folder tree and decides what is a book, by the rules
+        /// settled with Gordan on 2026-08-03 and measured against a real disk of
+        /// 360 top-level items, five levels deep (docs/Open file i Open folder.txt
+        /// §3.4b).
+        ///
+        /// <para><b>Audio.</b> A folder that holds audio IS a book. A folder that
+        /// holds audio-bearing SUBFOLDERS is a shelf, and then each of its own
+        /// loose files is a book of its own. The one exception is a book split
+        /// across discs: subfolders count as parts of a single book only when
+        /// every one of them carries a disc WORD beside its number — "Disc 3",
+        /// "Disk 16", "D01 Title". A bare number is not enough, because "Wheel of
+        /// Time 01" and "Disc 1" have the same shape and opposite meanings.
+        /// Without that exception three real books on the sample disk came apart
+        /// into 8, 16 and 10 shelf entries.</para>
+        ///
+        /// <para><b>Text.</b> One book per file — but only where the folder holds
+        /// no audio. A text file sitting beside audio is a note ABOUT the book,
+        /// not a book: 170 of them on the sample disk, 190 files named
+        /// <c>Info.txt</c>. It costs one pdf and one doc that might have been
+        /// books, and it keeps about 170 pieces of rubbish off the shelf.</para>
+        ///
+        /// <para><b>DAISY is checked at EVERY level</b>, not only on the folder
+        /// the user picked. All 83 DAISY books on the sample disk sit two or
+        /// three levels down; checking only the top would have brought them in as
+        /// plain audio folders with their navigation thrown away.</para></summary>
+        private static void PlanImport(string folder, ImportPlan plan, int depth = 0)
+        {
+            if (depth > 8) return;
+            string[] files, subs;
+            try
+            {
+                files = System.IO.Directory.GetFiles(folder);
+                subs = System.IO.Directory.GetDirectories(folder);
+            }
+            catch { return; }
+
+            // A DAISY book is one book, whole, and nothing inside it is looked at
+            // again — its audio is chapters and its HTML is the text.
+            //
+            // The test has to be LOCAL. DaisyParser.TryParse searches the whole
+            // tree beneath a folder, which is right when you already believe you
+            // are standing on a book and catastrophic when you are standing on a
+            // shelf: pointed at a disk holding 83 DAISY books it answered "yes"
+            // for the ROOT, and the entire import came out as one book. Measured,
+            // not imagined.
+            if (IsDaisyFolder(files)) { plan.Daisy.Add(folder); return; }
+
+            bool hasAudio = false;
+            foreach (string f in files)
+            {
+                string fn = System.IO.Path.GetFileName(f);
+                if (LibraryScanner.IsExtractableArchive(fn)) plan.Archives.Add(f);
+                else if (IsAudioFile(f)) hasAudio = true;
+            }
+
+            var audioSubs = new List<string>();
+            foreach (string s in subs) if (HasAudioAnywhere(s, 0)) audioSubs.Add(s);
+
+            if (audioSubs.Count > 0)
+            {
+                // Discs of one book, or a shelf of several?
+                bool allDiscs = subs.Length > 1 && audioSubs.Count == subs.Length;
+                if (allDiscs)
+                    foreach (string s in subs)
+                        if (!IsDiscMarked(System.IO.Path.GetFileName(s))) { allDiscs = false; break; }
+
+                if (allDiscs) { plan.DiscSets.Add(subs); return; }
+
+                // A shelf: its own loose audio files are each a book.
+                foreach (string f in files) if (IsAudioFile(f)) plan.AudioOrphans.Add(f);
+            }
+            else if (hasAudio)
+            {
+                plan.AudioFolders.Add(folder);
+            }
+
+            // Text is a book only where there is no audio for it to be a note
+            // about — and that means no audio in the folder AND none in the
+            // folders under it. A note sitting at the head of a shelf ("Info.txt"
+            // beside the discs' folders) is still a note; the first version of
+            // this rule looked only at the folder's own files and let 38 of them
+            // onto the shelf as books.
+            if (!hasAudio && audioSubs.Count == 0)
+                foreach (string f in files)
+                    if (IsTextBookFile(f) && !IsNoteFile(f)) plan.TextFiles.Add(f);
+
+            foreach (string s in subs) PlanImport(s, plan, depth + 1);
+        }
+
+        /// <summary>A file that is a note ABOUT a book rather than a book, told
+        /// apart by its name because nothing in the structure gives it away.
+        ///
+        /// <para>Every rule here would rather be structural, and this one cannot
+        /// be: a text book folder on the sample disk holds
+        /// <c>&lt;Title&gt;.epub</c> and <c>Info.txt</c> side by side, and a note
+        /// beside a book looks exactly like a second book. So the list is by
+        /// NAME, and it is deliberately tiny — an exact <c>info.txt</c>, and the
+        /// leavings of a torrent client. 190 files on that one disk are called
+        /// Info.txt; without this they arrive as 190 books.</para>
+        ///
+        /// <para>Anything longer than a handful of names would be guessing at
+        /// what a reader meant to keep. When in doubt it stays a book: an unwanted
+        /// entry is deleted in a second, a missing one is never noticed.</para></summary>
+        private static bool IsNoteFile(string path)
+        {
+            string n = System.IO.Path.GetFileName(path).ToLowerInvariant();
+            if (n == "info.txt" || n == "info.nfo" || n == "readme.txt") return true;
+            if (n.StartsWith("torrent downloaded from")) return true;
+            return false;
+        }
+
+        /// <summary>Is the navigation of a DAISY book lying in THIS folder — an
+        /// <c>ncc.html</c>, or an <c>.opf</c> together with an <c>.ncx</c>? Only
+        /// the folder's own files are looked at; whatever is further down belongs
+        /// to some other book.</summary>
+        private static bool IsDaisyFolder(string[] files)
+        {
+            bool opf = false, ncx = false;
+            foreach (string f in files)
+            {
+                string n = System.IO.Path.GetFileName(f).ToLowerInvariant();
+                if (n == "ncc.html" || n == "ncc.htm") return true;
+                if (n.EndsWith(".opf")) opf = true;
+                else if (n.EndsWith(".ncx")) ncx = true;
+            }
+            return opf && ncx;
+        }
+
+        private static bool IsAudioFile(string path)
+        {
+            return Array.IndexOf(LibraryScanner.AudioExtensions,
+                                 System.IO.Path.GetExtension(path).ToLowerInvariant()) >= 0;
+        }
+
+        private static bool HasAudioAnywhere(string folder, int depth)
+        {
+            if (depth > 6) return false;
+            try
+            {
+                foreach (string f in System.IO.Directory.GetFiles(folder))
+                    if (IsAudioFile(f)) return true;
+                foreach (string d in System.IO.Directory.GetDirectories(folder))
+                    if (HasAudioAnywhere(d, depth + 1)) return true;
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>A folder name that says "this is disc N of something", rather
+        /// than "this is volume N of a series". The word is what carries it —
+        /// see the note on <see cref="PlanImport"/>.</summary>
+        private static bool IsDiscMarked(string name)
+        {
+            string n = (name ?? "").ToLowerInvariant();
+            if (System.Text.RegularExpressions.Regex.IsMatch(n, @"^(cd|disc|disk|dvd)[\s._-]*\d+$")) return true;
+            if (System.Text.RegularExpressions.Regex.IsMatch(n, @"^d\d+[\s._-]")) return true;
+            if (System.Text.RegularExpressions.Regex.IsMatch(n, @"[\s._-](cd|disc|disk)[\s._-]*\d+$")) return true;
+            return false;
         }
 
         /// <summary>How many of the text files are a SPECIAL format rather than a

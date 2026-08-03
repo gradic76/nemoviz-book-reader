@@ -2277,6 +2277,25 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 
 ## 9. Library window
 
+> ### NAILED DOWN — 2026-08-03 (Gordan)
+>
+> **The Library window is finished and is not to be touched again**, unless
+> something outside it demands a change: a bug reported from use, a format that
+> needs a new import path, or the manual and About box arriving to fill the two
+> Help items that are deliberately unwired.
+>
+> That covers the window, the shelf, Now reading, the Sort menu, the tab order,
+> the buttons, and the whole of Open file / Open folder including the grouping
+> rules. The rules themselves, with the measurements behind every one of them,
+> are in **`docs/Open file i Open folder.txt`** — read that before changing any
+> of this, because most of what looks like an obvious improvement was already
+> tried against a real disk of 1622 books and found to be wrong.
+>
+> Known and deliberately left: `LibraryScanner` still carries its unpacking
+> inside `ScanFolder`, so the safety of the import path rests on `ownsFolder`
+> defaulting to false rather than on the scan being read-only by construction.
+> The debt is written up in that same document.
+
 ### Now reading is its own place (2026-08-03)
 
 **"Now reading" is whatever the PLAYER has loaded, and nothing else.** The
