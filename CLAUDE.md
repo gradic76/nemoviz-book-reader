@@ -2265,6 +2265,44 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 
 ## 9. Library window
 
+### Now reading is its own place (2026-08-03)
+
+**Two lists, not one with a pinned row.** The book being read sits in its own
+one-row `ListView` above a **one-pixel rule**, and is **taken off the shelf
+entirely** — a book in two places at once is a book you can lose track of. Each
+list is its own stop for Tab, which is the point: "what am I reading" is answered
+by *arriving somewhere*, not by trusting that the first row of a long list is the
+right one. When nothing is loaded the list says **"No book loaded"** in a row of
+its own, because arriving at an empty box and being told nothing is what leaves a
+reader wondering whether something failed.
+
+**The library opens focused on Now reading** (Gordan) — the question people most
+often come here with is "carry on", and that is now answered by pressing Enter
+where focus already is. **The focus has to be POSTED**, not set in `OnShown`: the
+form's own activation puts focus on the first control in the tab order
+afterwards, and the search box won every time.
+
+**`GetSelectedBook` answers from whichever list has focus**, falling back to the
+shelf. Both lists keep their selection while focus is elsewhere — that is what
+shows a reader where they were — so "which one is selected" is not a question
+with one answer, and focus is what settles it. The Tab ring is hand-made in
+`ProcessCmdKey` and had to be told about the new stop: **Now reading → shelf →
+details → Refresh**. Left to the default order the shelf would have been skipped,
+because Now reading is the *last* child of its panel (docking put it at the top
+of the screen, not the top of the collection — and for the same reason the FILL
+control must be added to `Panel1` first).
+
+**Help is in the menu bar**, with `Help` (F1) and `About NBR`. Both are
+deliberately **unwired**: the manual does not exist yet and neither does the
+About box. F1 is claimed all the same, so nothing else can take it — the key must
+mean Help here exactly as it does in the player, one function with two ways in.
+
+**Load and Close, not OK and Cancel**, in both looks now — the new look had
+already renamed them and the classic had not. Their accessible names are the
+captions themselves: "Load the selected book" and "Close the library" said
+nothing the word did not, on every pass through the button row. Same for
+Refresh.
+
 `LibraryForm.cs`. Book shelf is a single-column **ListView (Details view), one
 flat sorted list — no group headers** (the earlier Now Reading / Reading /
 Unread / Read native groups were removed by request). Each row instead carries

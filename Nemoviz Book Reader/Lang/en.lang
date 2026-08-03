@@ -198,10 +198,13 @@ Filter.AllFiles=All files
 ; Library window
 Library.Title=Library
 ; The Library's own buttons. "OK" and "Cancel" said nothing about a shelf.
+; The accessible names are the captions, not a sentence about them: a reader
+; hears these on every pass through the button row, and "Load the selected book"
+; says nothing "Load" does not (Gordan, 2026-08-03).
 Library.Btn.Load=Load
-Library.Btn.Load.Accessible=Load the selected book
+Library.Btn.Load.Accessible=Load
 Library.Btn.Close=Close
-Library.Btn.Close.Accessible=Close the library
+Library.Btn.Close.Accessible=Close
 Menu.File=File
 Menu.File.OpenFile=Open file...
 Menu.File.OpenFolder=Open folder...
@@ -215,7 +218,12 @@ Menu.View.DateDesc=Date added descending
 Menu.View.FormatAsc=Format ascending
 Menu.View.FormatDesc=Format descending
 Menu.View.ActiveMark=(active)
+Menu.Help=Help
+Menu.Help.Help=Help
+Menu.Help.About=About NBR
 Library.List.Accessible=Book shelf
+Library.NowReading.Accessible=Now reading
+Library.NowReading.Empty=No book loaded
 Library.Search.Accessible=Search books
 Library.Filter.Accessible=Filter by status
 Shelf.Filter.All=All books
@@ -270,11 +278,9 @@ Details.Sound.Off=Off
 Details.Speed.Value={0}×
 Details.Speed.Wpm={0} WPM
 Btn.Refresh=Refresh
-Btn.Refresh.Accessible=Refresh library
+Btn.Refresh.Accessible=Refresh
 Btn.OK=OK
-Btn.OK.Accessible=Open selected book
 Btn.Cancel=Cancel
-Btn.Cancel.Accessible=Close library
 ; The message shell's own Yes/No — plain, the way the system's own MessageBox
 ; buttons announce themselves (no per-dialog override; the message text itself,
 ; read first, is what supplies the context).

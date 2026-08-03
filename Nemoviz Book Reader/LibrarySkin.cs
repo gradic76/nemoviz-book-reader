@@ -11,7 +11,8 @@ namespace Nemoviz_Book_Reader
         public TextBox Search;
         public ComboBox Filter;
         public SplitContainer Split;
-        public ListView Books, Details;
+        public ListView Books, Details, NowReading;
+        public Control NowReadingRule;
         public Button Refresh, Load, Close;
     }
 
@@ -111,7 +112,12 @@ namespace Nemoviz_Book_Reader
             p.Split.Panel2.Padding = new Padding(0, 0, DialogSkin.W - (CX + CW), 0);
 
             AsShelf(p.Books);
+            AsShelf(p.NowReading);
             AsShelf(p.Details);
+            // The hairline between the two lists, in the colour the stickers use
+            // for their edge — visible on the glass without becoming a bar.
+            if (p.NowReadingRule != null)
+                p.NowReadingRule.BackColor = DialogSkin.StickerEdge;
             // Less the panel's own 10-unit padding on each side and the vertical
             // scroll bar, or the columns add up to more than the list and it grows
             // a horizontal bar under itself.

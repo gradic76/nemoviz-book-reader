@@ -26,6 +26,9 @@ namespace Nemoviz_Book_Reader
         private ToolStripMenuItem menuViewDateDesc;
         private ToolStripMenuItem menuViewFormatAsc;
         private ToolStripMenuItem menuViewFormatDesc;
+        private ToolStripMenuItem menuHelp;
+        private ToolStripMenuItem menuHelpHelp;
+        private ToolStripMenuItem menuHelpAbout;
 
         private Panel panelSearch;
         private TextBox tbSearch;
@@ -39,6 +42,8 @@ namespace Nemoviz_Book_Reader
         // when arrowing into a new group.
         private ListView listBooks;
 
+        private ListView listNowReading;
+        private Panel nowReadingRule;
         private Panel panelDetails;
         private ListView listViewDetails;
 
@@ -111,9 +116,26 @@ namespace Nemoviz_Book_Reader
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            // Default tab order would land on the search box first;
-            // the shelf is the natural starting point.
-            listBooks.Focus();
+            // Default tab order would land on the search box first. The library
+            // opens on NOW READING (Gordan, 2026-08-03) — the question a reader
+            // most often comes here with is "carry on with what I was reading",
+            // and that is answered by pressing Enter where focus already is. The
+            // shelf is one Tab away for everything else.
+            //
+            // POSTED, not called. Focusing from inside OnShown does not stick:
+            // the form's own activation puts focus on the first control in the
+            // tab order afterwards, and the search box won every time. The same
+            // reason the file already posts the start-up action below.
+            BeginInvoke((Action)(() =>
+            {
+                if (listNowReading == null) { listBooks.Focus(); return; }
+                listNowReading.Focus();
+                if (listNowReading.Items.Count > 0)
+                {
+                    listNowReading.Items[0].Selected = true;
+                    listNowReading.Items[0].Focused = true;
+                }
+            }));
 
             // Posted, not called: the shelf must finish coming up before a modal
             // file dialog opens on top of it, or focus lands somewhere neither
@@ -150,6 +172,25 @@ namespace Nemoviz_Book_Reader
             if (listBooks.Focused && keyData == (Keys.Alt | Keys.Enter))
             {
                 ShowProperties();
+                return true;
+            }
+
+            // The ring is hand-made here, so a new stop has to be let into it:
+            // Now reading → shelf → details → Refresh, and back the same way.
+            // Left to the default order the shelf would have been skipped
+            // altogether, because Now reading is the LAST child of its panel
+            // (docking put it at the top of the screen, not the top of the list).
+            if (listNowReading != null && listNowReading.Focused)
+            {
+                if (keyData == Keys.Tab)
+                {
+                    listBooks.Focus();
+                    return true;
+                }
+            }
+            if (listBooks.Focused && keyData == (Keys.Tab | Keys.Shift) && listNowReading != null)
+            {
+                listNowReading.Focus();
                 return true;
             }
 
@@ -209,6 +250,8 @@ namespace Nemoviz_Book_Reader
                     Filter = cbFilter,
                     Split = splitContainer,
                     Books = listBooks,
+                    NowReading = listNowReading,
+                    NowReadingRule = nowReadingRule,
                     Details = listViewDetails,
                     BottomPanel = panelBottom,
                     Refresh = btnRefresh,
@@ -275,8 +318,26 @@ namespace Nemoviz_Book_Reader
             menuView.DropDownItems.Add(menuViewFormatAsc);
             menuView.DropDownItems.Add(menuViewFormatDesc);
 
+            // Help, standing where a Windows menu bar always ends. The two items
+            // are DELIBERATELY not wired yet (Gordan, 2026-08-03): the manual
+            // does not exist and neither does the About box, and a menu item that
+            // opens an empty window is worse than one that is plainly waiting.
+            //
+            // F1 is claimed all the same, and that is the point of putting them in
+            // now: the key must mean Help here exactly as it does in the player,
+            // so nothing else may take it in the meantime. One function, two ways
+            // in — the menu for the mouse, F1 from wherever the reader is.
+            menuHelp = new ToolStripMenuItem(Localization.T("Menu.Help"));
+            menuHelpHelp = new ToolStripMenuItem(Localization.T("Menu.Help.Help"));
+            menuHelpHelp.ShortcutKeys = Keys.F1;
+            menuHelpAbout = new ToolStripMenuItem(Localization.T("Menu.Help.About"));
+            menuHelp.DropDownItems.Add(menuHelpHelp);
+            menuHelp.DropDownItems.Add(new ToolStripSeparator());
+            menuHelp.DropDownItems.Add(menuHelpAbout);
+
             menuStrip.Items.Add(menuFile);
             menuStrip.Items.Add(menuView);
+            menuStrip.Items.Add(menuHelp);
 
             this.MainMenuStrip = menuStrip;
             this.Controls.Add(menuStrip);
@@ -359,6 +420,42 @@ namespace Nemoviz_Book_Reader
             splitContainer.Panel1MinSize = 200;
             splitContainer.Panel2MinSize = 200;
             splitContainer.TabStop = false;
+
+            // The book being read is its own place now (Gordan, 2026-08-03), not
+            // a bold row pinned to the top of the shelf. Two lists, a hairline
+            // between them, and each its own stop on the way round with Tab — so
+            // "what am I reading" is answered by arriving somewhere, not by
+            // trusting that the first row of a long list is the right one.
+            // What stands here does NOT also stand on the shelf.
+            listNowReading = new ListView();
+            listNowReading.Dock = DockStyle.Top;
+            listNowReading.View = View.Details;
+            listNowReading.HeaderStyle = ColumnHeaderStyle.None;
+            listNowReading.FullRowSelect = true;
+            listNowReading.MultiSelect = false;
+            listNowReading.HideSelection = false;
+            listNowReading.ShowGroups = false;
+            listNowReading.Scrollable = false;
+            listNowReading.Font = new Font("Segoe UI", 11);
+            listNowReading.AccessibleName = Localization.T("Library.NowReading.Accessible");
+            listNowReading.Columns.Add("", 320);
+            listNowReading.SelectedIndexChanged += ListBooks_SelectedIndexChanged;
+            listNowReading.DoubleClick += ListBooks_DoubleClick;
+            listNowReading.KeyDown += ListBooks_KeyDown;
+            listNowReading.SizeChanged += (s, e) =>
+            {
+                if (listNowReading.Columns.Count > 0)
+                    listNowReading.Columns[0].Width = Math.Max(50, listNowReading.ClientSize.Width - 4);
+            };
+
+            // A hairline, not a splitter: there is nothing to drag here, and a
+            // one-pixel panel cannot take focus, so it separates the two lists for
+            // the eye without adding anything for Tab to land on.
+            nowReadingRule = new Panel();
+            nowReadingRule.Dock = DockStyle.Top;
+            nowReadingRule.Height = 1;
+            nowReadingRule.BackColor = SystemColors.ControlDark;
+            nowReadingRule.TabStop = false;
 
             listBooks = new ListView();
             listBooks.Dock = DockStyle.Fill;
@@ -477,10 +574,21 @@ namespace Nemoviz_Book_Reader
             // MouseDown, so the click that selects a row lands first.
             listBooks.MouseUp += (s, e) =>
             {
-                if (e.Button == MouseButtons.Right) ShowBookMenu(new Point(e.X, e.Y));
+                if (e.Button == MouseButtons.Right) ShowBookMenu(listBooks, new Point(e.X, e.Y));
+            };
+            listNowReading.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Right) ShowBookMenu(listNowReading, new Point(e.X, e.Y));
             };
 
+            // The FILL one goes in first: WinForms docks in reverse order of the
+            // collection, so whatever is added last ends up outermost. Added the
+            // other way round, Now reading would have been laid out inside the
+            // shelf's leftovers and come out at the bottom.
             splitContainer.Panel1.Controls.Add(listBooks);
+            splitContainer.Panel1.Controls.Add(nowReadingRule);
+            splitContainer.Panel1.Controls.Add(listNowReading);
+            SizeNowReading();
 
             panelDetails = new Panel();
             panelDetails.Dock = DockStyle.Fill;
@@ -524,18 +632,22 @@ namespace Nemoviz_Book_Reader
             btnRefresh.AccessibleName = Localization.T("Btn.Refresh.Accessible");
             btnRefresh.Click += (s, e) => LoadBooks();
 
+            // Load and Close, not OK and Cancel — the same words the new look
+            // already used (LibrarySkin renamed them), so the two agree and a
+            // reader hears what the button DOES rather than which dialog
+            // convention it belongs to.
             btnOK = new Button();
-            btnOK.Text = Localization.T("Btn.OK");
+            btnOK.Text = Localization.T("Library.Btn.Load");
             btnOK.Size = new Size(100, 35);
             btnOK.Location = new Point(580, 12);
-            btnOK.AccessibleName = Localization.T("Btn.OK.Accessible");
+            btnOK.AccessibleName = Localization.T("Library.Btn.Load.Accessible");
             btnOK.Click += (s, e) => OpenSelectedBook();
 
             btnCancel = new Button();
-            btnCancel.Text = Localization.T("Btn.Cancel");
+            btnCancel.Text = Localization.T("Library.Btn.Close");
             btnCancel.Size = new Size(100, 35);
             btnCancel.Location = new Point(690, 12);
-            btnCancel.AccessibleName = Localization.T("Btn.Cancel.Accessible");
+            btnCancel.AccessibleName = Localization.T("Library.Btn.Close.Accessible");
             btnCancel.Click += (s, e) => this.Close();
 
             this.AcceptButton = btnOK;
@@ -589,19 +701,27 @@ namespace Nemoviz_Book_Reader
                 if (include) list.Add(b);
             }
 
-            // Order follows the sort menu; the Now-reading book is then pinned
-            // to the very top (it can appear under All / Reading / Favorites).
+            // Order follows the sort menu. The book being read is then TAKEN OUT
+            // of the shelf entirely rather than pinned to the top of it: it has
+            // its own list above the rule, and a book in two places at once is a
+            // book you can lose track of.
             list.Sort(GetComparer());
+            BookData nowReading = null;
             for (int i = 0; i < list.Count; i++)
             {
                 if (IsNowReading(list[i]))
                 {
-                    BookData nr = list[i];
+                    nowReading = list[i];
                     list.RemoveAt(i);
-                    list.Insert(0, nr);
                     break;
                 }
             }
+            // Off the shelf, but still the answer to "what am I reading" even when
+            // the search box or the filter would have hidden it.
+            if (nowReading == null)
+                foreach (BookData b in books)
+                    if (IsNowReading(b)) { nowReading = b; break; }
+            FillNowReading(nowReading);
 
             listBooks.BeginUpdate();
             listBooks.Items.Clear();
@@ -757,9 +877,55 @@ namespace Nemoviz_Book_Reader
             return p;
         }
 
-        /// <summary>Returns the selected book, or null if nothing is selected.</summary>
+        /// <summary>Puts the book being read in its own list, or says plainly
+        /// that there is none. The empty row is a ROW rather than a blank box:
+        /// arriving at an empty list and being told nothing is the state that
+        /// leaves a reader wondering whether something failed to load.</summary>
+        private void FillNowReading(BookData b)
+        {
+            if (listNowReading == null) return;
+            listNowReading.BeginUpdate();
+            listNowReading.Items.Clear();
+            if (b != null)
+            {
+                listNowReading.SmallImageList = statusIcons;
+                listNowReading.Items.Add(BuildShelfItem(b));
+            }
+            else
+            {
+                listNowReading.SmallImageList = null;
+                var empty = new ListViewItem(Localization.T("Library.NowReading.Empty"));
+                empty.Tag = null;
+                empty.ForeColor = SystemColors.GrayText;
+                listNowReading.Items.Add(empty);
+            }
+            listNowReading.EndUpdate();
+            SizeNowReading();
+        }
+
+        /// <summary>One row tall, measured rather than guessed — the row height
+        /// follows the font, and this list must not grow a scroll bar or eat the
+        /// shelf's height.</summary>
+        private void SizeNowReading()
+        {
+            if (listNowReading == null) return;
+            int row = listNowReading.Items.Count > 0
+                ? listNowReading.Items[0].Bounds.Height : 0;
+            if (row <= 0) row = listNowReading.Font.Height + 8;
+            listNowReading.Height = row + 6;
+        }
+
+        /// <summary>Returns the selected book, or null if nothing is selected.
+        ///
+        /// <para>Two lists can each hold a selection, and they both keep it while
+        /// focus is elsewhere (that is what shows the reader where they were). So
+        /// the one that ANSWERS is the one with focus; failing that, the shelf,
+        /// which is where the work is done.</para></summary>
         private BookData GetSelectedBook()
         {
+            if (listNowReading != null && listNowReading.Focused &&
+                listNowReading.SelectedItems.Count > 0)
+                return listNowReading.SelectedItems[0].Tag as BookData;
             if (listBooks == null || listBooks.SelectedItems.Count == 0)
                 return null;
             return listBooks.SelectedItems[0].Tag as BookData;
@@ -1048,8 +1214,11 @@ namespace Nemoviz_Book_Reader
                 // At the selected row, not at the corner: a menu that opens where
                 // the selection is, is where a sighted user expects it, and it
                 // costs a keyboard user nothing.
-                ListViewItem sel = listBooks.SelectedItems.Count > 0 ? listBooks.SelectedItems[0] : null;
-                ShowBookMenu(sel != null
+                // Whichever list the key came from — the menu acts on the book
+                // that answers, so it must open beside that book.
+                ListView from = sender as ListView ?? listBooks;
+                ListViewItem sel = from.SelectedItems.Count > 0 ? from.SelectedItems[0] : null;
+                ShowBookMenu(from, sel != null
                     ? new Point(sel.Bounds.Left + 20, sel.Bounds.Bottom)
                     : new Point(0, 0));
                 e.Handled = true;
@@ -1059,10 +1228,10 @@ namespace Nemoviz_Book_Reader
         /// <summary>Opens the shelf's menu, or does nothing when there is no book
         /// to act on. A ContextMenu cannot cancel its own Popup the way a strip
         /// could, so the empty shelf is caught here instead.</summary>
-        private void ShowBookMenu(Point at)
+        private void ShowBookMenu(Control over, Point at)
         {
             if (bookMenu == null || GetSelectedBook() == null) return;
-            bookMenu.Show(listBooks, at);
+            bookMenu.Show(over ?? listBooks, at);
         }
 
         // ──────────────────────────────────────────────
