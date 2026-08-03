@@ -2286,7 +2286,10 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 >
 > That covers the window, the shelf, Now reading, the Sort menu, the tab order,
 > the buttons, and the whole of Open file / Open folder including the grouping
-> rules. The rules themselves, with the measurements behind every one of them,
+> rules. **Both Help items are wired** (2026-08-03, "da ne ostaju repovi"):
+> `Help`/F1 opens `Help\index.html`, a page that says the manual is coming, and
+> `About NBR` opens the window it will be, empty and saying so. What is missing
+> in both is the TEXT, not the plumbing — writing it changes no code. The rules themselves, with the measurements behind every one of them,
 > are in **`docs/Open file i Open folder.txt`** — read that before changing any
 > of this, because most of what looks like an obvious improvement was already
 > tried against a real disk of 1622 books and found to be wrong.

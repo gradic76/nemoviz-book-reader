@@ -384,19 +384,22 @@ namespace Nemoviz_Book_Reader
             menuSort.DropDownItems.Add(menuSortAsc);
             menuSort.DropDownItems.Add(menuSortDesc);
 
-            // Help, standing where a Windows menu bar always ends. The two items
-            // are DELIBERATELY not wired yet (Gordan, 2026-08-03): the manual
-            // does not exist and neither does the About box, and a menu item that
-            // opens an empty window is worse than one that is plainly waiting.
+            // Help, standing where a Windows menu bar always ends, and wired —
+            // both items lead somewhere real even though neither has its content
+            // yet (Gordan, 2026-08-03: "da ne ostaju repovi"). The manual is a
+            // page that says it is coming; About is the window it will be, empty
+            // and waiting for its words. A key that leads to a short page is
+            // fine; a key that does nothing is the failure people notice.
             //
-            // F1 is claimed all the same, and that is the point of putting them in
-            // now: the key must mean Help here exactly as it does in the player,
-            // so nothing else may take it in the meantime. One function, two ways
-            // in — the menu for the mouse, F1 from wherever the reader is.
+            // F1 means Help here exactly as it does in the player: one function,
+            // two ways in — the menu for the mouse, the key from wherever the
+            // reader is.
             menuHelp = new ToolStripMenuItem(Localization.T("Menu.Help"));
             menuHelpHelp = new ToolStripMenuItem(Localization.T("Menu.Help.Help"));
             menuHelpHelp.ShortcutKeys = Keys.F1;
+            menuHelpHelp.Click += (s, e) => HintSystem.OpenManual(this);
             menuHelpAbout = new ToolStripMenuItem(Localization.T("Menu.Help.About"));
+            menuHelpAbout.Click += (s, e) => HintSystem.ShowAbout(this);
             menuHelp.DropDownItems.Add(menuHelpHelp);
             menuHelp.DropDownItems.Add(new ToolStripSeparator());
             menuHelp.DropDownItems.Add(menuHelpAbout);

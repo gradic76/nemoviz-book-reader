@@ -136,6 +136,21 @@ namespace Nemoviz_Book_Reader
                                  Localization.T("Dialog.Help.Title"));
         }
 
+        /// <summary>About NBR — the window it will be, standing empty until
+        /// somebody writes what goes in it (Gordan, 2026-08-03). It is wired now
+        /// rather than left dead so the menu item leads somewhere: what is
+        /// missing is the text, and that is obvious the moment it opens.
+        ///
+        /// <para>The same shape as every other page of words in the app —
+        /// <see cref="TextHelpForm"/>, read-only and tabbable, which is what a
+        /// screen reader can walk line by line.</para></summary>
+        public static void ShowAbout(IWin32Window owner)
+        {
+            using (var f = new TextHelpForm(Localization.T("Dialog.About.Title"),
+                                            Localization.T("Dialog.About.Text"), true))
+                f.ShowDialog(owner);
+        }
+
         private static void Show(Control anchor, Control returnTo)
         {
             string key;

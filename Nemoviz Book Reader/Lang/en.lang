@@ -181,6 +181,10 @@ Player.Position.Accessible=Position {0} percent
 Dialog.Settings.Title=Settings
 Dialog.Help.ComingSoon=Help – coming soon.
 Dialog.Help.Title=Help
+; The About box, standing empty until its words are written. It says that
+; plainly rather than showing a blank window: what is missing is the text.
+Dialog.About.Title=About NBR
+Dialog.About.Text=Nemoviz Book Reader\n\nThis window is waiting for its text.\n\nWhat belongs here — the version, who made it, the licences of the parts NBR is built from, and how to get in touch — has not been written yet. The window is wired up so the menu item leads somewhere, and so that whoever writes it has a place to put it.
 Dialog.Timer.Title=Sleep Timer
 Dialog.GoTo.Title=Go To
 Dialog.ManageBookmarks.Title=Manage Bookmarks
