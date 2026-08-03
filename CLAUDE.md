@@ -567,10 +567,22 @@ were).
   does by recursing to the media folder. The **source archive is left
   untouched** (only the background-scan case deletes it). Failures surface as
   an error dialog; a cancelled password prompt just removes the empty folder.
-- **"Open folder" refuses archives**: `ImportFolder` shows an info dialog
-  (`Dialog.ArchiveInFolder.*`) pointing the user to "Open file" when the
-  chosen folder holds archive/volume files (`ContainsArchiveFiles`) — the
-  folder path for multi-volume archives is unreliable.
+- **"Open folder" imports archives now (2026-08-03)**, one book each, through
+  the same `ImportFileCore` Open file uses — into the library, source left
+  alone. It used to refuse the whole folder, and **the stated reason was
+  wrong**: nothing about multi-volume paths is unreliable, and the background
+  scan proves the recognition works on every start. What the refusal was
+  really protecting is one line inside the scanner — `ExtractAndScan` unpacks
+  an archive **into the folder being scanned** and then **deletes every volume
+  of it**. Correct for library-owned space; destruction of the user's own disk
+  for a folder they picked to import from. Hence `LibraryScanner`'s new
+  `extractArchives` flag, false on that path. A continuation volume whose entry
+  point is missing is reported **by name** in the skipped list, which is the
+  one thing the blanket refusal was catching.
+  **The two traps, both got backwards once in conversation:** old RAR numbers
+  its continuations from `.r00` because the first volume already used `.rar`,
+  and a spanned zip is opened at its `.zip` while `.z01` is a part. Entry
+  points are `.zip` / `.7z` / `.rar` / `.part1.rar` / `.001`.
 - `ArchivePasswordPrompt.cs` is the accessible password modal. Runtime-verified
   against real samples (Session 11): single & multi-volume, with/without
   password, all three formats — RAR multi-volume needed the streaming reader.

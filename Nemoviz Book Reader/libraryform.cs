@@ -2081,16 +2081,19 @@ namespace Nemoviz_Book_Reader
 
         private void ImportFolder(string folderPath)
         {
-            // Archives (especially multi-volume) are unreliable through folder
-            // import — steer the user to Open File, which handles them properly.
-            if (LibraryScanner.ContainsArchiveFiles(folderPath))
-            {
-                MessageForm.ShowInfo(this,
-                    Localization.T("Dialog.ArchiveInFolder.Message"),
-                    Localization.T("Dialog.ArchiveInFolder.Title"));
-                return;
-            }
-
+            // Archives used to make this refuse the whole folder. They are
+            // imported now, one book each, through exactly the path Open file
+            // uses — into the library, with the source left alone.
+            //
+            // The old refusal was not about multi-volume paths, whatever its
+            // comment said: the recognition (IsExtractableArchive picks the
+            // entry point, IsVolumeContinuation skips the rest, GetFileParts
+            // gathers the set) has always worked, and the background scan uses
+            // it on every start. What it was really protecting against is one
+            // line further down — LibraryScanner unpacks an archive INTO the
+            // folder it is scanning and then deletes every volume of it. Right
+            // for library-owned space, and destruction of the user's own disk
+            // here. Hence the extractArchives:false below.
             try
             {
                 // A DAISY book (ncc.html / OPF+NCX anywhere under the folder) is
@@ -2102,10 +2105,15 @@ namespace Nemoviz_Book_Reader
                 //    ebooks is a COLLECTION, so each file is its own book;
                 //  • loose AUDIO files — a folder of audio is ONE book (its parts).
                 var textFiles = EnumerateTextBookFiles(folderPath);
-                var audioBooks = new LibraryScanner(folderPath, false).Scan()
+                // extractArchives:false — see the note above. Without it this
+                // call would unpack the user's archives into their own folder
+                // and delete them.
+                var audioBooks = new LibraryScanner(folderPath, false, false).Scan()
                     .Where(b => FolderHasAudio(b.FolderPath)).ToList();
+                List<string> archives, orphanVolumes;
+                CollectArchives(folderPath, out archives, out orphanVolumes);
 
-                int total = textFiles.Count + audioBooks.Count;
+                int total = textFiles.Count + audioBooks.Count + archives.Count;
                 if (total == 0)
                 {
                     MessageForm.ShowInfo(this, Localization.T("Dialog.NoBooksFound.Message"), Localization.T("Dialog.NoBooksFound.Title"));
@@ -2124,6 +2132,25 @@ namespace Nemoviz_Book_Reader
 
                 int imported = 0;
                 var skipped = new List<string>();
+
+                // A continuation volume whose first part is not there. Nothing
+                // can start it, so the set would simply never appear — and the
+                // reader would be left with a book missing and no word about it.
+                // This is the one thing the blanket refusal was catching, and it
+                // is worth keeping as a NAMED line rather than as a wall.
+                foreach (string v in orphanVolumes)
+                    skipped.Add(System.IO.Path.GetFileName(v) + " — " +
+                                Localization.T("Dialog.Skipped.MissingFirstVolume"));
+
+                // Each archive is its own book, entry points only — the volumes
+                // behind them are pulled in by SharpCompress from the first part.
+                foreach (string a in archives)
+                {
+                    string why;
+                    if (ImportFileCore(a, true, out why)) imported++;
+                    else skipped.Add(System.IO.Path.GetFileName(a) +
+                                     (string.IsNullOrEmpty(why) ? "" : " — " + why));
+                }
 
                 // Each text-book file → its own book (quiet, no per-file dialogs).
                 // A file that can't be imported (DRM-protected, unreadable) is
@@ -2181,6 +2208,57 @@ namespace Nemoviz_Book_Reader
             {
                 MessageForm.ShowInfo(this, Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
             }
+        }
+
+        /// <summary>Every archive in the folder that is a starting point, and
+        /// separately every continuation volume that has no starting point to be
+        /// pulled in by.
+        ///
+        /// <para>The distinction is the whole of it, and it is easy to get
+        /// backwards. <b>Starting points</b> are a plain <c>.zip</c> / <c>.7z</c>
+        /// / <c>.rar</c>, a <c>.part1.rar</c>, and a <c>.001</c>.
+        /// <b>Continuations</b> are <c>.part2.rar</c> upwards, <c>.r00</c>
+        /// upwards, <c>.z01</c> upwards and <c>.002</c> upwards — note that the
+        /// old RAR scheme numbers its continuations from <c>r00</c> because the
+        /// first volume has already used the name <c>.rar</c>, and that a spanned
+        /// zip is opened at its <c>.zip</c> while <c>.z01</c> is a part.</para></summary>
+        private static void CollectArchives(string folder, out List<string> entryPoints,
+                                            out List<string> orphanVolumes)
+        {
+            entryPoints = new List<string>();
+            orphanVolumes = new List<string>();
+            CollectArchives(folder, entryPoints, orphanVolumes, 0);
+        }
+
+        private static void CollectArchives(string folder, List<string> entryPoints,
+                                            List<string> orphanVolumes, int depth)
+        {
+            if (depth > 4) return;
+            try
+            {
+                string[] files = System.IO.Directory.GetFiles(folder);
+                var stems = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (string f in files)
+                    if (LibraryScanner.IsExtractableArchive(System.IO.Path.GetFileName(f)))
+                    {
+                        entryPoints.Add(f);
+                        stems.Add(LibraryScanner.BaseArchiveName(f));
+                    }
+                foreach (string f in files)
+                {
+                    string fn = System.IO.Path.GetFileName(f);
+                    if (!LibraryScanner.IsVolumeContinuation(fn)) continue;
+                    // Only the FIRST orphan of a set is worth naming; the rest
+                    // say the same thing about the same missing file.
+                    string stem = LibraryScanner.BaseArchiveName(f);
+                    if (stems.Contains(stem)) continue;
+                    stems.Add(stem);
+                    orphanVolumes.Add(f);
+                }
+                foreach (string d in System.IO.Directory.GetDirectories(folder))
+                    CollectArchives(d, entryPoints, orphanVolumes, depth + 1);
+            }
+            catch { }
         }
 
         /// <summary>A free library folder path for a book, disambiguating a

@@ -29,11 +29,23 @@ namespace Nemoviz_Book_Reader
         private string libraryPath;
         private bool createBookIni;
 
-        public LibraryScanner(string libraryPath, bool createBookIni = false)
+        /// <param name="extractArchives">Whether an archive found while scanning
+        /// may be unpacked in place and its volumes then DELETED. True is right
+        /// for library-owned space — the archive is already ours and there is
+        /// nothing left to keep. It is badly wrong for a folder the user chose
+        /// for import: that folder is theirs, and unpacking into it and deleting
+        /// the originals would be destroying the source. That hazard is the real
+        /// reason "Open folder" used to refuse any folder holding an archive; the
+        /// comment there blamed multi-volume paths, which was not it.</param>
+        public LibraryScanner(string libraryPath, bool createBookIni = false,
+                              bool extractArchives = true)
         {
             this.libraryPath = libraryPath;
             this.createBookIni = createBookIni;
+            this.extractArchives = extractArchives;
         }
+
+        private readonly bool extractArchives = true;
 
         public List<BookData> Scan()
         {
@@ -60,6 +72,9 @@ namespace Nemoviz_Book_Reader
                 if (IsVolumeContinuation(fn)) continue;
                 if (IsExtractableArchive(fn))
                 {
+                    // Not ours to unpack or delete — the caller is looking at a
+                    // folder the user picked, and imports its archives itself.
+                    if (!extractArchives) continue;
                     // Cap archive-in-archive recursion (see MaxArchiveDepth).
                     if (archiveDepth >= MaxArchiveDepth) continue;
                     ExtractAndScan(file, folderPath, books, archiveDepth);

@@ -403,6 +403,7 @@ Dialog.ImportFolderSuccess.SkippedList=These did not go in:
 ; Reasons, kept short: they stand after a file name in that list.
 Dialog.Skipped.Drm=protected
 Dialog.Skipped.Cancelled=cancelled
+Dialog.Skipped.MissingFirstVolume=the first part of this set is missing
 Dialog.ReimportExisting.Title=Already in the library
 Dialog.ReimportExisting.Message={0} is already on the shelf. Importing it again refreshes what is in the book folder. Your place in the book and your bookmarks are kept — but if the file has changed since last time, the words will have moved and your place will no longer be where you left it. Import it again?
 Dialog.ImportFolderSuccess.Title=Add folder
