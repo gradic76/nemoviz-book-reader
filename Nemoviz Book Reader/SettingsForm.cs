@@ -38,6 +38,30 @@ namespace Nemoviz_Book_Reader
         private CheckBox chkUseMultimediaKeysGlobally;
         private readonly List<TextBox> hints = new List<TextBox>();
 
+        /// <summary>Controls that have an explanation but no GROUP to hang it on.
+        /// General and Misc are laid out as loose controls, so their help keys
+        /// cannot be attached the way a group's is, and for a long time they
+        /// simply were not attached at all: the texts sat in en.lang and no
+        /// <c>?</c> ever appeared beside them (Gordan noticed while writing the
+        /// Help, 2026-08-03).
+        ///
+        /// <para>Recorded here as the pages are built, because this is the only
+        /// place the controls are in scope by name; the new look walks the list
+        /// and hangs a key on each. Anchor, the text's key, and what the help is
+        /// ABOUT — the last because a caption written as an instruction ("Use
+        /// embedded metadata") makes a poor name for the help behind it.</para></summary>
+        internal sealed class LooseHint
+        {
+            public Control Anchor; public string BodyKey; public string Subject;
+        }
+        internal readonly List<LooseHint> LooseHints = new List<LooseHint>();
+
+        private void NoteHint(Control anchor, string bodyKey, string subject)
+        {
+            if (anchor == null) return;
+            LooseHints.Add(new LooseHint { Anchor = anchor, BodyKey = bodyKey, Subject = subject });
+        }
+
         // Audio Books tab — use embedded metadata for title/author.
         private CheckBox chkUseMetadata;
 
@@ -293,6 +317,20 @@ namespace Nemoviz_Book_Reader
             chkUseMetadata.Checked = appSettings.UseMetadata;
             page.Controls.Add(chkUseMetadata);
             page.Controls.Add(MakeHint("Settings.General.UseMetadata.Hint", 28, 332, 452, 44, 10));
+
+            // The same five explanations the classic look shows in boxes, so the
+            // new look can hang a ? on each. Subjects are nouns, not the
+            // instructions the captions are.
+            NoteHint(chkUseMultimediaKeys, "Settings.General.UseMultimediaKeys.Hint",
+                     Localization.T("Settings.General.UseMultimediaKeys"));
+            NoteHint(chkUseMultimediaKeysGlobally, "Settings.General.UseMultimediaKeysGlobally.Hint",
+                     Localization.T("Settings.General.UseMultimediaKeysGlobally"));
+            NoteHint(tbLibraryLocation, "Settings.General.LibraryLocation.Hint",
+                     Localization.T("Settings.General.LibraryLocation").TrimEnd(':'));
+            NoteHint(cmbLanguage, "Settings.General.Language.Hint",
+                     Localization.T("Settings.General.Language").TrimEnd(':'));
+            NoteHint(chkUseMetadata, "Settings.General.UseMetadata.Hint",
+                     Localization.T("Settings.General.UseMetadata"));
 
             UpdateMediaKeyEnabled();
             return page;
@@ -1059,6 +1097,8 @@ namespace Nemoviz_Book_Reader
                 string.Equals(appSettings.UiTheme, UiTheme.NewId, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
             page.Controls.Add(cmbLook);
             page.Controls.Add(MakeHint("Settings.Misc.Look.Hint", 10, 52, 480, 46, 1));
+            NoteHint(cmbLook, "Settings.Misc.Look.Hint",
+                     Localization.T("Settings.Misc.Look").TrimEnd(':'));
 
             page.Controls.Add(BuildPlaceholder(Localization.T("Settings.WorkInProgress"),
                 new Point(10, 110), new Size(480, 30)));

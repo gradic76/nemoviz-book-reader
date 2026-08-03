@@ -80,6 +80,7 @@ namespace Nemoviz_Book_Reader
 
             HintSystem.Clear();
             foreach (TabPage page in tabs.TabPages) LayOutPage(page, pw, ph);
+            AttachLooseHints(f as SettingsForm, pw);
 
             DialogSkin.AsKey(p.OK, new Rectangle(596, DialogSkin.ButtonsY,
                 DialogSkin.ButtonW, DialogSkin.ButtonH));
@@ -207,6 +208,31 @@ namespace Nemoviz_Book_Reader
             }
             if (over <= 0) return;
             foreach (Button b in buttons) b.Left = Math.Max(14, b.Left - over);
+        }
+
+        /// <summary>Hangs a <c>?</c> on the pages whose controls stand loose —
+        /// General and Misc, which have no groups to carry one. Their
+        /// explanations were written and then never appeared: every hint text in
+        /// en.lang existed, and six of the ten had nothing to open them (Gordan
+        /// found it while writing the Help, 2026-08-03).
+        ///
+        /// <para>The keys line up in a column at the right-hand edge rather than
+        /// beside each control, because the controls are of every width — a
+        /// checkbox, a text box with a Browse button, a combo — and keys chasing
+        /// their right edges would read as scatter. Each one is still ABOUT its
+        /// own row: it sits at that row's height and its name says which setting
+        /// it explains.</para></summary>
+        private static void AttachLooseHints(SettingsForm f, int pw)
+        {
+            if (f == null) return;
+            foreach (SettingsForm.LooseHint h in f.LooseHints)
+            {
+                Control a = h.Anchor;
+                if (a == null || a.Parent == null) continue;
+                int y = a.Top + Math.Max(0, (a.Height - 22) / 2);
+                HintSystem.Attach(a, h.BodyKey, a.Parent,
+                                  new Rectangle(pw - Margin - 22, y, 22, 22), h.Subject);
+            }
         }
 
         /// <summary>The help text behind each group's <c>?</c>, in the order the

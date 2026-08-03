@@ -2958,6 +2958,19 @@ no Apply; Settings saves itself, so it does).
   space is most of why the pages fit. **Where no help text was written, no `?`
   appears** — an unwritten key renders as the key, and "Hint.Settings.General.0"
   is worse than no button.
+- **Loose controls get one too, since 2026-08-03.** General and Misc have no
+  groups, so their five and one explanations sat written in `en.lang` with
+  nothing to open them — **six of the ten**, found by Gordan while writing the
+  Help. `SettingsForm` records each loose control's key as the page is built
+  (`LooseHints`, the only place they are in scope by name) and
+  `SettingsSkin.AttachLooseHints` hangs the key. They line up in a **column at
+  the right edge** rather than chasing each control's right edge: a checkbox, a
+  text box with a Browse button and a combo are of every width, and keys
+  following them would read as scatter. Audited: nine keys for nine texts, all
+  tabbable and all visible on their own page.
+  **A note for the next audit:** WinForms reports `Visible = false` for a control
+  on a tab page that is not the selected one. It reads exactly like a missing
+  button. Select each tab before believing the dump.
 - **No info column** (Settings has no book to describe), which is the width that
   fixed Text Books: it did not fit 640 in one column and used to scroll. Groups
   fall to **two columns** when one will not fit, balanced by height and keeping
