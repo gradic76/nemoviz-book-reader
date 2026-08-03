@@ -217,6 +217,51 @@ namespace Nemoviz_Book_Reader
             foreach (Button b in buttons) b.Left = Math.Max(14, b.Left - over);
         }
 
+        /// <summary>Makes a group's contents fit the width the grid gave it.
+        ///
+        /// <para>They are built for a 500-wide group on a 560-wide dialog and the
+        /// grid puts them in 293, so anything sized in absolute units hangs over
+        /// the edge. The check boxes did — 470 wide in a 293 group, saved from
+        /// looking wrong only by the group clipping them — and the Library
+        /// location was worse: a 340-wide path box with Browse dragged back
+        /// underneath it, so the button was there, drawn over, and to a reader
+        /// with eyes simply MISSING. Gordan's screenshot is what showed it; the
+        /// numbers then said exactly why.</para>
+        ///
+        /// <para>A text box with a button beside it is treated as the pair it is:
+        /// the button takes the right-hand end, the box takes the rest. Anything
+        /// else that overhangs is simply narrowed.</para></summary>
+        private static void FitContents(GroupBox g)
+        {
+            int inner = g.Width - 14;
+
+            Button pairButton = null;
+            TextBox pairBox = null;
+            foreach (Control c in g.Controls)
+            {
+                Button b = c as Button;
+                if (b != null && !HintSystem.IsHelpKey(b)) pairButton = b;
+                TextBox t = c as TextBox;
+                if (t != null) pairBox = t;
+            }
+
+            if (pairButton != null && pairBox != null)
+            {
+                pairButton.Left = Math.Max(pairBox.Left + 60, inner - pairButton.Width);
+                pairBox.Width = Math.Max(60, pairButton.Left - 8 - pairBox.Left);
+                return;
+            }
+
+            foreach (Control c in g.Controls)
+            {
+                Button b = c as Button;
+                if (b != null && HintSystem.IsHelpKey(b)) continue;   // pinned to its corner
+                if (c.Right <= inner) continue;
+                if (c is Button) c.Left = Math.Max(14, inner - c.Width);
+                else c.Width = Math.Max(40, inner - c.Left);
+            }
+        }
+
         /// <summary>Groups laid left to right, <paramref name="across"/> to a
         /// row, wrapping. Every group in a row is given the height of the tallest
         /// in it, so the rows line up and a short group does not leave a step in
@@ -243,7 +288,7 @@ namespace Nemoviz_Book_Reader
                 for (int k = i; k < groups.Count && k < i + across; k++)
                     column = Math.Max(column, PropertiesSkin.LabelColumn(groups[k]));
                 for (int k = i; k < groups.Count && k < i + across; k++)
-                { PropertiesSkin.PlaceValues(groups[k], column); PullButtonsIn(groups[k]); }
+                { PropertiesSkin.PlaceValues(groups[k], column); FitContents(groups[k]); }
 
                 y += rowH + Margin;
             }

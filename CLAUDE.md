@@ -1373,10 +1373,10 @@ which voice they use. NBR supplies the tool, the user supplies the content.
 > theme has to read `HKCU\…\Themes\Personalize\AppsUseLightTheme` and carry its
 > own palette.
 >
-> **Left to look at with eyes**: under `new` + high contrast a group reports a
-> white `BackColor` against pale text. The stickers are painted by the canvas
-> rather than filled from `BackColor`, so that may mean nothing on screen — but
-> it has not been seen, only read.
+> **Seen, and the worry was unfounded**: under `new` + high contrast a group
+> reports a white `BackColor` against pale text, but the stickers are painted by
+> the canvas and never filled from it. Gordan's screenshot shows dark groups with
+> readable text. Reading a property is not the same as seeing a pixel.
 
 
 `UiTheme.cs`. While the new design is being worked out, the app can be built

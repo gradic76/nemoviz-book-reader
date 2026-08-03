@@ -210,6 +210,28 @@ namespace Nemoviz_Book_Reader
         // Tooltips — mouse-hover hints with the keyboard shortcuts
         private ToolTip toolTip;
 
+        /// <summary>Takes down whatever tip is showing. A WinForms tooltip is a
+        /// topmost window of its own: it does not notice that a modal dialog has
+        /// opened over its owner, and simply stays there — on top of a window it
+        /// has nothing to say about. Gordan's screenshot of Settings has a stray
+        /// "Alt+Enter" floating in the middle of the page, which is the
+        /// Properties button's tip, left behind by the mouse.</summary>
+        private void HideTooltip()
+        {
+            try { if (toolTip != null) toolTip.Hide(this); } catch { }
+        }
+
+        /// <summary>Every dialog in NBR is modal and every one of them takes the
+        /// activation away from here, so this is the one place that has to know —
+        /// rather than a call before each of the five <c>ShowDialog</c>s, and a
+        /// sixth forgotten later. It is also right for plain Alt+Tab: a tip left
+        /// hanging over another application is nobody's idea of helpful.</summary>
+        protected override void OnDeactivate(EventArgs e)
+        {
+            base.OnDeactivate(e);
+            HideTooltip();
+        }
+
         // Off-screen labels for screen reader announcements
         private Label lblAnnounceVolume;
         private Label lblAnnounceProgress;
