@@ -1677,6 +1677,67 @@ output: a name or foreign word met in braille (which gives letters, not sound), 
 a word a low-vision reader cannot resolve. Mouse click in the visual display; a
 key otherwise.
 
+### The governing requirement: one place, three channels (Gordan, 2026-08-04)
+
+> *"Ono što treba postići jest da se tekst koji se trenutno izgovara TTS-om,
+> tekst koji je highlightan na ekranu i tekst koji se vidi na brajičnom retku
+> poklapaju. Poanta cijele priče je da korisnik čuje, vidi i pipa istu stvar."*
+
+If the TTS says **"Ana voli Milovana"**, that is what is highlighted and that is
+what stands on the display. This is the requirement everything in this chapter
+serves; a braille transport that cannot hold it is not worth having.
+
+**Already true, and built deliberately — do not "improve" it without reading
+why.** All three hang off ONE position. `UpdateReadingSurface` works out `start`
+(from the TTS for a text book, from the audio clock through the sync map for a
+hybrid) and everything follows from it: caret, highlight, scroll, braille. There
+is no second source that could drift. And **the look-ahead does not move the
+position**: `index` advances only in `TtsReader.OnCompleted`, i.e. when the
+engine reports the previous sentence *finished*; `PreRender` of sentence n+1 is
+a hint to the backend, not an advance. `PositionChanged` is raised AFTER the
+utterance is handed over, so it means "this sentence has started". Those two
+orderings are what closed the stolen sentence-beginnings and the queue growing
+behind the narrator.
+
+**Three gaps, found by reading the code on 2026-08-04:**
+
+1. **High contrast had the eye switched off** — the highlight was skipped
+   entirely rather than recoloured, so a high-contrast reader had two channels
+   of three and nothing said so. Gordan runs high contrast. **Fixed** (5fe7713):
+   the theme's own `Highlight`/`HighlightText` pair is painted there.
+2. **Braille and the eye need not show the same SPAN, and this is structural.**
+   The caret is placed at the sentence's START, so a focused surface is brailled
+   by the reader as the LINE containing that start — while an unfocused surface
+   gets the whole sentence as a `brailleMessage`. Crossed with the two highlight
+   modes that is four combinations, of which only two agree:
+
+   | | highlight = line | highlight = sentence |
+   |---|---|---|
+   | surface focused (reader brailles the caret) | agrees | disagrees |
+   | not focused (`brailleMessage`) | disagrees | agrees |
+
+   A sentence spanning two display lines gives the finger only the first.
+3. **The grain is a whole sentence.** Nothing moves inside a long one. That is
+   not drift — all three are equally coarse — but word-level travel would need
+   SAPI's word-boundary event, which is wired nowhere today.
+
+**OPEN, and explicitly NOT decided (Gordan, 2026-08-04): does braille follow the
+highlight mode, or does the highlight follow braille?** He declined to choose
+from the desk — *"to se isto mora provjeriti u praksi. Treba naći model koji će
+staviti sve u sync."* So the model is to be found by trying it on a display, not
+argued out here. The proposal on the table was that the SENTENCE become the
+shared unit of all three and "line" stay a purely visual preference; it is a
+proposal, not a decision. Whatever is chosen, **the deep test below decides
+it**, and it must be run on NVDA and JAWS separately.
+
+**Offered and not yet built:** a probe that MEASURES the sync instead of feeling
+it — logging, per step, the spoken text, the text actually under
+`markStart`/`markLength`, and the text pushed to braille, and asserting the
+three are equal. It covers the two channels NBR fully controls, needs no display,
+and turns "we hope it is in sync" into a number. What it cannot cover is whether
+what the reader PUTS on the display matches what was sent — that stays with the
+deep test.
+
 ### The braille transport — the hard constraint
 
 **No display drivers.** Too many vendors, series and models; the binary would
