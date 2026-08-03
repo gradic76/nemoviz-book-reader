@@ -20,8 +20,19 @@ namespace Nemoviz_Book_Reader
               // Prepared ahead of samples — mpv decodes these; duration falls
               // back to mpv where TagLib has no reader (ac3/amr/weba).
               ".aiff", ".aif", ".ac3", ".amr", ".weba", ".webm", ".au", ".voc" };
+        /// <summary>What counts as a text book when a FOLDER is being judged —
+        /// it decides whether a folder in the library is a book at all, and
+        /// whether an archive's single wrapper folder should be flattened.
+        ///
+        /// <para><b>It must match the parsers</b>, which are the real answer to
+        /// "can NBR read this". Five of them were missing until 2026-08-03 —
+        /// .rtf, .docx, .odt, .htm, .html — so a folder holding only a Word
+        /// document was not recognised as a book and simply did not appear on
+        /// the shelf. Import was never affected; it asks
+        /// <c>TextExtractor.IsTextFormat</c>, which asks the parsers.</para></summary>
         public static readonly string[] TextExtensions =
-            { ".epub", ".txt", ".pdf", ".fb2", ".mobi", ".azw", ".azw3", ".doc",
+            { ".epub", ".txt", ".rtf", ".pdf", ".fb2", ".mobi", ".azw", ".azw3",
+              ".doc", ".docx", ".odt", ".htm", ".html",
               ".brf", ".brl", ".bra", ".i55", ".dxb" };
         public static readonly string[] ArchiveExtensions =
             { ".zip", ".rar", ".7z" };
