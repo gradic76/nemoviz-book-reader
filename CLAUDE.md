@@ -3492,6 +3492,28 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
 
 ## 11. TODO (open items)
 
+- **Waiting on Gordan's own eyes and hands** (list opened 2026-08-03). None of
+  these is a suspected fault — they are things that were built, measured and
+  found correct by probe, and that a measurement *cannot* confirm:
+  - **Settings on the shared three-column frame.** Measured clean on all three
+    tabs (no overlaps, nothing outside a group, columns at 12/317/622), but how
+    it reads and looks is unmeasured.
+  - **The three visual reading modes in motion** — page, two rows, single row.
+    A probe can say the right range is painted; only a reader can say whether
+    the text moves the way the mode promises.
+  - **Braille on the reading surface.** The surface is a `RichTextBox`, chosen
+    partly because a real focusable text control is what lets the screen reader
+    braille and pan it by its own tracking (§ "The idea worth testing"). That
+    whole bet is still untested on an actual display.
+  - **Light and Dark themes** — deferred by Gordan ("za light/dark ćemo još
+    vidjeti"). Remember `SystemColors` does NOT track Windows dark mode; the
+    signal is `HKCU\…\Themes\Personalize\AppsUseLightTheme`, and scrollbars,
+    combo popups and ListView headers will not obey `BackColor`.
+  - **EPUB and the other hybrids across all three ranks — voice, text and
+    braille.** A narrated EPUB imports and plays, and DAISY parses, but no
+    hybrid has been read end to end in each of the three outputs by a person.
+    This is the widest item on the list.
+
 - **A key fires but a keyboard SHORTCUT does not light it.** The backlight is
   hung on `Button.Click`, so the mouse and Enter/Space light the key, but the
   shortcut handlers call `BtnLibrary_Click(null, ...)` and friends **directly**
@@ -3552,8 +3574,9 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   letter keys as type-ahead while focused), but **check the laptop case before
   committing**: many laptops default the F-row to OEM media/brightness, so
   without Fn-lock every shortcut needs Fn held.
-- **Settings → Misc is still an empty placeholder** — waiting on what Gordan
-  wants there.
+- ~~Settings → Misc is still an empty placeholder~~ — **gone** (2026-08-03).
+  Misc held nothing but the look switch and a "work in progress" line; the look
+  moved to General and the tab was deleted.
 - **RESOLVED & CONFIRMED BY GORDAN (Session 18): the four per-voice/voice-
   routing symptoms.** Root causes were voice-name duplication across backends
   (SAPI description vs plain Name), the 32-bit host mutating the voice without
