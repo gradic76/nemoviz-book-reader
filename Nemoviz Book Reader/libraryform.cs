@@ -175,48 +175,96 @@ namespace Nemoviz_Book_Reader
                 return true;
             }
 
-            // The ring is hand-made here, so a new stop has to be let into it:
-            // Now reading → shelf → details → Refresh, and back the same way.
-            // Left to the default order the shelf would have been skipped
-            // altogether, because Now reading is the LAST child of its panel
-            // (docking put it at the top of the screen, not the top of the list).
-            if (listNowReading != null && listNowReading.Focused)
-            {
-                if (keyData == Keys.Tab)
-                {
-                    listBooks.Focus();
-                    return true;
-                }
-            }
-            if (listBooks.Focused && keyData == (Keys.Tab | Keys.Shift) && listNowReading != null)
-            {
-                listNowReading.Focus();
-                return true;
-            }
-
-            if (listBooks.Focused && keyData == Keys.Tab)
-            {
-                listViewDetails.Focus();
-                if (listViewDetails.Items.Count > 0)
-                    listViewDetails.Items[0].Selected = true;
-                return true;
-            }
-
-            if (listViewDetails.Focused)
-            {
-                if (keyData == (Keys.Tab | Keys.Shift))
-                {
-                    listBooks.Focus();
-                    return true;
-                }
-                if (keyData == Keys.Tab)
-                {
-                    btnRefresh.Focus();
-                    return true;
-                }
-            }
+            if (keyData == Keys.Tab || keyData == (Keys.Tab | Keys.Shift))
+                return StepTabRing(keyData == (Keys.Tab | Keys.Shift) ? -1 : +1);
 
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        /// <summary>The Library's tab order, written down once (Gordan,
+        /// 2026-08-03): <b>Now reading, Bookshelf, Infobox, Search, Filter,
+        /// Refresh, Load, Close</b> — and the exact reverse with Shift+Tab.
+        ///
+        /// <para>It was a handful of separate "if this has focus and Tab is
+        /// pressed" rules before, which is why it was neither symmetric nor
+        /// closed: the way back was not the way out reversed, and once the ring
+        /// handed over to the default order Now reading fell out of it for good —
+        /// docking makes it the LAST child of its panel, so by TabIndex it comes
+        /// after the shelf rather than before it. Ordering the controls in one
+        /// place removes the whole class of mistake.</para></summary>
+        private Control[] TabRing()
+        {
+            return new Control[] { listNowReading, listBooks, listViewDetails,
+                                   tbSearch, cbFilter, btnRefresh, btnOK, btnCancel };
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr GetFocus();
+
+        /// <summary>The control that really has the focus — asked of Windows,
+        /// not of WinForms.
+        ///
+        /// <para>Two other answers were tried and both were wrong.
+        /// <c>Form.ActiveControl</c> gives the CONTAINER, here the
+        /// <c>SplitContainer</c>, so a ring asking "is this the focused one?"
+        /// recognised the buttons and neither list — which is exactly why Tab and
+        /// Shift+Tab walked two different, half-empty rings. Descending through
+        /// each container's own <c>ActiveControl</c> gets one level further and
+        /// then stops dead at the <c>SplitterPanel</c>, because <c>Panel</c> does
+        /// not implement <c>IContainerControl</c>; that left the first Tab of the
+        /// session skipping the shelf while every later lap was right, which is
+        /// the kind of bug that gets called intermittent and is not.</para>
+        ///
+        /// <para><c>GetFocus</c> has no such gaps. The managed descent stays as a
+        /// fallback for the case where the focus window belongs to no WinForms
+        /// control at all.</para></summary>
+        private Control FocusedControl()
+        {
+            Control c = Control.FromHandle(GetFocus());
+            if (c != null) return c;
+
+            c = this;
+            IContainerControl container = c as IContainerControl;
+            while (container != null && container.ActiveControl != null)
+            {
+                c = container.ActiveControl;
+                container = c as IContainerControl;
+            }
+            return c;
+        }
+
+        /// <summary>Moves one stop round the ring, skipping anything a look has
+        /// hidden or disabled, and wrapping at both ends so the order closes.
+        /// Returns false when focus is somewhere the ring does not know about —
+        /// a menu, say — and leaves Tab to Windows.</summary>
+        private bool StepTabRing(int direction)
+        {
+            Control[] ring = TabRing();
+            Control focused = FocusedControl();
+            int at = -1;
+            for (int i = 0; i < ring.Length && at < 0; i++)
+                for (Control c = focused; c != null; c = c.Parent)
+                    if (ReferenceEquals(c, ring[i])) { at = i; break; }
+            if (at < 0) return false;
+
+            for (int step = 1; step <= ring.Length; step++)
+            {
+                int i = ((at + direction * step) % ring.Length + ring.Length) % ring.Length;
+                Control next = ring[i];
+                if (next == null || !next.Visible || !next.Enabled || !next.CanSelect) continue;
+                next.Focus();
+                // Arriving at a list with nothing chosen leaves a reader with
+                // nothing announced; the info box in particular is read row by
+                // row, so it needs a row to start on.
+                ListView lv = next as ListView;
+                if (lv != null && lv.Items.Count > 0 && lv.SelectedItems.Count == 0)
+                {
+                    lv.Items[0].Selected = true;
+                    lv.Items[0].Focused = true;
+                }
+                return true;
+            }
+            return false;
         }
 
         private void BuildUI()

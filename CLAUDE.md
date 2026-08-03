@@ -2300,12 +2300,25 @@ afterwards, and the search box won every time.
 **`GetSelectedBook` answers from whichever list has focus**, falling back to the
 shelf. Both lists keep their selection while focus is elsewhere — that is what
 shows a reader where they were — so "which one is selected" is not a question
-with one answer, and focus is what settles it. The Tab ring is hand-made in
-`ProcessCmdKey` and had to be told about the new stop: **Now reading → shelf →
-details → Refresh**. Left to the default order the shelf would have been skipped,
-because Now reading is the *last* child of its panel (docking put it at the top
-of the screen, not the top of the collection — and for the same reason the FILL
-control must be added to `Panel1` first).
+with one answer, and focus is what settles it.
+
+**The tab order is written down once** (`TabRing`), and `StepTabRing` walks it
+both ways with wraparound: **Now reading → Bookshelf → Infobox → Search → Filter
+→ Refresh → Load → Close**, and the exact reverse. It used to be a handful of
+separate "if this has focus and Tab is pressed" rules, which is why it was
+neither symmetric nor closed — the way back was not the way out reversed, and
+once the ring handed over to the default order Now reading fell out of it for
+good. (Docking makes Now reading the *last* child of its panel, so by TabIndex it
+comes after the shelf; for the same reason the FILL control must be added to
+`Panel1` first.)
+
+**Finding the focused control is the part that bites.** `Form.ActiveControl`
+answers with the CONTAINER — the `SplitContainer` — so a ring asking "is this
+focused?" recognised the buttons and neither list. Descending through each
+container's own `ActiveControl` gets one level further and stops dead at the
+`SplitterPanel`, because `Panel` does not implement `IContainerControl`. **It
+asks Windows now** (`GetFocus`), with the managed descent as a fallback. Verified
+by driving real Tab and Shift+Tab keystrokes through two full laps in both looks.
 
 **Help is in the menu bar**, with `Help` (F1) and `About NBR`. Both are
 deliberately **unwired**: the manual does not exist yet and neither does the
