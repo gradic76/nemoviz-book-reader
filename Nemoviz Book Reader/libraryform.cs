@@ -20,12 +20,12 @@ namespace Nemoviz_Book_Reader
         private ToolStripMenuItem menuFileOpenFile;
         private ToolStripMenuItem menuFileOpenFolder;
         private ToolStripMenuItem menuView;
-        private ToolStripMenuItem menuViewAlphaAsc;
-        private ToolStripMenuItem menuViewAlphaDesc;
-        private ToolStripMenuItem menuViewDateAsc;
-        private ToolStripMenuItem menuViewDateDesc;
-        private ToolStripMenuItem menuViewFormatAsc;
-        private ToolStripMenuItem menuViewFormatDesc;
+        private ToolStripMenuItem menuViewAlpha;
+        private ToolStripMenuItem menuViewDate;
+        private ToolStripMenuItem menuViewFormat;
+        private ToolStripMenuItem menuViewStatus;
+        private ToolStripMenuItem menuViewAsc;
+        private ToolStripMenuItem menuViewDesc;
         private ToolStripMenuItem menuHelp;
         private ToolStripMenuItem menuHelpHelp;
         private ToolStripMenuItem menuHelpAbout;
@@ -53,7 +53,10 @@ namespace Nemoviz_Book_Reader
         private Button btnCancel;
 
         private List<BookData> books;          // all scanned books
-        private string currentSortMode = "alpha_asc";
+        // Two independent choices, not one of six combinations: what to sort by,
+        // and which way round.
+        private string sortKey = "alpha";
+        private bool sortAscending = true;
 
         private AppSettings appSettings;
         private string activeBookFolderPath;
@@ -339,32 +342,39 @@ namespace Nemoviz_Book_Reader
 
             menuView = new ToolStripMenuItem(Localization.T("Menu.View"));
 
-            menuViewAlphaAsc = new ToolStripMenuItem(Localization.T("Menu.View.AlphaAsc"));
-            menuViewAlphaAsc.Click += (s, e) => SortBooks("alpha_asc");
+            // WHAT to sort by and WHICH WAY are two questions, so the menu asks
+            // them separately and shows two ticks at once (Gordan, 2026-08-03).
+            // Combined entries meant a new key cost two lines every time, and
+            // four keys would have been eight of them.
+            menuViewAlpha = new ToolStripMenuItem(Localization.T("Menu.View.Alphabetically"));
+            menuViewAlpha.Click += (s, e) => SortBy("alpha");
 
-            menuViewAlphaDesc = new ToolStripMenuItem(Localization.T("Menu.View.AlphaDesc"));
-            menuViewAlphaDesc.Click += (s, e) => SortBooks("alpha_desc");
+            menuViewDate = new ToolStripMenuItem(Localization.T("Menu.View.DateAdded"));
+            menuViewDate.Click += (s, e) => SortBy("date");
 
-            menuViewDateAsc = new ToolStripMenuItem(Localization.T("Menu.View.DateAsc"));
-            menuViewDateAsc.Click += (s, e) => SortBooks("date_asc");
+            menuViewFormat = new ToolStripMenuItem(Localization.T("Menu.View.Format"));
+            menuViewFormat.Click += (s, e) => SortBy("format");
 
-            menuViewDateDesc = new ToolStripMenuItem(Localization.T("Menu.View.DateDesc"));
-            menuViewDateDesc.Click += (s, e) => SortBooks("date_desc");
+            // Status is the reading lifecycle — unread, then reading, then read.
+            // NOT "now reading", which is a place of its own above the shelf, and
+            // NOT favourite, which is a mark a book wears on top of its status
+            // (Gordan).
+            menuViewStatus = new ToolStripMenuItem(Localization.T("Menu.View.Status"));
+            menuViewStatus.Click += (s, e) => SortBy("status");
 
-            menuViewFormatAsc = new ToolStripMenuItem(Localization.T("Menu.View.FormatAsc"));
-            menuViewFormatAsc.Click += (s, e) => SortBooks("format_asc");
+            menuViewAsc = new ToolStripMenuItem(Localization.T("Menu.View.Ascending"));
+            menuViewAsc.Click += (s, e) => SortDirection(true);
 
-            menuViewFormatDesc = new ToolStripMenuItem(Localization.T("Menu.View.FormatDesc"));
-            menuViewFormatDesc.Click += (s, e) => SortBooks("format_desc");
+            menuViewDesc = new ToolStripMenuItem(Localization.T("Menu.View.Descending"));
+            menuViewDesc.Click += (s, e) => SortDirection(false);
 
-            menuView.DropDownItems.Add(menuViewAlphaAsc);
-            menuView.DropDownItems.Add(menuViewAlphaDesc);
+            menuView.DropDownItems.Add(menuViewAlpha);
+            menuView.DropDownItems.Add(menuViewDate);
+            menuView.DropDownItems.Add(menuViewFormat);
+            menuView.DropDownItems.Add(menuViewStatus);
             menuView.DropDownItems.Add(new ToolStripSeparator());
-            menuView.DropDownItems.Add(menuViewDateAsc);
-            menuView.DropDownItems.Add(menuViewDateDesc);
-            menuView.DropDownItems.Add(new ToolStripSeparator());
-            menuView.DropDownItems.Add(menuViewFormatAsc);
-            menuView.DropDownItems.Add(menuViewFormatDesc);
+            menuView.DropDownItems.Add(menuViewAsc);
+            menuView.DropDownItems.Add(menuViewDesc);
 
             // Help, standing where a Windows menu bar always ends. The two items
             // are DELIBERATELY not wired yet (Gordan, 2026-08-03): the manual
@@ -403,17 +413,17 @@ namespace Nemoviz_Book_Reader
         /// </summary>
         private void UpdateSortMenuChecks()
         {
-            ApplySortMark(menuViewAlphaAsc, "Menu.View.AlphaAsc", "alpha_asc");
-            ApplySortMark(menuViewAlphaDesc, "Menu.View.AlphaDesc", "alpha_desc");
-            ApplySortMark(menuViewDateAsc, "Menu.View.DateAsc", "date_asc");
-            ApplySortMark(menuViewDateDesc, "Menu.View.DateDesc", "date_desc");
-            ApplySortMark(menuViewFormatAsc, "Menu.View.FormatAsc", "format_asc");
-            ApplySortMark(menuViewFormatDesc, "Menu.View.FormatDesc", "format_desc");
+            ApplySortMark(menuViewAlpha, "Menu.View.Alphabetically", sortKey == "alpha");
+            ApplySortMark(menuViewDate, "Menu.View.DateAdded", sortKey == "date");
+            ApplySortMark(menuViewFormat, "Menu.View.Format", sortKey == "format");
+            ApplySortMark(menuViewStatus, "Menu.View.Status", sortKey == "status");
+            ApplySortMark(menuViewAsc, "Menu.View.Ascending", sortAscending);
+            ApplySortMark(menuViewDesc, "Menu.View.Descending", !sortAscending);
         }
 
-        private void ApplySortMark(ToolStripMenuItem item, string langKey, string mode)
+        private void ApplySortMark(ToolStripMenuItem item, string langKey, bool active)
         {
-            bool active = currentSortMode == mode;
+            if (item == null) return;
             item.Checked = active;
 
             string mark = Localization.T("Menu.View.ActiveMark");
@@ -1010,36 +1020,70 @@ namespace Nemoviz_Book_Reader
             return CatReading;
         }
 
+        /// <summary>The key decides what is compared; the direction is applied
+        /// once, at the end, by flipping the sign. Writing each key twice was
+        /// what made six menu entries out of three ideas — and it is also where a
+        /// descending order quietly loses its tie-break, since the second key has
+        /// to stay ascending to be any use.</summary>
         private Comparison<BookData> GetComparer()
         {
-            switch (currentSortMode)
+            Comparison<BookData> byTitle =
+                (a, b) => string.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
+
+            Comparison<BookData> key;
+            switch (sortKey)
             {
-                case "alpha_desc":
-                    return (a, b) => string.Compare(b.Title, a.Title, StringComparison.CurrentCultureIgnoreCase);
-                case "date_asc":
-                    return (a, b) => a.DateAdded.CompareTo(b.DateAdded);
-                case "date_desc":
-                    return (a, b) => b.DateAdded.CompareTo(a.DateAdded);
-                case "format_asc":
-                    return (a, b) =>
-                    {
-                        int c = string.Compare(a.Format, b.Format, StringComparison.CurrentCultureIgnoreCase);
-                        return c != 0 ? c : string.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
-                    };
-                case "format_desc":
-                    return (a, b) =>
-                    {
-                        int c = string.Compare(b.Format, a.Format, StringComparison.CurrentCultureIgnoreCase);
-                        return c != 0 ? c : string.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
-                    };
-                default: // alpha_asc
-                    return (a, b) => string.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
+                case "date":
+                    key = (a, b) => a.DateAdded.CompareTo(b.DateAdded);
+                    break;
+                case "format":
+                    key = (a, b) => string.Compare(a.Format, b.Format,
+                                                   StringComparison.CurrentCultureIgnoreCase);
+                    break;
+                case "status":
+                    key = (a, b) => StatusRank(a).CompareTo(StatusRank(b));
+                    break;
+                default:
+                    key = byTitle;
+                    break;
+            }
+
+            int sign = sortAscending ? 1 : -1;
+            if (key == byTitle) return (a, b) => sign * byTitle(a, b);
+            // Everything else falls back to the title, and that tie-break stays
+            // ASCENDING however the main key runs: within one format, or one
+            // status, a reader is looking a title up, not admiring the order.
+            return (a, b) =>
+            {
+                int c = key(a, b);
+                return c != 0 ? sign * c : byTitle(a, b);
+            };
+        }
+
+        /// <summary>Where a book stands in the reading lifecycle: unread, then
+        /// being read, then read. Not "now reading" — that is a place of its own
+        /// above the shelf — and not favourite, which is a mark worn on top of a
+        /// status rather than one of them (Gordan, 2026-08-03).</summary>
+        private int StatusRank(BookData b)
+        {
+            switch (GetCategory(b))
+            {
+                case CatUnread: return 0;
+                case CatReading: return 1;
+                default: return 2;      // CatRead
             }
         }
 
-        private void SortBooks(string mode)
+        private void SortBy(string key)
         {
-            currentSortMode = mode;
+            sortKey = key;
+            UpdateSortMenuChecks();
+            RebuildShelf(GetSelectedBook());
+        }
+
+        private void SortDirection(bool ascending)
+        {
+            sortAscending = ascending;
             UpdateSortMenuChecks();
             RebuildShelf(GetSelectedBook());
         }

@@ -2320,6 +2320,22 @@ container's own `ActiveControl` gets one level further and stops dead at the
 asks Windows now** (`GetFocus`), with the managed descent as a fallback. Verified
 by driving real Tab and Shift+Tab keystrokes through two full laps in both looks.
 
+**The View menu asks two questions, not one** (Gordan, 2026-08-03). It used to
+offer six combined entries — alphabetical ascending, alphabetical descending, and
+so on — so every new sort key cost *two* lines, and four keys would have been
+eight. Now: **Alphabetically / Date added / Format / Status**, a separator, then
+**Ascending / Descending**, with **two ticks showing at once**. `sortKey` and
+`sortAscending` are separate, the direction is applied by flipping the sign at
+the end, and the **title tie-break stays ascending whichever way the main key
+runs** — inside one format or one status a reader is looking a title up, not
+admiring the order. **Status is the reading lifecycle**: unread, being read,
+read. Not "now reading", which is a place of its own above the shelf, and not
+favourite, which is a mark worn *on top of* a status rather than one of them.
+
+The `(active)` suffix stays beside the tick: screen readers do not reliably
+announce the check state of a `MenuStrip` item, and text always gets read. Two
+groups means it now appears twice, which is exactly the state of things.
+
 **Help is in the menu bar**, with `Help` (F1) and `About NBR`. Both are
 deliberately **unwired**: the manual does not exist yet and neither does the
 About box. F1 is claimed all the same, so nothing else can take it — the key must
