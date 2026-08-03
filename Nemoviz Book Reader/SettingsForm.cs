@@ -388,6 +388,18 @@ namespace Nemoviz_Book_Reader
             VoicePrefs gp = stagedPrefs.Get(globalVoice, appSettings.PrefsFor(globalVoice));
             appSettings.SetTtsDefaults(globalVoice, gp.Wpm, gp.Pitch, gp.Volume);
 
+            // Text Books — how a book looks on screen, when the book itself has
+            // not been given a look of its own. These six wrote nowhere at all
+            // until 2026-08-03.
+            if (chkVisual != null && cmbVisualMode != null && cmbHighlight != null)
+                appSettings.SetVisualDefaults(
+                    chkVisual.Checked,
+                    cmbVisualMode.SelectedIndex,
+                    cmbHighlight.SelectedIndex,
+                    cmbHighlightColour != null ? cmbHighlightColour.SelectedIndex : -1,
+                    cmbTextColour != null ? cmbTextColour.SelectedIndex : -1,
+                    cmbBackColour != null ? cmbBackColour.SelectedIndex : -1);
+
             // Device — persist the chosen output card (empty = system default).
             if (cmbSoundCard != null)
             {
@@ -731,16 +743,17 @@ namespace Nemoviz_Book_Reader
             cmbVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.TwoRows"));
             cmbVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.FullInstant"));
             cmbVisualMode.Items.Add(Localization.T("Settings.TextBooks.VisualMode.FullScrolling"));
-            cmbVisualMode.SelectedIndex = 0;
+            cmbVisualMode.SelectedIndex = appSettings.VisualMode;
+            chkVisual.Checked = appSettings.Visual;
             box.Controls.Add(cmbVisualMode);
 
             yy += 34;
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Highlight"), lx, yy + 3));
             cmbHighlight = MakeCombo(Localization.T("Settings.TextBooks.Highlight"), cx, yy, cw, tab++);
             cmbHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.None"));
-            cmbHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Word"));
+            cmbHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Line"));
             cmbHighlight.Items.Add(Localization.T("Settings.TextBooks.Highlight.Sentence"));
-            cmbHighlight.SelectedIndex = 2;
+            cmbHighlight.SelectedIndex = appSettings.Highlight;
             box.Controls.Add(cmbHighlight);
 
             yy += 34;
@@ -766,9 +779,11 @@ namespace Nemoviz_Book_Reader
                 Localization.T("Settings.Colour.Green"), Localization.T("Settings.Colour.Red")
             };
             foreach (string c in colours) { cmbTextColour.Items.Add(c); cmbBackColour.Items.Add(c); cmbHighlightColour.Items.Add(c); }
-            cmbHighlightColour.SelectedIndex = 3;   // blue highlight under yellow-on-black
-            cmbTextColour.SelectedIndex = 2;   // yellow on black: the usual low-vision pair
-            cmbBackColour.SelectedIndex = 1;
+            // From the settings file, whose own defaults are the pair that used to
+            // be written here: yellow on black, marked blue.
+            cmbHighlightColour.SelectedIndex = appSettings.HighlightColour;
+            cmbTextColour.SelectedIndex = appSettings.TextColour;
+            cmbBackColour.SelectedIndex = appSettings.BackColour;
 
             UpdateVisualEnabled();
             return box;

@@ -252,19 +252,29 @@ namespace Nemoviz_Book_Reader
             TextVolume = tvol;
             int.TryParse(ini.Read("Settings", "TextPitch", "-99"), out int tpit);
             TextPitch = tpit;
-            TextVisual = ini.Read("Settings", "TextVisual", "0") == "1";
-            int.TryParse(ini.Read("Settings", "TextVisualMode", "0"), out int tvm);
+            TextVisual = ini.Read("Settings", "TextVisual",
+                AppSettings.Current != null && AppSettings.Current.Visual ? "1" : "0") == "1";
+            // The look falls back to the RULE in Settings, not to a constant: a
+            // book that has never been given one of its own should open the way
+            // this reader has said they want books to open. Once it is saved the
+            // book owns its copy, so changing the rule later does not walk over a
+            // book somebody has already set up by hand.
+            AppSettings rule = AppSettings.Current;
+            int.TryParse(ini.Read("Settings", "TextVisualMode",
+                (rule != null ? rule.VisualMode : 0).ToString()), out int tvm);
             TextVisualMode = tvm >= 0 && tvm <= 2 ? tvm : 0;
             int.TryParse(ini.Read("Settings", "TextColour",
-                ReadingColours.DefaultText.ToString()), out int tfg);
+                (rule != null ? rule.TextColour : ReadingColours.DefaultText).ToString()), out int tfg);
             TextColour = ReadingColours.Clamp(tfg);
             int.TryParse(ini.Read("Settings", "TextBackColour",
-                ReadingColours.DefaultBack.ToString()), out int tbg);
+                (rule != null ? rule.BackColour : ReadingColours.DefaultBack).ToString()), out int tbg);
             TextBackColour = ReadingColours.Clamp(tbg);
-            int.TryParse(ini.Read("Settings", "TextHighlight", "1"), out int thl);
+            int.TryParse(ini.Read("Settings", "TextHighlight",
+                (rule != null ? rule.Highlight : 1).ToString()), out int thl);
             TextHighlight = thl >= 0 && thl <= 2 ? thl : 1;
             int.TryParse(ini.Read("Settings", "TextHighlightColour",
-                ReadingColours.DefaultHighlight.ToString()), out int thc);
+                (rule != null ? rule.HighlightColour : ReadingColours.DefaultHighlight).ToString()),
+                out int thc);
             TextHighlightColour = ReadingColours.Clamp(thc);
             TextBraille = ini.Read("Settings", "TextBraille", "0") == "1";
             TextBrailleTable = ini.Read("Settings", "TextBrailleTable", "");

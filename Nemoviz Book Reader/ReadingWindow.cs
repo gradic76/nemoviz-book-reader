@@ -63,7 +63,11 @@ namespace Nemoviz_Book_Reader
         /// touching one it merely inherited.</summary>
         private Font ownFont;
         private Panel metal, glass;
-        private float fontSize = 26f;        // 60 chars across a 960-wide window
+        // What the window opens on: whatever it was left on last time, or the
+        // measured default (60 characters across a 960-wide window) the first
+        // time. This is the reader's eyesight, not the book's, so it is one
+        // setting for the app and not one per book (Gordan, 2026-08-03).
+        private float fontSize = 26f;
         private string fontFamily = "Segoe UI";
         // The book's colours, as indices; -1 means it has none and the skin's own
         // glass stands.
@@ -89,6 +93,13 @@ namespace Nemoviz_Book_Reader
             this.forwardKey = forwardKey;
             this.textColour = textColour;
             this.backColour = backColour;
+
+            AppSettings kept = AppSettings.Current;
+            if (kept != null)
+            {
+                if (!string.IsNullOrEmpty(kept.ReadingFont)) fontFamily = kept.ReadingFont;
+                if (kept.ReadingFontSize > 0) fontSize = kept.ReadingFontSize;
+            }
 
             Owner = owner;
             FormBorderStyle = FormBorderStyle.None;
@@ -238,6 +249,10 @@ namespace Nemoviz_Book_Reader
         private void ApplyFont()
         {
             if (surface == null) return;
+            // Remembered at the moment it takes effect, which is the moment the
+            // reader would call it chosen. Writes only on a real change.
+            if (AppSettings.Current != null)
+                AppSettings.Current.SetReadingFont(fontFamily, (int)fontSize);
             Font f;
             // Through BundledFonts, not new Font(name, size): the shipped faces
             // are private to this process, and GDI+ resolving a name it does not

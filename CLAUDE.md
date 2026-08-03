@@ -2207,14 +2207,36 @@ whole — measured stepping 0, 0, 2, 2, 4, 4 through a two-row window), and
 `EM_GETFIRSTVISIBLELINE` / `EM_LINESCROLL`, because `ScrollToCaret` cannot
 express either.
 
-**Still not carried anywhere: the reading window's font and size.** They are
-fields on the window, reset to Segoe UI 26 every time it opens, so a chosen face
-does not survive closing it. Gordan's call (2026-08-03) is that the font stays
-in the reading window and out of Properties — but it should still be remembered.
+**The Settings side has a home now, and it is the RULE.** `AppSettings` carries
+all six under `[Visual]`, Settings reads and writes them, and **a book with no
+look of its own inherits them on load** through `AppSettings.Current` — the same
+shape as the language→voice rule (§ *Settings and Properties are the same two
+combos*). Once a book is saved it owns its copy, so changing the rule later does
+not walk over a book someone set up by hand. Verified: a rule of white-on-red,
+marked green, scrolling, is inherited whole by a fresh book; that book then
+choosing yellow keeps yellow while the rule still fills everything else.
 
-**The same four controls are dead on the Settings side** — `AppSettings` knows
-none of them, so there is no global default for a new book to inherit; it gets
-`ReadingColours`' own (yellow on black, marked blue, the line).
+**The reading window remembers its font and size**, in `[Visual] Font` /
+`FontSize`, written the moment a face is applied and only on a real change. Not
+per book, by Gordan's call — *"najbolje da pamti zadnje odabrano"* — because
+this is the reader's eyesight, which does not change from one book to the next,
+and it is chosen in the window rather than in Properties.
+
+### Waiting on Gordan (2026-08-03) — the display and braille
+
+Everything above was verified by machine: colours read back off the characters,
+the paging measured, the inheritance round-tripped, `Settings.ini` byte-identical
+after the probe. **None of it has been seen or felt.** Two things need a person:
+
+1. **Braille on the `RichTextBox`.** The path was measured on a `TextBox`. The
+   caret is the same and the control is still a real focusable edit control, so
+   there is every reason to expect it to behave — but "every reason to expect"
+   is not the standard this feature was built to. Open a book with the display
+   and check the line follows as it did, **and that the reader does not comment**
+   while the mark moves.
+2. **The three modes in motion.** Paging steps 0, 0, 2, 2, 4, 4 through a
+   two-row window and the scrolling mode holds the line in the middle; whether
+   that reads well at reading speed is an eye's question, not a number's.
 
 ### Still open
 

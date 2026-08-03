@@ -298,6 +298,10 @@ namespace Nemoviz_Book_Reader
         {
             InitializeComponent();
             appSettings = new AppSettings();
+            // Reachable from the two places that need the rule but are not handed
+            // the settings: a BookData being loaded, and the reading window
+            // remembering the face it was left on.
+            AppSettings.Current = appSettings;
             UiTheme.Select(appSettings.UiTheme);   // before anything builds itself
             appSettings.EnsureLibraryExists();
             appSettings.EnsureLangFolderExists();
