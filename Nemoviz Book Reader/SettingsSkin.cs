@@ -117,65 +117,15 @@ namespace Nemoviz_Book_Reader
 
             int width = pw - 2 * Margin;
             int avail = ph - 2 * Margin;
-            int content = 0;
-            foreach (GroupBox g in groups) content += g.Height;
-            int n = groups.Count;
-
-            // A page can ask for a GRID: three across, wrapping — which is what
-            // General wants, five short groups of a kind. Left to right and then
-            // down is also the order they were added, so what a reader hears is
-            // what a reader sees (Gordan, 2026-08-03).
-            if ((page.Tag as string) == "grid3")
-            {
-                LayOutGrid(groups, 3, width, avail);
-                // NOT a return — the help keys are attached at the foot of this
-                // method, and jumping out took every ? off the page. Found by the
-                // audit, which is the whole reason it counts them.
-                AttachGroupHints(page, groups);
-                return;
-            }
-
-            // Otherwise: as FEW columns as the height allows, up to three. One
-            // while everything fits; two for Speech and Braille, whose three
-            // groups come to more than a 640-tall dialog has and whose old answer
-            // was a scroll bar. Nothing is cut off and nothing scrolls, and the
-            // ORDER the groups were added survives.
-            int wanted = 1;
-            while (wanted < 3 && wanted < n && !FitsInColumns(groups, wanted, avail)) wanted++;
-
-            var columns = SplitIntoColumns(groups, wanted, content);
-
-            int colW = columns.Count > 1
-                ? (width - Margin * (columns.Count - 1)) / columns.Count : width;
-            for (int ci = 0; ci < columns.Count; ci++)
-            {
-                List<GroupBox> col = columns[ci];
-                int used = 0;
-                foreach (GroupBox g in col) used += g.Height;
-                int cn = col.Count;
-                int slack = avail - used;
-                int pad = Math.Max(0, Math.Min(10, slack / (cn * 2)));
-                slack -= pad * cn;
-                int gap = cn > 1 ? Math.Max(6, slack / (cn - 1)) : 12;
-
-                int x = Margin + ci * (colW + Margin);
-                int y = Margin;
-                foreach (GroupBox g in col)
-                {
-                    int h = g.Height + pad;
-                    DialogSkin.AsSticker(g, new Rectangle(x, y, colW, h));
-                    foreach (Control c in g.Controls) DialogSkin.OnGlass(c);
-                    y += h + gap;
-                }
-
-                // The value column is worked out PER COLUMN. Sharing one across
-                // both would let the widest label on the page push the other
-                // column's values into its own right-hand edge.
-                int column = 0;
-                foreach (GroupBox g in col) column = Math.Max(column, PropertiesSkin.LabelColumn(g));
-                foreach (GroupBox g in col) { PropertiesSkin.PlaceValues(g, column); PullButtonsIn(g); }
-            }
-
+            // EVERY page goes on the three-column frame — A, B and C — and each
+            // arranges itself within them (Gordan, 2026-08-03). A group takes one
+            // column unless it says otherwise on itself.
+            //
+            // What this replaced: General was three columns of 293 and Speech and
+            // Braille two of 446, so nothing on one page lined up with anything on
+            // the other. Two arrangements, each reasonable alone, that together
+            // read as carelessness.
+            LayOutGrid(groups, 3, width, avail);
             AttachGroupHints(page, groups);
         }
 
@@ -235,117 +185,147 @@ namespace Nemoviz_Book_Reader
         {
             int inner = g.Width - 14;
 
+            // The top-right corner belongs to the help key, so anything on the top
+            // row stops short of it — the braille and visual checkboxes were both
+            // running underneath it. The corner is reserved unconditionally: the
+            // keys are attached AFTER the layout runs, so looking for one here
+            // finds nothing and the checkbox goes right on sitting under it.
+            int keyLeft = inner - 28;
+
             Button pairButton = null;
             TextBox pairBox = null;
+            var buttons = new List<Button>();
             foreach (Control c in g.Controls)
             {
                 Button b = c as Button;
-                if (b != null && !HintSystem.IsHelpKey(b)) pairButton = b;
+                if (b != null && !HintSystem.IsHelpKey(b)) { buttons.Add(b); pairButton = b; }
                 TextBox t = c as TextBox;
                 if (t != null) pairBox = t;
             }
 
-            if (pairButton != null && pairBox != null)
+            // A path box with Browse beside it is one thing, not two: the button
+            // takes the right-hand end and the box takes the rest.
+            if (buttons.Count == 1 && pairBox != null)
             {
-                pairButton.Left = Math.Max(pairBox.Left + 60, inner - pairButton.Width);
+                // Browse sits on the group's FIRST row, which is the row the help
+                // key's corner reaches into — so it stops where the key starts,
+                // not at the group's edge.
+                int edge = pairButton.Top < 26 ? keyLeft : inner;
+                pairButton.Left = Math.Max(pairBox.Left + 60, edge - pairButton.Width);
                 pairBox.Width = Math.Max(60, pairButton.Left - 8 - pairBox.Left);
                 return;
             }
 
+            // Buttons that SHARE a row are packed left to right, not each pushed
+            // to the right-hand edge — doing that to "Test voice" and
+            // "Pronunciation dictionary…" put one exactly on top of the other.
+            // They fit side by side at this width; they only had to be placed.
+            buttons.Sort((a, b) => a.Left.CompareTo(b.Left));
+            var rows = new Dictionary<int, List<Button>>();
+            foreach (Button b in buttons)
+            {
+                int row = b.Top / 8;
+                if (!rows.ContainsKey(row)) rows[row] = new List<Button>();
+                rows[row].Add(b);
+            }
+            foreach (var row in rows.Values)
+            {
+                int x = 14;
+                foreach (Button b in row)
+                {
+                    if (row.Count > 1 || b.Right > inner) b.Left = x;
+                    x = b.Right + 8;
+                }
+                // Still over? Then the row genuinely does not fit and the last
+                // one gives up the difference rather than leaving the group.
+                Button last = row[row.Count - 1];
+                if (last.Right > inner) last.Width = Math.Max(40, inner - last.Left);
+            }
+
             foreach (Control c in g.Controls)
             {
-                Button b = c as Button;
-                if (b != null && HintSystem.IsHelpKey(b)) continue;   // pinned to its corner
-                if (c.Right <= inner) continue;
-                if (c is Button) c.Left = Math.Max(14, inner - c.Width);
-                else c.Width = Math.Max(40, inner - c.Left);
+                Button b2 = c as Button;
+                if (b2 != null) continue;                    // handled above
+                int limit = c.Top < 26 ? keyLeft : inner;
+                if (c.Right <= limit) continue;
+                c.Width = Math.Max(40, limit - c.Left);
             }
         }
 
-        /// <summary>Groups laid left to right, <paramref name="across"/> to a
-        /// row, wrapping. Every group in a row is given the height of the tallest
-        /// in it, so the rows line up and a short group does not leave a step in
-        /// the edge beside a tall one.</summary>
+        /// <summary>The three-column frame the rest of NBR is laid out on —
+        /// <b>A, B and C</b>, groups dropped into them "kako je bilo
+        /// najpraktičnije" (Gordan's phrase, and the convention Properties has
+        /// always used). Groups flow left to right and wrap; a group may SPAN two
+        /// or three columns by carrying the number in its <c>Tag</c>.
+        ///
+        /// <para>One frame for every page is the point. Before this, General was
+        /// three columns of 293 and Speech and Braille two of 446, so nothing on
+        /// one page lined up with anything on the other — two arrangements that
+        /// were each reasonable alone and looked like carelessness together.</para>
+        ///
+        /// <para>Every group in a row takes the height of the tallest in it, so
+        /// the rows line up and a short group does not leave a step in the edge
+        /// beside a tall one.</para></summary>
         private static void LayOutGrid(List<GroupBox> groups, int across, int width, int avail)
         {
             int colW = (width - Margin * (across - 1)) / across;
-            int y = Margin;
-            for (int i = 0; i < groups.Count; i += across)
-            {
-                int rowH = 0;
-                for (int k = i; k < groups.Count && k < i + across; k++)
-                    rowH = Math.Max(rowH, groups[k].Height);
+            int y = Margin, i = 0;
 
-                for (int k = i; k < groups.Count && k < i + across; k++)
+            while (i < groups.Count)
+            {
+                // Fill one row: take groups until the columns are used up.
+                var row = new List<GroupBox>();
+                var spans = new List<int>();
+                int used = 0;
+                while (i < groups.Count)
                 {
-                    int x = Margin + (k - i) * (colW + Margin);
-                    DialogSkin.AsSticker(groups[k], new Rectangle(x, y, colW, rowH));
-                    foreach (Control c in groups[k].Controls) DialogSkin.OnGlass(c);
-                    groups[k].TabIndex = k;
+                    int span = Math.Max(1, Math.Min(across, SpanOf(groups[i])));
+                    if (used + span > across) break;
+                    row.Add(groups[i]); spans.Add(span); used += span; i++;
+                }
+                if (row.Count == 0) { row.Add(groups[i]); spans.Add(across); i++; }
+
+                int rowH = 0;
+                foreach (GroupBox g in row) rowH = Math.Max(rowH, g.Height);
+
+                int x = Margin;
+                for (int k = 0; k < row.Count; k++)
+                {
+                    int w = colW * spans[k] + Margin * (spans[k] - 1);
+                    DialogSkin.AsSticker(row[k], new Rectangle(x, y, w, rowH));
+                    foreach (Control c in row[k].Controls) DialogSkin.OnGlass(c);
+                    x += w + Margin;
                 }
 
-                int column = 0;
-                for (int k = i; k < groups.Count && k < i + across; k++)
-                    column = Math.Max(column, PropertiesSkin.LabelColumn(groups[k]));
-                for (int k = i; k < groups.Count && k < i + across; k++)
-                { PropertiesSkin.PlaceValues(groups[k], column); FitContents(groups[k]); }
+                // The value column is worked out per row, so a long caption in one
+                // group cannot push another row's values around — but only among
+                // groups of the SAME width. A wide group's captions used to set
+                // the column for a narrow one beside it, which left the braille
+                // list 65 pixels wide next to Speech's 174-pixel captions.
+                var column = new Dictionary<int, int>();
+                foreach (GroupBox g in row)
+                {
+                    int c = PropertiesSkin.LabelColumn(g);
+                    if (!column.ContainsKey(g.Width) || column[g.Width] < c) column[g.Width] = c;
+                }
+                foreach (GroupBox g in row) { PropertiesSkin.PlaceValues(g, column[g.Width]); FitContents(g); }
 
                 y += rowH + Margin;
             }
+
+            for (int k = 0; k < groups.Count; k++) groups[k].TabIndex = k;
         }
 
-        /// <summary>Would these groups fit if they were dealt into this many
-        /// columns, keeping their order? Height only — the width is whatever is
-        /// left after the split.</summary>
-        private static bool FitsInColumns(List<GroupBox> groups, int count, int avail)
+        /// <summary>How many of the three columns a group asks for. Written on the
+        /// group as <c>Tag = "span2"</c> by whoever built the page; one column
+        /// when it says nothing.</summary>
+        private static int SpanOf(GroupBox g)
         {
-            int total = 0;
-            foreach (GroupBox g in groups) total += g.Height;
-            foreach (List<GroupBox> col in SplitIntoColumns(groups, count, total))
-            {
-                int used = 0;
-                foreach (GroupBox g in col) used += g.Height;
-                if (used + 12 * (col.Count - 1) > avail) return false;
-            }
-            return true;
+            string tag = g.Tag as string;
+            if (string.IsNullOrEmpty(tag) || !tag.StartsWith("span")) return 1;
+            int n;
+            return int.TryParse(tag.Substring(4), out n) ? n : 1;
         }
-
-        /// <summary>Deals the groups into columns <b>in the order they were
-        /// added</b>, filling each until it has had its share of the total
-        /// height. Reading order is the one thing that must not be rearranged for
-        /// the sake of a tidier picture.</summary>
-        private static List<List<GroupBox>> SplitIntoColumns(List<GroupBox> groups, int count, int content)
-        {
-            var columns = new List<List<GroupBox>>();
-            if (count <= 1) { columns.Add(new List<GroupBox>(groups)); return columns; }
-
-            int share = Math.Max(1, content / count);
-            var col = new List<GroupBox>();
-            int run = 0;
-            foreach (GroupBox g in groups)
-            {
-                if (col.Count > 0 && columns.Count < count - 1 && run + g.Height / 2 > share)
-                {
-                    columns.Add(col);
-                    col = new List<GroupBox>();
-                    run = 0;
-                }
-                col.Add(g);
-                run += g.Height;
-            }
-            columns.Add(col);
-            // A column left empty by rounding takes the last group of the one
-            // before it, rather than being drawn as a blank stripe.
-            while (columns.Count < count && columns[columns.Count - 1].Count > 1)
-            {
-                var last = columns[columns.Count - 1];
-                var moved = new List<GroupBox> { last[last.Count - 1] };
-                last.RemoveAt(last.Count - 1);
-                columns.Add(moved);
-            }
-            return columns;
-        }
-
         /// <summary>The help text behind each group's <c>?</c>, in the order the
         /// groups were added to the page. These are the keys the hint boxes used:
         /// the words were written for exactly these groups, so they move to the
@@ -361,11 +341,21 @@ namespace Nemoviz_Book_Reader
             // Media keys, Metadata, Look. Five groups now, where five loose
             // controls used to need machinery of their own to carry a key.
             if (name == Localization.T("Settings.Tab.General"))
-                return new[] { "Settings.General.Language.Hint",
+                // No key on Language (Gordan, 2026-08-03), for the reason the
+                // sound card has none: a list of languages under a label that
+                // says "Language" explains itself, and a help text that only
+                // restates the caption costs a reader the same time to hear as
+                // one that tells them something. The empty string is how this
+                // table says "no ?" — see the loop that reads it.
+                return new[] { "",
                                "Settings.General.LibraryLocation.Hint",
                                "Settings.General.UseMultimediaKeys.Hint",
                                "Settings.General.UseMetadata.Hint",
                                "Settings.Misc.Look.Hint" };
+            // Device: one group, and the ? carries the keep-alive text that used
+            // to be an inline box the skin removed.
+            if (name == Localization.T("Settings.Tab.Device"))
+                return new[] { "Settings.Device.KeepAlive.Hint" };
             return new string[0];
         }
 

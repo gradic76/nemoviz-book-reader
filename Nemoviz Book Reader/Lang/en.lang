@@ -500,6 +500,7 @@ Settings.Colour.Yellow=Yellow
 Settings.Colour.Blue=Blue
 Settings.Colour.Green=Green
 Settings.Colour.Red=Red
+Settings.Device.OutputGroup=Audio output
 Settings.Device.SoundCard=Sound card:
 Settings.Device.KeepAlive=Keep the sound card awake
 Settings.Device.KeepAlive.Hint=Some sound outputs — HDMI especially — power down the moment the sound stops, and then take a moment to wake up again. What you hear is the first word of a sentence going missing, over and over, with nothing obviously wrong. While this is on, NBR plays a tone far below anything you can hear on the card it is using, so the card never gets the chance to fall asleep between sentences. Turn it off if your card does not do this: it holds the output open for as long as a book is playing.

@@ -516,6 +516,10 @@ namespace Nemoviz_Book_Reader
             box.Text = Localization.T("Settings.TextBooks.SpeechGroup");
             box.Location = new Point(8, 6);
             box.Size = new Size(500, 246);
+            // Two of the three columns. This is the widest group in Settings —
+            // "Books in this language:" alone pushes the value column to 214, and
+            // in one column that left the voice list 65 pixels wide.
+            box.Tag = "span2";
 
             int lx = 14, cx = 214, cw = 272, y = 26, tab = 0;
 
@@ -776,7 +780,12 @@ namespace Nemoviz_Book_Reader
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.TextBooks.VisualGroup");
             box.Location = new Point(x, y);
-            box.Size = new Size(500, 224);
+            // 232, not 224: the last row (Background colour) ended one pixel below
+            // the box that was meant to contain it.
+            box.Size = new Size(500, 232);
+            // Two columns, under Speech. Five lists whose entries are phrases
+            // ("Two text rows (subtitles)") and not single words.
+            box.Tag = "span2";
 
             chkVisual = new CheckBox();
             chkVisual.Text = Localization.T("Settings.TextBooks.UseVisual");
@@ -1044,14 +1053,29 @@ namespace Nemoviz_Book_Reader
         {
             TabPage page = new TabPage(Localization.T("Settings.Tab.Device"));
 
+            // Device goes in a group like every other page (Gordan, 2026-08-03).
+            // Loose controls are not on the three-column frame, so this tab was
+            // laid out unlike the two beside it — and, worse, the skin takes the
+            // inline hint boxes off every page, so with nothing to carry a ? the
+            // keep-alive explanation simply vanished in the new look. A group has
+            // somewhere to put the ?; that is what brings the text back.
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.Device.OutputGroup");
+            box.Location = new Point(8, 6);
+            box.Size = new Size(500, 92);
+            // Two columns: sound cards report themselves at length
+            // ("Speakers (Realtek(R) Audio)"), and one column left the list 171
+            // pixels wide — a name truncated to "Speakers (Realt...".
+            box.Tag = "span2";
+
             Label lblSoundCard = new Label();
             lblSoundCard.Text = Localization.T("Settings.Device.SoundCard");
-            lblSoundCard.Location = new Point(10, 22);
+            lblSoundCard.Location = new Point(14, 29);
             lblSoundCard.Size = new Size(160, 20);
 
             cmbSoundCard = new ComboBox();
             cmbSoundCard.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbSoundCard.Location = new Point(180, 19);
+            cmbSoundCard.Location = new Point(184, 26);
             cmbSoundCard.Size = new Size(240, 24);
             cmbSoundCard.AccessibleName = Localization.T("Settings.Device.SoundCard");
             cmbSoundCard.TabIndex = 0;
@@ -1087,8 +1111,8 @@ namespace Nemoviz_Book_Reader
                     applyAudioDeviceLive?.Invoke(deviceIds[i]);
             };
 
-            page.Controls.Add(lblSoundCard);
-            page.Controls.Add(cmbSoundCard);
+            box.Controls.Add(lblSoundCard);
+            box.Controls.Add(cmbSoundCard);
             // No hint on the card list (Gordan, 2026-08-02). A list of sound
             // cards under a label that says which sound card explains itself, and
             // a hint that only restates the caption costs a reader the same time
@@ -1102,11 +1126,13 @@ namespace Nemoviz_Book_Reader
             chkKeepAlive = new CheckBox();
             chkKeepAlive.Text = Localization.T("Settings.Device.KeepAlive");
             chkKeepAlive.AccessibleName = Localization.T("Settings.Device.KeepAlive");
-            chkKeepAlive.SetBounds(10, 58, 470, 24);
+            chkKeepAlive.SetBounds(14, 58, 470, 24);
             chkKeepAlive.TabIndex = 1;
             chkKeepAlive.Checked = appSettings.KeepDeviceAlive;
-            page.Controls.Add(chkKeepAlive);
-            page.Controls.Add(MakeHint("Settings.Device.KeepAlive.Hint", 28, 84, 452, 60, 2));
+            box.Controls.Add(chkKeepAlive);
+
+            page.Controls.Add(box);
+            page.Controls.Add(MakeHint("Settings.Device.KeepAlive.Hint", 22, 106, 452, 60, 2));
             return page;
         }
 
