@@ -392,10 +392,19 @@ Prop.Info.Off=off
 Prop.Info.Protection=Distortion protection
 Dialog.NoBooksFound.Message=No supported books were found in the selected folder.
 Dialog.NoBooksFound.Title=Add folder
-Dialog.ConfirmManyBooks.Message=Found {0} books. Continue with import?
-Dialog.ConfirmManyBooks.Title=Add folder
+; Asked on every folder import, not only a big one — so it needs the singular
+; as well, or a folder holding one book says "Found 1 books".
+Dialog.ConfirmImport.Message=Found {0} books. Import them?
+Dialog.ConfirmImport.One=Found one book. Import it?
+Dialog.ConfirmImport.Title=Add folder
 Dialog.ImportFolderSuccess.Message=Imported {0} books.
-Dialog.ImportFolderSuccess.Skipped={0} skipped (protected or unreadable).
+Dialog.ImportFolderSuccess.Skipped={0} were left out.
+Dialog.ImportFolderSuccess.SkippedList=These did not go in:
+; Reasons, kept short: they stand after a file name in that list.
+Dialog.Skipped.Drm=protected
+Dialog.Skipped.Cancelled=cancelled
+Dialog.ReimportExisting.Title=Already in the library
+Dialog.ReimportExisting.Message={0} is already on the shelf. Importing it again refreshes what is in the book folder. Your place in the book and your bookmarks are kept — but if the file has changed since last time, the words will have moved and your place will no longer be where you left it. Import it again?
 Dialog.ImportFolderSuccess.Title=Add folder
 Dialog.ImportFolderError.Message=Error importing folder: {0}
 

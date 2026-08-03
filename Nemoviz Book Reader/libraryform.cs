@@ -1646,8 +1646,19 @@ namespace Nemoviz_Book_Reader
                 ofd.Filter = BuildFileFilter();
                 ofd.FilterIndex = 4; // default to "All supported files"
                 ofd.Title = Localization.T("Library.ImportFile.Title");
+                // Reopen where the user last browsed, the same as Open folder.
+                // Windows usually does this by itself, but only usually, and the
+                // two dialogs disagreeing was the only reason for the difference.
+                if (!string.IsNullOrEmpty(appSettings.LastImportFileFolder)
+                    && System.IO.Directory.Exists(appSettings.LastImportFileFolder))
+                    ofd.InitialDirectory = appSettings.LastImportFileFolder;
                 if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    try { appSettings.SetLastImportFileFolder(
+                        System.IO.Path.GetDirectoryName(ofd.FileName)); }
+                    catch { }
                     ImportFile(ofd.FileName);
+                }
             }
         }
 
@@ -1720,6 +1731,17 @@ namespace Nemoviz_Book_Reader
         /// that once for the whole batch.</summary>
         private bool ImportFileCore(string filePath, bool quiet)
         {
+            string ignored;
+            return ImportFileCore(filePath, quiet, out ignored);
+        }
+
+        /// <param name="why">Why it did not go in, when it did not: something
+        /// short and already known at the point of failure. A batch import shows
+        /// these beside the file names, because a count of what is missing is not
+        /// something a reader can act on.</param>
+        private bool ImportFileCore(string filePath, bool quiet, out string why)
+        {
+            why = null;
             string destFolder = null;
             bool createdFolder = false;
             try
@@ -1756,6 +1778,20 @@ namespace Nemoviz_Book_Reader
                     : System.IO.Path.Combine(appSettings.LibraryPath, bookName);
 
                 createdFolder = !System.IO.Directory.Exists(destFolder);
+                // Importing over a book that is already on the shelf. Nobody
+                // remembered deciding this (Gordan, 2026-08-03), and what it
+                // actually does is worth being asked about: the reading position
+                // and the bookmarks SURVIVE, audio files already there are left
+                // alone — but content.txt is written again. For a text book that
+                // means the words can move while the position stays where it was,
+                // and the reader lands somewhere they never stopped.
+                if (!createdFolder && !quiet)
+                {
+                    if (!MessageForm.ShowConfirm(this,
+                            Localization.T("Dialog.ReimportExisting.Message", bookName),
+                            Localization.T("Dialog.ReimportExisting.Title"), true))
+                        return false;
+                }
                 if (createdFolder)
                     System.IO.Directory.CreateDirectory(destFolder);
 
@@ -1878,6 +1914,7 @@ namespace Nemoviz_Book_Reader
                     if (doc.DrmProtected)
                     {
                         if (createdFolder) TryDeleteFolder(destFolder);
+                        why = Localization.T("Dialog.Skipped.Drm");
                         if (!quiet)
                             MessageForm.ShowInfo(this, Localization.T("Dialog.DrmProtected.Message"),
                                 Localization.T("Dialog.DrmProtected.Title"));
@@ -1950,11 +1987,15 @@ namespace Nemoviz_Book_Reader
                 // User cancelled the archive password prompt — quietly undo the
                 // empty folder we just made, no error dialog.
                 if (createdFolder) TryDeleteFolder(destFolder);
+                why = Localization.T("Dialog.Skipped.Cancelled");
                 return false;
             }
             catch (Exception ex)
             {
                 if (createdFolder) TryDeleteFolder(destFolder);
+                // The exception's own message, not a category: it is already the
+                // most specific thing anyone knows, and it costs no extra work.
+                why = ex.Message;
                 if (!quiet)
                     MessageForm.ShowInfo(this, Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
                 return false;
@@ -2070,21 +2111,30 @@ namespace Nemoviz_Book_Reader
                     MessageForm.ShowInfo(this, Localization.T("Dialog.NoBooksFound.Message"), Localization.T("Dialog.NoBooksFound.Title"));
                     return;
                 }
-                if (total > 50)
-                {
-                    bool proceed = MessageForm.ShowConfirm(this,
-                        Localization.T("Dialog.ConfirmManyBooks.Message", total),
-                        Localization.T("Dialog.ConfirmManyBooks.Title"));
-                    if (!proceed) return;
-                }
+                // ALWAYS ask, whatever the number (Gordan, 2026-08-03). A
+                // threshold nobody can see is worse than no threshold: under it
+                // the reader was told nothing at all, and over it a question
+                // appeared out of nowhere. The count is the useful part, and it
+                // is useful at three books as much as at three hundred.
+                if (!MessageForm.ShowConfirm(this,
+                        total == 1 ? Localization.T("Dialog.ConfirmImport.One")
+                                   : Localization.T("Dialog.ConfirmImport.Message", total),
+                        Localization.T("Dialog.ConfirmImport.Title")))
+                    return;
 
-                int imported = 0, skipped = 0;
+                int imported = 0;
+                var skipped = new List<string>();
 
                 // Each text-book file → its own book (quiet, no per-file dialogs).
                 // A file that can't be imported (DRM-protected, unreadable) is
                 // counted so the summary can tell the user some were left out.
                 foreach (string tf in textFiles)
-                    if (ImportFileCore(tf, true)) imported++; else skipped++;
+                {
+                    string why;
+                    if (ImportFileCore(tf, true, out why)) imported++;
+                    else skipped.Add(System.IO.Path.GetFileName(tf) +
+                                     (string.IsNullOrEmpty(why) ? "" : " — " + why));
+                }
 
                 // Each audio folder → one book (copy its files, as before, but not
                 // the text files handled above).
@@ -2109,9 +2159,23 @@ namespace Nemoviz_Book_Reader
 
                 LoadBooks();
                 string msg = Localization.T("Dialog.ImportFolderSuccess.Message", imported);
-                if (skipped > 0)
-                    msg += " " + Localization.T("Dialog.ImportFolderSuccess.Skipped", skipped);
-                MessageForm.ShowInfo(this, msg, Localization.T("Dialog.ImportFolderSuccess.Title"));
+                if (skipped.Count == 0)
+                {
+                    MessageForm.ShowInfo(this, msg, Localization.T("Dialog.ImportFolderSuccess.Title"));
+                }
+                else
+                {
+                    // NAMES, not a number (Gordan, 2026-08-03). "3 skipped" tells
+                    // a reader that something is missing and nothing about which
+                    // book or what to do; the name and the reason are what makes
+                    // it actionable. A list is material to read, not an event to
+                    // dismiss, so it goes in the readable box rather than a
+                    // message box (§ a hint is material; a notice is an event).
+                    msg += " " + Localization.T("Dialog.ImportFolderSuccess.Skipped", skipped.Count)
+                         + "\r\n\r\n" + Localization.T("Dialog.ImportFolderSuccess.SkippedList")
+                         + "\r\n" + string.Join("\r\n", skipped.ToArray());
+                    MessageForm.ShowHint(this, msg, Localization.T("Dialog.ImportFolderSuccess.Title"));
+                }
             }
             catch (Exception ex)
             {
