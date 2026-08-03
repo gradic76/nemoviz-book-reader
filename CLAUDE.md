@@ -1359,9 +1359,24 @@ which voice they use. NBR supplies the tool, the user supplies the content.
 > F2 opens Settings from anywhere. A choice that could not be undone would be a
 > trap rather than a freedom.
 >
-> Verified: `follow`, empty and null all resolve without being counted as a
-> choice; `classic` and `new` are. The high-contrast branch itself is stated
-> rather than measured — exercising it means changing the machine's own theme.
+> **Measured with a contrast theme actually switched on** (Gordan turned one on,
+> 2026-08-03). `follow` and empty resolve to `ClassicTheme` and the skins are not
+> reached; `classic` likewise; `new` stays `NewTheme` and keeps its own look.
+> End to end, the Settings dialog under `follow` comes up in the system's own
+> colours — dialog and page both (45,50,54), the scheme's `Control` exactly —
+> while under `new` it is the skin's metal and glass.
+>
+> **The same run settled a separate question.** Windows dark mode does NOT reach
+> a WinForms app through `SystemColors`: with Windows dark, `SystemColors.Window`
+> was white; with Windows light, white; with a contrast theme, (45,50,54). So
+> "follow the system colours" buys high contrast and nothing else — a Light/Dark
+> theme has to read `HKCU\…\Themes\Personalize\AppsUseLightTheme` and carry its
+> own palette.
+>
+> **Left to look at with eyes**: under `new` + high contrast a group reports a
+> white `BackColor` against pale text. The stickers are painted by the canvas
+> rather than filled from `BackColor`, so that may mean nothing on screen — but
+> it has not been seen, only read.
 
 
 `UiTheme.cs`. While the new design is being worked out, the app can be built
