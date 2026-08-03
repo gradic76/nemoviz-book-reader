@@ -1682,9 +1682,42 @@ key otherwise.
 **No display drivers.** Too many vendors, series and models; the binary would
 balloon and some vendors charge for driver access (Gordan). **BrlAPI (BRLTTY)** is
 the real universal answer — output *and* input, including routing keys, ~90
-display families — but it is **the wrong bet on Windows**: BRLTTY must be running
-and holding the display, while on Windows the display is held by NVDA or JAWS, and
-two cannot fight over one device.
+display families.
+
+> **CORRECTION, 2026-08-04.** This section used to call BrlAPI "the wrong bet on
+> Windows: two cannot fight over one device". The device really does have one
+> owner, but the conclusion was wrong, and Gordan pushed back on it. **Not
+> fighting over the device is what BrlAPI is FOR:** *"An essential purpose of
+> BrlAPI is to manage concurrent access to the braille display between the
+> brltty daemon and applications, managed per Tty."* Clients stack as a pile of
+> sheets — brltty at the bottom, each client above. A client that takes its tty
+> gets the cells, and keys it does not claim fall back down as brltty commands.
+> **NVDA is already such a client**: it ships a BRLTTY braille driver, and NVDA
+> 2026.1 updated its BrlAPI to 0.8.7 (#18657), so the client is current, not
+> legacy. The shape is `display → BRLTTY → BrlAPI → {NVDA, NBR}`, with no screen
+> reader switched off.
+>
+> **What is genuinely unknown is Windows, not sharing.** BrlAPI's whole
+> concurrency chapter is written for Linux — VTs, X11, `WINDOWPATH` — and says
+> nothing about what a "tty" is on Windows. That is to be TESTED, and this file
+> should not assert it either way a second time.
+>
+> **Cost of entry, from BRLTTY's own Windows page:** the BrlAPI service is
+> installed by `enable-brlapi.bat`, which "should be run by a user that has
+> administrative privileges", and USB access goes through LibUSB-Win32 or
+> libusb-1.0/WinUSB with an `.inf` to install per device. So it can be bundled
+> (BRLTTY is LGPL 2.1+, and a separate process makes the obligation simple) but
+> it **cannot be made invisible** — and swapping a display's USB driver can take
+> it away from NVDA's own native driver, which makes this a change to the user's
+> whole braille stack rather than an addition to ours.
+>
+> **Nothing here is decided until the deep test below.** If a focusable control
+> already gives panning and routing through the screen reader, BrlAPI buys very
+> little for that price.
+>
+> Method note: the NVDA version was first read by grepping `changes.html`, which
+> lists every release, and a mention of "NVDA 2024.1 and above" was taken for the
+> installed version. It is 2026.1.1. Read `nvda.exe`'s `VersionInfo`.
 
 **Through the screen reader, speech and braille are different channels.** Sending
 text to NVDA's `speakText` or JAWS's `SayString` — what PotPlayer and Screen Reader
@@ -3492,6 +3525,31 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
 
 ## 11. TODO (open items)
 
+- **The braille settings are largely inert, and one of them lies** (traced in
+  code 2026-08-04, after Gordan reasoned it out from the tables). Facts, not
+  suspicions:
+  - `LibLouis.cs` binds **only** `lou_backTranslateString`. There is **no**
+    text→braille translation anywhere in NBR. An output table could not work
+    even if something wanted one.
+  - `BookData.TextBrailleTable` — the "Braille table" combo in **both** Settings
+    and Properties — is written to the ini and read back from it, and **no other
+    code ever reads it**. Dead.
+  - `SettingsForm.chkBraille` is **never loaded from and never saved to**
+    `AppSettings` (there is no braille field there at all). It resets on every
+    open, and its only effect is grey­ing the combo beside it. Compare
+    `chkVisual.Checked = appSettings.Visual;` one group over, which is wired.
+  - Meanwhile braille really is sent, **unconditionally**: `PushBrailleIfFocusLeft`
+    tests focus, not any setting. So a reader who unticks "Use braille output"
+    still gets braille. **A switch that does nothing is worse than no switch**,
+    and worst of all for this audience.
+  - What IS live: `BookData.BrailleTable` (the liblouis table a `.brf` was
+    back-translated with — set by `BrfParser`, carried on import, edited in
+    Properties) and `BookData.TextBraille` (per book, drives `OpensReadingWindow`).
+  - **Gordan's conclusion, which the code confirms: tables are an IMPORT concern.**
+    Once a book is parsed into the library the table has no further job, because
+    the screen reader translates the output with the table set in its own braille
+    settings. The output table belongs out of Settings and out of Properties; the
+    import table stays.
 - **Waiting on Gordan's own eyes and hands** (list opened 2026-08-03). None of
   these is a suspected fault — they are things that were built, measured and
   found correct by probe, and that a measurement *cannot* confirm:
@@ -3501,10 +3559,16 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   - **The three visual reading modes in motion** — page, two rows, single row.
     A probe can say the right range is painted; only a reader can say whether
     the text moves the way the mode promises.
-  - **Braille on the reading surface.** The surface is a `RichTextBox`, chosen
-    partly because a real focusable text control is what lets the screen reader
-    braille and pan it by its own tracking (§ "The idea worth testing"). That
-    whole bet is still untested on an actual display.
+  - **Braille on the reading surface — the deep test, and now the item the
+    braille transport hangs on.** The surface is a `RichTextBox`, chosen partly
+    because a real focusable text control is what lets the screen reader braille
+    and pan it by its own tracking (§ "The idea worth testing"). Today there are
+    **two routes switched by focus**: with the surface focused `PushBrailleIfFocusLeft`
+    deliberately stays silent and NVDA brailles the control itself; without it,
+    NBR pushes the sentence as a transient `brailleMessage`. Neither has been on
+    a display. **If the first route really gives panning and routing keys, BrlAPI
+    buys almost nothing; if it does not, it buys everything.** Test this before
+    spending another hour on BRLTTY.
   - **Light and Dark themes** — deferred by Gordan ("za light/dark ćemo još
     vidjeti"). Remember `SystemColors` does NOT track Windows dark mode; the
     signal is `HKCU\…\Themes\Personalize\AppsUseLightTheme`, and scrollbars,
