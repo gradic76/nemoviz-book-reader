@@ -29,23 +29,30 @@ namespace Nemoviz_Book_Reader
         private string libraryPath;
         private bool createBookIni;
 
-        /// <param name="extractArchives">Whether an archive found while scanning
-        /// may be unpacked in place and its volumes then DELETED. True is right
-        /// for library-owned space — the archive is already ours and there is
-        /// nothing left to keep. It is badly wrong for a folder the user chose
-        /// for import: that folder is theirs, and unpacking into it and deleting
-        /// the originals would be destroying the source. That hazard is the real
-        /// reason "Open folder" used to refuse any folder holding an archive; the
-        /// comment there blamed multi-volume paths, which was not it.</param>
+        /// <param name="ownsFolder">Whether the folder being scanned BELONGS to
+        /// the library. Only then may an archive found in it be unpacked in
+        /// place and its volumes then DELETED — the rule being that NBR copies
+        /// into the library and never touches the source (Gordan). Deleting is
+        /// for one case only: a user filling the library through Explorer, where
+        /// the archive is already inside library-owned space and there is
+        /// nothing left to keep.
+        ///
+        /// <para><b>It defaults to false on purpose.</b> The dangerous behaviour
+        /// is the one that has to be asked for by name, so a caller who forgets
+        /// gets the safe scan instead of eating somebody's disk. This flag was
+        /// added on 2026-08-03, when "Open folder" stopped refusing folders that
+        /// hold archives — up to then the refusal was, without saying so, the
+        /// only thing standing between the import and the user's own
+        /// files.</para></param>
         public LibraryScanner(string libraryPath, bool createBookIni = false,
-                              bool extractArchives = true)
+                              bool ownsFolder = false)
         {
             this.libraryPath = libraryPath;
             this.createBookIni = createBookIni;
-            this.extractArchives = extractArchives;
+            this.ownsFolder = ownsFolder;
         }
 
-        private readonly bool extractArchives = true;
+        private readonly bool ownsFolder;
 
         public List<BookData> Scan()
         {
@@ -74,7 +81,7 @@ namespace Nemoviz_Book_Reader
                 {
                     // Not ours to unpack or delete — the caller is looking at a
                     // folder the user picked, and imports its archives itself.
-                    if (!extractArchives) continue;
+                    if (!ownsFolder) continue;
                     // Cap archive-in-archive recursion (see MaxArchiveDepth).
                     if (archiveDepth >= MaxArchiveDepth) continue;
                     ExtractAndScan(file, folderPath, books, archiveDepth);

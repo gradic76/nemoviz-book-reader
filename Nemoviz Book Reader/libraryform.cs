@@ -731,7 +731,11 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         private void LoadBooks()
         {
-            LibraryScanner scanner = new LibraryScanner(appSettings.LibraryPath, true);
+            // ownsFolder: TRUE, and this is the only place that may say so. The
+            // library is NBR's own space, so an archive dropped in there through
+            // Explorer is unpacked and the original removed — that one case is
+            // what the deleting was ever for.
+            LibraryScanner scanner = new LibraryScanner(appSettings.LibraryPath, true, true);
             books = scanner.Scan();
             RebuildShelf(null);
         }
@@ -2105,10 +2109,10 @@ namespace Nemoviz_Book_Reader
                 //    ebooks is a COLLECTION, so each file is its own book;
                 //  • loose AUDIO files — a folder of audio is ONE book (its parts).
                 var textFiles = EnumerateTextBookFiles(folderPath);
-                // extractArchives:false — see the note above. Without it this
-                // call would unpack the user's archives into their own folder
-                // and delete them.
-                var audioBooks = new LibraryScanner(folderPath, false, false).Scan()
+                // ownsFolder stays false — this folder is the USER'S. Without
+                // that, the scan would unpack their archives into their own
+                // folder and delete the originals.
+                var audioBooks = new LibraryScanner(folderPath).Scan()
                     .Where(b => FolderHasAudio(b.FolderPath)).ToList();
                 List<string> archives, orphanVolumes;
                 CollectArchives(folderPath, out archives, out orphanVolumes);
