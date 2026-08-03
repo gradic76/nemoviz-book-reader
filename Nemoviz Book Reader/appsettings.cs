@@ -75,6 +75,31 @@ namespace Nemoviz_Book_Reader
         /// off from any dialog that has the toggle.</summary>
         public bool ShowHints { get; private set; }
 
+        /// <summary>How a book is shown on screen when nothing has been decided
+        /// FOR that book: the same six choices Properties offers, standing as the
+        /// rule the way the language→voice map does (§ Settings and Properties are
+        /// the same two combos). A book takes these the first time it is opened
+        /// and owns its copy from then on, so changing the rule later does not
+        /// walk over a book someone has already set up by hand.
+        ///
+        /// <para>Until 2026-08-03 these six controls existed in Settings and in
+        /// Properties and wrote nowhere at all.</para></summary>
+        public bool Visual { get; private set; }
+        public int VisualMode { get; private set; }
+        public int Highlight { get; private set; }
+        public int HighlightColour { get; private set; }
+        public int TextColour { get; private set; }
+        public int BackColour { get; private set; }
+
+        /// <summary>What the reading window was left set to — the face and the
+        /// size. Not per book (Gordan, 2026-08-03: "najbolje da pamti zadnje
+        /// odabrano"): this is the reader's eyesight, which does not change from
+        /// one book to the next, and it is chosen in the window itself rather
+        /// than in Properties. Empty font means "whatever the window defaults
+        /// to".</summary>
+        public string ReadingFont { get; private set; }
+        public int ReadingFontSize { get; private set; }
+
         /// <summary>The libmpv <c>audio-device</c> identifier for output (e.g.
         /// <c>wasapi/{…}</c>). Empty means <c>auto</c> — mpv picks the system
         /// default. Set from Settings → Device.</summary>
@@ -110,6 +135,30 @@ namespace Nemoviz_Book_Reader
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
             ShowHints = ini.Read("App", "ShowHints", "1") == "1";
             UiTheme = ini.Read("App", "Theme", Nemoviz_Book_Reader.UiTheme.ClassicId);
+
+            Visual = ini.Read("Visual", "Use", "0") == "1";
+            VisualMode = Clamp(ReadInt("Visual", "Mode", 0), 0, 2);
+            Highlight = Clamp(ReadInt("Visual", "Highlight", 1), 0, 2);
+            HighlightColour = ReadingColours.Clamp(
+                ReadInt("Visual", "HighlightColour", ReadingColours.DefaultHighlight));
+            TextColour = ReadingColours.Clamp(
+                ReadInt("Visual", "TextColour", ReadingColours.DefaultText));
+            BackColour = ReadingColours.Clamp(
+                ReadInt("Visual", "BackColour", ReadingColours.DefaultBack));
+
+            ReadingFont = ini.Read("Visual", "Font", "");
+            ReadingFontSize = Clamp(ReadInt("Visual", "FontSize", 26), 10, 96);
+        }
+
+        private int ReadInt(string section, string key, int def)
+        {
+            int v;
+            return int.TryParse(ini.Read(section, key, def.ToString()), out v) ? v : def;
+        }
+
+        private static int Clamp(int v, int lo, int hi)
+        {
+            return v < lo ? lo : (v > hi ? hi : v);
         }
 
         public void SetUiTheme(string id)
@@ -131,6 +180,47 @@ namespace Nemoviz_Book_Reader
             ShowHints = value;
             ini.Write("App", "ShowHints", value ? "1" : "0");
         }
+
+        /// <summary>The visual rule, as Settings left it.</summary>
+        public void SetVisualDefaults(bool use, int mode, int highlight,
+                                      int highlightColour, int textColour, int backColour)
+        {
+            Visual = use;
+            VisualMode = Clamp(mode, 0, 2);
+            Highlight = Clamp(highlight, 0, 2);
+            HighlightColour = ReadingColours.Clamp(highlightColour);
+            TextColour = ReadingColours.Clamp(textColour);
+            BackColour = ReadingColours.Clamp(backColour);
+
+            ini.Write("Visual", "Use", Visual ? "1" : "0");
+            ini.Write("Visual", "Mode", VisualMode.ToString());
+            ini.Write("Visual", "Highlight", Highlight.ToString());
+            ini.Write("Visual", "HighlightColour", HighlightColour.ToString());
+            ini.Write("Visual", "TextColour", TextColour.ToString());
+            ini.Write("Visual", "BackColour", BackColour.ToString());
+        }
+
+        /// <summary>What the reading window is left set to. Written as it happens
+        /// rather than on a save button, because the window has none — the reader
+        /// changes the face or the size and closes it.</summary>
+        public void SetReadingFont(string family, int size)
+        {
+            string f = family ?? "";
+            int s = Clamp(size, 10, 96);
+            // Called every time the face is applied, which includes every layout
+            // pass — so nothing is written unless something actually changed.
+            if (f == ReadingFont && s == ReadingFontSize) return;
+            ReadingFont = f;
+            ReadingFontSize = s;
+            ini.Write("Visual", "Font", ReadingFont);
+            ini.Write("Visual", "FontSize", ReadingFontSize.ToString());
+        }
+
+        /// <summary>Set by the app at startup so a window with no AppSettings in
+        /// its hands can still remember what the reader chose. The reading window
+        /// is such a window: it is built from the player, which owns the settings,
+        /// but it is the window itself that knows the font was changed.</summary>
+        public static AppSettings Current;
 
         /// <summary>The remembered setup of a voice, or the neutral default when
         /// this machine has never set that voice up.</summary>
