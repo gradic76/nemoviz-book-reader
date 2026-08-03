@@ -394,9 +394,14 @@ Dialog.NoBooksFound.Message=No supported books were found in the selected folder
 Dialog.NoBooksFound.Title=Add folder
 ; Asked on every folder import, not only a big one — so it needs the singular
 ; as well, or a folder holding one book says "Found 1 books".
-Dialog.ConfirmImport.Message=Found {0} books. Import them?
+; {0} total, {1} audio, {2} text, {3} special formats (DAISY, narrated EPUB,
+; braille), {4} archives, {5} the library path. A kind with none of its own
+; still shows its zero — the breakdown is what the reader checks against what
+; they expected, and a missing line is harder to notice than a nought.
+Dialog.ConfirmImport.Message={0} books detected on the selected location: {1} audio books, {2} text books, {3} special formats and {4} archives.\n\nIf this is correct, after you confirm the books will be copied to your library and the archives will be extracted there. Your library is at {5}.\n\nNothing changes on the source location — everything stays intact, so no worries.\n\nIf the numbers do not match what you expected, try rearranging the data you want to import. Bulk importing has some limits on telling titles apart, and NBR cannot guarantee it gets every one right.\n\nThis could take a while, so try not to interrupt it.
 Dialog.ConfirmImport.One=Found one book. Import it?
 Dialog.ConfirmImport.Title=Add folder
+Btn.Continue=Continue
 Dialog.ImportFolderSuccess.Message=Imported {0} books.
 Dialog.ImportFolderSuccess.Skipped={0} were left out.
 Dialog.ImportFolderSuccess.SkippedList=These did not go in:

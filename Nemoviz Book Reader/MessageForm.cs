@@ -85,7 +85,27 @@ namespace Nemoviz_Book_Reader
                 MessageBoxIcon.Question, def) == DialogResult.Yes;
         }
 
-        private static Form Build(string text, string title, bool confirm, bool defaultToNo = false)
+        /// <summary>A question whose answer is not "yes" — <b>Continue</b> and
+        /// <b>Cancel</b> rather than Yes and No, for the one case where the
+        /// dialog is several lines of numbers to weigh rather than a single
+        /// sentence to agree with (the bulk import warning).
+        ///
+        /// <para>Windows cannot relabel the buttons of a real message box, so
+        /// the classic look gets <c>OK / Cancel</c> — the same two answers under
+        /// the names that box does have. The new look draws its own buttons and
+        /// says exactly what was asked for.</para></summary>
+        public static bool ShowContinue(IWin32Window owner, string text, string title)
+        {
+            if (!UiTheme.Current.BuildsOwnLayout)
+                return MessageBox.Show(owner, text, title, MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Question) == DialogResult.OK;
+
+            using (Form f = Build(text, title, true, false, "Btn.Continue", "Btn.Cancel"))
+                return f.ShowDialog(owner) == DialogResult.Yes;
+        }
+
+        private static Form Build(string text, string title, bool confirm, bool defaultToNo = false,
+                                  string primaryKey = null, string secondaryKey = null)
         {
             // A multiline TextBox breaks lines on CRLF and NOTHING else: a bare
             // \n out of a language file draws a box glyph and runs the paragraphs
@@ -117,14 +137,14 @@ namespace Nemoviz_Book_Reader
             f.Controls.Add(msg);
 
             Button primary = new Button();
-            primary.Text = Localization.T(confirm ? "Btn.Yes" : "Btn.OK");
+            primary.Text = Localization.T(primaryKey ?? (confirm ? "Btn.Yes" : "Btn.OK"));
             primary.DialogResult = confirm ? DialogResult.Yes : DialogResult.OK;
             primary.TabIndex = 1;
 
             if (confirm)
             {
                 Button secondary = new Button();
-                secondary.Text = Localization.T("Btn.No");
+                secondary.Text = Localization.T(secondaryKey ?? "Btn.No");
                 secondary.DialogResult = DialogResult.No;
                 secondary.TabIndex = 2;
 

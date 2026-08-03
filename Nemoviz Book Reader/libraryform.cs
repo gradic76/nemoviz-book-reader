@@ -2128,11 +2128,29 @@ namespace Nemoviz_Book_Reader
                 // the reader was told nothing at all, and over it a question
                 // appeared out of nowhere. The count is the useful part, and it
                 // is useful at three books as much as at three hundred.
-                if (!MessageForm.ShowConfirm(this,
-                        total == 1 ? Localization.T("Dialog.ConfirmImport.One")
-                                   : Localization.T("Dialog.ConfirmImport.Message", total),
-                        Localization.T("Dialog.ConfirmImport.Title")))
-                    return;
+                //
+                // More than one book is a BULK import, and that gets the full
+                // warning: the breakdown by kind, where the books are going,
+                // that the source is left alone, that the separation is not
+                // guaranteed perfect, and that it takes a while. Gordan's
+                // words. One book keeps the one-line question — there is
+                // nothing to weigh.
+                if (total == 1)
+                {
+                    if (!MessageForm.ShowConfirm(this, Localization.T("Dialog.ConfirmImport.One"),
+                            Localization.T("Dialog.ConfirmImport.Title")))
+                        return;
+                }
+                else
+                {
+                    int special = CountSpecialFormats(textFiles);
+                    if (!MessageForm.ShowContinue(this,
+                            Localization.T("Dialog.ConfirmImport.Message", total,
+                                audioBooks.Count, textFiles.Count - special, special,
+                                archives.Count, appSettings.LibraryPath),
+                            Localization.T("Dialog.ConfirmImport.Title")))
+                        return;
+                }
 
                 int imported = 0;
                 var skipped = new List<string>();
@@ -2212,6 +2230,43 @@ namespace Nemoviz_Book_Reader
             {
                 MessageForm.ShowInfo(this, Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
             }
+        }
+
+        /// <summary>How many of the text files are a SPECIAL format rather than a
+        /// plain document — braille, or an EPUB that carries its own narration
+        /// (Gordan's third column). DAISY does not appear here: a DAISY book is a
+        /// folder, and it is taken by <c>ImportDaisyFolder</c> before any of this
+        /// runs.
+        ///
+        /// <para>The narrated EPUB is worth the look inside the zip: it is the
+        /// one that arrives believing it is a document and turns out to be a
+        /// recording. Only the central directory is read — entry names, not
+        /// content — so it costs little even over a folder of them.</para></summary>
+        private static int CountSpecialFormats(List<string> textFiles)
+        {
+            int n = 0;
+            foreach (string f in textFiles)
+            {
+                string ext = System.IO.Path.GetExtension(f).ToLowerInvariant();
+                if (ext == ".brf" || ext == ".brl" || ext == ".bra") { n++; continue; }
+                if (ext != ".epub") continue;
+                try
+                {
+                    using (var z = System.IO.Compression.ZipFile.OpenRead(f))
+                    {
+                        bool smil = false, audio = false;
+                        foreach (var e in z.Entries)
+                        {
+                            string x = System.IO.Path.GetExtension(e.FullName).ToLowerInvariant();
+                            if (x == ".smil") smil = true;
+                            else if (x == ".mp3" || x == ".m4a" || x == ".mp4" || x == ".ogg") audio = true;
+                            if (smil && audio) { n++; break; }
+                        }
+                    }
+                }
+                catch { }
+            }
+            return n;
         }
 
         /// <summary>Every archive in the folder that is a starting point, and
