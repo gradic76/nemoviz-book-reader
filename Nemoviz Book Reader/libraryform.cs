@@ -781,12 +781,27 @@ namespace Nemoviz_Book_Reader
 
         // The last-opened book counts as "Now reading" only while it's still
         // in progress (Reading category) — a finished or rewound book isn't.
+        /// <summary>The book the PLAYER currently has loaded — nothing else.
+        ///
+        /// <para>It used to be worked out here instead: the last opened book, and
+        /// only if it had been listened to at all. Those are two different
+        /// questions and they gave two different answers. Gordan had *Test
+        /// rječnik* loaded and playable in the player while the Library said "No
+        /// book loaded", because he had not yet played a second of it, so the
+        /// shelf filed it under Unread and refused to call it the book being
+        /// read. Loading a book IS reading it; the progress bar decides how far
+        /// in, not whether.</para>
+        ///
+        /// <para>The player hands its answer in on the way (<c>currentBook</c>,
+        /// or null when it holds nothing), so the two windows now say the same
+        /// thing by construction rather than by two rules kept in step. And when
+        /// the player holds nothing it is because it started empty — which is
+        /// exactly when it opens this window by itself.</para></summary>
         private bool IsNowReading(BookData b)
         {
-            string last = appSettings.LastOpenedBookPath;
-            return !string.IsNullOrEmpty(last)
-                && PathsEqual(b.FolderPath, last)
-                && GetCategory(b) == CatReading;
+            return b != null
+                && !string.IsNullOrEmpty(activeBookFolderPath)
+                && PathsEqual(b.FolderPath, activeBookFolderPath);
         }
 
         private int GetShelfStatus(BookData b)

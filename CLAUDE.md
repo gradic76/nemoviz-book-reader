@@ -2267,6 +2267,21 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 
 ### Now reading is its own place (2026-08-03)
 
+**"Now reading" is whatever the PLAYER has loaded, and nothing else.** The
+Library used to decide for itself: the last opened book, *and* only if it had
+been listened to at all. Those are two different questions, and they gave two
+different answers — Gordan had *Test rječnik* loaded and playable while the
+Library said "No book loaded", because he had not yet played a second of it, so
+the shelf filed it under Unread and refused to call it the book being read.
+**Loading a book is reading it**; progress decides how far in, not whether. The
+player already hands its answer in (`currentBook.FolderPath`, or null), so the
+two windows now agree by construction rather than by two rules kept in step.
+
+That also closes the invariant Gordan asked for: "No book loaded" can now only
+mean the player is holding nothing, and that is precisely when
+`DecideStartupView` sets `openLibraryOnStartup` and the player opens this window
+by itself.
+
 **Two lists, not one with a pinned row.** The book being read sits in its own
 one-row `ListView` above a **one-pixel rule**, and is **taken off the shelf
 entirely** — a book in two places at once is a book you can lose track of. Each
