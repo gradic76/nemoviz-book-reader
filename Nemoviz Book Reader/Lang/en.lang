@@ -195,6 +195,11 @@ Player.OpenFile.Title=Select a book
 ; Shared file filters
 Filter.Audiobooks=Audiobooks
 Filter.TextBooks=Text books
+; Braille stands on its own rather than among the documents: in NBR it is its
+; own way of reading, with its own tables and its own per-book setting, and the
+; reader who wants it should not have to know which five of eighteen extensions
+; are theirs.
+Filter.BrailleBooks=Braille books
 Filter.Archives=Archives
 Filter.AllSupported=All supported files
 Filter.AllFiles=All files

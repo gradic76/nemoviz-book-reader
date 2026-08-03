@@ -1641,9 +1641,10 @@ namespace Nemoviz_Book_Reader
         {
             return
                 Localization.T("Filter.Audiobooks") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc|" +
-                // .i55 and .dxb are read by the braille parsers and were missing
-                // here, so the only way to pick one was "All files".
-                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.brf;*.brl;*.bra;*.i55;*.dxb|" +
+                // Documents only. The braille formats have their own entry below
+                // — the groups are disjoint, or the split would say nothing.
+                Localization.T("Filter.TextBooks") + "|*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3|" +
+                Localization.T("Filter.BrailleBooks") + "|*.brf;*.brl;*.bra;*.i55;*.dxb|" +
                 Localization.T("Filter.Archives") + "|*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllSupported") + "|*.mp3;*.ogg;*.flac;*.m4a;*.m4b;*.wav;*.opus;*.aac;*.wma;*.ape;*.mka;*.spx;*.oga;*.dsf;*.dff;*.caf;*.aiff;*.aif;*.ac3;*.amr;*.weba;*.webm;*.au;*.voc;*.txt;*.rtf;*.doc;*.docx;*.odt;*.epub;*.fb2;*.htm;*.html;*.pdf;*.mobi;*.azw;*.azw3;*.brf;*.brl;*.bra;*.i55;*.dxb;*.zip;*.rar;*.7z;*.001;*.z01|" +
                 Localization.T("Filter.AllFiles") + "|*.*";
@@ -1654,7 +1655,11 @@ namespace Nemoviz_Book_Reader
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = BuildFileFilter();
-                ofd.FilterIndex = 4; // default to "All supported files"
+                // 1 Audiobooks, 2 Text books, 3 Braille books, 4 Archives,
+                // 5 All supported files, 6 All files. One-based, and it moved
+                // when braille was given an entry of its own — a stale index
+                // here silently opens the dialog on the wrong kind.
+                ofd.FilterIndex = 5;
                 ofd.Title = Localization.T("Library.ImportFile.Title");
                 // Reopen where the user last browsed, the same as Open folder.
                 // Windows usually does this by itself, but only usually, and the
