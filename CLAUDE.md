@@ -2320,7 +2320,13 @@ container's own `ActiveControl` gets one level further and stops dead at the
 asks Windows now** (`GetFocus`), with the managed descent as a fallback. Verified
 by driving real Tab and Shift+Tab keystrokes through two full laps in both looks.
 
-**The View menu asks two questions, not one** (Gordan, 2026-08-03). It used to
+**The menu is called Sort, and the shelf opens the way it was left.** Both
+choices live in `[Library] SortKey` / `SortAscending`, are written the moment
+they change, and are read *before* `BuildUI` so the menu opens with the right two
+ticks instead of showing the default and correcting itself. Verified across a
+real close and reopen.
+
+**The Sort menu asks two questions, not one** (Gordan, 2026-08-03). It used to
 offer six combined entries — alphabetical ascending, alphabetical descending, and
 so on — so every new sort key cost *two* lines, and four keys would have been
 eight. Now: **Alphabetically / Date added / Format / Status**, a separator, then

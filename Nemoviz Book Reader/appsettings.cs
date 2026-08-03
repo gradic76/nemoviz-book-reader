@@ -100,6 +100,13 @@ namespace Nemoviz_Book_Reader
         public string ReadingFont { get; private set; }
         public int ReadingFontSize { get; private set; }
 
+        /// <summary>How the shelf was left sorted: what by, and which way. A
+        /// reader who arranges the library by status once means it, and coming
+        /// back to alphabetical on the next run is the app forgetting something
+        /// it was told (Gordan, 2026-08-03).</summary>
+        public string ShelfSortKey { get; private set; }
+        public bool ShelfSortAscending { get; private set; }
+
         /// <summary>The libmpv <c>audio-device</c> identifier for output (e.g.
         /// <c>wasapi/{…}</c>). Empty means <c>auto</c> — mpv picks the system
         /// default. Set from Settings → Device.</summary>
@@ -148,6 +155,9 @@ namespace Nemoviz_Book_Reader
 
             ReadingFont = ini.Read("Visual", "Font", "");
             ReadingFontSize = Clamp(ReadInt("Visual", "FontSize", 26), 10, 96);
+
+            ShelfSortKey = ini.Read("Library", "SortKey", "alpha");
+            ShelfSortAscending = ini.Read("Library", "SortAscending", "1") == "1";
         }
 
         private int ReadInt(string section, string key, int def)
@@ -214,6 +224,15 @@ namespace Nemoviz_Book_Reader
             ReadingFontSize = s;
             ini.Write("Visual", "Font", ReadingFont);
             ini.Write("Visual", "FontSize", ReadingFontSize.ToString());
+        }
+
+        public void SetShelfSort(string key, bool ascending)
+        {
+            if (key == ShelfSortKey && ascending == ShelfSortAscending) return;
+            ShelfSortKey = string.IsNullOrEmpty(key) ? "alpha" : key;
+            ShelfSortAscending = ascending;
+            ini.Write("Library", "SortKey", ShelfSortKey);
+            ini.Write("Library", "SortAscending", ascending ? "1" : "0");
         }
 
         /// <summary>Set by the app at startup so a window with no AppSettings in

@@ -210,16 +210,16 @@ Menu.File.OpenFile=Open file...
 Menu.File.OpenFolder=Open folder...
 Menu.File.ClearLibrary=Clear library...
 Menu.File.Exit=Exit
-Menu.View=View
+Menu.Sort=Sort
 ; What to sort by, and which way — two questions, so two groups and two ticks
 ; showing at once. Six combined entries meant every new key added two lines.
-Menu.View.Alphabetically=Alphabetically
-Menu.View.DateAdded=Date added
-Menu.View.Format=Format
-Menu.View.Status=Status
-Menu.View.Ascending=Ascending
-Menu.View.Descending=Descending
-Menu.View.ActiveMark=(active)
+Menu.Sort.Alphabetically=Alphabetically
+Menu.Sort.DateAdded=Date added
+Menu.Sort.Format=Format
+Menu.Sort.Status=Status
+Menu.Sort.Ascending=Ascending
+Menu.Sort.Descending=Descending
+Menu.Sort.ActiveMark=(active)
 Menu.Help=Help
 Menu.Help.Help=Help
 Menu.Help.About=About NBR

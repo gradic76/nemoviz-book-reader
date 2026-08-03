@@ -19,13 +19,13 @@ namespace Nemoviz_Book_Reader
         private ToolStripMenuItem menuFile;
         private ToolStripMenuItem menuFileOpenFile;
         private ToolStripMenuItem menuFileOpenFolder;
-        private ToolStripMenuItem menuView;
-        private ToolStripMenuItem menuViewAlpha;
-        private ToolStripMenuItem menuViewDate;
-        private ToolStripMenuItem menuViewFormat;
-        private ToolStripMenuItem menuViewStatus;
-        private ToolStripMenuItem menuViewAsc;
-        private ToolStripMenuItem menuViewDesc;
+        private ToolStripMenuItem menuSort;
+        private ToolStripMenuItem menuSortAlpha;
+        private ToolStripMenuItem menuSortDate;
+        private ToolStripMenuItem menuSortFormat;
+        private ToolStripMenuItem menuSortStatus;
+        private ToolStripMenuItem menuSortAsc;
+        private ToolStripMenuItem menuSortDesc;
         private ToolStripMenuItem menuHelp;
         private ToolStripMenuItem menuHelpHelp;
         private ToolStripMenuItem menuHelpAbout;
@@ -54,7 +54,8 @@ namespace Nemoviz_Book_Reader
 
         private List<BookData> books;          // all scanned books
         // Two independent choices, not one of six combinations: what to sort by,
-        // and which way round.
+        // and which way round. Both come from the settings file and go back to it
+        // the moment they change — the shelf opens the way it was left.
         private string sortKey = "alpha";
         private bool sortAscending = true;
 
@@ -97,6 +98,13 @@ namespace Nemoviz_Book_Reader
             Action unloadActiveBook = null)
         {
             appSettings = settings;
+            // Before BuildUI, so the menu opens with the right two ticks rather
+            // than showing the default and then correcting itself.
+            if (settings != null)
+            {
+                sortKey = settings.ShelfSortKey;
+                sortAscending = settings.ShelfSortAscending;
+            }
             this.activeBookFolderPath = activeBookFolderPath;
             this.unloadActiveBook = unloadActiveBook;
             books = new List<BookData>();
@@ -340,41 +348,41 @@ namespace Nemoviz_Book_Reader
             menuFileExit.Click += (s, e) => this.Close();
             menuFile.DropDownItems.Add(menuFileExit);
 
-            menuView = new ToolStripMenuItem(Localization.T("Menu.View"));
+            menuSort = new ToolStripMenuItem(Localization.T("Menu.Sort"));
 
             // WHAT to sort by and WHICH WAY are two questions, so the menu asks
             // them separately and shows two ticks at once (Gordan, 2026-08-03).
             // Combined entries meant a new key cost two lines every time, and
             // four keys would have been eight of them.
-            menuViewAlpha = new ToolStripMenuItem(Localization.T("Menu.View.Alphabetically"));
-            menuViewAlpha.Click += (s, e) => SortBy("alpha");
+            menuSortAlpha = new ToolStripMenuItem(Localization.T("Menu.Sort.Alphabetically"));
+            menuSortAlpha.Click += (s, e) => SortBy("alpha");
 
-            menuViewDate = new ToolStripMenuItem(Localization.T("Menu.View.DateAdded"));
-            menuViewDate.Click += (s, e) => SortBy("date");
+            menuSortDate = new ToolStripMenuItem(Localization.T("Menu.Sort.DateAdded"));
+            menuSortDate.Click += (s, e) => SortBy("date");
 
-            menuViewFormat = new ToolStripMenuItem(Localization.T("Menu.View.Format"));
-            menuViewFormat.Click += (s, e) => SortBy("format");
+            menuSortFormat = new ToolStripMenuItem(Localization.T("Menu.Sort.Format"));
+            menuSortFormat.Click += (s, e) => SortBy("format");
 
             // Status is the reading lifecycle — unread, then reading, then read.
             // NOT "now reading", which is a place of its own above the shelf, and
             // NOT favourite, which is a mark a book wears on top of its status
             // (Gordan).
-            menuViewStatus = new ToolStripMenuItem(Localization.T("Menu.View.Status"));
-            menuViewStatus.Click += (s, e) => SortBy("status");
+            menuSortStatus = new ToolStripMenuItem(Localization.T("Menu.Sort.Status"));
+            menuSortStatus.Click += (s, e) => SortBy("status");
 
-            menuViewAsc = new ToolStripMenuItem(Localization.T("Menu.View.Ascending"));
-            menuViewAsc.Click += (s, e) => SortDirection(true);
+            menuSortAsc = new ToolStripMenuItem(Localization.T("Menu.Sort.Ascending"));
+            menuSortAsc.Click += (s, e) => SortDirection(true);
 
-            menuViewDesc = new ToolStripMenuItem(Localization.T("Menu.View.Descending"));
-            menuViewDesc.Click += (s, e) => SortDirection(false);
+            menuSortDesc = new ToolStripMenuItem(Localization.T("Menu.Sort.Descending"));
+            menuSortDesc.Click += (s, e) => SortDirection(false);
 
-            menuView.DropDownItems.Add(menuViewAlpha);
-            menuView.DropDownItems.Add(menuViewDate);
-            menuView.DropDownItems.Add(menuViewFormat);
-            menuView.DropDownItems.Add(menuViewStatus);
-            menuView.DropDownItems.Add(new ToolStripSeparator());
-            menuView.DropDownItems.Add(menuViewAsc);
-            menuView.DropDownItems.Add(menuViewDesc);
+            menuSort.DropDownItems.Add(menuSortAlpha);
+            menuSort.DropDownItems.Add(menuSortDate);
+            menuSort.DropDownItems.Add(menuSortFormat);
+            menuSort.DropDownItems.Add(menuSortStatus);
+            menuSort.DropDownItems.Add(new ToolStripSeparator());
+            menuSort.DropDownItems.Add(menuSortAsc);
+            menuSort.DropDownItems.Add(menuSortDesc);
 
             // Help, standing where a Windows menu bar always ends. The two items
             // are DELIBERATELY not wired yet (Gordan, 2026-08-03): the manual
@@ -394,7 +402,7 @@ namespace Nemoviz_Book_Reader
             menuHelp.DropDownItems.Add(menuHelpAbout);
 
             menuStrip.Items.Add(menuFile);
-            menuStrip.Items.Add(menuView);
+            menuStrip.Items.Add(menuSort);
             menuStrip.Items.Add(menuHelp);
 
             this.MainMenuStrip = menuStrip;
@@ -408,17 +416,17 @@ namespace Nemoviz_Book_Reader
         /// plus a localized text suffix (e.g. "(active)"). The suffix is
         /// there because screen readers don't reliably announce the check
         /// state of MenuStrip items — text is always read. If the suffix
-        /// is unwanted, empty the "Menu.View.ActiveMark" value in the
+        /// is unwanted, empty the "Menu.Sort.ActiveMark" value in the
         /// .lang file and only the checkmark remains.
         /// </summary>
         private void UpdateSortMenuChecks()
         {
-            ApplySortMark(menuViewAlpha, "Menu.View.Alphabetically", sortKey == "alpha");
-            ApplySortMark(menuViewDate, "Menu.View.DateAdded", sortKey == "date");
-            ApplySortMark(menuViewFormat, "Menu.View.Format", sortKey == "format");
-            ApplySortMark(menuViewStatus, "Menu.View.Status", sortKey == "status");
-            ApplySortMark(menuViewAsc, "Menu.View.Ascending", sortAscending);
-            ApplySortMark(menuViewDesc, "Menu.View.Descending", !sortAscending);
+            ApplySortMark(menuSortAlpha, "Menu.Sort.Alphabetically", sortKey == "alpha");
+            ApplySortMark(menuSortDate, "Menu.Sort.DateAdded", sortKey == "date");
+            ApplySortMark(menuSortFormat, "Menu.Sort.Format", sortKey == "format");
+            ApplySortMark(menuSortStatus, "Menu.Sort.Status", sortKey == "status");
+            ApplySortMark(menuSortAsc, "Menu.Sort.Ascending", sortAscending);
+            ApplySortMark(menuSortDesc, "Menu.Sort.Descending", !sortAscending);
         }
 
         private void ApplySortMark(ToolStripMenuItem item, string langKey, bool active)
@@ -426,8 +434,8 @@ namespace Nemoviz_Book_Reader
             if (item == null) return;
             item.Checked = active;
 
-            string mark = Localization.T("Menu.View.ActiveMark");
-            item.Text = active && mark.Length > 0 && mark != "Menu.View.ActiveMark"
+            string mark = Localization.T("Menu.Sort.ActiveMark");
+            item.Text = active && mark.Length > 0 && mark != "Menu.Sort.ActiveMark"
                 ? Localization.T(langKey) + " " + mark
                 : Localization.T(langKey);
         }
@@ -1077,13 +1085,18 @@ namespace Nemoviz_Book_Reader
         private void SortBy(string key)
         {
             sortKey = key;
-            UpdateSortMenuChecks();
-            RebuildShelf(GetSelectedBook());
+            ApplySort();
         }
 
         private void SortDirection(bool ascending)
         {
             sortAscending = ascending;
+            ApplySort();
+        }
+
+        private void ApplySort()
+        {
+            if (appSettings != null) appSettings.SetShelfSort(sortKey, sortAscending);
             UpdateSortMenuChecks();
             RebuildShelf(GetSelectedBook());
         }
