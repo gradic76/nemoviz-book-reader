@@ -559,9 +559,10 @@ Dict.Help=Regex help...
 Dict.Help.Title=Regular expressions in the pronunciation dictionary
 Dict.Help.Text=The old Zen wisdom says:\n\n    Developer had a problem.\n    Developer decided to solve the problem with regular expressions.\n    Developer had two problems.\n\nRegEx, or regular expressions, are something you would rather not deal with, but it is fancy to have that option, so here it is.\n\nIf you know what you are doing, knock yourself out. If not, just don't use it, or ask Google.
 Settings.Misc.Look=Look:
-Settings.Misc.Look.Classic=Classic (the one being tested)
-Settings.Misc.Look.New=New design (work in progress)
-Settings.Misc.Look.Hint=Which look NBR builds. Classic is what the app has always looked like and is what regular testing runs on; the new design is being worked out and changes as it goes. Temporary - the switch goes away once the new look is finished.
+Settings.Misc.Look.Follow=Follow Windows
+Settings.Misc.Look.Classic=System colours
+Settings.Misc.Look.New=NBR design
+Settings.Misc.Look.Hint=How NBR draws itself.\n\nFollow Windows is the usual answer: NBR uses its own design, except when you have a high contrast theme switched on in Windows, and then it steps aside and uses your colours instead.\n\nSystem colours makes it do that always — plain windows in whatever colours and fonts Windows is set to, which is also what works best with a magnifier.\n\nNBR design makes it use its own look always, high contrast or not. That is your call to make: if it turns out not to suit you, the keyboard and your screen reader are unaffected, and F2 brings you back here.
 Settings.Misc.Look.RestartTitle=Change the look
 Settings.Misc.Look.Restart=The look changes when NBR starts again. Restart it now? Your place in the book is saved either way.
 

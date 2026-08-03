@@ -318,10 +318,17 @@ namespace Nemoviz_Book_Reader
             GroupBox gLook = MakeGroup(Localization.T("Settings.General.LookGroup"), y, GW, 62);
             gLook.Controls.Add(MakeLabel(Localization.T("Settings.Misc.Look"), LX, 26));
             cmbLook = MakeCombo(Localization.T("Settings.Misc.Look"), CX, 22, CW, tab++);
+            // Follow Windows first, and it is where a reader who has never
+            // chosen already stands: under high contrast it gives the
+            // system-colours layout, otherwise the new one. The other two are
+            // deliberate choices and are honoured whatever Windows is doing.
+            cmbLook.Items.Add(Localization.T("Settings.Misc.Look.Follow"));
             cmbLook.Items.Add(Localization.T("Settings.Misc.Look.Classic"));
             cmbLook.Items.Add(Localization.T("Settings.Misc.Look.New"));
             cmbLook.SelectedIndex =
-                string.Equals(appSettings.UiTheme, UiTheme.NewId, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+                string.Equals(appSettings.UiTheme, UiTheme.NewId, StringComparison.OrdinalIgnoreCase) ? 2
+              : string.Equals(appSettings.UiTheme, UiTheme.ClassicId, StringComparison.OrdinalIgnoreCase) ? 1
+              : 0;
             gLook.Controls.Add(cmbLook);
             page.Controls.Add(gLook);
 
@@ -1111,7 +1118,13 @@ namespace Nemoviz_Book_Reader
         /// <summary>The chosen look, as an id for AppSettings.</summary>
         private string SelectedThemeId()
         {
-            return cmbLook != null && cmbLook.SelectedIndex == 1 ? UiTheme.NewId : UiTheme.ClassicId;
+            if (cmbLook == null) return UiTheme.FollowId;
+            switch (cmbLook.SelectedIndex)
+            {
+                case 1: return UiTheme.ClassicId;
+                case 2: return UiTheme.NewId;
+                default: return UiTheme.FollowId;
+            }
         }
     }
 }

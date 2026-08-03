@@ -159,7 +159,11 @@ namespace Nemoviz_Book_Reader
             MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
             ShowHints = ini.Read("App", "ShowHints", "1") == "1";
-            UiTheme = ini.Read("App", "Theme", Nemoviz_Book_Reader.UiTheme.ClassicId);
+            // "follow" for anyone who has never chosen: Windows decides, which
+            // under high contrast means the system-colours layout. An install
+            // that already carries "classic" or "new" keeps it — that WAS a
+            // choice, and it stands.
+            UiTheme = ini.Read("App", "Theme", Nemoviz_Book_Reader.UiTheme.FollowId);
 
             Visual = ini.Read("Visual", "Use", "0") == "1";
             VisualMode = Clamp(ReadInt("Visual", "Mode", 0), 0, 2);

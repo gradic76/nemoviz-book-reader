@@ -1333,6 +1333,37 @@ which voice they use. NBR supplies the tool, the user supplies the content.
 
 ## 8k. Two looks side by side (temporary, for the redesign)
 
+> ### High contrast is the DEFAULT, not a lock (2026-08-03)
+>
+> Gordan asked the question that fixed this: *does a reader with a high-contrast
+> theme lose the right to choose?* They do not. High contrast is a setting for
+> the SYSTEM, not an instruction to this app — someone may run it for one reason
+> and still want NBR to look the way they like.
+>
+> So the stored theme has three values. **`follow`** is the default and the one
+> a fresh install carries: Windows decides, and under high contrast that means
+> the system-colours layout. **`classic`** and **`new`** are deliberate choices
+> and are honoured whatever Windows is doing — `UiTheme.chosenByUser` is what
+> tells them apart, and it is the only thing that lets an explicit choice
+> outrank high contrast.
+>
+> **This closes a real gap, not just a policy one.** `UiTheme.Apply` had always
+> yielded to high contrast, but that is only the COLOURING pass; the layout
+> skins are called separately (`if (UiTheme.Current.BuildsOwnLayout) …`) and had
+> no such check, so the new look painted its own dark glass over the user's
+> chosen scheme. Resolving `follow` to the classic theme under high contrast
+> fixes it at the source — the skins are simply never reached.
+>
+> **Letting an explicit choice win is only safe because it is reversible without
+> seeing**: the keyboard and the screen reader are untouched by any of this, and
+> F2 opens Settings from anywhere. A choice that could not be undone would be a
+> trap rather than a freedom.
+>
+> Verified: `follow`, empty and null all resolve without being counted as a
+> choice; `classic` and `new` are. The high-contrast branch itself is stated
+> rather than measured — exercising it means changing the machine's own theme.
+
+
 `UiTheme.cs`. While the new design is being worked out, the app can be built
 either way and the switch lives in **Settings → Misc**:
 

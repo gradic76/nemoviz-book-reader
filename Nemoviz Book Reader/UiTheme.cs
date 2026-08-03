@@ -33,6 +33,9 @@ namespace Nemoviz_Book_Reader
     {
         public const string ClassicId = "classic";
         public const string NewId = "new";
+        /// <summary>Let Windows decide — the default, and the only value that
+        /// changes with the machine rather than with the reader.</summary>
+        public const string FollowId = "follow";
 
         private static UiTheme current;
 
@@ -42,8 +45,35 @@ namespace Nemoviz_Book_Reader
             get { return current ?? (current = new ClassicTheme()); }
         }
 
+        /// <summary>Puts a theme in force.
+        ///
+        /// <para><b>High contrast is the DEFAULT, not a lock</b> (Gordan asked
+        /// the right question, 2026-08-03: does a high-contrast user lose the
+        /// right to choose?). It does not. High contrast is a setting for the
+        /// SYSTEM, not an instruction to this app, and somebody may run it for
+        /// one reason and still want NBR to look the way they like. So it
+        /// decides only while the reader has not said otherwise — which is the
+        /// case for everyone who never opens Settings, and those are the people
+        /// it protects.</para>
+        ///
+        /// <para>An explicit <c>classic</c> or <c>new</c> is honoured whatever
+        /// Windows is doing. That is safe because the choice is <b>reversible
+        /// without seeing</b>: the keyboard and the screen reader are untouched
+        /// by any of this, and F2 opens Settings from anywhere. A choice that
+        /// could not be undone would be a trap rather than a freedom.</para></summary>
         public static void Select(string id)
         {
+            chosenByUser = !(string.IsNullOrEmpty(id)
+                || string.Equals(id, FollowId, StringComparison.OrdinalIgnoreCase));
+            if (!chosenByUser)
+            {
+                // Nothing chosen: Windows decides. Under high contrast that means
+                // the system-colours layout, which is the classic one — it paints
+                // nothing of its own, so the user's scheme comes through whole.
+                current = SystemInformation.HighContrast
+                    ? (UiTheme)new ClassicTheme() : new NewTheme();
+                return;
+            }
             current = string.Equals(id, NewId, StringComparison.OrdinalIgnoreCase)
                 ? (UiTheme)new NewTheme() : new ClassicTheme();
         }
@@ -61,11 +91,18 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Restyles a window that has already built itself. Called at the
         /// end of BuildUI, and again after a live change.</summary>
+        /// <summary>Whether the theme in force was ASKED for, rather than worked
+        /// out from Windows. It decides who wins under high contrast.</summary>
+        private static bool chosenByUser;
+
         public void Apply(Control root)
         {
             if (root == null) return;
-            // The user's own high-contrast scheme outranks any theme we ship.
-            if (SystemInformation.HighContrast) return;
+            // The user's own high-contrast scheme outranks a theme we PICKED for
+            // them — but not one they picked for themselves. Somebody who went to
+            // Settings and chose a look has said something; ignoring it because
+            // Windows is in high contrast would be deciding on their behalf twice.
+            if (SystemInformation.HighContrast && !chosenByUser) return;
             try { Style(root); } catch { }
         }
 
