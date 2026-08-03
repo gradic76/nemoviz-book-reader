@@ -111,6 +111,18 @@ namespace Nemoviz_Book_Reader
         public string ShelfSortKey { get; private set; }
         public bool ShelfSortAscending { get; private set; }
 
+        /// <summary>Whether the card the player uses is held awake while a book
+        /// plays, so it cannot power down between sentences and swallow the start
+        /// of the next one (§10f — Gordan's HDMI output does exactly that).
+        ///
+        /// <para><b>On by default</b>, because the fault it prevents is one
+        /// almost nobody would diagnose: words go missing and every measurement
+        /// says the software is correct. It is a switch rather than a fact
+        /// because it does keep an audio endpoint open, and on a machine that
+        /// does not need it that is a cost with no return (Gordan,
+        /// 2026-08-03).</para></summary>
+        public bool KeepDeviceAlive { get; private set; }
+
         /// <summary>The libmpv <c>audio-device</c> identifier for output (e.g.
         /// <c>wasapi/{…}</c>). Empty means <c>auto</c> — mpv picks the system
         /// default. Set from Settings → Device.</summary>
@@ -143,6 +155,7 @@ namespace Nemoviz_Book_Reader
             LoadSeenLanguages();
             LanguageSeen = NoteLanguageSeen;
             AudioDevice = ini.Read("Audio", "Device", "");
+            KeepDeviceAlive = ini.Read("Audio", "KeepAlive", "1") == "1";
             MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
             ShowHints = ini.Read("App", "ShowHints", "1") == "1";
@@ -354,6 +367,13 @@ namespace Nemoviz_Book_Reader
         {
             AudioDevice = device ?? "";
             ini.Write("Audio", "Device", AudioDevice);
+        }
+
+        public void SetKeepDeviceAlive(bool on)
+        {
+            if (on == KeepDeviceAlive) return;
+            KeepDeviceAlive = on;
+            ini.Write("Audio", "KeepAlive", on ? "1" : "0");
         }
 
         /// <summary>Stores the default voice and how it is set up. The numbers are

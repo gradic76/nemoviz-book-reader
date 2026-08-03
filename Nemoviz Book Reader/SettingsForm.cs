@@ -88,6 +88,7 @@ namespace Nemoviz_Book_Reader
         // callback (from the player) switches the output on selection so the user
         // hears the change immediately.
         private ComboBox cmbSoundCard;
+        private CheckBox chkKeepAlive;
         private readonly List<MpvAudioDevices.Device> audioDevices;
         private readonly List<string> deviceIds = new List<string>();
         private readonly Action<string> applyAudioDeviceLive;
@@ -441,13 +442,15 @@ namespace Nemoviz_Book_Reader
                     cmbTextColour != null ? cmbTextColour.SelectedIndex : -1,
                     cmbBackColour != null ? cmbBackColour.SelectedIndex : -1);
 
-            // Device — persist the chosen output card (empty = system default).
+            // Device — persist the chosen output card (empty = system default),
+            // and whether the card is held awake between sentences.
             if (cmbSoundCard != null)
             {
                 int i = cmbSoundCard.SelectedIndex;
                 if (i >= 0 && i < deviceIds.Count)
                     appSettings.SetAudioDevice(deviceIds[i]);
             }
+            if (chkKeepAlive != null) appSettings.SetKeepDeviceAlive(chkKeepAlive.Checked);
 
             // Misc — the look. A window builds itself once, so the change lands
             // when NBR starts again; offer to do that now rather than leaving the
@@ -1079,10 +1082,24 @@ namespace Nemoviz_Book_Reader
 
             page.Controls.Add(lblSoundCard);
             page.Controls.Add(cmbSoundCard);
-            // No hint here (Gordan, 2026-08-02). A list of sound cards under a
-            // label that says which sound card explains itself, and a hint that
-            // only restates the caption costs a reader the same time to hear as
-            // one that tells them something.
+            // No hint on the card list (Gordan, 2026-08-02). A list of sound
+            // cards under a label that says which sound card explains itself, and
+            // a hint that only restates the caption costs a reader the same time
+            // to hear as one that tells them something.
+
+            // The keep-alive gets a switch (Gordan, 2026-08-03). It DOES need its
+            // explanation: nothing about "keep the device awake" tells a reader
+            // what it is for, and what it is for is a fault almost nobody would
+            // diagnose — the first word of sentence after sentence going missing
+            // because the card powered down in the gap.
+            chkKeepAlive = new CheckBox();
+            chkKeepAlive.Text = Localization.T("Settings.Device.KeepAlive");
+            chkKeepAlive.AccessibleName = Localization.T("Settings.Device.KeepAlive");
+            chkKeepAlive.SetBounds(10, 58, 470, 24);
+            chkKeepAlive.TabIndex = 1;
+            chkKeepAlive.Checked = appSettings.KeepDeviceAlive;
+            page.Controls.Add(chkKeepAlive);
+            page.Controls.Add(MakeHint("Settings.Device.KeepAlive.Hint", 28, 84, 452, 60, 2));
             return page;
         }
 

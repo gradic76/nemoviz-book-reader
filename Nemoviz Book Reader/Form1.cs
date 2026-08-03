@@ -2868,12 +2868,21 @@ namespace Nemoviz_Book_Reader
                 {
                     // Made here, not with the TTS reader: an audio book never
                     // creates one of those and would have gone without.
-                    if (keepAlive == null)
+                    //
+                    // Switchable since 2026-08-03 (Settings → Device). Read on
+                    // every Play rather than once, so turning it off takes effect
+                    // at the next sentence instead of at the next launch; and the
+                    // one already running is stopped, not left holding the card.
+                    if (appSettings.KeepDeviceAlive)
                     {
-                        keepAlive = new AudioKeepAlive();
-                        keepAlive.SetDevice(appSettings.AudioDevice);
+                        if (keepAlive == null)
+                        {
+                            keepAlive = new AudioKeepAlive();
+                            keepAlive.SetDevice(appSettings.AudioDevice);
+                        }
+                        keepAlive.Start();
                     }
-                    keepAlive.Start();
+                    else if (keepAlive != null) keepAlive.Stop();
 
                     // The reading window comes up on PLAY, not on load (Gordan,
                     // 2026-08-01). Opening the player says nothing about what you

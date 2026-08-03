@@ -3270,6 +3270,15 @@ by default. NBR decodes AMR natively, so the usual reason for version3
 
 ## 10f. The sound card can eat the start of every sentence (2026-08-01)
 
+> **It is a switch now** — Settings → Device, "Keep the sound card awake", **on
+> by default** (Gordan, 2026-08-03). On by default because the fault it prevents
+> is one almost nobody would diagnose; a switch because it does hold an audio
+> endpoint open for as long as a book plays, and on a machine that does not need
+> it that is a cost with no return. Read on **every** Play, so switching it off
+> takes effect at the next sentence rather than the next launch, and the
+> keep-alive already running is stopped rather than left holding the card.
+
+
 **Gordan's finding, after most of a day chasing it in software.** Reading was
 losing the first word of sentence after sentence. It was not NBR. His HDMI
 output — an Ace Magic mini PC feeding a TV — powers down almost the instant the
