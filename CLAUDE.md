@@ -46,8 +46,9 @@ non-obvious code choices exist because of it.
 - **`AccessibleName` carries keyboard shortcuts**, because JAWS does not read
   tooltips on tab focus. Convention: the accessible name embeds the shortcut,
   e.g. "Back, Shift+Left", "Forward, Shift+Right", "Play, Space",
-  "Go To, Ctrl+G", "Sleep Timer, Ctrl+T". Tooltips are separate and for
-  sighted/mouse use.
+  "Go To, F4", "Sleep Timer, F7". Tooltips are separate and for
+  sighted/mouse use. (These read `Ctrl+G` / `Ctrl+T` until the shortcuts moved
+  onto function keys — `en.lang` was migrated with the code, this file was not.)
 - **Screen-reader announcements** of transient changes (volume, speed, timer
   set/cancelled, info-on-demand, bookmark set) go through
   `AnnounceToScreenReader(label, text)`. **As of Session 10 this speaks the
@@ -265,7 +266,7 @@ Documented in a comment above the seek-step methods in Form1. All four coexist:
    the combo — no fixed indices. The selected step is **remembered per book**
    in `Book.ini` (`[Settings] SeekStep`, encoded: heading depth L → 100+L,
    else the kind ordinal; `-1` = never chosen → defaults to the first row).
-4. **Go To... (Ctrl+G)** — named navigation. For plain audio this is a list
+4. **Go To... (F4)** — named navigation. For plain audio this is a list
    of the book's parts. DAISY/text structure (headings, pages) will plug in
    here later as a separate subsystem.
 
@@ -328,15 +329,32 @@ and an off switch.
 
 ### Other player keys
 
+**The letter keys are gone — everything named is on a function key** (done; this
+list was stale until 2026-08-04, when it was read back off `ProcessCmdKey`
+rather than remembered). The move was made because `cmbSeek` swallows letter
+keys as type-ahead while it has focus, and it turned out to suit braille
+displays too: a modifier-free function key is the easy case for a display's key
+emulation (§8l).
+
 - **Space** — Play/Pause (the only key for it; X was removed in Session 10).
 - **Up/Down** — volume ±5 (announced; beep at 0 and at 100).
+- **Left/Right** — the plain 5-second / one-sentence nudge.
 - **Ctrl+Left/Right** — speed ±10% (range 50–300%; double beep at 100%).
   Replaced PageUp/PageDown in Session 10.
-- **I** — announce fresh playback info.
-- **Ctrl+O** — Open File.
-- **Ctrl+G** — Go To.
-- **Ctrl+T** — Sleep Timer.
-- **Ctrl+B** — Set Bookmark.
+- **Shift+Left/Right** — jump by the selected seek step;
+  **Shift+Up/Down** — change which step is selected.
+- **F1** Help · **F2** Settings · **F3** Library · **F4** Go To ·
+  **F5** Set Bookmark · **F6** Manage Bookmarks · **F7** Sleep Timer ·
+  **F9** the reading window.
+- **F8** — announce fresh playback info. **Pressed twice inside 600 ms it moves
+  focus INTO the info box**, and a third press (or Escape) brings focus back
+  where it came from — the box is parked off the client area and out of the tab
+  order (§8k), so this is the only way in, and the way out matters as much.
+- **F4 is swallowed before anything else sees it**, because F4 on a focused
+  ComboBox drops its list open and `cmbSeek` is focusable. **F10 and Alt+F4 are
+  left alone** (menu bar, close).
+- **Ctrl+O** — Open File. **Ctrl+Shift+O** — Open Folder.
+- **Ctrl+1..9** — jump to 10%–90% of the book.
 - **Enter** — activates the focused button. (Note: Space does NOT activate a
   focused button — it is globally Play/Pause — so JAWS's generic "press
   spacebar to activate" hint on buttons is misleading; most users have that
@@ -369,7 +387,7 @@ listening and plans to fall asleep — it is **not** a standalone shutdown
 scheduler. Therefore:
 
 - A timer can only be set with something loaded; on an empty player the button
-  gives a short low beep (same as Ctrl+G with no book). The test is the **book**,
+  gives a short low beep (same as F4 with no book). The test is the **book**,
   not a current file — a text book is read by the speech engine and has no
   current file, which used to lock it out of the timer altogether.
 - **It works the same on a text book.** Every playback move the timer makes
@@ -391,7 +409,7 @@ scheduler. Therefore:
   announcement.
 - Seeking, volume, speed, part navigation, and Go To do **not** touch the
   timer.
-- Pressing the button (or Ctrl+T) **while a timer is active stops playback and
+- Pressing the button (or F7) **while a timer is active stops playback and
   cancels the timer** — one press, no new dialog. To set another, press the
   now-idle button again.
 
@@ -446,7 +464,7 @@ name ("Bookmark 01 (H:MM)") is always computed live from sorted position,
 never persisted as text — padding goes to 3 digits past 99 bookmarks.
 `IniFile.DeleteSection` was added to support rewriting a shrunk list.
 
-**Set Bookmark (Ctrl+B).** No book loaded → the same low "no go" beep as
+**Set Bookmark (F5).** No book loaded → the same low "no go" beep as
 Go To/Sleep Timer. With a book: adds the bookmark at the current virtual
 position, plays an ascending series of five short beeps (~1 s total), and
 announces only **"Bookmark set"** via the off-screen label — deliberately no
@@ -1421,7 +1439,7 @@ needs verifying by ear before it is relied on.
   replace `Postavi knjižnu oznaku` (167) and `Knjižne oznake` (113). The longest
   legend on the panel is now **`Knjižnica`, 71 units at 12 pt / 88 at 14 pt**, so
   a side column of **91 units** carries the whole set. The full wording stays in
-  `AccessibleName` — the screen reader still says "Postavi knjižnu oznaku, Ctrl+B".
+  `AccessibleName` — the screen reader still says "Postavi knjižnu oznaku, F5".
 - **Type.** 12 pt base, 14 pt for the display, 11 pt floor. Legends are printed
   under clean buttons; only the transport ring is iconographic.
 - **A groove around every control.** Each button and the ring sits in a recess
@@ -1503,7 +1521,8 @@ Two things worth keeping:
 - **The read-only fields are parked below the client area** (`y = H + 4` and on
   down), the same trick the `lblAnnounce*` labels have always used. They stay in
   the tab order and still speak; the drawn panel gets the space. `tbInfo` is out
-  of the tab order by agreement — it is reached with `I`.
+  of the tab order by agreement — it is reached with **F8** (twice to put focus
+inside it, a third press or Escape to leave).
 
 **Lessons from the first build, all measured on the screenshot rather than
 argued:** a 4-unit groove of one flat colour reads as a **border, not a recess**
@@ -3335,7 +3354,10 @@ reports libavcodec driver names (`8svx_exp`, `atrac3plus`, `real_144`, `g722`)
 where the enable-list carries FFmpeg's configure names (`eightsvx_exp`,
 `atrac3p`, `ra_144`, `adpcm_g722`).
 
-**Not yet checked by ear.** Rollback is one file: the 93.6 MB build is in git.
+**Checked by ear and passed** (Gordan, corrected here 2026-08-04 — this line had
+stood at "not yet checked by ear" long after he had listened to it, which is the
+worse way for a brief to be wrong: it invites redoing work that is done).
+Rollback is one file: the 93.6 MB build is in git.
 
 ---
 
@@ -3729,9 +3751,11 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   shortcut handlers call `BtnLibrary_Click(null, ...)` and friends **directly**
   and never raise `Click`. Do not "fix" this by swapping in `PerformClick()` —
   that silently does nothing when a control cannot be selected, which would be a
-  behaviour change on the classic path too. It lands naturally with the move of
-  the shortcuts onto function keys: that single `ProcessCmdKey` switch is the
-  right place to call `NewPlayerSkin.Canvas.Flash(theKey)`.
+  behaviour change on the classic path too. **The move onto function keys has
+  since happened and this did not land with it** — `Canvas.Flash` is still called
+  from nowhere, and the F1–F9 cases just invoke the handlers. That single
+  `ProcessCmdKey` switch remains the right place for
+  `NewPlayerSkin.Canvas.Flash(theKey)`.
 - **Mouse operation cannot be tested by Gordan** (stated 2026-07-28) — so it has
   to be verified some other way, and half of it still is not. Driven with real
   synthetic input against the running player and **confirmed working**: Play /
@@ -3776,14 +3800,18 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   the mouse, value in `AccessibleName`, arrows still global. Announcing does not
   depend on any of it: `AnnounceToScreenReader` already speaks through a UIA
   notification (JAWS) and the NVDA client, focus or no focus.
-  **Still to do:** adjust the tab order for the new layout, and move the main
-  window's shortcuts off letter keys onto function keys, modifiers and
-  navigation keys only. Watch out for: `F4` opens a focused ComboBox's dropdown,
-  `F10` activates the menu bar, `Alt+F4` closes — none of those may be reused;
-  `F1` should stay Help. The change does fix a real conflict (`cmbSeek` swallows
-  letter keys as type-ahead while focused), but **check the laptop case before
-  committing**: many laptops default the F-row to OEM media/brightness, so
-  without Fn-lock every shortcut needs Fn held.
+  ~~**Still to do:** move the main window's shortcuts off letter keys onto
+  function keys~~ **— DONE.** Read back off `ProcessCmdKey` on 2026-08-04, since
+  this file had gone on listing the letter keys long after they were gone: F1
+  Help, F2 Settings, F3 Library, F4 Go To, F5 Set Bookmark, F6 Manage Bookmarks,
+  F7 Sleep Timer, F8 info, F9 the reading window; `Ctrl+O` / `Ctrl+Shift+O` and
+  `Ctrl+1..9` kept. `en.lang`'s accessible names carry the new keys too
+  ("Go To, F4"). The hazards the note listed were all respected — F4 is
+  swallowed before a focused `cmbSeek` can open its list, F10 and Alt+F4 are
+  untouched, F1 stayed Help. The full list is in §6.
+  **Still open from this item:** the tab order for the new layout, and **the
+  laptop case** — many laptops default the F-row to OEM media/brightness, so
+  without Fn-lock every shortcut needs Fn held. That has not been checked on one.
 - ~~Settings → Misc is still an empty placeholder~~ — **gone** (2026-08-03).
   Misc held nothing but the look switch and a "work in progress" line; the look
   moved to General and the tab was deleted.
