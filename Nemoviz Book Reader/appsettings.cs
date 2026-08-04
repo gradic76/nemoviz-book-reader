@@ -89,6 +89,16 @@ namespace Nemoviz_Book_Reader
         /// <para>Until 2026-08-03 these six controls existed in Settings and in
         /// Properties and wrote nowhere at all.</para></summary>
         public bool Visual { get; private set; }
+        /// <summary>The braille rule. It lives under <c>[Visual]</c> and not in a
+        /// section of its own because it is the same fact from the other side:
+        /// braille reaches the display through the screen reader following focus
+        /// into the reading window, so this too is a statement about whether that
+        /// window opens.
+        ///
+        /// <para>Added 2026-08-04. The check box in Settings had existed since the
+        /// page was drawn and had nowhere to write, so it forgot itself between
+        /// visits.</para></summary>
+        public bool Braille { get; private set; }
         public int VisualMode { get; private set; }
         public int Highlight { get; private set; }
         public int HighlightColour { get; private set; }
@@ -166,6 +176,7 @@ namespace Nemoviz_Book_Reader
             UiTheme = ini.Read("App", "Theme", Nemoviz_Book_Reader.UiTheme.FollowId);
 
             Visual = ini.Read("Visual", "Use", "0") == "1";
+            Braille = ini.Read("Visual", "Braille", "0") == "1";
             VisualMode = Clamp(ReadInt("Visual", "Mode", 0), 0, 2);
             Highlight = Clamp(ReadInt("Visual", "Highlight", 1), 0, 2);
             HighlightColour = ReadingColours.Clamp(
@@ -214,10 +225,11 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>The visual rule, as Settings left it.</summary>
-        public void SetVisualDefaults(bool use, int mode, int highlight,
+        public void SetVisualDefaults(bool use, bool braille, int mode, int highlight,
                                       int highlightColour, int textColour, int backColour)
         {
             Visual = use;
+            Braille = braille;
             VisualMode = Clamp(mode, 0, 2);
             Highlight = Clamp(highlight, 0, 2);
             HighlightColour = ReadingColours.Clamp(highlightColour);
@@ -225,6 +237,7 @@ namespace Nemoviz_Book_Reader
             BackColour = ReadingColours.Clamp(backColour);
 
             ini.Write("Visual", "Use", Visual ? "1" : "0");
+            ini.Write("Visual", "Braille", Braille ? "1" : "0");
             ini.Write("Visual", "Mode", VisualMode.ToString());
             ini.Write("Visual", "Highlight", Highlight.ToString());
             ini.Write("Visual", "HighlightColour", HighlightColour.ToString());

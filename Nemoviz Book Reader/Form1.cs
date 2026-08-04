@@ -4576,12 +4576,28 @@ namespace Nemoviz_Book_Reader
         /// deliberately left alone; it is not an oversight.</para>
         ///
         /// <para>NVDA only, and silently nothing on JAWS, which has no public
-        /// braille call. There, focus tracking remains the whole story.</para></summary>
+        /// braille call. There, focus tracking remains the whole story.</para>
+        ///
+        /// <para><b>It obeys the book's braille switch</b> (Gordan, 2026-08-04).
+        /// It used to test focus and nothing else, so a reader who had unticked
+        /// "Use braille output" still got braille — a switch that does nothing is
+        /// worse than no switch, and worst of all for this audience. This is the
+        /// one braille channel NBR owns, so this is where the switch can mean
+        /// something.</para>
+        ///
+        /// <para><b>What the switch does NOT govern, and cannot:</b> while the
+        /// reading surface itself holds focus, the screen reader brailles that
+        /// control by its own focus tracking. Nothing in NBR asks it to and
+        /// nothing in NBR could stop it. So the honest reading of the switch is
+        /// "send the sentence when focus has wandered off the text", not "braille
+        /// on and off" — which is also why the only complete way to have no
+        /// braille is to leave the reading window shut.</para></summary>
         private void PushBrailleIfFocusLeft(string sentence)
         {
             try
             {
                 if (string.IsNullOrEmpty(sentence)) return;
+                if (currentBook == null || !currentBook.TextBraille) return;
                 if (GetForegroundWindow() != Handle
                     && (readingWindow == null || readingWindow.IsDisposed
                         || GetForegroundWindow() != readingWindow.Handle)) return;

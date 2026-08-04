@@ -2266,10 +2266,11 @@ someone sighted watching the caret, and no amount of instrument work replaces it
 ### What is left on the three outputs (Gordan's list, 2026-08-01)
 
 1. ~~**Make braille output open the reading window**~~ **— DONE** (`186dfff`).
-   `TextBraille` and `TextBrailleTable` persist beside `TextVisual` /
-   `TextVisualMode`, and `BookData.OpensReadingWindow` is what the player now
-   tests, so either switch brings the window up. Focus already landed in the
-   surface on `Shown`, so nothing was needed there.
+   `TextBraille` persists beside `TextVisual` / `TextVisualMode`, and
+   `BookData.OpensReadingWindow` is what the player now tests, so either switch
+   brings the window up. Focus already landed in the surface on `Shown`, so
+   nothing was needed there. (`TextBrailleTable` stood beside it until
+   2026-08-04, when it was removed as dead — see §11.)
 
    **The convention the two switches follow (Gordan, 2026-08-01, `563d290`).**
    The starting question was whether visual should imply braille or whether
@@ -2303,13 +2304,16 @@ someone sighted watching the caret, and no amount of instrument work replaces it
    would have no way to learn it is on, let alone why. The glass says *"Required
    by braille output"* under it — the one place they will hear it.
 
-   The table combo deliberately does **not** reuse `book.BrailleTable`: that one
-   back-translates a `.brf` being *read*, this one describes a text book being
-   written *out*. Same library, opposite directions. **Open:** with the screen
-   reader doing the translation, our table choice does not actually reach the
-   display — it is stored and remembered, which beats forgetting, but whether
-   NBR should translate cells itself is Gordan's call, not something to wire
-   silently.
+   **The table combo that stood beside the check box is GONE (2026-08-04), and
+   the question it left open is answered: NBR does not translate cells.** The
+   combo said it described a text book being written *out*, as against
+   `book.BrailleTable` which back-translates a `.brf` being *read* — same
+   library, opposite directions. But the outward direction does not exist:
+   `LibLouis.cs` binds back-translation only, and it should stay that way,
+   because the screen reader translates what it puts on the display using the
+   table in its own braille settings. Ours could only ever disagree. Worse, the
+   combo **wrote `book.BrailleTable` anyway** on save, erasing the real import
+   table. Full account in §11.
 2. ~~**Bundle the fonts.**~~ **— DONE** (`6c88cd0`). Andika, Atkinson
    Hyperlegible Next, Lexend, Luciole and OpenDyslexic, 2.3 MB, embedded in the
    assembly and registered into the process only. Three things had to be
@@ -3619,31 +3623,50 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
 
 ## 11. TODO (open items)
 
-- **The braille settings are largely inert, and one of them lies** (traced in
-  code 2026-08-04, after Gordan reasoned it out from the tables). Facts, not
-  suspicions:
+- ~~**The braille settings are largely inert, and one of them lies**~~ **— DONE
+  2026-08-04.** Gordan reasoned it out from the tables, the code confirmed every
+  part of it, and the cleanup is in. What the trace found and what became of it:
   - `LibLouis.cs` binds **only** `lou_backTranslateString`. There is **no**
-    text→braille translation anywhere in NBR. An output table could not work
-    even if something wanted one.
-  - `BookData.TextBrailleTable` — the "Braille table" combo in **both** Settings
-    and Properties — is written to the ini and read back from it, and **no other
-    code ever reads it**. Dead.
-  - `SettingsForm.chkBraille` is **never loaded from and never saved to**
-    `AppSettings` (there is no braille field there at all). It resets on every
-    open, and its only effect is grey­ing the combo beside it. Compare
-    `chkVisual.Checked = appSettings.Visual;` one group over, which is wired.
-  - Meanwhile braille really is sent, **unconditionally**: `PushBrailleIfFocusLeft`
-    tests focus, not any setting. So a reader who unticks "Use braille output"
-    still gets braille. **A switch that does nothing is worse than no switch**,
-    and worst of all for this audience.
-  - What IS live: `BookData.BrailleTable` (the liblouis table a `.brf` was
-    back-translated with — set by `BrfParser`, carried on import, edited in
-    Properties) and `BookData.TextBraille` (per book, drives `OpensReadingWindow`).
-  - **Gordan's conclusion, which the code confirms: tables are an IMPORT concern.**
-    Once a book is parsed into the library the table has no further job, because
-    the screen reader translates the output with the table set in its own braille
-    settings. The output table belongs out of Settings and out of Properties; the
-    import table stays.
+    text→braille translation anywhere in NBR, so an output table could not work
+    even if something wanted one. **Unchanged — and it does not need to change.**
+    **The screen reader owns the translation**, using the table set in its own
+    braille settings. Two tables and one display would only ever disagree.
+  - `BookData.TextBrailleTable` and the "Braille table" combo it fed in **both**
+    Settings and Properties: **removed.** It was written to the ini and read back
+    by the dialogs that offered it, and by nothing else.
+  - `SettingsForm.chkBraille` was never loaded from and never saved to
+    `AppSettings` — there was no braille field there at all — so it reset on
+    every open and its only effect was greying the combo beside it. **`AppSettings.
+    Braille` now exists** (`[Visual] Braille`, beside `Use`), the box reads and
+    writes it, and **a book with no braille setting of its own inherits it**,
+    exactly as `TextVisual` inherits `Visual`.
+  - Braille was sent **unconditionally**: `PushBrailleIfFocusLeft` tested focus
+    and no setting, so a reader who unticked the box still got braille. **It
+    tests `currentBook.TextBraille` now** (Gordan's call: *"ako kvačice ima da
+    lovi fokus i šalje na redak, ako nema ne radi ništa"*).
+    **But be precise about what the switch can mean.** It governs the one braille
+    channel NBR owns — the sentence pushed when focus has wandered off the text.
+    While the reading surface itself holds focus the screen reader brailles that
+    control by its own tracking, which NBR neither asks for nor could prevent. So
+    the only complete way to have no braille is to leave the reading window shut.
+  - A fault the trace did not name, found while removing the combo: the output
+    combo **overwrote `book.BrailleTable`** — the live import table — three lines
+    under a comment in its own group saying in as many words that it must not.
+    On "Detect from the book" (index 0) that erased it to `""`. Both gone.
+  - What is live now: `BookData.BrailleTable` (the liblouis table a `.brf` was
+    back-translated with — set by `BrfParser`, carried on import, **and written by
+    nothing else**) and `BookData.TextBraille` (per book: drives
+    `OpensReadingWindow` and gates the braille push).
+  - **Tables are an IMPORT concern, and the table is spent when `content.txt` is
+    written.** Gordan put it as a question — *"Braille table nakon toga više nema
+    nikakvog smisla, ili se varam?"* — and he is not wrong: nothing re-translates
+    a `.brf`, so after import the field is a record of how the book was read, not
+    a setting. **Consequence for §10g's misdetected English table: the place to
+    correct it is the import, not a dialog.** Building that is still open.
+  - Verified by probe: the rule round-trips through `Settings.ini`, a fresh book
+    inherits it, an explicit per-book setting still beats it, `Book.ini` no longer
+    carries `TextBrailleTable`, and the import table survives a save/load.
+    **Not verified: how it reads on a display** — that is the deep test below.
 - **Waiting on Gordan's own eyes and hands** (list opened 2026-08-03). None of
   these is a suspected fault — they are things that were built, measured and
   found correct by probe, and that a measurement *cannot* confirm:

@@ -69,10 +69,9 @@ namespace Nemoviz_Book_Reader
         private NumericUpDown numVolume;
         private NumericUpDown numPitch;
 
-        // Braille and visual output: the settings surface for the two branches that
-        // still have to be built, so the shape is agreed before the work starts.
+        // Braille and visual output: the rule a book inherits when it has not been
+        // given a look of its own.
         private CheckBox chkBraille;
-        private ComboBox cmbBrailleTable;
         private CheckBox chkVisual;
         private ComboBox cmbVisualMode;
         private ComboBox cmbHighlight;
@@ -443,6 +442,7 @@ namespace Nemoviz_Book_Reader
             if (chkVisual != null && cmbVisualMode != null && cmbHighlight != null)
                 appSettings.SetVisualDefaults(
                     chkVisual.Checked,
+                    chkBraille != null && chkBraille.Checked,
                     cmbVisualMode.SelectedIndex,
                     cmbHighlight.SelectedIndex,
                     cmbHighlightColour != null ? cmbHighlightColour.SelectedIndex : -1,
@@ -492,10 +492,12 @@ namespace Nemoviz_Book_Reader
             // engine row used to take.
             page.Controls.Add(BuildSpeechGroup());
             page.Controls.Add(MakeHint("Settings.TextBooks.Speech.Hint", 14, 258, 480, 32, 1));
+            // The braille group lost its table row (2026-08-04), so everything
+            // below it comes up by the 34 that row occupied.
             page.Controls.Add(BuildBrailleGroup(8, 296));
-            page.Controls.Add(MakeHint("Settings.TextBooks.Braille.Hint", 14, 388, 480, 32, 3));
-            page.Controls.Add(BuildVisualGroup(8, 426));
-            page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 656, 480, 32, 5));
+            page.Controls.Add(MakeHint("Settings.TextBooks.Braille.Hint", 14, 354, 480, 32, 3));
+            page.Controls.Add(BuildVisualGroup(8, 392));
+            page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 622, 480, 32, 5));
             return page;
         }
 
@@ -744,13 +746,27 @@ namespace Nemoviz_Book_Reader
                 new VoicePrefs((int)numRate.Value, (int)numVolume.Value, (int)numPitch.Value));
         }
 
-        // ── Braille output (placeholder for the display branch) ───────────────
+        /// <summary>The braille rule: whether a book opens its reading window for a
+        /// display unless it says otherwise for itself.
+        ///
+        /// <para><b>One row, and both of its old faults are fixed</b> (2026-08-04).
+        /// The check box was never loaded from and never saved to
+        /// <c>AppSettings</c> — there was no braille field there at all — so it
+        /// reset on every open and its only effect was to grey the combo beside
+        /// it. It reads and writes <c>Braille</c> now, on the same footing as
+        /// <c>Visual</c> one group over, and a book with no braille setting of its
+        /// own inherits it.</para>
+        ///
+        /// <para>And the combo it used to grey is gone. It chose a table for
+        /// translating text OUT to cells, which NBR does not do and cannot: the
+        /// screen reader owns that translation and uses the table in its own
+        /// braille settings. See <c>PropertiesForm.BuildTextBrailleGroup</c>.</para></summary>
         private GroupBox BuildBrailleGroup(int x, int y)
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.TextBooks.BrailleGroup");
             box.Location = new Point(x, y);
-            box.Size = new Size(500, 86);
+            box.Size = new Size(500, 52);
 
             chkBraille = new CheckBox();
             chkBraille.Text = Localization.T("Settings.TextBooks.UseBraille");
@@ -758,19 +774,9 @@ namespace Nemoviz_Book_Reader
             chkBraille.Location = new Point(14, 22);
             chkBraille.Size = new Size(470, 24);
             chkBraille.TabIndex = 0;
-            chkBraille.CheckedChanged += (s, e) => UpdateBrailleEnabled();
+            chkBraille.Checked = appSettings.Braille;
             box.Controls.Add(chkBraille);
 
-            box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.BrailleTable"), 14, 55));
-            cmbBrailleTable = MakeCombo(Localization.T("Settings.TextBooks.BrailleTable"), 214, 52, 272, 1);
-            // The tables NBR ships for reading .brf books; the same list serves as
-            // the default for what a braille display would be sent.
-            cmbBrailleTable.Items.Add(Localization.T("Settings.TextBooks.BrailleTableAuto"));
-            foreach (BrailleTableInfo t in BrailleTables.All) cmbBrailleTable.Items.Add(t.Display);
-            cmbBrailleTable.SelectedIndex = 0;
-            box.Controls.Add(cmbBrailleTable);
-
-            UpdateBrailleEnabled();
             return box;
         }
 
@@ -847,14 +853,6 @@ namespace Nemoviz_Book_Reader
 
             UpdateVisualEnabled();
             return box;
-        }
-
-        /// <summary>Everything under "Use braille output" follows the checkbox —
-        /// dimmed and out of the tab order while the feature is off.</summary>
-        private void UpdateBrailleEnabled()
-        {
-            bool on = chkBraille != null && chkBraille.Checked;
-            SetEnabled(on, cmbBrailleTable);
         }
 
         private void UpdateVisualEnabled()
