@@ -173,7 +173,29 @@ namespace Nemoviz_Book_Reader
                 char c = BrailleAscii[dots];
                 map[c] = dots;
                 // .brf files are conventionally uppercase, but accept lowercase too.
-                if (c >= 'A' && c <= 'Z') map[char.ToLowerInvariant(c)] = dots;
+                //
+                // THE SHIFT IS 0x40..0x5E, NOT JUST A..Z (fixed 2026-08-04). Braille
+                // ASCII proper is 0x20..0x5F; a file written in the lowercase
+                // convention carries the whole upper half shifted by 0x20, which is
+                // A..Z but ALSO @ [ \ ] ^ arriving as ` { | } ~. Only the letters
+                // were being accepted, so five cells were dropped without a sound.
+                //
+                // It reads as a table problem, which is how it was filed (§10g: the
+                // English sample "reads Have can a man be Born Again", blamed on
+                // UEB vs EBAE). It is not. The file writes the title as ",h{ …":
+                // dropping the { leaves a bare h, and a bare h is the word sign for
+                // "have" in EVERY English grade-2 standard — so all three of them
+                // agreed on the wrong word and the table looked guilty. Measured
+                // across the samples, 13 files lose cells this way, up to 3.34% of
+                // one Korean book and 1.37% of the English one; §10g's "stray bytes
+                // not yet mapped" (0x60 in the French integrals, 0x7C in an
+                // abridged) are the same bug seen from the other end, and its guess
+                // that they were 8-dot cells was wrong.
+                //
+                // Additive and therefore safe, by the same argument AddLatin1Cells
+                // makes below: these bytes map to nothing today, so nothing that
+                // parses now can parse differently after it.
+                if (c >= '@' && c <= '^') map[(char)(c + 0x20)] = dots;
             }
             AddLatin1Cells(map);
             return map;

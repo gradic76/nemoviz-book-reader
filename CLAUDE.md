@@ -3563,17 +3563,46 @@ available and needs nobody to know the language.
 
 ### Fine tuning still owed (2026-08-02)
 
-- **The English table is auto-detected wrongly.** `Smith_Chuck…BRF` reads "**Have**
-  can a man be Born Again" — `h` alone is the contraction for *have*, so the
-  chosen standard is not the one the file was written in (UEB vs EBAE). Same
-  cause as `Publishs` for *Publishing*. Formats are right; the table choice is
-  not. Per book it can be corrected in Properties.
+- ~~**The English table is auto-detected wrongly.**~~ **— FIXED 2026-08-04, and
+  it was never the table.** `Smith_Chuck…BRF` read "**Have** can a man be Born
+  Again", blamed here on the wrong English standard (UEB vs EBAE). Measured
+  rather than argued: **all three English grade-2 tables — UEB, EBAE
+  (`en-us-g2`) and British — produced the same "Have"**, which is not what a
+  wrong-table result looks like. The file writes the title as `,h{ …`, and the
+  byte `{` was being **dropped by our own cell map**, leaving a bare `h` — the
+  word sign for *have* in every English standard. The tables agreed, and they
+  agreed on what we had handed them.
+  **The bug: the lowercase convention shifts all of 0x40..0x5E, not just A..Z.**
+  `BuildCellMap` accepted lowercase letters and nothing else, so `@ [ \ ] ^`
+  arriving as `` ` { | } ~ `` were thrown away. That one line covers this bullet
+  **and** the "stray bytes" one below: `0x60` in the French integrals and `0x7C`
+  in the abridged are the same five cells.
+  **Measured before and after across all 24 affected samples** — a stashed build
+  for the baseline, so the comparison is real and not remembered: **no file lost
+  a character and no file changed its detected table**; 24 gained text, from +3
+  characters to +66 119 on a Korean book, +2 000 to +3 300 on each `.i55`, +310
+  on the English one. The title now reads *"How can a man be Born Again?"*, and
+  the ministry's phone number stops being `1-hjj-272-WILL` and becomes `…-WORD`,
+  which is what it actually is.
+  **Now a separate question: NBR ships only UEB for English.** EBAE is measurably
+  better on the two American samples (`en-us-g2` gave "Incarnation" where UEB gave
+  "IncarnN !Ascension"), and both tables are already vendored — adding them is two
+  lines. **But do not add them yet.** UEB and EBAE are genuinely hard to tell
+  apart automatically, and since the per-book override was removed (§11) a wrong
+  automatic pick has no remedy. The table choice at IMPORT is the prerequisite,
+  not the longer table list.
+- **Two English books are detected as FRENCH** (`NALIS_BR_ 00038` and `00041` —
+  Shakespeare's *Twelfth Night* and *The Year in San Fernando*, both reading
+  `fr-g2`). The text is recognisably English underneath (`forettord` for
+  *foreword*), so this is a real `Detect` failure, and a different one from the
+  bullet above. Not investigated.
 - French `<auteur>` markup arrives as text (`chauteuroi`), and `Haüy` comes out
   `Haouy`.
-- `.i55` decorative rules survive as `\5/∷∷∷∷∷:` — the `{ | } ~` bytes, probably
-  8-dot cells.
-- Stray bytes not yet mapped: `0x60` in French integral files, `0x7C`/`0xA4` in
-  one abridged.
+- `.i55` decorative rules survive as `\5/∷∷∷∷∷:`. **The guess that these were the
+  `{ | } ~` bytes was wrong** — those are mapped now, and the rules come out byte
+  for byte unchanged, so it is something else.
+- Stray byte not yet mapped: `0xA4` in one abridged French file. (`0x60` and
+  `0x7C` are fixed — see the first bullet.)
 - **More samples wanted** in languages not yet tested — Gordan's own sources are
   exhausted, so free download sites are worth finding when there is time.
 
