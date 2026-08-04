@@ -3746,16 +3746,32 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     hybrid has been read end to end in each of the three outputs by a person.
     This is the widest item on the list.
 
-- **A key fires but a keyboard SHORTCUT does not light it.** The backlight is
-  hung on `Button.Click`, so the mouse and Enter/Space light the key, but the
-  shortcut handlers call `BtnLibrary_Click(null, ...)` and friends **directly**
-  and never raise `Click`. Do not "fix" this by swapping in `PerformClick()` —
-  that silently does nothing when a control cannot be selected, which would be a
-  behaviour change on the classic path too. **The move onto function keys has
-  since happened and this did not land with it** — `Canvas.Flash` is still called
-  from nowhere, and the F1–F9 cases just invoke the handlers. That single
-  `ProcessCmdKey` switch remains the right place for
-  `NewPlayerSkin.Canvas.Flash(theKey)`.
+- ~~**A key fires but a keyboard SHORTCUT does not light it.**~~ **— DONE
+  2026-08-04.** The backlight was hung on `Button.Click`, so the mouse and
+  Enter/Space lit a key while a shortcut did not: those handlers call
+  `BtnLibrary_Click(null, …)` **directly** and never raise `Click`.
+  `Form1.FlashKey` now lights it and `FireKey` does both, from the one
+  `ProcessCmdKey` switch this note always pointed at. **Not `PerformClick()`**,
+  as the note warned — it silently does nothing when a control cannot be
+  selected, and would route the command through a second path on the classic
+  look too. Flashing and invoking stay separate.
+  - **Covered:** F1–F7 and Alt+Enter (their eight panel keys), Space
+    (the ring centre, from `Form1_KeyDown` and from the reading window's
+    forwarder), Shift+Left/Right (which *are* the ring's left and right — the
+    skin places `btnBack`/`btnForward` there), Up/Down (the ring's volume keys),
+    and the focused **WM_APPCOMMAND** media keys.
+  - **Deliberately not covered:** the **WM_HOTKEY** global claim, which fires
+    while NBR is in the background and would light a panel nobody is looking at;
+    F9, the plain arrows and the speed pair, which have no key of their own.
+  - `NewPlayerSkin.RingVolumeUp/Down` had to be exposed: the two volume keys are
+    the only controls the skin creates, so they were the one pair Form1 could not
+    name. Null under the classic look, which `FlashKey` already treats as
+    "nothing to light" along with a null `Canvas`.
+  - **Verified by reading, not by eye**: all four paint paths consult
+    `RingFor` (`PaintKey`, `PaintSector`, `PaintPlay`, `PaintPower`), and `Flash`
+    invalidates both the key and the 22-unit bloom around it, so a flash from any
+    caller reaches the screen. **That it LOOKS right is unverified** — it belongs
+    on the eyes-and-hands list above.
 - **Mouse operation cannot be tested by Gordan** (stated 2026-07-28) — so it has
   to be verified some other way, and half of it still is not. Driven with real
   synthetic input against the running player and **confirmed working**: Play /

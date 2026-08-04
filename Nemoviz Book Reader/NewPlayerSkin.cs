@@ -103,6 +103,12 @@ namespace Nemoviz_Book_Reader
         /// The key asks it what colour its well should be right now.</summary>
         internal static SkinCanvas Canvas;
 
+        /// <summary>The ring's two volume keys. The skin creates them — they are
+        /// the only controls it does — so they are the only keys on the panel
+        /// Form1 cannot reach by name, and the keyboard needs them to light
+        /// Up/Down the way the mouse does.</summary>
+        internal static Button RingVolumeUp, RingVolumeDown;
+
         /// <summary>What lights the inside of a key's well: the firing flash while
         /// it lasts, otherwise focus, otherwise nothing. Firing wins — a key you
         /// just pressed is the more urgent of the two facts.</summary>
@@ -298,6 +304,13 @@ namespace Nemoviz_Book_Reader
             Button right = p.Forward;
             Button down = MakeRingKey(form, "Btn.VolumeDown.Accessible", delegate { form.SkinVolume(-5); });
             Button left = p.Back;
+            // Kept so the keyboard can light them. Every other key on the panel is
+            // a control Form1 already owns and can name; these two exist only
+            // here, so Up/Down would have been the one pair of shortcuts with no
+            // key to flash. Null under the classic look, which is exactly what
+            // Form1.FlashKey expects.
+            RingVolumeUp = up;
+            RingVolumeDown = down;
 
             PlaceSector(up, 0, "▲", canvas);
             PlaceSector(right, 1, "▶", canvas);

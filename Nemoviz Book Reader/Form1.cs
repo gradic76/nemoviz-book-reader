@@ -409,29 +409,39 @@ namespace Nemoviz_Book_Reader
             if (m.Msg == WM_APPCOMMAND && currentBook != null && appSettings.MediaKeys)
             {
                 int cmd = (int)((m.LParam.ToInt64() >> 16) & 0x0FFF);
+                // These light their keys too — a media key is a key, and this
+                // branch only runs while NBR has focus, so the panel is there to
+                // be seen. The WM_HOTKEY branch below deliberately does NOT: that
+                // is the global claim, which fires while NBR is in the background
+                // and would be lighting a panel nobody is looking at.
                 switch (cmd)
                 {
                     case APPCOMMAND_MEDIA_PLAY_PAUSE:
+                        FlashKey(btnPlayPause);
                         BtnPlayPause_Click(null, EventArgs.Empty);
                         m.Result = (IntPtr)1;
                         return;
 
                     case APPCOMMAND_MEDIA_PLAY:
+                        FlashKey(btnPlayPause);
                         if (!isPlaying) BtnPlayPause_Click(null, EventArgs.Empty);
                         m.Result = (IntPtr)1;
                         return;
 
                     case APPCOMMAND_MEDIA_PAUSE:
+                        FlashKey(btnPlayPause);
                         if (isPlaying) BtnPlayPause_Click(null, EventArgs.Empty);
                         m.Result = (IntPtr)1;
                         return;
 
                     case APPCOMMAND_MEDIA_NEXTTRACK:
+                        FlashKey(btnForward);
                         SeekStepForward();
                         m.Result = (IntPtr)1;
                         return;
 
                     case APPCOMMAND_MEDIA_PREVIOUSTRACK:
+                        FlashKey(btnBack);
                         SeekStepBackward();
                         m.Result = (IntPtr)1;
                         return;
@@ -1012,6 +1022,41 @@ namespace Nemoviz_Book_Reader
             return true;
         }
 
+        /// <summary>Lights a key's backlight, as pressing it with the mouse does.
+        ///
+        /// <para><b>Why this exists.</b> The bloom is hung on <c>Button.Click</c>
+        /// inside the skin, so the mouse and Enter/Space light a key while a
+        /// keyboard SHORTCUT did not: the shortcut cases below call
+        /// <c>BtnLibrary_Click(null, …)</c> and friends **directly** and never
+        /// raise <c>Click</c>. For a sighted user that made the panel look dead
+        /// under exactly the keys this app expects people to use.</para>
+        ///
+        /// <para><b>Not <c>PerformClick()</c></b>, which was the obvious fix and
+        /// is the wrong one: it silently does nothing when a control cannot be
+        /// selected, so the flash would come and go with no way to tell, and it
+        /// would route the command through a second path on the classic look
+        /// too — a behaviour change where none was asked for. Flashing and
+        /// invoking are kept separate on purpose.</para>
+        ///
+        /// <para>Silent under the classic look, where there is no canvas and no
+        /// key to light, and silent for a shortcut with no key of its own (F9,
+        /// the plain arrows, the speed pair).</para></summary>
+        private static void FlashKey(Control key)
+        {
+            SkinCanvas canvas = NewPlayerSkin.Canvas;
+            if (canvas != null && key != null) canvas.Flash(key);
+        }
+
+        /// <summary>A shortcut that stands for a key on the panel: light it, then
+        /// do what it does. Returns true because every caller is a handled
+        /// <c>ProcessCmdKey</c> case.</summary>
+        private static bool FireKey(Control key, EventHandler action)
+        {
+            FlashKey(key);
+            action(null, EventArgs.Empty);
+            return true;
+        }
+
         // ──────────────────────────────────────────────
         // ProcessCmdKey
         // ──────────────────────────────────────────────
@@ -1021,12 +1066,16 @@ namespace Nemoviz_Book_Reader
 
             switch (keyData)
             {
+                // The ring's two volume keys belong to the skin, not to BuildUI, so
+                // they are the one pair FlashKey cannot be handed by name.
                 case Keys.Up:
-                    if (!infoBoxHasFocus) { ChangeVolume(+5); return true; }
+                    if (!infoBoxHasFocus)
+                    { FlashKey(NewPlayerSkin.RingVolumeUp); ChangeVolume(+5); return true; }
                     break;
 
                 case Keys.Down:
-                    if (!infoBoxHasFocus) { ChangeVolume(-5); return true; }
+                    if (!infoBoxHasFocus)
+                    { FlashKey(NewPlayerSkin.RingVolumeDown); ChangeVolume(-5); return true; }
                     break;
 
                 case Keys.Right:
@@ -1070,12 +1119,16 @@ namespace Nemoviz_Book_Reader
                     ChangeSpeed(+10);
                     return true;
 
-                // Seek jump by the selected step — Shift+Left/Right.
+                // Seek jump by the selected step — Shift+Left/Right. These two ARE
+                // the ring's left and right keys (the skin places btnBack and
+                // btnForward there), so they light like any other.
                 case Keys.Shift | Keys.Left:
+                    FlashKey(btnBack);
                     SeekStepBackward();
                     return true;
 
                 case Keys.Shift | Keys.Right:
+                    FlashKey(btnForward);
                     SeekStepForward();
                     return true;
 
@@ -1119,8 +1172,7 @@ namespace Nemoviz_Book_Reader
                 // Properties stays on Alt+Enter — that is the Windows convention
                 // for it and Gordan kept it deliberately.
                 case Keys.Alt | Keys.Enter:
-                    BtnProperties_Click(null, EventArgs.Empty);
-                    return true;
+                    return FireKey(btnProperties, BtnProperties_Click);
 
                 // The function-key set (Gordan, 2026-07-31). Letter keys had to
                 // go: the seek combo swallows them as type-ahead whenever it has
@@ -1137,37 +1189,33 @@ namespace Nemoviz_Book_Reader
                     if (infoBoxHasFocus) { ToggleInfoBoxFocus(); return true; }
                     break;
 
+                // Each of these stands for a key on the panel, so it lights that
+                // key on the way through — see FireKey.
                 case Keys.F1:
-                    BtnHelp_Click(null, EventArgs.Empty);
-                    return true;
+                    return FireKey(btnHelp, BtnHelp_Click);
 
                 case Keys.F2:
-                    BtnSettings_Click(null, EventArgs.Empty);
-                    return true;
+                    return FireKey(btnSettings, BtnSettings_Click);
 
                 case Keys.F3:
-                    BtnLibrary_Click(null, EventArgs.Empty);
-                    return true;
+                    return FireKey(btnLibrary, BtnLibrary_Click);
 
                 case Keys.F4:
                     // Swallowed before anything else can see it: F4 on a focused
                     // ComboBox drops its list open, and cmbSeek is focusable.
-                    BtnGoTo_Click(null, EventArgs.Empty);
-                    return true;
+                    return FireKey(btnGoTo, BtnGoTo_Click);
 
                 case Keys.F5:
-                    BtnSetBookmark_Click(null, EventArgs.Empty);
-                    return true;
+                    return FireKey(btnSetBookmark, BtnSetBookmark_Click);
 
                 case Keys.F6:
-                    BtnManageBookmarks_Click(null, EventArgs.Empty);
-                    return true;
+                    return FireKey(btnManageBookmarks, BtnManageBookmarks_Click);
 
                 case Keys.F7:
-                    BtnTimer_Click(null, EventArgs.Empty);
-                    return true;
+                    return FireKey(btnTimer, BtnTimer_Click);
 
                 case Keys.F9:
+                    // No key of its own on the panel, so nothing to light.
                     ToggleReadingWindow();
                     return true;
 
@@ -1254,6 +1302,10 @@ namespace Nemoviz_Book_Reader
         {
             if (e.KeyCode == Keys.Space)
             {
+                // Space is Play/Pause everywhere, so it lights the ring's centre
+                // exactly as clicking it does. It lives here rather than in
+                // ProcessCmdKey because Space has always been handled here.
+                FlashKey(btnPlayPause);
                 BtnPlayPause_Click(null, EventArgs.Empty);
                 e.Handled = true;
                 e.SuppressKeyPress = true;
@@ -3356,7 +3408,12 @@ namespace Nemoviz_Book_Reader
                     // whole player, so a Space case there would stop Space
                     // activating whichever button has focus — trading one dead
                     // key for a broken convention everywhere else.
-                    if (k == Keys.Space) { BtnPlayPause_Click(null, EventArgs.Empty); return; }
+                    // Flashes for the same reason the player's own Space does.
+                    // The reading window is covering the panel, so nobody sees
+                    // it — but "this command lights that key" is a rule worth
+                    // keeping whole rather than one with an invisible exception.
+                    if (k == Keys.Space)
+                    { FlashKey(btnPlayPause); BtnPlayPause_Click(null, EventArgs.Empty); return; }
                     Message m = new Message(); ProcessCmdKey(ref m, k);
                 },
                 currentBook.TextColour, currentBook.TextBackColour);
