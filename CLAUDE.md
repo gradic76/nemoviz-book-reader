@@ -3727,9 +3727,32 @@ The patch's hunk counts were re-derived and verified after the edit — one cont
 line became a removal, so `@@ -57,14 +47,10 @@` became `+47,9` and the following
 hunk's start shifted — and the verifier was proved on the unmodified patch first.
 
-**The DLL shipping today is still v3**, and both texts still ship with it. A new
-build has to pass the six checks in `tools/mpv-build/README.md` before it is
-swapped in.
+**A build is running: `gradic76/mpv-winbuild` run 31129028299**, "NBR audio-only
+8 — FFmpeg without version3", dispatched 2026-08-06 22:29 UTC with
+`build_target=64bit, lgpl=true, compiler=clang, release=false`. The workflow
+applies the patch with `git am --3way`, so mild context drift would survive but a
+malformed patch fails loudly — either way the run says which.
+
+**WHAT TO DO WITH IT WHEN IT FINISHES** (nobody is watching it; see below):
+1. The artifact wanted is `mpv-dev-lgpl-x86_64-*` — the patch renames the output
+   folder, so an artifact without `-lgpl` in its name is the ordinary build and
+   is not ours.
+2. **Confirm the licence actually changed**, which is the entire point: FFmpeg's
+   configure line in the build log must no longer carry `--enable-version3`.
+   Do not infer it from the fact that the run went green.
+3. Then the six checks in `tools/mpv-build/README.md`, in full — GPL scan,
+   decoder diff against the oracle, filter chain, play files with the OLD DLL as
+   a control run, `scaletempo2`/WASAPI/`ao=null`, and by ear.
+4. Only then swap the DLL, and only then drop `Licences\LGPL-3.0.txt` and
+   `Licences\GPL-3.0.txt` and the section about them in THIRD-PARTY-NOTICES.txt.
+
+**Nobody is monitoring this run.** Claude Code runs inside Gordan's session on his
+machine: when the app or the machine is closed it stops existing, and it cannot
+wake itself to check on anything. GitHub Actions is unaffected — that is the
+point of running it there — but the result has to be picked up by hand, or at the
+start of the next session.
+
+**The DLL shipping today is still v3**, and both texts still ship with it.
 
 **One wrinkle for MSIX specifically:** FFmpeg here is LGPL **v3**, which wants
 the user to be able to relink or replace the library. A signed MSIX package puts
