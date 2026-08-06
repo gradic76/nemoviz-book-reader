@@ -1275,8 +1275,46 @@ Form feed = braille page; ornamental rules/boxes are dropped.
   language's own everyday words) — **the user is the authority**.
 - Verified on 19 real books (HR grade 1, FR, EN UEB contracted): 18 detect
   correctly; one English TOC-heavy file misdetects — which is what the override
-  is for. **Still open:** the per-book override UI (needs the text Properties
-  dialog), `.pef` support, and more languages/samples.
+  is for. **Still open:** `.pef` support, and more languages/samples.
+
+**The per-book override — the engine is in (2026-08-04), the UI is not.**
+`BookData.RetranslateBraille(tableId)` reads the book's original braille file
+again with a chosen table and replaces the reading text with the result;
+`BookData.BrailleSourcePath` finds that original, or answers null for a book that
+did not come from one. Almost none of it was new: `BrfParser.ParseBytes` already
+took a table id and detected only when it was not given, `DuxburyParser.Parse`
+already forwarded one, and the import already kept the original beside
+`content.txt` — all three verified in code rather than taken from this file,
+which had been wrong twice that day.
+
+**It is an import operation wearing a settings dialog's clothes**, and that
+decides the hard part. The table is spent when the text is written, so changing
+it is doing the import again: the reading position, the bookmarks and the
+percentage are offsets into a text that no longer exists, and they are reset
+rather than carried. **Gordan's call (2026-08-04)** — a reader notices a wrong
+table long before they start setting bookmarks, so the 99% case costs nothing,
+and the 1% is owed a warning. That warning is to carry **"Don't show this
+again"**: *"kroz par puta će se naučiti i isključiti"*.
+
+**Measured on the misdetecting English sample**, three passes:
+
+| table | chars | first line |
+|---|---|---|
+| `en-g2` | 19 576 | *How can a man be Born Again?* |
+| `en-g1` | 18 198 | `H\246/ c a man ; Born Ag?` |
+| `en-g2` again | 19 576 | identical to the first pass |
+
+So it is **reversible** — the third pass reproduces the first byte for byte — which
+is the property that makes offering the choice safe at all: a wrong pick costs a
+re-read and nothing else. Pages survive (20), position and bookmarks come back at
+nought, and a book that is not from braille answers `BrailleSourcePath = null`
+and refuses.
+
+**Still to build:** the combo itself, in Properties → the text page, shown only
+when `BrailleSourcePath` is non-null; and the confirm dialog with its
+switch-off. **And once it exists, EBAE can be added** — §10g measured it as the
+better reading of the American samples and held it back only because a wrong
+automatic pick had no remedy.
 
 ---
 

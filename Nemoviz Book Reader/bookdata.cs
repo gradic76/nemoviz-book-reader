@@ -470,6 +470,94 @@ namespace Nemoviz_Book_Reader
             catch { return false; }
         }
 
+        /// <summary>The original braille file kept beside <c>content.txt</c> at
+        /// import, or null when this book did not come from one.
+        ///
+        /// <para>Gated on <see cref="BrailleTable"/> rather than on the extension
+        /// alone, because that is what says a liblouis table produced the text. A
+        /// Braillo <c>.brl</c> is ordinary text under a braille extension (§10g)
+        /// and has no table to change.</para></summary>
+        public string BrailleSourcePath
+        {
+            get
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(BrailleTable)) return null;
+                    foreach (string p in Directory.GetFiles(FolderPath))
+                    {
+                        string ext = Path.GetExtension(p).ToLowerInvariant();
+                        if (ext == ".brf" || ext == ".brl" || ext == ".bra"
+                            || ext == ".i55" || ext == ".dxb") return p;
+                    }
+                }
+                catch { }
+                return null;
+            }
+        }
+
+        /// <summary>Reads the book's original braille file again with a different
+        /// liblouis table, and replaces the reading text with the result.
+        ///
+        /// <para><b>Why this has to exist.</b> A braille file declares neither its
+        /// language nor its grade nor its national standard (§8i), so the table is
+        /// guessed at import — well, but not always: measured 18 right out of 19,
+        /// and §10g has a case where every English table agreed on the wrong word.
+        /// Without a way to say "no, read it as this instead", a misjudged book is
+        /// simply unreadable and the reader has no recourse.</para>
+        ///
+        /// <para><b>It is an IMPORT operation wearing a settings dialog's
+        /// clothes.</b> The table is spent the moment the text is written, so
+        /// changing it is not adjusting a preference — it is doing the import
+        /// again. Hence everything derived from the old text goes: the reading
+        /// position, the bookmarks, the percentage. They are character offsets
+        /// into a text that no longer exists, and carrying them across would put
+        /// them somewhere arbitrary while looking precise. Gordan's call
+        /// (2026-08-04), with the reasoning that a reader notices a wrong table
+        /// long before they start setting bookmarks — so the caller warns, and
+        /// the warning is one the reader can switch off once they have met
+        /// it.</para></summary>
+        public bool RetranslateBraille(string tableId)
+        {
+            try
+            {
+                string src = BrailleSourcePath;
+                if (src == null) return false;
+
+                // Duxbury is braille in an envelope (§10g): its own parser strips
+                // the wrapper and hands the cells to the same translator, so both
+                // formats take the table the same way.
+                TextDoc doc = Path.GetExtension(src).ToLowerInvariant() == ".dxb"
+                    ? new DuxburyParser().Parse(src, tableId)
+                    : new BrfParser().ParseBytes(File.ReadAllBytes(src), tableId);
+                if (doc == null || string.IsNullOrEmpty(doc.Text)) return false;
+
+                // The same order the import uses, so the two cannot drift: clean
+                // once with the marks moving with the text, then write.
+                TextCleaner.CleanDoc(doc);
+                File.WriteAllText(TextFilePath, doc.Text, new System.Text.UTF8Encoding(false));
+                TextCleaned = true;
+                SetTextHeadings(doc.Headings);
+                SetTextPages(doc.Pages);
+                BrailleTable = doc.BrailleTable;
+                Producer = NormalizeProducer(doc.Producer);
+                // Re-detected, not carried over: the language was read off the old
+                // text, and if that text was wrong the language may be too — which
+                // is exactly the case this exists for.
+                TextLanguage = LanguageDetector.Resolve(doc.Language, doc.Text);
+                TextChars = doc.Text.Length;
+
+                TextPosition = 0;
+                LastPosition = "00:00:00";
+                PercentListened = 0;
+                SetBookmarks(new List<double>());
+
+                Save();
+                return true;
+            }
+            catch { return false; }
+        }
+
         // [M4bNav]: C<i>=<position seconds>|<title>. Positions are absolute
         // virtual-timeline seconds (a single-file book, so = time in the file).
         private void LoadM4bNav()
