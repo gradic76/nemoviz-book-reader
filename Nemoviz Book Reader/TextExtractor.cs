@@ -20,6 +20,11 @@ namespace Nemoviz_Book_Reader
         // book remembers it and the user can correct the choice later.
         public string BrailleTable = "";
         public string Publisher = "";  // dc:publisher (EPUB print/edition publisher)
+        /// <summary>Whatever the file gave as a date — dc:date, and whatever
+        /// shape the producer wrote it in. Reduced to a year by
+        /// <see cref="BookData.ResolveYear"/>, which also knows where to look
+        /// when this is empty, as it usually is.</summary>
+        public string Date = "";
         /// <summary>Element id → character offset, for formats whose AUDIO is
         /// aligned to named points in the text: a DAISY SMIL par names a DTBook
         /// id, an EPUB media overlay names an XHTML id. Empty for everything

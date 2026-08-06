@@ -439,8 +439,10 @@ namespace Nemoviz_Book_Reader
             var info = new BookInfoBuilder();
             info.AddAlways(BookInfoField.Title, book.Title, dash);
             info.Add(BookInfoField.Author, book.Author);
-            info.Add(BookInfoField.Publisher, BookData.NormalizeProducer(book.Publisher));
+            string pubA = BookData.NormalizeProducer(book.Publisher);
+            info.Add(BookInfoField.Publisher, BookData.WithYear(pubA, book.Year));
             info.Add(BookInfoField.Producer, BookData.NormalizeProducer(book.Producer));
+            if (pubA.Length == 0) info.Add(BookInfoField.Year, book.Year);
             info.AddAlways(BookInfoField.Format, book.Format, dash);
             info.AddAlways(BookInfoField.Time, book.Duration, dash);
             sb.Append(info.ToText(Environment.NewLine));
@@ -1250,7 +1252,9 @@ namespace Nemoviz_Book_Reader
             var info = new BookInfoBuilder();
             info.AddAlways(BookInfoField.Title, book.Title, "");
             info.Add(BookInfoField.Author, book.Author);
-            info.Add(BookInfoField.Publisher, BookData.NormalizeProducer(book.Publisher));
+            string pubT = BookData.NormalizeProducer(book.Publisher);
+            info.Add(BookInfoField.Publisher, BookData.WithYear(pubT, book.Year));
+            if (pubT.Length == 0) info.Add(BookInfoField.Year, book.Year);
             info.Add(BookInfoField.Producer, BookData.NormalizeProducer(book.Producer));
             info.AddAlways(BookInfoField.Format, book.Format, "");
             if (book.TextPages.Count > 0)

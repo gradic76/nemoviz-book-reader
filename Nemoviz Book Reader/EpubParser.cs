@@ -130,7 +130,8 @@ namespace Nemoviz_Book_Reader
             if (opfXml == null) return new TextDoc();
             string opfDir = DirOf(opfPath);
 
-            string title = "", author = "", publisher = "", language = "", ncxId = null, navHref = null;
+            string title = "", author = "", publisher = "", language = "", date = "",
+                   ncxId = null, navHref = null;
             Dictionary<string, string> manifest = new Dictionary<string, string>(); // id → href
             Dictionary<string, string> mediaType = new Dictionary<string, string>();
             List<string> spine = new List<string>();
@@ -144,6 +145,10 @@ namespace Nemoviz_Book_Reader
                     else if (ln == "creator" && author == "") author = (el.Value ?? "").Trim();
                     else if (ln == "publisher" && publisher == "") publisher = (el.Value ?? "").Trim();
                     else if (ln == "language" && language == "") language = (el.Value ?? "").Trim();
+                    // dc:date. EPUB3 also carries a <meta property="dcterms:modified">,
+                    // which is when the FILE was touched and not when the book was
+                    // published — taking the first dc:date keeps those apart.
+                    else if (ln == "date" && date == "") date = (el.Value ?? "").Trim();
                     else if (ln == "item")
                     {
                         string id = (string)el.Attribute("id");
@@ -233,7 +238,8 @@ namespace Nemoviz_Book_Reader
             }
 
             return new TextDoc { Text = body, Headings = headings, Pages = pages, Title = title,
-                                 Author = author, Publisher = publisher, Language = language };
+                                 Author = author, Publisher = publisher, Language = language,
+                                 Date = date };
         }
 
         // ── DRM (only content encryption counts; fonts are obfuscation) ───

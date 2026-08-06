@@ -27,6 +27,21 @@ namespace Nemoviz_Book_Reader
         // Print-edition publisher, from dc:publisher (DAISY + EPUB). Distinct
         // from Producer (the audio/accessible-edition producer, DAISY ncc:producer).
         public string Publisher { get; set; }
+        /// <summary>The year of publication, as four digits, or empty.
+        ///
+        /// <para><b>Kept as text, not a number.</b> It is only ever shown, never
+        /// compared or counted, and a book that says "1996" should show 1996
+        /// rather than whatever an integer parse made of it.</para>
+        ///
+        /// <para><b>The tag is not where it usually is.</b> Formats that carry a
+        /// date — DAISY and EPUB <c>dc:date</c>, an audio year tag — are read
+        /// first, but §11 recorded Gordan's own library as the counter-example and
+        /// it holds: the year is routinely sitting at the end of another field,
+        /// as <c>Publisher=Školska knjiga, Zagreb 2008.</c> or
+        /// <c>Title=Catherine Coulter - FBI 01 The Cove 1996</c>. So a book with
+        /// no date tag is asked its publisher and then its title before being
+        /// given up on.</para></summary>
+        public string Year { get; set; }
         public string Format { get; set; }
         public string Duration { get; set; }
         public string LastPosition { get; set; }
@@ -226,6 +241,7 @@ namespace Nemoviz_Book_Reader
             Producer = ini.Read("Book", "Producer", "");
             BrailleTable = ini.Read("Braille", "Table", "");
             Publisher = ini.Read("Book", "Publisher", "");
+            Year = ini.Read("Book", "Year", "");
             Format = ini.Read("Book", "Format", "Unknown");
             Duration = ini.Read("Book", "Duration", "00:00:00");
             LastPosition = ini.Read("Progress", "LastPosition", "00:00:00");
@@ -734,10 +750,12 @@ namespace Nemoviz_Book_Reader
             Author = db.Author ?? "";
             Producer = NormalizeProducer(db.Producer);
             Publisher = NormalizeProducer(db.Publisher);
+            Year = ResolveYear(db.Date, Publisher, Title);
             ini.Write("Book", "Title", Title);
             ini.Write("Book", "Author", Author);
             ini.Write("Book", "Producer", Producer);
             ini.Write("Book", "Publisher", Publisher);
+            ini.Write("Book", "Year", Year);
 
             string audioDetails = ordered.Count > 0 ? DetectAudioFormatString(ordered[0]) : null;
             // Drop the leading codec name ("MP3 Audio, ...") and prefix the
@@ -1045,6 +1063,57 @@ namespace Nemoviz_Book_Reader
         /// non-values ("N/A", "Non disponible", "-", …) so they never show as a
         /// producer. Returns "" when there is no real publisher.
         /// </summary>
+        /// <summary>"Publisher (year)", the shape §8k asks the info glass for.
+        /// Falls back to whichever half exists, so it never produces a stray pair
+        /// of brackets round nothing.</summary>
+        public static string WithYear(string name, string year)
+        {
+            bool hasName = !string.IsNullOrWhiteSpace(name);
+            bool hasYear = !string.IsNullOrWhiteSpace(year);
+            if (hasName && hasYear) return name.Trim() + " (" + year.Trim() + ")";
+            return hasName ? name.Trim() : "";
+        }
+
+        /// <summary>A four-digit year out of a date, or "" when there is none.
+        ///
+        /// <para>Takes anything a producer might have written in a date field —
+        /// "2008", "2008-03-14", "14/03/2008", "c2008", "2008." — and keeps the
+        /// year. Bounded to 1400–2100 so a page count, an ISBN fragment or a
+        /// street number cannot pass for one.</para></summary>
+        public static string YearIn(string raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return "";
+            for (int i = 0; i + 4 <= raw.Length; i++)
+            {
+                if (i > 0 && char.IsDigit(raw[i - 1])) continue;          // mid-number
+                if (i + 4 < raw.Length && char.IsDigit(raw[i + 4])) continue;
+                bool four = true;
+                for (int k = 0; k < 4; k++) if (!char.IsDigit(raw[i + k])) { four = false; break; }
+                if (!four) continue;
+                int y = int.Parse(raw.Substring(i, 4));
+                if (y >= 1400 && y <= 2100) return y.ToString();
+            }
+            return "";
+        }
+
+        /// <summary>The year to show, from the date the file gave us if it gave
+        /// one, and otherwise out of the publisher and then the title.
+        ///
+        /// <para>The order is the order of trust, and the fallbacks are not a
+        /// nicety: measured on Gordan's own library (§11), real books carry
+        /// <c>Publisher=Školska knjiga, Zagreb 2008.</c> and
+        /// <c>Title=Catherine Coulter - FBI 01 The Cove 1996</c> while having no
+        /// date tag at all. A reader of <c>dc:date</c> alone would come back empty
+        /// from a shelf that plainly shows its years.</para></summary>
+        public static string ResolveYear(string date, string publisher, string title)
+        {
+            string y = YearIn(date);
+            if (y.Length > 0) return y;
+            y = YearIn(publisher);
+            if (y.Length > 0) return y;
+            return YearIn(title);
+        }
+
         public static string NormalizeProducer(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw)) return "";
@@ -1132,6 +1201,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Book", "Author", Author ?? "");
             ini.Write("Book", "Producer", Producer ?? "");
             ini.Write("Book", "Publisher", Publisher ?? "");
+            ini.Write("Book", "Year", Year ?? "");
             ini.Write("Book", "Format", Format);
             if (!string.IsNullOrEmpty(BrailleTable))
                 ini.Write("Braille", "Table", BrailleTable);

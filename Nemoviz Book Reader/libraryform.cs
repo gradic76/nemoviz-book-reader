@@ -1200,8 +1200,11 @@ namespace Nemoviz_Book_Reader
         // DAISY has both, plain audio has neither.
         private void AddAudioDetails(BookInfoBuilder info, BookData book)
         {
+            string pubA = BookData.NormalizeProducer(book.Publisher);
             info.AddAlways(BookInfoField.Producer, BookData.NormalizeProducer(book.Producer), "");
-            info.Add(BookInfoField.Publisher, BookData.NormalizeProducer(book.Publisher));
+            info.Add(BookInfoField.Publisher, BookData.WithYear(pubA, book.Year));
+            // Only when it has nowhere better to be — see BookInfoField.Year.
+            if (pubA.Length == 0) info.Add(BookInfoField.Year, book.Year);
 
             double totalSec = ParseDetailTime(book.Duration);
             double elapsedSec = ParseDetailTime(book.LastPosition);
@@ -1227,8 +1230,10 @@ namespace Nemoviz_Book_Reader
         // and the speed that estimate is based on.
         private void AddTextDetails(BookInfoBuilder info, BookData book)
         {
+            string pubT = BookData.NormalizeProducer(book.Publisher);
             info.Add(BookInfoField.Producer, BookData.NormalizeProducer(book.Producer));
-            info.Add(BookInfoField.Publisher, BookData.NormalizeProducer(book.Publisher));
+            info.Add(BookInfoField.Publisher, BookData.WithYear(pubT, book.Year));
+            if (pubT.Length == 0) info.Add(BookInfoField.Year, book.Year);
 
             int wpm = book.TextWpm >= 0 ? book.TextWpm : appSettings.TtsWpm;
             info.Add(BookInfoField.Time, "≈" + book.EstimatedReadingTime(wpm));
@@ -1283,6 +1288,9 @@ namespace Nemoviz_Book_Reader
                     if (string.IsNullOrWhiteSpace(artist)) artist = tf.Tag.FirstAlbumArtist;
                     if (!string.IsNullOrWhiteSpace(album)) book.Title = album.Trim();
                     if (!string.IsNullOrWhiteSpace(artist)) book.Author = artist.Trim();
+                    // The year tag, which is what an audio book has instead of a
+                    // dc:date. Zero means "not set" in TagLib, not year nought.
+                    if (tf.Tag.Year > 0) book.Year = tf.Tag.Year.ToString();
                 }
             }
             catch { }
@@ -1953,6 +1961,10 @@ namespace Nemoviz_Book_Reader
                     }
                     imported.Producer = BookData.NormalizeProducer(doc.Producer);
                     imported.Publisher = BookData.NormalizeProducer(doc.Publisher);
+                    // The file's own date if it has one, and otherwise out of the
+                    // publisher and the title, where real books keep it — see
+                    // BookData.ResolveYear.
+                    imported.Year = BookData.ResolveYear(doc.Date, imported.Publisher, imported.Title);
                     // What language it is in, so it gets read by a voice that
                     // speaks it. The file's own claim is only a claim — the text
                     // overrules it when it is sure (see LanguageDetector.Resolve).

@@ -275,6 +275,7 @@ Details.Field.Speed=Speed
 Details.Field.Added=Added
 Details.Field.Producer=Producer
 Details.Field.Publisher=Publisher
+Details.Field.Year=Year
 Details.Field.Time=Time
 Details.Field.Elapsed=Elapsed
 Details.Field.Remaining=Remaining

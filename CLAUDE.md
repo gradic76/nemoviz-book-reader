@@ -4207,17 +4207,27 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   desktop** — that needs `CS_DROPSHADOW` via `CreateParams` on Form1 itself,
   which the skin cannot reach from outside. Third tier (film grain, scanlines,
   drawn screws) was rejected: it costs contrast for nothing.
-- **Publication year is never extracted** (raised by Gordan, 2026-07-28). The new
-  info box wants "Izdavač (godina)" and "Producent (godina)", but no year field
-  exists anywhere today — not in `BookData`, not in `DaisyParser`, not in
-  `TextExtractor`, and nothing reads an audio year tag. The sources are there to
-  read: DAISY `dc:date` and `ncc:sourceDate`, EPUB `dc:date`, ID3/Vorbis year via
-  TagLib. **Gordan's recollection is confirmed** — his library really does carry
-  years, but inside the wrong fields: `Publisher=Školska knjiga, Zagreb 2008.`
-  and `Title=Catherine Coulter - FBI 01 The Cove 1996`. So a parser that reads
-  `dc:date` correctly may still come back empty on real books, while the year is
-  sitting in plain sight at the end of another field. Whatever gets built should
-  fall back to a trailing-year sniff on publisher and title.
+- ~~**Publication year is never extracted**~~ **— DONE 2026-08-04.**
+  `BookData.Year` (`[Book] Year`), filled at import from EPUB `dc:date`, DAISY
+  `ncc:sourceDate` then `dc:date` — the source date first, because that is the
+  print edition a reader means by "the year" — and an audio book's TagLib year
+  tag. Shown as **"Publisher (year)"** (`BookData.WithYear`), the shape §8k asks
+  for.
+  **The fallbacks are the part that earns its keep, and the 2026-07-28 note
+  predicted it exactly.** `ResolveYear` tries the date, then the publisher, then
+  the title, because a real shelf keeps the year in the wrong field:
+  `Catherine Coulter - FBI 01 The Cove 1996` in the library resolves to **1996
+  from its title**, having no date tag at all.
+  **`BookInfoField.Year` exists for the case with no publisher to hang it on**,
+  which is that same commonest case; with a publisher the year rides on that line
+  instead, so it is never shown twice.
+  **Measured on 14 real EPUBs:** 13 carry `dc:date` and **10 resolve to a year**.
+  The three that do not all declare `0101-01-01` — a placeholder — and are
+  rejected by the 1400–2100 bound, which is also what keeps an ISBN or a page
+  count from passing for a year.
+  **Known and left alone:** two samples resolve to 2026, which is when the file
+  was made rather than when the book was published. `dc:date` does not say which
+  it means, and §8c's rule stands — parse faithfully, do not invent.
 - **Keyboard model for the new player, decided 2026-07-28.** Tab + shortcuts
   stay exactly as they are — a roving-tabindex grouping was considered and
   **rejected for a good reason**: in a player the arrows are *global*

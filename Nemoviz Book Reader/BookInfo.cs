@@ -60,6 +60,13 @@ namespace Nemoviz_Book_Reader
         // Where it came from and what it is made of.
         Publisher,
         Producer,
+        /// <summary>The year, on a line of its own — used ONLY when there is no
+        /// publisher to hang it on. §8k asks for "Publisher (year)", and that is
+        /// what a book with a publisher gets; but a year is just as often the only
+        /// thing a book has, sniffed out of the end of its title, and dropping it
+        /// because there is nowhere tidy to put it would lose the commonest
+        /// case.</summary>
+        Year,
         Format,
         Pages,
         Headings,

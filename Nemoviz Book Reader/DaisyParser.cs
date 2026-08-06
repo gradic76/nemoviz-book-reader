@@ -39,6 +39,11 @@ namespace Nemoviz_Book_Reader
         public string Publisher;                   // dc:publisher (print-edition publisher)
         public string Language;                    // dc:language, as the producer declared it
         public string Producer;                    // ncc:producer (audio-producing institution)
+        /// <summary>dc:date, in whatever shape the producer wrote it. DAISY 2.02
+        /// also has ncc:sourceDate — the date of the PRINT edition the talking
+        /// book was made from, which is the one a reader means by "the year", so
+        /// it is preferred where both exist.</summary>
+        public string Date;
         public string TotalTime;                   // as declared in metadata (string)
         public List<string> AudioPlayOrder = new List<string>();
         public List<DaisyNavPoint> Headings = new List<DaisyNavPoint>();
@@ -119,6 +124,8 @@ namespace Nemoviz_Book_Reader
             book.Publisher = MetaContent(ncc, "dc:publisher");
             book.Language = MetaContent(ncc, "dc:language");
             book.Producer = MetaContent(ncc, "ncc:producer");
+            book.Date = FirstNonEmpty(MetaContent(ncc, "ncc:sourceDate"),
+                                      MetaContent(ncc, "dc:date"));
             book.TotalTime = MetaContent(ncc, "ncc:totalTime");
 
             // Headings: <h1..h6 ...><a href="file.smil#frag">Title</a></h1..>
@@ -198,6 +205,9 @@ namespace Nemoviz_Book_Reader
                 book.Publisher = FirstNonEmpty(MetaByName(opf, "dc:publisher"), ElemText(opf, "Publisher"));
                 book.Language = FirstNonEmpty(MetaByName(opf, "dc:language"), ElemText(opf, "Language"));
                 book.Producer = MetaByName(opf, "dtb:producer");
+                book.Date = FirstNonEmpty(MetaByName(opf, "dtb:sourceDate"),
+                                          MetaByName(opf, "dc:date"),
+                                          ElemText(opf, "Date"));
                 book.TotalTime = MetaAttr(opf, "dtb:totalTime");
 
                 var manifest = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
