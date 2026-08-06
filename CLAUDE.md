@@ -971,6 +971,49 @@ the end.
 - Verified: headings land on their own titles (20/20 where they had been 0/20),
   the assembled text is identical to a whole-text clean and idempotent, and the
   one-time migration of a real book leaves its position where it was.
+  **Both of those last two claims were measured on too little (corrected
+  2026-08-04).** Run over 33 real books, the cleaner as committed failed
+  `pieces == whole` on **2** of them and idempotence on **4**. The unwrapping
+  rewrite below fixes the first outright — 0 of 33 — and makes the second worse;
+  see there for why that is the right trade.
+
+**The unwrapping rule, rewritten 2026-08-04.** A line break is the source's
+wrapping unless the line before it **ended a sentence**. It replaces "the next
+line starts with a lower-case letter", which asked the wrong end of the break.
+
+- **Measured, the old rule caught nothing in braille**: 0 joins out of 43 466
+  breaks across 19 books, because a braille line that continues a sentence
+  usually starts with a space, a quote or a capital. Across the corpora it left
+  13 954 mid-sentence breaks in braille, 7 987 in plain text, 1 212 in flat Word.
+  The new rule removes **94.4%** of them in plain text against the old rule's
+  27.6%. Gordan asked for it after hearing the breaks in a braille book, and was
+  right that looking at the full stop is the sounder question: joining a line
+  whose predecessor DID end a sentence is pointless rather than harmful, since
+  the stop still separates them for speech.
+- **Short lines are left alone, and the corpus picked that guard.** Without it
+  the rule glues title pages — "The Yield by" + "Tara June Winch" + "print
+  pages", "HRVOJE HITREC" + "SMOGOVCI". Counting could not tell damage from
+  repair; reading the joins could, and the split was clean: every repair has a
+  full line in it, every piece of damage is a stack of short ones. "Short" is
+  half the width the text itself wraps at, taken from its own 90th percentile.
+- **It runs ONCE over the WHOLE text, before any cutting, and that placement is
+  the design.** Two attempts put it inside `Clean`, and both broke
+  `pieces == whole` on 7–8 books of 21. The cause is the same either way round: a
+  piece's first and last lines are cut off mid-line, so their LENGTHS are wrong,
+  and any test that measures a line answers differently at a piece edge than in
+  the middle of a text. **Deciding before the cutting removes the question
+  instead of answering it** — and it fixed the 2 pre-existing failures as well.
+  Length-preserving to the character, so every offset still lands where it did.
+- **Idempotence got worse — 4 failures to 15 — and that is accepted.** The guard
+  reads a line's length, and a line that has just been joined is longer, so a
+  second pass asks the same question of different text and can join once more.
+  Nothing depends on it: cleaning runs once at import, `[Book] TextCleaned`
+  guards the one-time migration, and a re-read always starts from the braille
+  file. The invariant that *is* load-bearing — pieces matching the whole, which
+  is what keeps a heading pointing at its own title — is now exact for the first
+  time.
+- A break inside a hyphenated word is skipped and left to `Dehyphenate`, which
+  needs to see the `-\n` it matches on.
 
 **Player integration** (branches on `BookData.IsTextBook`, like DAISY):
 - **Detection**: a folder with a `.txt` and no audio (`BookData.DetectTextBook`);

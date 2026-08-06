@@ -28,18 +28,98 @@ namespace Nemoviz_Book_Reader
             new Regex(@"[\uE000-\uF8FF\u200B-\u200F\uFEFF]", RegexOptions.Compiled);
         // letter-hyphen-newline-letter → glue the word back together.
         private static readonly Regex Dehyphenate = new Regex(@"(\p{L})-\n(\p{L})", RegexOptions.Compiled);
-        // A spaced dash (hyphen / en / em) used as punctuation → comma.
-        // A hard line break in the middle of a sentence is just the source's
-        // wrapping — braille wraps at ~40 columns, PDF at the page width, plain text
-        // at 70-odd. Speech engines treat every newline as a prosodic boundary, so
-        // those breaks make a voice stutter mid-sentence (very audible on Microsoft
-        // voices, less so on eSpeak). A line that continues in lowercase is a
-        // continuation, so the break becomes a space. It is a REPLACEMENT, not a
-        // deletion: the text keeps its length, so every heading/page offset already
-        // stored for a book stays exactly valid. Blank-line paragraph breaks are
-        // untouched (the next line doesn't start with a lowercase letter there).
-        private static readonly Regex WrappedLine =
-            new Regex(@"(?<=\S)\n(?=\p{Ll})", RegexOptions.Compiled);
+        /// <summary>True when this line finished a sentence — allowing for the
+        /// closing quotes and brackets that come after the stop.</summary>
+        private static readonly Regex LineEndsSentence =
+            new Regex(@"[.!?…][""'”’\)\]»]*$", RegexOptions.Compiled);
+
+        /// <summary>Turns the source's own line wrapping into spaces, so a voice
+        /// does not stop in the middle of a sentence.
+        ///
+        /// <para><b>A break is wrapping unless the line before it ENDED a
+        /// sentence</b> (Gordan, 2026-08-04). The rule this replaces asked the
+        /// opposite end — "does the next line start with a lower-case letter" —
+        /// and in braille that caught **nothing at all**: measured, 0 joins out of
+        /// 43 466 breaks across 19 books, because a braille line that continues a
+        /// sentence usually starts with a space, a quote or a capital. It left
+        /// 13 954 mid-sentence breaks in braille, 7 987 in plain text and 1 212 in
+        /// flat Word files, and each one is a pause the reader hears mid-sentence.
+        /// Looking BACK is also the safer question: joining a line whose
+        /// predecessor did end a sentence would be pointless rather than harmful,
+        /// since the full stop still separates them for speech.</para>
+        ///
+        /// <para><b>Short lines are left alone, and the corpus chose that guard.</b>
+        /// Without it the rule also glues title pages — "The Yield by" + "Tara
+        /// June Winch" + "print pages", or "HRVOJE HITREC" + "SMOGOVCI". Reading
+        /// the joins rather than counting them showed the split cleanly: every
+        /// repair had a full line in it, every piece of damage was a stack of
+        /// short ones. "Short" is half of what the text itself wraps at, not a
+        /// constant — braille wraps near 40 columns, plain text near 70.</para>
+        ///
+        /// <para><b>It runs ONCE, over the WHOLE text, before anything is cut up,
+        /// and that placement is the whole design.</b> Two earlier attempts put it
+        /// inside <see cref="Clean"/> and both broke the invariant this file
+        /// exists to keep — cleaning in pieces stopped matching cleaning the whole,
+        /// on 7 to 8 books out of 21. The reason is the same either way round: a
+        /// piece's first and last lines are cut off mid-line, so their LENGTHS are
+        /// wrong, and any test that measures a line gives a different answer at a
+        /// piece edge than it does in the middle of a text. Deciding before the
+        /// cutting removes the question rather than answering it.</para>
+        ///
+        /// <para>Length-preserving to the character — every break becomes exactly
+        /// as many spaces as it had characters — so the offsets
+        /// <see cref="CleanWithOffsets"/> carries stay valid, and a cut still
+        /// lands where it did.</para>
+        ///
+        /// <para>A break inside a hyphenated word is skipped and left for
+        /// <see cref="Dehyphenate"/>, which needs to see the "-\n" it matches
+        /// on.</para></summary>
+        private static string Unwrap(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            int shortLine = ShortLineFor(text);
+            var sb = new StringBuilder(text);
+            int lineStart = 0;
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] != '\n') continue;
+                int breakStart = (i > 0 && text[i - 1] == '\r') ? i - 1 : i;
+                string prev = text.Substring(lineStart, breakStart - lineStart).TrimEnd();
+                lineStart = i + 1;
+
+                if (prev.Length == 0) continue;                 // blank line: a paragraph
+                if (LineEndsSentence.IsMatch(prev)) continue;   // it finished; leave it
+                if (prev.Length < shortLine) continue;          // a heading, not a wrap
+                // "poč-\nne" belongs to Dehyphenate, which matches on the newline.
+                if (prev[prev.Length - 1] == '-') continue;
+                // A blank line after the break is a paragraph mark of its own.
+                int n = i + 1;
+                while (n < text.Length && (text[n] == ' ' || text[n] == '\t')) n++;
+                if (n >= text.Length || text[n] == '\n' || text[n] == '\r') continue;
+
+                for (int k = breakStart; k <= i; k++) sb[k] = ' ';
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>Half the width this text wraps at, which is what "short" means
+        /// for it. From the 90th percentile of the non-blank line lengths rather
+        /// than a constant, because braille wraps near 40 columns, plain text near
+        /// 70, and a flat Word export at whatever it likes.</summary>
+        private static int ShortLineFor(string text)
+        {
+            var lens = new List<int>();
+            foreach (string l in text.Split('\n'))
+            {
+                string s = l.TrimEnd();
+                if (s.Length > 0) lens.Add(s.Length);
+            }
+            if (lens.Count == 0) return 20;
+            lens.Sort();
+            int wrap = lens[(int)(lens.Count * 0.90)];
+            return wrap / 2 < 10 ? 10 : wrap / 2;
+        }
 
         private static readonly Regex SpacedDash = new Regex(@" [-–—] ", RegexOptions.Compiled);
         private static readonly Regex TrailingSpace = new Regex(@"[ \t]+\n", RegexOptions.Compiled);
@@ -66,6 +146,12 @@ namespace Nemoviz_Book_Reader
         {
             if (string.IsNullOrEmpty(text)) return "";
             if (offsets == null || offsets.Count == 0) return Clean(text);
+
+            // FIRST, and over the whole text: the one rule that needs to see more
+            // than a piece. It is length-preserving, so every cut below still
+            // lands exactly where it did. See Unwrap for why it cannot live inside
+            // the per-piece cleaning.
+            text = Unwrap(text);
 
             // Cut points in order, inside the text, without duplicates.
             var cuts = new List<int>();
@@ -115,8 +201,9 @@ namespace Nemoviz_Book_Reader
                         sb.Length -= 1;            // "poč-\nne" → "počne"
                         joint = "";
                     }
-                    else if (!char.IsWhiteSpace(before) && char.IsLower(after))
-                        joint = " ";               // "po\nkojima" → "po kojima"
+                    // The unwrapping rule is NOT applied here any more: it has
+                    // already run over the whole text above, so a break that
+                    // survives to this seam is one it deliberately kept.
                 }
                 // A dash used as punctuation ("Dado je - prvi put") becomes a
                 // comma, and that pattern can straddle a seam as well.
@@ -211,7 +298,14 @@ namespace Nemoviz_Book_Reader
                 foreach (string k in syncKeys) doc.SyncIds[k] = offsets[at++];
         }
 
-        public static string Clean(string text) { return Clean(text, true); }
+        public static string Clean(string text)
+        {
+            // Same order as CleanWithOffsets: unwrap the whole thing first, then
+            // clean. If these two ever disagree about when it happens, cleaning a
+            // book in pieces stops matching cleaning it whole, which is the one
+            // thing this file may not do.
+            return Clean(Unwrap(text ?? ""), true);
+        }
 
         /// <summary><paramref name="trimEnds"/> is false for a piece of a larger
         /// text (see <see cref="CleanWithOffsets"/>): trimming there would eat the
@@ -226,7 +320,6 @@ namespace Nemoviz_Book_Reader
             t = Noise.Replace(t, "");
             t = Invisible.Replace(t, " ");
             t = Dehyphenate.Replace(t, "$1$2");
-            t = WrappedLine.Replace(t, " ");   // unwrap mid-sentence line breaks
             t = SpacedDash.Replace(t, ", ");
             t = TrailingSpace.Replace(t, "\n");
             t = MultiSpace.Replace(t, " ");
