@@ -3724,9 +3724,49 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
    build for the baseline): of seven books **only the two EPUB hybrids changed**,
    both from `dh=0` to a full list (24 and 21). Every DAISY, M4B and text book
    came back byte-identical.
-2. **Granta Portugal's text side is nearly empty** — 21 sync points and 377
-   characters against 2.2 MB of SMIL, so its ids do not match what the XHTML
-   yields. Audio and duration are correct. Needs investigation, not a fix.
+2. ~~**Granta Portugal's text side is nearly empty**~~ **— INVESTIGATED AND
+   HANDLED 2026-08-04. Nothing was wrong with the parser: the text is not in the
+   file.** The note guessed that "its ids do not match what the XHTML yields".
+   Measured instead, across all 22 content documents: **10 787 self-closing
+   `<span id="dtb_…"/>` anchors, none of them with any content**, and **712
+   characters of readable text in the whole book** — the 21 chapter titles in
+   their `<h1>`s plus the nav document's own list. The 30–59 kB documents are
+   `id` attributes and nothing else.
+
+   Two things say it was deliberate. The stylesheet is **19 bytes**:
+   `div{display:none}`. And the book carries **`tpbnarrator.res`** — TPB
+   Narrator, the Swedish talking-book agency's production tool, which builds an
+   EPUB3 whose text layer exists only to hang media overlays on.
+
+   **Gordan's call: such a book imports as ordinary multi-file audio, not as a
+   hybrid**, because it sets two traps and the second is the worse one:
+   - a reader who turns on braille or the reading window is promised text there
+     is none of;
+   - **a reader who opens an `.epub` at all expects a book to read.** They may
+     not know narrated EPUBs exist, and what arrives is an audiobook. *"Morat ću
+     se u Helpu i na još kojem mjestu malo jače ograditi od gluposti koje rade
+     producenti knjiga."*
+
+   **The navigation survives, which is the part worth keeping.** The chapter
+   titles are put on the audio clock through the sync map that was just built,
+   in the same store a CUE sheet uses (§8f — chapters at times; the `M4b` name
+   there is historical). Go To lists *"A Casa Abandonada"* instead of
+   *"aud005.mp3"*. `PlayerFormatLabel` reads `Format`, not the player type, so
+   the book still calls itself EPUB.
+
+   **The test is the body, not the total:** how much text there is beyond the
+   chapter titles, since a skeleton still carries those. The two real samples are
+   three orders of magnitude apart — about **40** characters of body against
+   **~125 800** — so the threshold is not a fine judgement and does not pretend
+   to be.
+
+   **Measured after the change:** the skeleton comes back from a cold reload as
+   `hybrid=False, text=False, m4b=True`, 21 parts and 21 named chapters, with no
+   `content.txt` and no `sync.map`; the real hybrid is untouched — `hybrid=True`,
+   both files written, 23 headings.
+   **Note for the library:** a book already imported keeps the shape it was
+   imported with. The copy of this one in the library is still a hybrid and has
+   to be re-imported to pick this up.
 3. ~~**The surface stops refreshing after a large seek**~~ **— FIXED 2026-08-04,
    and it was not really about seeking.** Two bugs, both in the chunk logic, both
    left over from when the whole book really was in the control (§8l).

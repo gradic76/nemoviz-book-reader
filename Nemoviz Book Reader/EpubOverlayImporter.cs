@@ -209,15 +209,10 @@ namespace Nemoviz_Book_Reader
                     f => startAt.TryGetValue(Path.GetFileName(f ?? ""), out double s) ? s : -1);
                 if (map.IsEmpty) return false;
 
-                File.WriteAllText(Path.Combine(folder, "content.txt"),
-                                  doc.Text, new UTF8Encoding(false));
-                book.TextCleaned = true;
-                book.SetTextHeadings(doc.Headings);
-                book.TextLanguage = LanguageDetector.Resolve(MetaLanguage(xml), doc.Text);
-
                 // The book's own name and author, which nothing else on this path
                 // fills in — the document branch does it and this one skips past
-                // it, so the shelf and the info box had nothing to show.
+                // it, so the shelf and the info box had nothing to show. Set
+                // before the fork below, because both outcomes want them.
                 string title = Meta(xml, "title");
                 string author = Meta(xml, "creator");
                 if (!string.IsNullOrWhiteSpace(title)) book.Title = title;
@@ -225,6 +220,59 @@ namespace Nemoviz_Book_Reader
                 string pub = Meta(xml, "publisher");
                 if (!string.IsNullOrWhiteSpace(pub)) book.Publisher = pub;
                 book.Format = BookData.FriendlyFormatName(".epub");
+
+                // ── is there a book here, or only a skeleton? ────────────────
+                // Some producers ship an EPUB3 whose text layer exists only to
+                // hang the audio on. Measured on the Granta sample: 10 787
+                // self-closing <span id="dtb_…"/> anchors, NONE of them with any
+                // content, 712 characters of readable text in the whole book —
+                // the 21 chapter titles and the nav document's own list. The
+                // stylesheet is 19 bytes of div{display:none} and the producer
+                // signs itself tpbnarrator.res. The text was never in the file.
+                //
+                // Importing that as a hybrid sets two traps, and the second is
+                // Gordan's (2026-08-04) and the worse one. A reader who turns on
+                // braille or the reading window is promised text there is none
+                // of. And a reader who opens an .epub AT ALL expects a book to
+                // read — they may not know narrated EPUBs exist — and gets an
+                // audiobook instead. So it comes in as ordinary multi-file audio.
+                //
+                // What survives is the navigation, which is the one thing worth
+                // keeping: the chapter titles go onto the audio clock through the
+                // sync map we have just built, in the same store a CUE sheet uses
+                // (§8f — chapters at times; the M4b name there is historical).
+                // Go To then lists "A Casa Abandonada" instead of "aud005.mp3".
+                //
+                // The test is the body: how much text there is BEYOND the chapter
+                // titles themselves, since a skeleton still carries those. The two
+                // real samples sit three orders of magnitude apart — about 40
+                // characters of body against ~125 800 — so the threshold is not a
+                // fine judgement and is not trying to be.
+                int titleChars = 0;
+                foreach (var h in doc.Headings) titleChars += (h.Title ?? "").Length;
+                int bodyChars = doc.Text.Length - titleChars;
+                if (bodyChars < Math.Max(200, doc.Headings.Count * 20))
+                {
+                    var marks = new List<(string Title, double Position)>();
+                    foreach (var h in doc.Headings)
+                    {
+                        double at = DaisySync.SecondsAt(map, h.Offset);
+                        if (at >= 0) marks.Add((h.Title, at));
+                    }
+                    marks.Sort((x, y) => x.Position.CompareTo(y.Position));
+                    if (marks.Count > 0) book.SetM4bChapters(marks);
+                    // No content.txt and no sync.map: §8c makes writing the text
+                    // without a map the thing that turns a narrated book silent,
+                    // and here the mirror of it applies — a map with no text to
+                    // follow is what would make this a hybrid.
+                    return true;
+                }
+
+                File.WriteAllText(Path.Combine(folder, "content.txt"),
+                                  doc.Text, new UTF8Encoding(false));
+                book.TextCleaned = true;
+                book.SetTextHeadings(doc.Headings);
+                book.TextLanguage = LanguageDetector.Resolve(MetaLanguage(xml), doc.Text);
 
                 book.SaveSyncMap(map);
                 return true;
