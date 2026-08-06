@@ -142,10 +142,15 @@ namespace Nemoviz_Book_Reader
         public string Id;        // stable key persisted in Book.ini
         public string File;      // table file name in louis\tables
         public string Display;   // human-readable label
+        /// <summary>Primary language code, from the table's own
+        /// <c>#+language:</c>. What the picker filters on, so that a reader is
+        /// offered the one to three tables their book could plausibly be in
+        /// rather than all 148.</summary>
+        public string Language;
 
-        public BrailleTableInfo(string id, string file, string display)
+        public BrailleTableInfo(string id, string file, string display, string language = "")
         {
-            Id = id; File = file; Display = display;
+            Id = id; File = file; Display = display; Language = language ?? "";
         }
     }
 
@@ -171,20 +176,40 @@ namespace Nemoviz_Book_Reader
         /// zato nudimo mogućnost reloada."*</para></summary>
         public static readonly BrailleTableInfo[] All =
         {
-            new BrailleTableInfo("hr-old",  "hr-old.ctb",         "Croatian — pre-2020 standard"),
-            new BrailleTableInfo("hr-2020", "hr-2020.ctb",        "Croatian — 2020 standard"),
-            new BrailleTableInfo("en-g2",   "en-ueb-g2.ctb",      "English (UEB) — contracted"),
-            new BrailleTableInfo("en-g1",   "en-ueb-g1.ctb",      "English (UEB) — uncontracted"),
+            new BrailleTableInfo("hr-old",  "hr-old.ctb",         "Croatian — pre-2020 standard", "hr"),
+            new BrailleTableInfo("hr-2020", "hr-2020.ctb",        "Croatian — 2020 standard", "hr"),
+            new BrailleTableInfo("en-g2",   "en-ueb-g2.ctb",      "English (UEB) — contracted", "en"),
+            new BrailleTableInfo("en-g1",   "en-ueb-g1.ctb",      "English (UEB) — uncontracted", "en"),
             // EBAE, the pre-UEB American standard. §10g measured it as the better
             // reading of the American samples ("Incarnation" where UEB gave
             // "IncarnN !Ascension") and held it out only while a wrong automatic
             // pick had no remedy. It has one now.
-            new BrailleTableInfo("en-us-g2", "en-us-g2.ctb",      "English (EBAE, American) — contracted"),
-            new BrailleTableInfo("en-us-g1", "en-us-g1.ctb",      "English (EBAE, American) — uncontracted"),
-            new BrailleTableInfo("en-gb-g2", "en-GB-g2.ctb",      "English (British) — contracted"),
-            new BrailleTableInfo("fr-g2",   "fr-bfu-g2.ctb",      "French — contracted"),
-            new BrailleTableInfo("fr-g1",   "fr-bfu-comp6.utb",   "French — uncontracted"),
+            new BrailleTableInfo("en-us-g2", "en-us-g2.ctb",      "English (EBAE, American) — contracted", "en"),
+            new BrailleTableInfo("en-us-g1", "en-us-g1.ctb",      "English (EBAE, American) — uncontracted", "en"),
+            new BrailleTableInfo("en-gb-g2", "en-GB-g2.ctb",      "English (British) — contracted", "en"),
+            new BrailleTableInfo("fr-g2",   "fr-bfu-g2.ctb",      "French — contracted", "fr"),
+            new BrailleTableInfo("fr-g1",   "fr-bfu-comp6.utb",   "French — uncontracted", "fr"),
         };
+
+        /// <summary>The tables for one language, most useful first.
+        ///
+        /// <para>Measured over the shipped set: 59 of 89 languages have exactly
+        /// ONE table and 81 have three or fewer, so this is a short list almost
+        /// always. Danish is the worst at ten, English seven.</para>
+        ///
+        /// <para>An unknown or empty language gives the whole catalogue rather
+        /// than nothing: a book whose language could not be read is exactly the
+        /// one whose table needs changing.</para></summary>
+        public static BrailleTableInfo[] ForLanguage(string code)
+        {
+            string want = LanguageDetector.Primary(code ?? "");
+            if (want.Length == 0) return Catalog;
+            var hit = new List<BrailleTableInfo>();
+            foreach (BrailleTableInfo t in Catalog)
+                if (string.Equals(LanguageDetector.Primary(t.Language), want,
+                                  StringComparison.OrdinalIgnoreCase)) hit.Add(t);
+            return hit.Count > 0 ? hit.ToArray() : Catalog;
+        }
 
         private static BrailleTableInfo[] catalog;
 
@@ -232,22 +257,40 @@ namespace Nemoviz_Book_Reader
                     string file = Path.GetFileName(path);
                     if (seen.Contains(file)) continue;
 
-                    string type = null, dir = null, name = null, index = null;
+                    string type = null, dir = null, name = null, index = null, lang = null;
+                    // An alias is a table whose body is nothing but `include`
+                    // lines. liblouis ships several — en-us.tbl is a wrapper round
+                    // en-us-g2.ctb — and without resolving them the picker offers
+                    // the same translation twice under two names, which reads as
+                    // two choices where there is one.
+                    string onlyInclude = null; bool aliasOnly = true;
                     try
                     {
                         int n = 0;
                         foreach (string raw in File.ReadLines(path))
                         {
-                            if (++n > 60) break;
                             string s = raw.Trim();
-                            if (s.StartsWith("#+type:", StringComparison.OrdinalIgnoreCase))
-                                type = s.Substring(7).Trim();
-                            else if (s.StartsWith("#+direction:", StringComparison.OrdinalIgnoreCase))
-                                dir = s.Substring(12).Trim();
-                            else if (s.StartsWith("#-display-name:", StringComparison.OrdinalIgnoreCase))
-                                name = s.Substring(15).Trim();
-                            else if (s.StartsWith("#-index-name:", StringComparison.OrdinalIgnoreCase))
-                                index = s.Substring(13).Trim();
+                            if (n++ < 60)
+                            {
+                                if (s.StartsWith("#+type:", StringComparison.OrdinalIgnoreCase))
+                                    type = s.Substring(7).Trim();
+                                else if (s.StartsWith("#+direction:", StringComparison.OrdinalIgnoreCase))
+                                    dir = s.Substring(12).Trim();
+                                else if (s.StartsWith("#+language:", StringComparison.OrdinalIgnoreCase))
+                                    lang = s.Substring(11).Trim();
+                                else if (s.StartsWith("#-display-name:", StringComparison.OrdinalIgnoreCase))
+                                    name = s.Substring(15).Trim();
+                                else if (s.StartsWith("#-index-name:", StringComparison.OrdinalIgnoreCase))
+                                    index = s.Substring(13).Trim();
+                            }
+                            if (s.Length == 0 || s[0] == '#') continue;
+                            if (s.StartsWith("include ", StringComparison.OrdinalIgnoreCase))
+                            {
+                                string inc = s.Substring(8).Trim();
+                                string ie = Path.GetExtension(inc).ToLowerInvariant();
+                                if (ie == ".ctb" || ie == ".utb" || ie == ".tbl") onlyInclude = inc;
+                            }
+                            else { aliasOnly = false; }
                         }
                     }
                     catch { continue; }
@@ -255,13 +298,20 @@ namespace Nemoviz_Book_Reader
                     if (!string.Equals(type, "literary", StringComparison.OrdinalIgnoreCase)) continue;
                     if (string.Equals(dir, "forward", StringComparison.OrdinalIgnoreCase)) continue;
 
+                    // Resolved to what it actually translates with, so an alias and
+                    // its target collapse to one entry — and the curated name wins,
+                    // because `seen` already holds the target.
+                    string canonical = aliasOnly && onlyInclude != null ? onlyInclude : file;
+                    if (seen.Contains(canonical)) continue;
+
                     string display = !string.IsNullOrEmpty(name) ? name
                                    : !string.IsNullOrEmpty(index) ? index
                                    : Path.GetFileNameWithoutExtension(file);
-                    // The file name IS the id here: stable, unique, and already
-                    // what Book.ini would have to store anyway.
+                    // The file name IS the id: stable, unique, and already what
+                    // Book.ini would have to store anyway.
+                    seen.Add(canonical);
                     seen.Add(file);
-                    list.Add(new BrailleTableInfo(file, file, display));
+                    list.Add(new BrailleTableInfo(file, file, display, lang ?? ""));
                 }
             }
             catch { }

@@ -1340,9 +1340,43 @@ Two filters, both load-bearing, and one exception that matters more than either:
   built. Verified by probe: all nine survive, ids are unique, and every entry
   round-trips through `ById`.
 
-**Still to build:** the combo in Properties → the text page, shown only when
-`BrailleSourcePath` is non-null; the confirm dialog with its switch-off; and the
-hint text.
+**The picker offers ONE language's tables, and it hangs off the language combo
+that is already there** (Gordan, 2026-08-04: *"a zašto ne iskoristiti polje Jezik
+koje se već koristi za TTS i samo mu dokrpati granu za tablice?"* — right, and it
+saves a control). `BrailleTables.ForLanguage(code)` is the branch.
+
+**Measured, and it is a short list almost always:** after alias resolution the
+catalogue is **132 tables in 85 languages**, and **81 of the 85 have three or
+fewer**. Croatian 3, French 2, Serbian 2, German 2, Portuguese 2, Vietnamese 1;
+English 5, Danish 10 — the two worst. *(The dedupe took 148 to 132: liblouis
+ships `.tbl` wrappers that are nothing but `include` lines round a real table, so
+`en-us.tbl` and `en-us-g2.ctb` were the same translation offered twice under two
+names. A table whose body is only includes is resolved to its target and the
+curated name wins.)*
+
+**An unknown or empty language falls back to the WHOLE catalogue, deliberately.**
+The language is detected from the text, and when the table is wrong the text is
+gibberish — so the language can be wrong too. Measured, on this project's own
+samples: §10g's two NALIS books are **English detected as French**. A picker
+filtered to the detected language would offer them two French tables and hide
+the English ones, which is precisely the case the feature exists for. Because the
+filter hangs off the language combo, the reader changes the language and the
+tables follow.
+
+**The re-read fires on OK, not on the combo — and Gordan's reasoning beat mine.**
+I argued for a separate button, on the grounds that arrowing through a combo
+would otherwise fire a re-import per keypress. He pointed out the thing that
+actually matters: *"Ako napravim re-read na posebnom gumbu tu mi Cancel više neće
+pomoći ni ovako ni onako. Ako s druge strane odaberem tablicu u combu i ipak
+odlučim kontra toga Cancel me još uvijek spašava."* **Cancel has real power only
+while the action is deferred**, and deferring it to OK also disposes of the
+arrowing problem, since nothing fires on change at all.
+
+**Still to build:** the combo itself in Properties → the text page (in the slot
+the removed output table left, labelled *Input Braille Table*, shown only when
+`BrailleSourcePath` is non-null); the confirm on OK with its **"Don't show this
+again"**; the hint text; and the removal of the braille check box, which takes
+`BookData.TextBraille` and `AppSettings.Braille` with it — see §8l.
 
 ---
 
