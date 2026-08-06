@@ -188,13 +188,29 @@ DLL is built from, gradic76/mpv-winbuild: that patch REMOVES --enable-gpl and
 KEEPS --enable-version3. So FFmpeg here is LGPL v3, the notices above are right,
 and both LGPL-3.0.txt and GPL-3.0.txt are owed and now ship.
 
-It is worth removing rather than satisfying. Dropping --enable-version3 from
-that patch would put FFmpeg back at LGPL v2.1, retire two licence files, and
-close the MSIX relink wrinkle in CLAUDE.md §10e — a signed MSIX puts the DLL
-somewhere the user cannot replace it, which is exactly what LGPL v3 asks to be
-possible. tools/mpv-build/README.md already worked out that nothing here needs
-version3: its usual reason is libopencore-amr, and NBR decodes AMR natively
-(amr_nb and amr_wb are both in the enable-list). Not done — it needs a rebuild.
+THE FORK NO LONGER ASKS FOR IT (2026-08-07). --enable-version3 has been removed
+from compile-lgpl-libmpv.patch, so the NEXT build will be LGPL v2.1 and these two
+texts stop being owed. It was checked before it was changed, against FFmpeg's own
+configure rather than against anybody's memory: exactly eight components sit
+behind version3 —
+
+    gmp, libaribb24, liblensfun, libopencore_amrnb, libopencore_amrwb,
+    libvo_amrwbenc, mbedtls, rkmpp        (plus libsmbclient, which is GPLv3)
+
+— and this build enables NONE of them. Three of those are worth spelling out
+because they look close enough to matter: libaribcaption, which we do enable, is
+not libaribb24; the AMR pieces on the list are ENCODERS, while NBR only decodes
+and does that natively; and TLS goes through openssl, not mbedtls. FFmpeg's
+"OpenSSL >=3.0.0 requires --enable-version3" check reads "|| ! enabled gpl", and
+gpl is disabled here, so it does not fire either.
+
+Why bother: LGPL v3 asks that the user be able to relink or replace the library,
+and a signed MSIX puts libmpv-2.dll where they cannot. At v2.1 the question does
+not arise.
+
+UNTIL A NEW BUILD IS MADE AND VERIFIED, THE DLL SHIPPING TODAY IS STILL v3 AND
+BOTH TEXTS BELOW STILL APPLY. The rebuild has to go through the six checks in
+tools/mpv-build/README.md before the DLL is swapped.
 
 
 STILL TO RESOLVE BEFORE ANY RELEASE

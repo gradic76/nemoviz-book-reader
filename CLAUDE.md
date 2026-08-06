@@ -3706,13 +3706,30 @@ source for the text itself.
   ship — GPL v3 because LGPL v3 is written as additional permissions on top of
   it and cannot be read without it.
 
-**The better move is to remove the obligation, not satisfy it.** Dropping
-`--enable-version3` puts FFmpeg back at LGPL v2.1, retires two licence files and
-closes the MSIX relink wrinkle — a signed MSIX puts the DLL where the user cannot
-replace it, which is the thing LGPL v3 asks to be possible.
-`tools/mpv-build/README.md` had already worked out that nothing here needs it:
-version3's usual reason is libopencore-amr, and NBR decodes AMR natively. It
-needs a rebuild, so it is not done.
+**The obligation is removed at the source, not satisfied (2026-08-07,
+`gradic76/mpv-winbuild` commit `efb690a`).** Gordan's instruction: if Microsoft
+will hammer us for this and it can be avoided without costing the app anything,
+avoid it. `--enable-version3` is gone from `compile-lgpl-libmpv.patch`, so the
+NEXT build is LGPL v2.1 and both v3 texts stop being owed.
+
+**Checked against FFmpeg's own `configure` before touching anything**, because
+"nothing needs it" is exactly the sort of claim this project has been wrong about
+before. Exactly eight components sit behind version3 — `gmp`, `libaribb24`,
+`liblensfun`, `libopencore_amrnb`, `libopencore_amrwb`, `libvo_amrwbenc`,
+`mbedtls`, `rkmpp` (plus `libsmbclient`, GPLv3) — and this build enables **none**
+of them. Three near-misses are worth naming: **`libaribcaption`, which we do
+enable, is not `libaribb24`**; the AMR entries are ENCODERS while NBR only
+decodes, natively; and TLS goes through openssl, not mbedtls. FFmpeg's
+"OpenSSL >= 3.0.0 requires --enable-version3" check reads `|| ! enabled gpl`, and
+gpl is disabled here, so it does not fire.
+
+The patch's hunk counts were re-derived and verified after the edit — one context
+line became a removal, so `@@ -57,14 +47,10 @@` became `+47,9` and the following
+hunk's start shifted — and the verifier was proved on the unmodified patch first.
+
+**The DLL shipping today is still v3**, and both texts still ship with it. A new
+build has to pass the six checks in `tools/mpv-build/README.md` before it is
+swapped in.
 
 **One wrinkle for MSIX specifically:** FFmpeg here is LGPL **v3**, which wants
 the user to be able to relink or replace the library. A signed MSIX package puts
