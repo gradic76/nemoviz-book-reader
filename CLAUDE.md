@@ -3819,11 +3819,23 @@ available and needs nobody to know the language.
   apart automatically, and since the per-book override was removed (§11) a wrong
   automatic pick has no remedy. The table choice at IMPORT is the prerequisite,
   not the longer table list.
-- **Two English books are detected as FRENCH** (`NALIS_BR_ 00038` and `00041` —
-  Shakespeare's *Twelfth Night* and *The Year in San Fernando*, both reading
-  `fr-g2`). The text is recognisably English underneath (`forettord` for
-  *foreword*), so this is a real `Detect` failure, and a different one from the
-  bullet above. Not investigated.
+- ~~**Two English books are detected as FRENCH**~~ **— GONE by 2026-08-04, and
+  not by anything aimed at it.** `NALIS_BR_ 00038` and `00041` now read
+  `en-gb-g2` and `en-us-g2`. Two changes made that day did it between them: the
+  cell-map fix stopped throwing away five cells per file, and EBAE and British
+  joined the detection set, so the right answer was finally on the list to be
+  picked. **Worth remembering as a pattern** — the note called this "a real
+  `Detect` failure", and the scoring was never the problem; it was being asked to
+  choose from a set that did not contain the answer, using input with holes in
+  it.
+  **Swept over all 82 braille samples afterwards**, 77 of which get a table (the
+  rest are Braillo, `.smb` and `.bopf`, correctly refused): 44 EBAE, 22 French,
+  6 Croatian `hr-old`, 2 UEB, 2 `fr-g1`, 1 British. The French count matches the
+  French corpus exactly and the Croatian one the Croatian, which is the check
+  that the distribution is not just plausible-looking. The Korean, Thai and
+  Vietnamese files land on English or French tables — wrong, and expected, since
+  detection is only offered the nine it can score. **That is what the per-book
+  chooser is for.**
 - French `<auteur>` markup arrives as text (`chauteuroi`), and `Haüy` comes out
   `Haouy`.
 - `.i55` decorative rules survive as `\5/∷∷∷∷∷:`. **The guess that these were the
