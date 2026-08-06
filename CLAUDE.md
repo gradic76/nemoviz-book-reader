@@ -2278,6 +2278,32 @@ Two traps met on the way, both worth keeping:
   a second, stopping as soon as the surface really has it (`SurfaceHasFocus`).
   **Still reported unreliable — needs another look.**
 
+  **Confirmed again 2026-08-04, on the build that fixed the chunk bugs (§10h).**
+  Gordan: the text now changes on a seek and keeps refreshing as far as he could
+  follow voice and text together — so that half is good — but *"čitač ne lovi
+  automatski fokus, morao sam to pratiti ručno"*. The retry is therefore still
+  not winning, and this is now the **last thing standing between the reading
+  window and being testable**, because every other braille question is asked of
+  a window somebody is standing in.
+
+  **His follow-up question is the right one, and it has a two-part answer:**
+  *would the text reach braille at all if the reader is not following what is
+  shown?*
+  - **As a surface to live in — no, and that is structural.** The display is fed
+    by the screen reader tracking FOCUS. Focus on a player key means the display
+    shows that key ("Pause, Space"), not the book. No amount of work on our side
+    changes that; it is the whole reason §8l says the surface has to be where
+    focus *lives*.
+  - **As a transient line — yes, and this is new as of the same day.**
+    `PushBrailleIfFocusLeft` exists for exactly this gap: focus off the text, so
+    NBR pushes the current sentence to the display itself. It now obeys the
+    book's braille switch (§11), so it is on only if the reader asked for it, and
+    it is NVDA-only — JAWS has no public braille call.
+  So a reader whose focus wanders keeps a sentence at a time and loses panning,
+  routing keys and the rest of the book. **Which of those two he actually
+  experiences is one of the things the deep test has to report**, and it cannot
+  be settled from here.
+
 Also open: **hybrid sync cannot be judged by ear.** Gordan tried the French and
 the Darwin and could not tell whether narrator and text stay together. This needs
 someone sighted watching the caret, and no amount of instrument work replaces it.
@@ -3774,6 +3800,11 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     a display. **If the first route really gives panning and routing keys, BrlAPI
     buys almost nothing; if it does not, it buys everything.** Test this before
     spending another hour on BRLTTY.
+    **BLOCKED, as of 2026-08-04: the window does not reliably take focus.** Gordan
+    had to follow it by hand on the current build. Which of the two routes above a
+    reader actually gets is decided by where focus sits, so until that is fixed
+    the deep test cannot report on the route it is meant to be testing. Fixing the
+    focus retry is therefore the prerequisite for this whole bullet — see §8l.
   - **Light and Dark themes** — deferred by Gordan ("za light/dark ćemo još
     vidjeti"). Remember `SystemColors` does NOT track Windows dark mode; the
     signal is `HKCU\…\Themes\Personalize\AppsUseLightTheme`, and scrollbars,
