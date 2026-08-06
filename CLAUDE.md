@@ -3831,6 +3831,34 @@ available and needs nobody to know the language.
   for byte unchanged, so it is something else.
 - Stray byte not yet mapped: `0xA4` in one abridged French file. (`0x60` and
   `0x7C` are fixed — see the first bullet.)
+- ~~**Running heads and page numbers end up inside the sentences.**~~ **— FIXED
+  2026-08-04, and generally rather than per book.** A paragraph running over a
+  page break came back with the producer's furniture spliced into it: *"You can
+  hear conversations from the top **1 we all live here** floor as the words float
+  upwards"*, 111 times in one book. Gordan's instruction was that a rule per book
+  is no rule.
+  **`RunningHeads.Strip` keys on the REPETITION, not the words** — a line that
+  stands in the same place on most pages is furniture, whatever it says, in any
+  language. Digits are normalised away before counting, so "1 we all live here"
+  and "2 we all live here" are recognised as one thing; **two** candidates are
+  taken per end, because a book printed both sides alternates author and title
+  and catching only the commoner one would leave the fault looking intermittent;
+  and it needs 60% of at least 5 pages, because the cost of being wrong is a
+  deleted sentence.
+  It lives in its own file rather than in `BrfParser` so Braillo and PDF can use
+  it. **`BrfParser` now translates in one pass and assembles in a second**: the
+  old single loop had appended a line before it could ever see the page it
+  belonged to.
+  **Measured over 58 braille books, before and after.** 19 changed, losing
+  1.2–2.6% of their characters; the other 39 have no running heads and lost
+  nothing — including all 19 in `Test Naslovi\Braille`, which is why that corpus
+  alone would have shown a flat zero and proved nothing. In the reported book
+  *"we all live here"* goes **114 → 0**, in *Safe Enough* 117 → 4 and in *Daily
+  Gospel Devotional* 101 → 23, the remainder being the title page and genuine
+  mentions. **No distinct word disappears from any of the three** — the check
+  that matters, since it is the one that would catch a deleted sentence.
+  **Not exhaustive:** Daily Gospel Devotional keeps 23, so at least one book
+  carries a second head form this does not catch yet.
 - **More samples wanted** in languages not yet tested — Gordan's own sources are
   exhausted, so free download sites are worth finding when there is time.
 

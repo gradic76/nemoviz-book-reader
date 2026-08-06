@@ -119,14 +119,16 @@ namespace Nemoviz_Book_Reader
                 BrailleTableInfo table = BrailleTables.ById(tableId) ?? Detect(pages);
                 if (table == null) return doc;    // liblouis unavailable → no text
 
-                var sb = new StringBuilder();
-                var pageMarks = new List<(string Label, int Offset)>();
-                int pageNo = 0;
+                // TRANSLATE FIRST, ASSEMBLE SECOND. The two used to be one pass,
+                // which left nowhere to stand and look at the book as pages: a
+                // running head can only be recognised by seeing that the same line
+                // opens most of them (see RunningHeads), and by the time the old
+                // loop had a line in hand it had already appended the ones before.
+                var text = new List<List<string>>();
                 char rail = '\0';   // side-rail character of a box we're inside
                 foreach (List<string> page in pages)
                 {
-                    pageNo++;
-                    bool pageHasText = false;
+                    var outLines = new List<string>();
                     foreach (string cells in page)
                     {
                         string line = LibLouis.BackTranslate(cells, table.File);
@@ -142,10 +144,27 @@ namespace Nemoviz_Book_Reader
                         }
                         // Blank lines are kept: they carry the paragraph breaks the
                         // reader needs for pacing.
-                        line = StripRail(line, rail);
+                        outLines.Add(StripRail(line, rail));
+                    }
+                    text.Add(outLines);
+                }
+
+                // The producer's furniture — the running title and the page number
+                // at the head or foot of every page. Left in, it is spliced into
+                // whatever sentence spans the page break, and reads as words thrown
+                // in at random.
+                RunningHeads.Strip(text);
+
+                var sb = new StringBuilder();
+                var pageMarks = new List<(string Label, int Offset)>();
+                for (int p = 0; p < text.Count; p++)
+                {
+                    bool pageHasText = false;
+                    foreach (string line in text[p])
+                    {
                         if (!pageHasText)
                         {
-                            pageMarks.Add((pageNo.ToString(), sb.Length));
+                            pageMarks.Add(((p + 1).ToString(), sb.Length));
                             pageHasText = true;
                         }
                         sb.Append(line).Append('\n');
