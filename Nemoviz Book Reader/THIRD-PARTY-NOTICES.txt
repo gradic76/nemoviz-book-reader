@@ -6,7 +6,10 @@ library or as an unmodified package; none is statically linked into NBR itself,
 and each can be replaced by the user with a compatible build. That is what the
 LGPL asks for, and it is why NBR can be distributed under its own terms.
 
-Last verified: 2026-07-30.
+Last verified: 2026-08-07. Every licence named below was read out of the
+component's own metadata or its own licence file on this machine; where that was
+not possible the component is listed at the end as unestablished rather than
+guessed at.
 
 
 libmpv (mpv) — audio playback engine
@@ -74,19 +77,51 @@ Licence  : LGPL v2.1 — full text in nvdaControllerClient-license.txt
 TagLib# (TagLibSharp) 2.3.0 — audio metadata and durations
 -----------------------------------------------------------
 Upstream : https://github.com/mono/taglib-sharp
-Licence  : LGPL v2.1
+Licence  : LGPL-2.1-only, as the package's own nuspec declares it
+Copyright: Copyright (c) 2006-2007 Brian Nickel.
+           Copyright (c) 2009-2020 Other contributors
+Text     : Licences\LGPL-2.1.txt
 
 
-SharpCompress 0.49.1 — zip / rar / 7z import
----------------------------------------------
-Upstream : https://github.com/adamhathcock/sharpcompress
-Licence  : MIT
+PdfPig 0.1.15 — PDF text extraction
+------------------------------------
+Files    : UglyToad.PdfPig*.dll (7 assemblies)
+Upstream : https://github.com/UglyToad/PdfPig
+Licence  : NOT ESTABLISHED FROM ANY SOURCE ON THIS MACHINE — see the list at the
+           end of this file. This package was unpacked by hand and neither its
+           .nupkg nor a licence file survives beside it, so nothing here can be
+           read rather than remembered.
 
 
-System.Text.Encoding.CodePages — legacy code pages (windows-1250 and friends)
-------------------------------------------------------------------------------
-Upstream : https://github.com/dotnet/runtime
-Licence  : MIT
+MANAGED PACKAGES — MIT
+------------------------
+Each licence below was read out of that package's OWN .nuspec, not looked up.
+The terms are identical and are reproduced once, in Licences\MIT.txt; what
+differs between them is the copyright holder, so each is named here.
+
+  SharpCompress 0.49.1 — zip / rar / 7z import
+      https://github.com/adamhathcock/sharpcompress
+      Copyright (c) 2025  Adam Hathcock
+
+  © Microsoft Corporation, from https://github.com/dotnet/runtime:
+      Microsoft.Bcl.AsyncInterfaces 10.0.3
+      System.Buffers 4.6.1
+      System.ComponentModel.Annotations 5.0.0
+      System.IO.Pipelines 10.0.3
+      System.Memory 4.6.3
+      System.Numerics.Vectors 4.6.1
+      System.Runtime.CompilerServices.Unsafe 6.1.2
+      System.Text.Encoding.CodePages 10.0.9   (windows-1250 and friends)
+      System.Text.Encodings.Web 10.0.3
+      System.Text.Json 10.0.3
+      System.Threading.Tasks.Extensions 4.6.3
+      System.ValueTuple 4.6.1
+
+  Microsoft.Bcl.HashCode 6.0.0 — its .nupkg is not on this machine either, so
+      its licence is named nowhere that can be read. See the list at the end.
+
+Text     : Licences\MIT.txt (the copy shipped by System.ComponentModel.
+           Annotations, carrying the .NET Foundation copyright line)
 
 
 Reading fonts — five families for the reading window
@@ -114,8 +149,49 @@ licence URL, while its upstream repository ships OFL.txt covering exactly these
 files. The metadata is stale; the licence is OFL 1.1.
 
 
-STILL TO DO BEFORE ANY RELEASE
-------------------------------
-The verbatim licence texts (LGPL v2.1, LGPL v3, MIT) must ship ALONGSIDE this
-file. Naming a licence is not the same as providing it, and the LGPL asks for a
-copy. Only nvdaControllerClient's text is present today.
+LICENCE TEXTS
+-------------
+Naming a licence is not providing it, and the LGPL asks for a copy. These ship
+beside the program:
+
+  Licences\LGPL-2.1.txt   liblouis and its tables, nvdaControllerClient,
+                          TagLib#, libmpv
+  Licences\MIT.txt        SharpCompress and the managed packages above
+  Fonts\Licences\OFL-1.1.txt      Andika, Atkinson Hyperlegible Next,
+                                  Lexend, OpenDyslexic
+  Fonts\Licences\CC-BY-4.0.txt    Luciole
+  Fonts\Licences\NOTICE.txt       the fonts' own copyright lines
+
+Every one of these was copied from a file already on this machine — the LGPL 2.1
+text from the one nvaccess ships with its client, the MIT text from the copy
+inside System.ComponentModel.Annotations' own package. None was typed out from
+memory, and none should ever be: a licence reconstructed from recollection is
+not the licence.
+
+
+STILL TO RESOLVE BEFORE ANY RELEASE
+-----------------------------------
+Three things, each stated as what is missing rather than as a guess.
+
+1. PdfPig 0.1.15 — LICENCE NOT ESTABLISHED.
+   It is referenced by the project and its seven assemblies ship, but the
+   package was unpacked by hand and neither a .nupkg nor a licence file remains
+   beside it, and the assemblies carry no copyright metadata. Its licence is
+   therefore recorded NOWHERE that can be read on this machine. Settle it from
+   the package or the upstream repository, then add the text here.
+
+2. Microsoft.Bcl.HashCode 6.0.0 — same situation, same reason. Every other
+   package of that family declares MIT in its own nuspec; this one's nuspec is
+   not on the machine, so it is listed as unestablished rather than assumed.
+
+3. FFmpeg's LGPL VERSION is unverified, and the answer decides whether a third
+   text is owed. This file has said "the FFmpeg it links is stated by the build
+   to be LGPL v3", which matters because LGPL v3 would also require the GPL v3
+   text it refers to, and because §10e notes it interacts with MSIX packaging.
+   Scanned the shipped libmpv-2.dll on 2026-08-07 and the claim CANNOT be
+   confirmed from it: there is no "LGPL version 2.1 or later" string, no
+   "LGPL version 3 or later", and no "--enable-version3". (The twenty "GPL"
+   byte sequences a plain search finds are machine code — H?GPL, L?GPL and the
+   like — not text. The one real "LGPL" string belongs to libssh.) So the DLL
+   settles nothing either way; the build's own configure output does, and that
+   is where to look.

@@ -3670,8 +3670,36 @@ already animates at that level.
 System.Text.Encoding.CodePages MIT (both read from their nuspec), liblouis and
 its tables LGPL 2.1+ (read from a table header), nvdaControllerClient LGPL 2.1
 (text present), TagLib# LGPL 2.1, libmpv LGPL 2.1+ with FFmpeg stated as LGPL v3.
-**Not done:** the verbatim licence texts must ship alongside the notices —
-naming a licence is not providing it.
+
+**The texts ship now (2026-08-07)** — `Licences\LGPL-2.1.txt` and
+`Licences\MIT.txt`, beside the fonts' OFL and CC-BY. **Both were copied from
+files already on this machine**: the LGPL 2.1 from the copy nvaccess ships with
+its controller client, the MIT from inside `System.ComponentModel.Annotations`'
+own package. Neither was typed out, and neither should ever be — a licence
+reconstructed from memory is not the licence, and this is the one file in the
+project where being approximately right is worth nothing.
+
+**The bigger gap was the component list, not the texts.** The notices named
+three managed packages; the project references **sixteen**. Every licence is now
+read out of that package's own `.nuspec` inside its `.nupkg` — all MIT except
+**TagLib#, which declares `LGPL-2.1-only`** — with each MIT package's copyright
+holder listed, since the terms are shared but the holder is not.
+
+**Three things are still open, and each is recorded as unestablished rather than
+assumed:**
+- **PdfPig 0.1.15** ships seven assemblies and its licence is written **nowhere
+  readable on this machine** — hand-unpacked, no `.nupkg`, no licence file, no
+  copyright metadata in the DLLs.
+- **Microsoft.Bcl.HashCode 6.0.0**, same situation. Every sibling declares MIT;
+  this one is listed as unestablished anyway, because "its family is MIT" is an
+  inference and this file may not contain inferences.
+- **FFmpeg's LGPL version.** The claim that it is v3 matters — v3 would also
+  require the GPL v3 text it refers to, and §10e's MSIX note hangs on it.
+  **Scanned the shipped `libmpv-2.dll`: it settles nothing.** No
+  "LGPL version 2.1 or later", no "LGPL version 3 or later", no
+  "--enable-version3". The twenty "GPL" hits a plain search returns are **machine
+  code** (`H?GPL`, `L?GPL`), not text, and the single real "LGPL" string belongs
+  to libssh. The build's own configure output is what answers it.
 
 **One wrinkle for MSIX specifically:** FFmpeg here is LGPL **v3**, which wants
 the user to be able to relink or replace the library. A signed MSIX package puts
