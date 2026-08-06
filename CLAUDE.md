@@ -3685,21 +3685,34 @@ read out of that package's own `.nuspec` inside its `.nupkg` — all MIT except
 **TagLib#, which declares `LGPL-2.1-only`** — with each MIT package's copyright
 holder listed, since the terms are shared but the holder is not.
 
-**Three things are still open, and each is recorded as unestablished rather than
-assumed:**
-- **PdfPig 0.1.15** ships seven assemblies and its licence is written **nowhere
-  readable on this machine** — hand-unpacked, no `.nupkg`, no licence file, no
-  copyright metadata in the DLLs.
-- **Microsoft.Bcl.HashCode 6.0.0**, same situation. Every sibling declares MIT;
-  this one is listed as unestablished anyway, because "its family is MIT" is an
-  inference and this file may not contain inferences.
-- **FFmpeg's LGPL version.** The claim that it is v3 matters — v3 would also
-  require the GPL v3 text it refers to, and §10e's MSIX note hangs on it.
-  **Scanned the shipped `libmpv-2.dll`: it settles nothing.** No
-  "LGPL version 2.1 or later", no "LGPL version 3 or later", no
-  "--enable-version3". The twenty "GPL" hits a plain search returns are **machine
-  code** (`H?GPL`, `L?GPL`), not text, and the single real "LGPL" string belongs
-  to libssh. The build's own configure output is what answers it.
+**All of it is settled as of 2026-08-07, and the last three came off the web
+without a licence ever passing through a language model.** That distinction is
+the method worth keeping: `WebFetch` renders a page through a small model, which
+is fine for establishing a FACT and unacceptable for a text that ships. The
+**GitHub API returns a file's exact bytes** (base64), so it is a legitimate
+source for the text itself.
+- **PdfPig 0.1.15 → Apache-2.0**, as GitHub classifies the repository, with the
+  text taken from PdfPig's own `LICENSE`. It had been missing from the notices
+  altogether — seven assemblies of PDF extraction, unnamed.
+- **Microsoft.Bcl.HashCode 6.0.0 → MIT**, read from the package's own nuspec on
+  nuget.org (`<license type="expression">MIT</license>`, repo
+  `dotnet/maintenance-packages`).
+- **FFmpeg IS LGPL v3 — confirmed, and not from the binary.** The DLL settles
+  nothing: no version string of any kind, and the twenty "GPL" hits a plain
+  search returns are **machine code** (`H?GPL`, `L?GPL`), the one real "LGPL"
+  belonging to libssh. The answer is in `compile-lgpl-libmpv.patch` in the fork
+  the DLL is built from: it **removes `--enable-gpl` and keeps
+  `--enable-version3`**. So `LGPL-3.0.txt` and `GPL-3.0.txt` are owed and now
+  ship — GPL v3 because LGPL v3 is written as additional permissions on top of
+  it and cannot be read without it.
+
+**The better move is to remove the obligation, not satisfy it.** Dropping
+`--enable-version3` puts FFmpeg back at LGPL v2.1, retires two licence files and
+closes the MSIX relink wrinkle — a signed MSIX puts the DLL where the user cannot
+replace it, which is the thing LGPL v3 asks to be possible.
+`tools/mpv-build/README.md` had already worked out that nothing here needs it:
+version3's usual reason is libopencore-amr, and NBR decodes AMR natively. It
+needs a rebuild, so it is not done.
 
 **One wrinkle for MSIX specifically:** FFmpeg here is LGPL **v3**, which wants
 the user to be able to relink or replace the library. A signed MSIX package puts

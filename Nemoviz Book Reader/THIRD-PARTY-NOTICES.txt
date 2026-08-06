@@ -87,10 +87,9 @@ PdfPig 0.1.15 — PDF text extraction
 ------------------------------------
 Files    : UglyToad.PdfPig*.dll (7 assemblies)
 Upstream : https://github.com/UglyToad/PdfPig
-Licence  : NOT ESTABLISHED FROM ANY SOURCE ON THIS MACHINE — see the list at the
-           end of this file. This package was unpacked by hand and neither its
-           .nupkg nor a licence file survives beside it, so nothing here can be
-           read rather than remembered.
+Licence  : Apache License 2.0
+Text     : Licences\Apache-2.0.txt — the LICENSE file from PdfPig's own
+           repository, fetched byte for byte through the GitHub API.
 
 
 MANAGED PACKAGES — MIT
@@ -117,8 +116,10 @@ differs between them is the copyright holder, so each is named here.
       System.Threading.Tasks.Extensions 4.6.3
       System.ValueTuple 4.6.1
 
-  Microsoft.Bcl.HashCode 6.0.0 — its .nupkg is not on this machine either, so
-      its licence is named nowhere that can be read. See the list at the end.
+  Microsoft.Bcl.HashCode 6.0.0 — © Microsoft Corporation, from
+      https://github.com/dotnet/maintenance-packages. Its .nupkg is not on this
+      machine; the licence was read from the package's own nuspec on nuget.org,
+      which declares <license type="expression">MIT</license>.
 
 Text     : Licences\MIT.txt (the copy shipped by System.ComponentModel.
            Annotations, carrying the .NET Foundation copyright line)
@@ -155,43 +156,53 @@ Naming a licence is not providing it, and the LGPL asks for a copy. These ship
 beside the program:
 
   Licences\LGPL-2.1.txt   liblouis and its tables, nvdaControllerClient,
-                          TagLib#, libmpv
+                          TagLib#, libmpv (mpv itself)
+  Licences\LGPL-3.0.txt   the FFmpeg inside libmpv — see below
+  Licences\GPL-3.0.txt    referred to by LGPL v3, which is written as a set of
+                          additional permissions on top of it, so the LGPL v3 is
+                          not readable without it
+  Licences\Apache-2.0.txt PdfPig
   Licences\MIT.txt        SharpCompress and the managed packages above
   Fonts\Licences\OFL-1.1.txt      Andika, Atkinson Hyperlegible Next,
                                   Lexend, OpenDyslexic
   Fonts\Licences\CC-BY-4.0.txt    Luciole
   Fonts\Licences\NOTICE.txt       the fonts' own copyright lines
 
-Every one of these was copied from a file already on this machine — the LGPL 2.1
-text from the one nvaccess ships with its client, the MIT text from the copy
-inside System.ComponentModel.Annotations' own package. None was typed out from
-memory, and none should ever be: a licence reconstructed from recollection is
-not the licence.
+Every one of these came from the component itself, never from recollection. The
+LGPL 2.1 is the copy nvaccess ships with its client; the MIT is the copy inside
+System.ComponentModel.Annotations' own package; the LGPL v3 and GPL v3 are
+FFmpeg's own COPYING.LGPLv3 and COPYING.GPLv3, and the Apache 2.0 is PdfPig's own
+LICENSE — those three fetched through the GitHub API, which returns the file's
+exact bytes rather than a rendering of them. A licence reconstructed from memory
+is not the licence, and it must never be produced that way.
+
+
+FFmpeg IS LGPL v3, AND IT NEED NOT BE
+-------------------------------------
+Settled on 2026-08-07, from the build's own configuration rather than from the
+binary. Scanning the shipped libmpv-2.dll answers nothing — it carries no
+version string at all, and the twenty "GPL" byte sequences a plain search finds
+are machine code (H?GPL, L?GPL and the like), the one real "LGPL" string
+belonging to libssh. The answer is in compile-lgpl-libmpv.patch in the fork this
+DLL is built from, gradic76/mpv-winbuild: that patch REMOVES --enable-gpl and
+KEEPS --enable-version3. So FFmpeg here is LGPL v3, the notices above are right,
+and both LGPL-3.0.txt and GPL-3.0.txt are owed and now ship.
+
+It is worth removing rather than satisfying. Dropping --enable-version3 from
+that patch would put FFmpeg back at LGPL v2.1, retire two licence files, and
+close the MSIX relink wrinkle in CLAUDE.md §10e — a signed MSIX puts the DLL
+somewhere the user cannot replace it, which is exactly what LGPL v3 asks to be
+possible. tools/mpv-build/README.md already worked out that nothing here needs
+version3: its usual reason is libopencore-amr, and NBR decodes AMR natively
+(amr_nb and amr_wb are both in the enable-list). Not done — it needs a rebuild.
 
 
 STILL TO RESOLVE BEFORE ANY RELEASE
 -----------------------------------
-Three things, each stated as what is missing rather than as a guess.
+Nothing on the licence side, as of 2026-08-07. Every component the project
+references is named above, every licence was read from that component's own
+metadata or its own licence file, and every text ships.
 
-1. PdfPig 0.1.15 — LICENCE NOT ESTABLISHED.
-   It is referenced by the project and its seven assemblies ship, but the
-   package was unpacked by hand and neither a .nupkg nor a licence file remains
-   beside it, and the assemblies carry no copyright metadata. Its licence is
-   therefore recorded NOWHERE that can be read on this machine. Settle it from
-   the package or the upstream repository, then add the text here.
-
-2. Microsoft.Bcl.HashCode 6.0.0 — same situation, same reason. Every other
-   package of that family declares MIT in its own nuspec; this one's nuspec is
-   not on the machine, so it is listed as unestablished rather than assumed.
-
-3. FFmpeg's LGPL VERSION is unverified, and the answer decides whether a third
-   text is owed. This file has said "the FFmpeg it links is stated by the build
-   to be LGPL v3", which matters because LGPL v3 would also require the GPL v3
-   text it refers to, and because §10e notes it interacts with MSIX packaging.
-   Scanned the shipped libmpv-2.dll on 2026-08-07 and the claim CANNOT be
-   confirmed from it: there is no "LGPL version 2.1 or later" string, no
-   "LGPL version 3 or later", and no "--enable-version3". (The twenty "GPL"
-   byte sequences a plain search finds are machine code — H?GPL, L?GPL and the
-   like — not text. The one real "LGPL" string belongs to libssh.) So the DLL
-   settles nothing either way; the build's own configure output does, and that
-   is where to look.
+What remains is the packaging decision: build without --enable-version3 and drop
+to LGPL v2.1, or keep v3 and make sure the chosen installer lets the user replace
+libmpv-2.dll.
