@@ -3724,6 +3724,30 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
    build for the baseline): of seven books **only the two EPUB hybrids changed**,
    both from `dh=0` to a full list (24 and 21). Every DAISY, M4B and text book
    came back byte-identical.
+
+   **And it was still not enough — a third layer, found by Gordan testing it.**
+   With the headings built and on the clock, Go To *still* offered `aud001`. The
+   navigation is gated in three places by **the format instead of the headings**:
+   `GetPlayerType`, the Go To list builder, and `DaisyHeadingIndexAt` (which
+   feeds the title bar and the info box's Chapter line) all read
+   `IsDaisy && DaisyHeadings.Count > 0`. **A narrated EPUB is a hybrid, not a
+   DAISY**, so `IsDaisy` is false and all three fell through — to `MultiAudio`,
+   which navigates by parts, which are the audio files. Same symptom as the
+   original report, one layer further down than the fix for it reached.
+
+   All three test the headings alone now. `DaisyHeadings` is the generic store of
+   "named positions on the audio timeline" — its name is as historical as
+   `M4bChapters`' — so having any is the whole qualification, and a DAISY with no
+   headings still falls through exactly as before. Measured over the library:
+   `1ep_001` is `daisy=False, dh=23`, so it qualified under neither half of the
+   old test and qualifies now; **it is the only one of seven books whose
+   behaviour changes**. `Distribution` (`daisy=True, dh=148`) passed before and
+   passes now.
+
+   **The lesson is the one this whole item keeps teaching:** every layer asked
+   "what format is this?" when the question it needed answered was "does this
+   book have named positions?". Three copies of one wrong test, each hiding the
+   next.
 2. ~~**Granta Portugal's text side is nearly empty**~~ **— INVESTIGATED AND
    HANDLED 2026-08-04. Nothing was wrong with the parser: the text is not in the
    file.** The note guessed that "its ids do not match what the XHTML yields".

@@ -2328,7 +2328,20 @@ namespace Nemoviz_Book_Reader
             if (currentBook == null) return PlayerType.SingleAudio;
             if (currentBook.IsTextBook)
                 return currentBook.TextHeadings.Count > 0 ? PlayerType.StructuredText : PlayerType.FlatText;
-            if (currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0)
+            // THE HEADINGS DECIDE, NOT THE FORMAT (fixed 2026-08-04). This used
+            // to read `IsDaisy && DaisyHeadings.Count > 0`, which is the same test
+            // twice for a DAISY and a wrong one for anything else: a narrated EPUB
+            // is a hybrid, not a DAISY, so IsDaisy is false while
+            // BuildHybridNavFromText has just put its 23 chapters on the clock.
+            // The book fell through to MultiAudio and Go To went back to offering
+            // "aud001.mp3" — the very symptom §10h opened with, surviving one
+            // layer further down than the fix for it reached.
+            //
+            // DaisyHeadings is the generic store of "named positions on the audio
+            // timeline" (its name is as historical as M4bChapters'), so having any
+            // is the whole qualification. A DAISY with no headings still falls
+            // through exactly as it did.
+            if (currentBook.DaisyHeadings.Count > 0)
                 return PlayerType.Daisy;
             // M4B with real chapter marks (a single file navigated by chapter);
             // one with none falls through to single-file audio.
@@ -2518,7 +2531,12 @@ namespace Nemoviz_Book_Reader
         /// book has no DAISY headings.</summary>
         private int DaisyHeadingIndexAt(double virtualPos)
         {
-            if (currentBook == null || !currentBook.IsDaisy || currentBook.DaisyHeadings.Count == 0)
+            // Headings, not format — the third copy of that test (see
+            // GetPlayerType). This one feeds the title bar and the info box's
+            // Chapter line, so leaving it would have given a narrated EPUB the
+            // right seek steps and the right Go To list beside a Chapter row
+            // reading "—".
+            if (currentBook == null || currentBook.DaisyHeadings.Count == 0)
                 return -1;
             var hs = currentBook.DaisyHeadings;
             int idx = 0;
@@ -3686,7 +3704,10 @@ namespace Nemoviz_Book_Reader
             string[] names;
             double[] targets;
             int preselect;
-            bool daisyNav = currentBook.IsDaisy && currentBook.DaisyHeadings.Count > 0;
+            // Headings, not format — see GetPlayerType for why. Go To carried its
+            // own copy of that test, so fixing only the other one would have left
+            // the seek step naming chapters while this list still named files.
+            bool daisyNav = currentBook.DaisyHeadings.Count > 0;
             bool m4bNav = GetPlayerType() == PlayerType.M4b;
 
             if (daisyNav)
