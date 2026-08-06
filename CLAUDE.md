@@ -1310,11 +1310,39 @@ re-read and nothing else. Pages survive (20), position and bookmarks come back a
 nought, and a book that is not from braille answers `BrailleSourcePath = null`
 and refuses.
 
-**Still to build:** the combo itself, in Properties → the text page, shown only
-when `BrailleSourcePath` is non-null; and the confirm dialog with its
-switch-off. **And once it exists, EBAE can be added** — §10g measured it as the
-better reading of the American samples and held it back only because a wrong
-automatic pick had no remedy.
+**The table list is in, and it is two lists (2026-08-04).** Gordan: *"dodaj sve
+tablice koje možeš dodati da imamo što veći izbor. Jezike koje nismo mogli
+testirati, nismo mogli, zato nudimo mogućnost reloada."* That splits cleanly in
+two, and measurement says it has to:
+
+- **`BrailleTables.All` — what auto-detection tries — stays small.** Detection
+  back-translates a sample through every table it is offered and scores the
+  result, and the score only knows Croatian, English and French words. Measured:
+  **10 ms per table**, so the whole catalogue would cost ~2 s per import, and
+  — much worse — with a hundred unscoreable languages in the running one of them
+  wins by accident. It grew by three: **EBAE contracted and uncontracted**
+  (`en-us-g2`, `en-us-g1`) and **British contracted**, so nine.
+- **`BrailleTables.Catalog` — what the READER may choose — is everything**, read
+  out of the shipped tables' own metadata rather than listed by hand: the §10e′
+  rule again, since a hand-written list drops the one entry someone needs and it
+  surfaces on their machine. **148 tables, 113 languages, built in 13 ms** on
+  first use.
+
+Two filters, both load-bearing, and one exception that matters more than either:
+
+- `#+type:literary` keeps out maths, chess, computer-braille and display tables.
+- **`#+direction:forward` is excluded** — 52 literary tables say they go
+  text→braille only, and back-translating with one yields confident nonsense
+  rather than an error.
+- **The curated set is always in, whatever its metadata says.** Our two Croatian
+  tables are hand-written (§8i) and carry **no `#+type:` at all**, so the
+  mechanical filter would have thrown out precisely the tables this project
+  built. Verified by probe: all nine survive, ids are unique, and every entry
+  round-trips through `ById`.
+
+**Still to build:** the combo in Properties → the text page, shown only when
+`BrailleSourcePath` is non-null; the confirm dialog with its switch-off; and the
+hint text.
 
 ---
 
