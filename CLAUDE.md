@@ -1397,6 +1397,15 @@ ships `.tbl` wrappers that are nothing but `include` lines round a real table, s
 names. A table whose body is only includes is resolved to its target and the
 curated name wins.)*
 
+**A language's tables may be filed under a code nobody would guess** (checked
+2026-08-04). Korean is `ko` and Vietnamese `vi` as expected, but Chinese is under
+`cmn` and Hebrew under `phn`, so a book detected as `zh` or `he` finds nothing
+and drops to the whole catalogue — which is the right outcome, but by accident
+rather than design. **Thai has no literary table at all.** The occasion for
+checking was Gordan reading a detection sweep and concluding liblouis had no
+tables for Korean, Thai or Vietnamese; two of the three do, and a reader can
+reach them through the picker.
+
 **An unknown or empty language falls back to the WHOLE catalogue, deliberately.**
 The language is detected from the text, and when the table is wrong the text is
 gibberish — so the language can be wrong too. Measured, on this project's own
