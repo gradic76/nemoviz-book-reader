@@ -3664,8 +3664,45 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
 2. **Granta Portugal's text side is nearly empty** — 21 sync points and 377
    characters against 2.2 MB of SMIL, so its ids do not match what the XHTML
    yields. Audio and duration are correct. Needs investigation, not a fix.
-3. **The surface stops refreshing after a large seek** (Gordan: ~15 minutes in).
-   Not diagnosed.
+3. ~~**The surface stops refreshing after a large seek**~~ **— FIXED 2026-08-04,
+   and it was not really about seeking.** Two bugs, both in the chunk logic, both
+   left over from when the whole book really was in the control (§8l).
+
+   **The one Gordan reported.** `UpdateReadingSurface` computed `start` as an
+   offset into `readingText` — the whole book — and then bounds-checked it
+   against `tbReadingSurface.TextLength`, which since chunking is the length of
+   the **~5000-character chunk**. So the moment the reading passed the end of the
+   loaded chunk, the method returned **one line before the `EnsureChunkFor` that
+   would have loaded the next one**, and nothing could ever put it right: surface,
+   highlight and braille stopped together and stayed stopped. A large seek trips
+   it instantly, which is how it was noticed; ordinary reading trips it too, just
+   later. Now bounded against `readingText.Length`; the clamp to the chunk still
+   happens three lines below, where the offset is relative to the chunk and means
+   something.
+
+   **The one nobody had reported, and it is worse for braille.** While the caret
+   sits in the first or last quarter of the BOOK, neither of `EnsureChunkFor`'s
+   guards returns — there is no more text to slide towards — so the recomputed
+   window comes out **identical** and the old code assigned `Text` anyway, on
+   every tick. §8l measured what that costs: replacing `Text` **freezes** braille
+   (the display sat on one sentence for 35 seconds) and resets the caret the
+   reader is tracked by. So the opening minutes of every hybrid were the one place
+   braille could not work. Guarded now: same window, no assignment.
+
+   **Measured on the real books in the library**, replaying the old guard against
+   their own sync maps:
+
+   | book | froze at | never followed |
+   |---|---|---|
+   | `1ep_001` (126 230 chars, 178 min) | **11.3 min** | 93.7% of the book |
+   | `Distribution` (1 214 431 chars, 1313 min) | **9.2 min** | 99.3% of the book |
+
+   11.3 minutes against Gordan's "~15 minutes in" is the same event. The second
+   bug measures at **~5.2 minutes of frozen braille** at the start of each of
+   them. `2ep_001` never tripped either bug — it is item 2 below, 377 characters,
+   shorter than a single chunk.
+   **Not verified on a display**; that goes with the rest of the eyes-and-hands
+   list in §11.
 4. `Ctrl+C` in the reading surface copies nothing, because the surface never
    SELECTS anything by design (§8l — a selection is read aloud over NBR's own
    voice). Decide whether a bare Copy should take the current paragraph.

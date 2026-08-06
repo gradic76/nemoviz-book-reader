@@ -4273,6 +4273,20 @@ namespace Nemoviz_Book_Reader
             from = SnapToBreak(from, -1);
             to = SnapToBreak(to, +1);
 
+            // THE SAME WINDOW IS NOT A NEW WINDOW (fixed 2026-08-04).
+            //
+            // The two guards above ask whether the caret is comfortably inside the
+            // chunk, which it is not while the reading sits in the first or last
+            // quarter of the BOOK — there is no more text to slide towards, so the
+            // window computed here comes out identical and the old code assigned
+            // it anyway, on every tick. §8l measured what that costs: replacing
+            // Text FREEZES braille (the display sat on one sentence for 35
+            // seconds), and it resets the caret the reader is being tracked by. So
+            // the opening minutes of every hybrid — and the closing ones — were
+            // the two places where braille could not work, which is not a
+            // performance detail but the feature switched off.
+            if (from == chunkStart && to == chunkEnd) return;
+
             chunkStart = from;
             chunkEnd = to;
             tbReadingSurface.Text = readingText.Substring(from, to - from);
@@ -4727,7 +4741,23 @@ namespace Nemoviz_Book_Reader
             else return;
             if (start == lastSurfaceStart) return;
             lastSurfaceStart = start;
-            if (start < 0 || start > tbReadingSurface.TextLength) return;
+            // AGAINST THE BOOK, NOT THE SURFACE (fixed 2026-08-04 — this is
+            // §10h's "the surface stops refreshing after a large seek").
+            //
+            // `start` is an offset into readingText, the whole book. This line
+            // measured it against tbReadingSurface.TextLength, which since
+            // chunking is the length of the ~5000-character CHUNK. So the moment
+            // the reading passed the end of the loaded chunk — a large seek does
+            // it at once, ordinary reading does it after a few thousand
+            // characters — the method returned HERE, one line before the
+            // EnsureChunkFor that would have loaded the next chunk. Nothing could
+            // ever put it right again: the surface, the highlight and the braille
+            // all stopped together and stayed stopped.
+            //
+            // It is a leftover from when the whole book really was in the control
+            // (§8l). Clamping to the chunk still happens, three lines below, where
+            // the offset has been made relative to the chunk and means something.
+            if (start < 0 || start > readingText.Length) return;
             // The CARET moves, nothing is selected. Selecting the sentence did
             // carry braille perfectly, but a screen reader treats a selection as
             // news: Gordan heard it reading the marked text out, announcing
