@@ -156,7 +156,14 @@ namespace Nemoviz_Book_Reader
                 // Page markers only mean something when the file actually paginates
                 // (some producers ship one continuous stream with no form feeds).
                 doc.Pages = pageMarks.Count > 1 ? pageMarks : new List<(string, int)>();
-                doc.Producer = table.Display;   // surfaced so the user sees which table was used
+                // NOT into Producer any more (2026-08-04). The table used to be
+                // written there so the reader could see it at all, back when
+                // nothing else showed it. Properties now has a row of its own —
+                // "Input Braille Table" — so writing it here as well put the same
+                // fact on the glass twice under two names, one of them wrong:
+                // Producer means who made the recording or the edition, and
+                // "English (British) — contracted" is not a producer.
+                // Gordan spotted it in the info box.
                 doc.BrailleTable = table.Id;
             }
             catch { return new TextDoc(); }
