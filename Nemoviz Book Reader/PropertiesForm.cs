@@ -81,7 +81,10 @@ namespace Nemoviz_Book_Reader
         // Shown only when nothing installed speaks the book's language.
         private TextBox tbTNoVoice;
         private NumericUpDown numTWpm, numTVolume, numTPitch;
-        private CheckBox chkTBraille;
+        // The table a braille book was READ with. Not a preference: changing it
+        // re-runs the import, which is why it is committed on OK and nowhere else.
+        private ComboBox cmbTInTable;
+        private List<BrailleTableInfo> inTables = new List<BrailleTableInfo>();
         private CheckBox chkTVisual;
         private ComboBox cmbTVisualMode, cmbTHighlight, cmbTHighlightColour, cmbTTextColour, cmbTBackColour;
         private List<(string Name, string Engine, string Language)> textCatalog;
@@ -571,6 +574,47 @@ namespace Nemoviz_Book_Reader
             if (numPlayVolume != null) book.Volume = (int)numPlayVolume.Value;
             if (numPlaySpeed != null) book.Speed = (int)Math.Round(numPlaySpeed.Value * 100);
             book.Save();
+            RereadBrailleIfAsked();
+        }
+
+        /// <summary>Re-reads the braille file with the newly chosen table, if one
+        /// was chosen. LAST, after the book has been saved, because it does its own
+        /// save and there is no sense in it racing the one above.
+        ///
+        /// <para><b>It asks first, and it may be told not to ask again.</b> The
+        /// re-read throws away the reading position, the bookmarks and the
+        /// percentage — they are offsets into a text that is about to stop
+        /// existing. Gordan's reasoning for warning rather than preserving: a
+        /// reader notices a wrong table long before they start setting bookmarks,
+        /// so the 99% case loses nothing, and the 1% is owed the sentence. And a
+        /// reader hunting for the right table meets that sentence several times in
+        /// a row, which is what the switch-off is for.</para>
+        ///
+        /// <para>Declining leaves everything exactly as it was — the choice was
+        /// only ever staged in the combo, which is the whole reason this runs on
+        /// OK and not on the combo's own event.</para></summary>
+        private void RereadBrailleIfAsked()
+        {
+            BrailleTableInfo want = ChosenInputTable();
+            if (want == null) return;
+
+            // Properties can be opened from the library without settings handed in,
+            // so fall back to the live ones rather than silently losing the
+            // switch-off the reader asked for.
+            AppSettings st = appSettings ?? AppSettings.Current;
+            if (st == null || st.WarnBrailleReread)
+            {
+                bool off;
+                if (!ConfirmOnceForm.Ask(this,
+                        Localization.T("Dialog.BrailleReread.Message", want.Display),
+                        Localization.T("Dialog.BrailleReread.Title"), out off))
+                    return;
+                if (off && st != null) st.SetWarnBrailleReread(false);
+            }
+
+            if (!book.RetranslateBraille(want.Id))
+                MessageForm.ShowInfo(this, Localization.T("Dialog.BrailleReread.Failed"),
+                                     Localization.T("Dialog.BrailleReread.Title"));
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -605,12 +649,17 @@ namespace Nemoviz_Book_Reader
             page.Controls.Add(tbTextInfo);
 
             page.Controls.Add(BuildTextSpeechGroup(248, 8));
-            page.Controls.Add(BuildTextBrailleGroup(248, 226));
-            // 286, not 314: the braille group lost its table row (2026-08-04) and
-            // came down from 80 to 52, so the visual group follows it up rather
-            // than leaving a band of dead glass between the two (§10b — slack goes
-            // to the gaps, not into the boxes).
-            page.Controls.Add(BuildTextVisualGroup(248, 286));
+            // The input-table group appears ONLY for a book that came from a
+            // braille file, and the visual group closes the gap when it does not —
+            // an empty group invites the question of what it is for, and §10b's
+            // rule is that slack goes to the gaps and not into the boxes.
+            int visualY = 226;
+            if (book.BrailleSourcePath != null)
+            {
+                page.Controls.Add(BuildTextBrailleGroup(248, 226));
+                visualY = 290;
+            }
+            page.Controls.Add(BuildTextVisualGroup(248, visualY));
 
             UpdateTextEnabled();
             return page;
@@ -633,7 +682,15 @@ namespace Nemoviz_Book_Reader
             // which is the whole point of the page.
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Language"), lx, yy + 3));
             cmbTLanguage = SettingsForm.MakeCombo(Localization.T("Settings.TextBooks.Language"), cx, yy, cw, tab++);
-            cmbTLanguage.SelectedIndexChanged += (s, e) => TextVoicesForSelection();
+            // The language drives two branches now, not one: which voices can read
+            // the book, and which braille tables it could have been written in.
+            // Gordan's idea, and it saves a control — the alternative was a second
+            // language combo saying the same thing beside the first.
+            cmbTLanguage.SelectedIndexChanged += (s, e) =>
+            {
+                TextVoicesForSelection();
+                FillInputTablesForSelection();
+            };
             box.Controls.Add(cmbTLanguage);
 
             yy += 30;
@@ -822,66 +879,98 @@ namespace Nemoviz_Book_Reader
                 new VoicePrefs((int)numTWpm.Value, (int)numTVolume.Value, (int)numTPitch.Value));
         }
 
+        /// <summary>The table this book's braille file was READ with, and the way
+        /// to have it read again with another.
+        ///
+        /// <para><b>This is the slot the fake output table used to occupy, and it
+        /// is the opposite thing.</b> That one claimed to say how the text became
+        /// cells on the way OUT, which NBR cannot do and should not — the screen
+        /// reader translates for the display, with the table set in its own
+        /// braille settings. This one is the table that turned CELLS INTO TEXT at
+        /// import, and it is the only braille table in the app that ever meant
+        /// anything. Hence the caption: <b>Input Braille Table</b>, so the two can
+        /// never be confused again.</para>
+        ///
+        /// <para><b>Shown only for a book that came from braille</b> — the whole
+        /// group is left out otherwise, rather than greyed, because a book with no
+        /// braille file has nothing to re-read and an empty control invites the
+        /// question of what it is for.</para>
+        ///
+        /// <para><b>Nothing happens here.</b> Choosing a table only stages it; the
+        /// re-read runs on OK, after a warning. Gordan, 2026-08-04, and the
+        /// reasoning is better than the separate button I argued for: with a
+        /// button, Cancel cannot undo what it already did, while a staged choice
+        /// leaves Cancel meaning exactly what it says.</para></summary>
         private GroupBox BuildTextBrailleGroup(int x, int y)
         {
             GroupBox box = new GroupBox();
-            box.Text = Localization.T("Settings.TextBooks.BrailleGroup");
+            box.Text = Localization.T("Prop.Text.InputBrailleGroup");
             box.Location = new Point(x, y);
-            // One row since the table combo went (2026-08-04). The table was an
-            // OUTPUT table and there is no output translation in NBR to use it —
-            // see the group's own note below.
-            box.Size = new Size(452, 52);
+            box.Size = new Size(452, 56);
+            // Named, not numbered: this group is not always on the page, and the
+            // skin used to hand out help by position. See DialogSkin.
+            box.Tag = "Hint.TextBrailleSource";
 
-            chkTBraille = new CheckBox();
-            chkTBraille.Text = Localization.T("Settings.TextBooks.UseBraille");
-            chkTBraille.AccessibleName = Localization.T("Settings.TextBooks.UseBraille");
-            chkTBraille.Location = new Point(14, 20);
-            chkTBraille.Size = new Size(424, 24);
-            chkTBraille.TabIndex = 0;
-            chkTBraille.CheckedChanged += (s, e) =>
-            {
-                // Done HERE, on the transition, and not in UpdateTextEnabled: that
-                // one runs on every refresh, so setting the mode there would snap
-                // the choice back to two rows each time anything else was touched.
-                // Ticking braille SETS the smallest form; it does not nail it down.
-                if (chkTBraille.Checked)
-                {
-                    if (chkTVisual != null) chkTVisual.Checked = true;
-                    if (cmbTVisualMode != null && cmbTVisualMode.Items.Count > 0)
-                        cmbTVisualMode.SelectedIndex = 0;      // two rows, the subtitle strip
-                }
-                UpdateTextEnabled();
-            };
-            box.Controls.Add(chkTBraille);
+            box.Controls.Add(SettingsForm.MakeLabel(
+                Localization.T("Prop.Text.InputBrailleTable"), 10, 25));
+            cmbTInTable = SettingsForm.MakeCombo(
+                Localization.T("Prop.Text.InputBrailleTable"), 210, 22, 232, 0);
+            box.Controls.Add(cmbTInTable);
+            FillInputTablesForSelection();
 
-            // ── The braille table combo used to stand here, and it never had a
-            // job (removed 2026-08-04, Gordan's reading of it confirmed in code).
-            //
-            // It claimed to say how this book's text becomes cells on the way
-            // OUT. NBR cannot do that: LibLouis.cs binds lou_backTranslateString
-            // and nothing else, so there is no text→braille translation anywhere
-            // in the app for a table to govern. What it wrote — TextBrailleTable —
-            // was read back from the ini by this dialog and by nothing else.
-            //
-            // And it is not a gap waiting to be filled, because the translation is
-            // not ours to do: the screen reader puts the cells on the display,
-            // using the table set in ITS OWN braille settings. Two tables, one
-            // display, and the reader's wins — so ours could only ever disagree
-            // with what the user feels.
-            //
-            // The other table — the one that back-translates a .brf on the way IN —
-            // is real and stays where it belongs, in the parser at import
-            // (BrfParser, §8i). It is spent the moment content.txt is written, so
-            // it is a record of how the book was read, not a setting to change
-            // afterwards. If a misdetected table ever needs correcting (§10g), the
-            // place for that is the import, not this dialog.
-            chkTBraille.Checked = book.TextBraille;
             return box;
+        }
+
+        /// <summary>Refills the table list for whatever language is selected, and
+        /// keeps the book's current table selected if it is still in the list.
+        ///
+        /// <para>Filtering by language is what makes the list short — measured, 81
+        /// of 85 languages have three tables or fewer. Filtering by the DETECTED
+        /// language alone would be a trap, though: the language is read off the
+        /// text, and when the table is wrong the text is gibberish, so §10g's two
+        /// NALIS books are English detected as French. Hanging the list off the
+        /// language COMBO is what saves it — the reader changes the language and
+        /// the tables follow.</para></summary>
+        private void FillInputTablesForSelection()
+        {
+            if (cmbTInTable == null) return;
+            string lang = "";
+            if (cmbTLanguage != null && cmbTLanguage.SelectedIndex >= 0
+                && cmbTLanguage.SelectedIndex < textLanguageCodes.Count)
+                lang = textLanguageCodes[cmbTLanguage.SelectedIndex];
+            if (string.IsNullOrEmpty(lang)) lang = book.TextLanguage ?? "";
+
+            inTables = new List<BrailleTableInfo>(BrailleTables.ForLanguage(lang));
+            // The table the book is actually on always stands in the list, even
+            // when it belongs to another language — otherwise the box would show
+            // something the book is not using, which is the one thing it must not.
+            BrailleTableInfo cur = BrailleTables.ById(book.BrailleTable);
+            if (cur != null && !inTables.Exists(t => t.Id == cur.Id)) inTables.Insert(0, cur);
+
+            cmbTInTable.Items.Clear();
+            foreach (BrailleTableInfo t in inTables) cmbTInTable.Items.Add(t.Display);
+            int i = cur != null ? inTables.FindIndex(t => t.Id == cur.Id) : -1;
+            if (i < 0 && cmbTInTable.Items.Count > 0) i = 0;
+            if (i >= 0) cmbTInTable.SelectedIndex = i;
+        }
+
+        /// <summary>The table the reader has chosen, or null when nothing changed
+        /// — which is what the OK path asks before warning about anything.</summary>
+        private BrailleTableInfo ChosenInputTable()
+        {
+            if (cmbTInTable == null || cmbTInTable.SelectedIndex < 0
+                || cmbTInTable.SelectedIndex >= inTables.Count) return null;
+            BrailleTableInfo t = inTables[cmbTInTable.SelectedIndex];
+            return string.Equals(t.Id, book.BrailleTable, StringComparison.OrdinalIgnoreCase)
+                ? null : t;
         }
 
         private GroupBox BuildTextVisualGroup(int x, int y)
         {
             GroupBox box = new GroupBox();
+            // Named for the same reason the braille group is: it sits at a
+            // different index depending on whether that group is there at all.
+            box.Tag = "Hint.TextVisual";
             box.Text = Localization.T("Settings.TextBooks.VisualGroup");
             box.Location = new Point(x, y);
             box.Size = new Size(452, 204);
@@ -979,40 +1068,15 @@ namespace Nemoviz_Book_Reader
             bool noSpeech = cmbTVoice != null && cmbTVoice.SelectedIndex == 0;
             SettingsForm.SetEnabled(!noSpeech, numTVolume, numTPitch);
 
-            bool braille = chkTBraille != null && chkTBraille.Checked;
-            // Say it ON THE CONTROL as well as on the glass. Gordan looked beside
-            // the control first, which is where anyone would look — the glass is
-            // where NBR puts state, but a consequence of ticking THIS box belongs
-            // to this box. And it is the only control in the pair Tab can still
-            // reach once the whole visual group is disabled.
-            if (chkTBraille != null)
-                chkTBraille.AccessibleDescription = braille
-                    ? Localization.T("Settings.TextBooks.VisualForBraille") : null;
-            if (chkTVisual != null)
-            {
-                // Repairs an inconsistent book as well as enforcing the rule. The
-                // braille group is BUILT BEFORE the visual one, so on load the
-                // transition handler above fires while chkTVisual is still null
-                // and cannot do this; and a book stored while the two switches
-                // were independent can carry braille on with visual off. Either
-                // way the dialog would show braille ticked beside an unticked,
-                // greyed visual box — a state the rule says cannot exist.
-                if (braille && !chkTVisual.Checked) chkTVisual.Checked = true;
-                chkTVisual.Enabled = !braille;
-            }
-
-            // The WHOLE visual group goes with the check box, not just the check
-            // box (Gordan, 2026-08-01). A braille reader has no use for a display
-            // mode, a highlight or three colours, and the form is already pinned
-            // to the smallest one — the subtitle strip — so there is nothing left
-            // to choose. Leaving them live was mine, on the theory that someone
-            // might still want full screen for a sighted companion; his answer is
-            // that it is clutter in the one place a braille reader has to work,
-            // and that reusing this box at its smallest is the point of putting
-            // braille in it rather than drawing another.
-            SettingsForm.SetEnabled(!braille && chkTVisual != null && chkTVisual.Checked,
+            // The visual switch stands alone now. It used to be forced on and then
+            // disabled whenever braille was ticked, along with the whole group
+            // below it — a rule that existed only because there were two switches
+            // for one output. With the braille box gone there is one, and it means
+            // what it says.
+            SettingsForm.SetEnabled(chkTVisual != null && chkTVisual.Checked,
                                     cmbTVisualMode, cmbTHighlight, cmbTHighlightColour,
                                     cmbTTextColour, cmbTBackColour);
+            if (chkTVisual != null) chkTVisual.Enabled = true;
             RefreshTextInfo();
         }
 
@@ -1101,11 +1165,10 @@ namespace Nemoviz_Book_Reader
                 book.TextHighlight = cmbTHighlight.SelectedIndex;
             if (cmbTHighlightColour != null && cmbTHighlightColour.SelectedIndex >= 0)
                 book.TextHighlightColour = cmbTHighlightColour.SelectedIndex;
-            // Braille is one flag now: whether this book opens its reading window
-            // for a display, and whether the player pushes the sentence when focus
-            // leaves the text. The table that stood beside it is gone — see
-            // BuildTextBrailleGroup for why it never meant anything.
-            book.TextBraille = chkTBraille != null && chkTBraille.Checked;
+            // Braille writes nothing here. The reading window IS the braille
+            // output, so the visual switch above already carries it; and the input
+            // table is not saved but ACTED ON, in the OK path, because changing it
+            // re-runs the import rather than setting a preference.
             // File the numbers under the voice they were set for — every voice this
             // book has been read with keeps its own, so coming back to one restores
             // it instead of inheriting whatever was used last.
@@ -1239,22 +1302,16 @@ namespace Nemoviz_Book_Reader
                   .Append((int)numTPitch.Value).Append(nl);
             sb.Append(nl);
 
-            sb.Append(Localization.T("Settings.TextBooks.BrailleGroup")).Append(": ")
-              .Append(Localization.T(chkTBraille != null && chkTBraille.Checked ? "Prop.On" : "Prop.Off")).Append(nl);
+            // The table the book was read with, for a book that came from braille.
+            // It belongs on the glass because it is the one fact behind every
+            // strange word a reader might be meeting, and the info panel is where
+            // NBR states what a book IS.
+            if (cmbTInTable != null && cmbTInTable.SelectedItem != null)
+                sb.Append(Localization.T("Prop.Text.InputBrailleTable")).Append(' ')
+                  .Append(cmbTInTable.SelectedItem).Append(nl);
 
-            // Why it is on, when the user did not turn it on. The visual group is
-            // DISABLED while braille is ticked — all of it now, not just the check
-            // box — and Windows skips a disabled control in the tab order, so a
-            // screen-reader user never lands on any of it and would otherwise have
-            // no way at all to learn that it is set, let alone by what.
-            //
-            // ON the line it qualifies, not under it. It was a line of its own and
-            // Gordan went through both dialogs without meeting it; a reason tacked
-            // onto the statement it explains cannot be passed over separately.
             sb.Append(Localization.T("Settings.TextBooks.VisualGroup")).Append(": ")
               .Append(Localization.T(chkTVisual != null && chkTVisual.Checked ? "Prop.On" : "Prop.Off"));
-            if (chkTBraille != null && chkTBraille.Checked)
-                sb.Append(" — ").Append(Localization.T("Settings.TextBooks.VisualForBraille"));
             sb.Append(nl);
             if (chkTVisual != null && chkTVisual.Checked && cmbTVisualMode != null && cmbTVisualMode.SelectedItem != null)
                 sb.Append(cmbTVisualMode.SelectedItem).Append(nl);

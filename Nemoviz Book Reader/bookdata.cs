@@ -119,24 +119,19 @@ namespace Nemoviz_Book_Reader
         /// word it is speaking.</summary>
         public int TextHighlight { get; set; }
         public int TextHighlightColour { get; set; }
-        /// <summary>Read this book on a braille display.
-        ///
-        /// <para>Braille rides on the reading window rather than on a hidden
-        /// control: a screen reader brailles what has FOCUS, so the text has to
-        /// be somewhere the user can actually be. That makes this flag a second
-        /// reason to open the window — see <c>OpensReadingWindow</c> — and it is
-        /// also what <c>Form1.PushBrailleIfFocusLeft</c> tests before pushing a
-        /// sentence to the display when focus has wandered off the text.</para>
-        ///
-        /// <para><b>There is no table beside it any more</b> (2026-08-04). One
-        /// stood here, <c>TextBrailleTable</c>, describing how the text should
-        /// become cells on the way out; it was written to the ini, read back by
-        /// the two dialogs that offered it, and read by nothing else — because NBR
-        /// has no text→braille translation for a table to govern, and does not
-        /// need one: the screen reader translates, with the table set in its own
-        /// braille settings. The table that IS real is <see cref="BrailleTable"/>,
-        /// which back-translates a .brf on the way IN and is spent at import.</para></summary>
-        public bool TextBraille { get; set; }
+        // Braille used to have a switch of its own here, TextBraille, and a table
+        // beside it. Both are gone (2026-08-04) and the order they went in is the
+        // argument for it. The TABLE went first: it claimed to say how the text
+        // became cells on the way OUT, which NBR cannot do and should not — the
+        // screen reader translates, with the table set in its own braille
+        // settings. Then the SWITCH, once Gordan put it plainly: braille reaches
+        // the display because the reader follows FOCUS into the reading surface,
+        // so a book that opens the reading window has braille and one that does
+        // not has none, and a check box beside that fact can only ever agree with
+        // it or lie about it. §8l had already decided the same thing in words —
+        // "Braille output IS the reading window" — and this finishes it.
+        // What remains is BrailleTable: the table a .brf was read WITH, which is
+        // an import fact and the only one of the three that ever meant anything.
         /// <summary>Read this book without a voice, the position paced by
         /// <see cref="TextWpm"/> instead (Gordan, 2026-08-01).
         ///
@@ -149,10 +144,10 @@ namespace Nemoviz_Book_Reader
         /// magic voice name, so that turning speech back on restores the voice
         /// the book was last read with instead of losing it.</para></summary>
         public bool TextNoSpeech { get; set; }
-        /// <summary>True when the book asks for the reading window, whichever of
-        /// the two reasons it is. Both callers used to test <c>TextVisual</c>
-        /// alone, which left a braille reader with no window and so no braille.</summary>
-        public bool OpensReadingWindow { get { return TextVisual || TextBraille; } }
+        /// <summary>True when the book asks for the reading window — which is the
+        /// same question as "does this book reach a braille display", since that
+        /// is where the text a reader can put focus into lives.</summary>
+        public bool OpensReadingWindow { get { return TextVisual; } }
         /// <summary>How each voice was set up while reading THIS book, so going
         /// back to a voice restores the speed/volume/pitch it was read at rather
         /// than inheriting the previous voice's.</summary>
@@ -284,11 +279,6 @@ namespace Nemoviz_Book_Reader
                 (rule != null ? rule.HighlightColour : ReadingColours.DefaultHighlight).ToString()),
                 out int thc);
             TextHighlightColour = ReadingColours.Clamp(thc);
-            // Falls back to the RULE, exactly as TextVisual does above: a book
-            // that has never been given one of its own opens the way this reader
-            // has said books should open.
-            TextBraille = ini.Read("Settings", "TextBraille",
-                rule != null && rule.Braille ? "1" : "0") == "1";
             TextNoSpeech = ini.Read("Settings", "TextNoSpeech", "0") == "1";
             TextLanguage = ini.Read("Book", "Language", "");
             // Reading a book off the shelf registers its language too, not only
@@ -1164,7 +1154,6 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "TextBackColour", TextBackColour.ToString());
             ini.Write("Settings", "TextHighlight", TextHighlight.ToString());
             ini.Write("Settings", "TextHighlightColour", TextHighlightColour.ToString());
-            ini.Write("Settings", "TextBraille", TextBraille ? "1" : "0");
             ini.Write("Settings", "TextNoSpeech", TextNoSpeech ? "1" : "0");
             ini.Write("Book", "Language", TextLanguage ?? "");
             // Tell Settings this language exists in the library, so a voice can be

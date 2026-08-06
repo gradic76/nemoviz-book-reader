@@ -472,12 +472,18 @@ Settings.TextBooks.Pitch=Pitch:
 Settings.TextBooks.ComingSoon=Additional options for low-vision and dyslexic readers — coming soon.
 Settings.TextBooks.SpeechGroup=Speech
 Settings.TextBooks.LanguageUnknown=(language not reported)
-Settings.TextBooks.BrailleGroup=Braille output
-Settings.TextBooks.UseBraille=Use braille output
+; The braille table a book was READ WITH — an import fact, not an output
+; setting. There is no output table: the screen reader translates what it puts
+; on the display, with the table set in its own braille settings.
+Prop.Text.InputBrailleGroup=Braille source
+Prop.Text.InputBrailleTable=Input Braille Table:
+Dialog.DontShowAgain=Don't show this again
+Dialog.BrailleReread.Title=Read the braille file again?
+Dialog.BrailleReread.Message=This book will be read again from its original braille file, using {0}.\n\nThe text is produced fresh, so everything that pointed into the old text is lost: where you had got to, your bookmarks, and the percentage read. The book itself is not touched, and you can read it again with another table as often as you like.
+Dialog.BrailleReread.Failed=The braille file could not be read with that table. The book has been left as it was.
 Settings.TextBooks.VisualGroup=Visual output
 Settings.TextBooks.UseVisual=Use visual output
 Settings.TextBooks.NoSpeech=No speech
-Settings.TextBooks.VisualForBraille=Required by braille output
 Settings.TextBooks.VisualMode=Display mode:
 Settings.TextBooks.VisualMode.TwoRows=Two text rows (subtitle style)
 Settings.TextBooks.VisualMode.FullInstant=Full screen text (instant switch)
@@ -512,7 +518,6 @@ Settings.General.UseMultimediaKeysGlobally.Hint=This allows you to manage NBR fr
 Settings.General.LibraryLocation.Hint=This is the place where NBR copies imported books. You can leave it as default on your system partition, but if you plan to have a large library, another partition or disk would be a much better solution. NBR also keeps the information for each book in there, so if you want to save your reading positions, bookmarks, speed and other reading settings, note that you need to copy the content from the old library folder manually to the new location. And within the same price range: by changing the library location to somewhere other than the system partition, you are preserving your books from accidental system crashes and the usual data loss accompanying them.
 Settings.General.Language.Hint=The language NBR speaks to you in. It has nothing to do with the language a book is read in, which each book decides for itself.
 Settings.TextBooks.Speech.Hint=Here is the list of the languages and the voices installed on your system. You can choose the default voice for every language shown here, so every new title in that language opens with the selected voice. Choosing a voice for a language is what makes it the default — there is nothing else to press. If your new book is written in a language that is not on the list, it is best not to set a default voice for it here. You can always set a voice in the Properties of the book itself, on its Text page, or choose No speech and go on reading in braille or on screen. You will also see a notice when a language has no voice installed.
-Settings.TextBooks.Braille.Hint=For reading on a braille display. A book opens its reading window and the text follows the reading, line by line, on your display. This is the setting new books start with; each book can be set on its own in Properties. Your screen reader does the braille translation with its own table, so there is none to choose here.
 Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears. Switched on here, the window opens by itself every time you press Play. It can also be opened and closed by hand at any time with F9, whether this is switched on or not — so you can try it on a book without changing its settings.
 Cue.Track=Track {0}
 ; ── User speech dictionary (ships empty; only what the user writes runs) ──
@@ -576,8 +581,8 @@ Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a wh
 Hint.Tone=Bass, voice and treble, in decibels. Small moves go a long way; anything past a few dB usually means another stage is the real fix.
 Hint.AutomaticLoudness=Holds the overall level steady across a whole book, including between files recorded on different days. It follows the voice rather than the whole signal, which is what a spoken recording asks for.
 Hint.Text0=Here you can choose the language and voice for reading this book. You can have different settings for each individual book in the Library. Every voice remembers its own settings — speed, volume and pitch — so there is no need to set them again after switching back from another voice.\n\nRemember that you can select "No speech" if you want to read visually or on the braille display without hearing audio.
-Hint.Text1=Reads this book on a braille display. The reading window opens with it and the text follows the reading on your display, so switching braille on switches visual output on as well — the window is where the text has to be for your screen reader to find it.\n\nThere is no braille table to choose here. Your screen reader does the translation, using the table set in its own braille settings, so that is the one place to change it.
-Hint.Text2=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like film end credits, or instant page changes. You can also choose the background, text and highlight colours, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
+Hint.TextBrailleSource=This book came from a braille file, and this is the table it was read with — the one that turned the braille cells back into words.\n\nA braille file says nothing about its language, its grade, or which national standard it follows, so NBR has to work the table out from the text itself. It is usually right, but not always, and a wrong table gives words that are almost right: "Have" where the book says "How".\n\nIf that is what you are seeing, pick another table here and press OK. The book is read again from the braille file you imported, which is kept beside it, so you can try as many tables as you like and go back to the first one at any time.\n\nThe tables offered are the ones for the language above. If that language is wrong, change it and the tables will follow.\n\nThis has nothing to do with what your braille display shows. Your screen reader translates that, using the table in its own settings.
+Hint.TextVisual=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like film end credits, or instant page changes. You can also choose the background, text and highlight colours, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
 
 ; Reading window - the on-screen visual output (CLAUDE.md 8l).
 ; Captions stay short; the explanation belongs in the hint, per the 30-character

@@ -146,6 +146,7 @@
     <Compile Include="appsettings.cs" />
     <Compile Include="ArchivePasswordPrompt.cs" />
     <Compile Include="bookdata.cs" />
+    <Compile Include="ConfirmOnceForm.cs" />
     <Compile Include="CueParser.cs" />
     <Compile Include="DaisyParser.cs" />
     <Compile Include="DaisyTextExtractor.cs" />

@@ -334,8 +334,9 @@ namespace Nemoviz_Book_Reader
         {
             string name = page.Text ?? "";
             if (name == Localization.T("Settings.Tab.TextBooks"))
+                // Braille lost its group on this page (2026-08-04): the reading
+                // window is the braille output, so there was nothing left to set.
                 return new[] { "Settings.TextBooks.Speech.Hint",
-                               "Settings.TextBooks.Braille.Hint",
                                "Settings.TextBooks.Visual.Hint" };
             // General, in the order Gordan set: Language, Library location,
             // Media keys, Metadata, Look. Five groups now, where five loose

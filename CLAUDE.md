@@ -1372,11 +1372,48 @@ odlučim kontra toga Cancel me još uvijek spašava."* **Cancel has real power o
 while the action is deferred**, and deferring it to OK also disposes of the
 arrowing problem, since nothing fires on change at all.
 
-**Still to build:** the combo itself in Properties → the text page (in the slot
-the removed output table left, labelled *Input Braille Table*, shown only when
-`BrailleSourcePath` is non-null); the confirm on OK with its **"Don't show this
-again"**; the hint text; and the removal of the braille check box, which takes
-`BookData.TextBraille` and `AppSettings.Braille` with it — see §8l.
+**BUILT 2026-08-04.** Properties → the text page carries a **Braille source**
+group with **Input Braille Table**, in the slot the fake output table used to
+occupy and captioned so the two can never be confused again. It appears only for
+a book with a `BrailleSourcePath`; the visual group closes the gap otherwise.
+Choosing a table only stages it — `RereadBrailleIfAsked` runs from `Persist()`,
+after the book is saved, and warns through `ConfirmOnceForm` unless the reader
+has switched that off (`[App] WarnBrailleReread`).
+
+**`ConfirmOnceForm` is a new dialog and had to be.** `MessageForm.ShowConfirm` is
+a real `MessageBox` on purpose — "a question is a notice too… always the real
+thing" — and a system dialog cannot carry a check box. So it is built the way
+`ArchivePasswordPrompt` is: ordinary controls, keyboard-reachable, the message a
+read-only multiline TextBox rather than a Label (a reader driven by Tab never
+visits a Label, and here the text is the whole dialog). Focus starts on the
+question. **Ticking "don't show again" and then cancelling does NOT switch the
+warning off** — that is a decision not to do this, not a decision to skip the
+warning next time.
+
+**The braille check box is gone, and with it `BookData.TextBraille` and
+`AppSettings.Braille`** — the Settings braille group went too, since one dead
+check box was all that was left in it. `OpensReadingWindow` is now simply
+`TextVisual`, and `PushBrailleIfFocusLeft` gates on **the reading window being
+open** rather than on a setting. One fact, three consequences: window open and
+focus in the text, the reader brailles the control; window open and focus
+wandered, NBR pushes the sentence; window shut, no braille. §8l had decided this
+in words on 2026-08-01 — *"Braille output IS the reading window"* — and this
+finishes it. Gordan, 2026-08-04: the check box *"je u naravi besmislen"*.
+
+**A trap this nearly walked into, worth keeping.** `DialogSkin` attached each
+group's help by POSITION — `"Hint.Text" + i`. That is safe only while every group
+is always present, and the braille-source group is not. The visual group would
+have inherited the braille group's help the moment it moved up a slot: the wrong
+text under the right button, which is worse than no text. Groups may now name
+their own key through `Tag`, and the two that move do.
+
+**Verified after the surgery:** every new language key resolves and the warning
+carries the table name; the whole library cold-loads byte-identical to before, so
+dropping `TextBraille` moved nothing; and the re-read still gives *How can a man
+be Born Again?* on `en-g2`, gibberish on `en-g1`, and the first result again on
+the way back.
+**Not seen by anyone yet** — the group, the dialog and the hint are all unmeasured
+by eye, and go on §11's eyes-and-hands list.
 
 ---
 

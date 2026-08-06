@@ -814,7 +814,16 @@ namespace Nemoviz_Book_Reader
             for (int i = 0; i < groups.Count; i++)
             {
                 groups[i].TabIndex = i;
-                HintSystem.Attach(groups[i], "Hint.Text" + i);
+                // BY IDENTITY WHERE THE GROUP SAYS SO, not by position (2026-08-04).
+                // "Hint.Text" + i was safe only while every group was always
+                // present, and the braille-source group is not: it appears for a
+                // book that came from a braille file and for no other. Without
+                // this the visual group would inherit the braille group's help the
+                // moment it moved up a slot — the wrong text under the right
+                // button, which is worse than no text.
+                string key = groups[i].Tag as string;
+                HintSystem.Attach(groups[i],
+                    !string.IsNullOrEmpty(key) && key.StartsWith("Hint.") ? key : "Hint.Text" + i);
             }
             p.TextInfo.TabIndex = 20;
         }
