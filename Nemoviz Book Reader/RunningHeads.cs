@@ -51,6 +51,20 @@ namespace Nemoviz_Book_Reader
         public static void Strip(List<List<string>> pages)
         {
             if (pages == null || pages.Count < MinPages) return;
+            // PREFIX FIRST, and the order is not a preference. The whole-line pass
+            // removes the heads that stand alone, and once it has, the pages no
+            // longer agree about how they begin — so the prefix pass, which needs
+            // that agreement on 60% of them, finds nothing and the heads sharing a
+            // line with the text survive. Measured: run second it changed no book
+            // at all; run first it clears them.
+            //
+            // They do not do each other's work. A head whose page number comes
+            // FIRST ("1 we all live here") has no common prefix to find, and one
+            // written with braille letters for digits ("…pblea", "…pbleb") has
+            // nothing a digit rule can normalise. Each pass catches what the other
+            // structurally cannot.
+            StripPrefix(pages, true);
+            StripPrefix(pages, false);
             StripEnd(pages, true);
             StripEnd(pages, false);
         }
@@ -104,6 +118,88 @@ namespace Nemoviz_Book_Reader
             for (int p = 0; p < pages.Count; p++)
                 if (at[p] >= 0 && furniture.Contains(form[p]))
                     pages[p].RemoveAt(at[p]);
+        }
+
+        /// <summary>The second shape furniture comes in: a head that SHARES its
+        /// line with the text, and whose page number is not a number.
+        ///
+        /// <para>Measured on <i>Daily Gospel Devotional</i>, which survived the
+        /// whole-line pass with 23 of its heads intact:</para>
+        /// <code>
+        /// Daily Gospel Devotional pblea
+        /// Daily Gospel Devotional pbleb Jan. 15 Matthew 2:according-ah
+        /// Daily Gospel Devotional pblec Feb. 4 John 3:bc-cf
+        /// </code>
+        /// <para>Two things defeat the first pass at once. The page number is
+        /// written the braille way — the letters a to j standing for 1 to 0 — so
+        /// normalising DIGITS finds nothing varying to normalise. And the head is
+        /// followed on the same line by the day's reading, so removing the line
+        /// would take a sentence with it.</para>
+        ///
+        /// <para>So this matches the common PREFIX instead of the whole line, and
+        /// removes only that. It then eats the token after it, which is where the
+        /// page number sits, and the space following. Everything else on the line
+        /// stays.</para>
+        ///
+        /// <para>Guarded the same way and for the same reason: at least 12
+        /// characters, ending on a word boundary, on 60% of the pages. A short
+        /// prefix would match the ordinary way sentences begin.</para></summary>
+        private static void StripPrefix(List<List<string>> pages, bool top)
+        {
+            var line = new string[pages.Count];
+            var at = new int[pages.Count];
+            var have = new List<string>();
+            for (int p = 0; p < pages.Count; p++)
+            {
+                at[p] = -1;
+                List<string> page = pages[p];
+                if (page == null) continue;
+                for (int k = 0; k < page.Count; k++)
+                {
+                    int i = top ? k : page.Count - 1 - k;
+                    if (string.IsNullOrWhiteSpace(page[i])) continue;
+                    at[p] = i; line[p] = page[i].TrimStart(); have.Add(line[p]);
+                    break;
+                }
+            }
+            if (have.Count < MinPages) return;
+
+            // The longest prefix that at least the required share of pages agree
+            // on. Grown one character at a time rather than guessed: the answer is
+            // whatever the book itself repeats.
+            int need = (int)Math.Ceiling(have.Count * Share);
+            string best = "";
+            for (int len = 12; len <= 60; len++)
+            {
+                var count = new Dictionary<string, int>();
+                foreach (string s in have)
+                {
+                    if (s.Length < len) continue;
+                    string key = s.Substring(0, len).ToLowerInvariant();
+                    count[key] = count.TryGetValue(key, out int n) ? n + 1 : 1;
+                }
+                string top1 = null; int top1N = 0;
+                foreach (var kv in count) if (kv.Value > top1N) { top1 = kv.Key; top1N = kv.Value; }
+                if (top1 == null || top1N < need) break;
+                best = top1;
+            }
+            if (best.Length < 12) return;
+            // Only on a word boundary — half a word is not a running head.
+            int cut = best.Length;
+            while (cut > 0 && !char.IsWhiteSpace(best[cut - 1])) cut--;
+            if (cut < 12) return;
+
+            for (int p = 0; p < pages.Count; p++)
+            {
+                if (at[p] < 0 || line[p].Length < cut) continue;
+                if (!line[p].Substring(0, cut).ToLowerInvariant().StartsWith(best.Substring(0, cut))) continue;
+                int i = cut;
+                while (i < line[p].Length && !char.IsWhiteSpace(line[p][i])) i++;   // the page number
+                while (i < line[p].Length && char.IsWhiteSpace(line[p][i])) i++;
+                string rest = line[p].Substring(i);
+                if (rest.Trim().Length == 0) pages[p].RemoveAt(at[p]);
+                else pages[p][at[p]] = rest;
+            }
         }
 
         /// <summary>The shape of a line, with the parts that vary from page to

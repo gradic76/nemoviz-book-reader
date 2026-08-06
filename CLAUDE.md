@@ -3857,8 +3857,23 @@ available and needs nobody to know the language.
   Gospel Devotional* 101 → 23, the remainder being the title page and genuine
   mentions. **No distinct word disappears from any of the three** — the check
   that matters, since it is the one that would catch a deleted sentence.
-  **Not exhaustive:** Daily Gospel Devotional keeps 23, so at least one book
-  carries a second head form this does not catch yet.
+  **A second shape, and a second pass for it (same day).** *Daily Gospel
+  Devotional* kept 23 of its heads because it breaks the first pass twice over:
+  its page number is written the braille way — the letters **a to j** standing
+  for 1 to 0, so `pblea`, `pbleb`, `pblec` — which a digit rule has nothing to
+  normalise; and the head shares its line with the day's reading, so removing the
+  line would take a sentence with it. `StripPrefix` matches the common **prefix**
+  instead, removes it plus the token holding the page number, and leaves the rest
+  of the line standing. 101 → 14.
+  **The two passes run prefix-first, and the order is not a preference.** Run
+  second it changed *no book at all*: the whole-line pass had already taken the
+  heads that stand alone, so the pages no longer agreed about how they begin and
+  the 60% was never reached. They also do not overlap — a head whose number comes
+  FIRST ("1 we all live here") has no common prefix to find, and one written in
+  braille letters has nothing to normalise. Each catches what the other
+  structurally cannot.
+  **Still not exhaustive:** 14 remain in that one book, and the shape of them has
+  not been looked at.
 - **More samples wanted** in languages not yet tested — Gordan's own sources are
   exhausted, so free download sites are worth finding when there is time.
 
