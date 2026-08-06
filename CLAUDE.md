@@ -3687,6 +3687,43 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
    into seconds through the sync map, and is waiting for headings to exist. The
    source is the **EPUB nav document** (`epub:type="toc"`), which points at
    fragments this code already resolves. **Clear, bounded, and first.**
+
+   ~~All of which was the wrong diagnosis.~~ **FIXED 2026-08-04, and the cause was
+   none of the above.** The claim that "both samples yield zero `h1…h6`" is simply
+   **false** — measured, the old importer collected **24 headings with correct
+   titles** from this sample's `<hN>` and wrote them to `[TextNav]`, and the
+   library's own copies have carried them all along (`th=24`, `th=21`).
+
+   **The real fault was an ordering bug in `BookData.Load()`.**
+   `BuildHybridNavFromText` was called from the end of `BuildDaisyNav`, which runs
+   **early** in `Load()` — before `DetectTextBook` has decided whether the book is
+   a hybrid, and long before `LoadTextNav` has read the headings out of
+   `[TextNav]`. So both of its guards (`!IsHybrid`, empty `TextHeadings`) were
+   always true and it returned every time, for every book, since it was written.
+   `DaisyHeadings` therefore stayed empty and Go To fell back to the audio file
+   names. It is called at the end of `Load()` now, after both of the things it
+   needs. **That one move is the whole fix**: 24 chapters, correct Portuguese
+   titles, correctly placed on the clock, surviving a cold reload.
+
+   **Why the note was so confident and so wrong:** an empty heading list and a
+   guard that never fires produce exactly the same symptom, and the note picked
+   the explanation it could see. Do not diagnose a nav problem from what Go To
+   shows — load a book and print both lists.
+
+   **The TOC work was kept, but it is a policy improvement and not the fix.**
+   Headings now come from the NCX, then the EPUB3 nav, then `<hN>` — the same
+   order and the same code (`EpubParser.ParseNcx/ParseNav/ResolveToc`, which took
+   a path-resolver argument so one implementation serves both the in-zip document
+   path and the unpacked hybrid one) that §8e already chose for a plain EPUB, and
+   for its reason: raw `<hN>` is wildly inconsistent. On this sample it yields 23
+   entries against `<hN>`'s 24, the difference being the book's own title sitting
+   at 0.0 s as a heading. A book imported as a document and as a hybrid now gets
+   the same chapter list.
+
+   **Regression-checked across the whole library, before and after** (a stashed
+   build for the baseline): of seven books **only the two EPUB hybrids changed**,
+   both from `dh=0` to a full list (24 and 21). Every DAISY, M4B and text book
+   came back byte-identical.
 2. **Granta Portugal's text side is nearly empty** — 21 sync points and 377
    characters against 2.2 MB of SMIL, so its ids do not match what the XHTML
    yields. Audio and duration are correct. Needs investigation, not a fix.

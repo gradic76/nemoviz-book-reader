@@ -309,6 +309,13 @@ namespace Nemoviz_Book_Reader
             int.TryParse(ini.Read("Book", "TextChars", "0"), out int tc);
             TextChars = tc;
             LoadTextNav();
+            // LAST, and that is the whole point of where it sits. It needs
+            // IsHybrid (set by DetectTextBook, above) and TextHeadings (read by
+            // LoadTextNav, on the line before), so from anywhere earlier in Load()
+            // it is a no-op — which is exactly what it was, silently, while the
+            // headings were empty for another reason and nobody could tell the two
+            // causes apart.
+            BuildHybridNavFromText();
         }
 
         private void LoadTextNav()
@@ -572,8 +579,12 @@ namespace Nemoviz_Book_Reader
             {
                 // Malformed DAISY must never break loading a book.
             }
-
-            BuildHybridNavFromText();
+            // BuildHybridNavFromText used to be called here and could never do
+            // anything: BuildDaisyNav runs early in Load(), before DetectTextBook
+            // has decided whether this is a hybrid at all and long before
+            // LoadTextNav has read the headings out of [TextNav]. Both of its
+            // guards were therefore always false. It lives at the end of Load()
+            // now — see there.
         }
 
         /// <summary>Puts a hybrid's HEADINGS on the audio timeline, for a book

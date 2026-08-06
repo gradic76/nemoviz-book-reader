@@ -270,7 +270,7 @@ namespace Nemoviz_Book_Reader
         }
 
         // ── TOC parsing ───────────────────────────────────────────────────
-        private static List<(int Level, string Title, string Src)> ParseNcx(string ncxXml)
+        internal static List<(int Level, string Title, string Src)> ParseNcx(string ncxXml)
         {
             var list = new List<(int, string, string)>();
             if (string.IsNullOrEmpty(ncxXml)) return list;
@@ -307,7 +307,7 @@ namespace Nemoviz_Book_Reader
             return list;
         }
 
-        private static List<(int Level, string Title, string Src)> ParseNav(string navXml)
+        internal static List<(int Level, string Title, string Src)> ParseNav(string navXml)
         {
             var list = new List<(int, string, string)>();
             if (string.IsNullOrEmpty(navXml)) return list;
@@ -421,10 +421,22 @@ namespace Nemoviz_Book_Reader
             return list;
         }
 
-        private static List<(int Level, string Title, int Offset)> ResolveToc(
+        /// <summary>Turns a parsed TOC into character offsets into the assembled
+        /// text.
+        ///
+        /// <para><paramref name="resolve"/> is how a TOC href becomes the key
+        /// <paramref name="fileStart"/> is filed under, and it is a parameter
+        /// because there are now two callers in two different path spaces: this
+        /// parser reads a book still inside its zip, so it resolves to a zip entry
+        /// path, while <c>EpubOverlayImporter</c> reads one already unpacked and
+        /// resolves to a file on disk. Everything else about turning a TOC into
+        /// offsets is identical, and was not worth a second copy.</para></summary>
+        internal static List<(int Level, string Title, int Offset)> ResolveToc(
             List<(int Level, string Title, string Src)> toc, string tocDir,
-            Dictionary<string, int> fileStart, Dictionary<string, Dictionary<string, int>> fileIds)
+            Dictionary<string, int> fileStart, Dictionary<string, Dictionary<string, int>> fileIds,
+            Func<string, string, string> resolve = null)
         {
+            if (resolve == null) resolve = TextParsing.ResolvePath;
             var result = new List<(int, string, int)>();
             foreach (var t in toc)
             {
@@ -436,8 +448,8 @@ namespace Nemoviz_Book_Reader
                 string src = t.Src; string frag = null;
                 int hash = src.IndexOf('#');
                 if (hash >= 0) { frag = src.Substring(hash + 1); src = src.Substring(0, hash); }
-                string entryPath = TextParsing.ResolvePath(tocDir, src);
-                if (!fileStart.TryGetValue(entryPath, out int baseOff)) continue;
+                string entryPath = resolve(tocDir, src);
+                if (entryPath == null || !fileStart.TryGetValue(entryPath, out int baseOff)) continue;
                 int off = baseOff;
                 if (frag != null && fileIds.TryGetValue(entryPath, out var ids) && ids.TryGetValue(frag, out int fo))
                     off = baseOff + fo;

@@ -66,13 +66,34 @@ namespace Nemoviz_Book_Reader
 
                 // manifest: id → (href, media-overlay id)
                 var byId = new Dictionary<string, (string Href, string Overlay)>(StringComparer.OrdinalIgnoreCase);
+                // …and, on the way past, the two things a table of contents can
+                // live in: the EPUB3 nav document (properties="nav") and the
+                // EPUB2 NCX (media-type application/x-dtbncx+xml). A narrated
+                // book needs them for the reason §10h gives — its chapters are
+                // named nowhere else.
+                string navHref = null, ncxHrefByType = null;
+                var hrefById = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (Match m in RxItem.Matches(xml))
                 {
                     var a = Attrs(m.Value);
                     if (!a.TryGetValue("id", out string id) || !a.TryGetValue("href", out string href)) continue;
                     a.TryGetValue("media-overlay", out string ov);
                     byId[id] = (href, ov);
+                    hrefById[id] = href;
+                    if (a.TryGetValue("properties", out string props) && props != null
+                        && props.Split(' ').Contains("nav")) navHref = href;
+                    if (a.TryGetValue("media-type", out string mt) && mt != null
+                        && mt.IndexOf("dtbncx", StringComparison.OrdinalIgnoreCase) >= 0)
+                        ncxHrefByType = href;
                 }
+                // <spine toc="ncx"> names the NCX by id, which is the older and
+                // more reliable way of finding it than sniffing media types.
+                string ncxHref = null;
+                Match sm = Regex.Match(xml, @"<spine\b[^>]*\btoc\s*=\s*[""']([^""']+)[""']",
+                                       RegexOptions.IgnoreCase);
+                if (sm.Success && hrefById.TryGetValue(sm.Groups[1].Value, out string byIdHref))
+                    ncxHref = byIdHref;
+                if (ncxHref == null) ncxHref = ncxHrefByType;
 
                 // spine: the reading order, which is the only order that matters
                 var docs = new List<string>();
@@ -96,6 +117,12 @@ namespace Nemoviz_Book_Reader
                 var full = new StringBuilder();
                 var headings = new List<(int Level, string Title, int Offset)>();
                 var syncIds = new Dictionary<string, int>();
+                // Per-document, and keyed by the path on disk, because that is what
+                // a TOC href resolves to here. The flat syncIds above cannot serve:
+                // it keeps the FIRST of any repeated id across the whole book, and
+                // "top" or "start" appears once per chapter in a great many books.
+                var fileStart = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                var fileIds = new Dictionary<string, Dictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
                 foreach (string d in docs)
                 {
                     string raw;
@@ -104,11 +131,24 @@ namespace Nemoviz_Book_Reader
                                          out string text, out var heads, out var ids);
                     if (text.Length == 0) continue;
                     int start = full.Length;
+                    fileStart[d] = start;
+                    fileIds[d] = ids;
                     foreach (var h in heads) headings.Add((h.Level, h.Title, start + h.Offset));
                     foreach (var kv in ids)
                         if (!syncIds.ContainsKey(kv.Key)) syncIds[kv.Key] = start + kv.Value;
                     full.Append(text).Append("\n\n");
                 }
+
+                // ── the chapters ─────────────────────────────────────────────
+                // The TOC wins over <hN>, exactly as EpubParser decides it for a
+                // document (§8e: raw headings are wildly inconsistent, and a
+                // narrated book routinely has none at all). Without this, Go To and
+                // the seek step offered the producer's audio file names — "aud001",
+                // "aud002" — which is not something anyone can navigate a book by.
+                // NCX first, then the EPUB3 nav, then whatever <hN> yielded.
+                var toc = ResolveTocFile(ncxHref, opfDir, true, fileStart, fileIds);
+                if (toc.Count == 0) toc = ResolveTocFile(navHref, opfDir, false, fileStart, fileIds);
+                if (toc.Count > 0) headings = toc.OrderBy(h => h.Offset).ToList();
                 var doc = new TextDoc
                 {
                     Text = full.ToString().TrimEnd('\n'),
@@ -196,6 +236,33 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>A Dublin Core field from the package document. Matches with or
         /// without the dc: prefix — both are met in the wild.</summary>
+        /// <summary>Reads one table of contents and turns it into headings at
+        /// character offsets, or an empty list if it is not there or says nothing.
+        ///
+        /// <para>The parsing and the offset resolution are <c>EpubParser</c>'s —
+        /// the same NCX and nav readers a plain EPUB document goes through, and
+        /// the same <c>ResolveToc</c>. Only the path space differs: that parser
+        /// works inside the zip, this one on a book already unpacked, which is
+        /// why <c>ResolveToc</c> takes the resolver as an argument now.</para></summary>
+        private static List<(int Level, string Title, int Offset)> ResolveTocFile(
+            string href, string opfDir, bool ncx,
+            Dictionary<string, int> fileStart, Dictionary<string, Dictionary<string, int>> fileIds)
+        {
+            var empty = new List<(int, string, int)>();
+            try
+            {
+                if (string.IsNullOrEmpty(href)) return empty;
+                string path = Resolve(opfDir, href);
+                if (path == null || !File.Exists(path)) return empty;
+                string xml = File.ReadAllText(path);
+                var toc = ncx ? EpubParser.ParseNcx(xml) : EpubParser.ParseNav(xml);
+                if (toc == null || toc.Count == 0) return empty;
+                return EpubParser.ResolveToc(toc, Path.GetDirectoryName(path),
+                                             fileStart, fileIds, Resolve);
+            }
+            catch { return empty; }
+        }
+
         private static string Meta(string opfXml, string name)
         {
             Match m = Regex.Match(opfXml, @"<(?:dc:)?" + name + @"\b[^>]*>([^<]+)<",
