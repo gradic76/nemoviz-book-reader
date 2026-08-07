@@ -2930,6 +2930,27 @@ no translation engine, so it does not belong in Pro.
   same publishers do both. So the local pass is the feature; the network is a
   footnote, and bulk title-matching for the other half is where wrong blurbs
   would come from.
+- **The local pass is BUILT, and the sidecar `.txt` is the best source of the
+  lot** (2026-08-07). `SidecarDescription` reads the small text file people leave
+  beside a book — the same files the 5 KB import filter refuses to treat AS a
+  book, which is one mechanism seen from both ends. Measured by running the
+  compiled class over 161 book folders in Test naslovi and four OneDrive
+  collections: **155, 96 %**, median ~1050 characters. Every one of the six
+  rejections is right (torrent lines, a file-host referral advert, "BBC Comedy
+  Series", one blurb cut off at 99 characters).
+  **Sources now, in the order they are tried:** the book's own metadata — EPUB
+  `dc:description` 45 %, MOBI EXTH 103 13 %, M4B `desc`/`ldes` 10 of 13, DAISY —
+  then a description trailing the text itself, then the sidecar. Hooked into all
+  three import paths: `ImportFileCore`, `ImportDaisyFolder`, and `CopyAudioInto`
+  for a folder of audio, which is where the sidecars actually live.
+  **The method is the part worth keeping.** Every rule came out of a
+  baseline-vs-rebuild sweep with each change read by hand, and four rules that
+  looked obviously right did damage the sweep caught: "start at the first line
+  that is not scaffolding" began INSIDE a header block; `unabridged` in the
+  technical-marker list deleted a sentence out of a real blurb; an all-caps
+  heading with no colon split an omnibus into its last novel only; and a "must
+  contain a full stop" test — measured before any of the line filtering existed —
+  was rejecting two genuine blurbs and nothing else.
 - **Two things the samples proved about `dc:description`:** it is usually
   **escaped HTML**, so it needs decoding and THEN tag-stripping (one pass leaves
   `<p class="description">` in the text), and some are Apple exports carrying

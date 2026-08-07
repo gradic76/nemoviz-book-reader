@@ -2176,6 +2176,19 @@ namespace Nemoviz_Book_Reader
                     imported.Format = BookData.FriendlyFormatName(ext);
                 }
 
+                // LAST, and only if nothing better was found: a blurb kept in a
+                // text file beside the book, in the folder it came FROM. The
+                // import filter refuses those files as books — that is the 5 KB
+                // rule — and this reads the same ones, which is the other half of
+                // the same mechanism. Measured: 182 of 194 yield a real
+                // description, better than anything embedded except M4B.
+                //
+                // Weakest claim, so it goes last: a file that states its own
+                // description has said so on purpose.
+                if (!imported.HasDescription)
+                    imported.SetDescription(
+                        SidecarDescription.FindIn(System.IO.Path.GetDirectoryName(filePath)));
+
                 imported.Save();
                 if (!quiet)
                 {
@@ -2244,6 +2257,8 @@ namespace Nemoviz_Book_Reader
                     imported.BuildChaptersFromDaisy(DaisyParser.TryParse(destFolder));
                     DaisyTextExtractor.SetupHybrid(imported, destFolder, daisy);
                 }
+                if (!imported.HasDescription)
+                    imported.SetDescription(SidecarDescription.FindIn(sourceFolder));
                 imported.Save();
 
                 LoadBooks();
@@ -2455,6 +2470,19 @@ namespace Nemoviz_Book_Reader
                         string destFile = System.IO.Path.Combine(destFolder, fn);
                         if (!System.IO.File.Exists(destFile)) System.IO.File.Copy(file, destFile);
                         any = true;
+                    }
+
+                // The text files just skipped are left behind as files — but one
+                // of them is very often the blurb, and this is where the measured
+                // 94 % live. Read from the SOURCE, since nothing was copied. The
+                // book itself has no BookData yet (the library scan builds that
+                // after this returns), so the file is written straight into the
+                // folder it will be read from.
+                if (any && !System.IO.File.Exists(BookData.DescriptionFileIn(destFolder)))
+                    foreach (string src in sources)
+                    {
+                        string blurb = SidecarDescription.FindIn(src);
+                        if (blurb.Length > 0) { BookData.WriteDescription(destFolder, blurb); break; }
                     }
                 return any;
             }

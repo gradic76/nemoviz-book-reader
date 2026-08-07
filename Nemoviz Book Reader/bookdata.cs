@@ -59,20 +59,30 @@ namespace Nemoviz_Book_Reader
 
         private string DescriptionFilePath
         {
-            get
-            {
-                return string.IsNullOrEmpty(FolderPath)
-                       ? null : Path.Combine(FolderPath, "description.txt");
-            }
+            get { return DescriptionFileIn(FolderPath); }
+        }
+
+        /// <summary>Where a book folder keeps its description. Static because the
+        /// audio-folder import writes one into a folder that has no BookData yet
+        /// — the library scan builds that afterwards.</summary>
+        public static string DescriptionFileIn(string folder)
+        {
+            return string.IsNullOrEmpty(folder)
+                   ? null : Path.Combine(folder, "description.txt");
         }
 
         /// <summary>Writes the description, or removes it when there is none, so
         /// a re-import that finds nothing does not leave the old one behind.</summary>
         public void SetDescription(string text)
         {
+            WriteDescription(FolderPath, text);
+        }
+
+        public static void WriteDescription(string folder, string text)
+        {
             try
             {
-                string p = DescriptionFilePath;
+                string p = DescriptionFileIn(folder);
                 if (p == null) return;
                 if (string.IsNullOrWhiteSpace(text))
                 {
