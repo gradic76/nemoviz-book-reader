@@ -204,6 +204,7 @@
     <Compile Include="TabKeys.cs" />
     <Compile Include="TextExtractor.cs" />
     <Compile Include="SidecarDescription.cs" />
+    <Compile Include="SoundAnalysis.cs" />
     <Compile Include="TrailingDescription.cs" />
     <Compile Include="libraryform.cs">
       <SubType>Form</SubType>

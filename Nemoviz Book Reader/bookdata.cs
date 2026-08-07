@@ -161,6 +161,13 @@ namespace Nemoviz_Book_Reader
         // Sound.Enabled is false. Persisted in Book.ini's [Sound] section.
         public SoundSettings Sound { get; private set; }
 
+        // What the recording actually measures. Written once, when the reader
+        // first switches sound processing on, and kept in Book.ini's
+        // [SoundAnalysis] section — the MEASUREMENTS, not only the levels they
+        // produced (Gordan, 2026-08-07). Having it stored is why the analysis
+        // runs once instead of on every visit to Properties.
+        public SoundAnalysis Analysis { get; private set; }
+
         // Text book (read aloud by TTS): a folder with a text document and no
         // audio. TextPosition is the resume point as a character offset.
         public bool IsTextBook { get; private set; }
@@ -304,6 +311,7 @@ namespace Nemoviz_Book_Reader
             TextPages = new List<(string, int)>();
             TextHeadings = new List<(int, string, int)>();
             Sound = new SoundSettings();
+            Analysis = new SoundAnalysis();
             Load();
         }
 
@@ -339,6 +347,7 @@ namespace Nemoviz_Book_Reader
             BuildDaisyNav();
             LoadM4bNav();
             Sound.Load(ini);
+            Analysis.Load(ini);
             DetectTextBook();
             int.TryParse(ini.Read("Progress", "TextPosition", "0"), out int tp);
             TextPosition = tp;
@@ -1331,6 +1340,7 @@ namespace Nemoviz_Book_Reader
                     M4bChapters[i].Position.ToString(System.Globalization.CultureInfo.InvariantCulture)
                     + "|" + M4bChapters[i].Title);
             Sound.Save(ini);
+            Analysis.Save(ini);
         }
     }
 }

@@ -1,0 +1,646 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Runtime.InteropServices;
+
+namespace Nemoviz_Book_Reader
+{
+    /// <summary>What a recording actually measures, so the six stages of §8d can
+    /// be set from the book in front of the reader instead of from a default.
+    ///
+    /// <para><b>It runs when the reader switches sound processing ON, not at
+    /// import</b> (Gordan, 2026-08-07: <i>"Ako Sound processing ne treba tj.
+    /// čitatelj je zadovoljan zvukom ne rade se bespotrebne radnje na
+    /// uvozu."</i>). CLAUDE.md §8d argued for import and that argument is
+    /// superseded — its three reasons were about not disturbing PLAYBACK and
+    /// about amortising the cost, and neither survives here. The measurement
+    /// never touches the player: it runs in its own silent libmpv context and
+    /// seeks where it likes, so "the opening moments give the wrong answer" is
+    /// not a constraint, it is a choice of segment. And switching processing on
+    /// already rebuilds mpv's filter graph, so the break §8d worried about is
+    /// something the reader has just asked for. What is left is the plain point
+    /// that most readers never turn processing on at all, and analysing every
+    /// book at import spends their time on a question they never asked.</para>
+    ///
+    /// <para><b>No ffmpeg.exe, and that was worth proving before designing
+    /// anything.</b> The shipped libmpv carries astats and ebur128, and mpv
+    /// forwards a filter's own log output through
+    /// <c>mpv_request_log_messages</c> — so the numbers come back over the same
+    /// channel the player already has, from the same DLL, with nothing new to
+    /// install or ship. Verified through the real C API on a real book, not by
+    /// finding the strings in the binary.</para></summary>
+    public sealed class SoundAnalysis
+    {
+        /// <summary>Integrated loudness, LUFS. Negative; −16 is a well-made
+        /// audiobook, −30 is a quiet one.</summary>
+        public double Lufs;
+
+        /// <summary>Loudness range, LU. Small means evenly read, large means the
+        /// quiet parts are much quieter than the loud ones.</summary>
+        public double Lra;
+
+        /// <summary>True peak, dBFS. Above about −0.1 the recording is already
+        /// touching the ceiling.</summary>
+        public double TruePeakDb;
+
+        public double RmsDb = double.NaN;
+        public double PeakDb = double.NaN;
+
+        /// <summary>astats' own noise-floor estimate, dB, or NaN when it did not
+        /// produce one — which is most of the time. <b>Measured over 103 real
+        /// books: 49 % came back <c>-inf</c> and another 6 % had no such line at
+        /// all.</b> So this is the secondary measure, not the one to build a
+        /// decision on.</summary>
+        public double NoiseFloorDb = double.NaN;
+
+        /// <summary>The quietest RMS window in the segment, dB — astats' "RMS
+        /// trough". <b>This is the real noise measure</b>, and it is available
+        /// where the noise floor is not: between sentences a spoken recording
+        /// falls to its own noise, so the quietest window IS the noise. §8d
+        /// reached the same place from the other direction, noting that voice
+        /// activity detection would find the noise in the gaps — the trough gets
+        /// there without needing the detection.</summary>
+        public double RmsTroughDb = double.NaN;
+
+        /// <summary>Long runs of identical samples — a clipping tell.</summary>
+        public double FlatFactor;
+
+        /// <summary>RMS of everything below 300 Hz, dB. Its distance from
+        /// <see cref="RmsDb"/> says whether the recording is muddy.</summary>
+        public double LowBandDb = double.NaN;
+
+        /// <summary>RMS of everything above 6 kHz, dB. Its distance from
+        /// <see cref="RmsDb"/> says whether it is bright or sibilant.</summary>
+        public double HighBandDb = double.NaN;
+
+        /// <summary>How many segments went into the averages. 0 means nothing was
+        /// measured and every other field is meaningless.</summary>
+        public int Segments;
+
+        public bool Measured { get { return Segments > 0; } }
+
+        /// <summary>Signal to noise, dB, or NaN when neither noise measure came
+        /// back. The trough is preferred — see <see cref="RmsTroughDb"/>.
+        ///
+        /// <para><b>NaN rather than a number, deliberately.</b> A missing key
+        /// used to read back as 0, which made the SNR come out as the RMS level
+        /// itself — about −21 dB, a confident and entirely invented answer. Six
+        /// books in the sample did exactly that.</para></summary>
+        public double Snr
+        {
+            get
+            {
+                double noise = Usable(RmsTroughDb) ? RmsTroughDb
+                             : Usable(NoiseFloorDb) ? NoiseFloorDb : double.NaN;
+                return Usable(RmsDb) && !double.IsNaN(noise) ? RmsDb - noise : double.NaN;
+            }
+        }
+
+        /// <summary>How far the sub-300 Hz band sits below the whole signal, dB.
+        /// Smaller means more low end.</summary>
+        public double LowBandBelow
+        {
+            get { return Usable(RmsDb) && Usable(LowBandDb) ? RmsDb - LowBandDb : double.NaN; }
+        }
+
+        /// <summary>How far the 6 kHz-and-up band sits below the whole signal,
+        /// dB. Smaller means brighter.</summary>
+        public double HighBandBelow
+        {
+            get { return Usable(RmsDb) && Usable(HighBandDb) ? RmsDb - HighBandDb : double.NaN; }
+        }
+
+        /// <summary>A finite dB reading, as opposed to a missing one or a
+        /// <c>-inf</c>. Both occur, and neither may be averaged.</summary>
+        internal static bool Usable(double v)
+        {
+            return !double.IsNaN(v) && !double.IsInfinity(v);
+        }
+
+        // ---- persistence -------------------------------------------------
+
+        private const string Section = "SoundAnalysis";
+
+        public void Load(IniFile ini)
+        {
+            Segments = (int)Read(ini, "Segments", 0);
+            Lufs = Read(ini, "Lufs", 0);
+            Lra = Read(ini, "Lra", 0);
+            TruePeakDb = Read(ini, "TruePeak", 0);
+            RmsDb = Read(ini, "Rms", 0);
+            PeakDb = Read(ini, "Peak", 0);
+            NoiseFloorDb = Read(ini, "NoiseFloor", double.NaN);
+            RmsTroughDb = Read(ini, "RmsTrough", double.NaN);
+            FlatFactor = Read(ini, "FlatFactor", 0);
+            LowBandDb = Read(ini, "LowBand", double.NaN);
+            HighBandDb = Read(ini, "HighBand", double.NaN);
+        }
+
+        /// <summary>Kept in Book.ini by Gordan's instruction — the MEASUREMENTS,
+        /// not only the levels they produced. A stored measurement is why the
+        /// analysis runs once rather than on every visit to Properties, and it is
+        /// what a technical read-out can show when someone asks why a stage is
+        /// set the way it is.</summary>
+        public void Save(IniFile ini)
+        {
+            Write(ini, "Segments", Segments);
+            Write(ini, "Lufs", Lufs);
+            Write(ini, "Lra", Lra);
+            Write(ini, "TruePeak", TruePeakDb);
+            Write(ini, "Rms", RmsDb);
+            Write(ini, "Peak", PeakDb);
+            Write(ini, "NoiseFloor", NoiseFloorDb);
+            Write(ini, "RmsTrough", RmsTroughDb);
+            Write(ini, "FlatFactor", FlatFactor);
+            Write(ini, "LowBand", LowBandDb);
+            Write(ini, "HighBand", HighBandDb);
+        }
+
+        private static double Read(IniFile ini, string key, double dflt)
+        {
+            string s = ini.Read(Section, key, null);
+            double v;
+            // InvariantCulture, always: a decimal comma written on one machine
+            // must not read back as a different number on another. Same rule as
+            // sync.map (§8c).
+            return double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out v) ? v : dflt;
+        }
+
+        /// <summary>A measure that was never taken is left OUT of the file, not
+        /// written as a number. Reading a key that is not there gives NaN again,
+        /// so "not measured" survives the round trip instead of coming back as a
+        /// plausible reading.</summary>
+        private static void Write(IniFile ini, string key, double v)
+        {
+            if (!Usable(v)) return;
+            ini.Write(Section, key, v.ToString("0.###", CultureInfo.InvariantCulture));
+        }
+    }
+
+    /// <summary>Turns a measurement into the six stage levels of §8d.
+    ///
+    /// <para><b>Every threshold here comes from OUR OWN distribution</b>, taken
+    /// over 113 real audiobooks measured through the shipped analyser (Test
+    /// naslovi + two OneDrive collections). The percentiles quoted against each
+    /// rule are from that sweep, and the rules are written so that a book at the
+    /// median of the library gets close to the defaults the dialog already
+    /// shipped — the analysis should move a book that is unusual, not re-decide
+    /// every book.</para>
+    ///
+    /// <para><b>The reference tool's numbers were NOT copied, and measurement is
+    /// why.</b> §8d suggested taking SlušajKnjigu's thresholds as a free starting
+    /// point — SNR 14 dB for denoise, centroid 1500 Hz, low-frequency ratio 0.55.
+    /// Run against this sample, its 14 dB denoise threshold fires on <b>zero of
+    /// 113 books</b>: the noisiest recording here measures 20.9 dB. Their SNR is
+    /// a different quantity computed a different way, so the number is
+    /// meaningless on our scale, and the centroid we cannot measure at all.
+    /// A borrowed constant is only free if the two scales agree.</para>
+    ///
+    /// <para><b>What this sets is a starting point for the ear, not a verdict.</b>
+    /// §8d's split stands: the measurement is mine, the judgement is
+    /// Gordan's.</para></summary>
+    public static class SoundAdvisor
+    {
+        /// <summary>Sets the stages from the measurement. The master switch is
+        /// not touched — the reader has just turned it on, which is what caused
+        /// the analysis.</summary>
+        public static void Apply(SoundAnalysis a, SoundSettings s)
+        {
+            if (a == null || s == null || !a.Measured) return;
+
+            // Rumble. Speech carries nothing below 50 Hz, so this stage is always
+            // on; how high it reaches depends on how much low end there is.
+            // LowBandBelow over the sample: min 1.2, p25 2.9, median 3.7,
+            // p75 4.6, max 9.2 dB. Smaller means more low end.
+            s.HighpassEnabled = true;
+            s.HighpassLevel = Pick(a.LowBandBelow, 2, new[] { 2.2, 2.9, 3.7, 4.6 }, true);
+
+            // Noise. Only where it could be measured -- the trough is unavailable
+            // in a THIRD of the sample, and a stage switched on from a number
+            // that was never taken is exactly the fault the parser rewrite
+            // removed. Silence is the honest answer.
+            // Snr over the sample: min 20.9, p25 58.0, median 65.4, p75 74.6.
+            if (SoundAnalysis.Usable(a.Snr))
+            {
+                s.DenoiseLevel = Pick(a.Snr, 0, new[] { 35.0, 45.0, 55.0, 65.0 }, true);
+                s.DenoiseEnabled = a.Snr < 65;      // at or above the median, leave it alone
+            }
+            else
+            {
+                s.DenoiseEnabled = false;
+            }
+
+            // Sibilance. HighBandBelow: min 9.2, p25 16.4, median 19.9, p75 23.1,
+            // max 40.2 dB. Smaller means brighter.
+            s.DeesserLevel = Pick(a.HighBandBelow, 0, new[] { 12.0, 14.5, 16.4, 19.9 }, true);
+            s.DeesserEnabled = SoundAnalysis.Usable(a.HighBandBelow) && a.HighBandBelow < 19.9;
+
+            // Dynamics. Lra: min 1.1, p25 3.2, median 4.3, p75 5.7, max 11.7 LU.
+            // Larger means the quiet passages are much quieter than the loud.
+            // Worst first, so the widest range comes first here -- the opposite
+            // order to the measures where small is bad.
+            s.CompressorLevel = Pick(a.Lra, 0, new[] { 8.0, 5.7, 4.3, 3.2 }, false);
+            s.CompressorEnabled = SoundAnalysis.Usable(a.Lra) && a.Lra > 3.2;
+
+            // Level. Lufs: min -34.1, p25 -20.6, median -18.6, p75 -16.7,
+            // max -7.2. A well-made audiobook sits near -18.
+            s.NormalizeLevel = Pick(a.Lufs, 0, new[] { -26.0, -22.0, -18.6, -15.0 }, true);
+            s.NormalizeEnabled = SoundAnalysis.Usable(a.Lufs) && a.Lufs < -15;
+
+            // Tone. Only the two ends, and only when the recording is off the
+            // usual range -- the middle band is where the voice lives and a
+            // measurement cannot say it is wrong.
+            s.EqBass = SoundAnalysis.Usable(a.LowBandBelow) && a.LowBandBelow < 2.9 ? -3 : 0;
+            s.EqVoice = 0;
+            s.EqTreble = !SoundAnalysis.Usable(a.HighBandBelow) ? 0
+                       : a.HighBandBelow < 14.5 ? -2      // harsh
+                       : a.HighBandBelow > 23.1 ? 2       // dull
+                       : 0;
+            s.EqEnabled = s.EqBass != 0 || s.EqTreble != 0;
+        }
+
+        /// <summary>Which of five levels a reading falls into. Level 4 is the
+        /// strongest treatment, 0 the mildest.
+        ///
+        /// <para><b>Cuts are listed WORST FIRST</b> and the first one crossed
+        /// wins. <paramref name="smallerIsWorse"/> says which way the measure
+        /// runs: for signal-to-noise a smaller number is worse, for loudness
+        /// range a larger one is. Getting either wrong silently inverts a whole
+        /// stage — treating the cleanest recordings as the noisiest — which is
+        /// why the direction is a named argument and not four hand-written
+        /// comparisons per stage.</para></summary>
+        private static int Pick(double v, int ifUnknown, double[] worstFirst, bool smallerIsWorse)
+        {
+            if (!SoundAnalysis.Usable(v)) return ifUnknown;
+            for (int i = 0; i < worstFirst.Length; i++)
+            {
+                bool worse = smallerIsWorse ? v < worstFirst[i] : v > worstFirst[i];
+                if (worse) return worstFirst.Length - i;
+            }
+            return 0;
+        }
+    }
+
+    /// <summary>Runs the measurement. Its own silent libmpv context, exactly the
+    /// way <see cref="MpvDuration"/> works — it never plays a sound and never
+    /// touches the player's context.</summary>
+    public static class SoundAnalyser
+    {
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr mpv_create();
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_initialize(IntPtr ctx);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern void mpv_terminate_destroy(IntPtr ctx);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_set_property_string(IntPtr ctx, string name, string data);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_command(IntPtr ctx, IntPtr args);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr mpv_wait_event(IntPtr ctx, double timeout);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_request_log_messages(IntPtr ctx, string level);
+
+        private const int EventLogMessage = 2, EventEndFile = 7;
+
+        /// <summary>Seconds taken from each sampled point.</summary>
+        public const double SegmentSeconds = 20;
+
+        /// <summary>How many points in the book are sampled. §8d: level varies
+        /// between files recorded on different days, so one sample would set the
+        /// whole book from whichever day that was.</summary>
+        public const int SegmentCount = 3;
+
+        /// <summary>The filter graph, in one decode.
+        ///
+        /// <para><b>ebur128 stands AHEAD of the split, and that is not
+        /// arbitrary.</b> Behind the <c>amix</c> that rejoins the three bands it
+        /// measures the mixed-down signal instead of the recording — a real book
+        /// came back at −21.7 LUFS against its true −13.8, with nothing in the
+        /// output to say the number was wrong. astats is unaffected: each branch
+        /// measures before the mix.</para>
+        ///
+        /// <para><c>aspectralstats</c> would have given the spectral centroid
+        /// directly and is accepted by mpv, but it prints no end-of-stream
+        /// summary — it only sets per-frame metadata, which does not reach the
+        /// log. The two band ratios answer the same two questions.</para></summary>
+        private const string Graph =
+            "lavfi=[ebur128=peak=true:framelog=quiet,asplit=3[a][b][c];"
+            + "[a]astats=metadata=1:reset=0:measure_perchannel=none[a1];"
+            + "[b]lowpass=f=300,astats=metadata=1:reset=0:measure_perchannel=none[b1];"
+            + "[c]highpass=f=6000,astats=metadata=1:reset=0:measure_perchannel=none[c1];"
+            + "[a1][b1][c1]amix=inputs=3]";
+
+        /// <summary>Measures the book and returns what it found, or null when
+        /// nothing could be measured. Never throws.</summary>
+        public static SoundAnalysis Measure(BookData book)
+        {
+            try
+            {
+                if (book == null || book.Chapters == null || book.Chapters.Count == 0) return null;
+                var points = PickSegments(book);
+                if (points.Count == 0) return null;
+
+                var got = new List<Reading>();
+                foreach (var p in points)
+                {
+                    Reading r = MeasureOne(p.Path, p.Start);
+                    if (r != null) got.Add(r);
+                }
+                if (got.Count == 0) return null;
+
+                // The mean over the segments, except for the peaks and the flat
+                // factor, where the WORST is what matters -- one clipped passage
+                // is a clipped book, and averaging it away is how it would be
+                // missed.
+                //
+                // Every average takes only the readings that HAVE that measure.
+                // Half the sample has no noise floor at all, so a mean over all
+                // three segments regardless would be a mean of two real numbers
+                // and one placeholder.
+                var a = new SoundAnalysis();
+                a.Segments = got.Count;
+                a.Lufs = Mean(got, r => r.Lufs);
+                a.Lra = Mean(got, r => r.Lra);
+                a.RmsDb = Mean(got, r => r.RmsDb);
+                a.NoiseFloorDb = Mean(got, r => r.NoiseFloorDb);
+                a.RmsTroughDb = Mean(got, r => r.RmsTroughDb);
+                a.LowBandDb = Mean(got, r => r.LowBandDb);
+                a.HighBandDb = Mean(got, r => r.HighBandDb);
+                a.TruePeakDb = Worst(got, r => r.TruePeakDb);
+                a.PeakDb = Worst(got, r => r.PeakDb);
+                a.FlatFactor = Worst(got, r => r.FlatFactor);
+                if (double.IsNaN(a.FlatFactor)) a.FlatFactor = 0;   // no flatness measured is no flatness
+                return a;
+            }
+            catch { return null; }
+        }
+
+        /// <summary>One segment of one file, as a finished result. Exposed for
+        /// the harness that sets the thresholds — the numbers behind them have to
+        /// be re-runnable when new samples arrive, and a harness that measures a
+        /// whole book cannot say which segment a reading came from. Returns null
+        /// when nothing could be measured.</summary>
+        public static SoundAnalysis MeasureSegment(string path, double startSeconds)
+        {
+            Reading r = MeasureOne(path, startSeconds);
+            if (r == null) return null;
+            return new SoundAnalysis
+            {
+                Segments = 1,
+                Lufs = r.Lufs,
+                Lra = r.Lra,
+                TruePeakDb = r.TruePeakDb,
+                RmsDb = r.RmsDb,
+                PeakDb = r.PeakDb,
+                NoiseFloorDb = r.NoiseFloorDb,
+                RmsTroughDb = r.RmsTroughDb,
+                FlatFactor = r.FlatFactor,
+                LowBandDb = r.LowBandDb,
+                HighBandDb = r.HighBandDb
+            };
+        }
+
+        private static double Mean(List<Reading> rs, Func<Reading, double> pick)
+        {
+            double sum = 0; int n = 0;
+            foreach (Reading r in rs) { double v = pick(r); if (SoundAnalysis.Usable(v)) { sum += v; n++; } }
+            return n > 0 ? sum / n : double.NaN;
+        }
+
+        private static double Worst(List<Reading> rs, Func<Reading, double> pick)
+        {
+            double worst = double.NaN;
+            foreach (Reading r in rs)
+            {
+                double v = pick(r);
+                if (!SoundAnalysis.Usable(v)) continue;
+                if (double.IsNaN(worst) || v > worst) worst = v;
+            }
+            return worst;
+        }
+
+        private struct Point { public string Path; public double Start; }
+
+        /// <summary>Where to listen. Spread through the book, and never at the
+        /// very start of a file: an opening carries the publisher's announcement
+        /// and often music, which is not the voice the settings are for.</summary>
+        private static List<Point> PickSegments(BookData book)
+        {
+            var pts = new List<Point>();
+            int n = book.Chapters.Count;
+            if (n >= SegmentCount)
+            {
+                // Several files: take one from each third of the book, so files
+                // recorded on different days are all represented.
+                for (int i = 0; i < SegmentCount; i++)
+                {
+                    int idx = (int)((i + 0.5) * n / SegmentCount);
+                    if (idx >= n) idx = n - 1;
+                    var ch = book.Chapters[idx];
+                    if (ch.Duration <= SegmentSeconds + 40) continue;
+                    pts.Add(new Point
+                    {
+                        Path = System.IO.Path.Combine(book.FolderPath, ch.FileName),
+                        Start = Math.Min(30, ch.Duration * 0.1)
+                    });
+                }
+            }
+            if (pts.Count == 0)
+            {
+                // One file, or every file too short to sample twice: spread the
+                // points along whichever file is longest.
+                int best = 0;
+                for (int i = 1; i < n; i++)
+                    if (book.Chapters[i].Duration > book.Chapters[best].Duration) best = i;
+                var ch = book.Chapters[best];
+                string path = System.IO.Path.Combine(book.FolderPath, ch.FileName);
+                double usable = ch.Duration - SegmentSeconds;
+                if (usable <= 0) { pts.Add(new Point { Path = path, Start = 0 }); return pts; }
+                for (int i = 0; i < SegmentCount; i++)
+                    pts.Add(new Point { Path = path, Start = usable * (i + 0.5) / SegmentCount });
+            }
+            return pts;
+        }
+
+        private class Reading
+        {
+            public double Lufs = double.NaN, Lra = double.NaN, TruePeakDb = double.NaN;
+            public double RmsDb = double.NaN, PeakDb = double.NaN, NoiseFloorDb = double.NaN;
+            public double RmsTroughDb = double.NaN, FlatFactor = double.NaN;
+            public double LowBandDb = double.NaN, HighBandDb = double.NaN;
+        }
+
+        /// <summary>Below this a segment is silence, not a sample of the reading.
+        /// <b>7 of 103 books in the sweep landed on one</b> — a gap between
+        /// chapters, or a file shorter than the point asked for. Such a segment
+        /// says nothing about the recording and must not be averaged into it;
+        /// left in, it dragged the mean level down by its whole depth.</summary>
+        private const double SilenceFloorDb = -60;
+
+        private static Reading MeasureOne(string path, double start)
+        {
+            IntPtr ctx = IntPtr.Zero;
+            try
+            {
+                ctx = mpv_create();
+                if (ctx == IntPtr.Zero) return null;
+                mpv_set_property_string(ctx, "terminal", "no");
+                mpv_set_property_string(ctx, "ao", "null");
+                mpv_set_property_string(ctx, "vid", "no");
+                // A filter's own output is logged under the "ffmpeg" prefix and
+                // is dropped by default. Without BOTH of these the graph runs
+                // perfectly and reports nothing, which reads exactly like a
+                // filter that is not there.
+                mpv_set_property_string(ctx, "msg-level", "all=no,ffmpeg=v");
+                if (mpv_initialize(ctx) < 0) return null;
+                mpv_request_log_messages(ctx, "v");
+
+                mpv_set_property_string(ctx, "audio-display", "no");
+                mpv_set_property_string(ctx, "untimed", "yes");
+                // A null audio output still paces to the clock, so 20 s of audio
+                // would cost 20 s of the reader's time. This is what makes the
+                // whole feature affordable: measured at about 50x real time.
+                mpv_set_property_string(ctx, "speed", "100");
+                mpv_set_property_string(ctx, "audio-pitch-correction", "no");
+                mpv_set_property_string(ctx, "start", start.ToString("0.###", CultureInfo.InvariantCulture));
+                mpv_set_property_string(ctx, "length", SegmentSeconds.ToString(CultureInfo.InvariantCulture));
+                if (mpv_set_property_string(ctx, "af", Graph) < 0) return null;
+
+                Command(ctx, "loadfile", path, "replace");
+
+                var lines = new List<string>();
+                DateTime deadline = DateTime.UtcNow.AddSeconds(30);
+                while (DateTime.UtcNow < deadline)
+                {
+                    IntPtr ev = mpv_wait_event(ctx, 0.2);
+                    int id = Marshal.ReadInt32(ev);
+                    if (id == EventLogMessage)
+                    {
+                        // mpv_event = { int event_id; int error; uint64
+                        // reply_userdata; void *data; } -> data at 16 on x64.
+                        IntPtr data = Marshal.ReadIntPtr(ev, 16);
+                        string prefix = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(data, 0));
+                        string text = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(data, IntPtr.Size * 2));
+                        if (prefix == "ffmpeg" && text != null) lines.Add(text.Trim());
+                    }
+                    else if (id == EventEndFile) break;
+                }
+                return Parse(lines);
+            }
+            catch { return null; }
+            finally { if (ctx != IntPtr.Zero) try { mpv_terminate_destroy(ctx); } catch { } }
+        }
+
+        /// <summary>Reads the three astats blocks and the ebur128 summary out of
+        /// the log.
+        ///
+        /// <para>The astats instances are told apart by their graph position —
+        /// <c>Parsed_astats_2</c> is the full band, <c>_4</c> the low, <c>_6</c>
+        /// the high — because that is the order they are declared in
+        /// <see cref="Graph"/>. Anyone editing that graph has to keep the three
+        /// branches in that order or come back here.</para></summary>
+        private static Reading Parse(List<string> lines)
+        {
+            var r = new Reading();
+            bool anyStats = false;
+            var band = new Dictionary<int, Dictionary<string, double>>();
+            var order = new List<int>();
+
+            foreach (string l in lines)
+            {
+                int colon = l.IndexOf(": ", StringComparison.Ordinal);
+                if (l.StartsWith("Parsed_astats_", StringComparison.Ordinal) && colon > 0)
+                {
+                    string head = l.Substring(0, colon);
+                    int us = head.LastIndexOf('_');
+                    int idx;
+                    if (us < 0 || !int.TryParse(head.Substring(us + 1), out idx)) continue;
+                    string rest = l.Substring(colon + 2);
+                    int c2 = rest.IndexOf(": ", StringComparison.Ordinal);
+                    if (c2 < 0) continue;
+                    double v;
+                    if (!Num(rest.Substring(c2 + 2), out v)) continue;
+                    if (!band.ContainsKey(idx)) { band[idx] = new Dictionary<string, double>(); order.Add(idx); }
+                    band[idx][rest.Substring(0, c2)] = v;
+                    anyStats = true;
+                }
+                else if (l.StartsWith("I:", StringComparison.Ordinal)) { double v; if (Num(l.Substring(2), out v)) r.Lufs = v; }
+                else if (l.StartsWith("LRA:", StringComparison.Ordinal)) { double v; if (Num(l.Substring(4), out v)) r.Lra = v; }
+                else if (l.StartsWith("Peak:", StringComparison.Ordinal)) { double v; if (Num(l.Substring(5), out v)) r.TruePeakDb = v; }
+            }
+            if (!anyStats) return null;
+
+            order.Sort();
+            if (order.Count < 3) return null;
+            var full = band[order[0]];
+            var low = band[order[1]];
+            var high = band[order[2]];
+
+            r.RmsDb = Get(full, "RMS level dB");
+            r.PeakDb = Get(full, "Peak level dB");
+            r.NoiseFloorDb = Get(full, "Noise floor dB");
+            // ffmpeg's own spelling in this build, "through" and not "trough".
+            // Taken from the log rather than from the documentation, because the
+            // log is what has to be matched.
+            r.RmsTroughDb = Get(full, "RMS through dB");
+            if (double.IsNaN(r.RmsTroughDb)) r.RmsTroughDb = Get(full, "RMS trough dB");
+            r.FlatFactor = Get(full, "Flat factor");
+            r.LowBandDb = Get(low, "RMS level dB");
+            r.HighBandDb = Get(high, "RMS level dB");
+
+            // Silence is not a reading. A segment that landed in a gap tells us
+            // nothing, and its level would drag the book's mean down with it.
+            if (!SoundAnalysis.Usable(r.RmsDb) || r.RmsDb <= SilenceFloorDb) return null;
+            return r;
+        }
+
+        /// <summary>NaN when the key is absent — never 0. A missing key read back
+        /// as 0 is how six books in the sweep reported a signal-to-noise ratio of
+        /// about −21 dB: arithmetic on a value that was never measured.</summary>
+        private static double Get(Dictionary<string, double> d, string k)
+        {
+            double v;
+            return d.TryGetValue(k, out v) ? v : double.NaN;
+        }
+
+        /// <summary><c>-inf</c> is a real answer from astats, not a parse
+        /// failure — it means the measurement found nothing there, and it arrives
+        /// for the noise floor in <b>49 % of real books</b>. It is kept as an
+        /// infinity so the caller can tell "silent" from "not measured" from a
+        /// number; an earlier version clamped it to −120 dB, which made half the
+        /// sample report a plausible noise floor that had never been
+        /// measured.</summary>
+        private static bool Num(string s, out double v)
+        {
+            v = double.NaN;
+            if (s == null) return false;
+            s = s.Trim();
+            int sp = s.IndexOf(' ');
+            if (sp > 0) s = s.Substring(0, sp);     // "-15.1 LUFS" -> "-15.1"
+            if (s == "-inf") { v = double.NegativeInfinity; return true; }
+            if (s == "inf") { v = double.PositiveInfinity; return true; }
+            if (s == "nan" || s == "-nan") { v = double.NaN; return true; }
+            return double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out v);
+        }
+
+        private static void Command(IntPtr ctx, params string[] args)
+        {
+            IntPtr[] ptrs = new IntPtr[args.Length + 1];
+            for (int i = 0; i < args.Length; i++) ptrs[i] = Utf8(args[i]);
+            ptrs[args.Length] = IntPtr.Zero;
+            GCHandle h = GCHandle.Alloc(ptrs, GCHandleType.Pinned);
+            try { mpv_command(ctx, h.AddrOfPinnedObject()); }
+            finally
+            {
+                h.Free();
+                foreach (IntPtr p in ptrs) if (p != IntPtr.Zero) Marshal.FreeHGlobal(p);
+            }
+        }
+
+        /// <summary>mpv takes UTF-8 always. StringToHGlobalAnsi uses the system
+        /// code page and silently fails to open any path with a Č or a Đ in it —
+        /// which looks exactly like an unsupported format (§10e).</summary>
+        private static IntPtr Utf8(string s)
+        {
+            byte[] b = System.Text.Encoding.UTF8.GetBytes(s ?? "");
+            IntPtr p = Marshal.AllocHGlobal(b.Length + 1);
+            Marshal.Copy(b, 0, p, b.Length);
+            Marshal.WriteByte(p, b.Length, 0);
+            return p;
+        }
+    }
+}
