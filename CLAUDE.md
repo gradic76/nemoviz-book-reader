@@ -3727,11 +3727,24 @@ The patch's hunk counts were re-derived and verified after the edit — one cont
 line became a removal, so `@@ -57,14 +47,10 @@` became `+47,9` and the following
 hunk's start shifted — and the verifier was proved on the unmodified patch first.
 
-**A build is running: `gradic76/mpv-winbuild` run 31129028299**, "NBR audio-only
-8 — FFmpeg without version3", dispatched 2026-08-06 22:29 UTC with
-`build_target=64bit, lgpl=true, compiler=clang, release=false`. The workflow
-applies the patch with `git am --3way`, so mild context drift would survive but a
-malformed patch fails loudly — either way the run says which.
+**A build is running: `gradic76/mpv-winbuild` run 31133430735**, "NBR audio-only
+8b", dispatched 2026-08-07 00:06 UTC with `build_target=64bit, lgpl=true,
+compiler=clang, release=false`. The workflow applies the patch with
+`git am --3way`, so mild context drift would survive but a malformed patch fails
+loudly — either way the run says which.
+
+**The first attempt (run 31129028299) failed on nothing of ours**, and the way
+that was established is worth keeping. No step failed: the `params` job sat for
+**15 minutes with zero steps and no runner assigned** and was then cancelled,
+taking the rest of the run with it. The comparison that settled it is the last
+successful run, where the same job took **3 seconds and had 4 steps** — so the
+job never got a machine rather than failing on one. GitHub's own status API then
+named it: **Actions was in a major outage**, critical incident opened 15:22 UTC.
+**It was NOT re-sent while that lasted.** Re-dispatching into an outage is not
+persistence, it is a row of identical red runs that say nothing; the previous
+seven attempts were seven DIFFERENT causes, which is what made them worth making.
+A monitor watched the status API instead and the build went out the moment
+Actions returned to `operational`.
 
 **WHAT TO DO WITH IT WHEN IT FINISHES** (nobody is watching it; see below):
 1. The artifact wanted is `mpv-dev-lgpl-x86_64-*` — the patch renames the output
