@@ -1981,6 +1981,34 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // Progress timer
         // ──────────────────────────────────────────────
+        /// <summary>Puts the progress box, its accessible name, the label and the
+        /// info box back in step with where the book actually is — without waiting
+        /// for a tick. Used when the reading window closes, because the ticker is
+        /// deliberately silent while it is open and the tick that would refresh
+        /// them does not run at all when playback is paused.</summary>
+        private void RefreshProgressDisplay()
+        {
+            try
+            {
+                if (currentBook == null || tbProgress == null) return;
+                if (currentBook.IsTextBook) { UpdateTextPositionDisplay(); return; }
+
+                double virtualPos = GetVirtualPosition();
+                double totalDur = currentBook.TotalDuration;
+                if (totalDur <= 0) return;
+                int percent = (int)(virtualPos / totalDur * 100);
+
+                string posText = Localization.T("Player.Position.Text",
+                                                FormatTime(virtualPos), FormatTime(totalDur));
+                tbProgress.Text = posText;
+                tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
+                if (lblProgress != null) lblProgress.Text = posText;
+                if (tbInfo != null && this.ActiveControl != tbInfo)
+                    tbInfo.Text = BuildCurrentInfoText();
+            }
+            catch { }
+        }
+
         private void ProgressTimer_Tick(object sender, EventArgs e)
         {
             // Text books update their position from the TTS reader's events.
@@ -2011,10 +2039,36 @@ namespace Nemoviz_Book_Reader
                 if (currentBook != null && currentBook.IsHybrid && readingWindow != null)
                     UpdateReadingSurface();
 
+                // SILENT WHILE THE READING WINDOW IS OPEN (measured 2026-08-07).
+                //
+                // A WinEvent capture of everything NBR raises during 30 s of
+                // reading found the loudest thing on the wire was not the reading
+                // at all: `EVENT_OBJECT_VALUECHANGE` on these text boxes, 63–80
+                // times, against 6–14 caret moves. Two to three times a second,
+                // NBR was telling the screen reader that a DIFFERENT control's
+                // value had changed, while the reader was supposed to be
+                // following a caret in the reading surface.
+                //
+                // The window is MODAL, so this costs nothing: the player behind
+                // it is disabled and covered, no sighted user is watching these
+                // times, and no reader can reach them. The next tick after it
+                // closes puts them right.
+                //
+                // The old rule — "refresh the info box only while it does not
+                // have focus" — was aimed at the same fault but could not catch
+                // this one: when the reading surface holds focus, tbInfo is
+                // unfocused BY DEFINITION, so the guard opened exactly when it
+                // was most needed.
+                bool reading = readingWindow != null && !readingWindow.IsDisposed
+                                                     && readingWindow.Visible;
+
                 string posText = Localization.T("Player.Position.Text", FormatTime(virtualPos), FormatTime(totalDur));
-                tbProgress.Text = posText;
-                tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
-                lblProgress.Text = posText;
+                if (!reading)
+                {
+                    tbProgress.Text = posText;
+                    tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
+                    lblProgress.Text = posText;
+                }
 
                 // Title bar counts down live (window caption — a sighted user
                 // sees remaining time / percent advance during playback, not
@@ -2025,8 +2079,9 @@ namespace Nemoviz_Book_Reader
                 // displayed times advance for a sighted user without causing
                 // screen-reader chatter (the on-Enter refresh keeps it correct
                 // the moment it's focused). This preserves the "no live ticker
-                // under the reader cursor" rule.
-                if (this.ActiveControl != tbInfo)
+                // under the reader cursor" rule — and, per the note above, not
+                // while the reading window is up either.
+                if (!reading && this.ActiveControl != tbInfo)
                     tbInfo.Text = BuildCurrentInfoText();
             }
         }
@@ -3443,6 +3498,12 @@ namespace Nemoviz_Book_Reader
                 // what the off-client-area trick gives (§8k).
                 if (tbReadingSurface != null)
                     tbReadingSurface.SetBounds(12, ClientSize.Height + 4, ClientSize.Width - 24, 44);
+                // The ticker was held silent while the window was up (see
+                // ProgressTimer_Tick). Put the boxes right NOW rather than at the
+                // next tick: the tick returns early when playback is paused, so a
+                // reader who closes the window on a pause would otherwise find an
+                // old time sitting in the progress box.
+                RefreshProgressDisplay();
                 Activate();
             };
             // MODAL, like the Library, Settings and Properties dialogs — Gordan's
