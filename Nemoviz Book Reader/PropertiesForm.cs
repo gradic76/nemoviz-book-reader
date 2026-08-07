@@ -451,6 +451,7 @@ namespace Nemoviz_Book_Reader
             if (!chkMaster.Checked)
             {
                 sb.AppendLine(Localization.T("Prop.Info.ProcessingOff"));
+                AppendDescription(sb, Environment.NewLine);
                 tbInfo.Text = sb.ToString();
                 return;
             }
@@ -486,6 +487,7 @@ namespace Nemoviz_Book_Reader
             sb.AppendLine(Localization.T("Prop.Info.Protection") + ": " +
                 SoundSettings.LimiterCeilingDb.ToString("0.0") + " dB");
 
+            AppendDescription(sb, Environment.NewLine);
             tbInfo.Text = sb.ToString();
         }
 
@@ -1320,7 +1322,33 @@ namespace Nemoviz_Book_Reader
             if (chkTVisual != null && chkTVisual.Checked && cmbTVisualMode != null && cmbTVisualMode.SelectedItem != null)
                 sb.Append(cmbTVisualMode.SelectedItem).Append(nl);
 
+            AppendDescription(sb, nl);
             tbTextInfo.Text = sb.ToString();
+        }
+
+        /// <summary>The publisher's blurb, LAST in the column and nowhere else.
+        ///
+        /// <para>It goes here rather than into a dialog of its own, unlike the
+        /// Library's: this column is already a read-only, tabbable, wrapping text
+        /// box — the same control shape NBR uses for prose everywhere — so the
+        /// paragraph simply belongs in it. The Library could not do that because
+        /// its details pane is a two-column GRID, where a paragraph has nowhere
+        /// to wrap to.</para>
+        ///
+        /// <para><b>Last, and that is the whole placement decision.</b> A blurb
+        /// runs to about 935 characters; put anywhere above, it would push the
+        /// reading settings and the processing read-out off the bottom, and those
+        /// are what a reader opens this page FOR. At the foot it costs nothing to
+        /// anyone who does not want it and is one arrow key away for anyone who
+        /// does.</para></summary>
+        private void AppendDescription(StringBuilder sb, string nl)
+        {
+            if (book == null || !book.HasDescription) return;
+            string text = book.Description;
+            if (string.IsNullOrWhiteSpace(text)) return;
+            sb.Append(nl);
+            sb.Append(Localization.T("Details.Field.Description")).Append(':').Append(nl);
+            sb.Append(text).Append(nl);
         }
     }
 }

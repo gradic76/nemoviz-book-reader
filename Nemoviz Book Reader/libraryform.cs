@@ -1190,8 +1190,20 @@ namespace Nemoviz_Book_Reader
             ShowDetails(book);
         }
 
+        /// <summary>The book the details pane is currently DESCRIBING.
+        ///
+        /// <para>Not the same question as <see cref="GetSelectedBook"/>, and that
+        /// difference was a bug: GetSelectedBook asks which list has focus, and by
+        /// the time a reader has tabbed INTO the details pane neither list has it
+        /// any more. Pressing Enter on the Description row then found no book and
+        /// the window opened onto nothing — silently, because there was nothing to
+        /// say. The pane knows perfectly well whose details it is showing, so it
+        /// remembers.</para></summary>
+        private BookData detailsBook;
+
         private void ShowDetails(BookData book)
         {
+            detailsBook = book;
             // Lazy one-time upgrade of old plain format labels ("MP3 Audio")
             // to the detailed ones ("MP3 Audio, 44.1 kHz, 128 kbps, stereo").
             // Persists in Book.ini, so it's a no-op on every later selection.
@@ -1371,7 +1383,9 @@ namespace Nemoviz_Book_Reader
             if (listViewDetails.SelectedItems.Count == 0) return;
             if (!ReferenceEquals(listViewDetails.SelectedItems[0].Tag, DescriptionRowTag)) return;
 
-            BookData b = GetSelectedBook();
+            // detailsBook, NOT GetSelectedBook: see the field. Asking which list
+            // has focus is the wrong question here, because the answer is neither.
+            BookData b = detailsBook;
             if (b == null) return;
             string text = b.Description;
             if (string.IsNullOrWhiteSpace(text)) return;
@@ -1385,6 +1399,7 @@ namespace Nemoviz_Book_Reader
 
         private void ClearDetails()
         {
+            detailsBook = null;
             listViewDetails.Items.Clear();
         }
 
