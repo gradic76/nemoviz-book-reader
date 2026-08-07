@@ -108,12 +108,20 @@ namespace Nemoviz_Book_Reader
         /// display shows "Forward, Shift+Right" (Gordan, 2026-08-01). This channel
         /// keeps the book coming in that case.</para>
         ///
-        /// <para><b>It is a supplement, never a replacement.</b> A message is
-        /// transient and overwritten by the next thing NVDA has to show; there is
-        /// no panning through the book and no routing keys, both of which focus
-        /// tracking gives for free. So it is for when focus is NOT on the reading
-        /// surface — with focus there, the reader is already doing a better job
-        /// and pushing over it would only flicker.</para>
+        /// <para><b>It turned out to be the whole story, not a supplement
+        /// (2026-08-07).</b> The paragraph here used to say this was for when
+        /// focus is NOT on the reading surface, because with focus there "the
+        /// reader is already doing a better job". It is not: a screen reader
+        /// follows a caret the USER moves and ignores one the PROGRAM moves, so
+        /// with focus on the surface both NVDA and JAWS sat on the same sentence
+        /// while the caret walked whole paragraphs. Measured — see
+        /// Form1.PushBrailleIfSurfaceFocused. The gate is now the other way round.</para>
+        ///
+        /// <para><b>What it still cannot do.</b> A message is transient and
+        /// overwritten by the next thing NVDA has to show, and it gives no panning
+        /// through the book and no routing keys — those come from focus tracking,
+        /// which is exactly what does not work here. So the display shows the line
+        /// being read and the reader cannot wander off it by hand.</para>
         ///
         /// <para><b>NVDA only.</b> JAWS has no public equivalent; braille there is
         /// written from a JAWS script, which would mean shipping and installing

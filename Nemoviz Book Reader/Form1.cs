@@ -4778,16 +4778,49 @@ namespace Nemoviz_Book_Reader
         /// focus in the text, the reader brailles the control itself; window open
         /// and focus wandered, this pushes the sentence; window shut, there is no
         /// text to be in and no braille at all.</para></summary>
-        private void PushBrailleIfFocusLeft(string sentence)
+        /// <summary>Puts the sentence being read on the braille display, WHILE THE
+        /// READING SURFACE HOLDS FOCUS.
+        ///
+        /// <para><b>The gate used to be the other way round, on a premise that has
+        /// since been measured false (2026-08-07).</b> The premise was that a
+        /// screen reader following the caret does a better job than a pushed
+        /// message, so pushing was for when focus had wandered off the surface.
+        /// The reader does not follow. Everything on our side is right — focus is
+        /// in the surface, the caret advances by whole sentences, it changes
+        /// display line (57 → 61 → 65 → 66 on a 113-line chunk), and
+        /// EVENT_OBJECT_LOCATIONCHANGE on OBJID_CARET fires on every move — and
+        /// both readers still repeat the same sentence. Readers follow a caret the
+        /// USER moves; a caret the program moves they deliberately ignore, or no
+        /// app that animates a cursor would ever stop talking.</para>
+        ///
+        /// <para><b>Focus is the switch (Gordan, 2026-08-07).</b> Surface focused →
+        /// the book is on the display. Focus anywhere else → nothing, and braille
+        /// goes back to whatever the reader would normally show. That is why the
+        /// braille checkbox could be taken out of Text properties and replaced
+        /// with the input table: the reader was already expressing the choice by
+        /// where they put focus.</para>
+        ///
+        /// <para><b>It cannot double-speak, and that was the condition.</b>
+        /// <c>nvdaController_brailleMessage</c> writes to the display and nothing
+        /// else — <see cref="NvdaController.Braille"/> never touches
+        /// <c>speakText</c>. NBR's own voice stays the only voice.</para>
+        ///
+        /// <para><b>JAWS gets none of this</b> and it is a real limitation, left
+        /// open deliberately: JAWS has no braille-only call, so the sentence would
+        /// have to go through the UIA notification, which SPEAKS — over NBR's own
+        /// reading. Documented rather than fudged.</para></summary>
+        private void PushBrailleIfSurfaceFocused(string sentence)
         {
             try
             {
                 if (string.IsNullOrEmpty(sentence)) return;
                 if (readingWindow == null || readingWindow.IsDisposed) return;
+                // Never take the display off another application. A Windows
+                // Update prompt in front is what the reader needs to be reading.
                 if (GetForegroundWindow() != Handle
                     && (readingWindow == null || readingWindow.IsDisposed
                         || GetForegroundWindow() != readingWindow.Handle)) return;
-                if (tbReadingSurface != null && tbReadingSurface.Focused) return;
+                if (tbReadingSurface == null || !tbReadingSurface.Focused) return;
                 // Off the UI thread, for the same reason the announcement is.
                 // nvdaController_brailleMessage is an RPC into NVDA's process, and
                 // this runs ONCE PER SENTENCE — with the aid off as well, which is
@@ -4933,7 +4966,7 @@ namespace Nemoviz_Book_Reader
             // closed inside the sentence loop — the exact cost that has been
             // chopping the speech. SurfaceLog survives for routing keys, which
             // happen when a hand moves, not four times a minute.
-            PushBrailleIfFocusLeft(s);
+            PushBrailleIfSurfaceFocused(s);
             // NOT Select(0, 0) here, deliberately. Putting the caret back on nought
             // after every sentence is a caret MOVE as far as the reader is
             // concerned, and it answers by speaking the character underneath —
