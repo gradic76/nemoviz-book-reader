@@ -204,8 +204,23 @@ Library.Btn.Close.Accessible=Close
 Menu.File=File
 Menu.File.OpenFile=Open file...
 Menu.File.OpenFolder=Open folder...
+; Present and live, present and dimmed, or absent - three states meaning three
+; different things. See BuildMenuStrip.
+Menu.File.OpenAudioCd=Open audio CD
 Menu.File.ClearLibrary=Clear library...
 Menu.File.Exit=Exit
+; Audio CD
+Cd.Progress.Title=Audio CD
+Cd.Progress.Preparing=Reading the disc...
+Cd.Progress.Track=Reading track {0} of {1}
+Cd.Progress.Stopping=Stopping...
+; The disc has no title of its own, so the name says what is in front of you
+; rather than inventing something to be corrected. {0} is the track count.
+Cd.BookTitle=Audio CD ({0} tracks)
+Cd.Format=Audio CD - Compact Disc Digital Audio
+Cd.NoDisc=There is no disc in the drive, or the drive is still reading it. Put an audio CD in and try again.
+Cd.DataDisc=This is a data disc, not an audio CD. If it holds a book as MP3 files, open it with File, Open folder instead - NBR plays that already.
+Cd.ReadFailed=The disc could not be read: {0}
 Menu.Sort=Sort
 ; What to sort by, and which way — two questions, so two groups and two ticks
 ; showing at once. Six combined entries meant every new key added two lines.

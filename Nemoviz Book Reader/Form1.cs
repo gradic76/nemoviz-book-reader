@@ -327,6 +327,11 @@ namespace Nemoviz_Book_Reader
             UiTheme.Select(appSettings.UiTheme);   // before anything builds itself
             appSettings.EnsureLibraryExists();
             appSettings.EnsureLangFolderExists();
+            // A ripped CD is 850 MB in TEMP and is deleted when the book closes.
+            // If NBR did not get to close it — a crash, a power cut — the folder
+            // is still there, and at start-up every rip in existence is by
+            // definition stale. Cheap: it looks at nothing but its own prefix.
+            AudioCd.SweepOldRips();
             Localization.Initialize(appSettings.LangPath, appSettings.LanguageCode);
             BuildUI();
             InitializeMpv();
@@ -5280,6 +5285,13 @@ namespace Nemoviz_Book_Reader
             // nobody could read sitting in the player.
             if (!EnsureVoiceForBook(book)) return;
 
+            // A CD that is being replaced goes with it. Noted BEFORE the swap and
+            // deleted after mpv has let go, because 850 MB of WAV should not
+            // survive the reader moving on — and the folder cannot be removed
+            // while the file in it is still open.
+            string outgoingRip = (currentBook != null && AudioCd.IsRipFolder(currentBook.FolderPath))
+                                 ? currentBook.FolderPath : null;
+
             // Changing the book ends the previous listening session — an
             // active sleep timer is cancelled, with the same announcement
             // as a manual pause. (At startup no timer can be active, so
@@ -5289,6 +5301,15 @@ namespace Nemoviz_Book_Reader
 
             // Stop any TTS reading from a previous text book.
             if (tts != null) tts.Stop();
+
+            // The outgoing CD's files, now that nothing is reading them: "stop"
+            // clears mpv's playlist and releases the handle, which is the same
+            // reason a marked-read book could not be deleted until it had been.
+            if (outgoingRip != null)
+            {
+                MpvCommand("stop");
+                AudioCd.DeleteRip(outgoingRip);
+            }
 
             currentBook = book;
             RebuildSeekSteps();
@@ -5660,6 +5681,10 @@ namespace Nemoviz_Book_Reader
             if (mpvHandle != IntPtr.Zero)
                 mpv_terminate_destroy(mpvHandle);
             try { tones.Dispose(); } catch { }
+            // AFTER mpv is destroyed, so the WAVs are no longer open. A CD lives
+            // only as long as it is being listened to.
+            if (currentBook != null && AudioCd.IsRipFolder(currentBook.FolderPath))
+                AudioCd.DeleteRip(currentBook.FolderPath);
             MpvDuration.Shutdown();   // release the duration-probe context too
             LibLouis.Shutdown();      // release liblouis' table cache
             base.OnFormClosing(e);

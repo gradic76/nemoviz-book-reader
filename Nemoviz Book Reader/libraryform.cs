@@ -19,6 +19,7 @@ namespace Nemoviz_Book_Reader
         private ToolStripMenuItem menuFile;
         private ToolStripMenuItem menuFileOpenFile;
         private ToolStripMenuItem menuFileOpenFolder;
+        private ToolStripMenuItem menuFileOpenCd;
         private ToolStripMenuItem menuSort;
         private ToolStripMenuItem menuSortAlpha;
         private ToolStripMenuItem menuSortDate;
@@ -347,6 +348,61 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        /// <summary>Reads the disc and opens it as a book — the whole of "Open
+        /// audio CD".
+        ///
+        /// <para>Every way this can fail is answered with a sentence saying what
+        /// actually happened, because "could not open the CD" tells a reader
+        /// nothing they can act on. An empty drive, a data disc, a cancelled
+        /// read and a drive that stopped answering are four different situations
+        /// and get four different answers — and the data-disc one points at Open
+        /// folder, because a disc full of MP3s is a book NBR can already
+        /// play.</para></summary>
+        private void MenuFileOpenCd_Click(object sender, EventArgs e)
+        {
+            List<OpticalDrive.Track> tracks;
+            string drive = AudioCd.FindDiscDrive(out tracks);
+            if (drive == null)
+            {
+                MessageForm.ShowHint(this,
+                    Localization.T(AudioCd.HasDataDisc() ? "Cd.DataDisc" : "Cd.NoDisc"),
+                    Localization.T("Cd.Progress.Title"));
+                return;
+            }
+
+            string folder = null;
+            try
+            {
+                folder = AudioCd.NewRipFolder();
+                using (CdRipProgressForm prog = new CdRipProgressForm(drive, tracks, folder))
+                {
+                    prog.ShowDialog(this);
+                    if (prog.Cancelled) { AudioCd.DeleteRip(folder); return; }
+                    if (prog.Error != null)
+                    {
+                        AudioCd.DeleteRip(folder);
+                        MessageForm.ShowHint(this,
+                            Localization.T("Cd.ReadFailed", prog.Error.Message),
+                            Localization.T("Cd.Progress.Title"));
+                        return;
+                    }
+                }
+
+                // Straight to the player, and NOT onto the shelf: a CD is played,
+                // not collected. SelectedBook + OK is the same door the shelf uses,
+                // so Form1 needs to know nothing about discs.
+                SelectedBook = AudioCd.BuildBook(folder, tracks);
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                if (folder != null) AudioCd.DeleteRip(folder);
+                MessageForm.ShowHint(this, Localization.T("Cd.ReadFailed", ex.Message),
+                                     Localization.T("Cd.Progress.Title"));
+            }
+        }
+
         private void BuildMenuStrip()
         {
             menuStrip = new MenuStrip();
@@ -363,6 +419,32 @@ namespace Nemoviz_Book_Reader
 
             menuFile.DropDownItems.Add(menuFileOpenFile);
             menuFile.DropDownItems.Add(menuFileOpenFolder);
+
+            // Open audio CD — present, dimmed or absent, and the three cases mean
+            // three different things (Gordan, 2026-08-07).
+            //
+            //   no optical drive          → NOT THERE. There is nothing to
+            //                               discover and nothing the reader could
+            //                               do about it; an item that can never
+            //                               be used is clutter in a menu that a
+            //                               screen reader reads out in full.
+            //   drive, switch off         → THERE BUT DIMMED. This is the case
+            //                               worth showing: the feature exists,
+            //                               this machine can do it, and it is off.
+            //                               Disabled is a state a reader
+            //                               announces, so it says so out loud.
+            //   drive, switch on          → live.
+            //
+            // Same rule as the Settings group one step further on: dimmed when it
+            // is possible but off, gone when it is impossible.
+            if (OpticalDrive.AnyDrive())
+            {
+                menuFileOpenCd = new ToolStripMenuItem(Localization.T("Menu.File.OpenAudioCd"));
+                menuFileOpenCd.Enabled = appSettings != null && appSettings.UseOpticalDrive;
+                menuFileOpenCd.Click += MenuFileOpenCd_Click;
+                menuFile.DropDownItems.Add(menuFileOpenCd);
+            }
+
             menuFile.DropDownItems.Add(new ToolStripSeparator());
 
             ToolStripMenuItem menuFileClear = new ToolStripMenuItem(Localization.T("Menu.File.ClearLibrary"));
@@ -2715,6 +2797,119 @@ namespace Nemoviz_Book_Reader
     /// streamed). Auto-closes when extraction finishes; Error/Cancelled expose
     /// the outcome to the caller, which keeps the original import error handling.
     /// </summary>
+    /// <summary>Reads a whole audio CD to WAV while the reader waits, on the
+    /// pattern <see cref="ExtractProgressForm"/> already set: a modal box, a
+    /// determinate bar, the work on a worker thread, every report marshalled back.
+    ///
+    /// <para><b>The whole disc before anything plays</b>, and that is the quiet
+    /// choice rather than the lazy one. Reading track by track as the book goes
+    /// along would spin the drive up and down for hours; one unbroken forward
+    /// pass has it working for a few minutes and silent thereafter, which is what
+    /// Gordan asked for. The bar counts tracks, so a reader knows what they are
+    /// waiting for.</para>
+    ///
+    /// <para>An 80-minute disc is about 850 MB of WAV in the temp folder. It is
+    /// deleted when the book is closed, and any left behind by a crash are swept
+    /// on the next start — see <see cref="AudioCd.SweepOldRips"/>.</para></summary>
+    internal class CdRipProgressForm : Form
+    {
+        public bool Cancelled { get; private set; }
+        public Exception Error { get; private set; }
+
+        private readonly string drive;
+        private readonly List<OpticalDrive.Track> tracks;
+        private readonly string destFolder;
+        private readonly ProgressBar bar;
+        private readonly Label status;
+        private volatile bool stop;
+
+        public CdRipProgressForm(string drive, List<OpticalDrive.Track> tracks, string destFolder)
+        {
+            this.drive = drive;
+            this.tracks = tracks;
+            this.destFolder = destFolder;
+
+            Text = Localization.T("Cd.Progress.Title");
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MinimizeBox = false;
+            MaximizeBox = false;
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterParent;
+            ClientSize = new Size(420, 132);
+
+            status = new Label
+            {
+                Location = new Point(12, 14),
+                Size = new Size(396, 24),
+                Text = Localization.T("Cd.Progress.Preparing"),
+                TabStop = true
+            };
+            status.AccessibleName = status.Text;
+
+            bar = new ProgressBar
+            {
+                Location = new Point(12, 46),
+                Size = new Size(396, 24),
+                Style = ProgressBarStyle.Blocks,
+                Maximum = Math.Max(1, tracks.Count)
+            };
+
+            Button cancel = new Button
+            {
+                Text = Localization.T("Btn.Cancel"),
+                Location = new Point(320, 84),
+                Size = new Size(88, 28)
+            };
+            cancel.AccessibleName = Localization.T("Btn.Cancel");
+            cancel.Click += (s, e) => { stop = true; cancel.Enabled = false; status.Text = Localization.T("Cd.Progress.Stopping"); };
+
+            Controls.Add(status);
+            Controls.Add(bar);
+            Controls.Add(cancel);
+            CancelButton = cancel;
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    int n = 0;
+                    foreach (OpticalDrive.Track t in tracks)
+                    {
+                        if (stop) { Cancelled = true; break; }
+                        n++;
+                        int shown = n;
+                        try { BeginInvoke(new Action(() => Report(shown - 1, shown))); } catch { }
+                        string wav = System.IO.Path.Combine(destFolder,
+                            "Track " + t.Number.ToString("00") + ".wav");
+                        if (!OpticalDrive.RipTrack(drive, t, wav, null, () => stop))
+                        {
+                            if (!stop) throw new Exception("The drive stopped answering on track " + t.Number + ".");
+                            Cancelled = true;
+                            break;
+                        }
+                        try { BeginInvoke(new Action(() => Report(shown, shown))); } catch { }
+                    }
+                }
+                catch (Exception ex) { Error = ex; }
+                finally
+                {
+                    try { BeginInvoke(new Action(() => { DialogResult = DialogResult.OK; Close(); })); } catch { }
+                }
+            });
+        }
+
+        private void Report(int done, int current)
+        {
+            bar.Value = Math.Min(done, bar.Maximum);
+            status.Text = Localization.T("Cd.Progress.Track", current, tracks.Count);
+            status.AccessibleName = status.Text;
+        }
+    }
+
     internal class ExtractProgressForm : Form
     {
         public Exception Error { get; private set; }
