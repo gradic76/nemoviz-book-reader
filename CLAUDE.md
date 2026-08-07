@@ -2897,9 +2897,26 @@ no translation engine, so it does not belong in Pro.
   can be extracted: someone burns the quota and the abuse is attributed to our
   project. There is no useful key restriction for a desktop app (no referrer, no
   fixed IP).
-- **Open Library is the one to use.** Verified 2026-08-07: no key, no account,
-  and `openlibrary.org/api/books?bibkeys=ISBN:…&jscmd=details` returned a real
-  description first try.
+- **THEN IT WAS MEASURED, AND THE ANSWER IS: DO NOT BUILD IT** (2026-08-07,
+  Gordan asked to try it before committing to anything — which is what saved the
+  work). Both services, against the 235 ISBNs NBR's own parser found:
+  - **Open Library**, no key needed, all 235 asked in 12 batched requests:
+    **174 known to it at all**, but only **30 carry a description**. Of the 32
+    books that actually need one — an ISBN and no local blurb — it supplies
+    **three**, and all three are the same series (Temeraire). Three books out of
+    596. **0.5 %.**
+  - **Where both exist** (27 books) Open Library's is consistently the THINNER
+    one: 349→159 characters, 1414→577, 2179→226, 2411→142. So it is not an
+    upgrade either, and there is no argument for preferring it.
+  - **Google Books, keyless, from a real home IP: 429 on all 32**, first request,
+    900 ms apart. Not quota pressure — a refusal, exactly as their page says
+    ("must be accompanied by an identifier"). So the keyless path is closed, and
+    a key in a shipped app can be extracted and burned on our project.
+  - **Conclusion.** Even if Google's coverage tripled Open Library's, that is
+    about ten books out of 596 in exchange for an account, a key that leaks, a
+    network path, a consent dialog and telling a third party what someone reads.
+    The local pass already gets 45 % for nothing. Park it; if it ever returns, it
+    is a per-book action a reader asks for, never a bulk fetch.
 - **MEASURED 2026-08-07 on 596 real EPUBs** (Test naslovi + three OneDrive
   libraries; every OPF readable). This is what the whole remote idea is worth:
   | | books | share |
