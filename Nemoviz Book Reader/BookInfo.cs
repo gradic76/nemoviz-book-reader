@@ -73,6 +73,14 @@ namespace Nemoviz_Book_Reader
         Characters,
         Language,
 
+        /// <summary>The DOORWAY, not the text. A description runs to 935
+        /// characters at the median and this pane is a two-column grid — 120 px
+        /// of label, 280 px of value — so the paragraph would not wrap, would be
+        /// cut at the column edge, and a screen reader would read it as one
+        /// unbroken sub-item with no way to move inside it. The row says there is
+        /// one and Enter opens it in a window built for prose.</summary>
+        Description,
+
         // How it is being read.
         Speed,
         SoundProcessing,

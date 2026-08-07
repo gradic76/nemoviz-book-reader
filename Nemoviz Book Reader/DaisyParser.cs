@@ -39,6 +39,11 @@ namespace Nemoviz_Book_Reader
         public string Publisher;                   // dc:publisher (print-edition publisher)
         public string Language;                    // dc:language, as the producer declared it
         public string Producer;                    // ncc:producer (audio-producing institution)
+        /// <summary>dc:description, cleaned. Rarer in DAISY than in EPUB — the
+        /// producing institutions fill in what they need for navigation and often
+        /// nothing else — but free where it is there.</summary>
+        public string Description;
+        public string Isbn;                        // dc:identifier, when it is one
         /// <summary>dc:date, in whatever shape the producer wrote it. DAISY 2.02
         /// also has ncc:sourceDate — the date of the PRINT edition the talking
         /// book was made from, which is the one a reader means by "the year", so
@@ -121,6 +126,8 @@ namespace Nemoviz_Book_Reader
             book.Publisher = MetaContent(ncc, "dc:publisher");
             book.Language = MetaContent(ncc, "dc:language");
             book.Producer = MetaContent(ncc, "ncc:producer");
+            book.Description = BookDescription.Clean(MetaContent(ncc, "dc:description"));
+            book.Isbn = BookDescription.NormaliseIsbn(MetaContent(ncc, "dc:identifier"));
             book.Date = FirstNonEmpty(MetaContent(ncc, "ncc:sourceDate"),
                                       MetaContent(ncc, "dc:date"));
             book.TotalTime = MetaContent(ncc, "ncc:totalTime");
@@ -202,6 +209,10 @@ namespace Nemoviz_Book_Reader
                 book.Publisher = FirstNonEmpty(MetaByName(opf, "dc:publisher"), ElemText(opf, "Publisher"));
                 book.Language = FirstNonEmpty(MetaByName(opf, "dc:language"), ElemText(opf, "Language"));
                 book.Producer = MetaByName(opf, "dtb:producer");
+                book.Description = BookDescription.Clean(
+                    FirstNonEmpty(MetaByName(opf, "dc:description"), ElemText(opf, "Description")));
+                book.Isbn = BookDescription.NormaliseIsbn(
+                    FirstNonEmpty(MetaByName(opf, "dc:identifier"), ElemText(opf, "Identifier")));
                 book.Date = FirstNonEmpty(MetaByName(opf, "dtb:sourceDate"),
                                           MetaByName(opf, "dc:date"),
                                           ElemText(opf, "Date"));

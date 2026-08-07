@@ -24,6 +24,73 @@ namespace Nemoviz_Book_Reader
         /// (language + grade + national standard). A .brf declares none of that, so
         /// it is auto-detected at import and remembered here for later correction.</summary>
         public string BrailleTable { get; set; }
+        /// <summary>The publisher's blurb, or "" when the book carries none.
+        ///
+        /// <para><b>In its own file, not in Book.ini.</b> A description is a
+        /// paragraph — median 935 characters over 596 measured books, with blank
+        /// lines between paragraphs — and <see cref="IniFile"/> writes
+        /// <c>key=value</c> on ONE line and reads back with ReadAllLines. The
+        /// second line of a description would arrive as a malformed entry and
+        /// everything after it in the section would be read wrong. So it lives
+        /// beside content.txt as <c>description.txt</c>, the same way the text and
+        /// the sync map do, and the file simply not being there means the book has
+        /// no description.</para></summary>
+        public string Description
+        {
+            get
+            {
+                try
+                {
+                    string p = DescriptionFilePath;
+                    return p != null && File.Exists(p) ? File.ReadAllText(p, System.Text.Encoding.UTF8) : "";
+                }
+                catch { return ""; }
+            }
+        }
+
+        public bool HasDescription
+        {
+            get
+            {
+                try { string p = DescriptionFilePath; return p != null && File.Exists(p); }
+                catch { return false; }
+            }
+        }
+
+        private string DescriptionFilePath
+        {
+            get
+            {
+                return string.IsNullOrEmpty(FolderPath)
+                       ? null : Path.Combine(FolderPath, "description.txt");
+            }
+        }
+
+        /// <summary>Writes the description, or removes it when there is none, so
+        /// a re-import that finds nothing does not leave the old one behind.</summary>
+        public void SetDescription(string text)
+        {
+            try
+            {
+                string p = DescriptionFilePath;
+                if (p == null) return;
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    if (File.Exists(p)) File.Delete(p);
+                    return;
+                }
+                File.WriteAllText(p, text, new System.Text.UTF8Encoding(false));
+            }
+            catch { }
+        }
+
+        /// <summary>ISBN as the file declared it, digits only. Short and
+        /// single-line, so this one does belong in Book.ini. Kept because it is
+        /// the only key that makes a description lookup safe later — matching by
+        /// a folder-derived title produces a wrong blurb, and a wrong blurb is
+        /// worse than none.</summary>
+        public string Isbn { get; set; }
+
         // Print-edition publisher, from dc:publisher (DAISY + EPUB). Distinct
         // from Producer (the audio/accessible-edition producer, DAISY ncc:producer).
         public string Publisher { get; set; }
@@ -241,6 +308,7 @@ namespace Nemoviz_Book_Reader
             Producer = ini.Read("Book", "Producer", "");
             BrailleTable = ini.Read("Braille", "Table", "");
             Publisher = ini.Read("Book", "Publisher", "");
+            Isbn = ini.Read("Book", "Isbn", "");
             Year = ini.Read("Book", "Year", "");
             Format = ini.Read("Book", "Format", "Unknown");
             Duration = ini.Read("Book", "Duration", "00:00:00");
@@ -547,6 +615,10 @@ namespace Nemoviz_Book_Reader
                 SetTextPages(doc.Pages);
                 BrailleTable = doc.BrailleTable;
                 Producer = NormalizeProducer(doc.Producer);
+                // Re-read with the text, for the same reason the language is: a
+                // re-import is where a better description would come from.
+                SetDescription(doc.Description);
+                if (!string.IsNullOrEmpty(doc.Isbn)) Isbn = doc.Isbn;
                 // Re-detected, not carried over: the language was read off the old
                 // text, and if that text was wrong the language may be too — which
                 // is exactly the case this exists for.
@@ -750,11 +822,14 @@ namespace Nemoviz_Book_Reader
             Author = db.Author ?? "";
             Producer = NormalizeProducer(db.Producer);
             Publisher = NormalizeProducer(db.Publisher);
+            if (!string.IsNullOrEmpty(db.Isbn)) Isbn = db.Isbn;
+            SetDescription(db.Description);
             Year = ResolveYear(db.Date, Publisher, Title);
             ini.Write("Book", "Title", Title);
             ini.Write("Book", "Author", Author);
             ini.Write("Book", "Producer", Producer);
             ini.Write("Book", "Publisher", Publisher);
+            ini.Write("Book", "Isbn", Isbn ?? "");
             ini.Write("Book", "Year", Year);
 
             string audioDetails = ordered.Count > 0 ? DetectAudioFormatString(ordered[0]) : null;
@@ -1201,6 +1276,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Book", "Author", Author ?? "");
             ini.Write("Book", "Producer", Producer ?? "");
             ini.Write("Book", "Publisher", Publisher ?? "");
+            ini.Write("Book", "Isbn", Isbn ?? "");
             ini.Write("Book", "Year", Year ?? "");
             ini.Write("Book", "Format", Format);
             if (!string.IsNullOrEmpty(BrailleTable))

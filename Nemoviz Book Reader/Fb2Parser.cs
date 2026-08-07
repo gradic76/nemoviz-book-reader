@@ -28,6 +28,12 @@ namespace Nemoviz_Book_Reader
                 int depth = 0;
                 bool inTitle = false, inBody = false, inDesc = false;
                 string metaField = null;
+                // FB2's blurb is <annotation> inside <title-info> — a subtree of
+                // <p>, not a plain field like the others, so it is gathered rather
+                // than read. This is the format's PROPER place for a description,
+                // which makes it more trustworthy than EPUB's dc:description.
+                bool inAnnotation = false;
+                StringBuilder annBuf = new StringBuilder();
 
                 System.Action flushPara = () =>
                 {
@@ -53,6 +59,8 @@ namespace Nemoviz_Book_Reader
                                 else if (ln == "p" && !inTitle) flushPara();
                                 else if (ln == "empty-line") flushPara();
                             }
+                            else if (inDesc && ln == "annotation")
+                            { inAnnotation = true; annBuf.Clear(); }
                             else if (inDesc && (ln == "book-title" || ln == "first-name"
                                              || ln == "last-name" || ln == "lang"))
                             { metaField = ln; metaBuf.Clear(); }
@@ -60,12 +68,18 @@ namespace Nemoviz_Book_Reader
                         else if (reader.NodeType == XmlNodeType.Text || reader.NodeType == XmlNodeType.CDATA)
                         {
                             if (inTitle) headBuf.Append(reader.Value);
+                            else if (inAnnotation) annBuf.Append(reader.Value);
                             else if (metaField != null) metaBuf.Append(reader.Value);
                             else if (inBody) cur.Append(reader.Value);
                         }
                         else if (reader.NodeType == XmlNodeType.EndElement)
                         {
                             if (ln == "body") inBody = false;
+                            else if (ln == "annotation") inAnnotation = false;
+                            // A paragraph break inside the annotation, kept so a
+                            // multi-paragraph blurb does not run together.
+                            else if (inAnnotation && (ln == "p" || ln == "empty-line"))
+                                annBuf.Append('\n');
                             else if (ln == "title-info") inDesc = false;
                             else if (inBody)
                             {
@@ -95,7 +109,8 @@ namespace Nemoviz_Book_Reader
 
                 TextParsing.Assemble(blocks, out string text, out var headings, out _);
                 return new TextDoc { Text = text, Headings = headings, Title = title,
-                                     Author = (first + " " + last).Trim(), Language = lang };
+                                     Author = (first + " " + last).Trim(), Language = lang,
+                                     Description = BookDescription.Clean(annBuf.ToString()) };
             }
             catch { return new TextDoc(); }
         }

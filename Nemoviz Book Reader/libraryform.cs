@@ -677,6 +677,7 @@ namespace Nemoviz_Book_Reader
 
             listViewDetails.Columns.Add("Field", 120);
             listViewDetails.Columns.Add("Value", 280);
+            listViewDetails.ItemActivate += DetailsRowActivated;
 
             // Rows are populated per selection in ShowDetails (nothing selected
             // yet at construction, so the panel starts empty).
@@ -1191,7 +1192,14 @@ namespace Nemoviz_Book_Reader
             if (book.IsTextBook) AddTextDetails(info, book);
             else AddAudioDetails(info, book);
 
-            foreach (InfoRow r in info.Rows()) AddDetailRow(r.Label, r.Value);
+            // Only when there is one — an empty "Description" row would be a door
+            // to an empty room, and every book without a blurb would carry it.
+            if (book.HasDescription)
+                info.Add(BookInfoField.Description, Localization.T("Details.Description.Open"));
+
+            string descLabel = Localization.T("Details.Field.Description");
+            foreach (InfoRow r in info.Rows())
+                AddDetailRow(r.Label, r.Value, r.Label == descLabel ? DescriptionRowTag : null);
             listViewDetails.EndUpdate();
         }
 
@@ -1309,11 +1317,43 @@ namespace Nemoviz_Book_Reader
             return string.Format("{0:D2}:{1:D2}:{2:D2}", (int)t.TotalHours, t.Minutes, t.Seconds);
         }
 
-        private void AddDetailRow(string field, string value)
+        /// <summary>Marks the one row that is a door rather than a fact. Compared
+        /// by reference, so it cannot collide with anything a book's text might
+        /// happen to equal.</summary>
+        private static readonly object DescriptionRowTag = new object();
+
+        private void AddDetailRow(string field, string value, object tag = null)
         {
             string dash = Localization.T("Common.Dash");
-            listViewDetails.Items.Add(new ListViewItem(
-                new string[] { field, string.IsNullOrEmpty(value) ? dash : value }));
+            var item = new ListViewItem(
+                new string[] { field, string.IsNullOrEmpty(value) ? dash : value });
+            item.Tag = tag;
+            listViewDetails.Items.Add(item);
+        }
+
+        /// <summary>Enter or a double-click on the Description row opens the blurb
+        /// in a window built for prose.
+        ///
+        /// <para>ItemActivate rather than KeyDown: it is the event the list itself
+        /// raises for BOTH ways of saying yes, so the keyboard and the mouse take
+        /// the same path and a screen reader user gets the behaviour every other
+        /// list in Windows already taught them. Every other row does nothing,
+        /// which is what a row of facts should do.</para></summary>
+        private void DetailsRowActivated(object sender, EventArgs e)
+        {
+            if (listViewDetails.SelectedItems.Count == 0) return;
+            if (!ReferenceEquals(listViewDetails.SelectedItems[0].Tag, DescriptionRowTag)) return;
+
+            BookData b = GetSelectedBook();
+            if (b == null) return;
+            string text = b.Description;
+            if (string.IsNullOrWhiteSpace(text)) return;
+
+            // The book's own name in the caption, so a reader who opens two in a
+            // row knows which one is in front of them.
+            string title = Localization.T("Dialog.Description.Title", b.Title ?? "");
+            using (var f = new TextHelpForm(title, text, true))
+                f.ShowDialog(this);
         }
 
         private void ClearDetails()
@@ -1961,6 +2001,12 @@ namespace Nemoviz_Book_Reader
                     }
                     imported.Producer = BookData.NormalizeProducer(doc.Producer);
                     imported.Publisher = BookData.NormalizeProducer(doc.Publisher);
+                    // The blurb, already unwrapped and bounded by
+                    // BookDescription.Clean — 45 % of real EPUBs carry one, and
+                    // it costs nothing to keep it while the book is being read
+                    // anyway. Its own file: see BookData.Description.
+                    imported.SetDescription(doc.Description);
+                    imported.Isbn = doc.Isbn;
                     // The file's own date if it has one, and otherwise out of the
                     // publisher and the title, where real books keep it — see
                     // BookData.ResolveYear.

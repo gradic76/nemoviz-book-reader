@@ -169,6 +169,7 @@ Dialog.Help.ComingSoon=Help – coming soon.
 Dialog.Help.Title=Help
 ; The About box, standing empty until its words are written. It says that
 ; plainly rather than showing a blank window: what is missing is the text.
+Dialog.Description.Title=Description - {0}
 Dialog.About.Title=About NBR
 Dialog.About.Text=Nemoviz Book Reader\n\nThis window is waiting for its text.\n\nWhat belongs here — the version, who made it, the licences of the parts NBR is built from, and how to get in touch — has not been written yet. The window is wired up so the menu item leads somewhere, and so that whoever writes it has a place to put it.
 Dialog.Timer.Title=Sleep Timer
@@ -263,6 +264,10 @@ Details.Field.Pages=Pages
 Details.Field.Headings=Headings
 Details.Field.Characters=Characters
 Details.Field.Language=Detected language
+Details.Field.Description=Description
+; The VALUE of the Description row. The row is a doorway, not the text: the
+; pane is a 120/280 px grid and a blurb runs to about 935 characters.
+Details.Description.Open=Press Enter to read it
 Details.Field.SoundProcessing=Sound processing
 Details.Sound.On=On
 Details.Sound.Off=Off
