@@ -854,6 +854,86 @@ linear amplitudes (threshold/makeup/limit via `10^(dB/20)`).
   re-applied (OK saved new, Cancel kept old). From the library there's no audio,
   so no preview.
 
+### The auto-analyser is BUILT, and it runs on the switch, not at import (2026-08-07)
+
+`SoundAnalysis.cs` — `SoundAnalyser` measures, `SoundAdvisor` maps the numbers
+onto the six stages, `BookData.Analysis` keeps them in `Book.ini`
+`[SoundAnalysis]`. Committed `da2efa8`. **Not yet wired to the UI**: the hook on
+Properties' master switch, the `en.lang` keys, and keeping the dialog responsive
+for the ~1.6 s are still to do.
+
+**It runs when the reader switches sound processing ON.** Gordan, 2026-08-07:
+*"Ako Sound processing ne treba tj. čitatelj je zadovoljan zvukom ne rade se
+bespotrebne radnje na uvozu."* **That supersedes the section below**, whose three
+reasons do not survive the move: changing filters mid-playback is heard as a
+break — but switching processing on already rebuilds mpv's graph, so the break is
+what the reader just asked for; the measurement needs seconds to settle — but it
+never touches the player, running in its own silent context and seeking where it
+likes, so the segment is a choice and not a constraint; and "import already walks
+every file" is an argument about amortising a cost most readers never incur.
+What it stores is the **measurements**, not only the levels they produced — his
+instruction, and also why the analysis runs once rather than on every visit.
+
+**No ffmpeg.exe, which was proved before anything was designed.** The shipped
+audio-only libmpv carries `astats` and `ebur128`, and mpv forwards a filter's own
+output through `mpv_request_log_messages` — so the numbers come back over the
+channel the player already has. Verified through the real C API on real books,
+not by finding strings in the DLL (§10e′'s rule). Two settings decide whether it
+works at all: **`msg-level=ffmpeg=v`**, without which the graph runs perfectly
+and reports nothing — which reads exactly like a filter that is not there; and
+**`speed=100`**, because a null AO still paces to the clock, so 20 s of audio
+cost 20 s. Measured at about **50× real time — one decode, 530 ms**, so a book is
+~1.6 s.
+
+**One graph, three bands** (`asplit` → full / `lowpass=300` / `highpass=6000` →
+`amix`). **`ebur128` stands AHEAD of the split**: behind the `amix` it measures
+the mixed-down signal, and a real book came back at **−21.7 LUFS against its true
+−13.8**, with nothing in the output to say the number was wrong.
+**`aspectralstats` is accepted but prints no end-of-stream summary** — it only
+sets per-frame metadata, which never reaches the log — so the spectral centroid
+is unavailable and the two band ratios answer the same two questions instead.
+
+**A sweep of 113 real books found three faults in the parser, every one silent:**
+
+| fault | how often | what it produced |
+|---|---|---|
+| astats reports `Noise floor: -inf` | **49 %**, plus 6 % with no such line | clamping it to −120 dB made half the sample report a noise floor never measured |
+| a missing key read back as **0** | 6 books | a signal-to-noise ratio of ≈ −21 dB — arithmetic on a value that does not exist |
+| a segment landed on **silence** | 7 books | the book's mean level dragged down by the whole depth of the gap |
+
+So `NaN` means *not measured* and never enters an average, `-inf` is kept as an
+infinity so "silent" stays distinguishable from "not measured", and a segment
+below −60 dB is rejected as no sample at all. **The real noise measure is
+astats' RMS trough** — the quietest window, which between sentences *is* the
+noise; this section had already reasoned that voice activity detection would find
+the noise in the gaps, and the trough gets there without the detection. (ffmpeg
+spells it `RMS through dB` in this build. Match the log, not the documentation.)
+**Even so the SNR is unavailable in a third of books** (76 of 113), and there
+denoise stays off rather than guessing.
+
+**The reference tool's thresholds were NOT copied, and measurement is why.** The
+section below offers SlušajKnjigu's SNR 14 dB as a free starting point. Run
+against this sample it fires on **zero of 113 books** — the noisiest measures
+20.9 dB. Their SNR is a different quantity on a different scale, so the constant
+is meaningless here. Every threshold in `SoundAdvisor` comes from our own
+distribution, recorded beside each rule:
+
+| measure | have | min | p25 | median | p75 | max |
+|---|---|---|---|---|---|---|
+| LUFS | 113 | −34.1 | −20.6 | **−18.6** | −16.7 | −7.2 |
+| LRA | 113 | 1.1 | 3.2 | **4.3** | 5.7 | 11.7 |
+| true peak | 113 | −12.0 | −4.8 | −3.1 | −1.8 | **+3.0** |
+| SNR | 76 | 20.9 | 58.0 | 65.4 | 74.6 | 243 |
+| low band below | 113 | 1.2 | 2.9 | 3.7 | 4.6 | 9.2 |
+| high band below | 113 | 9.2 | 16.4 | 19.9 | 23.1 | 40.2 |
+
+Replayed through the advisor: 4 stages for 46 books, 3 for 27, 5 for 26, and the
+four noisiest all take denoise at maximum while clean recordings take none.
+**These are starting points for the ear, not a verdict** — the rules are set so a
+book at the library's median gets roughly what the dialog already defaults to, so
+the analysis moves a book that is unusual rather than re-deciding every book.
+§8d's split stands: I measure, Gordan judges by ear.
+
 **An auto-analyser belongs at IMPORT, not on the fly** (settled 2026-07-31 after
 reading a comparable tool, `D:\Test Naslovi\SlušajKnjigu_Portable` — a
 PyInstaller app whose whole configuration is in plain sight in
