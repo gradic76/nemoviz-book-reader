@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -465,13 +465,13 @@ namespace Nemoviz_Book_Reader
             if (pubA.Length == 0) info.Add(BookInfoField.Year, book.Year);
             info.AddAlways(BookInfoField.Format, book.Format, dash);
             info.AddAlways(BookInfoField.Time, book.Duration, dash);
+            AddDescriptionRow(info);
             sb.Append(info.ToText(Environment.NewLine));
             sb.AppendLine();
 
             if (!chkMaster.Checked)
             {
                 sb.AppendLine(Localization.T("Prop.Info.ProcessingOff"));
-                AppendDescription(sb, Environment.NewLine);
                 tbInfo.Text = sb.ToString();
                 return;
             }
@@ -507,7 +507,6 @@ namespace Nemoviz_Book_Reader
             sb.AppendLine(Localization.T("Prop.Info.Protection") + ": " +
                 SoundSettings.LimiterCeilingDb.ToString("0.0") + " dB");
 
-            AppendDescription(sb, Environment.NewLine);
             tbInfo.Text = sb.ToString();
         }
 
@@ -1287,6 +1286,7 @@ namespace Nemoviz_Book_Reader
                 info.Add(BookInfoField.Characters, book.TextChars.ToString("N0"));
             if (!string.IsNullOrEmpty(book.TextLanguage))
                 info.Add(BookInfoField.Language, LanguageDetector.DisplayName(book.TextLanguage));
+            AddDescriptionRow(info);
             sb.Append(info.ToText(nl));
             sb.Append(nl);
 
@@ -1342,7 +1342,6 @@ namespace Nemoviz_Book_Reader
             if (chkTVisual != null && chkTVisual.Checked && cmbTVisualMode != null && cmbTVisualMode.SelectedItem != null)
                 sb.Append(cmbTVisualMode.SelectedItem).Append(nl);
 
-            AppendDescription(sb, nl);
             tbTextInfo.Text = sb.ToString();
         }
 
@@ -1361,12 +1360,24 @@ namespace Nemoviz_Book_Reader
         /// are what a reader opens this page FOR. At the foot it costs nothing to
         /// anyone who does not want it and is one arrow key away for anyone who
         /// does.</para></summary>
-        private void AppendDescription(StringBuilder sb, string nl)
+        /// <summary>The description's door, in the SAME place the Library puts it
+        /// (Gordan, 2026-08-07 — "možeš to malo uniformirati?").
+        ///
+        /// <para>It went in through the BookInfoBuilder rather than being appended
+        /// at the foot, which is what makes the two agree: the builder orders by
+        /// <see cref="BookInfoField"/>, so one enum decides the position
+        /// everywhere and neither page can drift from the other. That is the
+        /// convention both columns already state at the top — the book's own
+        /// facts in the canonical order first, the page's own business after — and
+        /// a description is a fact about the book.</para>
+        ///
+        /// <para>The reason it was ever last has gone: a paragraph at the foot
+        /// would have pushed the reading settings and the processing read-out off
+        /// the bottom. A single line saying "press Enter" pushes nothing.</para></summary>
+        private void AddDescriptionRow(BookInfoBuilder info)
         {
             if (book == null || !book.HasDescription) return;
-            sb.Append(nl);
-            sb.Append(Localization.T("Details.Field.Description")).Append(": ")
-              .Append(Localization.T("Details.Description.Open")).Append(nl);
+            info.Add(BookInfoField.Description, Localization.T("Details.Description.Open"));
         }
 
         /// <summary>Opens the blurb in the same window the Library uses.
