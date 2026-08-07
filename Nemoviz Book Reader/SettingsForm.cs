@@ -87,6 +87,7 @@ namespace Nemoviz_Book_Reader
         // hears the change immediately.
         private ComboBox cmbSoundCard;
         private CheckBox chkKeepAlive;
+        private CheckBox chkOptical;
         private readonly List<MpvAudioDevices.Device> audioDevices;
         private readonly List<string> deviceIds = new List<string>();
         private readonly Action<string> applyAudioDeviceLive;
@@ -440,6 +441,11 @@ namespace Nemoviz_Book_Reader
                     appSettings.SetAudioDevice(deviceIds[i]);
             }
             if (chkKeepAlive != null) appSettings.SetKeepDeviceAlive(chkKeepAlive.Checked);
+            // Only when the group was reachable: a disabled box reads as
+            // unchecked, and saving that would quietly clear a setting made on a
+            // machine that did have a drive.
+            if (chkOptical != null && chkOptical.Enabled)
+                appSettings.SetUseOpticalDrive(chkOptical.Checked);
 
             // Misc — the look. A window builds itself once, so the change lands
             // when NBR starts again; offer to do that now rather than leaving the
@@ -1074,6 +1080,37 @@ namespace Nemoviz_Book_Reader
 
             page.Controls.Add(box);
             page.Controls.Add(MakeHint("Settings.Device.KeepAlive.Hint", 22, 106, 452, 60, 2));
+
+            // ── Optical drive (Gordan, 2026-08-07) ───────────────────────────
+            // Its own group, which is why the tab is "Devices" now: a sound card
+            // and a CD drive are two different pieces of hardware and the page
+            // was named for having only one of them.
+            //
+            // THE WHOLE GROUP IS DIMMED WHEN THERE IS NO DRIVE, rather than
+            // hidden. A reader who has one wants to find the switch; a reader who
+            // has none is better told "this exists and your machine cannot do it"
+            // than left to wonder whether they missed it. Hiding answers no
+            // question at all — and disabled is a state a screen reader announces.
+            bool haveDrive = OpticalDrive.AnyDrive();
+
+            GroupBox optical = new GroupBox();
+            optical.Text = Localization.T("Settings.Device.OpticalGroup");
+            optical.Location = new Point(8, 172);
+            optical.Size = new Size(500, 62);
+            optical.Tag = "span2";
+            optical.Enabled = haveDrive;
+
+            chkOptical = new CheckBox();
+            chkOptical.Text = Localization.T("Settings.Device.UseOptical");
+            chkOptical.AccessibleName = Localization.T("Settings.Device.UseOptical");
+            chkOptical.SetBounds(14, 26, 470, 24);
+            chkOptical.TabIndex = 0;
+            // Off by default even where a drive exists — see AppSettings.
+            chkOptical.Checked = haveDrive && appSettings.UseOpticalDrive;
+            optical.Controls.Add(chkOptical);
+
+            page.Controls.Add(optical);
+            page.Controls.Add(MakeHint("Settings.Device.UseOptical.Hint", 22, 240, 452, 76, 3));
             return page;
         }
 
