@@ -2422,7 +2422,36 @@ namespace Nemoviz_Book_Reader
             string n = System.IO.Path.GetFileName(path).ToLowerInvariant();
             if (n == "info.txt" || n == "info.nfo" || n == "readme.txt") return true;
             if (n.StartsWith("torrent downloaded from")) return true;
-            return false;
+            return IsTooSmallToBeABook(path);
+        }
+
+        /// <summary>The second half of the note filter, and the half that does not
+        /// need to know any names (Gordan, 2026-08-07): <b>under 5 KB it is not a
+        /// book</b>.
+        ///
+        /// <para>The name list above catches what people call their notes. This
+        /// catches the rest — colophons, licence files, stray shortcuts, a
+        /// two-line "downloaded from" left in a folder under some other name. On a
+        /// shelf import those all arrive as books, and every one of them has to be
+        /// deleted by hand.</para>
+        ///
+        /// <para><b>Only on the FOLDER import.</b> A reader who picks a file
+        /// themselves has said what they want, and is not to be second-guessed;
+        /// this runs where the app is guessing on their behalf across a whole
+        /// disk. 5 KB of plain text is about 800 words — shorter than any book,
+        /// longer than any note, and a real short story is still safely above
+        /// it.</para>
+        ///
+        /// <para>Unreadable means NOT filtered: if the length cannot be taken, the
+        /// file keeps the benefit of the doubt and stays a book, which is the same
+        /// way round as the name list — an unwanted entry is deleted in a second,
+        /// a missing one is never noticed.</para></summary>
+        private const long MinBookBytes = 5 * 1024;
+
+        private static bool IsTooSmallToBeABook(string path)
+        {
+            try { return new System.IO.FileInfo(path).Length < MinBookBytes; }
+            catch { return false; }
         }
 
         /// <summary>Is the navigation of a DAISY book lying in THIS folder — an
