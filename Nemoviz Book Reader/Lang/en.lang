@@ -81,6 +81,10 @@ SleepTimer.Duration.45=45 minutes
 SleepTimer.Duration.60=60 minutes
 SleepTimer.Duration.Custom=Custom:
 SleepTimer.Custom.Accessible=Custom duration in minutes
+; Neither a duration nor an expiry action - a third question, about the BOOK.
+; A reader who falls asleep wakes up somewhere they were not listening; this
+; marks where they were still awake.
+SleepTimer.Bookmark=Set bookmark on timer's start position
 SleepTimer.Action.Group=When the time expires
 SleepTimer.Action.Stop=Stop playback
 SleepTimer.Action.StopClose=Stop and close the program

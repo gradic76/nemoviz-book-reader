@@ -42,8 +42,28 @@ namespace Nemoviz_Book_Reader
         private RadioButton rbActionStopClose;
         private RadioButton rbActionStopShutdown;
 
+        private CheckBox chkBookmark;
+
         private Button btnStart;
         private Button btnCancel;
+
+        /// <summary>Whether to drop a bookmark where the book stands when the
+        /// timer is armed (valid when DialogResult is OK).
+        ///
+        /// <para><b>What it is for</b> (Gordan): a reader who falls asleep wakes
+        /// up somewhere they were not listening. The bookmark marks where they
+        /// were still awake, so they can go back to it and move forward to
+        /// wherever they actually dropped off, instead of hunting backwards
+        /// through a chapter they half heard.</para>
+        ///
+        /// <para><b>Remembered across books and sessions</b>, on the pattern the
+        /// Go To dialog's "start playing after jump" already set: if it suits a
+        /// reader once it suits them always, and re-ticking it every night is the
+        /// app forgetting something it was told.</para></summary>
+        public bool SetBookmark
+        {
+            get { return chkBookmark != null && chkBookmark.Checked; }
+        }
 
         /// <summary>Chosen duration in minutes (valid when DialogResult is OK).</summary>
         public int SelectedMinutes
@@ -81,7 +101,7 @@ namespace Nemoviz_Book_Reader
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterParent;
-            this.ClientSize = new Size(380, 360);
+            this.ClientSize = new Size(380, 388);
             this.ShowInTaskbar = false;
 
             // ── Duration group ──
@@ -188,25 +208,38 @@ namespace Nemoviz_Book_Reader
             grpAction.Controls.Add(rbActionStopClose);
             grpAction.Controls.Add(rbActionStopShutdown);
 
+            // ── Bookmark ──
+            // Loose on the dialog rather than inside either group: it belongs to
+            // neither. The duration group answers "how long" and the action group
+            // "what then"; this answers "and mark where I am", which is a third
+            // question and the only one about the BOOK rather than the timer.
+            chkBookmark = new CheckBox();
+            chkBookmark.Text = Localization.T("SleepTimer.Bookmark");
+            chkBookmark.AccessibleName = Localization.T("SleepTimer.Bookmark");
+            chkBookmark.SetBounds(15, 288, 350, 24);
+            chkBookmark.TabIndex = 2;
+            chkBookmark.Checked = AppSettings.Current != null && AppSettings.Current.SleepTimerBookmark;
+
             // ── Buttons ──
             btnStart = new Button();
             btnStart.Text = Localization.T("SleepTimer.Start");
             btnStart.Size = new Size(120, 32);
-            btnStart.Location = new Point(120, 295);
-            btnStart.TabIndex = 2;
+            btnStart.Location = new Point(120, 322);
+            btnStart.TabIndex = 3;
             btnStart.AccessibleName = Localization.T("SleepTimer.Start.Accessible");
             btnStart.DialogResult = DialogResult.OK;
 
             btnCancel = new Button();
             btnCancel.Text = Localization.T("SleepTimer.CancelBtn");
             btnCancel.Size = new Size(120, 32);
-            btnCancel.Location = new Point(248, 295);
-            btnCancel.TabIndex = 3;
+            btnCancel.Location = new Point(248, 322);
+            btnCancel.TabIndex = 4;
             btnCancel.AccessibleName = Localization.T("SleepTimer.CancelBtn.Accessible");
             btnCancel.DialogResult = DialogResult.Cancel;
 
             this.Controls.Add(grpDuration);
             this.Controls.Add(grpAction);
+            this.Controls.Add(chkBookmark);
             this.Controls.Add(btnStart);
             this.Controls.Add(btnCancel);
 
@@ -226,6 +259,7 @@ namespace Nemoviz_Book_Reader
                 {
                     Duration = grpDuration,
                     Action = grpAction,
+                    Bookmark = chkBookmark,
                     Start = btnStart,
                     Cancel = btnCancel,
                 };

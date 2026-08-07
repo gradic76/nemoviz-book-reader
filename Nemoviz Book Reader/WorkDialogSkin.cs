@@ -21,6 +21,11 @@ namespace Nemoviz_Book_Reader
     internal sealed class TimerParts
     {
         public GroupBox Duration, Action;
+        /// <summary>The bookmark switch, which belongs to neither group and so
+        /// has to be placed by name. Added 2026-08-07 — the skin lays this dialog
+        /// out by hand, so a control it has never heard of stays wherever the
+        /// classic layout left it, which in the new look is off the glass.</summary>
+        public CheckBox Bookmark;
         public Button Start, Cancel;
     }
 
@@ -53,6 +58,14 @@ namespace Nemoviz_Book_Reader
         // shorter and carries the slack — that is the cost of one size per
         // family, and it is the cheaper way round.
         internal const int SmallW = 420, SmallH = 360;
+
+        /// <summary>The Sleep Timer's own height. It outgrew the shared one when
+        /// the bookmark switch arrived: 12 + 150 (duration) + 12 + 110 (action) +
+        /// 14 + 24 puts the switch at 322, and the buttons on a 360-high dialog
+        /// start at 312 — they would have overlapped. Its own constant rather
+        /// than a bigger SmallH, because Manage Bookmarks and the password prompt
+        /// share that one and neither grew.</summary>
+        private const int TimerH = 396;
         private const int Margin = 12;
 
         public static void ApplyGoTo(GoToForm f)
@@ -143,10 +156,10 @@ namespace Nemoviz_Book_Reader
 
             DialogSkin.EnsureFonts();
             f.SuspendLayout();
-            DialogCanvas canvas = DialogSkin.Shell(f, SmallW, SmallH);
+            DialogCanvas canvas = DialogSkin.Shell(f, SmallW, TimerH);
             DialogSkin.AnchorToOwner(f, DialogAnchor.BottomLeft);
 
-            int buttonsY = SmallH - Margin - DialogSkin.ButtonH;
+            int buttonsY = TimerH - Margin - DialogSkin.ButtonH;
             int w = SmallW - 2 * Margin;
 
             DialogSkin.AsSticker(p.Duration, new Rectangle(Margin, Margin, w, p.Duration.Height));
@@ -157,6 +170,18 @@ namespace Nemoviz_Book_Reader
             DialogSkin.AsSticker(p.Action, new Rectangle(Margin, actionY, w, p.Action.Height));
             foreach (Control c in p.Action.Controls) DialogSkin.OnGlass(c);
             WidenLabels(p.Action);
+
+            // Between the last group and the buttons, on the metal rather than in
+            // a sticker: it is not part of either question above it.
+            // Between the last group and the buttons, styled the way Go To's
+            // "start playing after jump" already is — the same shape of question
+            // in the same place on the same kind of dialog.
+            if (p.Bookmark != null)
+            {
+                int y = actionY + p.Action.Height + 14;
+                p.Bookmark.SetBounds(Margin, y, w, 24);
+                DialogSkin.OnGlass(p.Bookmark);
+            }
 
             DialogSkin.AsKey(p.Start, new Rectangle(SmallW - Margin - 2 * DialogSkin.ButtonW - 12, buttonsY,
                 DialogSkin.ButtonW, DialogSkin.ButtonH));

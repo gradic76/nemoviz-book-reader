@@ -2145,7 +2145,19 @@ namespace Nemoviz_Book_Reader
             using (SleepTimerForm dlg = new SleepTimerForm())
             {
                 if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    // The mark goes down BEFORE the timer starts, so it records
+                    // where the reader was awake rather than a second or two of
+                    // drift. Remembered either way, ticked or not, on the Go To
+                    // pattern — the answer is about the reader, not this book.
+                    appSettings.SetSleepTimerBookmark(dlg.SetBookmark);
+                    if (dlg.SetBookmark && currentBook != null)
+                    {
+                        currentBook.AddBookmark(BookPosition());
+                        RebuildSeekSteps();
+                    }
                     StartSleepTimer(dlg.SelectedMinutes, dlg.SelectedAction);
+                }
                 else if (wasPlaying)
                     ResumePlaybackQuietly();
             }
