@@ -71,7 +71,20 @@ namespace Nemoviz_Book_Reader
         public static string FindDiscDrive(out List<OpticalDrive.Track> tracks)
         {
             tracks = new List<OpticalDrive.Track>();
-            foreach (string d in OpticalDrive.Drives())
+
+            // The chosen drive first, if there is one and it still exists. A
+            // letter that has gone — the image software uninstalled, the drive
+            // unplugged — falls through to the search rather than failing, so a
+            // setting made on one machine cannot break NBR on another.
+            List<string> order = new List<string>(OpticalDrive.Drives());
+            string want = AppSettings.Current != null ? AppSettings.Current.OpticalDriveLetter : null;
+            if (!string.IsNullOrEmpty(want) && order.Contains(want))
+            {
+                order.Remove(want);
+                order.Insert(0, want);
+            }
+
+            foreach (string d in order)
             {
                 if (!OpticalDrive.HasDisc(d)) continue;
                 List<OpticalDrive.Track> toc = OpticalDrive.ReadToc(d);
@@ -130,6 +143,16 @@ namespace Nemoviz_Book_Reader
             book.Author = "";
             book.Format = Localization.T("Cd.Format");
             book.Duration = TimeSpan.FromSeconds(total).ToString(@"hh\:mm\:ss");
+
+            // THE TRACKS HAVE TO BE ON THE CHAPTER LIST, or the disc is not a
+            // multi-file book at all — GetPlayerType decides on Chapters.Count,
+            // so without this the player took an eight-track CD for one long file
+            // and the seek step offered nothing but minutes (Gordan, 2026-08-07).
+            // Sorted by name, which for "Track 01.wav" is the disc's own order.
+            var wavs = new List<string>(Directory.GetFiles(folder, "*.wav"));
+            wavs.Sort(StringComparer.OrdinalIgnoreCase);
+            book.BuildChaptersFromFolder(wavs.ToArray());
+
             book.Save();
             return book;
         }

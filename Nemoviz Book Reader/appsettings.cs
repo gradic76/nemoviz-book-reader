@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -123,6 +123,31 @@ namespace Nemoviz_Book_Reader
         /// 2026-08-03).</para></summary>
         public bool KeepDeviceAlive { get; private set; }
 
+        /// <summary>Whether NBR may use an optical drive to play an audio CD.
+        ///
+        /// <para><b>Off unless asked for (Gordan, 2026-08-07)</b>, even on a
+        /// machine that has a drive. Reading a CD spins up hardware that most
+        /// readers will never point at NBR, and a feature that touches the
+        /// machine should be the reader's decision rather than ours. The Library's
+        /// "Open audio CD" follows this switch, not the presence of a
+        /// drive.</para></summary>
+        public bool UseOpticalDrive { get; private set; }
+
+        /// <summary>Which optical drive to read, as a letter with its colon
+        /// ("F:"), or "" for whichever one has a disc in it.
+        ///
+        /// <para><b>More than one is not the museum piece it sounds like</b>
+        /// (Gordan, 2026-08-07): he runs a physical drive and a virtual one side
+        /// by side on another machine, and image-mounting software puts a second
+        /// drive on plenty of systems. Guessing between them is exactly the sort
+        /// of thing that looks fine on the machine it was written on.</para>
+        ///
+        /// <para>A letter that has since disappeared — the software uninstalled,
+        /// the drive unplugged — falls back to the automatic search rather than
+        /// failing, so a setting made on one machine cannot break NBR on
+        /// another.</para></summary>
+        public string OpticalDriveLetter { get; private set; }
+
         /// <summary>The libmpv <c>audio-device</c> identifier for output (e.g.
         /// <c>wasapi/{…}</c>). Empty means <c>auto</c> — mpv picks the system
         /// default. Set from Settings → Device.</summary>
@@ -156,6 +181,8 @@ namespace Nemoviz_Book_Reader
             LanguageSeen = NoteLanguageSeen;
             AudioDevice = ini.Read("Audio", "Device", "");
             KeepDeviceAlive = ini.Read("Audio", "KeepAlive", "1") == "1";
+            UseOpticalDrive = ini.Read("Audio", "UseOpticalDrive", "0") == "1";
+            OpticalDriveLetter = ini.Read("Audio", "OpticalDrive", "");
             MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
             ShowHints = ini.Read("App", "ShowHints", "1") == "1";
@@ -393,6 +420,22 @@ namespace Nemoviz_Book_Reader
             if (on == KeepDeviceAlive) return;
             KeepDeviceAlive = on;
             ini.Write("Audio", "KeepAlive", on ? "1" : "0");
+        }
+
+        public void SetUseOpticalDrive(bool on)
+        {
+            if (on == UseOpticalDrive) return;
+            UseOpticalDrive = on;
+            ini.Write("Audio", "UseOpticalDrive", on ? "1" : "0");
+        }
+
+        /// <summary>"" means "whichever drive has a disc in it".</summary>
+        public void SetOpticalDriveLetter(string letter)
+        {
+            letter = letter ?? "";
+            if (letter == OpticalDriveLetter) return;
+            OpticalDriveLetter = letter;
+            ini.Write("Audio", "OpticalDrive", letter);
         }
 
         /// <summary>Stores the default voice and how it is set up. The numbers are

@@ -894,7 +894,12 @@ namespace Nemoviz_Book_Reader
             switch (type)
             {
                 case PlayerType.MultiAudio:
-                    AddSeekStep(new SeekStep(SeekStepKind.Part), Localization.T("Seek.Item.Part"));
+                    // A CD's unit is a TRACK, and calling it a part while Go To
+                    // lists "Track 01" would be two names for one thing. Same
+                    // step, same behaviour — only the word follows the medium.
+                    AddSeekStep(new SeekStep(SeekStepKind.Part),
+                        Localization.T(currentBook != null && AudioCd.IsRipFolder(currentBook.FolderPath)
+                                       ? "Seek.Item.Track" : "Seek.Item.Part"));
                     goto case PlayerType.SingleAudio;
 
                 case PlayerType.SingleAudio:

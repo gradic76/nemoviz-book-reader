@@ -108,6 +108,8 @@ Seek.Item.15min=15 minutes
 Seek.Item.30min=30 minutes
 Seek.Item.Chapter=Chapter
 Seek.Item.Part=Part
+; A CD's unit is a track. Same step as Part, only the word follows the medium.
+Seek.Item.Track=Track
 Seek.Item.HeadingLevel=Heading {0}
 Seek.Item.Page=Page
 Seek.Item.Bookmark=Bookmark
@@ -502,6 +504,8 @@ Settings.Device.Default=System default (auto)
 ; drive are two different pieces of hardware; it was named for having only one.
 Settings.Device.OpticalGroup=Optical drive
 Settings.Device.UseOptical=Use the optical drive for audio CDs
+Settings.Device.OpticalWhich=Drive:
+Settings.Device.OpticalAuto=Whichever has a disc in it
 Settings.Device.UseOptical.Hint=Books were once published on ordinary audio CDs, and NBR can play them. It reads the disc itself rather than leaving it spinning: the whole side is read in one pass, straight through and without going back, so the drive works for a few minutes and is then silent for the rest of the book. Reading slowly would be quieter for a second and noisier for an hour. Turn this on only if you want it - it is off to begin with, even on a machine that has a drive, and while it is off NBR never touches the drive at all.
 Settings.OK.Accessible=OK
 Settings.Cancel.Accessible=Cancel

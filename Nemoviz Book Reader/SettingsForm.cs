@@ -88,6 +88,33 @@ namespace Nemoviz_Book_Reader
         private ComboBox cmbSoundCard;
         private CheckBox chkKeepAlive;
         private CheckBox chkOptical;
+        private ComboBox cmbOptical;
+        /// <summary>Drive letters parallel to cmbOptical's rows; "" is the
+        /// automatic first row.</summary>
+        private readonly List<string> opticalDrives = new List<string>();
+
+        /// <summary>"F: (Audio CD)" when something is in the drive, "F:" when it
+        /// is empty.
+        ///
+        /// <para>The model name would have been nicer to read and was written
+        /// that way first — through WMI, which meant a reference to
+        /// System.Management for one label, on the same morning seven unused
+        /// framework references were taken out for exactly that reason, plus a
+        /// WMI query while a dialog is being built. The disc's own label costs
+        /// nothing and, for the job in hand, says more: a reader choosing between
+        /// two drives wants to know WHICH ONE HAS THE DISC, not what it is
+        /// called.</para></summary>
+        private static string DriveLabel(string letter)
+        {
+            try
+            {
+                var d = new System.IO.DriveInfo(letter + "\\");
+                if (d.IsReady && !string.IsNullOrWhiteSpace(d.VolumeLabel))
+                    return letter + "  (" + d.VolumeLabel.Trim() + ")";
+            }
+            catch { }
+            return letter;
+        }
         private readonly List<MpvAudioDevices.Device> audioDevices;
         private readonly List<string> deviceIds = new List<string>();
         private readonly Action<string> applyAudioDeviceLive;
@@ -445,7 +472,12 @@ namespace Nemoviz_Book_Reader
             // unchecked, and saving that would quietly clear a setting made on a
             // machine that did have a drive.
             if (chkOptical != null && chkOptical.Enabled)
+            {
                 appSettings.SetUseOpticalDrive(chkOptical.Checked);
+                int i = cmbOptical != null ? cmbOptical.SelectedIndex : -1;
+                if (i >= 0 && i < opticalDrives.Count)
+                    appSettings.SetOpticalDriveLetter(opticalDrives[i]);
+            }
 
             // Misc — the look. A window builds itself once, so the change lands
             // when NBR starts again; offer to do that now rather than leaving the
@@ -1096,7 +1128,10 @@ namespace Nemoviz_Book_Reader
             GroupBox optical = new GroupBox();
             optical.Text = Localization.T("Settings.Device.OpticalGroup");
             optical.Location = new Point(8, 172);
-            optical.Size = new Size(500, 62);
+            // 92, the same as the sound-card group above: a checkbox on one row
+            // and a labelled combo on the next is exactly the shape that group
+            // already has, and 62 was the height for the checkbox alone.
+            optical.Size = new Size(500, 92);
             optical.Tag = "span2";
             optical.Enabled = haveDrive;
 
@@ -1109,8 +1144,43 @@ namespace Nemoviz_Book_Reader
             chkOptical.Checked = haveDrive && appSettings.UseOpticalDrive;
             optical.Controls.Add(chkOptical);
 
+            // WHICH drive, because more than one is not a museum piece (Gordan,
+            // 2026-08-07): a physical drive and a virtual one side by side is an
+            // ordinary setup wherever image-mounting software is installed, and
+            // guessing between them is the kind of thing that works perfectly on
+            // the machine it was written on.
+            //
+            // The first row is "whichever has a disc in it", and it stays the
+            // default: for the one-drive machine that is the whole answer, and
+            // for two it is still right most of the time.
+            Label lblDrive = new Label();
+            lblDrive.Text = Localization.T("Settings.Device.OpticalWhich");
+            lblDrive.SetBounds(14, 59, 160, 20);
+
+            cmbOptical = new ComboBox();
+            cmbOptical.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbOptical.SetBounds(184, 56, 240, 24);
+            cmbOptical.AccessibleName = Localization.T("Settings.Device.OpticalWhich");
+            cmbOptical.TabIndex = 1;
+
+            opticalDrives.Add("");
+            cmbOptical.Items.Add(Localization.T("Settings.Device.OpticalAuto"));
+            foreach (string d in OpticalDrive.Drives())
+            {
+                opticalDrives.Add(d);
+                // The letter and, where Windows will say, what the drive calls
+                // itself — "F:  Yubsoft ImgDrive" tells the two apart at a glance
+                // where "F:" alone does not.
+                cmbOptical.Items.Add(DriveLabel(d));
+            }
+            int pick = opticalDrives.IndexOf(appSettings.OpticalDriveLetter ?? "");
+            cmbOptical.SelectedIndex = pick >= 0 ? pick : 0;
+
+            optical.Controls.Add(lblDrive);
+            optical.Controls.Add(cmbOptical);
+
             page.Controls.Add(optical);
-            page.Controls.Add(MakeHint("Settings.Device.UseOptical.Hint", 22, 240, 452, 76, 3));
+            page.Controls.Add(MakeHint("Settings.Device.UseOptical.Hint", 22, 270, 452, 76, 3));
             return page;
         }
 
