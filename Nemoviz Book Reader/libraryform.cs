@@ -2080,6 +2080,11 @@ namespace Nemoviz_Book_Reader
                         M4bBook m4b = M4bParser.TryParse(destFile);
                         if (m4b != null && m4b.HasChapters)
                             imported.SetM4bChapters(m4b.Chapters);
+                        // The blurb does NOT depend on there being chapters — the
+                        // one sampled book with a chapter list of zero still has
+                        // a description, and the two are unrelated facts.
+                        if (m4b != null && !string.IsNullOrEmpty(m4b.Description))
+                            imported.SetDescription(m4b.Description);
                     }
                 }
                 else if (isTextImport && ImportNarratedEpub(filePath, destFolder, imported))

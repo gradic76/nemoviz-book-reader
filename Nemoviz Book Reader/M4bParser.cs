@@ -10,6 +10,10 @@ namespace Nemoviz_Book_Reader
     {
         public string Title = "";
         public string Author = "";
+        /// <summary>The publisher's blurb, cleaned. M4B audiobooks carry it more
+        /// often than any other format measured so far — better than half the
+        /// sampled files, against 45 % of EPUBs and 13 % of MOBI.</summary>
+        public string Description = "";
         public double DurationSeconds = 0;
         // Chapter marks in reading order: title + start time (seconds) into the
         // single audio file.
@@ -147,7 +151,7 @@ namespace Nemoviz_Book_Reader
         // ── Metadata (ilst ©nam / ©ART) ───────────────────────────────────
         private static void ReadMetadata(byte[] b, List<Box> boxes, M4bBook book)
         {
-            string nam = "", art = "", aart = "";
+            string nam = "", art = "", aart = "", desc = "", ldes = "";
             foreach (Box d in boxes.FindAll(x => x.Type == "data" && x.Path.Contains("/ilst/")))
             {
                 int idx = d.Path.IndexOf("/ilst/");
@@ -157,10 +161,29 @@ namespace Nemoviz_Book_Reader
                 if (atom == "©nam" && nam == "") nam = val;
                 else if (atom == "©ART" && art == "") art = val;
                 else if (atom == "aART" && aart == "") aart = val;  // album artist
+                else if (atom == "desc" && desc == "") desc = val;  // short description
+                else if (atom == "ldes" && ldes == "") ldes = val;  // long description
             }
             book.Title = nam;
             // Audiobooks commonly carry the author in Artist, else Album Artist.
             book.Author = art != "" ? art : aart;
+
+            // LONG first: where a producer fills both, desc is a one-line teaser
+            // and ldes is the blurb. Cleaned like every other source, because an
+            // M4B description can carry markup too.
+            string blurb = BookDescription.Clean(ldes != "" ? ldes : desc);
+
+            // AND A FLOOR, which the measurement asked for. Twelve of thirteen
+            // sampled books carry a description — the best rate of any format —
+            // but two of those twelve are not descriptions at all: "Narrated by:
+            // CC Hogan" (21 characters) and "Narrated by: Hollie Jackson" (27),
+            // sitting in `desc` with no `ldes` beside them. A Description row
+            // that opens a window to read a narrator's name is worse than no row.
+            //
+            // 80 characters, the same floor the trailing-text rule uses. The real
+            // blurbs in the sample start at 230, so nothing genuine is anywhere
+            // near it, and NBR has no narrator field for the credit to go to.
+            book.Description = blurb.Length >= 80 ? blurb : "";
         }
 
         private static string Utf8(byte[] b, int off, int len)
