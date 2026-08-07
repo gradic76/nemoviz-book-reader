@@ -131,6 +131,7 @@ namespace Nemoviz_Book_Reader
             string opfDir = DirOf(opfPath);
 
             string title = "", author = "", publisher = "", language = "", date = "",
+                   description = "", isbn = "",
                    ncxId = null, navHref = null;
             Dictionary<string, string> manifest = new Dictionary<string, string>(); // id → href
             Dictionary<string, string> mediaType = new Dictionary<string, string>();
@@ -149,6 +150,18 @@ namespace Nemoviz_Book_Reader
                     // which is when the FILE was touched and not when the book was
                     // published — taking the first dc:date keeps those apart.
                     else if (ln == "date" && date == "") date = (el.Value ?? "").Trim();
+                    // The blurb. Kept RAW here — what sits in the field is
+                    // usually escaped HTML, and BookDescription.Clean is the one
+                    // place that knows how to unwrap it (measured on 596 books).
+                    else if (ln == "description" && description == "")
+                        description = BookDescription.Clean(el.Value ?? "");
+                    // dc:identifier carries UUIDs, internal ids and URLs as well
+                    // as ISBNs, and there is no reliable attribute saying which:
+                    // opf:scheme="ISBN" is common but far from universal. So every
+                    // identifier is offered and NormaliseIsbn decides on shape —
+                    // ten or thirteen digits and nothing else survives.
+                    else if (ln == "identifier" && isbn == "")
+                        isbn = BookDescription.NormaliseIsbn(el.Value ?? "");
                     else if (ln == "item")
                     {
                         string id = (string)el.Attribute("id");
@@ -239,7 +252,7 @@ namespace Nemoviz_Book_Reader
 
             return new TextDoc { Text = body, Headings = headings, Pages = pages, Title = title,
                                  Author = author, Publisher = publisher, Language = language,
-                                 Date = date };
+                                 Date = date, Description = description, Isbn = isbn };
         }
 
         // ── DRM (only content encryption counts; fonts are obfuscation) ───

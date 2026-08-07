@@ -2888,9 +2888,37 @@ feature *requires*, not about a different app.
 2026-07-29). A "fancy feature" on the Lite backlog, deliberately parked: it needs
 no translation engine, so it does not belong in Pro.
 
-- **Goodreads is out** — its public API was shut down at the end of 2020. The
-  realistic sources are **Google Books** (best coverage, no key needed for basic
-  queries) and **Open Library** (open data, no key).
+- **Goodreads is out** — its public API was shut down at the end of 2020.
+- **"Google Books needs no key for basic queries" was WRONG** (mine, corrected
+  2026-08-07 against Google's own page): *"Requests to the Books API for public
+  data must be accompanied by an identifier, which can be an API key or an access
+  token."* Keyless requests do often work, but they are undocumented and rated by
+  IP — a test call came back **429**. And a key shipped inside a distributed app
+  can be extracted: someone burns the quota and the abuse is attributed to our
+  project. There is no useful key restriction for a desktop app (no referrer, no
+  fixed IP).
+- **Open Library is the one to use.** Verified 2026-08-07: no key, no account,
+  and `openlibrary.org/api/books?bibkeys=ISBN:…&jscmd=details` returned a real
+  description first try.
+- **MEASURED 2026-08-07 on 596 real EPUBs** (Test naslovi + three OneDrive
+  libraries; every OPF readable). This is what the whole remote idea is worth:
+  | | books | share |
+  |---|---|---|
+  | `dc:description` AND ISBN | 199 | 33 % |
+  | `dc:description` only | 70 | 12 % |
+  | **ISBN only — where a SAFE lookup adds something** | **31** | **5 %** |
+  | neither — a lookup must guess by title | 296 | 50 % |
+  The local pass gets **45 %** free and offline. A safe remote lookup adds **5 %**:
+  the books that carry an ISBN mostly carry a description already, because the
+  same publishers do both. So the local pass is the feature; the network is a
+  footnote, and bulk title-matching for the other half is where wrong blurbs
+  would come from.
+- **Two things the samples proved about `dc:description`:** it is usually
+  **escaped HTML**, so it needs decoding and THEN tag-stripping (one pass leaves
+  `<p class="description">` in the text), and some are Apple exports carrying
+  inline CSS. And **23 of the 269 run past 3000 characters** — the next book's
+  first chapter, or the author's bibliography. Median of a real blurb: **993
+  characters**, which is a paragraph and settles where it can go.
 - **The API is not the problem; matching is.** Folder-derived titles like
   `Silvia_Urich_El_chico_de_la_mascara_de` will mis-match, and a wrong blurb is
   worse than none — the reader has no way to notice. **ISBN is the way out where
@@ -2910,8 +2938,16 @@ no translation engine, so it does not belong in Pro.
   translating anything. Chaining Player → Books → Translate → Player couples the
   app to two outside services for one paragraph — Gordan's call, and the right
   one. Lite shows the description in whatever language the source has it.
-- **Where it goes:** not the player's info column (about three spare lines there,
-  measured — a description is a paragraph). The Library's details pane has room.
+- **Where it goes — and the old answer here was wrong.** This used to say "the
+  Library's details pane has room". It has not: that pane is a **two-column
+  ListView**, `Field` 120 px and `Value` 280 px. It is a label/value grid, not a
+  text area — a 993-character paragraph would not wrap, would be clipped at the
+  column edge, and a screen reader would read it as one unbroken sub-item with no
+  way to move inside it. The window is not full; the CONTROL is the wrong shape.
+  So: a **row in the details grid as the doorway** ("Description", Enter opens),
+  and the paragraph itself in **its own small dialog** on the `TextHelpForm`
+  pattern — read-only, tabbable, Escape closes. That is how NBR already shows
+  prose to a reader, and it adds nothing to any window that is already crowded.
 **Workflow rule:** until Lite is finished, when reporting "where we stopped"
 or "what's left", list **Lite items only**. Treat STT/OCR/translate as a
 separate Pro backlog — mention them only when explicitly asked about Pro.

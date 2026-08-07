@@ -20,6 +20,23 @@ namespace Nemoviz_Book_Reader
         // book remembers it and the user can correct the choice later.
         public string BrailleTable = "";
         public string Publisher = "";  // dc:publisher (EPUB print/edition publisher)
+        /// <summary>The publisher's blurb, when the file carries one.
+        ///
+        /// <para>Measured on 596 real EPUBs (2026-08-07): <b>45 % have one</b>,
+        /// median 993 characters. That is the whole feature — a remote lookup
+        /// keyed on ISBN would add 5 % on top, because the books that carry an
+        /// ISBN almost all carry a description already.</para>
+        ///
+        /// <para>Cleaned by <see cref="BookDescription.Clean"/> before it lands
+        /// here: what the file holds is usually ESCAPED HTML, and 23 of those 269
+        /// ran past 3000 characters because the producer put the next book's
+        /// first chapter or the author's bibliography in the field.</para></summary>
+        public string Description = "";
+        /// <summary>ISBN as the file declares it, digits only, 10 or 13 long.
+        /// The only key that makes a remote lookup safe: matching by title on
+        /// folder-derived names produces a wrong blurb, and a wrong blurb is
+        /// worse than none because the reader cannot tell.</summary>
+        public string Isbn = "";
         /// <summary>Whatever the file gave as a date — dc:date, and whatever
         /// shape the producer wrote it in. Reduced to a year by
         /// <see cref="BookData.ResolveYear"/>, which also knows where to look
