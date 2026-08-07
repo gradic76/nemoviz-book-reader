@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
-using System.Speech.Synthesis;
 using System.Windows.Forms;
 
 namespace Nemoviz_Book_Reader
@@ -188,22 +187,6 @@ namespace Nemoviz_Book_Reader
                     Apply = btnApply,
                 };
             }
-        }
-
-        /// <summary>Read-only, tabbable placeholder textbox — same "hint box"
-        /// control shape used elsewhere, so an otherwise-empty tab still
-        /// announces something to a screen reader instead of being silent.</summary>
-        private TextBox BuildPlaceholder(string text, Point location, Size size)
-        {
-            TextBox tb = new TextBox();
-            tb.Multiline = true;
-            tb.ReadOnly = true;
-            tb.TabStop = true;
-            tb.Location = location;
-            tb.Size = size;
-            tb.Text = text;
-            tb.AccessibleName = text;
-            return tb;
         }
 
         /// <summary>General, as five groups rather than a column of loose
@@ -897,14 +880,6 @@ namespace Nemoviz_Book_Reader
             n.AccessibleName = name;
             n.TabIndex = tabIndex;
             return n;
-        }
-
-        /// <summary>"hr-HR" → the language's own name, so the list reads naturally.</summary>
-        internal static string LanguageLabel(string code)
-        {
-            if (string.IsNullOrEmpty(code)) return Localization.T("Settings.TextBooks.LanguageUnknown");
-            try { return new System.Globalization.CultureInfo(code).DisplayName + " (" + code + ")"; }
-            catch { return code; }
         }
 
         /// <summary>Opens the user's dictionary for the language picked here, and

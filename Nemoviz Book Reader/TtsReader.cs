@@ -80,7 +80,6 @@ namespace Nemoviz_Book_Reader
 
         public int Count { get { return sentenceText.Count; } }
         public int CurrentSentence { get { return index; } }
-        public bool IsReading { get { return reading; } }
         public int TotalChars { get { return fullText.Length; } }
         public int CharPosition
         {

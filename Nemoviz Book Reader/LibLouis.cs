@@ -25,9 +25,6 @@ namespace Nemoviz_Book_Reader
         [DllImport(Dll, CallingConvention = Conv)]
         private static extern IntPtr lou_version();
 
-        [DllImport(Dll, CallingConvention = Conv)]
-        private static extern int lou_charSize();
-
         [DllImport(Dll, CallingConvention = Conv, CharSet = CharSet.Ansi)]
         private static extern int lou_backTranslateString(
             [MarshalAs(UnmanagedType.LPStr)] string tableList,

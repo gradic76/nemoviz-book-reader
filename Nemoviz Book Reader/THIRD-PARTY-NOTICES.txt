@@ -114,24 +114,31 @@ differs between them is the copyright holder, so each is named here.
   © Microsoft Corporation, from https://github.com/dotnet/runtime:
       Microsoft.Bcl.AsyncInterfaces 10.0.3
       System.Buffers 4.6.1
-      System.ComponentModel.Annotations 5.0.0
-      System.IO.Pipelines 10.0.3
       System.Memory 4.6.3
       System.Numerics.Vectors 4.6.1
       System.Runtime.CompilerServices.Unsafe 6.1.2
       System.Text.Encoding.CodePages 10.0.9   (windows-1250 and friends)
-      System.Text.Encodings.Web 10.0.3
-      System.Text.Json 10.0.3
       System.Threading.Tasks.Extensions 4.6.3
       System.ValueTuple 4.6.1
+
+  Four more were referenced and shipped until 2026-08-07 and no longer are:
+  System.Text.Json, System.Text.Encodings.Web, System.IO.Pipelines and
+  System.ComponentModel.Annotations. NBR's code never called any of them, and
+  no shipped assembly names them either — checked by reading the assembly
+  references out of every DLL in the output rather than by reasoning about it.
+  Json pulled in Encodings.Web and Pipelines; Annotations was wanted by nothing
+  at all. Roughly 1 MB, and four fewer components to account for.
 
   Microsoft.Bcl.HashCode 6.0.0 — © Microsoft Corporation, from
       https://github.com/dotnet/maintenance-packages. Its .nupkg is not on this
       machine; the licence was read from the package's own nuspec on nuget.org,
       which declares <license type="expression">MIT</license>.
 
-Text     : Licences\MIT.txt (the copy shipped by System.ComponentModel.
-           Annotations, carrying the .NET Foundation copyright line)
+Text     : Licences\MIT.txt — taken from the copy inside System.ComponentModel.
+           Annotations' own package, carrying the .NET Foundation copyright
+           line. That package is no longer shipped (see above); the TEXT is the
+           same MIT for every package listed here, and where it was read from
+           is recorded so it can be checked, not because that package is special.
 
 
 Reading fonts — five families for the reading window

@@ -146,27 +146,6 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        /// <summary>A row of buttons laid out for a 500-wide dialog does not fit a
-        /// 444-wide column, and "Speech dictionary…" was simply cut off by the
-        /// group's edge. They move together, by the worst overflow among them:
-        /// nudging only the offender would push it straight into the button on its
-        /// left. The <c>?</c> in the corner is left alone — it is positioned from
-        /// the right edge and belongs there.</summary>
-        private static void PullButtonsIn(GroupBox g)
-        {
-            int limit = g.Width - 14, over = 0;
-            var buttons = new List<Button>();
-            foreach (Control c in g.Controls)
-            {
-                Button b = c as Button;
-                if (b == null || HintSystem.IsHelpKey(b)) continue;
-                buttons.Add(b);
-                over = Math.Max(over, b.Right - limit);
-            }
-            if (over <= 0) return;
-            foreach (Button b in buttons) b.Left = Math.Max(14, b.Left - over);
-        }
-
         /// <summary>Makes a group's contents fit the width the grid gave it.
         ///
         /// <para>They are built for a 500-wide group on a 560-wide dialog and the

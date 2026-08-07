@@ -39,18 +39,6 @@ namespace Nemoviz_Book_Reader
         private static readonly Regex RxAttr = new Regex(
             @"\b([a-zA-Z:\-]+)\s*=\s*[""']([^""']*)[""']", RegexOptions.Compiled);
 
-        /// <summary>True if this extracted EPUB carries media overlays — i.e. it
-        /// is a narrated book and not merely a document.</summary>
-        public static bool HasOverlays(string folder)
-        {
-            try
-            {
-                return Directory.EnumerateFiles(folder, "*.smil", SearchOption.AllDirectories).Any()
-                    && Directory.EnumerateFiles(folder, "*.mp3", SearchOption.AllDirectories).Any();
-            }
-            catch { return false; }
-        }
-
         /// <summary>Turns an extracted EPUB into a hybrid book: content.txt, the
         /// sync map, and the audio timeline the transport plays. Returns false and
         /// changes nothing if the book turns out not to be one.</summary>

@@ -2299,7 +2299,6 @@ namespace Nemoviz_Book_Reader
             public readonly List<string> AudioOrphans = new List<string>();// file → one book
             public readonly List<string> TextFiles = new List<string>();   // file → one book
             public readonly List<string> Archives = new List<string>();    // file → one book
-            public readonly List<string> OrphanVolumes = new List<string>();
 
             public int Books
             {
@@ -2589,49 +2588,6 @@ namespace Nemoviz_Book_Reader
             return TextExtractor.IsTextFormat(System.IO.Path.GetExtension(path));
         }
 
-        private static bool FolderHasAudio(string folder)
-        {
-            try
-            {
-                foreach (string f in System.IO.Directory.GetFiles(folder))
-                    if (Array.IndexOf(LibraryScanner.AudioExtensions, System.IO.Path.GetExtension(f).ToLower()) >= 0)
-                        return true;
-            }
-            catch { }
-            return false;
-        }
-
-        /// <summary>Every loose text-book file under the folder (recursively), each
-        /// of which becomes its own book. Skips DAISY subfolders (ncc.html / .opf /
-        /// .ncx) — those are whole-book units handled elsewhere.</summary>
-        private static List<string> EnumerateTextBookFiles(string folder)
-        {
-            var result = new List<string>();
-            CollectTextBookFiles(folder, result);
-            return result;
-        }
-
-        private static void CollectTextBookFiles(string folder, List<string> result)
-        {
-            try
-            {
-                string[] files = System.IO.Directory.GetFiles(folder);
-                // A DAISY/structured folder is one book, not a bag of text files.
-                bool daisyLike = files.Any(f =>
-                {
-                    string n = System.IO.Path.GetFileName(f).ToLower();
-                    string e = System.IO.Path.GetExtension(f).ToLower();
-                    return n == "ncc.html" || e == ".opf" || e == ".ncx";
-                });
-                if (!daisyLike)
-                    foreach (string f in files)
-                        if (IsTextBookFile(f)) result.Add(f);
-
-                foreach (string sub in System.IO.Directory.GetDirectories(folder))
-                    CollectTextBookFiles(sub, result);
-            }
-            catch { }
-        }
     }
 
     /// <summary>

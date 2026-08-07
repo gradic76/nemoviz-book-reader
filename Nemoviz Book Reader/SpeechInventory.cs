@@ -59,13 +59,6 @@ namespace Nemoviz_Book_Reader
             return list;
         }
 
-        /// <summary>True when a SAPI 4 text-to-speech engine is installed. NBR
-        /// cannot speak with it yet; this is what would switch that work on.</summary>
-        public static bool Sapi4Present
-        {
-            get { return ScanSapi4() != null; }
-        }
-
         private static void AddTokenSource(List<Source> list, string name, RegistryView view,
                                            string key, bool usable, string note)
         {

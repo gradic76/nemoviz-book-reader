@@ -48,9 +48,6 @@ namespace Nemoviz_Book_Reader
         public List<string> AudioPlayOrder = new List<string>();
         public List<DaisyNavPoint> Headings = new List<DaisyNavPoint>();
         public List<DaisyNavPoint> Pages = new List<DaisyNavPoint>();
-
-        public bool HasHeadings { get { return Headings.Count > 0; } }
-        public bool HasPages { get { return Pages.Count > 0; } }
     }
 
     public static class DaisyParser

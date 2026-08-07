@@ -12,30 +12,19 @@ Player.Info.PublisherLabel=Publisher:
 Player.Info.ChapterLabel=Chapter:
 Player.Info.PartLabel=Part:
 Player.Info.PageLabel=Page:
-Player.Info.HeadingLabel=Heading:
 Player.Info.BookmarksLabel=Bookmarks:
 ; The experimental reading surface — see CLAUDE.md 8l.
 Player.ReadingSurface.Accessible=Reading surface
 Player.Info.VoiceLabel=Voice:
 ; {0} is the book's language. Stands in the voice line while the book has none.
 Player.Info.NoVoiceLabel=No installed voice speaks
-Player.Info.ElapsedSegmentLabel=Part time elapsed:
-Player.Info.ElapsedTotalLabel=Total time elapsed:
-Player.Info.RemainingSegmentLabel=Part time remaining:
-Player.Info.RemainingTotalLabel=Total time remaining:
 Player.Info.PartNumElapsed=Part {0} elapsed:
 Player.Info.PartNumRemaining=Part {0} remaining:
-Player.Info.ReadLabel=Read:
-Player.Info.VoiceLabel=Voice:
 Player.Info.ElapsedLabel=Time elapsed:
 Player.Info.RemainingLabel=Time remaining:
-Player.Info.TimeLabel=Time:
-Player.Info.TotalLabel=Total time:
-Player.Info.Estimated=(estimated)
 Player.Info.AccessibleName=Playback information, F8
 
 ; Player - title bar
-Player.TitleBar.Chapter= — {0}/{1}
 Player.TitleBar.Playing= — playing
 Player.TitleBar.Paused= — paused
 
@@ -122,8 +111,6 @@ Seek.Item.Part=Part
 Seek.Item.HeadingLevel=Heading {0}
 Seek.Item.Page=Page
 Seek.Item.Bookmark=Bookmark
-Seek.Item.Sentence=Sentence
-Seek.Item.Paragraph=Paragraph
 Seek.Item.StandardPage=Standard page
 
 ; Player - Go To dialog
@@ -174,7 +161,6 @@ Player.Speed.Wpm=Speed: {0} WPM
 Player.Speed.WpmAccessible=Speed {0} words per minute
 Player.Position.Label=Position
 Player.Position.Text=Position: {0} / {1}
-Player.Position.Sentence=Sentence {0}/{1}
 Player.Position.Accessible=Position {0} percent
 
 ; Player - dialogs
@@ -242,15 +228,10 @@ Shelf.Filter.Reading=Reading
 Shelf.Filter.Unread=Unread
 Shelf.Filter.Read=Read
 Shelf.Filter.Favorites=Favorites
-Shelf.Group.NowReading=Now Reading
-Shelf.Group.Reading=Reading
-Shelf.Group.Unread=Unread
-Shelf.Group.Read=Read
 Shelf.Status.NowReading=Now reading
 Shelf.Status.Reading=Reading
 Shelf.Status.Unread=Unread
 Shelf.Status.Read=Read
-Shelf.Favorite=Favorite
 Context.Open=Open
 Context.MarkRead=Mark as Read
 Context.MarkUnread=Mark as Unread
@@ -261,8 +242,6 @@ Context.Delete=Delete
 Context.Properties=Properties
 Library.Details.Accessible=Book details
 Details.Field.Title=Title
-Details.Format.PlainText=Plain text
-Details.Estimated=(estimated)
 ; One caption per field, and ONE field per fact. These are the names
 ; BookInfoField uses, and they are shared by the Library's columns and by the
 ; info glass in Properties, so none of them carries a colon of its own — the
@@ -287,7 +266,6 @@ Details.Field.Language=Detected language
 Details.Field.SoundProcessing=Sound processing
 Details.Sound.On=On
 Details.Sound.Off=Off
-Details.Speed.Value={0}×
 Details.Speed.Wpm={0} WPM
 Btn.Refresh=Refresh
 Btn.Refresh.Accessible=Refresh
@@ -300,8 +278,6 @@ Btn.Yes=Yes
 Btn.No=No
 
 ; Library - dialogs
-Dialog.Restart.Message=Book has been rewound to the start.
-Dialog.Restart.Title=Rewind to Start
 Dialog.Rename.Title=Rename book
 Dialog.Rename.Prompt=New name:
 Dialog.Rename.AuthorLabel=Author:
@@ -316,8 +292,6 @@ Dialog.ClearLibrary.Empty=The library is already empty.
 Dialog.ClearLibrary.Done=Removed {0} books.
 Dialog.ClearLibrary.Skipped={0} could not be removed (in use or currently open).
 Dialog.DeleteError.Message=Error deleting book from disk: {0}
-Dialog.Properties.ComingSoon=Properties – coming soon.
-Dialog.Properties.Title=Properties
 Library.ImportFile.Title=Add book to library
 Library.ImportFolder.Description=Select a folder with books
 Dialog.ImportSuccess.Message=Book added to library.
@@ -337,8 +311,6 @@ Dialog.ArchivePassword.Retry=That password didn't work. Try again for "{0}":
 Dialog.ArchivePassword.Field=Archive password
 
 ; Steer folder-import away from archives (use Open file instead)
-Dialog.ArchiveInFolder.Title=Archive detected
-Dialog.ArchiveInFolder.Message=This folder contains archive files (.zip / .rar / .7z or split volumes). To add an archive — including multi-volume and password-protected ones — use File, Open file... instead, which handles them reliably.
 
 ; Properties dialog — per-book sound processing
 ; NOTE (for later English review): the stage titles below are the plain,
@@ -362,10 +334,6 @@ NoVoice.Message=This book is in {0}, and no installed voice speaks it. Choose a 
 NoVoice.Read=Read with this voice
 NoVoice.Leave=Leave it unread
 Prop.Text.ReadingIn=Reading in:
-Prop.Text.Language=Detected language:
-Prop.Text.Characters=Characters:
-Prop.Text.Headings=Headings:
-Prop.Text.Pages=Pages:
 Prop.On=on
 Prop.Off=off
 Prop.Tab.Audio=Audio
@@ -374,7 +342,6 @@ Prop.UseSoundProcessing=Use sound processing
 ; The subject itself, for the help key and its pop-up title — the caption above
 ; is an instruction, and "Help for Use sound processing" reads badly.
 Prop.SoundProcessing=Sound processing
-Prop.Stage.Use=Use
 Prop.Stage.Level=Level
 Prop.Highpass.Title=Remove rumble
 Prop.Denoise.Title=Noise reduction
@@ -427,7 +394,6 @@ Dialog.ImportFolderError.Message=Error importing folder: {0}
 ; Common
 Common.Dash=-
 Common.Error=Error
-Common.DateFormat=MM/dd/yyyy
 Common.DateFormatLong=dd. MMMM yyyy
 
 ; Settings dialog (Session 9 — UI shell only, nothing wired up yet)
@@ -453,11 +419,14 @@ Settings.General.LibraryLocation.Browse=Choose the folder where your book librar
 Settings.General.Browse=Browse...
 Settings.General.Browse.Accessible=Browse for library folder
 Settings.General.Language=Language:
-Settings.WorkInProgress=Work in progress.
+; The two hints below are WRITTEN BUT NOT YET SHOWN — the Language and Media
+; keys groups have no help key attached, unlike Book details below. Kept
+; because the text is written; delete only if those groups are dropped.
+Settings.General.Language.Hint=The language NBR speaks to you in. It has nothing to do with the language a book is read in, which each book decides for itself.
+Settings.General.UseMultimediaKeysGlobally.Hint=This allows you to manage NBR from anywhere in the system. Multimedia keys will not work with other players while NBR has them.
 Settings.General.UseMetadata=Use embedded metadata
 Settings.General.UseMetadata.Hint=Some file formats have metadata with additional information about the author, title, publisher, producer and so on. NBR can read and display that information where it exists. However, if that information is wrong or missing, NBR can take the basic details from folder and file names instead. As a last resort, you can always rename books in the Library.
 Settings.TextBooks.Language=Language:
-Settings.TextBooks.SpeechEngine=Speech engine:
 Settings.TextBooks.BookLanguage=Books in this language:
 Settings.TextBooks.AllOtherLanguages=All other languages
 Settings.TextBooks.VoiceNotSet=(no voice chosen)
@@ -470,7 +439,6 @@ Settings.TextBooks.Test=Test voice
 Settings.TextBooks.TestSample=This is a sample of the selected voice.
 Settings.TextBooks.Volume=Volume:
 Settings.TextBooks.Pitch=Pitch:
-Settings.TextBooks.ComingSoon=Additional options for low-vision and dyslexic readers — coming soon.
 Settings.TextBooks.SpeechGroup=Speech
 Settings.TextBooks.LanguageUnknown=(language not reported)
 ; The braille table a book was READ WITH — an import fact, not an output
@@ -515,9 +483,7 @@ Settings.Cancel.Accessible=Cancel
 Settings.Apply=Apply
 Settings.Apply.Accessible=Apply
 Settings.General.UseMultimediaKeys.Hint=You can use your keyboard multimedia keys or headset keys to play, pause and navigate the book using the seek step you have chosen.
-Settings.General.UseMultimediaKeysGlobally.Hint=This allows you to manage NBR from anywhere in the system. Multimedia keys will not work with other players while NBR has them.
 Settings.General.LibraryLocation.Hint=This is the place where NBR copies imported books. You can leave it as default on your system partition, but if you plan to have a large library, another partition or disk would be a much better solution. NBR also keeps the information for each book in there, so if you want to save your reading positions, bookmarks, speed and other reading settings, note that you need to copy the content from the old library folder manually to the new location. And within the same price range: by changing the library location to somewhere other than the system partition, you are preserving your books from accidental system crashes and the usual data loss accompanying them.
-Settings.General.Language.Hint=The language NBR speaks to you in. It has nothing to do with the language a book is read in, which each book decides for itself.
 Settings.TextBooks.Speech.Hint=Here is the list of the languages and the voices installed on your system. You can choose the default voice for every language shown here, so every new title in that language opens with the selected voice. Choosing a voice for a language is what makes it the default — there is nothing else to press. If your new book is written in a language that is not on the list, it is best not to set a default voice for it here. You can always set a voice in the Properties of the book itself, on its Text page, or choose No speech and go on reading in braille or on screen. You will also see a notice when a language has no voice installed.
 Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears. Switched on here, the window opens by itself every time you press Play. It can also be opened and closed by hand at any time with F9, whether this is switched on or not — so you can try it on a book without changing its settings.
 Cue.Track=Track {0}
@@ -589,7 +555,6 @@ Hint.TextVisual=Here you can adjust the screen layout for reading. You can choos
 ; Captions stay short; the explanation belongs in the hint, per the 30-character
 ; rule. The three buttons repeat the player's transport, which still owns it.
 Reading.Title=Reading
-Btn.Reading.Accessible=Reading view, F9
 Reading.Back=Back
 Reading.Back.Accessible=Back one step
 Reading.PlayPause=Play/Pause

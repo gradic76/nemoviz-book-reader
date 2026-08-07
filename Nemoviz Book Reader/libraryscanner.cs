@@ -208,23 +208,6 @@ namespace Nemoviz_Book_Reader
             return false;
         }
 
-        /// <summary>True if the folder directly holds any archive file (a single
-        /// archive or any volume part). Used to steer the "Open folder" import
-        /// away from archives, which belong in the reliable "Open file" path.</summary>
-        public static bool ContainsArchiveFiles(string folderPath)
-        {
-            try
-            {
-                foreach (string f in Directory.GetFiles(folderPath))
-                {
-                    string fn = Path.GetFileName(f);
-                    if (IsExtractableArchive(fn) || IsVolumeContinuation(fn)) return true;
-                }
-            }
-            catch { }
-            return false;
-        }
-
         /// <summary>A continuation volume that must not be treated as its own
         /// archive (its content is pulled in with the first part).</summary>
         public static bool IsVolumeContinuation(string fileName)

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace Nemoviz_Book_Reader
@@ -46,7 +45,6 @@ namespace Nemoviz_Book_Reader
     {
         private const int Rim = 12;          // silver margin around the glass
         private const int BarH = 52;         // the control strip along the foot
-        private const int TargetChars = 60;
 
         private readonly RichTextBox surface;
         private readonly Control returnTo;   // where the surface came from
@@ -569,8 +567,9 @@ namespace Nemoviz_Book_Reader
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        /// <summary>Hands the surface back where it came from. Without this the
-        /// player loses its reading surface for good, and with it braille.</summary>
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
         /// <summary>Puts the caret in the reading surface, which is where braille
         /// and the screen reader both look. Called on Shown, and again by the
         /// player once the play path has finished putting focus wherever it
@@ -581,17 +580,6 @@ namespace Nemoviz_Book_Reader
         /// shows a solid block. The reading position is a caret, never a range
         /// (§8l) — so it is put back where it was the instant focus lands, before
         /// anything can announce it.</para></summary>
-        /// <summary>True once the reading surface really holds focus — which is
-        /// the only state in which braille and the screen reader follow the
-        /// book. Asked by the player, which keeps trying until it is.</summary>
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-        public bool SurfaceHasFocus
-        {
-            get { return surface != null && !surface.IsDisposed && surface.Focused; }
-        }
-
         public void FocusSurface()
         {
             if (surface == null || surface.IsDisposed) return;
@@ -601,6 +589,8 @@ namespace Nemoviz_Book_Reader
             surface.ScrollToCaret();
         }
 
+        /// <summary>Hands the surface back where it came from. Without this the
+        /// player loses its reading surface for good, and with it braille.</summary>
         private void GiveSurfaceBack()
         {
             if (surface == null) return;
