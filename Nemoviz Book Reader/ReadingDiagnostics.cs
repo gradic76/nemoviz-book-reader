@@ -130,11 +130,34 @@ namespace Nemoviz_Book_Reader
         public static void Trace(string line)
         {
             if (!Highlight) return;
+            Write(line);
+        }
+
+        /// <summary>Writes whatever the aid is set to.
+        ///
+        /// <para><b>Why this exists (2026-08-07).</b> Gordan pressed Play and then
+        /// F9 and the reading window did not come. The code had a trace for
+        /// exactly that — "F9 REFUSED", with the four reasons — and it wrote
+        /// nothing, because <see cref="Trace"/> is gated on the test aid being
+        /// switched on. The instrumentation built for this failure was off during
+        /// the failure, so there was nothing to read afterwards.</para>
+        ///
+        /// <para>Use it only for things that happen at KEY-PRESS rate — a window
+        /// opening, a refusal. The per-sentence traces stay gated: a disk write
+        /// per sentence is what chopped the speech twice, which is the whole
+        /// reason for the in-memory recorder above.</para></summary>
+        public static void Always(string line)
+        {
+            Write(line);
+        }
+
+        private static void Write(string line)
+        {
             try
             {
                 System.IO.File.AppendAllText(
                     System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NBR-diagnostics.log"),
-                    System.DateTime.Now.ToString("HH:mm:ss.fff") + "  " + line + "\r\n");
+                    System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "  " + line + "\r\n");
             }
             catch { }
         }

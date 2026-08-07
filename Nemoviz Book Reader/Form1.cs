@@ -3391,6 +3391,10 @@ namespace Nemoviz_Book_Reader
         /// box is a snapshot, and arriving at a stale one is worse than not
         /// arriving at all.</para></summary>
         private ReadingWindow readingWindow;
+        /// <summary>When the window was BUILT, so the gap between building it and
+        /// showing it can be told from a show that is never coming. See
+        /// ToggleReadingWindow.</summary>
+        private DateTime readingWindowMadeAt = DateTime.MinValue;
 
         /// <summary>Opens or closes the on-screen reading view (F9).
         ///
@@ -3427,8 +3431,31 @@ namespace Nemoviz_Book_Reader
             }
             if (readingWindow != null && !readingWindow.IsDisposed)
             {
-                ReadingDiagnostics.Note("F9 while the window was made but not yet shown — ignored");
-                return;                       // it is on its way; let it arrive
+                // MADE BUT NOT SHOWN. The window is built here and shown one
+                // message cycle later, so for a moment this state is normal and
+                // the right answer is to wait. But it used to be the answer
+                // FOREVER: if the posted show never ran, readingWindow stayed
+                // non-null and not visible, and every later F9 returned here —
+                // silently, without even the refusal beep. Gordan hit exactly
+                // that: Play gave nothing, F9 gave nothing, and the window only
+                // appeared after another dialog had been opened and closed, which
+                // is what a nested message loop does to a stuck posted callback.
+                //
+                // So the wait is now BOUNDED. Inside the window it is still "let
+                // it arrive". Past it, the show is never coming: throw the
+                // wedged instance away and build a new one by falling through.
+                double waiting = (DateTime.UtcNow - readingWindowMadeAt).TotalSeconds;
+                if (waiting < 3.0)
+                {
+                    ReadingDiagnostics.Always(string.Format(
+                        "F9 while the window was made but not yet shown ({0:N1}s) — let it arrive", waiting));
+                    tones.Play(300, 150);     // never answer a key press with nothing
+                    return;
+                }
+                ReadingDiagnostics.Always(string.Format(
+                    "F9: reading window WEDGED — made {0:N1}s ago and never shown. Rebuilding.", waiting));
+                try { readingWindow.Dispose(); } catch { }
+                readingWindow = null;
             }
             // Same low "no go" beep the other book keys give on an empty player.
             // Tested on the TEXT, not on tts: a hybrid has words to show and no
@@ -3440,7 +3467,7 @@ namespace Nemoviz_Book_Reader
                 // different reasons for it. Recorded here rather than guessed at:
                 // this happens on a key press, not per sentence, so it costs
                 // nothing that matters.
-                ReadingDiagnostics.Note(string.Format(
+                ReadingDiagnostics.Always(string.Format(
                     "F9 REFUSED: book={0} textbook={1} hybrid={2} textFile={3} sync={4} readingText={5}",
                     currentBook == null ? "null" : "ok",
                     currentBook != null && currentBook.IsTextBook,
@@ -3462,6 +3489,7 @@ namespace Nemoviz_Book_Reader
             // box is free, so the text is laid out once.
             var mode = (VisualMode)(currentBook.TextVisualMode >= 0 && currentBook.TextVisualMode <= 2
                                     ? currentBook.TextVisualMode : 0);
+            readingWindowMadeAt = DateTime.UtcNow;
             readingWindow = new ReadingWindow(this, tbReadingSurface, mode,
                 () => DistinctBookChars(),
                 // The book's colours travel with it: see ReadingColours.
@@ -3523,12 +3551,22 @@ namespace Nemoviz_Book_Reader
             BeginInvoke((Action)(() =>
             {
                 ReadingWindow modal = readingWindow;
-                if (modal == null || modal.IsDisposed) return;
+                if (modal == null || modal.IsDisposed)
+                {
+                    ReadingDiagnostics.Always("READING WINDOW: the posted show ran but the window was already gone");
+                    return;
+                }
                 LoadReadingSurface();          // styled and empty until now
-                ReadingDiagnostics.Note("READING WINDOW opening (modal)");
+                ReadingDiagnostics.Always("READING WINDOW opening (modal)");
                 try { modal.ShowDialog(this); }
-                catch (Exception ex) { ReadingDiagnostics.Note("ShowDialog THREW " + ex.Message); }
-                ReadingDiagnostics.Note("READING WINDOW closed");
+                catch (Exception ex)
+                {
+                    // Logged unconditionally now. If ShowDialog throws, the window
+                    // is never shown and nothing else says so — which is one of
+                    // the two ways the wedged state above can be reached.
+                    ReadingDiagnostics.Always("READING WINDOW ShowDialog THREW " + ex.GetType().Name + ": " + ex.Message);
+                }
+                ReadingDiagnostics.Always("READING WINDOW closed");
                 // ShowDialog does not dispose the form the way Show does.
                 try { modal.Dispose(); } catch { }
             }));
