@@ -327,6 +327,26 @@ namespace Nemoviz_Book_Reader
                     Localization.T(chkBypass.Checked ? "Prop.On" : "Prop.Off"));
                 return true;
             }
+
+            // Enter in an info column opens the description — and it has to be
+            // caught here for the same reason it did in the Library: this form
+            // has an AcceptButton, a read-only TextBox does not claim Enter, so
+            // Form.ProcessDialogKey would press OK and close the dialog before
+            // the column was ever asked. The column says "press Enter to read
+            // it", so pressing Enter there must not mean OK.
+            //
+            // Only in the info columns, and only when there IS a description:
+            // Enter anywhere else on this page still means OK, which is what a
+            // dialog's Enter has always meant.
+            if (keyData == Keys.Enter && book != null && book.HasDescription)
+            {
+                Control on = DeepActiveControl();
+                if (ReferenceEquals(on, tbInfo) || ReferenceEquals(on, tbTextInfo))
+                {
+                    OpenDescription();
+                    return true;
+                }
+            }
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
@@ -1344,11 +1364,49 @@ namespace Nemoviz_Book_Reader
         private void AppendDescription(StringBuilder sb, string nl)
         {
             if (book == null || !book.HasDescription) return;
+            sb.Append(nl);
+            sb.Append(Localization.T("Details.Field.Description")).Append(": ")
+              .Append(Localization.T("Details.Description.Open")).Append(nl);
+        }
+
+        /// <summary>Opens the blurb in the same window the Library uses.
+        ///
+        /// <para><b>A door here too, after all (Gordan, 2026-08-07).</b> The
+        /// description was inline at the foot of this column first, which the
+        /// control could carry — it wraps and it scrolls, so nothing was ever cut.
+        /// His question was the right one: with sound processing ON there are ten
+        /// more lines above it, so a thousand characters sat well below the fold
+        /// and had to be scrolled to. A line saying it is there, and a window that
+        /// is only the description, beats a paragraph nobody scrolls to. It also
+        /// makes the two places agree.</para></summary>
+        /// <summary>The control that really has the focus, not the container it
+        /// lives in.
+        ///
+        /// <para><c>Form.ActiveControl</c> would answer "the TabControl" here,
+        /// because both info boxes are children of a tab page — LibraryForm hit
+        /// exactly this and wrote it down, which is the only reason it did not
+        /// cost a second round of "the key does nothing". Descending through each
+        /// container's own ActiveControl gets to the leaf.</para></summary>
+        private Control DeepActiveControl()
+        {
+            Control c = this;
+            IContainerControl box = c as IContainerControl;
+            while (box != null && box.ActiveControl != null)
+            {
+                c = box.ActiveControl;
+                box = c as IContainerControl;
+            }
+            return c;
+        }
+
+        private void OpenDescription()
+        {
+            if (book == null || !book.HasDescription) return;
             string text = book.Description;
             if (string.IsNullOrWhiteSpace(text)) return;
-            sb.Append(nl);
-            sb.Append(Localization.T("Details.Field.Description")).Append(':').Append(nl);
-            sb.Append(text).Append(nl);
+            string title = Localization.T("Dialog.Description.Title", book.Title ?? "");
+            using (var f = new TextHelpForm(title, text, true))
+                f.ShowDialog(this);
         }
     }
 }

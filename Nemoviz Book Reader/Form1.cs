@@ -4324,11 +4324,38 @@ namespace Nemoviz_Book_Reader
             watch.Interval = 200;
             watch.Tick += (s, e) =>
             {
-                if (tbReadingSurface == null) return;
-                int at = tbReadingSurface.SelectionStart;
+                // NULL WAS THE WRONG TEST, and it put two entries in
+                // %TEMP%\NBR-crash.log before anyone read them.
+                //
+                // When the form goes down, WinForms disposes the controls but the
+                // FIELD still points at this one — it is disposed, not null. And
+                // SelectionStart on a RichTextBox asks for the handle, which on a
+                // disposed control means CreateHandle, which throws
+                // ObjectDisposedException. The timer meanwhile is still ticking,
+                // because nothing ever stopped it.
+                //
+                // So: disposed means the watch has outlived what it watches and
+                // stops for good. Not-yet-created is a different thing and only
+                // means "not this tick".
+                RichTextBox box = tbReadingSurface;
+                if (box == null) return;
+                if (box.IsDisposed || box.Disposing)
+                {
+                    watch.Stop();
+                    watch.Dispose();
+                    return;
+                }
+                if (!box.IsHandleCreated) return;
+
+                int at = box.SelectionStart;
                 if (at == lastCaretSet) return;
                 lastCaretSet = at;
-                SurfaceLog("ROUTED to " + at + "  " + tts.SnippetAt(at, 6));
+                // The OTHER crash in that log, from 2026-08-02: the snippet comes
+                // from the TTS reader, and a hybrid has no reader at all. It was a
+                // NullReferenceException on the same timer, one lambda earlier.
+                TtsReader reader = tts;
+                SurfaceLog("ROUTED to " + at + "  " +
+                           (reader != null ? reader.SnippetAt(at, 6) : ""));
             };
             watch.Start();
         }
