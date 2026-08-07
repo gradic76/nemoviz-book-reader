@@ -56,10 +56,14 @@ namespace Nemoviz_Book_Reader
         /// wherever they actually dropped off, instead of hunting backwards
         /// through a chapter they half heard.</para>
         ///
-        /// <para><b>Remembered across books and sessions</b>, on the pattern the
-        /// Go To dialog's "start playing after jump" already set: if it suits a
-        /// reader once it suits them always, and re-ticking it every night is the
-        /// app forgetting something it was told.</para></summary>
+        /// <para><b>NOT remembered — it starts unticked every time</b> (Gordan,
+        /// 2026-08-07). It was persisted at first, on the pattern the Go To
+        /// dialog's "start playing after jump" set, and that was the wrong
+        /// pattern to copy: Go To's switch describes how a reader likes to
+        /// navigate, which does not change from night to night, while this one
+        /// performs an ACT. Left ticked it would quietly drop a bookmark every
+        /// single time the timer was armed, and a bookmark list nobody asked for
+        /// is worse than one keystroke a night.</para></summary>
         public bool SetBookmark
         {
             get { return chkBookmark != null && chkBookmark.Checked; }
@@ -218,7 +222,7 @@ namespace Nemoviz_Book_Reader
             chkBookmark.AccessibleName = Localization.T("SleepTimer.Bookmark");
             chkBookmark.SetBounds(15, 288, 350, 24);
             chkBookmark.TabIndex = 2;
-            chkBookmark.Checked = AppSettings.Current != null && AppSettings.Current.SleepTimerBookmark;
+            // Deliberately not restored from anywhere: see the property above.
 
             // ── Buttons ──
             btnStart = new Button();

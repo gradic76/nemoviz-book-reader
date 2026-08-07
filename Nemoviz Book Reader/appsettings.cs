@@ -36,13 +36,6 @@ namespace Nemoviz_Book_Reader
         /// </summary>
         public bool GoToAutoPlay { get; private set; }
 
-        /// <summary>Whether arming the sleep timer also drops a bookmark where
-        /// the book stands. Remembered across books and sessions for the same
-        /// reason <see cref="GoToAutoPlay"/> is: a reader who wants it wants it
-        /// every night, and asking again each time is the app forgetting
-        /// something it was told. Off to begin with — a bookmark nobody asked for
-        /// is clutter in the list.</summary>
-        public bool SleepTimerBookmark { get; private set; }
 
         /// <summary>
         /// When true (default), a book's title/author come from embedded
@@ -171,7 +164,6 @@ namespace Nemoviz_Book_Reader
             LangPath = ini.Read("App", "LangPath", DefaultLangPath);
             LanguageCode = ini.Read("App", "Language", "en");
             GoToAutoPlay = ini.Read("Player", "GoToAutoPlay", "0") == "1";
-            SleepTimerBookmark = ini.Read("Player", "SleepTimerBookmark", "0") == "1";
             UseMetadata = ini.Read("Import", "UseMetadata", "1") == "1";
             TtsVoice = ini.Read("TextToSpeech", "Voice", "");
             int.TryParse(ini.Read("TextToSpeech", "Wpm", "175"), out int ttsWpm);
@@ -508,12 +500,6 @@ namespace Nemoviz_Book_Reader
             ini.Write("Import", "UseMetadata", value ? "1" : "0");
         }
 
-        public void SetSleepTimerBookmark(bool value)
-        {
-            if (value == SleepTimerBookmark) return;
-            SleepTimerBookmark = value;
-            ini.Write("Player", "SleepTimerBookmark", value ? "1" : "0");
-        }
 
         public void SetGoToAutoPlay(bool value)
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -153,6 +153,22 @@ namespace Nemoviz_Book_Reader
         private DateTime sleepDeadline;
         private SleepTimerAction sleepAction;
         private bool sleepTimerActive = false;
+
+        /// <summary>How much of the timer was left when playback was paused, or
+        /// null while it is running.
+        ///
+        /// <para><b>The clock counts LISTENING, not wall time (Gordan,
+        /// 2026-08-07).</b> A manual pause used to CANCEL the timer outright, on
+        /// the reasoning that pausing ends the listening session. It does not: a
+        /// reader pauses to answer the phone, and losing the timer for it is a
+        /// small annoyance while the alternative is worse — with "stop, close and
+        /// shut the computer down" armed, a timer running through a pause can
+        /// shut the machine down on someone who is sitting there talking.</para>
+        ///
+        /// <para>So the countdown holds where it is and starts again on Play.
+        /// Cancelling deliberately still works, on the timer button, which is
+        /// where a reader would look for it.</para></summary>
+        private TimeSpan? sleepRemainingWhilePaused = null;
         // True once the -5 min warning series has fired (or when the timer
         // was started with 5 minutes or less — no point beeping instantly).
         private bool sleepWarned5Min = false;
@@ -2150,7 +2166,6 @@ namespace Nemoviz_Book_Reader
                     // where the reader was awake rather than a second or two of
                     // drift. Remembered either way, ticked or not, on the Go To
                     // pattern — the answer is about the reader, not this book.
-                    appSettings.SetSleepTimerBookmark(dlg.SetBookmark);
                     if (dlg.SetBookmark && currentBook != null)
                     {
                         currentBook.AddBookmark(BookPosition());
@@ -2168,6 +2183,8 @@ namespace Nemoviz_Book_Reader
             sleepDeadline = DateTime.Now.AddMinutes(minutes);
             sleepAction = action;
             sleepTimerActive = true;
+            // A fresh timer is never born held, whatever the last one was doing.
+            sleepRemainingWhilePaused = null;
             // For timers of 5 minutes or less, the -5 min series would fire
             // immediately after closing the dialog — pointless noise, skip it.
             sleepWarned5Min = minutes <= 5;
@@ -2234,6 +2251,10 @@ namespace Nemoviz_Book_Reader
         {
             sleepTimer.Stop();
             sleepTimerActive = false;
+            // Whether it was cancelled from a pause, from the button or by the
+            // book ending, the hold goes with it — a leftover would make the next
+            // timer start out already paused.
+            sleepRemainingWhilePaused = null;
             ResetSleepTimerButton();
             RestorePlaybackVolume();
 
@@ -2259,6 +2280,12 @@ namespace Nemoviz_Book_Reader
 
         private void SleepTimer_Tick(object sender, EventArgs e)
         {
+            // Held while paused: nothing counts down, nothing warns, and above
+            // all nothing EXPIRES. This is the line that stops "stop, close and
+            // shut the computer down" from firing at someone who paused to answer
+            // the phone.
+            if (sleepRemainingWhilePaused.HasValue) return;
+
             TimeSpan remaining = sleepDeadline - DateTime.Now;
 
             if (remaining.TotalSeconds <= 0)
@@ -2315,7 +2342,10 @@ namespace Nemoviz_Book_Reader
             if (!sleepTimerActive) return;
             if (!force && this.ActiveControl == btnTimer) return;
 
-            TimeSpan remaining = sleepDeadline - DateTime.Now;
+            // While playback is paused the clock is held, so the button shows
+            // what is LEFT and stops counting down — a caption ticking towards
+            // zero while nothing plays would say the opposite of what happens.
+            TimeSpan remaining = sleepRemainingWhilePaused ?? (sleepDeadline - DateTime.Now);
             if (remaining < TimeSpan.Zero) remaining = TimeSpan.Zero;
 
             btnTimer.Text = Localization.T("Btn.Timer.Countdown", FormatCountdown(remaining));
@@ -3094,7 +3124,7 @@ namespace Nemoviz_Book_Reader
                 {
                     tts.Pause();
                     SetPlayPauseState(false);
-                    if (sleepTimerActive) CancelSleepTimer(true);
+                    HoldSleepTimer();   // a text book pauses the clock too
                 }
                 else
                 {
@@ -3108,6 +3138,7 @@ namespace Nemoviz_Book_Reader
                     lastSurfaceStart = -1;      // same reason as ResumePlaybackQuietly
                     tts.Play();
                     SetPlayPauseState(true);
+                    ReleaseSleepTimer();
                 }
                 return;
             }
@@ -3129,24 +3160,40 @@ namespace Nemoviz_Book_Reader
                 mpv_set_property_string(mpvHandle, "pause", "yes");
                 SetPlayPauseState(false);
 
-                // A MANUAL pause ends the listening session — an active
-                // sleep timer is cancelled, with an announcement. This is
-                // the only place the cancel hook lives: every user-initiated
-                // pause (Space, X, on-screen button, media keys) routes
-                // through here, while programmatic pauses (seeks, loading,
-                // the timer's own expiry) use mpv directly and are
-                // unaffected. The cancel runs AFTER the pause so that the
-                // volume restore inside it (undoing a possible fadeout in
-                // progress) happens while nothing is audible.
-                if (sleepTimerActive)
-                    CancelSleepTimer(true);
+                // A MANUAL pause HOLDS the timer; it used to cancel it. Every
+                // user-initiated pause (Space, X, the on-screen button, the media
+                // keys) routes through here, while programmatic pauses (seeks,
+                // loading, the timer's own expiry) go to mpv directly and are
+                // unaffected — so this is still the one place that needs to know.
+                HoldSleepTimer();
             }
             else
             {
                 RewindOnResume();
                 mpv_set_property_string(mpvHandle, "pause", "no");
                 SetPlayPauseState(true);
+                ReleaseSleepTimer();
             }
+        }
+
+        /// <summary>Stops the sleep timer's clock without ending it, keeping what
+        /// is left. Safe to call when no timer is running, or when one is already
+        /// held — a second pause cannot shorten the first.</summary>
+        private void HoldSleepTimer()
+        {
+            if (!sleepTimerActive || sleepRemainingWhilePaused.HasValue) return;
+            TimeSpan left = sleepDeadline - DateTime.Now;
+            sleepRemainingWhilePaused = left > TimeSpan.Zero ? left : TimeSpan.Zero;
+            UpdateSleepTimerButton(true);
+        }
+
+        /// <summary>Starts it again from where it stopped.</summary>
+        private void ReleaseSleepTimer()
+        {
+            if (!sleepTimerActive || !sleepRemainingWhilePaused.HasValue) return;
+            sleepDeadline = DateTime.Now.Add(sleepRemainingWhilePaused.Value);
+            sleepRemainingWhilePaused = null;
+            UpdateSleepTimerButton(true);
         }
 
         /// <summary>Steps back a few seconds when an audio book resumes.
