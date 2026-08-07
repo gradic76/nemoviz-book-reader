@@ -131,6 +131,19 @@ namespace Nemoviz_Book_Reader
                 if (doc.Headings != null && doc.Headings.Count < MinStructureHeadings)
                     doc.Headings.Clear();
 
+                // The blurb, when the producer put it in the TEXT instead of the
+                // metadata. Here rather than in a parser, so every format gets it
+                // from one place — the source this was measured on ships the same
+                // book as .docx, .odt, .rtf and .txt, and the marker is in all
+                // four. See TrailingDescription for what the 87 % does and does
+                // not mean.
+                //
+                // ONLY as a fallback. A file that declares its own description has
+                // said so on purpose; text found by looking is the weaker claim
+                // and does not get to overrule it.
+                if (string.IsNullOrEmpty(doc.Description))
+                    doc.Description = TrailingDescription.Find(doc.Text);
+
                 return doc;
             }
             catch { return new TextDoc(); }
