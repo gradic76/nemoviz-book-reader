@@ -4828,27 +4828,13 @@ namespace Nemoviz_Book_Reader
                 // speech comes from the 32-bit satellite over IPC and needs the
                 // message pump; anything that blocks the pump between sentences
                 // comes out of the reading.
+                // Braille only. The speech channel was on beside it for one test
+                // (2026-08-07) so the mechanism could be HEARD with no display in
+                // the room — NVDA saying the sentence proved the same sentence
+                // reached the display. It did. Gordan confirmed, and it came back
+                // out: speaking here would talk over NBR's own reading.
                 System.Threading.ThreadPool.QueueUserWorkItem(
-                    _ =>
-                    {
-                        try { NvdaController.Braille(sentence); } catch { }
-
-                        // ── TEMPORARY, and meant to come straight back out ──
-                        // Gordan asked for the SPEECH channel on beside the
-                        // braille one, purely so the mechanism can be HEARD while
-                        // there is no braille display in the room: if NVDA says
-                        // the sentence, the same sentence reached the display.
-                        //
-                        // It double-speaks ON PURPOSE. NBR reads the book in its
-                        // own voice and NVDA reads it again in NVDA's, so put a
-                        // DIFFERENT voice in NVDA and it is obvious which channel
-                        // is saying what. SpeakQueued, not Speak: Speak cancels
-                        // first, and consecutive sentences would then guillotine
-                        // each other and come out chopped.
-                        //
-                        // To remove: delete this block. Nothing else refers to it.
-                        try { NvdaController.SpeakQueued(sentence); } catch { }
-                    });
+                    _ => { try { NvdaController.Braille(sentence); } catch { } });
             }
             catch { }
         }
