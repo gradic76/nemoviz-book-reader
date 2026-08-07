@@ -39,7 +39,6 @@ namespace Nemoviz_Book_Reader
 
         private static readonly Regex Tags = new Regex("<[^>]+>", RegexOptions.Compiled);
         private static readonly Regex Spaces = new Regex(@"[ \t ]+", RegexOptions.Compiled);
-        private static readonly Regex BlankLines = new Regex(@"(\r?\n){3,}", RegexOptions.Compiled);
 
         /// <summary>Empty in, empty out; junk in, empty out. Never throws.</summary>
         public static string Clean(string raw)
@@ -54,9 +53,15 @@ namespace Nemoviz_Book_Reader
                 // point and a strip pass would sail straight past them.
                 s = System.Net.WebUtility.HtmlDecode(s);
 
-                // Paragraph and line breaks are the only structure worth keeping;
-                // turn them into real ones before the rest of the tags go.
-                s = Regex.Replace(s, @"<\s*br\s*/?\s*>", "\n", RegexOptions.IgnoreCase);
+                // Paragraph breaks are the only structure worth keeping; turn
+                // them into real ones before the rest of the tags go.
+                //
+                // <br> counts as one. In a blurb it is nearly always used where a
+                // paragraph is meant, and marking it as a mere line break loses
+                // the distinction that matters two lines below: a single newline
+                // has to mean "the SOURCE was hard-wrapped here" so it can be
+                // undone.
+                s = Regex.Replace(s, @"<\s*br\s*/?\s*>", "\n\n", RegexOptions.IgnoreCase);
                 s = Regex.Replace(s, @"<\s*/\s*(p|div|li|h[1-6])\s*>", "\n\n", RegexOptions.IgnoreCase);
 
                 s = Tags.Replace(s, " ");
@@ -71,7 +76,30 @@ namespace Nemoviz_Book_Reader
 
                 s = s.Replace("\r\n", "\n").Replace('\r', '\n');
                 s = Spaces.Replace(s, " ");
-                s = BlankLines.Replace(s, "\n\n");
+                s = string.Join("\n", Array.ConvertAll(s.Split('\n'), l => l.Trim()));
+
+                // UNDO THE SOURCE'S OWN WRAPPING. Measured on a real import: the
+                // Wingrove blurb came out as "From the frozen tundra of 13th |
+                // Century Russia to the battle of Paltava in 1709 and beyond,
+                // Otto Behr | has waged an unquestioning..." — the OPF was
+                // pretty-printed, so the publisher's line endings were sitting
+                // inside the sentences. They are not the author's line breaks and
+                // they read as stumbles, spoken or on a braille line.
+                //
+                // A SINGLE newline is therefore wrapping and becomes a space; a
+                // run of them is a real paragraph and stays as exactly one blank
+                // line. This is the same rule §8j settled for the book text
+                // itself — the description had simply never been through it.
+                // Done with a sentinel, because once either case has been
+                // rewritten the two can no longer be told apart: park every
+                // REAL break first, flatten what is left, then put them back.
+                // U+0001 because no description contains a control character,
+                // and anything that somehow did was stripped as markup above.
+                const string Para = "\u0001";
+                s = Regex.Replace(s, @"\n{2,}", Para);   // real paragraph breaks
+                s = s.Replace('\n', ' ');                  // the source's own wrapping
+                s = s.Replace(Para, "\n\n");             // and back again
+                s = Spaces.Replace(s, " ");
                 s = string.Join("\n", Array.ConvertAll(s.Split('\n'), l => l.Trim())).Trim();
 
                 if (s.Length == 0) return "";

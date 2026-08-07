@@ -186,6 +186,33 @@ namespace Nemoviz_Book_Reader
                 return true;
             }
 
+            // Enter on the Description row — and it has to be caught HERE, which
+            // is the whole lesson. The row is wired to ItemActivate, which a
+            // ListView raises for a double-click and for Enter; the double-click
+            // worked and Enter loaded the book instead. The form has an
+            // AcceptButton, a ListView does not claim Enter as an input key, so
+            // Form.ProcessDialogKey fires OK before the list is ever asked.
+            // ProcessCmdKey runs before all of that.
+            //
+            // ONLY on that row. Every other row keeps Enter meaning "open this
+            // book", which is what it has always meant here and what a reader
+            // pressing Enter in a library expects.
+            // FocusedControl(), not listViewDetails.Focused — this form already
+            // learned that lesson once and wrote it down: the lists live inside a
+            // SplitContainer, and asking WinForms who is focused gives the
+            // CONTAINER. FocusedControl asks Windows and then walks down through
+            // each container's ActiveControl, which is what made Tab and
+            // Shift+Tab agree in the first place. Reusing it here rather than
+            // trusting .Focused keeps this working wherever the control is put.
+            if (keyData == Keys.Enter
+                && ReferenceEquals(FocusedControl(), listViewDetails)
+                && listViewDetails.SelectedItems.Count == 1
+                && ReferenceEquals(listViewDetails.SelectedItems[0].Tag, DescriptionRowTag))
+            {
+                DetailsRowActivated(listViewDetails, EventArgs.Empty);
+                return true;
+            }
+
             if (keyData == Keys.Tab || keyData == (Keys.Tab | Keys.Shift))
                 return StepTabRing(keyData == (Keys.Tab | Keys.Shift) ? -1 : +1);
 
