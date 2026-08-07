@@ -64,10 +64,15 @@ toolchain is a much larger lift for the same artifact.
 
 **FFmpeg**: `--disable-everything`, then the enable-line from this folder, plus
 demuxers and parsers. Encoders, muxers, hwaccels, bitstream filters and devices
-all go — NBR only ever decodes. Keep `--disable-gpl`, and try dropping
-`--enable-version3` too: it would put FFmpeg back at LGPL 2.1 and remove the MSIX
-relink wrinkle (CLAUDE.md §10e). NBR decodes AMR natively (`amr_nb`/`amr_wb` are
-in the list above), so the usual reason for version3 does not apply.
+all go — NBR only ever decodes. Keep `--disable-gpl` **and `--disable-version3`**,
+which is what `patch/0099-NBR-LGPL-audio-only.patch` does and what the shipped
+DLL was built with: FFmpeg here is **LGPL 2.1**, and the MSIX relink wrinkle
+(CLAUDE.md §10e) never applied to it. NBR decodes AMR natively (`amr_nb`/`amr_wb`
+are in the list above), so the usual reason for version3 does not apply.
+
+**Dispatch the workflow with `lgpl=false`.** `lgpl=true` reaches zhongfly's
+`compile-lgpl-libmpv.patch`, which configures the same two files as 0099 and
+conflicts with it; that leg has never built. 0099 alone does the whole job.
 
 **mpv**: `-Dgpl=false -Dcplayer=false -Dlua=disabled -Djavascript=disabled
 -Dlibarchive=disabled -Ddvdnav=disabled -Duchardet=disabled -Dgl=disabled

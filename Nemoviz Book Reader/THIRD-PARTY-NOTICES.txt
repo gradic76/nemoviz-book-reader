@@ -19,8 +19,17 @@ Build    : mpv-dev-x86_64-20260801-git-1d15686142
 Built by : NBR, from gradic76/mpv-winbuild — a fork of zhongfly/mpv-winbuild
            carrying one patch, patch/0099-NBR-LGPL-audio-only.patch
 Upstream : https://github.com/mpv-player/mpv
-Licence  : LGPL v2.1 or later (mpv built with -Dgpl=false).
-           The FFmpeg it links is stated by the build to be LGPL v3.
+Licence  : LGPL v2.1 or later, mpv and FFmpeg alike.
+           This file said "the FFmpeg it links is stated by the build to be
+           LGPL v3" from 2026-07-30 until 2026-08-07. That WAS true, of the
+           93.6 MB build we shipped then, which came from zhongfly and carried
+           --enable-version3. It stopped being true the moment §10e' replaced it
+           with our own 30.2 MB build, and the line was never updated. Checked
+           three ways on 2026-08-07: patch/0099-NBR-LGPL-audio-only.patch, the
+           patch our build actually applies, removes BOTH --enable-gpl and
+           --enable-version3; --enable-version3 appears nowhere in the build log
+           of the run that produced the shipped DLL; and the DLL itself carries
+           no v3 marker.
 
 AUDIO ONLY. This build decodes no picture of any kind — no video, no images, no
 cover art (the Library shows format icons instead). FFmpeg is configured with
@@ -156,11 +165,7 @@ Naming a licence is not providing it, and the LGPL asks for a copy. These ship
 beside the program:
 
   Licences\LGPL-2.1.txt   liblouis and its tables, nvdaControllerClient,
-                          TagLib#, libmpv (mpv itself)
-  Licences\LGPL-3.0.txt   the FFmpeg inside libmpv — see below
-  Licences\GPL-3.0.txt    referred to by LGPL v3, which is written as a set of
-                          additional permissions on top of it, so the LGPL v3 is
-                          not readable without it
+                          TagLib#, libmpv — mpv and its FFmpeg alike
   Licences\Apache-2.0.txt PdfPig
   Licences\MIT.txt        SharpCompress and the managed packages above
   Fonts\Licences\OFL-1.1.txt      Andika, Atkinson Hyperlegible Next,
@@ -170,48 +175,44 @@ beside the program:
 
 Every one of these came from the component itself, never from recollection. The
 LGPL 2.1 is the copy nvaccess ships with its client; the MIT is the copy inside
-System.ComponentModel.Annotations' own package; the LGPL v3 and GPL v3 are
-FFmpeg's own COPYING.LGPLv3 and COPYING.GPLv3, and the Apache 2.0 is PdfPig's own
-LICENSE — those three fetched through the GitHub API, which returns the file's
-exact bytes rather than a rendering of them. A licence reconstructed from memory
-is not the licence, and it must never be produced that way.
+System.ComponentModel.Annotations' own package; the Apache 2.0 is PdfPig's own
+LICENSE, fetched through the GitHub API, which returns the file's exact bytes
+rather than a rendering of them. A licence reconstructed from memory is not the
+licence, and it must never be produced that way.
 
 
-FFmpeg IS LGPL v3, AND IT NEED NOT BE
--------------------------------------
-Settled on 2026-08-07, from the build's own configuration rather than from the
-binary. Scanning the shipped libmpv-2.dll answers nothing — it carries no
-version string at all, and the twenty "GPL" byte sequences a plain search finds
-are machine code (H?GPL, L?GPL and the like), the one real "LGPL" string
-belonging to libssh. The answer is in compile-lgpl-libmpv.patch in the fork this
-DLL is built from, gradic76/mpv-winbuild: that patch REMOVES --enable-gpl and
-KEEPS --enable-version3. So FFmpeg here is LGPL v3, the notices above are right,
-and both LGPL-3.0.txt and GPL-3.0.txt are owed and now ship.
+FFmpeg IS LGPL v2.1 - AND THE ROAD TO FINDING OUT IS WORTH KEEPING
+-------------------------------------------------------------------
+Settled 2026-08-07, after being got wrong first.
 
-THE FORK NO LONGER ASKS FOR IT (2026-08-07). --enable-version3 has been removed
-from compile-lgpl-libmpv.patch, so the NEXT build will be LGPL v2.1 and these two
-texts stop being owed. It was checked before it was changed, against FFmpeg's own
-configure rather than against anybody's memory: exactly eight components sit
-behind version3 —
+THE WRONG ANSWER, and why it looked right. gradic76/mpv-winbuild carries TWO
+patches that both configure FFmpeg. compile-lgpl-libmpv.patch is zhongfly's
+upstream one: it removes --enable-gpl and KEEPS --enable-version3. Reading it
+gives "FFmpeg is LGPL v3", confidently and wrongly - because NBR's build does
+not apply that file at all. It is reached only when a run is dispatched with
+lgpl=true, and the run that produced the shipped DLL was dispatched lgpl=false.
 
-    gmp, libaribb24, liblensfun, libopencore_amrnb, libopencore_amrwb,
-    libvo_amrwbenc, mbedtls, rkmpp        (plus libsmbclient, which is GPLv3)
+THE RIGHT ANSWER. What NBR's build applies is
+patch/0099-NBR-LGPL-audio-only.patch, in the ordinary patch loop, and that one
+removes --enable-gpl AND --enable-version3. Three independent checks agree:
+  - the patch itself: both flags are removal lines;
+  - the build log of the run that produced the shipped DLL: --enable-version3
+    appears nowhere in 3067 lines, while "Applying: NBR: LGPL, audio only" does;
+  - the DLL: no v3 marker, and no version string at all. (The twenty "GPL" byte
+    sequences a plain search finds are machine code - H?GPL, L?GPL and the like;
+    the one real "LGPL" string belongs to libssh.)
 
-— and this build enables NONE of them. Three of those are worth spelling out
-because they look close enough to matter: libaribcaption, which we do enable, is
-not libaribb24; the AMR pieces on the list are ENCODERS, while NBR only decodes
-and does that natively; and TLS goes through openssl, not mbedtls. FFmpeg's
-"OpenSSL >=3.0.0 requires --enable-version3" check reads "|| ! enabled gpl", and
-gpl is disabled here, so it does not fire either.
+So FFmpeg here has been LGPL v2.1 since 10e' replaced the 93.6 MB zhongfly build
+with our own 30.2 MB one. The "LGPL v3" line this file carried was true of the
+build it was written for, and was simply never updated.
 
-Why bother: LGPL v3 asks that the user be able to relink or replace the library,
-and a signed MSIX puts libmpv-2.dll where they cannot. At v2.1 the question does
-not arise.
+WHAT IT COSTS: nothing, which is the point. No rebuild is needed, the MSIX
+relink wrinkle never applied to the DLL we actually ship, and LGPL-3.0.txt and
+GPL-3.0.txt - added on 2026-08-07 and removed the same day - covered nothing.
 
-UNTIL A NEW BUILD IS MADE AND VERIFIED, THE DLL SHIPPING TODAY IS STILL v3 AND
-BOTH TEXTS BELOW STILL APPLY. The rebuild has to go through the six checks in
-tools/mpv-build/README.md before the DLL is swapped.
-
+THE LESSON, since this file is where it will be re-read: two patches in one
+repository can both look authoritative, and the one that is NOT applied reads
+exactly like the one that is. Check what the BUILD did, not what a patch says.
 
 STILL TO RESOLVE BEFORE ANY RELEASE
 -----------------------------------
@@ -219,6 +220,16 @@ Nothing on the licence side, as of 2026-08-07. Every component the project
 references is named above, every licence was read from that component's own
 metadata or its own licence file, and every text ships.
 
-What remains is the packaging decision: build without --enable-version3 and drop
-to LGPL v2.1, or keep v3 and make sure the chosen installer lets the user replace
-libmpv-2.dll.
+Nothing on the packaging side either, which was the last thing thought to be
+open: FFmpeg is already LGPL v2.1, so no installer has to make libmpv-2.dll
+replaceable on its account.
+
+Two things that are NOT licence questions but touch this file:
+  - a fork run dispatched with lgpl=true fails, and always would have:
+    compile-lgpl-libmpv.patch conflicts with patch/0099-NBR-LGPL-audio-only.patch
+    because they configure the same two files. Build with lgpl=FALSE, as every
+    working build has.
+  - the fork's own patches for libpsl, curl, c-ares and mpv-enable-libcurl no
+    longer apply cleanly against upstream. They fail tolerated (the loop ends in
+    "|| git am --abort") so the build still succeeds without them, but that drift
+    will widen.

@@ -1,4 +1,4 @@
-﻿# CLAUDE.md — Nemoviz Book Reader (NBR)
+# CLAUDE.md — Nemoviz Book Reader (NBR)
 
 This file is the persistent project brief for Claude Code. Read it fully at
 the start of every session. It replaces the per-session "recap" documents the
@@ -3669,7 +3669,8 @@ already animates at that level.
 `THIRD-PARTY-NOTICES.txt`, which ships with the app):** SharpCompress MIT,
 System.Text.Encoding.CodePages MIT (both read from their nuspec), liblouis and
 its tables LGPL 2.1+ (read from a table header), nvdaControllerClient LGPL 2.1
-(text present), TagLib# LGPL 2.1, libmpv LGPL 2.1+ with FFmpeg stated as LGPL v3.
+(text present), TagLib# LGPL 2.1, libmpv LGPL 2.1+ — with FFmpeg **also LGPL
+2.1**, though that line said v3 until 2026-08-07; see the bullet below.
 
 **The texts ship now (2026-08-07)** — `Licences\LGPL-2.1.txt` and
 `Licences\MIT.txt`, beside the fonts' OFL and CC-BY. **Both were copied from
@@ -3697,82 +3698,69 @@ source for the text itself.
 - **Microsoft.Bcl.HashCode 6.0.0 → MIT**, read from the package's own nuspec on
   nuget.org (`<license type="expression">MIT</license>`, repo
   `dotnet/maintenance-packages`).
-- **FFmpeg IS LGPL v3 — confirmed, and not from the binary.** The DLL settles
-  nothing: no version string of any kind, and the twenty "GPL" hits a plain
-  search returns are **machine code** (`H?GPL`, `L?GPL`), the one real "LGPL"
-  belonging to libssh. The answer is in `compile-lgpl-libmpv.patch` in the fork
-  the DLL is built from: it **removes `--enable-gpl` and keeps
-  `--enable-version3`**. So `LGPL-3.0.txt` and `GPL-3.0.txt` are owed and now
-  ship — GPL v3 because LGPL v3 is written as additional permissions on top of
-  it and cannot be read without it.
+- **FFmpeg is LGPL v2.1 — and I got this WRONG first, in the notices, in this
+  file and in a commit message.** The fork carries **two** patches that configure
+  FFmpeg. `compile-lgpl-libmpv.patch` is zhongfly's upstream one and keeps
+  `--enable-version3`; reading it gives "LGPL v3", confidently and wrongly,
+  because **NBR's build never applies that file** — it is reached only with
+  `lgpl=true`, and the run that produced the shipped DLL ran `lgpl=false`. What
+  it does apply is `patch/0099-NBR-LGPL-audio-only.patch`, which removes
+  `--enable-gpl` **and** `--enable-version3`.
+  **Three independent checks agree**: both flags are removal lines in that patch;
+  `--enable-version3` appears nowhere in the 3067-line build log of the run that
+  produced the DLL, while "Applying: NBR: LGPL, audio only" does; and the DLL
+  carries no version marker at all. So it has been v2.1 since §10e′, and the
+  "LGPL v3" line was true of the 93.6 MB zhongfly build it was written for and
+  was never updated. `LGPL-3.0.txt` and `GPL-3.0.txt` shipped for one day and are
+  gone; they covered nothing.
+  **The lesson worth more than the fix: two patches in one repository can both
+  look authoritative, and the one that is NOT applied reads exactly like the one
+  that is. Check what the BUILD did, not what a patch says.**
 
-**The obligation is removed at the source, not satisfied (2026-08-07,
-`gradic76/mpv-winbuild` commit `efb690a`).** Gordan's instruction: if Microsoft
-will hammer us for this and it can be avoided without costing the app anything,
-avoid it. `--enable-version3` is gone from `compile-lgpl-libmpv.patch`, so the
-NEXT build is LGPL v2.1 and both v3 texts stop being owed.
+**The whole "remove the obligation" exercise was ANSWERING A QUESTION THAT WAS
+NOT OPEN (2026-08-07).** Gordan's instruction was sound — if Microsoft will
+hammer us for something avoidable, avoid it — but FFmpeg was already LGPL v2.1.
+What followed is kept because the mistakes are the useful part.
 
-**Checked against FFmpeg's own `configure` before touching anything**, because
-"nothing needs it" is exactly the sort of claim this project has been wrong about
-before. Exactly eight components sit behind version3 — `gmp`, `libaribb24`,
-`liblensfun`, `libopencore_amrnb`, `libopencore_amrwb`, `libvo_amrwbenc`,
-`mbedtls`, `rkmpp` (plus `libsmbclient`, GPLv3) — and this build enables **none**
-of them. Three near-misses are worth naming: **`libaribcaption`, which we do
-enable, is not `libaribb24`**; the AMR entries are ENCODERS while NBR only
-decodes, natively; and TLS goes through openssl, not mbedtls. FFmpeg's
-"OpenSSL >= 3.0.0 requires --enable-version3" check reads `|| ! enabled gpl`, and
-gpl is disabled here, so it does not fire.
+1. **`--enable-version3` was edited out of `compile-lgpl-libmpv.patch`** (commit
+   `efb690a`), after a genuinely careful check against FFmpeg's own `configure`:
+   exactly eight components sit behind version3 — `gmp`, `libaribb24`,
+   `liblensfun`, `libopencore_amrnb`, `libopencore_amrwb`, `libvo_amrwbenc`,
+   `mbedtls`, `rkmpp` — and this build enables none of them. **That analysis is
+   still correct and worth keeping**: `libaribcaption` is not `libaribb24`, the
+   AMR entries are encoders, TLS goes through openssl. It was simply applied to a
+   file the build does not use.
+2. **The build was dispatched with `lgpl=true`** to exercise that file, and that
+   is what broke it. With `lgpl=true` the workflow applies
+   `compile-lgpl-libmpv.patch` ON TOP of `patch/0099-NBR-LGPL-audio-only.patch`,
+   and the two configure the same two files: CONFLICT in `packages/ffmpeg.cmake`
+   and `packages/mpv.cmake`, job dead in 1.6 minutes. **Every working build has
+   used `lgpl=false`**, where 0099 alone does the job.
+3. **The run still reported SUCCESS**, because the ordinary `(64, false)` leg
+   built fine for 46 minutes while the `(64, true)` leg failed. A green run is not
+   a green build when a matrix leg can fail on its own — and the handover note
+   written the night before had said "do not infer it from the run going green",
+   which turned out to be the right warning for the wrong reason.
+4. Both changes are reverted (`ad0d057`). The fork is back to what built the
+   shipped DLL, and **no rebuild is needed at all**.
 
-The patch's hunk counts were re-derived and verified after the edit — one context
-line became a removal, so `@@ -57,14 +47,10 @@` became `+47,9` and the following
-hunk's start shifted — and the verifier was proved on the unmodified patch first.
+**The first attempt (run 31129028299) failed on nothing of ours**, and that
+diagnosis stands. No step failed: the `params` job sat **15 minutes with zero
+steps and no runner assigned** and was cancelled, taking the run with it. The
+comparison that settled it is the last successful run, where the same job took
+**3 seconds and had 4 steps**. GitHub's status API then named the cause —
+**Actions in a major outage**, critical incident opened 15:22 UTC. **It was NOT
+re-sent while that lasted**: re-dispatching into an outage is not persistence, it
+is a row of identical red runs that say nothing, and the previous seven attempts
+were worth making precisely because they were seven DIFFERENT causes.
 
-**A build is running: `gradic76/mpv-winbuild` run 31133430735**, "NBR audio-only
-8b", dispatched 2026-08-07 00:06 UTC with `build_target=64bit, lgpl=true,
-compiler=clang, release=false`. The workflow applies the patch with
-`git am --3way`, so mild context drift would survive but a malformed patch fails
-loudly — either way the run says which.
-
-**The first attempt (run 31129028299) failed on nothing of ours**, and the way
-that was established is worth keeping. No step failed: the `params` job sat for
-**15 minutes with zero steps and no runner assigned** and was then cancelled,
-taking the rest of the run with it. The comparison that settled it is the last
-successful run, where the same job took **3 seconds and had 4 steps** — so the
-job never got a machine rather than failing on one. GitHub's own status API then
-named it: **Actions was in a major outage**, critical incident opened 15:22 UTC.
-**It was NOT re-sent while that lasted.** Re-dispatching into an outage is not
-persistence, it is a row of identical red runs that say nothing; the previous
-seven attempts were seven DIFFERENT causes, which is what made them worth making.
-A monitor watched the status API instead and the build went out the moment
-Actions returned to `operational`.
-
-**WHAT TO DO WITH IT WHEN IT FINISHES** (nobody is watching it; see below):
-1. The artifact wanted is `mpv-dev-lgpl-x86_64-*` — the patch renames the output
-   folder, so an artifact without `-lgpl` in its name is the ordinary build and
-   is not ours.
-2. **Confirm the licence actually changed**, which is the entire point: FFmpeg's
-   configure line in the build log must no longer carry `--enable-version3`.
-   Do not infer it from the fact that the run went green.
-3. Then the six checks in `tools/mpv-build/README.md`, in full — GPL scan,
-   decoder diff against the oracle, filter chain, play files with the OLD DLL as
-   a control run, `scaletempo2`/WASAPI/`ao=null`, and by ear.
-4. Only then swap the DLL, and only then drop `Licences\LGPL-3.0.txt` and
-   `Licences\GPL-3.0.txt` and the section about them in THIRD-PARTY-NOTICES.txt.
-
-**Nobody is monitoring this run.** Claude Code runs inside Gordan's session on his
-machine: when the app or the machine is closed it stops existing, and it cannot
-wake itself to check on anything. GitHub Actions is unaffected — that is the
-point of running it there — but the result has to be picked up by hand, or at the
-start of the next session.
-
-**The DLL shipping today is still v3**, and both texts still ship with it.
-
-**One wrinkle for MSIX specifically:** FFmpeg here is LGPL **v3**, which wants
-the user to be able to relink or replace the library. A signed MSIX package puts
-the DLL inside `WindowsApps` where it cannot be replaced. Worth checking whether
-the build uses `--enable-version3` and what needs it, since FFmpeg is LGPL 2.1+
-by default. NBR decodes AMR natively, so the usual reason for version3
-(libopencore-amr, encoding only) probably does not apply.
+**Two things left behind, neither a licence question:**
+- A run dispatched with **`lgpl=true` will always fail** in this fork, for the
+  conflict above. Build with `lgpl=false`.
+- The fork's own patches for **libpsl, curl, c-ares and mpv-enable-libcurl no
+  longer apply** against upstream. They fail tolerated — that loop ends in
+  `|| git am --abort` — so builds still succeed without them, but the drift will
+  widen.
 
 ---
 

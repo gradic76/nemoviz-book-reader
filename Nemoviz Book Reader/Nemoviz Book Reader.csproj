@@ -270,16 +270,11 @@
     <Content Include="Licences\MIT.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- FFmpeg's own COPYING.LGPLv3 and COPYING.GPLv3, and PdfPig's own LICENSE,
-         fetched through the GitHub API — which returns a file's exact bytes, not
-         a rendering of them. GPL v3 is here because LGPL v3 is written as a set
-         of additional permissions on top of it and cannot be read without it. -->
-    <Content Include="Licences\LGPL-3.0.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Licences\GPL-3.0.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <!-- PdfPig's own LICENSE, fetched through the GitHub API, which returns a
+         file's exact bytes rather than a rendering of them.
+         LGPL-3.0.txt and GPL-3.0.txt were here for a day and are gone: FFmpeg in
+         this build is LGPL v2.1, not v3 (see THIRD-PARTY-NOTICES.txt), so they
+         covered nothing and shipping them would have said otherwise. -->
     <Content Include="Licences\Apache-2.0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
