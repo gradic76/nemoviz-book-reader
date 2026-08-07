@@ -181,6 +181,10 @@ Dialog.About.Text=Nemoviz Book Reader\n\nThis window is waiting for its text.\n\
 Dialog.Timer.Title=Sleep Timer
 Dialog.GoTo.Title=Go To
 Dialog.ManageBookmarks.Title=Manage Bookmarks
+; Shown the first few times sound processing is switched on. The same thing the
+; Help says, met head-on: the name promises more than the thing delivers.
+Dialog.SoundProcessing.Title=Sound processing
+Dialog.SoundProcessing.Message=Sound processing makes a poor recording easier to listen to. It does not repair one.\n\nIt cannot put back what was never recorded, and pushed hard it does more harm than good. Leave it simply on, listen for a few minutes, and only then reach for the separate stages.\n\nThe Help explains what each one does.
 Dialog.Error.Title=Error
 Dialog.Error.General=Error: {0}
 Player.OpenFile.Title=Select a book

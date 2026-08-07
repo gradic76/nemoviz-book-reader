@@ -195,6 +195,7 @@ namespace Nemoviz_Book_Reader
 
             Visual = ini.Read("Visual", "Use", "0") == "1";
             WarnBrailleReread = ini.Read("App", "WarnBrailleReread", "1") == "1";
+            WarnSoundProcessing = ini.Read("App", "WarnSoundProcessing", "1") == "1";
             VisualMode = Clamp(ReadInt("Visual", "Mode", 0), 0, 2);
             Highlight = Clamp(ReadInt("Visual", "Highlight", 1), 0, 2);
             HighlightColour = ReadingColours.Clamp(
@@ -249,6 +250,18 @@ namespace Nemoviz_Book_Reader
         /// bookmarks and the percentage; the switch-off is owed because a reader
         /// hunting for the right table will meet it several times in a row.</summary>
         public bool WarnBrailleReread { get; private set; }
+
+        /// <summary>Whether to say what sound processing can and cannot do the
+        /// next time it is switched on. On until the reader ticks it away — the
+        /// same shape as WarnBrailleReread.</summary>
+        public bool WarnSoundProcessing { get; private set; }
+
+        public void SetWarnSoundProcessing(bool value)
+        {
+            if (value == WarnSoundProcessing) return;
+            WarnSoundProcessing = value;
+            ini.Write("App", "WarnSoundProcessing", value ? "1" : "0");
+        }
 
         public void SetWarnBrailleReread(bool value)
         {

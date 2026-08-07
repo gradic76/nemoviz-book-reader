@@ -283,7 +283,12 @@ namespace Nemoviz_Book_Reader
             // Master gates the cells; each stage's own switch gates its params
             // (an unchecked stage can't have its parameters changed). Any change
             // refreshes column A.
-            chkMaster.CheckedChanged += (s2, e) => { UpdateEnabledStates(); OnAnyChange(); };
+            chkMaster.CheckedChanged += (s2, e) =>
+            {
+                WarnAboutSoundProcessing();
+                UpdateEnabledStates();
+                OnAnyChange();
+            };
             foreach (var st in stages)
                 st.Enable.CheckedChanged += (s2, e) => { UpdateEnabledStates(); OnAnyChange(); };
             WireCombo(cmbHp); WireCombo(cmbDn); WireCombo(cmbDs); WireCombo(cmbCmp);
@@ -638,6 +643,52 @@ namespace Nemoviz_Book_Reader
             if (!book.RetranslateBraille(want.Id))
                 MessageForm.ShowInfo(this, Localization.T("Dialog.BrailleReread.Failed"),
                                      Localization.T("Dialog.BrailleReread.Title"));
+        }
+
+        /// <summary>Says what sound processing can and cannot do, the first few
+        /// times it is switched on (Gordan, 2026-08-07 — "da ne očekuje baš nešto
+        /// previše").
+        ///
+        /// <para><b>Why it is worth a box at all.</b> The name promises more than
+        /// the thing delivers. A reader who turns on something called "sound
+        /// processing" on a bad recording expects it repaired; what it does is
+        /// make a poor recording easier to listen to for an hour. Meeting that
+        /// expectation head-on once is kinder than letting someone conclude the
+        /// feature is broken — and it is the same text the Help carries, so
+        /// nobody has to go and look it up.</para>
+        ///
+        /// <para><b>Only on the way ON, and only until told otherwise.</b>
+        /// Switching it off needs no warning, and a box that appeared every time
+        /// would be the thing people remember instead of what it said. It uses
+        /// the ConfirmOnceForm the braille re-read already established, so
+        /// "don't show this again" behaves the way it does everywhere else — and
+        /// Cancel leaves the switch OFF, which is the only honest thing a Cancel
+        /// button on this question can mean.</para></summary>
+        private bool warningInProgress;
+
+        private void WarnAboutSoundProcessing()
+        {
+            if (chkMaster == null || !chkMaster.Checked) return;
+            // Un-ticking below re-enters this handler; without the guard the box
+            // would ask about its own answer.
+            if (warningInProgress) return;
+
+            AppSettings st = appSettings ?? AppSettings.Current;
+            if (st != null && !st.WarnSoundProcessing) return;
+
+            bool off;
+            bool go = ConfirmOnceForm.Ask(this,
+                          Localization.T("Dialog.SoundProcessing.Message"),
+                          Localization.T("Dialog.SoundProcessing.Title"), out off);
+            if (go)
+            {
+                if (off && st != null) st.SetWarnSoundProcessing(false);
+                return;
+            }
+
+            warningInProgress = true;
+            try { chkMaster.Checked = false; }
+            finally { warningInProgress = false; }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
