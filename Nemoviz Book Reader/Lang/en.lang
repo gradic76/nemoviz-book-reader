@@ -372,6 +372,12 @@ Prop.UseSoundProcessing=Use sound processing
 ; The subject itself, for the help key and its pop-up title — the caption above
 ; is an instruction, and "Help for Use sound processing" reads badly.
 Prop.SoundProcessing=Sound processing
+; Spoken, not shown: switching sound processing on measures the recording and
+; sets the six stages from it, which takes about a second and a half. Nothing is
+; disabled meanwhile, so these three lines are the only sign it is happening.
+Prop.Analysing=Analysing the recording
+Prop.Analysing.Done=Recording analysed, {0} stages set. Change any of them if you prefer.
+Prop.Analysing.Failed=The recording could not be analysed. The settings are unchanged.
 Prop.Stage.Level=Level
 Prop.Highpass.Title=Remove rumble
 Prop.Denoise.Title=Noise reduction

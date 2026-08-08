@@ -288,6 +288,10 @@ namespace Nemoviz_Book_Reader
                 WarnAboutSoundProcessing();
                 UpdateEnabledStates();
                 OnAnyChange();
+                // After the warning, not before: declining it puts the switch
+                // back off, and measuring a recording nobody asked to process
+                // is the very work this feature exists to avoid.
+                AnalyseIfNeeded();
             };
             foreach (var st in stages)
                 st.Enable.CheckedChanged += (s2, e) => { UpdateEnabledStates(); OnAnyChange(); };
@@ -523,7 +527,14 @@ namespace Nemoviz_Book_Reader
 
         private void ResetAll()
         {
-            SoundSettings d = new SoundSettings(); // fresh defaults
+            ShowSettings(new SoundSettings());   // fresh defaults
+        }
+
+        /// <summary>Puts a set of settings into the controls. Two callers now —
+        /// Reset all, and the analysis — so the six stages are loaded in one
+        /// place rather than in two that could drift.</summary>
+        private void ShowSettings(SoundSettings d)
+        {
             suppressAnnounce = true;
 
             chkHp.Checked = d.HighpassEnabled; cmbHp.SelectedIndex = d.HighpassLevel;
@@ -691,10 +702,91 @@ namespace Nemoviz_Book_Reader
             finally { warningInProgress = false; }
         }
 
+        private bool analysing;
+
+        /// <summary>Measures the recording and sets the six stages from it — the
+        /// autoscan.
+        ///
+        /// <para><b>Once per book, and only when there is no stored
+        /// measurement.</b> A book that has been measured already had its stages
+        /// set from that measurement, and the reader has had every chance to
+        /// correct them since; running again would walk over exactly the
+        /// corrections Gordan said the reader should be free to make.</para>
+        ///
+        /// <para><b>Nothing is disabled while it runs.</b> Disabling a control
+        /// takes it out of the tab order, so a screen-reader user would find the
+        /// dialog silently rearranging itself for a second and a half and then
+        /// rearranging back — far more disturbing than the wait. The reader is
+        /// told it is running instead, and told again when it lands.</para></summary>
+        private void AnalyseIfNeeded()
+        {
+            if (chkMaster == null || !chkMaster.Checked || analysing) return;
+            if (book == null || book.Chapters == null || book.Chapters.Count == 0) return;
+            if (book.Analysis != null && book.Analysis.Measured) return;
+
+            analysing = true;
+            ScreenReader.Announce(this, Localization.T("Prop.Analysing"));
+
+            BookData target = book;
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                SoundAnalysis found = null;
+                try { found = SoundAnalyser.Measure(target); } catch { }
+                try
+                {
+                    // The dialog can be closed while this runs; a disposed form
+                    // is not a null one, and BeginInvoke on it throws.
+                    if (IsDisposed || Disposing || !IsHandleCreated) return;
+                    BeginInvoke((MethodInvoker)(() => AnalysisDone(found)));
+                }
+                catch { }
+            });
+        }
+
+        private void AnalysisDone(SoundAnalysis found)
+        {
+            analysing = false;
+            if (IsDisposed || Disposing) return;
+
+            if (found == null || !found.Measured)
+            {
+                // Nothing measurable — an unreadable file, or every segment
+                // silence. Say so rather than leaving the reader waiting for an
+                // announcement that never comes, and leave the stages alone.
+                ScreenReader.Announce(this, Localization.T("Prop.Analysing.Failed"));
+                return;
+            }
+
+            // The measurement is kept on the book even though the STAGES are
+            // only staged in the dialog: it is a fact about the recording, not a
+            // setting, and Cancel does not make it untrue. It is also what stops
+            // the next visit measuring the same book again.
+            book.SetAnalysis(found);
+
+            SoundSettings suggested = BuildCurrent();
+            SoundAdvisor.Apply(found, suggested);
+            ShowSettings(suggested);
+
+            ScreenReader.Announce(this, Localization.T("Prop.Analysing.Done", StagesOn(suggested)));
+        }
+
+        private static int StagesOn(SoundSettings s)
+        {
+            int n = 0;
+            if (s.HighpassEnabled) n++;
+            if (s.DenoiseEnabled) n++;
+            if (s.DeesserEnabled) n++;
+            if (s.CompressorEnabled) n++;
+            if (s.EqEnabled) n++;
+            if (s.NormalizeEnabled) n++;
+            return n;
+        }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             // The catalog backend starts the 32-bit host; let it go with the dialog.
             try { if (textSpeech != null) { textSpeech.Dispose(); textSpeech = null; } } catch { }
+            ScreenReader.Forget(this);
             base.OnFormClosed(e);
         }
 

@@ -168,6 +168,15 @@ namespace Nemoviz_Book_Reader
         // runs once instead of on every visit to Properties.
         public SoundAnalysis Analysis { get; private set; }
 
+        /// <summary>Records what the recording measured. Kept separate from the
+        /// sound SETTINGS on purpose: the measurement is a fact about the file
+        /// and Cancel does not make it untrue, while the settings it suggests are
+        /// staged in the dialog like everything else there.</summary>
+        public void SetAnalysis(SoundAnalysis a)
+        {
+            if (a != null) Analysis = a;
+        }
+
         // Text book (read aloud by TTS): a folder with a text document and no
         // audio. TextPosition is the resume point as a character offset.
         public bool IsTextBook { get; private set; }
