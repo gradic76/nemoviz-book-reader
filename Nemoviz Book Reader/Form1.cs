@@ -402,6 +402,10 @@ namespace Nemoviz_Book_Reader
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            // From here on the player is expected to answer. Started after the
+            // window is up, so the ordinary cost of building it is not reported
+            // as a hang.
+            UiWatchdog.Start(this);
             if (openLibraryOnStartup)
             {
                 openLibraryOnStartup = false;
@@ -3411,7 +3415,9 @@ namespace Nemoviz_Book_Reader
         {
             if (isLibraryOpen) return;
 
+            UiWatchdog.Note("player: opening the library");
             SaveCurrentBookProgress();
+            UiWatchdog.Note("player: progress saved");
 
             isLibraryOpen = true;
             try
@@ -3558,6 +3564,7 @@ namespace Nemoviz_Book_Reader
             // box is free, so the text is laid out once.
             var mode = (VisualMode)(currentBook.TextVisualMode >= 0 && currentBook.TextVisualMode <= 2
                                     ? currentBook.TextVisualMode : 0);
+            UiWatchdog.Note("player: opening the reading window");
             readingWindowMadeAt = DateTime.UtcNow;
             readingWindow = new ReadingWindow(this, tbReadingSurface, mode,
                 () => DistinctBookChars(),
@@ -4979,7 +4986,10 @@ namespace Nemoviz_Book_Reader
                 // first call — reading the property alone was the bug above.
                 SyncMap sync = currentBook.LoadSyncMap();
                 if (sync == null || sync.IsEmpty) return;
-                start = DaisySync.CharAt(sync, GetVirtualPosition());
+                // The text goes IN, so a book whose anchors are minutes apart is
+                // walked sentence by sentence between them instead of standing
+                // still — see DaisySync.CharAt.
+                start = DaisySync.CharAt(sync, GetVirtualPosition(), readingText);
                 s = SentenceAround(readingText, start);
             }
             else if (currentBook.IsTextBook && tts != null)
@@ -5364,7 +5374,9 @@ namespace Nemoviz_Book_Reader
                 CancelSleepTimer(true);
 
             // Stop any TTS reading from a previous text book.
+            UiWatchdog.Note("player: stopping the reader before loading");
             if (tts != null) tts.Stop();
+            UiWatchdog.Note("player: reader stopped");
 
             // The outgoing CD's files, now that nothing is reading them: "stop"
             // clears mpv's playlist and releases the handle, which is the same

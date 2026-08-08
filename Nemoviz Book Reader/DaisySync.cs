@@ -230,6 +230,36 @@ namespace Nemoviz_Book_Reader
         /// following along, so it runs on every position tick.</summary>
         public static int CharAt(SyncMap map, double seconds)
         {
+            return CharAt(map, seconds, null);
+        }
+
+        /// <summary>The same, but moving SENTENCE BY SENTENCE between anchors
+        /// when the book's own anchors are far apart.
+        ///
+        /// <para><b>Why this is needed, measured on the library.</b> Gordan tested
+        /// braille on real hardware: plain text and EPUB follow beautifully,
+        /// sentence by sentence, while a DAISY text+audio hybrid is
+        /// <i>"ćudljiv, ne sinka baš, zna zaglaviti i ne micati se"</i>. It is not
+        /// the surface. A hybrid is driven by this map, and one book in his
+        /// library carries <b>1417 points across 21.9 hours — a median gap of
+        /// 46 seconds, and up to 271</b>. The text CANNOT move more often than
+        /// that; another hybrid with a 4.8 s median feels fine. The difference is
+        /// how the producer authored the SMIL, per paragraph or per sentence, and
+        /// no amount of care in the player changes what is in the file.</para>
+        ///
+        /// <para><b>So the position is estimated between anchors and exact at
+        /// them.</b> Reading advances roughly evenly, so the text between two
+        /// anchors is walked in step with the time between them.</para>
+        ///
+        /// <para><b>A SENTENCE at a time, never continuously</b>, and that is the
+        /// whole design rather than a detail. Sentence-at-a-time is exactly what
+        /// he reports working well on the formats that do work, it is the unit
+        /// §8l requires all three outputs to share, and a continuously creeping
+        /// caret would drive a braille display to refresh without end. So the
+        /// estimate is snapped back to a sentence start — the same boundary the
+        /// surface already highlights on.</para></summary>
+        public static int CharAt(SyncMap map, double seconds, string text)
+        {
             if (map == null || map.ByTime.Count == 0) return 0;
             var list = map.ByTime;
             int lo = 0, hi = list.Count - 1, best = 0;
@@ -239,8 +269,42 @@ namespace Nemoviz_Book_Reader
                 if (list[mid].Seconds <= seconds) { best = mid; lo = mid + 1; }
                 else hi = mid - 1;
             }
-            return list[best].CharOffset;
+
+            SyncPoint prev = list[best];
+            if (string.IsNullOrEmpty(text) || best + 1 >= list.Count) return prev.CharOffset;
+
+            SyncPoint next = list[best + 1];
+            double span = next.Seconds - prev.Seconds;
+            // Below this the book's own anchors are already finer than a
+            // sentence, and guessing between them could only be worse than the
+            // truth it would be overwriting.
+            if (span < MinGapToEstimate) return prev.CharOffset;
+
+            int chars = next.CharOffset - prev.CharOffset;
+            // Not every book reads in order — §8c found four whose text and audio
+            // genuinely run backwards in places. There, estimate nothing.
+            if (chars <= 0) return prev.CharOffset;
+
+            double f = (seconds - prev.Seconds) / span;
+            if (f < 0) f = 0; else if (f > 1) f = 1;
+            int raw = prev.CharOffset + (int)(chars * f);
+            if (raw >= text.Length) raw = text.Length - 1;
+            if (raw < prev.CharOffset) return prev.CharOffset;
+
+            int start = text.LastIndexOfAny(SentenceEnds, raw) + 1;
+            while (start < text.Length && char.IsWhiteSpace(text[start])) start++;
+            // Never behind the anchor: an anchor is measured truth and an
+            // estimate may not walk back over one.
+            return start < prev.CharOffset ? prev.CharOffset : start;
         }
+
+        /// <summary>The sentence boundary, the same set <c>SentenceAround</c> in
+        /// the player highlights on. One convention, so an estimated position and
+        /// the highlight it produces cannot land on different things.</summary>
+        private static readonly char[] SentenceEnds = { '.', '!', '?', '\n' };
+
+        /// <summary>Anchors closer together than this are left alone.</summary>
+        public const double MinGapToEstimate = 8.0;
 
         private static string FindFile(string folder, string name)
         {

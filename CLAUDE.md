@@ -4512,11 +4512,21 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     a display. **If the first route really gives panning and routing keys, BrlAPI
     buys almost nothing; if it does not, it buys everything.** Test this before
     spending another hour on BRLTTY.
-    **BLOCKED, as of 2026-08-04: the window does not reliably take focus.** Gordan
-    had to follow it by hand on the current build. Which of the two routes above a
-    reader actually gets is decided by where focus sits, so until that is fixed
-    the deep test cannot report on the route it is meant to be testing. Fixing the
-    focus retry is therefore the prerequisite for this whole bullet — see §8l.
+    **DONE, ON REAL HARDWARE — 2026-08-08, and the bet paid off.** Gordan tested
+    with a display attached, on plain text, EPUB and a DAISY text+audio hybrid.
+    **Text and EPUB work**: the line refreshes per sentence or per paragraph, the
+    display's own panning keys widen the text by hand, and the whole thing stays
+    "u poprilično dobrom syncu". So the route this project bet on — a real
+    focusable control, tracked by the screen reader itself, no drivers and no API
+    — **is confirmed on hardware**. Panning works. **BrlAPI is therefore not
+    needed**, which retires the whole BRLTTY question for Lite; §8l's long
+    argument stands as written and nothing further should be spent on it.
+    (Routing keys specifically were not exercised and remain the one unproven
+    item.)
+    **The hybrid was the exception and it is NOT the surface's fault** —
+    *"ćudljiv, ne sinka baš, zna zaglaviti i ne micati se"*. Measured: it is the
+    resolution of the book's own sync map. See §8l's estimate-between-anchors
+    note and `DaisySync.CharAt`.
   - **Light and Dark themes** — deferred by Gordan ("za light/dark ćemo još
     vidjeti"). Remember `SystemColors` does NOT track Windows dark mode; the
     signal is `HKCU\…\Themes\Personalize\AppsUseLightTheme`, and scrollbars,

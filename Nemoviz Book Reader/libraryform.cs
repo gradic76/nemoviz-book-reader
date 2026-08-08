@@ -844,6 +844,7 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         private void LoadBooks()
         {
+            UiWatchdog.Note("library: rebuilding the shelf");
             LibraryScanner scanner = new LibraryScanner(appSettings.LibraryPath, true);
             // The ONE call in NBR that may delete a user's file, and the only
             // place allowed to make it: an archive dropped into the library
@@ -1824,6 +1825,7 @@ namespace Nemoviz_Book_Reader
 
         private void MenuFileOpenFile_Click(object sender, EventArgs e)
         {
+            UiWatchdog.Note("library: Open file requested");
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = BuildFileFilter();
@@ -1839,7 +1841,11 @@ namespace Nemoviz_Book_Reader
                 if (!string.IsNullOrEmpty(appSettings.LastImportFileFolder)
                     && System.IO.Directory.Exists(appSettings.LastImportFileFolder))
                     ofd.InitialDirectory = appSettings.LastImportFileFolder;
-                if (ofd.ShowDialog() == DialogResult.OK)
+                UiWatchdog.Note("library: showing the file dialog at "
+                                + (ofd.InitialDirectory ?? "(default)"));
+                bool ok = ofd.ShowDialog() == DialogResult.OK;
+                UiWatchdog.Note("library: file dialog closed, ok=" + ok);
+                if (ok)
                 {
                     try { appSettings.SetLastImportFileFolder(
                         System.IO.Path.GetDirectoryName(ofd.FileName)); }
@@ -1909,6 +1915,7 @@ namespace Nemoviz_Book_Reader
 
         private void ImportFile(string filePath)
         {
+            UiWatchdog.Note("library: importing " + System.IO.Path.GetFileName(filePath ?? ""));
             ImportFileCore(filePath, false);
         }
 
