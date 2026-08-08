@@ -42,10 +42,29 @@ namespace Nemoviz_Book_Reader
         // reader a question they had no way to answer.
         public static readonly double[] SpeechnormExpansion = { 1.5, 2.0, 2.5, 3.0, 3.5 };
 
-        // EQ band centre frequencies (Hz), just for the technical read-out.
+        // EQ band centre frequencies (Hz).
+        //
+        // TREBLE MOVED 10 kHz -> 4 kHz (2026-08-08). Gordan, listening to a dull
+        // recording with the treble at +8: "kao da naš ekvilajzer radi izvan
+        // frekvencija koje se koriste". He was exactly right, and measuring the
+        // six samples band by band shows why — dB relative to the whole signal:
+        //
+        //                  150-400  400-1k   1k-2k   2k-4k   4k-8k    >8k
+        //   the good two      -3.9    -4.4   -10.0   -14.2   -17.4   -21.5
+        //   the bad four      -2.8    -5.5   -13.8   -21.1   -30.3   -44.1
+        //
+        // Below 1 kHz all six are the same, which is why cutting bass changed
+        // nothing he could hear. And at 10 kHz the damaged recordings are 40 to
+        // 48 dB down: a shelf there lifts something inaudible to something
+        // slightly less inaudible. The loss that MATTERS opens from about 1 kHz
+        // and is worst from 4 kHz up, so that is where the shelf belongs.
+        //
+        // Honest limit, worth saying out loud: what was never recorded cannot be
+        // restored. A 4 kHz shelf reaches real content; nothing reaches content
+        // above 8 kHz that a cassette or a 64 kbps encoder threw away.
         public const int EqBassHz = 120;
         public const int EqVoiceHz = 3000;
-        public const int EqTrebleHz = 10000;
+        public const int EqTrebleHz = 4000;
 
         // The always-on safety limiter ceiling (dBFS). Fixed, not user-editable:
         // "set and forget", and we want the hottest clean output possible.

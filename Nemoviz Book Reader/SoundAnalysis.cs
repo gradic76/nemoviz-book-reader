@@ -271,6 +271,23 @@ namespace Nemoviz_Book_Reader
                 s.DenoiseLevel = Pick(a.Snr, 0, new[] { 15.0, 22.0, 28.0, 34.0 }, true);
                 s.DenoiseEnabled = a.Snr < 34;
             }
+            else if (Damaged(a))
+            {
+                // No measurable noise, but the recording is measurably damaged.
+                //
+                // This is a CORRELATION and is labelled as one. Yesterday's
+                // reading — "no measurable noise floor means clean" — is wrong:
+                // Gordan asked for noise reduction on two recordings whose noise
+                // this code cannot see at all, strong on one and medium on the
+                // other, and a third got it automatically and he called the
+                // result excellent. Three of the four damaged samples wanted it
+                // and none of the good ones did. There is no mechanism behind
+                // that, only the observation, so it takes a middle setting
+                // rather than guessing a level from a number that does not
+                // exist.
+                s.DenoiseEnabled = true;
+                s.DenoiseLevel = 2;
+            }
             else
             {
                 s.DenoiseEnabled = false;
@@ -304,8 +321,22 @@ namespace Nemoviz_Book_Reader
             // the target: a book a little quieter than average is not a book
             // that needs its level rebuilt, and the gate goes under the good
             // pair rather than at the middle of the shelf.
-            s.NormalizeLevel = Pick(a.Lufs, 0, new[] { -30.0, -27.0, -25.0, -23.0 }, true);
-            s.NormalizeEnabled = SoundAnalysis.Usable(a.Lufs) && a.Lufs < -23;
+            //
+            // NORMALISATION FOLLOWS DAMAGE, NOT LEVEL, and Gordan's own answers
+            // are what forced that. Asked which recordings wanted it he said:
+            // not at -15.9, yes at -19.3, yes at -20.7 (medium), and he would
+            // touch neither of the good pair at -21.6 and -22.0. The two he
+            // wanted sit BETWEEN the one he did not need and the two he would
+            // leave alone — so no threshold on loudness can express it, and
+            // every gate tried on loudness alone got at least one of the six
+            // wrong.
+            //
+            // What those two have and the good pair has not is that they are
+            // measurably damaged. Gated on that plus "not already loud", the
+            // rule reproduces all six of his answers. Same signal the denoise
+            // fallback uses, which makes it one idea rather than two patches.
+            s.NormalizeLevel = Pick(a.Lufs, 0, new[] { -28.0, -24.0, -20.0, -18.0 }, true);
+            s.NormalizeEnabled = Damaged(a) && SoundAnalysis.Usable(a.Lufs) && a.Lufs < -18;
 
             // Tone -- and DULLNESS is the fault that actually separates a bad
             // recording from a good one here, which is not what the library
@@ -326,6 +357,15 @@ namespace Nemoviz_Book_Reader
             s.EqVoice = 0;
             s.EqTreble = Dullness(a);
             s.EqEnabled = s.EqBass != 0 || s.EqTreble != 0;
+        }
+
+        /// <summary>Is this recording measurably damaged? The high band sitting
+        /// 24 dB or more below the signal is the one test that separated Gordan.s
+        /// four bad samples from his two good ones with nobody in the gap, and it
+        /// is what the denoise fallback and the normalisation gate both hang on.</summary>
+        private static bool Damaged(SoundAnalysis a)
+        {
+            return SoundAnalysis.Usable(a.HighBandBelow) && a.HighBandBelow >= 24;
         }
 
         /// <summary>How much treble a dull recording gets back, in dB, capped at
