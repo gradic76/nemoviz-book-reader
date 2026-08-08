@@ -41,6 +41,9 @@ namespace Nemoviz_Book_Reader
 
         private const int MaxCrumbs = 60;
 
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern uint GetCurrentThreadId();
+
         private static readonly object gate = new object();
         private static readonly Queue<string> crumbs = new Queue<string>();
         private static Control host;
@@ -48,6 +51,8 @@ namespace Nemoviz_Book_Reader
         private static volatile bool running;
         private static long lastBeatTicks;
         private static int reportedAt;
+        private static uint uiOsThreadId;
+        private static Thread uiThread;
 
         /// <summary>Records what the UI thread is about to do. Cheap and safe to
         /// call from anywhere; only the last <see cref="MaxCrumbs"/> are kept.</summary>
@@ -66,11 +71,37 @@ namespace Nemoviz_Book_Reader
             catch { }
         }
 
+        /// <summary>Leaves a breadcrumb only if the message loop is still turning
+        /// a moment from now.
+        ///
+        /// <para>It is the difference between "the dialog never opened" and "the
+        /// dialog opened and then froze" — a modal dialog pumps, so this fires
+        /// from inside one. Nothing else in the log can tell those two apart, and
+        /// they are looked for in completely different places.</para></summary>
+        public static void NoteWhenPumping(string what, int afterMs = 400)
+        {
+            try
+            {
+                // The WinForms one on purpose: it ticks from the message loop, so
+                // it fires only while that loop is turning. A threading timer
+                // would fire regardless and prove nothing.
+                var t = new System.Windows.Forms.Timer { Interval = afterMs };
+                t.Tick += (s, e) => { t.Stop(); t.Dispose(); Note(what); };
+                t.Start();
+            }
+            catch { }
+        }
+
         /// <summary>Starts watching. Safe to call twice; the second is ignored.</summary>
         public static void Start(Control uiHost)
         {
             if (running || uiHost == null) return;
             host = uiHost;
+            // Called from the UI thread, so this IS the thread to watch. Both
+            // identities are kept: the OS id finds its ProcessThread and its
+            // wait reason, the managed one is what a stack can be read from.
+            try { uiOsThreadId = GetCurrentThreadId(); } catch { }
+            uiThread = Thread.CurrentThread;
             running = true;
             Interlocked.Exchange(ref lastBeatTicks, DateTime.UtcNow.Ticks);
             worker = new Thread(Loop);
@@ -143,13 +174,76 @@ namespace Nemoviz_Book_Reader
                               + "   handles: " + me.HandleCount
                               + "   private: " + (me.PrivateMemorySize64 / (1024 * 1024)) + " MB");
 
+                // WHAT it is waiting on. A blocked thread's wait reason is the
+                // single most useful fact there is and costs nothing to read —
+                // no suspending, no debugger. LpcReceive or LpcReply means it is
+                // stuck in a cross-process call (COM, the shell, a screen
+                // reader); UserRequest means an ordinary wait handle.
+                try
+                {
+                    foreach (ProcessThread pt in me.Threads)
+                    {
+                        if (pt.Id != uiOsThreadId) continue;
+                        sb.Append("     UI thread state: " + pt.ThreadState);
+                        if (pt.ThreadState == System.Diagnostics.ThreadState.Wait)
+                            sb.Append("   waiting on: " + pt.WaitReason);
+                        sb.AppendLine("   user time " + pt.UserProcessorTime.TotalSeconds.ToString("0.0") + " s");
+                        break;
+                    }
+                }
+                catch (Exception ex) { sb.AppendLine("     UI thread state unavailable: " + ex.Message); }
+
                 sb.AppendLine("     what the UI thread was doing, most recent last:");
                 lock (gate)
                     foreach (string c in crumbs) sb.AppendLine("       " + c);
 
+                sb.AppendLine("     where it stopped:");
+                sb.AppendLine(Stack());
+
                 File.AppendAllText(LogPath, sb.ToString(), new UTF8Encoding(false));
             }
             catch { }
+        }
+
+        /// <summary>The UI thread's managed stack, best effort.
+        ///
+        /// <para><b>Suspending a thread to read it is deprecated and unsafe</b>,
+        /// and it is done here anyway, on a deliberate trade: this only ever runs
+        /// when the application has ALREADY stopped answering and the reader is
+        /// about to kill it, so the worst case costs a session that was lost
+        /// regardless. It is the last thing in the report and is allowed to fail
+        /// — the breadcrumbs and the wait reason above are the payload, and they
+        /// are gathered without touching the thread at all.</para></summary>
+        private static string Stack()
+        {
+            Thread t = uiThread;
+            if (t == null) return "       (no UI thread recorded)";
+#pragma warning disable 618
+            try
+            {
+                t.Suspend();
+                try
+                {
+                    var st = new StackTrace(t, true);
+                    var sb = new StringBuilder();
+                    foreach (StackFrame f in st.GetFrames() ?? new StackFrame[0])
+                    {
+                        var m = f.GetMethod();
+                        if (m == null) continue;
+                        sb.Append("       ")
+                          .Append(m.DeclaringType != null ? m.DeclaringType.Name + "." : "")
+                          .Append(m.Name);
+                        if (f.GetFileLineNumber() > 0)
+                            sb.Append("  (").Append(System.IO.Path.GetFileName(f.GetFileName()))
+                              .Append(':').Append(f.GetFileLineNumber()).Append(')');
+                        sb.AppendLine();
+                    }
+                    return sb.Length > 0 ? sb.ToString().TrimEnd() : "       (empty — probably blocked in native code)";
+                }
+                finally { t.Resume(); }
+            }
+            catch (Exception ex) { return "       (unavailable: " + ex.Message + ")"; }
+#pragma warning restore 618
         }
 
         public static string LogPath

@@ -1843,6 +1843,9 @@ namespace Nemoviz_Book_Reader
                     ofd.InitialDirectory = appSettings.LastImportFileFolder;
                 UiWatchdog.Note("library: showing the file dialog at "
                                 + (ofd.InitialDirectory ?? "(default)"));
+                // Fires only if the modal loop is turning, which tells "never
+                // opened" from "opened, then froze".
+                UiWatchdog.NoteWhenPumping("library: file dialog is up and pumping");
                 bool ok = ofd.ShowDialog() == DialogResult.OK;
                 UiWatchdog.Note("library: file dialog closed, ok=" + ok);
                 if (ok)
