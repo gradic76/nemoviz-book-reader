@@ -934,6 +934,62 @@ book at the library's median gets roughly what the dialog already defaults to, s
 the analysis moves a book that is unusual rather than re-deciding every book.
 §8d's split stands: I measure, Gordan judges by ear.
 
+### Recalibrated against Gordan's own samples — the library median was NOT the target (2026-08-08)
+
+Six files in `D:\Test naslovi\Audio Test`: four he calls bad, one **Poželjno**
+(his reference for how a book should sound) and one **Prihvatljivo**. They
+disproved most of the thresholds set from the library distribution, which is
+exactly what they were for.
+
+| | LUFS | LRA | true peak | SNR | low below | **high below** | **centroid** |
+|---|---|---|---|---|---|---|---|
+| Loše 1 | −15.7 | 3.0 | −1.7 | — | 4.1 | **42.5** | **987** |
+| Loše 2 | −19.9 | 8.5 | −3.3 | — | 2.3 | **36.7** | **1280** |
+| Loše 3 | −7.3 | **+2.8** | — | — | 2.5 | **27.6** | **1583** |
+| Loše 4 | −20.7 | 2.7 | −4.3 | — | 2.6 | **38.9** | **1437** |
+| Poželjno | −22.3 | 5.9 | −2.8 | — | 4.7 | **20.0** | **1759** |
+| Prihvatljivo | −21.8 | 5.6 | −2.5 | **35.0** | 5.8 | **17.8** | **3404** |
+
+**His bad recordings are not noisy — they are DULL**, and the two dullness
+measures separate them with nobody in the gap. Four rules were wrong, three of
+them backwards:
+
+- **De-esser fired on healthy voices.** Its gate was the library median (19.9),
+  and both good samples sit at 17.8 and 20.0 — so the reference recording was
+  de-essed while four muffled ones were not. Gate moved to 15.
+- **Denoise was wildly aggressive.** 35 dB below the speech is what Gordan calls
+  *"malo rooma, skoro nezamjetno"*, and the rule applied FULL denoise there. The
+  scale is now anchored on that one ear-verified point, not on the library's
+  median of 65.
+- **LRA does not separate good from bad at all** — the good pair measures 5.9 and
+  5.6 against three bad ones at 3.7, 3.0 and 2.7. So the compressor was
+  compressing the reference and leaving the bad alone. Gate moved above the good
+  pair, which leaves only the one genuine outlier at 8.5.
+- **Normalisation treated the median as the target.** Both good samples are
+  quieter than the library median; a book a little quieter than average does not
+  need its level rebuilt. Gate moved under them.
+- **Dullness now scales.** +2 dB was the whole correction, which is nothing to a
+  recording sitting 42 dB down; it is 2 dB per 6 dB past the edge of normal,
+  capped at 8, and requires the centroid to agree.
+
+**Result: both reference recordings come out with nothing but the mildest
+highpass**, and the four bad ones get treble lifted in proportion to how dull
+they measure.
+
+**Two honest negatives worth keeping.** *Plosives cannot be detected this way* —
+the idea was low-band crest, and measured it says the opposite of the truth
+(Poželjno, which has none, has the highest crest at 19.2; the bad four are
+13.7–16.6, because crest tracks compression). A plosive is a handful of events
+in an hour and an aggregate over 20-second windows cannot see one by
+construction; the highpass is cheap insurance either way. And *clipping cannot be
+repaired* — Loše 3 runs to +2.8 dBFS and no rule is offered for it, because
+nothing in the chain can undo it and the always-on limiter already stops it
+clipping again on the way out.
+
+**The lesson under all of it:** the median of a 1622-book shelf is the average of
+what people happen to own, not a definition of good. Calibrating to it and
+calling it the target is how every one of these rules went wrong.
+
 **An auto-analyser belongs at IMPORT, not on the fly** (settled 2026-07-31 after
 reading a comparable tool, `D:\Test Naslovi\SlušajKnjigu_Portable` — a
 PyInstaller app whose whole configuration is in plain sight in

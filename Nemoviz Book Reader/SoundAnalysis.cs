@@ -77,6 +77,12 @@ namespace Nemoviz_Book_Reader
         /// <see cref="RmsDb"/> says whether it is bright or sibilant.</summary>
         public double HighBandDb = double.NaN;
 
+        /// <summary>Peak of each band, dB. Peak minus RMS in the sub-300 Hz band
+        /// is the CREST of the low end: a plosive is a short low-frequency burst,
+        /// which an average says nothing about.</summary>
+        public double LowPeakDb = double.NaN;
+        public double HighPeakDb = double.NaN;
+
         /// <summary>Spectral centroid, Hz — where the weight of the sound sits.
         /// Higher is brighter.
         ///
@@ -110,6 +116,13 @@ namespace Nemoviz_Book_Reader
                              : Usable(NoiseFloorDb) ? NoiseFloorDb : double.NaN;
                 return Usable(RmsDb) && !double.IsNaN(noise) ? RmsDb - noise : double.NaN;
             }
+        }
+
+        /// <summary>How far the low band PEAKS above its own average, dB. A
+        /// plosive is a burst, so the average hides it and the crest does not.</summary>
+        public double LowCrest
+        {
+            get { return Usable(LowPeakDb) && Usable(LowBandDb) ? LowPeakDb - LowBandDb : double.NaN; }
         }
 
         /// <summary>How far the sub-300 Hz band sits below the whole signal, dB.
@@ -150,6 +163,8 @@ namespace Nemoviz_Book_Reader
             FlatFactor = Read(ini, "FlatFactor", 0);
             LowBandDb = Read(ini, "LowBand", double.NaN);
             HighBandDb = Read(ini, "HighBand", double.NaN);
+            LowPeakDb = Read(ini, "LowPeak", double.NaN);
+            HighPeakDb = Read(ini, "HighPeak", double.NaN);
             CentroidHz = Read(ini, "Centroid", double.NaN);
         }
 
@@ -171,6 +186,8 @@ namespace Nemoviz_Book_Reader
             Write(ini, "FlatFactor", FlatFactor);
             Write(ini, "LowBand", LowBandDb);
             Write(ini, "HighBand", HighBandDb);
+            Write(ini, "LowPeak", LowPeakDb);
+            Write(ini, "HighPeak", HighPeakDb);
             Write(ini, "Centroid", CentroidHz);
         }
 
@@ -233,48 +250,94 @@ namespace Nemoviz_Book_Reader
             s.HighpassEnabled = true;
             s.HighpassLevel = Pick(a.LowBandBelow, 2, new[] { 2.2, 2.9, 3.7, 4.6 }, true);
 
-            // Noise. Only where it could be measured -- the trough is unavailable
-            // in a THIRD of the sample, and a stage switched on from a number
-            // that was never taken is exactly the fault the parser rewrite
-            // removed. Silence is the honest answer.
-            // Snr over the sample: min 20.9, p25 58.0, median 65.4, p75 74.6.
+            // Noise. NO measurable noise at all is the commonest answer and it
+            // means CLEAN, not unknown -- Gordan's reference recording, made in
+            // a dead room, produces none. Where there is one, 35 dB below the
+            // speech is what he calls "a little room, almost imperceptible", and
+            // that single anchor is what sets this scale: 35 must be mild, not
+            // maximum. An earlier version read the library's own median of 65 as
+            // the "leave it alone" point and so applied FULL denoise at 35 -- to
+            // a recording its owner had just called acceptable.
             if (SoundAnalysis.Usable(a.Snr))
             {
-                s.DenoiseLevel = Pick(a.Snr, 0, new[] { 35.0, 45.0, 55.0, 65.0 }, true);
-                s.DenoiseEnabled = a.Snr < 65;      // at or above the median, leave it alone
+                s.DenoiseLevel = Pick(a.Snr, 0, new[] { 15.0, 22.0, 28.0, 34.0 }, true);
+                s.DenoiseEnabled = a.Snr < 34;
             }
             else
             {
                 s.DenoiseEnabled = false;
             }
 
-            // Sibilance. HighBandBelow: min 9.2, p25 16.4, median 19.9, p75 23.1,
-            // max 40.2 dB. Smaller means brighter.
-            s.DeesserLevel = Pick(a.HighBandBelow, 0, new[] { 12.0, 14.5, 16.4, 19.9 }, true);
-            s.DeesserEnabled = SoundAnalysis.Usable(a.HighBandBelow) && a.HighBandBelow < 19.9;
+            // Sibilance. This fired on healthy recordings and is now the other
+            // way round: BOTH of Gordan's good samples measure 17.8 and 20.0,
+            // so anything at or above about 16 is a normal voice and must not be
+            // touched. Only a genuinely harsh recording -- high band close to the
+            // signal -- gets a de-esser.
+            s.DeesserLevel = Pick(a.HighBandBelow, 0, new[] { 9.0, 11.0, 13.0, 15.0 }, true);
+            s.DeesserEnabled = SoundAnalysis.Usable(a.HighBandBelow) && a.HighBandBelow < 15;
 
             // Dynamics. Lra: min 1.1, p25 3.2, median 4.3, p75 5.7, max 11.7 LU.
             // Larger means the quiet passages are much quieter than the loud.
             // Worst first, so the widest range comes first here -- the opposite
             // order to the measures where small is bad.
-            s.CompressorLevel = Pick(a.Lra, 0, new[] { 8.0, 5.7, 4.3, 3.2 }, false);
-            s.CompressorEnabled = SoundAnalysis.Usable(a.Lra) && a.Lra > 3.2;
+            //
+            // LRA does NOT separate good from bad, which was worth finding out:
+            // the two good samples measure 5.9 and 5.6 while three of the four
+            // bad ones measure 3.7, 3.0 and 2.7. Set from the library median the
+            // rule therefore compressed the REFERENCE recording and left most of
+            // the bad ones alone. Only one sample stands out at 8.5, so the gate
+            // sits above the good pair and catches that.
+            s.CompressorLevel = Pick(a.Lra, 0, new[] { 10.0, 8.5, 7.0, 6.0 }, false);
+            s.CompressorEnabled = SoundAnalysis.Usable(a.Lra) && a.Lra > 6.0;
 
-            // Level. Lufs: min -34.1, p25 -20.6, median -18.6, p75 -16.7,
-            // max -7.2. A well-made audiobook sits near -18.
-            s.NormalizeLevel = Pick(a.Lufs, 0, new[] { -26.0, -22.0, -18.6, -15.0 }, true);
-            s.NormalizeEnabled = SoundAnalysis.Usable(a.Lufs) && a.Lufs < -15;
+            // Level. Lufs over the library: min -34.1, p25 -20.6, median -18.6,
+            // p75 -16.7, max -7.2 -- but the two recordings Gordan calls good
+            // sit at -22.3 and -21.8, BELOW that median. So the median is not
+            // the target: a book a little quieter than average is not a book
+            // that needs its level rebuilt, and the gate goes under the good
+            // pair rather than at the middle of the shelf.
+            s.NormalizeLevel = Pick(a.Lufs, 0, new[] { -30.0, -27.0, -25.0, -23.0 }, true);
+            s.NormalizeEnabled = SoundAnalysis.Usable(a.Lufs) && a.Lufs < -23;
 
-            // Tone. Only the two ends, and only when the recording is off the
-            // usual range -- the middle band is where the voice lives and a
-            // measurement cannot say it is wrong.
+            // Tone -- and DULLNESS is the fault that actually separates a bad
+            // recording from a good one here, which is not what the library
+            // distribution suggested at all.
+            //
+            //             high band below   centroid
+            //   bad x4       27.6 .. 42.5   987 .. 1583 Hz
+            //   good x2      17.8 .. 20.0  1759 .. 3404 Hz
+            //
+            // A clean gap on both, with nobody in between, so the cut goes in the
+            // middle of it. And the lift has to SCALE: +2 dB was the whole
+            // correction before, which is nothing to a recording sitting 42 dB
+            // down. The centroid agrees independently and is the one quantity
+            // measured the same way as the reference tool -- whose 1500 Hz
+            // threshold lands inside the bad range but misclassifies the worst of
+            // them, so it is used as a second opinion and not as the test.
             s.EqBass = SoundAnalysis.Usable(a.LowBandBelow) && a.LowBandBelow < 2.9 ? -3 : 0;
             s.EqVoice = 0;
-            s.EqTreble = !SoundAnalysis.Usable(a.HighBandBelow) ? 0
-                       : a.HighBandBelow < 14.5 ? -2      // harsh
-                       : a.HighBandBelow > 23.1 ? 2       // dull
-                       : 0;
+            s.EqTreble = Dullness(a);
             s.EqEnabled = s.EqBass != 0 || s.EqTreble != 0;
+        }
+
+        /// <summary>How much treble a dull recording gets back, in dB, capped at
+        /// the EQ's own ±15.
+        ///
+        /// <para>Both measures have to agree that it is dull before anything is
+        /// lifted. They are independent — one is band energy, the other is where
+        /// the spectrum's weight sits — and on the samples they agree perfectly,
+        /// so requiring both costs nothing and guards against a recording that
+        /// merely has a quiet top octave.</para></summary>
+        private static int Dullness(SoundAnalysis a)
+        {
+            if (!SoundAnalysis.Usable(a.HighBandBelow)) return 0;
+            if (a.HighBandBelow < 15) return -2;                 // harsh, not dull
+            if (a.HighBandBelow < 24) return 0;                  // both good samples land here
+            if (SoundAnalysis.Usable(a.CentroidHz) && a.CentroidHz > 1650) return 0;
+
+            // 24 dB down is the edge of normal; every 6 dB past it buys 2 dB back.
+            int lift = 2 + (int)((a.HighBandBelow - 24) / 6) * 2;
+            return lift > 8 ? 8 : lift;
         }
 
         /// <summary>Which of five levels a reading falls into. Level 4 is the
@@ -401,6 +464,8 @@ namespace Nemoviz_Book_Reader
                 a.RmsTroughDb = Mean(got, r => r.RmsTroughDb);
                 a.LowBandDb = Mean(got, r => r.LowBandDb);
                 a.HighBandDb = Mean(got, r => r.HighBandDb);
+                a.LowPeakDb = Worst(got, r => r.LowPeakDb);
+                a.HighPeakDb = Worst(got, r => r.HighPeakDb);
                 a.CentroidHz = Mean(got, r => r.CentroidHz);
                 a.TruePeakDb = Worst(got, r => r.TruePeakDb);
                 a.PeakDb = Worst(got, r => r.PeakDb);
@@ -433,7 +498,9 @@ namespace Nemoviz_Book_Reader
                 FlatFactor = r.FlatFactor,
                 LowBandDb = r.LowBandDb,
                 HighBandDb = r.HighBandDb,
-                CentroidHz = r.CentroidHz
+                CentroidHz = r.CentroidHz,
+                LowPeakDb = r.LowPeakDb,
+                HighPeakDb = r.HighPeakDb
             };
         }
 
@@ -505,6 +572,7 @@ namespace Nemoviz_Book_Reader
             public double RmsDb = double.NaN, PeakDb = double.NaN, NoiseFloorDb = double.NaN;
             public double RmsTroughDb = double.NaN, FlatFactor = double.NaN;
             public double LowBandDb = double.NaN, HighBandDb = double.NaN;
+            public double LowPeakDb = double.NaN, HighPeakDb = double.NaN;
             public double CentroidHz = double.NaN;
         }
 
@@ -541,8 +609,10 @@ namespace Nemoviz_Book_Reader
 
             var low = RunGraph(path, start, GraphLow);
             if (low != null) r.LowBandDb = Get(low, "lavfi.astats.Overall.RMS_level");
+            if (low != null) r.LowPeakDb = Get(low, "lavfi.astats.Overall.Peak_level");
             var high = RunGraph(path, start, GraphHigh);
             if (high != null) r.HighBandDb = Get(high, "lavfi.astats.Overall.RMS_level");
+            if (high != null) r.HighPeakDb = Get(high, "lavfi.astats.Overall.Peak_level");
             return r;
         }
 
