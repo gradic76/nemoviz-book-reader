@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Nemoviz_Book_Reader
 {
@@ -23,12 +24,15 @@ namespace Nemoviz_Book_Reader
     /// book at import spends their time on a question they never asked.</para>
     ///
     /// <para><b>No ffmpeg.exe, and that was worth proving before designing
-    /// anything.</b> The shipped libmpv carries astats and ebur128, and mpv
-    /// forwards a filter's own log output through
-    /// <c>mpv_request_log_messages</c> — so the numbers come back over the same
-    /// channel the player already has, from the same DLL, with nothing new to
-    /// install or ship. Verified through the real C API on a real book, not by
-    /// finding the strings in the binary.</para></summary>
+    /// anything.</b> The shipped libmpv carries astats, ebur128 and
+    /// aspectralstats, and their values are read back as an mpv property. Nothing
+    /// new to install or ship. Verified through the real C API on real books,
+    /// not by finding the strings in the binary.</para>
+    ///
+    /// <para><b>The numbers are read as a PROPERTY, never off the log</b> — see
+    /// <see cref="SoundAnalyser"/>. The log route worked in a harness and would
+    /// have failed in the running player every time, which is the kind of fault
+    /// worth reading about before touching any of this.</para></summary>
     public sealed class SoundAnalysis
     {
         /// <summary>Integrated loudness, LUFS. Negative; −16 is a well-made
@@ -72,6 +76,18 @@ namespace Nemoviz_Book_Reader
         /// <summary>RMS of everything above 6 kHz, dB. Its distance from
         /// <see cref="RmsDb"/> says whether it is bright or sibilant.</summary>
         public double HighBandDb = double.NaN;
+
+        /// <summary>Spectral centroid, Hz — where the weight of the sound sits.
+        /// Higher is brighter.
+        ///
+        /// <para><b>Recorded but not yet used to decide anything.</b> It was
+        /// written off as unobtainable while the numbers were read off the log,
+        /// and came back the moment they were read as filter metadata instead.
+        /// It is the one quantity the reference tool and NBR now measure the same
+        /// way, so it is the honest place to test that tool's 1500 Hz threshold —
+        /// but on OUR distribution, not on its say-so, and that sweep has not
+        /// been run.</para></summary>
+        public double CentroidHz = double.NaN;
 
         /// <summary>How many segments went into the averages. 0 means nothing was
         /// measured and every other field is meaningless.</summary>
@@ -134,6 +150,7 @@ namespace Nemoviz_Book_Reader
             FlatFactor = Read(ini, "FlatFactor", 0);
             LowBandDb = Read(ini, "LowBand", double.NaN);
             HighBandDb = Read(ini, "HighBand", double.NaN);
+            CentroidHz = Read(ini, "Centroid", double.NaN);
         }
 
         /// <summary>Kept in Book.ini by Gordan's instruction — the MEASUREMENTS,
@@ -154,6 +171,7 @@ namespace Nemoviz_Book_Reader
             Write(ini, "FlatFactor", FlatFactor);
             Write(ini, "LowBand", LowBandDb);
             Write(ini, "HighBand", HighBandDb);
+            Write(ini, "Centroid", CentroidHz);
         }
 
         private static double Read(IniFile ini, string key, double dflt)
@@ -292,9 +310,10 @@ namespace Nemoviz_Book_Reader
         [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_set_property_string(IntPtr ctx, string name, string data);
         [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_command(IntPtr ctx, IntPtr args);
         [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr mpv_wait_event(IntPtr ctx, double timeout);
-        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern int mpv_request_log_messages(IntPtr ctx, string level);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr mpv_get_property_string(IntPtr ctx, string name);
+        [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern void mpv_free(IntPtr data);
 
-        private const int EventLogMessage = 2, EventEndFile = 7;
+        private const int EventEndFile = 7;
 
         /// <summary>Seconds taken from each sampled point.</summary>
         public const double SegmentSeconds = 20;
@@ -304,25 +323,47 @@ namespace Nemoviz_Book_Reader
         /// whole book from whichever day that was.</summary>
         public const int SegmentCount = 3;
 
-        /// <summary>The filter graph, in one decode.
+        /// <summary>The measurements are read as a mpv PROPERTY, not off the log.
         ///
-        /// <para><b>ebur128 stands AHEAD of the split, and that is not
-        /// arbitrary.</b> Behind the <c>amix</c> that rejoins the three bands it
-        /// measures the mixed-down signal instead of the recording — a real book
-        /// came back at −21.7 LUFS against its true −13.8, with nothing in the
-        /// output to say the number was wrong. astats is unaffected: each branch
-        /// measures before the mix.</para>
+        /// <para><b>The log route was wrong, and only a harness could ever have
+        /// made it look right.</b> FFmpeg's log callback is process-global: the
+        /// FIRST mpv context created in the process captures it, and every later
+        /// one receives nothing. Measured — alone, a segment yields 83 ffmpeg log
+        /// lines; with one earlier context alive, <b>zero</b>. In the running
+        /// player Form1's context is created at start-up and lives for the whole
+        /// session, so the analysis would have returned null every single time.
+        /// It passed its end-to-end test only because the harness was the one
+        /// context in the process. Gordan's six samples are what exposed it,
+        /// because that script called <see cref="MpvDuration"/> first.</para>
         ///
-        /// <para><c>aspectralstats</c> would have given the spectral centroid
-        /// directly and is accepted by mpv, but it prints no end-of-stream
-        /// summary — it only sets per-frame metadata, which does not reach the
-        /// log. The two band ratios answer the same two questions.</para></summary>
-        private const string Graph =
-            "lavfi=[ebur128=peak=true:framelog=quiet,asplit=3[a][b][c];"
-            + "[a]astats=metadata=1:reset=0:measure_perchannel=none[a1];"
-            + "[b]lowpass=f=300,astats=metadata=1:reset=0:measure_perchannel=none[b1];"
-            + "[c]highpass=f=6000,astats=metadata=1:reset=0:measure_perchannel=none[c1];"
-            + "[a1][b1][c1]amix=inputs=3]";
+        /// <para><b>Filter metadata is per-context and has none of that.</b> A
+        /// labelled filter (<c>@st:</c>) publishes its values as
+        /// <c>af-metadata/st</c>, verified identical with and without an earlier
+        /// context alive. It must be read WHILE the segment plays — at
+        /// end-of-file the graph is gone and the property is empty.</para>
+        ///
+        /// <para><b>Three things got better, not just fixed.</b> The
+        /// <c>asplit</c>/<c>amix</c> graph is gone, and with it the trap of
+        /// <c>ebur128</c> silently measuring the mixed-down signal.
+        /// <c>aspectralstats</c> now works — it publishes exactly the per-frame
+        /// metadata this route reads, so the <b>spectral centroid</b> we had
+        /// written off is available, which also makes the reference tool's
+        /// 1500 Hz threshold comparable on the same quantity for the first time.
+        /// And the keys are prefixed by filter name, so three measurements share
+        /// one decode without colliding.</para></summary>
+        private const string GraphFull =
+            "@st:lavfi=[astats=metadata=1:reset=0:measure_perchannel=none,"
+            + "aspectralstats=measure=centroid+flatness+rolloff,"
+            + "ebur128=metadata=1:peak=true:framelog=quiet]";
+
+        /// <summary>The two band passes keep their own decode. Inside one lavfi
+        /// entry three astats instances would all publish under
+        /// <c>lavfi.astats.*</c> and overwrite one another, and mpv's label is
+        /// per filter ENTRY, not per filter inside a graph. Chaining them in one
+        /// entry is worse still — the low-pass would filter the audio the
+        /// high-pass then measures.</summary>
+        private const string GraphLow = "@st:lavfi=[lowpass=f=300,astats=metadata=1:reset=0:measure_perchannel=none]";
+        private const string GraphHigh = "@st:lavfi=[highpass=f=6000,astats=metadata=1:reset=0:measure_perchannel=none]";
 
         /// <summary>Measures the book and returns what it found, or null when
         /// nothing could be measured. Never throws.</summary>
@@ -360,6 +401,7 @@ namespace Nemoviz_Book_Reader
                 a.RmsTroughDb = Mean(got, r => r.RmsTroughDb);
                 a.LowBandDb = Mean(got, r => r.LowBandDb);
                 a.HighBandDb = Mean(got, r => r.HighBandDb);
+                a.CentroidHz = Mean(got, r => r.CentroidHz);
                 a.TruePeakDb = Worst(got, r => r.TruePeakDb);
                 a.PeakDb = Worst(got, r => r.PeakDb);
                 a.FlatFactor = Worst(got, r => r.FlatFactor);
@@ -390,7 +432,8 @@ namespace Nemoviz_Book_Reader
                 RmsTroughDb = r.RmsTroughDb,
                 FlatFactor = r.FlatFactor,
                 LowBandDb = r.LowBandDb,
-                HighBandDb = r.HighBandDb
+                HighBandDb = r.HighBandDb,
+                CentroidHz = r.CentroidHz
             };
         }
 
@@ -462,6 +505,7 @@ namespace Nemoviz_Book_Reader
             public double RmsDb = double.NaN, PeakDb = double.NaN, NoiseFloorDb = double.NaN;
             public double RmsTroughDb = double.NaN, FlatFactor = double.NaN;
             public double LowBandDb = double.NaN, HighBandDb = double.NaN;
+            public double CentroidHz = double.NaN;
         }
 
         /// <summary>Below this a segment is silence, not a sample of the reading.
@@ -473,6 +517,39 @@ namespace Nemoviz_Book_Reader
 
         private static Reading MeasureOne(string path, double start)
         {
+            var full = RunGraph(path, start, GraphFull);
+            if (full == null) return null;
+
+            var r = new Reading();
+            r.RmsDb = Get(full, "lavfi.astats.Overall.RMS_level");
+            r.PeakDb = Get(full, "lavfi.astats.Overall.Peak_level");
+            r.NoiseFloorDb = Get(full, "lavfi.astats.Overall.Noise_floor");
+            r.RmsTroughDb = Get(full, "lavfi.astats.Overall.RMS_trough");
+            r.FlatFactor = Get(full, "lavfi.astats.Overall.Flat_factor");
+            r.Lufs = Get(full, "lavfi.r128.I");
+            r.Lra = Get(full, "lavfi.r128.LRA");
+            r.CentroidHz = Get(full, "lavfi.aspectralstats.1.centroid");
+            // r128 publishes the true peak as a LINEAR amplitude here, where the
+            // log printed it in dBFS. Same measurement, different unit, and
+            // taking one for the other would have read 0.564 as -0.564 dB.
+            double tp = Get(full, "lavfi.r128.true_peak");
+            r.TruePeakDb = SoundAnalysis.Usable(tp) && tp > 0 ? 20 * Math.Log10(tp) : double.NaN;
+
+            // Silence is not a reading. A segment that landed in a gap tells us
+            // nothing, and its level would drag the book's mean down with it.
+            if (!SoundAnalysis.Usable(r.RmsDb) || r.RmsDb <= SilenceFloorDb) return null;
+
+            var low = RunGraph(path, start, GraphLow);
+            if (low != null) r.LowBandDb = Get(low, "lavfi.astats.Overall.RMS_level");
+            var high = RunGraph(path, start, GraphHigh);
+            if (high != null) r.HighBandDb = Get(high, "lavfi.astats.Overall.RMS_level");
+            return r;
+        }
+
+        /// <summary>Plays one segment through one filter graph and returns the
+        /// filter's published metadata, or null.</summary>
+        private static Dictionary<string, double> RunGraph(string path, double start, string graph)
+        {
             IntPtr ctx = IntPtr.Zero;
             try
             {
@@ -481,13 +558,7 @@ namespace Nemoviz_Book_Reader
                 mpv_set_property_string(ctx, "terminal", "no");
                 mpv_set_property_string(ctx, "ao", "null");
                 mpv_set_property_string(ctx, "vid", "no");
-                // A filter's own output is logged under the "ffmpeg" prefix and
-                // is dropped by default. Without BOTH of these the graph runs
-                // perfectly and reports nothing, which reads exactly like a
-                // filter that is not there.
-                mpv_set_property_string(ctx, "msg-level", "all=no,ffmpeg=v");
                 if (mpv_initialize(ctx) < 0) return null;
-                mpv_request_log_messages(ctx, "v");
 
                 mpv_set_property_string(ctx, "audio-display", "no");
                 mpv_set_property_string(ctx, "untimed", "yes");
@@ -498,95 +569,60 @@ namespace Nemoviz_Book_Reader
                 mpv_set_property_string(ctx, "audio-pitch-correction", "no");
                 mpv_set_property_string(ctx, "start", start.ToString("0.###", CultureInfo.InvariantCulture));
                 mpv_set_property_string(ctx, "length", SegmentSeconds.ToString(CultureInfo.InvariantCulture));
-                if (mpv_set_property_string(ctx, "af", Graph) < 0) return null;
+                if (mpv_set_property_string(ctx, "af", graph) < 0) return null;
 
                 Command(ctx, "loadfile", path, "replace");
 
-                var lines = new List<string>();
+                // Polled WHILE it plays: astats and ebur128 publish cumulative
+                // values on every frame, and at end-of-file the graph is torn
+                // down and the property comes back empty. So the LAST non-empty
+                // read is the answer, not the one after EOF.
+                Dictionary<string, double> last = null;
                 DateTime deadline = DateTime.UtcNow.AddSeconds(30);
                 while (DateTime.UtcNow < deadline)
                 {
-                    IntPtr ev = mpv_wait_event(ctx, 0.2);
-                    int id = Marshal.ReadInt32(ev);
-                    if (id == EventLogMessage)
-                    {
-                        // mpv_event = { int event_id; int error; uint64
-                        // reply_userdata; void *data; } -> data at 16 on x64.
-                        IntPtr data = Marshal.ReadIntPtr(ev, 16);
-                        string prefix = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(data, 0));
-                        string text = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(data, IntPtr.Size * 2));
-                        if (prefix == "ffmpeg" && text != null) lines.Add(text.Trim());
-                    }
-                    else if (id == EventEndFile) break;
+                    IntPtr ev = mpv_wait_event(ctx, 0.02);
+                    Dictionary<string, double> now = ReadMetadata(ctx);
+                    if (now != null && now.Count > 0) last = now;
+                    if (Marshal.ReadInt32(ev) == EventEndFile) break;
                 }
-                return Parse(lines);
+                return last;
             }
             catch { return null; }
             finally { if (ctx != IntPtr.Zero) try { mpv_terminate_destroy(ctx); } catch { } }
         }
 
-        /// <summary>Reads the three astats blocks and the ebur128 summary out of
-        /// the log.
+        /// <summary>Reads <c>af-metadata/st</c> and pulls the numbers out of it.
         ///
-        /// <para>The astats instances are told apart by their graph position —
-        /// <c>Parsed_astats_2</c> is the full band, <c>_4</c> the low, <c>_6</c>
-        /// the high — because that is the order they are declared in
-        /// <see cref="Graph"/>. Anyone editing that graph has to keep the three
-        /// branches in that order or come back here.</para></summary>
-        private static Reading Parse(List<string> lines)
+        /// <para>mpv hands this back as JSON. It is scanned for quoted
+        /// key/value pairs rather than parsed as a document — the shape is fixed
+        /// and flat, and the project has no JSON library to reach for.</para></summary>
+        private static Dictionary<string, double> ReadMetadata(IntPtr ctx)
         {
-            var r = new Reading();
-            bool anyStats = false;
-            var band = new Dictionary<int, Dictionary<string, double>>();
-            var order = new List<int>();
-
-            foreach (string l in lines)
+            IntPtr p = mpv_get_property_string(ctx, "af-metadata/st");
+            if (p == IntPtr.Zero) return null;
+            string json;
+            try
             {
-                int colon = l.IndexOf(": ", StringComparison.Ordinal);
-                if (l.StartsWith("Parsed_astats_", StringComparison.Ordinal) && colon > 0)
-                {
-                    string head = l.Substring(0, colon);
-                    int us = head.LastIndexOf('_');
-                    int idx;
-                    if (us < 0 || !int.TryParse(head.Substring(us + 1), out idx)) continue;
-                    string rest = l.Substring(colon + 2);
-                    int c2 = rest.IndexOf(": ", StringComparison.Ordinal);
-                    if (c2 < 0) continue;
-                    double v;
-                    if (!Num(rest.Substring(c2 + 2), out v)) continue;
-                    if (!band.ContainsKey(idx)) { band[idx] = new Dictionary<string, double>(); order.Add(idx); }
-                    band[idx][rest.Substring(0, c2)] = v;
-                    anyStats = true;
-                }
-                else if (l.StartsWith("I:", StringComparison.Ordinal)) { double v; if (Num(l.Substring(2), out v)) r.Lufs = v; }
-                else if (l.StartsWith("LRA:", StringComparison.Ordinal)) { double v; if (Num(l.Substring(4), out v)) r.Lra = v; }
-                else if (l.StartsWith("Peak:", StringComparison.Ordinal)) { double v; if (Num(l.Substring(5), out v)) r.TruePeakDb = v; }
+                int len = 0;
+                while (Marshal.ReadByte(p, len) != 0) len++;
+                byte[] b = new byte[len];
+                Marshal.Copy(p, b, 0, len);
+                json = Encoding.UTF8.GetString(b);
             }
-            if (!anyStats) return null;
+            finally { try { mpv_free(p); } catch { } }
 
-            order.Sort();
-            if (order.Count < 3) return null;
-            var full = band[order[0]];
-            var low = band[order[1]];
-            var high = band[order[2]];
-
-            r.RmsDb = Get(full, "RMS level dB");
-            r.PeakDb = Get(full, "Peak level dB");
-            r.NoiseFloorDb = Get(full, "Noise floor dB");
-            // ffmpeg's own spelling in this build, "through" and not "trough".
-            // Taken from the log rather than from the documentation, because the
-            // log is what has to be matched.
-            r.RmsTroughDb = Get(full, "RMS through dB");
-            if (double.IsNaN(r.RmsTroughDb)) r.RmsTroughDb = Get(full, "RMS trough dB");
-            r.FlatFactor = Get(full, "Flat factor");
-            r.LowBandDb = Get(low, "RMS level dB");
-            r.HighBandDb = Get(high, "RMS level dB");
-
-            // Silence is not a reading. A segment that landed in a gap tells us
-            // nothing, and its level would drag the book's mean down with it.
-            if (!SoundAnalysis.Usable(r.RmsDb) || r.RmsDb <= SilenceFloorDb) return null;
-            return r;
+            var map = new Dictionary<string, double>();
+            var parts = json.Split('"');
+            // "key":"value" -> the quoted tokens alternate key, value.
+            for (int i = 1; i + 2 < parts.Length; i += 4)
+            {
+                double v;
+                if (Num(parts[i + 2], out v)) map[parts[i]] = v;
+            }
+            return map;
         }
+
 
         /// <summary>NaN when the key is absent — never 0. A missing key read back
         /// as 0 is how six books in the sweep reported a signal-to-noise ratio of
