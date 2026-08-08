@@ -4506,6 +4506,28 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     inherits it, an explicit per-book setting still beats it, `Book.ini` no longer
     carries `TextBrailleTable`, and the import table survives a save/load.
     **Not verified: how it reads on a display** — that is the deep test below.
+- **OPEN BUG: the player freezes on Ctrl+O in the Library** (reported
+  2026-08-08). Intermittent — it survived a deliberate attempt to reproduce and
+  then happened on its own. `UiWatchdog` is in and captured the first one; read
+  `%TEMP%\NBR-hang.log`.
+  **What is already known, so none of it is worth re-deriving:**
+  - It stalls **inside `ofd.ShowDialog()`** — the last breadcrumb is "showing the
+    file dialog" and nothing follows.
+  - **CPU 0 %**, so the thread is WAITING, not spinning. That rules out a loop, a
+    repaint storm and a corrupted collection.
+  - **The folder is not the cause.** The same dialog opened on the same folder
+    twice earlier in the same session and closed normally both times. It is a
+    state the app reaches, not a path it takes.
+  - Thread count falls 33 → 27 across the stall: nothing is running at all.
+  - **It took three cycles.** Each was identical — import a book, load it, open
+    the Library, Ctrl+O — and only the third hung. That shape suggests something
+    accumulating rather than something happening.
+  **What the next capture adds:** the UI thread's **wait reason** (`LpcReceive` /
+  `LpcReply` = a cross-process call — COM, the shell, a screen reader; against
+  `UserRequest` = an ordinary wait handle — two completely different places to
+  look), a best-effort managed **stack**, and a breadcrumb that fires only while
+  the message loop turns, which separates "the dialog never opened" from "it
+  opened and then froze".
 - **Waiting on Gordan's own eyes and hands** (list opened 2026-08-03). None of
   these is a suspected fault — they are things that were built, measured and
   found correct by probe, and that a measurement *cannot* confirm:
