@@ -934,6 +934,81 @@ book at the library's median gets roughly what the dialog already defaults to, s
 the analysis moves a book that is unusual rather than re-deciding every book.
 §8d's split stands: I measure, Gordan judges by ear.
 
+### The numbers come from a PROPERTY, never from the log — and the log route would have failed in the shipped player (2026-08-08)
+
+**FFmpeg's log callback is process-global.** The first mpv context created in the
+process captures it; every later one receives nothing. Measured: alone, a segment
+yields **83** ffmpeg log lines; with one earlier context alive, **zero**.
+`Form1` creates its context at start-up and holds it for the whole session, so
+the analysis would have returned null every single time a reader used it.
+
+**It passed its end-to-end test the day before** — because the harness was the
+only mpv context in the process. A false pass of exactly the kind this file keeps
+recording. What exposed it was Gordan's six sample files, because that script
+asked `MpvDuration` for durations first.
+
+The fix is to read the values as **`af-metadata/<label>`** off a labelled filter
+(`@st:lavfi=[…]`), which is per-context; verified identical with and without an
+earlier context alive. It must be polled **while the segment plays** — at
+end-of-file the graph is torn down and the property is empty. Three things
+improved rather than merely being fixed: the `asplit`/`amix` graph went away, and
+with it the trap of `ebur128` measuring the mixed-down signal; **`aspectralstats`
+started working**, since it publishes exactly the per-frame metadata this route
+reads; and keys are prefixed by filter name, so three measurements share one
+decode. One unit trap on the way: r128 publishes true peak as a **linear
+amplitude** here where the log printed dBFS.
+
+**The centroid is measured but decides nothing.** It was given a veto over the
+dullness rule and it had to be taken away: with only the sampling points moved it
+swung 1759→3553 on one file and 3404→1352 on another, while the band ratio
+measuring the same property moved at most 2.3 dB. astats and ebur128 accumulate
+over the segment; aspectralstats publishes per frame, so a poll reads one
+essentially random frame. Averaging every frame would fix it.
+
+### Every book is brought to one loudness — −16 LUFS (2026-08-08)
+
+`SoundSettings.TargetLufs`, applied as a `volume` stage just before the limiter,
+with the gain worked out once from the measurement. **It cuts as well as lifts**,
+and that is the point: the loudest sample comes DOWN 8.2 dB. Gordan named that
+sample's level (−7.8 LUFS) as ideal for everything; what he wants is books that
+stop jumping, and −7.8 is unreachable for the rest of the shelf. That sample
+true-peaks at **+2.8 dBFS** — already clipped — with a crest of 10.6 dB where a
+clean recording measures 18.8; lifting the clean one to −7.8 hands the limiter
+11 dB to remove, which is precisely the "compressed, muddy" quality he heard on
+it. **Its loudness and its muddiness are one thing, not two.**
+
+**A lift stops rather than squashes**: capped so peaks land no more than 5 dB over
+the ceiling. The cap fired on a real file — *Prihvatljivo* already peaks at
++0.3 dBFS, so it stops at −17.4 instead of being limited into the target.
+
+### `tools/spectrum` — the analyser we already had (2026-08-08)
+
+Gordan asked whether a small free analyser could be downloaded. **No, and none is
+needed.** The audio-only libmpv carries ffmpeg's whole audio filter set; the small
+candidates were also the wrong licence — [aubio](https://aubio.org/) is
+GPL-3-or-later and Essentia AGPL, and §10e's LGPL build exists precisely to avoid
+that. `tools/spectrum` prints 22 ISO third-octave bands, each relative to the
+file's own RMS so recordings of different loudness compare directly.
+
+What it says about the six samples: all peak at 250–400 Hz, and **the damage is a
+smooth tilt, not a step** — the four bad ones track the good pair to about 800 Hz
+and then fall away, 4 dB down at 1 kHz, 8 at 2 kHz, 12 at 3–4 kHz, 15 by 8 kHz.
+It also named something nobody had spotted: **Loše 2 carries 5–10 dB MORE than
+every other file at 100–125 Hz**, which is the rumble under the "svakakvi šumovi"
+Gordan heard, and the reason a strong highpass belongs on it.
+
+**Open, and Gordan's call: five EQ bands instead of three.** A `treble` shelf
+gives a FLAT lift above its corner, but the deficit is a ramp — matching the
+reference needs +4 at 1 k, +8 at 2 k, +12 at 3.5 k, +15 above 5 k, which three
+bands cannot express. Centres suggested by the measurement rather than by
+convention: **120 · 400 · 1500 · 3500 · 8000 Hz**. Cost: §10b's Tone cell already
+sets the height of the whole stage row, so two more rows is a layout change, not
+two more controls.
+
+**Known artefact of the tool, not hidden:** at or above Nyquist the `bandpass`
+degenerates to passthrough and the band reads 0.0. Half these samples are
+22.05 kHz, so their 12.5 kHz row is meaningless.
+
 ### Recalibrated against Gordan's own samples — the library median was NOT the target (2026-08-08)
 
 Six files in `D:\Test naslovi\Audio Test`: four he calls bad, one **Poželjno**
