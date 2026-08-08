@@ -2650,9 +2650,22 @@ transport keys, so from inside it the Library, Go To, the bookmarks and the time
 were unreachable — a room with no doors, and precisely the room a braille reader
 is meant to live in. It now forwards the whole set.
 
-**Still unproven and still needing hardware: routing keys.** Those are the other
-half of the story — a cell tap moving the reading position — and the detection is
-built but has never been exercised.
+**Routing keys, on hardware at last (Gordan, 2026-08-08) — half proven.** With
+NVDA set to report the character under the cursor, a routing key press speaks the
+character it lands on. So the chain display → reader → our surface's text is
+real, which is the half this section predicted and could not test.
+
+**The other half is still open, and the distinction matters.** That NVDA answers a
+routing key says nothing about whether NBR sees it: the surface polls for a caret
+it did not move and logs `ROUTED to <offset>`, and no one has confirmed that fires
+or that the offset lands where the finger was. Proving the input path is not the
+same as proving our use of it, and only the first has evidence.
+
+**A display's Space does drive playback, inconsistently.** Bare keys need no
+virtual modifier (see below), so this is the easy case and ought to be reliable.
+Unchecked candidates: focus not on the surface at that instant, the reader eating
+it in browse mode, or the reading window's own key forwarding. **Gordan asked for
+this to be recorded, not acted on** — it is an observation, not a diagnosis.
 
 ### The reading window opens on PLAY (Gordan, 2026-08-01)
 
@@ -4521,8 +4534,19 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     — **is confirmed on hardware**. Panning works. **BrlAPI is therefore not
     needed**, which retires the whole BRLTTY question for Lite; §8l's long
     argument stands as written and nothing further should be spent on it.
-    (Routing keys specifically were not exercised and remain the one unproven
-    item.)
+    **Routing keys were exercised too, and they reach the reader.** With NVDA's
+    "report character under the cursor" switched on, pressing a routing key
+    speaks the character it sits on — so the key travels display → reader →
+    the surface's text, which is the chain §8l predicted. **What that does NOT
+    yet show is NBR's own side**: the surface polls for a caret it did not move
+    and logs `ROUTED to <offset>`, and nobody has confirmed that fires or that
+    the offset is right. So the input path is proven and our *use* of it is not
+    — two different claims, and only the first has evidence.
+    **The display's Space starts and stops playback, but not consistently**
+    (Gordan). Space is a bare key, so it needs no virtual modifier and should be
+    the easy case. Candidates, none of them checked: focus not on the surface at
+    that moment, the reader consuming it in browse mode, or the reading window's
+    key forwarding. Left as an observation, not a diagnosis.
     **The hybrid was the exception and it is NOT the surface's fault** —
     *"ćudljiv, ne sinka baš, zna zaglaviti i ne micati se"*. Measured: it is the
     resolution of the book's own sync map. See §8l's estimate-between-anchors
