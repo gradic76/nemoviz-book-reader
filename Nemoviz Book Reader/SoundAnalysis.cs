@@ -86,13 +86,21 @@ namespace Nemoviz_Book_Reader
         /// <summary>Spectral centroid, Hz — where the weight of the sound sits.
         /// Higher is brighter.
         ///
-        /// <para><b>Recorded but not yet used to decide anything.</b> It was
-        /// written off as unobtainable while the numbers were read off the log,
-        /// and came back the moment they were read as filter metadata instead.
-        /// It is the one quantity the reference tool and NBR now measure the same
-        /// way, so it is the honest place to test that tool's 1500 Hz threshold —
-        /// but on OUR distribution, not on its say-so, and that sweep has not
-        /// been run.</para></summary>
+        /// <para><b>Recorded, and deliberately NOT used to decide anything —
+        /// because as sampled here it is not stable enough.</b> Measured twice
+        /// over the same six files with only the sampling points moved, it swung
+        /// 1759→3553 on one and 3404→1352 on another, while the band ratio
+        /// measuring the same property moved by at most 2.3 dB. The reason is
+        /// structural: astats and ebur128 publish values accumulated over the
+        /// whole segment, aspectralstats publishes PER FRAME, so a poll reads one
+        /// essentially random frame.</para>
+        ///
+        /// <para>It would become usable by averaging every frame rather than the
+        /// last of each poll, which needs the values collected as they pass
+        /// rather than sampled. Worth doing if a decision ever needs it — it is
+        /// the one quantity the reference tool and NBR compute the same way, so
+        /// it is where that tool's 1500 Hz threshold could honestly be
+        /// tested.</para></summary>
         public double CentroidHz = double.NaN;
 
         /// <summary>How many segments went into the averages. 0 means nothing was
@@ -323,17 +331,22 @@ namespace Nemoviz_Book_Reader
         /// <summary>How much treble a dull recording gets back, in dB, capped at
         /// the EQ's own ±15.
         ///
-        /// <para>Both measures have to agree that it is dull before anything is
-        /// lifted. They are independent — one is band energy, the other is where
-        /// the spectrum's weight sits — and on the samples they agree perfectly,
-        /// so requiring both costs nothing and guards against a recording that
-        /// merely has a quiet top octave.</para></summary>
+        /// <para><b>The band ratio decides alone. The centroid was given a veto
+        /// and it had to be taken away.</b> Both are honest measures of the same
+        /// thing, but they are not equally STABLE: measured twice over the same
+        /// six files with only the sampling points moved, the band ratio shifted
+        /// by at most 2.3 dB while the centroid swung 1759→3553 on one file and
+        /// 3404→1352 on another. The cause is structural — astats and ebur128
+        /// publish values accumulated over the whole segment, while
+        /// aspectralstats publishes PER FRAME, so what gets read is one
+        /// essentially random frame rather than the segment. As a veto it had
+        /// already done damage, cancelling the treble lift on a recording that
+        /// needs it.</para></summary>
         private static int Dullness(SoundAnalysis a)
         {
             if (!SoundAnalysis.Usable(a.HighBandBelow)) return 0;
             if (a.HighBandBelow < 15) return -2;                 // harsh, not dull
             if (a.HighBandBelow < 24) return 0;                  // both good samples land here
-            if (SoundAnalysis.Usable(a.CentroidHz) && a.CentroidHz > 1650) return 0;
 
             // 24 dB down is the edge of normal; every 6 dB past it buys 2 dB back.
             int lift = 2 + (int)((a.HighBandBelow - 24) / 6) * 2;
