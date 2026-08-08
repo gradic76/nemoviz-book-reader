@@ -70,6 +70,31 @@ namespace Nemoviz_Book_Reader
         // "set and forget", and we want the hottest clean output possible.
         public const double LimiterCeilingDb = -0.1;
 
+        /// <summary>Where every book is brought to, LUFS.
+        ///
+        /// <para><b>Why −16 and not the loudest recording in the library.</b>
+        /// Gordan pointed at a sample measuring −7.8 LUFS and said that level
+        /// would be ideal for everything. It is a fine level; the problem is what
+        /// it costs to REACH it. That sample also true-peaks at +2.8 dBFS — it is
+        /// already clipped — and its crest is 10.6 dB where a clean reading of
+        /// the same library measures 18.8. Lifting the good recording to −7.8
+        /// needs +13.8 dB, which puts its peaks 11 dB over the ceiling and hands
+        /// the limiter 11 dB to remove. That is precisely the treatment he
+        /// described hearing on the loud sample: "kao da je komprimirana sa svim
+        /// dodatnim šumovima i mutnoćom". Its loudness and its muddiness are not
+        /// two properties, one is the price of the other.</para>
+        ///
+        /// <para>−16 asks +5.6 dB of that same recording and about 4 dB of gentle
+        /// limiting, which is inaudible. The library's own median is −18.6, so
+        /// nearly every book comes UP.</para></summary>
+        public const double TargetLufs = -16.0;
+
+        /// <summary>How much peak reduction the target may spend before it stops
+        /// chasing. Past this the book is left quieter rather than squashed —
+        /// evening out the shelf is not worth doing the damage the whole feature
+        /// exists to avoid.</summary>
+        public const double MaxLimitingDb = 5.0;
+
         // ── Stored settings ───────────────────────────────────────────────
         public bool Enabled;            // master switch
 
@@ -92,6 +117,13 @@ namespace Nemoviz_Book_Reader
 
         public bool NormalizeEnabled;
         public int NormalizeLevel;      // 0..4
+
+        /// <summary>Gain in dB that brings this book to <see cref="TargetLufs"/>,
+        /// worked out once from the measurement. 0 means the book is already there
+        /// or was never measured. Negative for a book that is too LOUD -- the
+        /// point is that books stop jumping, which cuts both ways.</summary>
+        public double GainDb;
+        public bool GainEnabled;
 
         public SoundSettings()
         {
@@ -147,6 +179,8 @@ namespace Nemoviz_Book_Reader
 
             NormalizeEnabled = ReadBool(ini, "NormalizeEnabled", NormalizeEnabled);
             NormalizeLevel = ClampLevel(ReadInt(ini, "NormalizeLevel", NormalizeLevel), SpeechnormExpansion.Length);
+            GainEnabled = ReadBool(ini, "GainEnabled", GainEnabled);
+            GainDb = ReadDouble(ini, "GainDb", GainDb);
         }
 
         public void Save(IniFile ini)
@@ -172,6 +206,8 @@ namespace Nemoviz_Book_Reader
 
             WriteBool(ini, "NormalizeEnabled", NormalizeEnabled);
             WriteInt(ini, "NormalizeLevel", NormalizeLevel);
+            WriteBool(ini, "GainEnabled", GainEnabled);
+            ini.Write("Sound", "GainDb", GainDb.ToString("0.##", CultureInfo.InvariantCulture));
         }
 
         private static int ClampLevel(int v, int count)
@@ -235,12 +271,29 @@ namespace Nemoviz_Book_Reader
                 f.Add("speechnorm=e=" + SpeechnormExpansion[nl].ToString("0.0", ic) + ":p=0.95");
             }
 
+            // The loudness target, applied LAST of the shaping stages: everything
+            // above decides how the book sounds, this decides how loud it is, and
+            // the limiter below then protects what comes out. Putting it earlier
+            // would let the EQ and the compressor move the level again after it
+            // had been set.
+            if (s.GainEnabled && Math.Abs(s.GainDb) >= 0.5)
+                f.Add("volume=" + s.GainDb.ToString("0.##", ic) + "dB");
+
             // Always-on safety limiter (level=false so it only caps peaks and
             // doesn't re-normalize loudness back up, undoing our chain).
             double limit = Math.Pow(10.0, LimiterCeilingDb / 20.0);
             f.Add("alimiter=limit=" + limit.ToString("0.#####", ic) + ":level=false");
 
             return "lavfi=[" + string.Join(",", f) + "]";
+        }
+
+        /// <summary>InvariantCulture, always: a decimal comma written on one
+        /// machine must not read back as a different number on another.</summary>
+        private static double ReadDouble(IniFile ini, string key, double def)
+        {
+            double v;
+            return double.TryParse(ini.Read("Sound", key, null), NumberStyles.Float,
+                                   CultureInfo.InvariantCulture, out v) ? v : def;
         }
 
         private static bool ReadBool(IniFile ini, string key, bool def)

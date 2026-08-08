@@ -353,10 +353,49 @@ namespace Nemoviz_Book_Reader
             // measured the same way as the reference tool -- whose 1500 Hz
             // threshold lands inside the bad range but misclassifies the worst of
             // them, so it is used as a second opinion and not as the test.
+            // The loudness target. Independent of every stage above -- it is not
+            // a repair, it is the answer to "why does the next book jump".
+            //
+            // It CUTS as well as lifts, and that is the point rather than a side
+            // effect: the loudest sample in the set comes DOWN by 8 dB. Gordan
+            // named its level as the one he wanted everywhere; what he actually
+            // wants is for books to stop jumping, and −7.8 LUFS cannot be reached
+            // by the rest of the shelf without doing to them what was done to it.
+            s.GainDb = GainFor(a);
+            s.GainEnabled = s.GainDb != 0;
+
             s.EqBass = SoundAnalysis.Usable(a.LowBandBelow) && a.LowBandBelow < 2.9 ? -3 : 0;
             s.EqVoice = 0;
             s.EqTreble = Dullness(a);
             s.EqEnabled = s.EqBass != 0 || s.EqTreble != 0;
+        }
+
+        /// <summary>How many dB this book needs to reach
+        /// <see cref="SoundSettings.TargetLufs"/>, or 0 when it cannot be worked
+        /// out.
+        ///
+        /// <para><b>It stops chasing the target rather than squashing to reach
+        /// it.</b> A lift is capped so the peaks end no more than
+        /// <see cref="SoundSettings.MaxLimitingDb"/> above the limiter's ceiling
+        /// — past that the book is simply left quieter. Chasing a number by
+        /// handing the limiter 11 dB to remove is exactly the treatment that made
+        /// the loudest sample in the set sound compressed and muddy, and doing it
+        /// deliberately to every quiet book would be worse than the jumping it
+        /// set out to cure.</para>
+        ///
+        /// <para>A CUT is never capped. Bringing a too-loud book down costs
+        /// nothing and risks nothing.</para></summary>
+        private static double GainFor(SoundAnalysis a)
+        {
+            if (!SoundAnalysis.Usable(a.Lufs)) return 0;
+            double want = SoundSettings.TargetLufs - a.Lufs;
+            if (want > 0 && SoundAnalysis.Usable(a.TruePeakDb))
+            {
+                double headroom = SoundSettings.LimiterCeilingDb + SoundSettings.MaxLimitingDb - a.TruePeakDb;
+                if (want > headroom) want = headroom;
+            }
+            if (want < 0.5 && want > -0.5) return 0;
+            return Math.Round(want, 1);
         }
 
         /// <summary>Is this recording measurably damaged? The high band sitting
