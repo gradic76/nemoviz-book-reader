@@ -981,6 +981,87 @@ it. **Its loudness and its muddiness are one thing, not two.**
 the ceiling. The cap fired on a real file — *Prihvatljivo* already peaks at
 +0.3 dBFS, so it stops at −17.4 instead of being limited into the target.
 
+### The loudness target had never once been heard, and the chain order follows from that (2026-08-09)
+
+Gordan tuned four bad recordings by ear and asked for the normalisation to move
+to the **front** of the chain: *"pa da se zahvati rade na maksimalnom volumenu
+jer je, osim šumova, krckanja, šuštanja i tko zna čega, glasnoća veliki problem
+kod zvučnih knjiga."* Reading his four books' `Book.ini` back found something
+underneath the request.
+
+**`PropertiesForm.FillSettings` was dropping `GainDb`/`GainEnabled`.** It builds
+its `SoundSettings` from the CONTROLS, and the loudness target has no control —
+it is a single number computed from the measurement. A fresh `SoundSettings`
+defaults it to off, and `FillSettings` never wrote it, so it was gone from
+**every live preview** and wiped from the book **on OK**. Measured on his four:
+the advisor had computed **−9.1 dB** for one and **+2.4** for another, and all
+four came back off. So −16 LUFS, the whole "every book at one loudness" feature,
+had never reached anyone's ears.
+
+**That is also why he ended up at speechnorm max on three of the four.** The
+static stage that was supposed to supply loudness was not in the chain, so the
+only loudness control left to him was the DYNAMIC one — which rides gain over
+time, lifts the quiet passages, and so raises exactly the noise the denoiser had
+taken out. His *"neke stvari koje su bile uklonjene su se na većoj glasnoći
+pojačale"* is that, precisely.
+
+**Fixed in three places, because the gain is not a setting:**
+- `FillSettings` **carries** it rather than rebuilding it, from a pair of fields
+  seeded off the book and replaced when an analysis lands.
+- `BookData.Load` **derives** it whenever a measurement exists, so it cannot go
+  stale and needs no migration flag — and the books already wiped repair
+  themselves on next load. Verified: three of the four came back with a gain
+  (−9.1, +2.4, and two at zero because they measure −16.4 and −15.8, already at
+  target).
+- `SoundAdvisor.GainFor` is public for it.
+
+**And then the order, which he was right about — but only for the static half.**
+`volume` now stands FIRST, ahead of the highpass. The reason is sharper than the
+intuition: `afftdn`, `deesser` and `acompressor` all take thresholds in
+**absolute dB**, while the books they meet run **−7 to −22 LUFS**, so "noise
+reduction, medium" has meant something different on every book. Bringing the
+level to target first makes one preset mean one thing. **The highpass and the EQ
+are linear and do not care** — nothing about them changes, and nobody should
+expect it to.
+
+**`speechnorm` stays at the far end, and that distinction is the whole of it.**
+In front, a dynamic gain rider would hand `afftdn` a noise floor that moves. Only
+the fixed number moves. Clipping is not a concern at the front: mpv's graph is
+float, and `alimiter` still owns the way out.
+
+**Verified through the shipped dialog**, on a copy of a real `Book.ini`: the
+advisor's −9.1 dB comes out as `lavfi=[volume=-9.1dB,highpass=f=100,afftdn=…]` —
+first in the chain — and survives a real `Persist()` and a cold reload, where
+before it was lost.
+
+**What his four books say about the rules** (his values against what NBR
+proposed):
+
+| book | high band below | NBR rumble | his rumble | NBR EQ | his EQ |
+|---|---|---|---|---|---|
+| Barbara | 39.6 | strong (3) | **max** | 0,0,+2,+4,+7 | −15,−10,+3,+4,+7 |
+| Jevtušenko | 31.5 | strong (3) | **max** | 0,0,+1,+2,+5 | **identical** |
+| Aragon | 36.5 | strong (3) | **max** | 0,0,+2,+3,+6 | −10,−15,+5,+5,+5 |
+| Torton | 42.0 | **light (1)** | **max** | 0,0,+2,+4,+8 | **identical** |
+
+- **The rumble rule is too timid — 4 of 4, unanimously.** He went to maximum on
+  every one; the advisor proposed one step lower on three and *three* steps lower
+  on Torton. That is the clearest signal in the set and it is not a close call.
+- **The treble ramp is landing right.** Two of four are identical to the dB, and
+  they are the two where he did not also raise the level.
+- **The two big low-band cuts are downstream of the missing gain**, not of the
+  EQ rule: both are books where he turned normalisation up and then had to take
+  300 and 800 Hz out by 10–15 dB — which is the highpass being too weak, seen
+  from the other end. Worth re-listening before treating them as EQ data.
+- **`NoiseShare` is 0.0 on all four**, so denoise came from the damage rule, as
+  §8d's `MinNoiseShare` intends. He kept its answer on three and softened Torton
+  by one step.
+
+**His settings were tuned against a chain that no longer exists** — the gain was
+absent and the order was different — so all four are owed a re-listen before any
+threshold is moved on their evidence. The rumble finding is the exception: it is
+unanimous and does not depend on level.
+
 ### `tools/spectrum` — the analyser we already had (2026-08-08)
 
 Gordan asked whether a small free analyser could be downloaded. **No, and none is

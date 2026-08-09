@@ -2235,12 +2235,42 @@ namespace Nemoviz_Book_Reader
         /// Returns false when the folder is not a DAISY book (caller falls back
         /// to the generic import); true when it handled it (success or error).
         /// </summary>
+        /// <summary>What became of a DAISY folder. A bool could not say it: the
+        /// caller needs "this was not DAISY, carry on" and "it was, and it
+        /// failed" to be different answers, and they used to be the same one —
+        /// so a bulk import counted a failed book among the ones it added.
+        /// </summary>
+        private enum DaisyImport { NotDaisy, Imported, Failed }
+
+        /// <summary>The noisy single-book route: Add File landing on a nav file,
+        /// and Open file. Answers the old question — was this handled, or should
+        /// the caller fall through to the generic import.</summary>
         private bool ImportDaisyFolder(string sourceFolder)
         {
+            string why;
+            return ImportDaisyFolder(sourceFolder, false, out why) != DaisyImport.NotDaisy;
+        }
+
+        /// <summary><para><b>quiet is what a bulk import needs, and it was
+        /// missing.</b> Reported by Gordan 2026-08-09: importing a folder of
+        /// seven books announced seven, then made him dismiss "Book added to
+        /// library." twice, then said "Imported 7 books." The two were the
+        /// folder's two DAISY books — every other kind already goes through
+        /// <c>ImportFileCore(…, quiet: true)</c> or <c>CopyAudioInto</c>, neither
+        /// of which says anything. Nothing marked the two out, so from the
+        /// outside it looked as though two books were special.</para>
+        ///
+        /// <para>Quiet also drops the per-book <c>LoadBooks()</c>: that is a full
+        /// rescan of the library, and the bulk path already does one at the end.
+        /// Seven DAISY books meant seven rescans of a shelf that can hold
+        /// 1622.</para></summary>
+        private DaisyImport ImportDaisyFolder(string sourceFolder, bool quiet, out string why)
+        {
+            why = null;
             if (string.IsNullOrEmpty(sourceFolder) || !System.IO.Directory.Exists(sourceFolder))
-                return false;
+                return DaisyImport.NotDaisy;
             if (DaisyParser.TryParse(sourceFolder) == null)
-                return false;   // not DAISY — let the caller handle it normally
+                return DaisyImport.NotDaisy;   // not DAISY — the caller handles it normally
 
             string name = System.IO.Path.GetFileName(sourceFolder.TrimEnd('\\', '/'));
             string destFolder = System.IO.Path.Combine(appSettings.LibraryPath, name);
@@ -2271,15 +2301,23 @@ namespace Nemoviz_Book_Reader
                     imported.SetDescription(SidecarDescription.FindIn(sourceFolder));
                 imported.Save();
 
-                LoadBooks();
-                MessageForm.ShowInfo(this, Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
+                if (!quiet)
+                {
+                    LoadBooks();
+                    MessageForm.ShowInfo(this, Localization.T("Dialog.ImportSuccess.Message"), Localization.T("Dialog.ImportSuccess.Title"));
+                }
             }
             catch (Exception ex)
             {
                 if (created) TryDeleteFolder(destFolder);
-                MessageForm.ShowInfo(this, Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
+                why = ex.Message;
+                // A bulk import collects the reason by name into the skipped
+                // list; only the single-book route stops to say it.
+                if (!quiet)
+                    MessageForm.ShowInfo(this, Localization.T("Dialog.ImportError.Message", ex.Message), Localization.T("Common.Error"));
+                return DaisyImport.Failed;
             }
-            return true;   // handled either way — don't fall through to generic import
+            return DaisyImport.Imported;
         }
 
         /// <summary>Recursively copies a folder tree (skipping any Book.ini).</summary>
@@ -2399,8 +2437,12 @@ namespace Nemoviz_Book_Reader
                 // A DAISY book comes in whole, with its navigation. Found at
                 // every level now, not only on the folder that was picked.
                 foreach (string d in plan.Daisy)
-                    if (ImportDaisyFolder(d)) imported++;
-                    else skipped.Add(System.IO.Path.GetFileName(d));
+                {
+                    string why;
+                    if (ImportDaisyFolder(d, true, out why) == DaisyImport.Imported) imported++;
+                    else skipped.Add(System.IO.Path.GetFileName(d) +
+                                     (string.IsNullOrEmpty(why) ? "" : " — " + why));
+                }
 
                 // A folder of audio is one book: its own files.
                 foreach (string bookFolder in plan.AudioFolders)

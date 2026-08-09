@@ -357,6 +357,19 @@ namespace Nemoviz_Book_Reader
             LoadM4bNav();
             Sound.Load(ini);
             Analysis.Load(ini);
+            // The loudness target is DERIVED, not read. It is the one part of the
+            // chain with no control behind it — a single number that follows from
+            // the measurement — so the ini can only ever hold a stale copy of it,
+            // and until 2026-08-09 it held a wiped one (PropertiesForm built a
+            // fresh SoundSettings for every preview and for OK, and never wrote
+            // this pair, so it went to the default of nothing). Deriving here
+            // needs no migration flag and cannot go stale: change the measurement
+            // and the gain follows.
+            if (Analysis != null && Analysis.Measured)
+            {
+                Sound.GainDb = SoundAdvisor.GainFor(Analysis);
+                Sound.GainEnabled = Sound.GainDb != 0;
+            }
             DetectTextBook();
             int.TryParse(ini.Read("Progress", "TextPosition", "0"), out int tp);
             TextPosition = tp;

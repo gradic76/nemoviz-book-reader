@@ -148,6 +148,8 @@ namespace Nemoviz_Book_Reader
             this.appSettings = appSettings;
             this.onHoldPlayback = onHoldPlayback;
             SoundSettings s = book.Sound;
+            gainDb = s.GainDb;
+            gainEnabled = s.GainEnabled;
 
             this.Text = ShelfName(book);
             // Tall enough that the Text tab's three groups fit without scrolling
@@ -637,7 +639,30 @@ namespace Nemoviz_Book_Reader
 
             s.NormalizeEnabled = chkNrm.Checked;
             s.NormalizeLevel = cmbNrm.SelectedIndex;
+
+            // CARRIED, not rebuilt. The loudness target is the one part of the
+            // chain that is not a control: it is a single number worked out from
+            // the measurement, so there is nothing on screen to read it off.
+            //
+            // It was simply being dropped. FillSettings starts from a fresh
+            // SoundSettings, so anything it does not write stays at the default —
+            // and this pair defaults to off. Every live preview was built through
+            // here, and so was Persist, which means the −16 LUFS target had never
+            // once reached the reader's ears and was wiped from the book on OK.
+            // Measured on Gordan's four tuned books, 2026-08-09: the advisor had
+            // computed −9.1 dB for one and +2.4 for another, and all four came
+            // back from Book.ini with the gain OFF. That is also why he had to
+            // reach for speechnorm to get loudness — the static stage that was
+            // supposed to provide it was not in the chain.
+            s.GainDb = gainDb;
+            s.GainEnabled = gainEnabled;
         }
+
+        /// <summary>The loudness target, held on the form because no control
+        /// holds it. Seeded from the book, replaced when an analysis lands.
+        /// </summary>
+        private double gainDb;
+        private bool gainEnabled;
 
         /// <summary>A SoundSettings snapshot of the live (unsaved) control state,
         /// used to build the preview chain.</summary>
@@ -823,6 +848,10 @@ namespace Nemoviz_Book_Reader
 
             SoundSettings suggested = BuildCurrent();
             SoundAdvisor.Apply(found, suggested);
+            // Before ShowSettings, which previews through BuildCurrent and would
+            // otherwise hand the player the old gain with the new stages.
+            gainDb = suggested.GainDb;
+            gainEnabled = suggested.GainEnabled;
             ShowSettings(suggested);
 
             ScreenReader.Announce(this, Localization.T("Prop.Analysing.Done", StagesOn(suggested)));

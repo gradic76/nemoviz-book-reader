@@ -262,6 +262,36 @@ namespace Nemoviz_Book_Reader
             CultureInfo ic = CultureInfo.InvariantCulture;
             List<string> f = new List<string>();
 
+            // ── The loudness target goes FIRST (Gordan, 2026-08-09) ──────────
+            //
+            // His words: "Nekako bi tu normalizaciju trebalo staviti na početak
+            // pa da se zahvati rade na maksimalnom volumenu jer je, osim šumova,
+            // krckanja, šuštanja i tko zna čega, glasnoća veliki problem kod
+            // zvučnih knjiga." He is right, and the reason is sharper than the
+            // intuition: three stages below have thresholds written in ABSOLUTE
+            // dB — afftdn's noise floor, the deesser's, the compressor's — while
+            // the books they meet run from −7 to −22 LUFS. So "noise reduction,
+            // medium" has meant something different on every book. Bringing the
+            // level to the target first makes one preset mean one thing.
+            //
+            // Highpass and the EQ are LINEAR and do not care where the gain sits;
+            // nothing about them changes. This is for the three that do.
+            //
+            // Only the STATIC gain moves. speechnorm stays at the far end, and
+            // that distinction is the whole of it: speechnorm rides the gain over
+            // time, so in front it would lift the quiet passages — the gaps
+            // between sentences, which is where the noise lives — and hand
+            // afftdn a noise floor that moves. That is exactly the "neke stvari
+            // koje su bile uklonjene su se na većoj glasnoći pojačale" Gordan
+            // hit, and he hit it because the static stage was being dropped
+            // (see PropertiesForm.FillSettings) and speechnorm was the only
+            // loudness control left to him.
+            //
+            // Clipping is not a concern at the front: mpv's graph is float, so a
+            // lift here cannot overflow, and alimiter still owns the way out.
+            if (s.GainEnabled && Math.Abs(s.GainDb) >= 0.5)
+                f.Add("volume=" + s.GainDb.ToString("0.##", ic) + "dB");
+
             if (s.HighpassEnabled)
                 f.Add("highpass=f=" + HighpassHz[ClampLevel(s.HighpassLevel, HighpassHz.Length)]);
 
@@ -303,14 +333,6 @@ namespace Nemoviz_Book_Reader
                 int nl = ClampLevel(s.NormalizeLevel, SpeechnormExpansion.Length);
                 f.Add("speechnorm=e=" + SpeechnormExpansion[nl].ToString("0.0", ic) + ":p=0.95");
             }
-
-            // The loudness target, applied LAST of the shaping stages: everything
-            // above decides how the book sounds, this decides how loud it is, and
-            // the limiter below then protects what comes out. Putting it earlier
-            // would let the EQ and the compressor move the level again after it
-            // had been set.
-            if (s.GainEnabled && Math.Abs(s.GainDb) >= 0.5)
-                f.Add("volume=" + s.GainDb.ToString("0.##", ic) + "dB");
 
             // Always-on safety limiter (level=false so it only caps peaks and
             // doesn't re-normalize loudness back up, undoing our chain).

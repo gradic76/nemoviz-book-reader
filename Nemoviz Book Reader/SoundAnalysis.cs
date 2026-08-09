@@ -437,7 +437,12 @@ namespace Nemoviz_Book_Reader
         ///
         /// <para>A CUT is never capped. Bringing a too-loud book down costs
         /// nothing and risks nothing.</para></summary>
-        private static double GainFor(SoundAnalysis a)
+        /// <summary>Public because the loudness target is NOT a setting: no
+        /// control holds it, so it is a function of the measurement and nothing
+        /// else. <c>BookData.Load</c> derives it on every load rather than
+        /// trusting what is in the ini — which also repairs the books whose gain
+        /// was wiped while <c>FillSettings</c> was dropping it.</summary>
+        public static double GainFor(SoundAnalysis a)
         {
             if (!SoundAnalysis.Usable(a.Lufs)) return 0;
             double want = SoundSettings.TargetLufs - a.Lufs;
