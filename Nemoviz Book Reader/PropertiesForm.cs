@@ -29,6 +29,17 @@ namespace Nemoviz_Book_Reader
         private const int CellW = 214;
         private const int CellH = 112;
 
+        /// <summary>The Tone cell alone is taller: five rows at 40, 64, 88, 112,
+        /// 136 and a spin box 22 tall end at 158.
+        ///
+        /// <para>Only this one, because under the NEW look the skin stretches
+        /// every cell to DialogSkin.StageH (166 since Properties gave up its
+        /// Playback row) and the difference never shows — while under the
+        /// CLASSIC look nothing resizes anything, and at 112 the bottom two
+        /// bands would simply have been cut off the page. A cell built for three
+        /// rows cannot hold five.</para></summary>
+        private const int EqCellH = 166;
+
         private readonly BookData book;
 
         private TextBox tbInfo;
@@ -42,7 +53,10 @@ namespace Nemoviz_Book_Reader
         private CheckBox chkDn; private ComboBox cmbDn;
         private CheckBox chkDs; private ComboBox cmbDs;
         private CheckBox chkCmp; private ComboBox cmbCmp;
-        private CheckBox chkEq; private NumericUpDown numBass, numVoice, numTreble;
+        /// <summary>One spin box per band of SoundSettings.EqBandHz. Built from
+        /// that array rather than named one by one, so moving a band or adding
+        /// one is a change in the data and nowhere else.</summary>
+        private CheckBox chkEq; private NumericUpDown[] numEq;
         private CheckBox chkNrm; private ComboBox cmbNrm;
 
         private Button btnResetAll;
@@ -155,12 +169,17 @@ namespace Nemoviz_Book_Reader
             chkMaster = new CheckBox();
             chkMaster.Text = Localization.T("Prop.UseSoundProcessing");
             chkMaster.AccessibleName = Localization.T("Prop.UseSoundProcessing");
-            chkMaster.Location = new Point(256, 372);
+            // Below the tallest stage row: the Tone cell grew to five bands and
+            // now ends at 244 + 166 = 410 under the classic look, where nothing
+            // moves it. The new look ignores these positions entirely.
+            chkMaster.Location = new Point(256, 420);
             chkMaster.Size = new Size(420, 24);
             chkMaster.TabIndex = 1;
             chkMaster.Checked = s.Enabled;
 
             int xB = 248, xC = 470;
+            // Spaced by the cell height plus 14, so the three rows follow the
+            // cells rather than a number written down beside them.
             int y1 = 8, y2 = 126, y3 = 244;
 
             GroupBox gHp = StageBox("Prop.Highpass.Title", xB, y1, 2);
@@ -179,11 +198,12 @@ namespace Nemoviz_Book_Reader
             chkCmp = StageEnable(gCmp); chkCmp.Checked = s.CompressorEnabled;
             cmbCmp = LevelCombo(gCmp, L5, s.CompressorLevel);
 
-            GroupBox gEq = StageBox("Prop.Eq.Title", xB, y3, 6);
+            GroupBox gEq = StageBox("Prop.Eq.Title", xB, y3, 6, EqCellH);
             chkEq = StageEnable(gEq); chkEq.Checked = s.EqEnabled;
-            numBass = EqBand(gEq, "Prop.Eq.Bass", 40, s.EqBass);
-            numVoice = EqBand(gEq, "Prop.Eq.Voice", 64, s.EqVoice);
-            numTreble = EqBand(gEq, "Prop.Eq.Treble", 88, s.EqTreble);
+            numEq = new NumericUpDown[SoundSettings.EqBandHz.Length];
+            for (int i = 0; i < numEq.Length; i++)
+                numEq[i] = EqBand(gEq, BandLabel(i), 40 + i * 24,
+                                  i < s.EqGain.Length ? s.EqGain[i] : 0);
 
             // One method, not a choice of two (Gordan, decided long before
             // 2026-08-03 and settled here): speech normalisation is what a
@@ -201,7 +221,7 @@ namespace Nemoviz_Book_Reader
                 (chkDn, new Control[] { cmbDn }),
                 (chkDs, new Control[] { cmbDs }),
                 (chkCmp, new Control[] { cmbCmp }),
-                (chkEq, new Control[] { numBass, numVoice, numTreble }),
+                (chkEq, numEq),
                 (chkNrm, new Control[] { cmbNrm }),
             };
 
@@ -209,7 +229,7 @@ namespace Nemoviz_Book_Reader
             btnResetAll.Text = Localization.T("Prop.ResetAll");
             btnResetAll.AccessibleName = Localization.T("Prop.ResetAll");
             btnResetAll.Size = new Size(90, 30);
-            btnResetAll.Location = new Point(256, 404);
+            btnResetAll.Location = new Point(256, 452);
             btnResetAll.TabIndex = 8;
             btnResetAll.Click += (s2, e) => ResetAll();
 
@@ -220,7 +240,7 @@ namespace Nemoviz_Book_Reader
             chkBypass.AccessibleName = Localization.T("Prop.Bypass");
             chkBypass.AccessibleDescription = Localization.T("Prop.Bypass.Shortcut");
             chkBypass.Size = new Size(90, 30);
-            chkBypass.Location = new Point(352, 404);
+            chkBypass.Location = new Point(352, 452);
             chkBypass.TabIndex = 9;
             chkBypass.CheckedChanged += (s2, e) => OnAnyChange();
 
@@ -292,9 +312,7 @@ namespace Nemoviz_Book_Reader
                 st.Enable.CheckedChanged += (s2, e) => { UpdateEnabledStates(); OnAnyChange(); };
             WireCombo(cmbHp); WireCombo(cmbDn); WireCombo(cmbDs); WireCombo(cmbCmp);
             WireCombo(cmbNrm);
-            numBass.ValueChanged += (s2, e) => OnAnyChange();
-            numVoice.ValueChanged += (s2, e) => OnAnyChange();
-            numTreble.ValueChanged += (s2, e) => OnAnyChange();
+            foreach (NumericUpDown n in numEq) n.ValueChanged += (s2, e) => OnAnyChange();
 
             UpdateEnabledStates();
             RefreshInfo();
@@ -366,12 +384,12 @@ namespace Nemoviz_Book_Reader
         }
 
         // ── Cell builders ─────────────────────────────────────────────────
-        private GroupBox StageBox(string titleKey, int x, int y, int tabIndex)
+        private GroupBox StageBox(string titleKey, int x, int y, int tabIndex, int h = CellH)
         {
             GroupBox g = new GroupBox();
             g.Text = Localization.T(titleKey);
             g.Location = new Point(x, y);
-            g.Size = new Size(CellW, CellH);
+            g.Size = new Size(CellW, h);
             g.TabIndex = tabIndex;
             return g;
         }
@@ -405,10 +423,31 @@ namespace Nemoviz_Book_Reader
             return cb;
         }
 
-        private NumericUpDown EqBand(GroupBox g, string labelKey, int y, int value)
+        /// <summary>A band is named by its frequency, not by a word. "Bass",
+        /// "voice" and "treble" worked for three; with five there is no honest
+        /// word for 1800 Hz, and the number is what the reader is actually
+        /// choosing. The top one says so, because a shelf behaves differently
+        /// from a bell and the reader can hear that it does.</summary>
+        private static string BandLabel(int i)
+        {
+            int hz = SoundSettings.EqBandHz[i];
+            string n = hz >= 1000 ? (hz / 1000.0).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + " kHz"
+                                  : hz + " Hz";
+            return i == SoundSettings.EqShelfIndex ? Localization.T("Prop.Eq.Shelf", n) : n;
+        }
+
+        private string EqReadout()
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            for (int i = 0; i < numEq.Length; i++)
+                parts.Add(BandLabel(i) + " " + Sign((int)numEq[i].Value));
+            return string.Join(", ", parts.ToArray()) + " dB";
+        }
+
+        private NumericUpDown EqBand(GroupBox g, string label, int y, int value)
         {
             Label lbl = new Label();
-            lbl.Text = Localization.T(labelKey);
+            lbl.Text = label;
             lbl.Location = new Point(10, y + 3);
             lbl.Size = new Size(90, 18);
 
@@ -417,7 +456,7 @@ namespace Nemoviz_Book_Reader
             n.Location = new Point(120, y);
             n.Size = new Size(70, 22);
             n.TextAlign = HorizontalAlignment.Right;
-            n.AccessibleName = Localization.T(labelKey);
+            n.AccessibleName = label;
             n.TabIndex = g.Controls.Count;
             if (value < -15) value = -15; if (value > 15) value = 15;
             n.Value = value;
@@ -505,8 +544,7 @@ namespace Nemoviz_Book_Reader
                 " dB, " + c.Attack + "/" + c.Release + " ms");
 
             AppendStage(sb, "Prop.Eq.Title", chkEq.Checked,
-                "bass " + Sign((int)numBass.Value) + ", voice " + Sign((int)numVoice.Value) +
-                ", treble " + Sign((int)numTreble.Value) + " dB");
+                EqReadout());
 
             int nl = cmbNrm.SelectedIndex;
             AppendStage(sb, "Prop.Normalize.Title", chkNrm.Checked,
@@ -542,7 +580,8 @@ namespace Nemoviz_Book_Reader
             chkDs.Checked = d.DeesserEnabled; cmbDs.SelectedIndex = d.DeesserLevel;
             chkCmp.Checked = d.CompressorEnabled; cmbCmp.SelectedIndex = d.CompressorLevel;
             chkEq.Checked = d.EqEnabled;
-            numBass.Value = d.EqBass; numVoice.Value = d.EqVoice; numTreble.Value = d.EqTreble;
+            for (int i = 0; i < numEq.Length; i++)
+                numEq[i].Value = i < d.EqGain.Length ? Clamp(d.EqGain[i], -15, 15) : 0;
             chkNrm.Checked = d.NormalizeEnabled;
             cmbNrm.SelectedIndex = d.NormalizeLevel;
 
@@ -587,9 +626,8 @@ namespace Nemoviz_Book_Reader
             s.CompressorLevel = cmbCmp.SelectedIndex;
 
             s.EqEnabled = chkEq.Checked;
-            s.EqBass = (int)numBass.Value;
-            s.EqVoice = (int)numVoice.Value;
-            s.EqTreble = (int)numTreble.Value;
+            for (int i = 0; i < numEq.Length && i < s.EqGain.Length; i++)
+                s.EqGain[i] = (int)numEq[i].Value;
 
             s.NormalizeEnabled = chkNrm.Checked;
             s.NormalizeLevel = cmbNrm.SelectedIndex;

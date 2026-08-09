@@ -42,29 +42,59 @@ namespace Nemoviz_Book_Reader
         // reader a question they had no way to answer.
         public static readonly double[] SpeechnormExpansion = { 1.5, 2.0, 2.5, 3.0, 3.5 };
 
-        // EQ band centre frequencies (Hz).
-        //
-        // TREBLE MOVED 10 kHz -> 4 kHz (2026-08-08). Gordan, listening to a dull
-        // recording with the treble at +8: "kao da naš ekvilajzer radi izvan
-        // frekvencija koje se koriste". He was exactly right, and measuring the
-        // six samples band by band shows why — dB relative to the whole signal:
-        //
-        //                  150-400  400-1k   1k-2k   2k-4k   4k-8k    >8k
-        //   the good two      -3.9    -4.4   -10.0   -14.2   -17.4   -21.5
-        //   the bad four      -2.8    -5.5   -13.8   -21.1   -30.3   -44.1
-        //
-        // Below 1 kHz all six are the same, which is why cutting bass changed
-        // nothing he could hear. And at 10 kHz the damaged recordings are 40 to
-        // 48 dB down: a shelf there lifts something inaudible to something
-        // slightly less inaudible. The loss that MATTERS opens from about 1 kHz
-        // and is worst from 4 kHz up, so that is where the shelf belongs.
-        //
-        // Honest limit, worth saying out loud: what was never recorded cannot be
-        // restored. A 4 kHz shelf reaches real content; nothing reaches content
-        // above 8 kHz that a cassette or a 64 kbps encoder threw away.
-        public const int EqBassHz = 120;
-        public const int EqVoiceHz = 3000;
-        public const int EqTrebleHz = 4000;
+        /// <summary>The five EQ bands, in Hz. The last one is a SHELF; the other
+        /// four are bells.
+        ///
+        /// <para><b>Where they are, and why each.</b> Measured across the six
+        /// samples, third-octave, dB relative to each file's own level:</para>
+        /// <code>
+        ///              150-400  400-1k   1k-2k   2k-4k   4k-8k    >8k
+        ///  the good two   -3.9    -4.4   -10.0   -14.2   -17.4   -21.5
+        ///  the bad four   -2.8    -5.5   -13.8   -21.1   -30.3   -44.1
+        /// </code>
+        /// <list type="bullet">
+        /// <item><b>300</b> — body and boxiness. Chosen so it CANNOT fight the
+        /// highpass: measured, a bell here touches 0.8 dB at 100 Hz and 0.5 at
+        /// 80, where the highpass is working. Gordan's question is what settled
+        /// it — "nema smisla da nešto otkinemo hipassom a da se to može vratiti
+        /// ekvilajzerom". The old 120 Hz SHELF did exactly that: measured, its
+        /// whole action was below 200 Hz, a weaker duplicate of the highpass in
+        /// the same place.</item>
+        /// <item><b>800</b> — nasality and mud. The measurement shows good and
+        /// bad recordings do NOT differ here, so nothing sets it automatically;
+        /// it is kept because four bad samples are a thin basis for removing a
+        /// control (Gordan: "tko zna na što se sve može naletjeti").</item>
+        /// <item><b>1800</b> — where the loss actually begins, 3.8 dB.</item>
+        /// <item><b>3500</b> — consonants and intelligibility, 7 dB.</item>
+        /// <item><b>5000, a shelf</b> — 13 dB, and a shelf because a damaged
+        /// recording needs a RAMP rising to the top, which two adjacent bells
+        /// would turn into a hump. Not higher than 5 kHz because half this
+        /// library is sampled at 22.05 kHz and so carries nothing at all above
+        /// 11 kHz — the ceiling is half the sample rate, per channel, whether
+        /// the file is mono or stereo.</item>
+        /// </list>
+        ///
+        /// <para><b>The bands overlap, and that is the point.</b> Measured, the
+        /// 300 Hz bell at +6 still gives +1.0 at 800 Hz, and the 800 Hz bell
+        /// gives +3.2 at 1250. Bands with hard edges would produce a lumpy
+        /// response with dips between them; overlapping ones let five points
+        /// build a smooth curve. The cost is that <b>they SUM</b> — aiming for
+        /// +2/+4/+6 at 800/1250/1800 measured +4.2/+6.7/+9.6 — so any rule that
+        /// sets them must think about the composite, never one band at a
+        /// time.</para>
+        ///
+        /// <para><b>Honest limit:</b> what was never recorded cannot be restored.
+        /// A 5 kHz shelf reaches real content; nothing reaches what a cassette or
+        /// a 64 kbps encoder threw away.</para></summary>
+        public static readonly int[] EqBandHz = { 300, 800, 1800, 3500, 5000 };
+
+        /// <summary>The last band is a high shelf, the rest are bells.</summary>
+        public static int EqShelfIndex { get { return EqBandHz.Length - 1; } }
+
+        /// <summary>Bell width, in Q. About 1.4 octaves — wide enough that five
+        /// bands cover the range without dips, narrow enough that each still has
+        /// a recognisable centre.</summary>
+        public const double EqBellQ = 1.0;
 
         // The always-on safety limiter ceiling (dBFS). Fixed, not user-editable:
         // "set and forget", and we want the hottest clean output possible.
@@ -111,9 +141,12 @@ namespace Nemoviz_Book_Reader
         public int CompressorLevel;     // 0..4
 
         public bool EqEnabled;
-        public int EqBass;              // dB
-        public int EqVoice;             // dB
-        public int EqTreble;            // dB
+
+        /// <summary>One gain in dB per band of <see cref="EqBandHz"/>. An array
+        /// rather than five named fields: the bands are data, and every piece of
+        /// code that touches them — the chain, the advisor, the dialog, the
+        /// read-out — then works for any number of them.</summary>
+        public int[] EqGain = new int[EqBandHz.Length];
 
         public bool NormalizeEnabled;
         public int NormalizeLevel;      // 0..4
@@ -147,9 +180,7 @@ namespace Nemoviz_Book_Reader
             CompressorLevel = 2;        // Medium
 
             EqEnabled = true;
-            EqBass = 0;
-            EqVoice = 0;
-            EqTreble = 0;
+            for (int i = 0; i < EqGain.Length; i++) EqGain[i] = 0;
 
             NormalizeEnabled = true;
             NormalizeLevel = 2;         // Medium
@@ -173,9 +204,9 @@ namespace Nemoviz_Book_Reader
             CompressorLevel = ClampLevel(ReadInt(ini, "CompressorLevel", CompressorLevel), Compressor.Length);
 
             EqEnabled = ReadBool(ini, "EqEnabled", EqEnabled);
-            EqBass = ReadInt(ini, "EqBass", EqBass);
-            EqVoice = ReadInt(ini, "EqVoice", EqVoice);
-            EqTreble = ReadInt(ini, "EqTreble", EqTreble);
+            for (int i = 0; i < EqGain.Length; i++)
+                EqGain[i] = ReadInt(ini, "EqGain" + i, 0);
+            MigrateOldEq(ini);
 
             NormalizeEnabled = ReadBool(ini, "NormalizeEnabled", NormalizeEnabled);
             NormalizeLevel = ClampLevel(ReadInt(ini, "NormalizeLevel", NormalizeLevel), SpeechnormExpansion.Length);
@@ -200,9 +231,7 @@ namespace Nemoviz_Book_Reader
             WriteInt(ini, "CompressorLevel", CompressorLevel);
 
             WriteBool(ini, "EqEnabled", EqEnabled);
-            WriteInt(ini, "EqBass", EqBass);
-            WriteInt(ini, "EqVoice", EqVoice);
-            WriteInt(ini, "EqTreble", EqTreble);
+            for (int i = 0; i < EqGain.Length; i++) WriteInt(ini, "EqGain" + i, EqGain[i]);
 
             WriteBool(ini, "NormalizeEnabled", NormalizeEnabled);
             WriteInt(ini, "NormalizeLevel", NormalizeLevel);
@@ -257,12 +286,16 @@ namespace Nemoviz_Book_Reader
 
             if (s.EqEnabled)
             {
-                if (s.EqBass != 0)
-                    f.Add("bass=g=" + s.EqBass.ToString(ic) + ":f=" + EqBassHz.ToString(ic));
-                if (s.EqVoice != 0)
-                    f.Add("equalizer=f=" + EqVoiceHz.ToString(ic) + ":t=q:w=1.5:g=" + s.EqVoice.ToString(ic));
-                if (s.EqTreble != 0)
-                    f.Add("treble=g=" + s.EqTreble.ToString(ic) + ":f=" + EqTrebleHz.ToString(ic));
+                for (int i = 0; i < EqBandHz.Length && i < s.EqGain.Length; i++)
+                {
+                    if (s.EqGain[i] == 0) continue;
+                    string hz = EqBandHz[i].ToString(ic);
+                    string g = s.EqGain[i].ToString(ic);
+                    f.Add(i == EqShelfIndex
+                          ? "treble=g=" + g + ":f=" + hz
+                          : "equalizer=f=" + hz + ":t=q:w="
+                            + EqBellQ.ToString("0.##", ic) + ":g=" + g);
+                }
             }
 
             if (s.NormalizeEnabled)
@@ -294,6 +327,32 @@ namespace Nemoviz_Book_Reader
             double v;
             return double.TryParse(ini.Read("Sound", key, null), NumberStyles.Float,
                                    CultureInfo.InvariantCulture, out v) ? v : def;
+        }
+
+        /// <summary>Carries a book saved with the old three-control equaliser
+        /// over to the five bands, once.
+        ///
+        /// <para>A book analysed before 2026-08-09 has <c>EqVoice</c> (a bell at
+        /// 3 kHz) and <c>EqTreble</c> (a shelf at 4 kHz) in its Book.ini. Those
+        /// land on the 3500 bell and the 5000 shelf, which are the same controls
+        /// in the same places to within half an octave. <c>EqBass</c> is
+        /// deliberately DROPPED: it was a shelf at 120 Hz whose whole action was
+        /// below 200, which is the highpass's region now — carrying it over would
+        /// re-create the very overlap this change removed.</para>
+        ///
+        /// <para>Only when the new keys are absent, so it cannot overwrite
+        /// anything the reader has since set.</para></summary>
+        private void MigrateOldEq(IniFile ini)
+        {
+            if (ini.Read("Sound", "EqGain0", null) != null) return;   // already migrated
+            int voice = ReadInt(ini, "EqVoice", 0);
+            int treble = ReadInt(ini, "EqTreble", 0);
+            if (voice == 0 && treble == 0) return;
+            for (int i = 0; i < EqBandHz.Length; i++)
+            {
+                if (EqBandHz[i] == 3500) EqGain[i] = voice;
+                if (i == EqShelfIndex) EqGain[i] = treble;
+            }
         }
 
         private static bool ReadBool(IniFile ini, string key, bool def)

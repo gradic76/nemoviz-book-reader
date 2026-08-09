@@ -387,9 +387,11 @@ Prop.Denoise.Title=Noise reduction
 Prop.Deesser.Title=Soften sibilance
 Prop.Compressor.Title=Even out speech
 Prop.Eq.Title=Tone
-Prop.Eq.Bass=Bass
-Prop.Eq.Voice=Voice
-Prop.Eq.Treble=Treble
+; The five bands are named by their frequency, because with five of them there
+; is no honest word for 1800 Hz and the number is what is being chosen. Only the
+; top one gets a word, because a shelf behaves differently from a bell: it lifts
+; or lowers EVERYTHING above it, and that is audible as such. {0} is "5 kHz".
+Prop.Eq.Shelf={0} and above
 Prop.Normalize.Title=Automatic loudness
 ; Preset level names — every stage uses Minimal/Light/Medium/Strong/Maximum.
 Prop.Level.Minimal=Minimal

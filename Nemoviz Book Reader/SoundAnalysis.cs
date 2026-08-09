@@ -408,10 +408,18 @@ namespace Nemoviz_Book_Reader
             s.GainDb = GainFor(a);
             s.GainEnabled = s.GainDb != 0;
 
-            s.EqBass = SoundAnalysis.Usable(a.LowBandBelow) && a.LowBandBelow < 2.9 ? -3 : 0;
-            s.EqVoice = 0;
-            s.EqTreble = Dullness(a);
-            s.EqEnabled = s.EqBass != 0 || s.EqTreble != 0;
+            // THE BASS CUT IS GONE, and it was a duplicate twice over. It cut a
+            // shelf at 120 Hz whose whole measured action was below 200 -- the
+            // highpass's region -- and it keyed on LowBandBelow, which is what
+            // the highpass level above already keys on. One measurement was
+            // driving two controls at the same frequencies. The low end belongs
+            // to the highpass, which has five levels for it.
+            int lift = Dullness(a);
+            for (int i = 0; i < s.EqGain.Length; i++) s.EqGain[i] = 0;
+            if (lift > 0) Ramp(s, lift);
+            else if (lift < 0) s.EqGain[SoundSettings.EqShelfIndex] = lift;   // harsh: pull the top down
+            s.EqEnabled = false;
+            foreach (int g in s.EqGain) if (g != 0) s.EqEnabled = true;
         }
 
         /// <summary>How many dB this book needs to reach
@@ -449,6 +457,31 @@ namespace Nemoviz_Book_Reader
         private static bool Damaged(SoundAnalysis a)
         {
             return SoundAnalysis.Usable(a.HighBandBelow) && a.HighBandBelow >= 24;
+        }
+
+        /// <summary>Spreads a dullness lift across the top three bands as a
+        /// rising ramp, which is the shape a dull recording actually needs.
+        ///
+        /// <para>Measured, the loss is a slope and not a step: the damaged
+        /// recordings track the good ones to about 800 Hz and then fall away, 4 dB
+        /// down at 1 kHz, 8 at 2 kHz, 12 at 3–4 kHz, 15 by 8 kHz. A single shelf
+        /// gives a FLAT lift above its corner, which under-corrects the middle
+        /// and over-corrects the top where there is nothing left to lift.</para>
+        ///
+        /// <para><b>The fractions are deliberately conservative because the bands
+        /// SUM.</b> A trial set aiming for +2/+4/+6 at 800/1250/1800 measured
+        /// +4.2/+6.7/+9.6 — roughly double at the bottom of the ramp. So each
+        /// band is given a fraction of the target rather than the target, and the
+        /// composite is what the reader hears. Verifying the composite against
+        /// the intended curve, and solving for exact gains rather than
+        /// approximating them, is the piece still owed here.</para></summary>
+        private static void Ramp(SoundSettings s, int lift)
+        {
+            int n = s.EqGain.Length;
+            if (n < 3) return;
+            s.EqGain[n - 1] = lift;                                  // 5 kHz shelf: the full lift
+            s.EqGain[n - 2] = (int)Math.Round(lift * 0.5);           // 3500
+            s.EqGain[n - 3] = (int)Math.Round(lift * 0.25);          // 1800
         }
 
         /// <summary>How much treble a dull recording gets back, in dB, capped at
