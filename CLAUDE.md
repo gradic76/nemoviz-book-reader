@@ -3399,6 +3399,54 @@ reaches a screen reader and draws nothing, so for ~1.6 s the dialog sat still an
 then rewrote six cells with no visible cause. The read-out now carries the line
 while it runs.
 
+**And then the job grew, so the line became a window (2026-08-09).**
+`AnalysisProgressForm` — a modal dialog with a determinate bar, a status line and
+Cancel. **Measured: 20.6 s for twenty segments on the i9-14900HX**, ~1.0 s each,
+which is four to seven minutes on the minimum machine. An announcement and a
+still dialog is a defensible answer to 1.6 s and not to that.
+
+- **The estimate is measured on the machine it is running on**, from the segments
+  already done — so it is right on hardware nobody here has seen. **Rebuilt only
+  when a segment lands, never per tick**: recomputing every 300 ms made it WALK
+  BACKWARDS between segments (measured: 80 → 85 → 65 → 70 seconds), because the
+  elapsed time keeps growing while the count dividing it does not. A remaining
+  time that goes up while you watch reads as the job getting worse.
+- **Spoken at the quarters** — three utterances plus the opening line and
+  Properties' own "recording analysed", against twenty if every segment spoke.
+  A bar is for the eye; the quarters are the progress as far as the ear is
+  concerned, which also settles §8a's long-open "spoken progress for
+  screen-reader users".
+- **Focus starts on Cancel, and it has to.** The status line is a read-only edit
+  control under §2's focus echo guard, so it does not change while it is focused.
+  Measured with focus starting there: **the line stood at "Starting the analysis"
+  for the whole twenty seconds.** Focus therefore starts on the only action in
+  the window and the line is one Tab away, refreshing on the way in. Nothing the
+  ear gets depends on it — announcements need no focus.
+- **Cancel does not close the window; the worker closing it does.** The stop flag
+  is read *between* segments, so giving up takes up to one segment. Closing on
+  the keypress would put the reader back in Properties with a decode still
+  running against the book, and a second visit could start another. The close box
+  means Cancel and behaves identically; only Windows shutting down gets its
+  window back at once.
+- **A cancelled job is not a failed one.** `AnalyseIfNeeded` skips
+  `Prop.Analysing.Failed` when `dlg.Cancelled` — "the recording could not be
+  analysed" is the wrong sentence for a job somebody stopped on purpose.
+- **Playback is held for the duration and put back** (Gordan: *"Može privremena
+  pauza dok se radi analiza ali da se knjiga onda opet pokrene jer iz properties
+  dijaloga se ne može kontrolirati a poželjno je da svira dok se podešavaju
+  kontrole"*). `Form1.HoldPlaybackForAnalysis` goes through
+  `PausePlaybackQuietly`/`ResumePlaybackQuietly`, so it is a **programmatic**
+  pause — no sleep timer is cancelled (§7) — and it resumes only if it was the
+  one that stopped it, leaving an already-paused book paused.
+
+**Verified through the shipped classes** on a real 145-part book, not on a
+harness copy of the logic: the bar walks 0→20, the wording comes out of `en.lang`
+and counts down monotonically, the result is `Measured` with the same
+`HighBandBelow` on repeat runs, `book.Analysis` is untouched by the dialog
+itself, and Cancel at segment 4 closes with `DialogResult.Cancel` and a null
+result. **Not seen by eye yet** — it goes on §11's eyes-and-hands list with the
+five-band Tone cell.
+
 **Apply was dropped, deliberately (2026-07-28).** Every change is already live
 through `onPreview`, so Apply would only mean "persist now instead of on OK" —
 and Properties does not persist itself: the caller writes the book on

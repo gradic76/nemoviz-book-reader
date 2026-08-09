@@ -3757,10 +3757,42 @@ namespace Nemoviz_Book_Reader
             UpdateVolumeDisplay();
         }
 
-        /// <summary>Hears a volume / speed edit from the Properties dialog straight
-        /// away, the same way the processing stages preview. Only playback is
-        /// touched — the player's own fields are settled when the dialog closes, so
-        /// Cancel simply restores what the book had.</summary>
+        /// <summary>Whether it was THIS that stopped playback. A book already
+        /// paused when the measurement began stays paused afterwards.</summary>
+        private bool heldForAnalysis;
+
+        /// <summary>Holds playback while Properties measures the recording, and
+        /// puts it back exactly as it was.
+        ///
+        /// <para>Gordan's rule: the book SHOULD play while the controls are being
+        /// tried, since playback cannot be reached from that dialog — but not
+        /// while the measurement runs, where it would be a voice under a progress
+        /// bar for anything up to several minutes.</para>
+        ///
+        /// <para>Through the quiet pair, so this is a PROGRAMMATIC pause: it does
+        /// not cancel a sleep timer the way a reader's own pause does (§7).</para>
+        ///
+        /// <para>(The dangling doc comment that used to stand here belonged to the
+        /// volume/speed preview hook, removed with the Playback group — §10b.)
+        /// </para></summary>
+        private void HoldPlaybackForAnalysis(bool hold)
+        {
+            try
+            {
+                if (hold)
+                {
+                    heldForAnalysis = isPlaying;
+                    if (heldForAnalysis) PausePlaybackQuietly();
+                }
+                else if (heldForAnalysis)
+                {
+                    heldForAnalysis = false;
+                    ResumePlaybackQuietly();
+                }
+            }
+            catch { }
+        }
+
         /// <summary>Switch libmpv's output device live (empty → "auto", the
         /// system default). Used for the Settings → Device live preview and to
         /// re-apply the persisted choice when the dialog closes.</summary>
@@ -3807,7 +3839,8 @@ namespace Nemoviz_Book_Reader
             // Pass a live-preview hook so edits are heard on the fly while the
             // dialog is open.
             using (PropertiesForm dlg = new PropertiesForm(currentBook, ApplySoundProcessing,
-                                                           PreviewTextSpeech, appSettings))
+                                                           PreviewTextSpeech, appSettings,
+                                                           HoldPlaybackForAnalysis))
             {
                 dlg.ShowDialog(this);
             }

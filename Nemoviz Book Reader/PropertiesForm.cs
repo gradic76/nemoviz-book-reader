@@ -119,6 +119,10 @@ namespace Nemoviz_Book_Reader
         // being chosen, not only after OK.
         private readonly Action<string, int, int, int> onTextPreview;
 
+        /// <summary>true to hold playback, false to put it back as it was. Null
+        /// from the Library, where there is nothing playing.</summary>
+        private readonly Action<bool> onHoldPlayback;
+
         /// <summary>Whether the user has toggled Bypass (compare processed vs.
         /// raw).</summary>
         public bool Bypass { get { return chkBypass.Checked; } }
@@ -135,12 +139,14 @@ namespace Nemoviz_Book_Reader
         // preview. The player still owns both, live, from its own keys.
         public PropertiesForm(BookData book, Action<SoundSettings, bool> onPreview = null,
                               Action<string, int, int, int> onTextPreview = null,
-                              AppSettings appSettings = null)
+                              AppSettings appSettings = null,
+                              Action<bool> onHoldPlayback = null)
         {
             this.book = book;
             this.onPreview = onPreview;
             this.onTextPreview = onTextPreview;
             this.appSettings = appSettings;
+            this.onHoldPlayback = onHoldPlayback;
             SoundSettings s = book.Sound;
 
             this.Text = ShelfName(book);
@@ -752,11 +758,15 @@ namespace Nemoviz_Book_Reader
         /// correct them since; running again would walk over exactly the
         /// corrections Gordan said the reader should be free to make.</para>
         ///
-        /// <para><b>Nothing is disabled while it runs.</b> Disabling a control
-        /// takes it out of the tab order, so a screen-reader user would find the
-        /// dialog silently rearranging itself for a second and a half and then
-        /// rearranging back — far more disturbing than the wait. The reader is
-        /// told it is running instead, and told again when it lands.</para></summary>
+        /// <para><b>It waits behind its own window now, and that is because the
+        /// job grew.</b> At three segments it was 1.6 s and an announcement over
+        /// a dialog nobody was stopped from using was the right answer. At twenty
+        /// it is 22 s here and four to seven minutes on the minimum machine —
+        /// long enough that the reader needs to see it moving, to know how much
+        /// is left, and to be able to stop it. `AnalysisProgressForm` is all
+        /// three, and being modal also settles what the earlier version left
+        /// vague: the stages cannot be edited halfway through a measurement that
+        /// is about to overwrite them.</para></summary>
         private void AnalyseIfNeeded()
         {
             if (chkMaster == null || !chkMaster.Checked || analysing) return;
@@ -764,24 +774,31 @@ namespace Nemoviz_Book_Reader
             if (book.Analysis != null && book.Analysis.Measured) return;
 
             analysing = true;
-            // Spoken only. A line in the read-out was tried and taken out again
-            // the same day — Gordan has another plan for showing this.
-            ScreenReader.Announce(this, Localization.T("Prop.Analysing"));
 
-            BookData target = book;
-            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            // PAUSED for the duration, then put back exactly as it was (Gordan).
+            // Playback cannot be reached from this dialog, and it is wanted while
+            // the controls are being tried — but not while the measurement runs,
+            // where it would be a voice under a progress bar for anything up to
+            // several minutes. The pause is PROGRAMMATIC, through the same pair
+            // the sleep timer uses, so it does not read as the reader pausing.
+            if (onHoldPlayback != null) onHoldPlayback(true);
+            try
             {
-                SoundAnalysis found = null;
-                try { found = SoundAnalyser.Measure(target); } catch { }
-                try
+                using (var dlg = new AnalysisProgressForm(book))
                 {
-                    // The dialog can be closed while this runs; a disposed form
-                    // is not a null one, and BeginInvoke on it throws.
-                    if (IsDisposed || Disposing || !IsHandleCreated) return;
-                    BeginInvoke((MethodInvoker)(() => AnalysisDone(found)));
+                    dlg.ShowDialog(this);
+                    // A reader who cancelled has already been told what happened,
+                    // and nothing failed — so the failure line is not said here.
+                    // "Could not be analysed" for a job somebody stopped on
+                    // purpose is the wrong sentence twice over.
+                    if (!dlg.Cancelled) AnalysisDone(dlg.Result);
                 }
-                catch { }
-            });
+            }
+            finally
+            {
+                analysing = false;
+                if (onHoldPlayback != null) onHoldPlayback(false);
+            }
         }
 
         private void AnalysisDone(SoundAnalysis found)

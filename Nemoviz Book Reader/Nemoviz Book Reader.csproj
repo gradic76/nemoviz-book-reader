@@ -131,6 +131,7 @@
   <ItemGroup>
     <Compile Include="appsettings.cs" />
     <Compile Include="ArchivePasswordPrompt.cs" />
+    <Compile Include="AnalysisProgressForm.cs" />
     <Compile Include="AudioCd.cs" />
     <Compile Include="bookdata.cs" />
     <Compile Include="ConfirmOnceForm.cs" />

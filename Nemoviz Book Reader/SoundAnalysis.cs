@@ -619,7 +619,20 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Measures the book and returns what it found, or null when
         /// nothing could be measured. Never throws.</summary>
+        /// <summary>How many segments are done. Read by the progress dialog;
+        /// a plain int because it is written by one thread and read by one
+        /// other, and neither cares about the odd stale value.</summary>
+        public static volatile int Progress;
+
         public static SoundAnalysis Measure(BookData book)
+        {
+            return Measure(book, null, null);
+        }
+
+        /// <summary>The same, watched and interruptible. <paramref name="stop"/>
+        /// is asked between segments -- never inside one, so a cancel costs at
+        /// most the segment in flight rather than leaving a half-read file.</summary>
+        public static SoundAnalysis Measure(BookData book, Func<bool> stop, Action<int> onProgress)
         {
             try
             {
@@ -628,10 +641,14 @@ namespace Nemoviz_Book_Reader
                 if (points.Count == 0) return null;
 
                 var got = new List<SoundAnalysis>();
+                Progress = 0;
                 foreach (var p in points)
                 {
+                    if (stop != null && stop()) return null;
                     SoundAnalysis r = MeasureSegment(p.Path, p.Start);
                     if (r != null) got.Add(r);
+                    Progress++;
+                    if (onProgress != null) onProgress(Progress);
                 }
                 return Combine(got);
             }

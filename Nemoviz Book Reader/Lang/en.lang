@@ -379,6 +379,21 @@ Prop.SoundProcessing=Sound processing
 ; sets the six stages from it, which takes about a second and a half. Nothing is
 ; disabled meanwhile, so these three lines are the only sign it is happening.
 Prop.Analysing=Analysing the recording
+; The wait while a recording is measured. It was 1.6 s with three segments and
+; is 22 s with twenty on a fast machine, four to seven minutes on the minimum
+; one -- hence a dialog with a bar, a spoken quarter, and a way out. {1} is a
+; phrase like "about a minute", measured from how long this machine has taken
+; so far rather than guessed.
+Analyse.Progress.Title=Analysing the recording
+Analyse.Progress.Starting=Starting the analysis...
+Analyse.Progress.Working=Segment {0} of {1}. {2}
+Analyse.Progress.Quarter={0} per cent done. {1}
+Analyse.Progress.Cancel=Cancel
+Analyse.Progress.Cancelling=Stopping after this segment. The settings are left unchanged.
+Analyse.Progress.Estimating=Working out how long this will take.
+Analyse.Progress.AlmostDone=Almost done.
+Analyse.Progress.Seconds=About {0} seconds left.
+Analyse.Progress.Minutes=About {0} minutes left.
 Prop.Analysing.Done=Recording analysed, {0} stages set. Change any of them if you prefer.
 Prop.Analysing.Failed=The recording could not be analysed. The settings are unchanged.
 Prop.Stage.Level=Level
