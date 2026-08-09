@@ -488,11 +488,6 @@ namespace Nemoviz_Book_Reader
             sb.AppendLine(Localization.T("Prop.Info.ProcessingOn"));
             if (chkBypass.Checked)
                 sb.AppendLine(Localization.T("Prop.Info.Bypassed"));
-            // The one visible sign that a measurement is running. Without it the
-            // dialog sits unchanged for ~1.6 s and then rewrites six cells with
-            // nothing on screen having asked for it.
-            if (analysing)
-                sb.AppendLine(Localization.T("Prop.Analysing"));
             sb.AppendLine();
 
             AppendStage(sb, "Prop.Highpass.Title", chkHp.Checked,
@@ -731,13 +726,9 @@ namespace Nemoviz_Book_Reader
             if (book.Analysis != null && book.Analysis.Measured) return;
 
             analysing = true;
-            // Spoken AND shown. The announcement reaches a screen reader and
-            // nothing else — for the second and a half it takes, someone
-            // watching the screen saw no cause at all for the controls that then
-            // changed by themselves. Gordan asked what was happening on screen;
-            // the honest answer was "nothing".
+            // Spoken only. A line in the read-out was tried and taken out again
+            // the same day — Gordan has another plan for showing this.
             ScreenReader.Announce(this, Localization.T("Prop.Analysing"));
-            RefreshInfo();
 
             BookData target = book;
             System.Threading.ThreadPool.QueueUserWorkItem(_ =>
