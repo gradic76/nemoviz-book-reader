@@ -22,6 +22,11 @@ Player.Info.PartNumElapsed=Part {0} elapsed:
 Player.Info.PartNumRemaining=Part {0} remaining:
 Player.Info.ElapsedLabel=Time elapsed:
 Player.Info.RemainingLabel=Time remaining:
+; Volume and speed, once for every kind of audio book. Until 2026-08-09 neither
+; appeared in ANY info box — they could be changed from the player and heard,
+; but not read — and Properties has since given up its controls for them.
+Player.Info.VolumeLabel=Volume:
+Player.Info.SpeedLabel=Speed:
 Player.Info.AccessibleName=Playback information, F8
 
 ; Player - title bar
@@ -277,6 +282,7 @@ Details.Field.Title=Title
 Details.Field.Author=Author
 Details.Field.Format=Format
 Details.Field.Speed=Speed
+Details.Field.Volume=Volume
 Details.Field.Added=Added
 Details.Field.Producer=Producer
 Details.Field.Publisher=Publisher
@@ -348,9 +354,6 @@ Dialog.ArchivePassword.Field=Archive password
 ; (e.g. "Normalization", "Equalizer", "Compressor", "De-esser") — revisit
 ; before the final English pass.
 Prop.Info.Accessible=Book information
-Prop.Playback.Title=Playback
-Prop.Playback.Volume=Volume:
-Prop.Playback.Speed=Speed (×):
 ; {0} is the book's language. Both shown only when nothing installed speaks it:
 ; the short one sits between the controls it explains and has one line to do it
 ; in, the long one on the info panel where there is room to say why.

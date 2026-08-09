@@ -3302,6 +3302,40 @@ reflow of a group's children pulls every label away from the control it labels:
 those cells were laid out pair by pair and a loop that only knows "control"
 cannot put them back. The children are recoloured and left where they are.
 
+**The Playback group is gone too (2026-08-09, Gordan's call).** It held volume
+and speed — both set from the player, both remembered per book regardless of
+this dialog, so the controls were a second way to do something already done,
+occupying the one band of height the five tone bands will need. Its 76 units
+plus the 8 below go straight into the three stage rows: **StageH 138 → 166**,
+and `PropGeom.For(960, 628, 570)` still reproduces every constant to the unit,
+so the invariant that lets the hybrid page compute its own narrower layout is
+intact.
+
+**But his premise for it was wrong, and checking it is what made the change
+safe.** He expected the two numbers to be visible in the info boxes. They were
+not — measured: the player's audio info box lists title, author, chapter/part,
+page, bookmarks and the times, and Properties' own info column lists title,
+author, publisher, producer, year, format, time and description. **Neither
+showed volume or speed anywhere.** They could be changed from the player and
+heard announced, never read. So they were added first — `BookInfoField.Volume`
+beside the `Speed` that already existed unused, in both boxes — and only then
+were the controls taken out. Removing them without that would have made two
+settings unreadable.
+
+Two consequences worth knowing. Focus on opening Properties now starts on the
+**master switch** (it started on the Playback group, which no longer exists),
+which is what a reader came to this page for. And the info column is tighter:
+§10b measured 19 lines of 22 with every stage on, and this adds two — plus a
+transient "Analysing the recording" line — so the worst case now touches the
+scroll bar that column has always had.
+
+**The analysis is visible now as well as spoken.** Gordan heard the two
+measurement announcements and asked what was happening on screen; the honest
+answer was *nothing at all* — they go out through `ScreenReader.Announce`, which
+reaches a screen reader and draws nothing, so for ~1.6 s the dialog sat still and
+then rewrote six cells with no visible cause. The read-out now carries the line
+while it runs.
+
 **Apply was dropped, deliberately (2026-07-28).** Every change is already live
 through `onPreview`, so Apply would only mean "persist now instead of on OK" —
 and Properties does not persist itself: the caller writes the book on

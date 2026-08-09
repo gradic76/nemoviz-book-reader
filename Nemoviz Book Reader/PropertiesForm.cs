@@ -49,7 +49,6 @@ namespace Nemoviz_Book_Reader
         private CheckBox chkBypass;
         private TabControl tabs;
         private Button btnOK, btnCancel;
-        private GroupBox gPlayback;
 
         /// <summary>The way in for the new look. Same rule as the player: the skin
         /// only moves and repaints what this form already built, so every role,
@@ -67,7 +66,6 @@ namespace Nemoviz_Book_Reader
                     OK = btnOK,
                     Cancel = btnCancel,
                     Stages = stageCells,
-                    Playback = gPlayback,
                     TextInfo = tbTextInfo,
                     Tabs = tabs
                 };
@@ -76,7 +74,6 @@ namespace Nemoviz_Book_Reader
 
         // Text tab (per-book reading options; mirrors Settings -> Text Books).
         private TextBox tbTextInfo;
-        private NumericUpDown numPlayVolume, numPlaySpeed;
         private ComboBox cmbTLanguage, cmbTVoice;
         // Shown only when nothing installed speaks the book's language.
         private TextBox tbTNoVoice;
@@ -104,7 +101,6 @@ namespace Nemoviz_Book_Reader
         private readonly Action<SoundSettings, bool> onPreview;
         // Live preview for playback level and speed, so they are heard while being
         // adjusted just like the processing stages. Cancel restores the old values.
-        private readonly Action<int, int> onPlaybackPreview;
         // Same idea for a text book: the voice and how it reads are heard while
         // being chosen, not only after OK.
         private readonly Action<string, int, int, int> onTextPreview;
@@ -120,14 +116,15 @@ namespace Nemoviz_Book_Reader
         // been read with the voice being picked. Null when the caller has none.
         private readonly AppSettings appSettings;
 
+        // The playback-preview hook went with the Playback controls: nothing in
+        // this dialog changes volume or speed any more, so there is nothing to
+        // preview. The player still owns both, live, from its own keys.
         public PropertiesForm(BookData book, Action<SoundSettings, bool> onPreview = null,
-                              Action<int, int> onPlaybackPreview = null,
                               Action<string, int, int, int> onTextPreview = null,
                               AppSettings appSettings = null)
         {
             this.book = book;
             this.onPreview = onPreview;
-            this.onPlaybackPreview = onPlaybackPreview;
             this.onTextPreview = onTextPreview;
             this.appSettings = appSettings;
             SoundSettings s = book.Sound;
@@ -267,8 +264,6 @@ namespace Nemoviz_Book_Reader
                 foreach (GroupBox g in stageCells) audio.Controls.Add(g);
                 audio.Controls.Add(btnResetAll);
                 audio.Controls.Add(chkBypass);
-                gPlayback = BuildPlaybackGroup(248, 404);
-                audio.Controls.Add(gPlayback);
                 tabs.TabPages.Add(audio);
             }
             if (hasText) tabs.TabPages.Add(BuildTextPage());
@@ -475,6 +470,11 @@ namespace Nemoviz_Book_Reader
             info.AddAlways(BookInfoField.Format, book.Format, dash);
             info.AddAlways(BookInfoField.Time, book.Duration, dash);
             AddDescriptionRow(info);
+            // The two numbers this dialog used to hold controls for. The controls
+            // went so the tone bands could have the room; the VALUES had to stay,
+            // because until they were put here they were legible nowhere at all.
+            info.AddAlways(BookInfoField.Volume, book.Volume + " %", dash);
+            info.AddAlways(BookInfoField.Speed, book.Speed + " %", dash);
             sb.Append(info.ToText(Environment.NewLine));
             sb.AppendLine();
 
@@ -488,6 +488,11 @@ namespace Nemoviz_Book_Reader
             sb.AppendLine(Localization.T("Prop.Info.ProcessingOn"));
             if (chkBypass.Checked)
                 sb.AppendLine(Localization.T("Prop.Info.Bypassed"));
+            // The one visible sign that a measurement is running. Without it the
+            // dialog sits unchanged for ~1.6 s and then rewrites six cells with
+            // nothing on screen having asked for it.
+            if (analysing)
+                sb.AppendLine(Localization.T("Prop.Analysing"));
             sb.AppendLine();
 
             AppendStage(sb, "Prop.Highpass.Title", chkHp.Checked,
@@ -610,8 +615,9 @@ namespace Nemoviz_Book_Reader
         {
             FillSettings(book.Sound);
             PersistTextOptions();
-            if (numPlayVolume != null) book.Volume = (int)numPlayVolume.Value;
-            if (numPlaySpeed != null) book.Speed = (int)Math.Round(numPlaySpeed.Value * 100);
+            // Volume and speed are no longer written from here: their controls
+            // are gone, and the player owns both. It already saves them per book
+            // as they change, so a second writer could only disagree with it.
             book.Save();
             RereadBrailleIfAsked();
         }
@@ -725,7 +731,13 @@ namespace Nemoviz_Book_Reader
             if (book.Analysis != null && book.Analysis.Measured) return;
 
             analysing = true;
+            // Spoken AND shown. The announcement reaches a screen reader and
+            // nothing else — for the second and a half it takes, someone
+            // watching the screen saw no cause at all for the controls that then
+            // changed by themselves. Gordan asked what was happening on screen;
+            // the honest answer was "nothing".
             ScreenReader.Announce(this, Localization.T("Prop.Analysing"));
+            RefreshInfo();
 
             BookData target = book;
             System.Threading.ThreadPool.QueueUserWorkItem(_ =>
@@ -1360,29 +1372,6 @@ namespace Nemoviz_Book_Reader
         /// stages — they are what the book sounds like just as much as the filters.
         /// The player writes these back as the user adjusts them live, so the dialog
         /// simply shows and edits the stored values.</summary>
-        private GroupBox BuildPlaybackGroup(int x, int y)
-        {
-            GroupBox box = new GroupBox();
-            box.Text = Localization.T("Prop.Playback.Title");
-            box.Location = new Point(x, y);
-            box.Size = new Size(CellW * 2 + 8, 70);
-
-            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Prop.Playback.Volume"), 10, 28));
-            numPlayVolume = SettingsForm.MakeNumeric(Localization.T("Prop.Playback.Volume"),
-                                                     120, 25, 0, 100, Clamp(book.Volume, 0, 100), 0, 5);
-            box.Controls.Add(numPlayVolume);
-
-            box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Prop.Playback.Speed"), 240, 28));
-            // Speed is the same multiplier the player and the library show (1,4×),
-            // not a percentage, and it steps by the player's own Ctrl+←/→ step.
-            numPlaySpeed = SettingsForm.MakeDecimal(Localization.T("Prop.Playback.Speed"), 340, 25,
-                                                    0.5m, 3.0m, Clamp(book.Speed, 50, 300) / 100m, 1, 0.1m, 1);
-            box.Controls.Add(numPlaySpeed);
-            numPlayVolume.ValueChanged += (s, e) => PreviewPlayback();
-            numPlaySpeed.ValueChanged += (s, e) => PreviewPlayback();
-            return box;
-        }
-
         /// <summary>Applies the reading settings to the live reader so the change is
         /// heard at once; the values are only committed on OK.</summary>
         private void PreviewText()
@@ -1390,12 +1379,6 @@ namespace Nemoviz_Book_Reader
             if (initialising || onTextPreview == null || cmbTVoice == null) return;
             string v = cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
             onTextPreview(v, (int)numTWpm.Value, (int)numTVolume.Value, (int)numTPitch.Value);
-        }
-
-        private void PreviewPlayback()
-        {
-            if (initialising || onPlaybackPreview == null || numPlayVolume == null || numPlaySpeed == null) return;
-            onPlaybackPreview((int)numPlayVolume.Value, (int)Math.Round(numPlaySpeed.Value * 100));
         }
 
         /// <summary>The Text tab's read-out: what this book will actually be read

@@ -82,6 +82,14 @@ namespace Nemoviz_Book_Reader
         Description,
 
         // How it is being read.
+        //
+        // Volume joined Speed here on 2026-08-09, when Properties gave up its
+        // Playback controls to make room for the tone bands. Until then neither
+        // number appeared in ANY info box for an audio book — they could be
+        // changed from the player and heard, but not read — so removing the
+        // controls without this would have taken the only place they were
+        // legible.
+        Volume,
         Speed,
         SoundProcessing,
 

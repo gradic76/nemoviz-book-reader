@@ -2634,6 +2634,20 @@ namespace Nemoviz_Book_Reader
                 sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -").Append(FormatTime(virtualRemaining));
             }
 
+            // Volume and speed, added once here rather than in each of the four
+            // branches above — §10d's order puts "how it is read" after "where
+            // you are", and every branch ends in the same place.
+            //
+            // They are here because Properties gave up its Playback controls
+            // (2026-08-09) and, before that, these two numbers appeared in NO
+            // info box for an audio book at all: they could be changed and
+            // heard, never read.
+            sb.Append(nl).Append(nl);
+            sb.Append(Localization.T("Player.Info.VolumeLabel")).Append(' ')
+              .Append(currentVolume).Append(" %").Append(nl);
+            sb.Append(Localization.T("Player.Info.SpeedLabel")).Append(' ')
+              .Append(currentSpeed).Append(" %");
+
             return sb.ToString();
         }
 
@@ -3747,16 +3761,6 @@ namespace Nemoviz_Book_Reader
         /// away, the same way the processing stages preview. Only playback is
         /// touched — the player's own fields are settled when the dialog closes, so
         /// Cancel simply restores what the book had.</summary>
-        private void PreviewPlayback(int volume, int speedPercent)
-        {
-            if (mpvHandle == IntPtr.Zero) return;
-            mpv_set_property_string(mpvHandle, "volume",
-                Math.Min(100, Math.Max(0, volume)).ToString());
-            mpv_set_property_string(mpvHandle, "speed",
-                (Math.Min(300, Math.Max(50, speedPercent)) / 100.0)
-                    .ToString(System.Globalization.CultureInfo.InvariantCulture));
-        }
-
         /// <summary>Switch libmpv's output device live (empty → "auto", the
         /// system default). Used for the Settings → Device live preview and to
         /// re-apply the persisted choice when the dialog closes.</summary>
@@ -3802,7 +3806,7 @@ namespace Nemoviz_Book_Reader
 
             // Pass a live-preview hook so edits are heard on the fly while the
             // dialog is open.
-            using (PropertiesForm dlg = new PropertiesForm(currentBook, ApplySoundProcessing, PreviewPlayback,
+            using (PropertiesForm dlg = new PropertiesForm(currentBook, ApplySoundProcessing,
                                                            PreviewTextSpeech, appSettings))
             {
                 dlg.ShowDialog(this);

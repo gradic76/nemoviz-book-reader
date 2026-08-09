@@ -16,7 +16,6 @@ namespace Nemoviz_Book_Reader
         public CheckBox Master, Bypass;
         public Button ResetAll, OK, Cancel;
         public GroupBox[] Stages;
-        public GroupBox Playback;
         public TextBox TextInfo;
         public TabControl Tabs;
     }
@@ -45,10 +44,17 @@ namespace Nemoviz_Book_Reader
         public static readonly Rectangle InfoGlass = new Rectangle(29, 29, 262, 582);
         public const int ColA = 320, ColB = 640, ColW = 308;
 
-        public static readonly Rectangle PlaybackCell = new Rectangle(320, 12, 628, 76);
-        public const int StripY = 96, StripH = 32;
-        public static readonly int[] StageRowY = { 136, 284, 432 };
-        public const int StageH = 138;
+        // THE PLAYBACK CELL IS GONE (2026-08-09, Gordan). It held volume and
+        // speed, both of which are set from the player, remembered per book
+        // regardless, and now READ in the info column beside this — so the
+        // controls were a second way to do something already done, occupying the
+        // one band of height the tone bands need.
+        //
+        // Its 76 units plus the 8 below it go straight into the three stage rows,
+        // 28 each: 138 -> 166. The strip moves up to where it stood.
+        public const int StripY = 12, StripH = 32;
+        public static readonly int[] StageRowY = { 52, 228, 404 };
+        public const int StageH = 166;
         public const int ButtonsY = 578, ButtonW = 112, ButtonH = 36;
 
         /// <summary>Where everything on a Properties AUDIO page goes, worked out
@@ -70,7 +76,7 @@ namespace Nemoviz_Book_Reader
         /// gets spent, not where something has to be cut.</para></summary>
         public struct PropGeom
         {
-            public Rectangle InfoPanel, InfoGlass, Playback;
+            public Rectangle InfoPanel, InfoGlass;
             public int ColA, ColB, ColW, StripY, StripH, StageH;
             public int[] StageRowY;
 
@@ -83,7 +89,7 @@ namespace Nemoviz_Book_Reader
             public static PropGeom For(int w, int contentH, int rowsBottom)
             {
                 var g = new PropGeom();
-                const int m = 12, infoW = 296, playH = 76, gap = 8, rowGap = 10;
+                const int m = 12, infoW = 296, gap = 8, rowGap = 10;
                 g.InfoPanel = new Rectangle(m, m, infoW, contentH - m);
                 g.InfoGlass = new Rectangle(m + 17, m + 17, infoW - 34, contentH - m - 34);
 
@@ -92,8 +98,10 @@ namespace Nemoviz_Book_Reader
                 g.ColW = (colsW - m) / 2;
                 g.ColB = g.ColA + g.ColW + m;
 
-                g.Playback = new Rectangle(g.ColA, m, colsW, playH);
-                g.StripY = m + playH + gap;
+                // No playback row any more — see PlaybackCell above. The strip
+                // starts at the margin and the height it used to take is spread
+                // across the three stage rows by the arithmetic below.
+                g.StripY = m;
                 g.StripH = 32;
 
                 int firstRow = g.StripY + g.StripH + gap;
@@ -458,7 +466,7 @@ namespace Nemoviz_Book_Reader
                 ApplyTextPage(f, p, only);
                 return;
             }
-            if (p.Stages == null || p.Playback == null) return;
+            if (p.Stages == null) return;
 
             DialogSkin.EnsureFonts();
             f.SuspendLayout();
@@ -478,13 +486,11 @@ namespace Nemoviz_Book_Reader
             canvas.Wells.Add(DialogSkin.InfoPanel);
             DialogSkin.AsGlass(p.Info, DialogSkin.InfoGlass);
 
-            DialogSkin.AsSticker(p.Playback, DialogSkin.PlaybackCell);
             for (int i = 0; i < p.Stages.Length; i++)
                 DialogSkin.AsSticker(p.Stages[i], new Rectangle(
                     i % 2 == 0 ? DialogSkin.ColA : DialogSkin.ColB,
                     DialogSkin.StageRowY[i / 2], DialogSkin.ColW, DialogSkin.StageH));
 
-            Reflow(p.Playback, true);
             foreach (GroupBox g in p.Stages) Reflow(g, false);
 
             // The strip on the metal between the playback sticker and the stages.
@@ -504,9 +510,8 @@ namespace Nemoviz_Book_Reader
             DialogSkin.AsKey(p.OK, new Rectangle(716, DialogSkin.ButtonsY,
                 DialogSkin.ButtonW, DialogSkin.ButtonH));
 
-            // Tab order as agreed: playback first, then the master switch, then
-            // what it gates, then the read-out, then the buttons.
-            p.Playback.TabIndex = 0;
+            // Tab order: the master switch first now that playback has gone,
+            // then what it gates, then the read-out, then the buttons.
             p.Master.TabIndex = 1;
             p.ResetAll.TabIndex = 2;
             p.Bypass.TabIndex = 3;
@@ -528,8 +533,6 @@ namespace Nemoviz_Book_Reader
             gate(null, EventArgs.Empty);
 
             // One ? per group, and F1 as the second way to the same text.
-            // Playback has none: volume and speed for this book, and Gordan's
-            // ruling is that a three-year-old would work that out.
             HintSystem.Clear();
             HintSystem.Attach(p.Master, "Hint.SoundProcessing", p.Master.Parent,
                               DialogSkin.HelpKeyBounds(624, DialogSkin.StripY),
@@ -539,7 +542,10 @@ namespace Nemoviz_Book_Reader
             for (int i = 0; i < p.Stages.Length && i < stageHints.Length; i++)
                 HintSystem.Attach(p.Stages[i], stageHints[i]);
 
-            f.Shown += (s, e) => { f.ActiveControl = p.Playback; f.SelectNextControl(p.Playback, true, true, true, false); };
+            // Focus starts on the master switch — it used to start on the
+            // playback group, which no longer exists, and the switch is what a
+            // reader opened this page to reach.
+            f.Shown += (s, e) => { try { f.ActiveControl = p.Master; } catch { } };
 
             f.ResumeLayout();
             canvas.Rebuild();
@@ -623,12 +629,11 @@ namespace Nemoviz_Book_Reader
         private static void LayOutAudioPage(PropParts p, TabPage page, DialogCanvas canvas,
                                             DialogSkin.PropGeom geom, int pageBottom)
         {
-            if (p.Stages == null || p.Playback == null || p.Info == null) return;
+            if (p.Stages == null || p.Info == null) return;
 
             canvas.Wells.Add(geom.InfoPanel);
             DialogSkin.AsGlass(p.Info, geom.InfoGlass);
 
-            DialogSkin.AsSticker(p.Playback, geom.Playback);
 
             // ROWS ARE AS TALL AS WHAT STANDS IN THEM — not all alike, which is
             // what the full-form layout can afford and a tab page cannot. Five of
@@ -688,7 +693,6 @@ namespace Nemoviz_Book_Reader
                 y += rowH[r] + gap;
             }
 
-            Reflow(p.Playback, true);
             foreach (GroupBox g in p.Stages) Reflow(g, false);
 
             OnMetal(p.Master);
@@ -697,7 +701,6 @@ namespace Nemoviz_Book_Reader
             DialogSkin.AsSwitch(p.Bypass, new Rectangle(right - 312, geom.StripY, 200, geom.StripH));
             DialogSkin.AsKey(p.ResetAll, new Rectangle(right - 112, geom.StripY, 112, geom.StripH));
 
-            p.Playback.TabIndex = 0;
             p.Master.TabIndex = 1;
             p.ResetAll.TabIndex = 2;
             p.Bypass.TabIndex = 3;
