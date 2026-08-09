@@ -1009,6 +1009,69 @@ two more controls.
 degenerates to passthrough and the band reads 0.0. Half these samples are
 22.05 kHz, so their 12.5 kHz row is meaningless.
 
+### How many samples, and the two rules that mattered more than any of them (2026-08-09)
+
+Gordan supplied the six WHOLE books his extracts came from —
+`D:\Test naslovi\Audio Test`, **100 hours**. Extracts could not answer this: the
+whole premise of sampling more is that a book varies across its length, and an
+extract has no tenths. Raw readings kept in **`docs/sound-sampling-6-books.tsv`**
+(2203 of them, including a 2003-point grid through every book) so any future rule
+change can be tested in seconds instead of re-measuring for 45 minutes.
+
+**Three samples was not defensible.** Twenty independent triples produced on
+average **six different sets of settings per book**, and the loudness they implied
+**spanned 10.5 dB** — comfortable against unusable, decided by which three seconds
+were drawn.
+
+**Sampling is now ten tenths of the TIMELINE, two readings in each — twenty.**
+Of the timeline and not the file list: one of these books has 5 files and another
+156, so picking by file index samples a long file and a short one equally. Fixed
+positions, never random — the same book measured twice must give the same
+settings, or *"why did it change?"* has no answer.
+
+**Twenty, and the corpus chose it.** Worst gain error falls 10.5 → 4.1 → **2.7 dB**
+from 3 to 10 to 20 samples and then stops: sixty gives 2.2, ninety 2.1. Gordan
+asked for quality regardless of duration; the honest answer is that **quality
+stopped being limited by sample count.** What limited it was two rules.
+
+**The noise rule was a lottery.** It used the mean SNR, and the mean takes only
+the segments that HAVE one. Measured: **astats' RMS trough is available in 0–1 %
+of 2003 segments** — it is a minimum over windows, and 20 s of speech nearly
+always contains an instant of digital silence, so it is `-inf`. (This file called
+it "the real noise measure" on one favourable reading. Corrected.) With the noise
+floor as patchy as it is, **two books had their denoise decided by ONE OR TWO
+readings out of six hundred, whose median was 122 dB.** The figure now decides
+nothing unless **at least half** the segments produce one; otherwise the damage
+rule takes over, which is stable. That change alone took agreement with the
+reference from **23 % to 76 %**.
+
+**The treble steps were the rest, and the corpus says so almost exactly** — how
+reproducible a book's settings were is predicted by nothing but its distance from
+a 6 dB step edge:
+
+| book | high band below | from an edge | reproducible |
+|---|---|---|---|
+| Torton Vajlder | 42.0 | **0.0 — on it** | **45 %** |
+| luj aragon | 36.4 | 0.4 | 58 % |
+| Jevtušenko | 31.5 | 1.5 | 85 % |
+| Barbara | 39.4 | 2.6 | 95 % |
+| hallmarked man | 19.8 | 4.2 | 98 % |
+
+A book on a boundary flips for ever however well it is measured: the measurement
+converges and the STEP turns what is left into a categorical difference. The lift
+is continuous now through the same anchors, rounded to 1 dB. Torton went **45 % →
+85 %**, and the **treble error is at most 1 dB anywhere, mean 0.2** — which is what
+reaches the ear, and what an exact-match metric was hiding in both directions.
+
+**Method note worth keeping: the metric was wrong before the rule was.** Counting
+exact equality of an integer dB value penalises a 1 dB difference as heavily as a
+4 dB one, so finer quantisation made agreement look WORSE while the actual error
+fell. Measure the quantity that reaches the ear, not the label.
+
+**Open, and NOT a sampling problem:** about 2.5 dB of gain error that does not
+improve with more samples (2.1 at ninety). That is the book varying within itself,
+and the answer would be **settings per part of a book** — a different feature.
+
 ### Recalibrated against Gordan's own samples — the library median was NOT the target (2026-08-08)
 
 Six files in `D:\Test naslovi\Audio Test`: four he calls bad, one **Poželjno**
