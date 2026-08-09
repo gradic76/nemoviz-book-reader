@@ -58,13 +58,27 @@ namespace Nemoviz_Book_Reader
         public double NoiseFloorDb = double.NaN;
 
         /// <summary>The quietest RMS window in the segment, dB — astats' "RMS
-        /// trough". <b>This is the real noise measure</b>, and it is available
-        /// where the noise floor is not: between sentences a spoken recording
-        /// falls to its own noise, so the quietest window IS the noise. §8d
-        /// reached the same place from the other direction, noting that voice
-        /// activity detection would find the noise in the gaps — the trough gets
-        /// there without needing the detection.</summary>
+        /// trough".
+        ///
+        /// <para><b>This was called "the real noise measure" here and that was
+        /// WRONG.</b> The claim rested on one favourable reading. Measured across
+        /// <b>2003 segments of six real books it is available in 0–1 % of
+        /// them</b>, and the reason is structural: the trough is the MINIMUM over
+        /// astats' windows, and in twenty seconds of speech there is almost
+        /// always an instant of true digital silence, which makes it
+        /// <c>-inf</c>. It is kept because where it does appear it is the right
+        /// quantity, but nothing may lean on it.</para></summary>
         public double RmsTroughDb = double.NaN;
+
+        /// <summary>How many of the segments produced ANY noise reading at all.
+        ///
+        /// <para>Without this the mean is a lottery: <see cref="SoundAnalyser"/>
+        /// averages only the readings that exist, so a book where two segments in
+        /// six hundred yield a noise figure has its denoise decided by those two
+        /// — and their median came out at 122 dB, which is not a measurement of
+        /// anything. Knowing the SHARE is what lets a rule decline to use a
+        /// number it should not trust.</para></summary>
+        public int NoiseSamples;
 
         /// <summary>Long runs of identical samples — a clipping tell.</summary>
         public double FlatFactor;
@@ -124,6 +138,15 @@ namespace Nemoviz_Book_Reader
                              : Usable(NoiseFloorDb) ? NoiseFloorDb : double.NaN;
                 return Usable(RmsDb) && !double.IsNaN(noise) ? RmsDb - noise : double.NaN;
             }
+        }
+
+        /// <summary>What share of the segments produced a noise reading. Below
+        /// <see cref="SoundAdvisor.MinNoiseShare"/> the signal-to-noise figure is
+        /// an average of a handful of freak readings and must not decide
+        /// anything.</summary>
+        public double NoiseShare
+        {
+            get { return Segments > 0 ? (double)NoiseSamples / Segments : 0; }
         }
 
         /// <summary>How far the low band PEAKS above its own average, dB. A
@@ -244,6 +267,18 @@ namespace Nemoviz_Book_Reader
     /// Gordan's.</para></summary>
     public static class SoundAdvisor
     {
+        /// <summary>How many of a book's segments must yield a noise reading
+        /// before the signal-to-noise figure is allowed to decide anything.
+        ///
+        /// <para>Half, because that is the point at which the figure describes
+        /// the recording rather than a few unusual moments in it — and because
+        /// the SHARE converges with sampling where the mean of a handful of
+        /// outliers does not, which is what makes the decision reproducible.
+        /// Measured on six books: only one clears it (79 %); the rest sit at
+        /// 0–33 % and fall to the damage rule, which is stable.</para></summary>
+        public const double MinNoiseShare = 0.5;
+
+
         /// <summary>Sets the stages from the measurement. The master switch is
         /// not touched — the reader has just turned it on, which is what caused
         /// the analysis.</summary>
@@ -266,11 +301,20 @@ namespace Nemoviz_Book_Reader
             // maximum. An earlier version read the library's own median of 65 as
             // the "leave it alone" point and so applied FULL denoise at 35 -- to
             // a recording its owner had just called acceptable.
-            if (SoundAnalysis.Usable(a.Snr))
+            if (SoundAnalysis.Usable(a.Snr) && a.NoiseShare >= MinNoiseShare)
             {
                 s.DenoiseLevel = Pick(a.Snr, 0, new[] { 15.0, 22.0, 28.0, 34.0 }, true);
                 s.DenoiseEnabled = a.Snr < 34;
             }
+            // Otherwise the noise figure is not trustworthy, whether because no
+            // segment produced one or because too few did. Measured over 2003
+            // segments of six real books: four of them yield a noise reading in
+            // 0 to 10 % of segments, and for two the whole decision rested on ONE
+            // OR TWO readings out of six hundred whose median was 122 dB — a
+            // number that is not a measurement of anything. A rule that averages
+            // whatever happens to exist is a lottery, and it is why the same book
+            // came out with denoise on or off depending on how many samples were
+            // taken.
             else if (Damaged(a))
             {
                 // No measurable noise, but the recording is measurably damaged.
@@ -427,9 +471,29 @@ namespace Nemoviz_Book_Reader
             if (a.HighBandBelow < 15) return -2;                 // harsh, not dull
             if (a.HighBandBelow < 24) return 0;                  // both good samples land here
 
-            // 24 dB down is the edge of normal; every 6 dB past it buys 2 dB back.
-            int lift = 2 + (int)((a.HighBandBelow - 24) / 6) * 2;
-            return lift > 8 ? 8 : lift;
+            // 24 dB down is the edge of normal; every 6 dB past it buys 2 dB
+            // back — but SMOOTHLY, rounded to the nearest dB rather than jumping
+            // in twos at 6 dB boundaries.
+            //
+            // THE STEPS WERE THE INSTABILITY, and the corpus says so almost
+            // exactly. How reliably a book's settings could be reproduced turned
+            // out to be predicted by nothing but its distance from a step edge:
+            //
+            //   Torton Vajlder  42.0 dB — exactly on an edge — 45 % reproducible
+            //   luj aragon      36.4 dB — 0.4 from an edge   — 58 %
+            //   Jevtušenko      31.5 dB — 1.5 from an edge   — 85 %
+            //   Barbara         39.4 dB — 2.6 from an edge   — 95 %
+            //   hallmarked man  19.8 dB — 4.2 from an edge   — 98 %
+            //
+            // A book sitting on a boundary flips for ever, however well it is
+            // measured, and no number of samples can help it: the measurement
+            // converges and the STEP turns what is left into a categorical
+            // difference. Rounded to 1 dB the same curve passes through the same
+            // anchors (24→2, 30→4, 36→6, 42→8) and a borderline book now differs
+            // by a decibel, which nobody can hear.
+            double lift = 2 + (a.HighBandBelow - 24) / 3.0;
+            if (lift > 8) lift = 8;
+            return (int)Math.Round(lift, MidpointRounding.AwayFromZero);
         }
 
         /// <summary>Which of five levels a reading falls into. Level 4 is the
@@ -473,10 +537,10 @@ namespace Nemoviz_Book_Reader
         /// <summary>Seconds taken from each sampled point.</summary>
         public const double SegmentSeconds = 20;
 
-        /// <summary>How many points in the book are sampled. §8d: level varies
-        /// between files recorded on different days, so one sample would set the
-        /// whole book from whichever day that was.</summary>
-        public const int SegmentCount = 3;
+        /// <summary>Ten tenths of the book, two readings in each: twenty in all.
+        /// See PickSegments for why twenty and not three, and not thirty.</summary>
+        public const int Tenths = 10;
+        public const int PerTenth = 2;
 
         /// <summary>The measurements are read as a mpv PROPERTY, not off the log.
         ///
@@ -530,42 +594,57 @@ namespace Nemoviz_Book_Reader
                 var points = PickSegments(book);
                 if (points.Count == 0) return null;
 
-                var got = new List<Reading>();
+                var got = new List<SoundAnalysis>();
                 foreach (var p in points)
                 {
-                    Reading r = MeasureOne(p.Path, p.Start);
+                    SoundAnalysis r = MeasureSegment(p.Path, p.Start);
                     if (r != null) got.Add(r);
                 }
-                if (got.Count == 0) return null;
-
-                // The mean over the segments, except for the peaks and the flat
-                // factor, where the WORST is what matters -- one clipped passage
-                // is a clipped book, and averaging it away is how it would be
-                // missed.
-                //
-                // Every average takes only the readings that HAVE that measure.
-                // Half the sample has no noise floor at all, so a mean over all
-                // three segments regardless would be a mean of two real numbers
-                // and one placeholder.
-                var a = new SoundAnalysis();
-                a.Segments = got.Count;
-                a.Lufs = Mean(got, r => r.Lufs);
-                a.Lra = Mean(got, r => r.Lra);
-                a.RmsDb = Mean(got, r => r.RmsDb);
-                a.NoiseFloorDb = Mean(got, r => r.NoiseFloorDb);
-                a.RmsTroughDb = Mean(got, r => r.RmsTroughDb);
-                a.LowBandDb = Mean(got, r => r.LowBandDb);
-                a.HighBandDb = Mean(got, r => r.HighBandDb);
-                a.LowPeakDb = Worst(got, r => r.LowPeakDb);
-                a.HighPeakDb = Worst(got, r => r.HighPeakDb);
-                a.CentroidHz = Mean(got, r => r.CentroidHz);
-                a.TruePeakDb = Worst(got, r => r.TruePeakDb);
-                a.PeakDb = Worst(got, r => r.PeakDb);
-                a.FlatFactor = Worst(got, r => r.FlatFactor);
-                if (double.IsNaN(a.FlatFactor)) a.FlatFactor = 0;   // no flatness measured is no flatness
-                return a;
+                return Combine(got);
             }
             catch { return null; }
+        }
+
+        /// <summary>Folds a set of segment readings into one answer for the book.
+        ///
+        /// <para>The mean over the segments, except for the peaks and the flat
+        /// factor, where the WORST is what matters — one clipped passage is a
+        /// clipped book, and averaging it away is how it would be missed.</para>
+        ///
+        /// <para>Every average takes only the readings that HAVE that measure.
+        /// Half of a real library has no noise floor at all, so a mean taken over
+        /// every segment regardless would be a mean of two real numbers and a
+        /// placeholder.</para>
+        ///
+        /// <para>Public because the harness that asks "would more samples change
+        /// the answer?" has to fold ITS samples the same way this does, and a
+        /// second copy of these rules would be a second thing to keep in
+        /// step.</para></summary>
+        public static SoundAnalysis Combine(List<SoundAnalysis> got)
+        {
+            if (got == null || got.Count == 0) return null;
+            var a = new SoundAnalysis();
+            a.Segments = got.Count;
+            a.Lufs = Mean(got, r => r.Lufs);
+            a.Lra = Mean(got, r => r.Lra);
+            a.RmsDb = Mean(got, r => r.RmsDb);
+            a.NoiseFloorDb = Mean(got, r => r.NoiseFloorDb);
+            a.RmsTroughDb = Mean(got, r => r.RmsTroughDb);
+            // How many segments actually produced a noise reading, so a rule can
+            // tell "quiet" from "not measured".
+            foreach (SoundAnalysis r in got)
+                if (SoundAnalysis.Usable(r.RmsTroughDb) || SoundAnalysis.Usable(r.NoiseFloorDb))
+                    a.NoiseSamples++;
+            a.LowBandDb = Mean(got, r => r.LowBandDb);
+            a.HighBandDb = Mean(got, r => r.HighBandDb);
+            a.LowPeakDb = Worst(got, r => r.LowPeakDb);
+            a.HighPeakDb = Worst(got, r => r.HighPeakDb);
+            a.CentroidHz = Mean(got, r => r.CentroidHz);
+            a.TruePeakDb = Worst(got, r => r.TruePeakDb);
+            a.PeakDb = Worst(got, r => r.PeakDb);
+            a.FlatFactor = Worst(got, r => r.FlatFactor);
+            if (double.IsNaN(a.FlatFactor)) a.FlatFactor = 0;   // nothing measured is no flatness
+            return a;
         }
 
         /// <summary>One segment of one file, as a finished result. Exposed for
@@ -596,17 +675,17 @@ namespace Nemoviz_Book_Reader
             };
         }
 
-        private static double Mean(List<Reading> rs, Func<Reading, double> pick)
+        private static double Mean(List<SoundAnalysis> rs, Func<SoundAnalysis, double> pick)
         {
             double sum = 0; int n = 0;
-            foreach (Reading r in rs) { double v = pick(r); if (SoundAnalysis.Usable(v)) { sum += v; n++; } }
+            foreach (SoundAnalysis r in rs) { double v = pick(r); if (SoundAnalysis.Usable(v)) { sum += v; n++; } }
             return n > 0 ? sum / n : double.NaN;
         }
 
-        private static double Worst(List<Reading> rs, Func<Reading, double> pick)
+        private static double Worst(List<SoundAnalysis> rs, Func<SoundAnalysis, double> pick)
         {
             double worst = double.NaN;
-            foreach (Reading r in rs)
+            foreach (SoundAnalysis r in rs)
             {
                 double v = pick(r);
                 if (!SoundAnalysis.Usable(v)) continue;
@@ -620,42 +699,72 @@ namespace Nemoviz_Book_Reader
         /// <summary>Where to listen. Spread through the book, and never at the
         /// very start of a file: an opening carries the publisher's announcement
         /// and often music, which is not the voice the settings are for.</summary>
+        /// <summary>Where to listen: TWO points inside each TENTH of the book,
+        /// twenty in all, placed on the book's own timeline rather than on its
+        /// file list.
+        ///
+        /// <para><b>Three points was measured and is not defensible.</b> Over six
+        /// real books, twenty independent triples produced on average six
+        /// different sets of settings, and the loudness they implied spanned
+        /// 10.5 dB at worst — the difference between comfortable and unusable,
+        /// decided by which three seconds happened to be drawn.</para>
+        ///
+        /// <para><b>Twenty, not thirty, and the corpus chose that.</b> The worst
+        /// loudness error falls 10.5 dB → 4.1 → 2.7 going from 3 to 10 to 20
+        /// samples, and then stops: thirty gives 3.1 and ninety gives 2.1. Twenty
+        /// buys essentially all of the convergence there is, and a third less of
+        /// the reader's time than thirty. (Gordan's proposal was thirty; the
+        /// measurement is what trimmed it.)</para>
+        ///
+        /// <para><b>Tenths of the TIMELINE, not of the file list.</b> Files
+        /// differ enormously in length — one book here has five files, another
+        /// 156 — so picking by file index samples a long file and a short one
+        /// equally, which is not what "spread through the book" means.</para>
+        ///
+        /// <para>The two points inside a tenth sit at a third and two thirds of
+        /// it. Deliberately NOT random: random means the same book measured twice
+        /// gives different settings, and then "why did it change?" has no
+        /// answer.</para></summary>
         private static List<Point> PickSegments(BookData book)
         {
             var pts = new List<Point>();
             int n = book.Chapters.Count;
-            if (n >= SegmentCount)
-            {
-                // Several files: take one from each third of the book, so files
-                // recorded on different days are all represented.
-                for (int i = 0; i < SegmentCount; i++)
+            if (n == 0) return pts;
+
+            // The book's own timeline: cumulative start of each file.
+            var starts = new double[n];
+            double total = 0;
+            for (int i = 0; i < n; i++) { starts[i] = total; total += book.Chapters[i].Duration; }
+            if (total <= SegmentSeconds) return pts;
+
+            for (int tenth = 0; tenth < Tenths; tenth++)
+                for (int k = 1; k <= PerTenth; k++)
                 {
-                    int idx = (int)((i + 0.5) * n / SegmentCount);
-                    if (idx >= n) idx = n - 1;
-                    var ch = book.Chapters[idx];
-                    if (ch.Duration <= SegmentSeconds + 40) continue;
-                    pts.Add(new Point
-                    {
-                        Path = System.IO.Path.Combine(book.FolderPath, ch.FileName),
-                        Start = Math.Min(30, ch.Duration * 0.1)
-                    });
+                    double at = total * (tenth + (double)k / (PerTenth + 1)) / Tenths;
+                    Point p;
+                    if (Locate(book, starts, at, out p)) pts.Add(p);
                 }
-            }
-            if (pts.Count == 0)
-            {
-                // One file, or every file too short to sample twice: spread the
-                // points along whichever file is longest.
-                int best = 0;
-                for (int i = 1; i < n; i++)
-                    if (book.Chapters[i].Duration > book.Chapters[best].Duration) best = i;
-                var ch = book.Chapters[best];
-                string path = System.IO.Path.Combine(book.FolderPath, ch.FileName);
-                double usable = ch.Duration - SegmentSeconds;
-                if (usable <= 0) { pts.Add(new Point { Path = path, Start = 0 }); return pts; }
-                for (int i = 0; i < SegmentCount; i++)
-                    pts.Add(new Point { Path = path, Start = usable * (i + 0.5) / SegmentCount });
-            }
             return pts;
+        }
+
+        /// <summary>Turns a position on the book's timeline into a file and an
+        /// offset inside it, pulled back from the end so a whole segment
+        /// fits.</summary>
+        private static bool Locate(BookData book, double[] starts, double at, out Point p)
+        {
+            p = new Point();
+            for (int i = starts.Length - 1; i >= 0; i--)
+            {
+                if (at < starts[i]) continue;
+                double dur = book.Chapters[i].Duration;
+                if (dur <= SegmentSeconds + 1) return false;   // too short to sample
+                double inFile = at - starts[i];
+                if (inFile + SegmentSeconds > dur) inFile = dur - SegmentSeconds - 1;
+                p.Path = System.IO.Path.Combine(book.FolderPath, book.Chapters[i].FileName);
+                p.Start = inFile < 0 ? 0 : inFile;
+                return true;
+            }
+            return false;
         }
 
         private class Reading
