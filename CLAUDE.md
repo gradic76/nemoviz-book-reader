@@ -1997,6 +1997,37 @@ which voice they use. NBR supplies the tool, the user supplies the content.
 
 ## 8k. Two looks side by side (temporary, for the redesign)
 
+> ### THE NBR DEFAULT LOOK IS CLOSED — 2026-08-10 (Gordan)
+>
+> *"Možeš zatvoriti i dio s dizajnom, barem ovaj za NBR default. Classic nek
+> ostane još malo otvoren."* The new look — the player panel and the three
+> sub-windows — is **done and not to be reworked**, on the same footing as §9's
+> Library. Reopen only for a fault found in use, not for an improvement.
+>
+> What that closing pass fixed, all found on captures of the running player and
+> the real dialogs rather than by eye:
+> - the vertical seam down every key and the play disc (a gradient brush's tile
+>   wrap at the end-fade's own edge);
+> - square corners round every round bed, twice — the panel keys and then the
+>   dialog buttons — both from a control filling its own rectangle with one flat
+>   colour over a gradient background;
+> - the key face lit from off to one side, so its two ends did not match;
+> - the bed's light/shadow walls, which made every corner a different corner and
+>   the bottom-right read as pinched: the direction now comes from a CLIP, and
+>   then went away entirely at Gordan's call — **the bed is one flat dark all
+>   round, and the lip is not to come back**;
+> - one milled grip shared by the speed knob and the progress blade;
+> - the glass: labels keep their colons, the time captions come from the line
+>   instead of being invented, and they are no longer clipped by the tiles;
+> - the dialogs: the `?` glyph fitting its key, the key clearing the combos,
+>   Settings' pages on metal so their groups read as recessed rather than raised,
+>   the EQ spin boxes matching the Speech page, and the Sleep Timer's rows with
+>   room for their descenders.
+>
+> **Classic stays open**, deliberately — it is the untouched fallback that
+> regular testing runs on, and §8k's rule that `ClassicTheme.Style` is empty so
+> it cannot drift still holds.
+
 > ### High contrast is the DEFAULT, not a lock (2026-08-03)
 >
 > Gordan asked the question that fixed this: *does a reader with a high-contrast
@@ -3114,6 +3145,29 @@ choosing yellow keeps yellow while the rule still fills everything else.
 per book, by Gordan's call — *"najbolje da pamti zadnje odabrano"* — because
 this is the reader's eyesight, which does not change from one book to the next,
 and it is chosen in the window rather than in Properties.
+
+### The visual output, first real report (Gordan, 2026-08-10)
+
+Tested across a good many books. **Mostly right and in sync**; what unevenness
+there is he puts at *"dobrih 90 %"* down to how the books were produced and the
+rest to our parsing. Testing continues.
+
+- **FIXED: the subtitle mode's two rows were pinned to the BOTTOM of the glass.**
+  They are centred now. The original reasoning — "where subtitles live on a
+  picture" — does not survive the window it is in: this is not a picture with
+  captions under it, it is a frame containing nothing but those two rows, so
+  pinned low they read as having fallen to the floor of it. **The height is
+  deliberately unchanged**, because `Form1.ScrollSurfaceForMode` derives how many
+  lines a frame holds from `ClientSize.Height / Font.Height` — a roomier box
+  would silently make the two-row mode a three-row one.
+- **OPEN, unlocated: a blank line where a paragraph break falls mid-sentence,
+  which "zna malo kočiti".** Gordan cannot say which book — they tested many.
+  Not chased without a sample: the plausible mechanisms are different in each
+  output (a blank line eats one of the two rows in subtitle mode; a paragraph
+  break inside a sentence splits what the reader speaks), and picking one from
+  a second-hand description is how §11's four wrong diagnoses started. **When a
+  sample turns up, the question to ask first is whether the blank line is in
+  `content.txt` — i.e. the parser's — or only in the wrapping.**
 
 ### Waiting on Gordan (2026-08-03) — the display and braille
 

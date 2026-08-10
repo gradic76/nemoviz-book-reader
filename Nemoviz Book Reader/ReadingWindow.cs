@@ -287,10 +287,20 @@ namespace Nemoviz_Book_Reader
             int h = glass.ClientSize.Height - 16;
             if (mode == VisualMode.TwoRows)
             {
-                // Two rows as one frame, sitting along the bottom of the glass —
-                // where subtitles live on a picture.
+                // Two rows as one frame, CENTRED in the glass (Gordan,
+                // 2026-08-10). They used to sit along the bottom edge, on the
+                // reasoning that this is where subtitles live on a picture — but
+                // this window is not a picture with subtitles under it, it is a
+                // window with nothing in it except these two rows. Pinned to the
+                // bottom they read as having fallen to the floor of an empty
+                // frame, and there is nothing above them for them to be under.
+                //
+                // The height is left exactly as it was, and that is deliberate:
+                // Form1.ScrollSurfaceForMode works out how many lines a frame
+                // holds as ClientSize.Height / Font.Height, so making the box
+                // roomier would silently turn the two-row mode into three.
                 h = Math.Max(f.Height * 2 + 8, 40);
-                top = glass.ClientSize.Height - 8 - h;
+                top = Math.Max(8, (glass.ClientSize.Height - h) / 2);
             }
             surface.SetBounds((glass.ClientSize.Width - w) / 2, top, w, Math.Max(h, 40));
         }
