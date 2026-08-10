@@ -567,6 +567,15 @@ namespace Nemoviz_Book_Reader
                 case Keys.Control | Keys.Shift | Keys.H:
                     forwardKey?.Invoke(keyData);
                     return true;
+
+                // TEMPORARY test aid, for the JAWS braille pass. Answers "is the
+                // caret still in the text?" with a TONE, because that test is run
+                // with the screen reader's speech switched off — so nothing
+                // spoken, by JAWS or by us, can answer it. NBR's own tones come
+                // out of the book's sound card and are heard either way.
+                case Keys.Control | Keys.Shift | Keys.F:
+                    forwardKey?.Invoke(keyData);
+                    return true;
             }
             // Ctrl+1..9 — the percentage jumps.
             if ((keyData & Keys.Control) == Keys.Control)

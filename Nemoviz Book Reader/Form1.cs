@@ -1274,6 +1274,28 @@ namespace Nemoviz_Book_Reader
                     NvdaController.Speak(where != null ? "Timing written" : "Nothing recorded");
                     return true;
 
+                // TEMPORARY test aid — the JAWS braille pass (2026-08-10). That
+                // test is run with the READER'S SPEECH OFF, which is the only way
+                // to hear NBR's own voice cleanly while braille keeps following
+                // focus. But it also means nothing can TELL the tester where
+                // focus is — and "the display stopped following" and "focus left
+                // the text" look identical from the display's end. This answers
+                // it with a tone, which comes out of the book's own sound card
+                // and is heard whatever the reader is doing: rising = the caret
+                // is in the reading surface and braille should be tracking it,
+                // falling = focus is somewhere else and the display is showing
+                // that instead. The spoken form is for NVDA and is a no-op under
+                // JAWS, so the tone is the part that matters here.
+                case Keys.Control | Keys.Shift | Keys.F:
+                {
+                    bool onText = tbReadingSurface != null && !tbReadingSurface.IsDisposed
+                                  && tbReadingSurface.Focused;
+                    tones.Play(onText ? 880 : 440, 140);
+                    NvdaController.Speak(onText ? "Reading surface has focus"
+                                                : "Focus is not on the reading surface");
+                    return true;
+                }
+
                 case Keys.Control | Keys.Shift | Keys.H:
                     string diag = ReadingDiagnostics.Toggle();
                     // A tone as well as the words: NvdaController.Speak is NVDA's
