@@ -519,7 +519,14 @@ namespace Nemoviz_Book_Reader
 
                 string label = null, value = line;
                 int cut = line.IndexOf(": ", StringComparison.Ordinal);
-                if (cut > 0) { label = line.Substring(0, cut); value = line.Substring(cut + 2).Trim(); }
+                // The colon comes WITH the label. Splitting on ": " and keeping
+                // the part before it threw the colon away, so the glass read
+                // "Author" where the info box says "Author:" — and once the time
+                // captions started carrying their own (they are drawn from the
+                // line now) the two halves of the display no longer matched each
+                // other. A colon is also what makes a label read as a label
+                // rather than as a word standing on its own.
+                if (cut > 0) { label = line.Substring(0, cut + 1); value = line.Substring(cut + 2).Trim(); }
 
                 if (first)
                 {
@@ -572,13 +579,17 @@ namespace Nemoviz_Book_Reader
                                  List<(string Label, string Value)> times)
         {
             NewPlayerSkin.DrawString(g, Caption(times[0].Label, "Player.Info.ElapsedLabel"),
-                new RectangleF(x, y, 160, 18), NewPlayerSkin.FSilk, NewPlayerSkin.Silk,
+                new RectangleF(x, y, 160, 20), NewPlayerSkin.FSilk, NewPlayerSkin.Silk,
                 StringAlignment.Near, StringAlignment.Center);
             if (times.Count > 1)
                 NewPlayerSkin.DrawString(g, Caption(times[1].Label, "Player.Info.RemainingLabel"),
-                    new RectangleF(x + 170, y, 160, 18), NewPlayerSkin.FSilk, NewPlayerSkin.Silk,
+                    new RectangleF(x + 170, y, 160, 20), NewPlayerSkin.FSilk, NewPlayerSkin.Silk,
                     StringAlignment.Near, StringAlignment.Center);
-            y += 20;
+            // 24, not 20: at 20 the tile below started exactly where the
+            // caption's descenders were still going, so "Part 12 elapsed:" lost
+            // the tail of its p and its comma-like colon foot. Seen on a render,
+            // which is the only way this kind of fault is ever seen.
+            y += 24;
             Flaps(g, x, y, HoursMinutes(times[0].Value), "elapsed");
             if (times.Count > 1) Flaps(g, x + 170, y, HoursMinutes(times[1].Value), "remaining");
 
