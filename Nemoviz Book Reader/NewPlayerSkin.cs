@@ -635,8 +635,18 @@ namespace Nemoviz_Book_Reader
                 // and nowhere else, which is why that corner read as fatter and
                 // rounder than the other three: the outer silhouette of the well
                 // was a different curve on each side. One path, one silhouette.
+                //
+                // And KEPT INSIDE THE WELL. Even centred, half of a 1.8-unit
+                // stroke falls outside the boundary, and since it is clipped to
+                // the shadow half that spill lands on one side only. Measured off
+                // the running player: the groove came out 8 units wide on the
+                // left against 6 on the right. Clipping it to the well as well as
+                // to the half makes the ring a true constant width, which is what
+                // Gordan asked for when he said to make the right side the same
+                // as the left.
                 Region saved = g.Clip;
                 g.SetClip(half, CombineMode.Intersect);
+                g.SetClip(p, CombineMode.Intersect);
                 g.DrawPath(pen, p);
                 g.Clip = saved;
             }
@@ -646,7 +656,12 @@ namespace Nemoviz_Book_Reader
             // corners show a step where one stroke ends and the other begins.
             using (var p = Round(outer, rad + Groove))
             using (var pen = new Pen(Color.FromArgb(70, 0, 0, 0), 1.2f))
+            {
+                Region saved = g.Clip;
+                g.SetClip(p, CombineMode.Intersect);   // inside the well, same reason
                 g.DrawPath(pen, p);
+                g.Clip = saved;
+            }
 
             // Focus and the firing flash both ride INSIDE the well so the key
             // still reads as the same key, only lit — replacing the whole recess
@@ -712,9 +727,26 @@ namespace Nemoviz_Book_Reader
             return br;
         }
 
+        /// <summary>The face of a key: a half cylinder lying on its side, so the
+        /// shading runs TOP TO BOTTOM and nowhere else.
+        ///
+        /// <para><b>It used to run at <see cref="LightAngle"/></b> — the bearing
+        /// from the panel's lamp to this particular key — which tilted the ramp
+        /// so it varied across the key as well as down it. Measured on the
+        /// running player: the face came out grey 67 at its left edge, 199 at
+        /// about three quarters across, and 133 at its right edge. Gordan asked
+        /// for the two ends to match, which is a cylinder lit from straight
+        /// ahead rather than from off to one side.</para>
+        ///
+        /// <para>Straight down also means every key on the panel is shaded
+        /// identically, where before each carried a slightly different tilt
+        /// depending on where it stood. The ends still fall away — that is what
+        /// the two end fades in <see cref="SilverFace"/> are for, and they are
+        /// mirror images of each other, so they darken both ends equally.</para>
+        /// </summary>
         internal static LinearGradientBrush SilverBrush(RectangleF r)
         {
-            var br = Angled(r, LightAngle(r), KeyTop, KeyFoot);
+            var br = Angled(r, 90f, KeyTop, KeyFoot);
             var blend = new ColorBlend(5);
             blend.Colors = new[] { KeyTop, PanelLight, PanelMid, KeyBelly, KeyFoot };
             blend.Positions = new[] { 0f, 0.16f, 0.46f, 0.86f, 1f };
@@ -766,12 +798,14 @@ namespace Nemoviz_Book_Reader
                 }
 
                 // The specular line along the crown, and the dark line under the
-                // belly. The crown slides sideways depending on where the key
-                // stands relative to the lamp.
-                float slide = (PaintOrigin.X + r.X + r.Width / 2 - Light.X) / (float)W * r.Width * 0.18f;
+                // belly. The crown used to SLIDE sideways by where the key stood
+                // relative to the lamp, which put the highlight off-centre and
+                // left one end of the key brighter than the other — the same
+                // off-to-one-side lighting the face gradient has just given up.
+                // Centred, both ends match.
                 float inset = rad * 0.7f;
                 using (var pen = new Pen(Color.FromArgb(235, 0xFF, 0xFF, 0xFC), 1.4f))
-                    g.DrawLine(pen, r.Left + inset - slide, r.Top + 1.2f, r.Right - inset - slide, r.Top + 1.2f);
+                    g.DrawLine(pen, r.Left + inset, r.Top + 1.2f, r.Right - inset, r.Top + 1.2f);
                 using (var pen = new Pen(Color.FromArgb(150, 0x6E, 0x6E, 0x6A), 1.4f))
                     g.DrawLine(pen, r.Left + inset, r.Bottom - 1.4f, r.Right - inset, r.Bottom - 1.4f);
                 g.Clip = saved;
