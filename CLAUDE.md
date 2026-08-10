@@ -4786,10 +4786,45 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     inherits it, an explicit per-book setting still beats it, `Book.ini` no longer
     carries `TextBrailleTable`, and the import table survives a save/load.
     **Not verified: how it reads on a display** — that is the deep test below.
-- **OPEN BUG: the player freezes on Ctrl+O in the Library** (reported
-  2026-08-08). Intermittent — it survived a deliberate attempt to reproduce and
-  then happened on its own. `UiWatchdog` is in and captured the first one; read
-  `%TEMP%\NBR-hang.log`.
+- ~~**OPEN BUG: the player freezes on Ctrl+O in the Library**~~ **— SOLVED
+  2026-08-10, and it was never NBR's.** Gordan found it: a **virtual optical
+  drive with an NRG mounted**, and that NRG living in OneDrive. Unmounting the
+  image stopped it.
+
+  **Confirmed by reading the file attributes**: every `.nrg` and `.iso` in his
+  OneDrive carries `FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS` **and**
+  `FILE_ATTRIBUTE_OFFLINE` — Files On-Demand placeholders, metadata local and
+  **content not**, at 360–780 MB each.
+
+  **The mechanism, and every observation falls out of it.** The Vista file
+  dialog builds its navigation pane by enumerating the shell namespace,
+  including This PC and every drive. Querying the virtual optical drive makes
+  the drive software read the NRG; that read hits OneDrive's cloud-files filter
+  driver, which has to **fetch the bytes over the network**; and the dialog's own
+  thread waits on it — inside `IFileDialog::Show`, on an ordinary handle
+  (`UserRequest`), at 0 % CPU, before the message loop ever starts. Hence the
+  missing "up and pumping" breadcrumb. **And hence the idle gap**: once fetched,
+  the bytes are cached for a while, so a repeat within a minute or two opens in
+  400 ms, while one a few minutes later pays the download again.
+
+  **It is not an NBR defect.** Nothing above `ShowDialog` in that stack is ours,
+  and any application opening a Vista file dialog on that machine would do the
+  same — Notepad's Open is a thirty-second confirmation.
+
+  **The legacy-dialog proposal is WITHDRAWN.** It was reasoned from the wrong
+  cause, and it would not have helped: `GetOpenFileName` enumerates drives for
+  its own drive list too. It would have cost the modern dialog for nothing.
+
+  **The method lesson, which is the part worth keeping.** The instrument I built
+  to crack this — "which foreign modules are injected" — could only ever accuse
+  an injected DLL, and it duly accused NVDA, then JAWS, then the cloud shell
+  extensions. **The actual cause was a FILE, and a file never appears in a module
+  list.** What solved it was pairing every open in the log with whether it pumped
+  and noticing the gaps separated cleanly at ~100 s — an analysis of data that
+  had been sitting in the log the whole time. When an instrument keeps naming
+  plausible suspects, ask what it is structurally incapable of seeing.
+
+  Kept below because the reasoning is still sound about what the stack shows:
   **What is already known, so none of it is worth re-deriving:**
   - It stalls **inside `ofd.ShowDialog()`** — the last breadcrumb is "showing the
     file dialog" and nothing follows.
