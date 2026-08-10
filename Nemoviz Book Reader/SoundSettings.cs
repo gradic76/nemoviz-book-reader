@@ -121,10 +121,30 @@ namespace Nemoviz_Book_Reader
         /// <para><b>Honest limit:</b> what was never recorded cannot be restored.
         /// A 5 kHz shelf reaches real content; nothing reaches what a cassette or
         /// a 64 kbps encoder threw away.</para></summary>
-        public static readonly int[] EqBandHz = { 300, 800, 1800, 3500, 5000 };
+        /// <para><b>The lowest band moved 300 → 200 Hz on 2026-08-09, and the
+        /// measurement is the whole argument.</b> A third-octave profile of the
+        /// six samples put the bad recordings' real excess at <b>160–250 Hz</b> —
+        /// +5.6 and +7.9 dB over the reference on Loše 3, +5.5 and +6.0 on
+        /// Loše 4, +2.3 and +5.6 on Loše 2 — and NOTHING reached it: the highpass
+        /// stops at 120 and the lowest bell started at 300. That gap is why
+        /// Gordan pinned the rumble control at maximum on all four of his books
+        /// AND cut 300 Hz by 10–15 dB: he was attacking a 200 Hz problem from
+        /// both sides because nothing addressed it directly.
+        ///
+        /// A bell at 200 with Q=1 spans about 140–283 Hz, which is the excess.
+        /// It also overlaps the highpass a little, and that is accepted rather
+        /// than avoided — the highpass is 3 dB down at its own 120 Hz ceiling
+        /// and 12 dB down an octave lower, so the two barely meet. Unlike the
+        /// highpass this can also LIFT, and it takes nothing below it with
+        /// it.</para>
+        public static readonly int[] EqBandHz = { 200, 800, 1800, 3500, 5000 };
 
         /// <summary>The last band is a high shelf, the rest are bells.</summary>
         public static int EqShelfIndex { get { return EqBandHz.Length - 1; } }
+
+        /// <summary>How far a band may be moved, either way. One number in one
+        /// place, because it was written out as a literal in three.</summary>
+        public const int EqMaxDb = 20;
 
         /// <summary>Bell width, in Q. About 1.4 octaves — wide enough that five
         /// bands cover the range without dips, narrow enough that each still has
@@ -437,9 +457,13 @@ namespace Nemoviz_Book_Reader
         /// 3 kHz) and <c>EqTreble</c> (a shelf at 4 kHz) in its Book.ini. Those
         /// land on the 3500 bell and the 5000 shelf, which are the same controls
         /// in the same places to within half an octave. <c>EqBass</c> is
-        /// deliberately DROPPED: it was a shelf at 120 Hz whose whole action was
-        /// below 200, which is the highpass's region now — carrying it over would
-        /// re-create the very overlap this change removed.</para>
+        /// deliberately DROPPED: it was a SHELF at 120 Hz, so it acted on
+        /// everything below itself without limit, which is the highpass's job
+        /// and not a band's. The 200 Hz bell that now stands in that slot is not
+        /// its replacement — it is bounded on both sides and sits an octave
+        /// higher, on the 160–250 Hz excess the samples actually measure — so
+        /// carrying a shelf's number onto it would put the wrong correction in
+        /// the wrong place.</para>
         ///
         /// <para>Only when the new keys are absent, so it cannot overwrite
         /// anything the reader has since set.</para></summary>

@@ -1078,6 +1078,60 @@ It also named something nobody had spotted: **Loše 2 carries 5–10 dB MORE tha
 every other file at 100–125 Hz**, which is the rumble under the "svakakvi šumovi"
 Gordan heard, and the reason a strong highpass belongs on it.
 
+### The bands moved, and a seventh stage arrived (2026-08-09)
+
+**The lowest bell is 200 Hz, not 300, and the range is ±20 dB, not ±15.** A
+third-octave profile put the bad recordings' real excess at **160–250 Hz** —
++5.6/+7.9 dB over the reference on Loše 3, +5.5/+6.0 on Loše 4, +2.3/+5.6 on
+Loše 2 — and **nothing reached it**: the highpass stops at 120 and the lowest bell
+started at 300. That gap is why Gordan pinned rumble at maximum on all four books
+*and* cut 300 Hz by 10–15 dB; he was attacking a 200 Hz problem from both sides.
+He also hit the ±15 wall twice in one session, and a control a reader pins at its
+limit has run out of travel.
+
+**Do NOT extend the highpass — measured, it buys nothing.** 120 Hz ×1 removes
+0.1–0.6 dB of the whole signal; 180 Hz, which already eats a male fundamental,
+removes at most 1.4 dB. There is nothing below 120 Hz in a speech recording.
+(150 ×1 and 120 ×2 measure almost identically, so "steeper" and "higher" are the
+same purchase.) The 4-of-4 "the rumble rule is too timid" signal is real as a
+report and misleading as a diagnosis: what he wanted was the 200 Hz band.
+
+**"Noise in pauses" — a gate (`agate`), the seventh stage.** Gordan asked for
+"another compressor that pushes everything below x dB into inaudibility"; that is
+a gate, the opposite of a compressor. Measured with a level trace in **0.2 s
+windows** — nothing coarser sees a pause — it identifies his two books by itself:
+noise floors at **−40.0** (Loše 2) and **−46.4 dBFS** (Loše 4) against −57.5 on
+Loše 1 and **−99.2** on his reference, which is digital silence. With thresholds
+from that measurement the pauses drop **6.1 and 12.7 dB while the speech median
+moves 0.1 dB**. Four decibels of threshold was the difference between doing
+nothing and working, so the presets step 3 dB. It **attenuates rather than
+silences** (20 dB cap, 250 ms release), because a hard-closing gate is more
+tiring than steady noise and chops word tails. **Off by default** — every other
+stage has an advisor rule and this one cannot have one until the noise floor is
+measured (below).
+
+**It shares the loudness cell, and Gordan's reasoning beat mine.** I proposed
+pairing it with Noise reduction; he pointed out that **the six cells already read
+the chain in order**, so the stage that acts last belongs in the last cell — and
+that these two fight each other directly, one lifting quiet passages and the
+other pushing them down. It costs no layout: that cell shares row three with
+Tone, already the tall one. The group is retitled **"Loudness and pauses"** and
+each switch carries its own name, since a group name that covers only one of two
+controls is exactly what misleads a reader on entry.
+
+**The noise floor IS measurable, and this file was wrong about it.** §8d says it
+is unavailable in 99 % of segments; that is true of astats' `RMS_trough` — a
+minimum over tiny windows, so it hits an instant of digital silence and reads
+−inf — and false of the noise floor itself. **The p5 of RMS over 0.2 s windows is
+stable on every sample.** Getting that into the analyser is the most valuable
+thing left here: it gives the gate an automatic level and stops denoise falling
+back to the damage rule, which is what it does on all four of Gordan's books
+(`NoiseShare = 0.0`). Take it from ONE decode by polling `af-metadata`, not the
+150 separate decodes the probe used.
+
+**Superseded, and left here as the record:** the paragraph below suggested
+centres of 120 · 400 · 1500 · 3500 · 8000 Hz. The measurement moved them.
+
 **Open, and Gordan's call: five EQ bands instead of three.** A `treble` shelf
 gives a FLAT lift above its corner, but the deficit is a ramp — matching the
 reference needs +4 at 1 k, +8 at 2 k, +12 at 3.5 k, +15 above 5 k, which three

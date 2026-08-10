@@ -497,13 +497,20 @@ namespace Nemoviz_Book_Reader
             lbl.Size = new Size(90, 18);
 
             NumericUpDown n = new NumericUpDown();
-            n.Minimum = -15; n.Maximum = 15; n.Increment = 1;
+            // 20, not 15 (2026-08-09). Gordan hit the old wall twice in one
+            // listening round -- 300 Hz at -15 on one book, 800 Hz at -15 on
+            // another -- and a control a reader pins at its limit is a control
+            // that has run out of travel. Both of those were him reaching for
+            // the 200 Hz excess through the wrong band, which the band move
+            // above now addresses directly; the wider range is what is left
+            // over for the cases it does not.
+            n.Minimum = -SoundSettings.EqMaxDb; n.Maximum = SoundSettings.EqMaxDb; n.Increment = 1;
             n.Location = new Point(120, y);
             n.Size = new Size(70, 22);
             n.TextAlign = HorizontalAlignment.Right;
             n.AccessibleName = label;
             n.TabIndex = g.Controls.Count;
-            if (value < -15) value = -15; if (value > 15) value = 15;
+            value = Clamp(value, -SoundSettings.EqMaxDb, SoundSettings.EqMaxDb);
             n.Value = value;
 
             g.Controls.Add(lbl);
@@ -632,7 +639,8 @@ namespace Nemoviz_Book_Reader
             chkCmp.Checked = d.CompressorEnabled; cmbCmp.SelectedIndex = d.CompressorLevel;
             chkEq.Checked = d.EqEnabled;
             for (int i = 0; i < numEq.Length; i++)
-                numEq[i].Value = i < d.EqGain.Length ? Clamp(d.EqGain[i], -15, 15) : 0;
+                numEq[i].Value = i < d.EqGain.Length
+                    ? Clamp(d.EqGain[i], -SoundSettings.EqMaxDb, SoundSettings.EqMaxDb) : 0;
             chkNrm.Checked = d.NormalizeEnabled;
             cmbNrm.SelectedIndex = d.NormalizeLevel;
             chkGate.Checked = d.GateEnabled;
