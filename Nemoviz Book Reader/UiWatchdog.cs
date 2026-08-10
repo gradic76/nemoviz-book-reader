@@ -151,6 +151,78 @@ namespace Nemoviz_Book_Reader
             Interlocked.Exchange(ref lastBeatTicks, DateTime.UtcNow.Ticks);
         }
 
+        /// <summary>Every OTHER thread's wait reason, grouped.
+        ///
+        /// <para><b>Added 2026-08-10, and the capture it is meant for is the
+        /// Ctrl+O freeze.</b> That one has the UI thread waiting inside
+        /// <c>IFileDialog::Show</c> on <c>UserRequest</c> — an ordinary handle,
+        /// NOT <c>LpcReceive</c>/<c>LpcReply</c> — so it is not blocked on a call
+        /// out of the process. It is waiting for something INSIDE the process to
+        /// finish, and the shell dialog does its start-up work on threads of its
+        /// own. Those threads are the missing half of the picture: one of them
+        /// sitting on <c>LpcReply</c> would name a provider outside, one on
+        /// <c>Executive</c> a disk that is not answering.</para></summary>
+        private static void DumpOtherThreads(StringBuilder sb, Process me)
+        {
+            try
+            {
+                var byReason = new System.Collections.Generic.SortedDictionary<string, int>();
+                foreach (ProcessThread pt in me.Threads)
+                {
+                    if (pt.Id == uiOsThreadId) continue;
+                    string k;
+                    try
+                    {
+                        k = pt.ThreadState == System.Diagnostics.ThreadState.Wait
+                            ? "Wait/" + pt.WaitReason : pt.ThreadState.ToString();
+                    }
+                    catch { k = "(gone)"; }   // a thread can exit while being read
+                    byReason[k] = byReason.ContainsKey(k) ? byReason[k] + 1 : 1;
+                }
+                var parts = new System.Collections.Generic.List<string>();
+                foreach (var kv in byReason) parts.Add(kv.Value + " " + kv.Key);
+                sb.AppendLine("     other threads: " + string.Join(", ", parts.ToArray()));
+            }
+            catch (Exception ex) { sb.AppendLine("     other threads unavailable: " + ex.Message); }
+        }
+
+        /// <summary>Modules loaded from outside the app folder, Windows and the
+        /// .NET framework — i.e. <b>what has been injected into this process</b>:
+        /// shell extensions, cloud-storage providers, anti-virus hooks, screen
+        /// readers.
+        ///
+        /// <para>Worth capturing because the shell file dialog is the one place
+        /// NBR hands control to code nobody here wrote. If a hang always carries
+        /// the same foreign DLL, that names the cause; if the list is empty, the
+        /// cause is ours after all. Either answer is progress, and neither can be
+        /// had from the managed stack.</para></summary>
+        private static void DumpForeignModules(StringBuilder sb, Process me)
+        {
+            try
+            {
+                string appDir = "";
+                try { appDir = System.IO.Path.GetDirectoryName(
+                          System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ""; }
+                catch { }
+                string win = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+
+                var foreign = new System.Collections.Generic.List<string>();
+                foreach (ProcessModule m in me.Modules)
+                {
+                    string p;
+                    try { p = m.FileName ?? ""; } catch { continue; }
+                    if (p.Length == 0) continue;
+                    if (appDir.Length > 0 && p.StartsWith(appDir, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (p.StartsWith(win, StringComparison.OrdinalIgnoreCase)) continue;
+                    foreign.Add(System.IO.Path.GetFileName(p));
+                }
+                sb.AppendLine(foreign.Count == 0
+                    ? "     injected modules: none"
+                    : "     injected modules: " + string.Join(", ", foreign.ToArray()));
+            }
+            catch (Exception ex) { sb.AppendLine("     injected modules unavailable: " + ex.Message); }
+        }
+
         private static void Report(double stalled)
         {
             try
@@ -192,6 +264,9 @@ namespace Nemoviz_Book_Reader
                     }
                 }
                 catch (Exception ex) { sb.AppendLine("     UI thread state unavailable: " + ex.Message); }
+
+                DumpOtherThreads(sb, me);
+                DumpForeignModules(sb, me);
 
                 sb.AppendLine("     what the UI thread was doing, most recent last:");
                 lock (gate)
