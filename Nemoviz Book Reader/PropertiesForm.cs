@@ -38,6 +38,21 @@ namespace Nemoviz_Book_Reader
         /// CLASSIC look nothing resizes anything, and at 112 the bottom two
         /// bands would simply have been cut off the page. A cell built for three
         /// rows cannot hold five.</para></summary>
+        /// <summary>The Tone cell and the pitch of its five rows.
+        ///
+        /// <para>The cell CANNOT grow: it shares row three with the loudness
+        /// cell and the skin pins that row bottom at 570, so 166 is all there is.
+        /// Tried 30 and the fifth band fell off the bottom of the dialog
+        /// altogether — measured on a render, which is the only way that was ever
+        /// going to be noticed.</para>
+        ///
+        /// <para>So the box gets the space instead of the gap. Gordan asked about
+        /// "the number box and the arrows", and those are what 70 x 22 was
+        /// starving — the spin arrows came out half the size of the ones on the
+        /// Speech page. At 90 x 24 they match, and the pitch pays for it: five
+        /// rows from y=36 at 25 end at 160, four clear of the cell.</para>
+        /// </summary>
+        private const int EqRowH = 25;
         private const int EqCellH = 166;
 
         private readonly BookData book;
@@ -211,7 +226,7 @@ namespace Nemoviz_Book_Reader
             chkEq = StageEnable(gEq); chkEq.Checked = s.EqEnabled;
             numEq = new NumericUpDown[SoundSettings.EqBandHz.Length];
             for (int i = 0; i < numEq.Length; i++)
-                numEq[i] = EqBand(gEq, BandLabel(i), 40 + i * 24,
+                numEq[i] = EqBand(gEq, BandLabel(i), 36 + i * EqRowH,
                                   i < s.EqGain.Length ? s.EqGain[i] : 0);
 
             // One method, not a choice of two (Gordan, decided long before
@@ -491,10 +506,13 @@ namespace Nemoviz_Book_Reader
 
         private NumericUpDown EqBand(GroupBox g, string label, int y, int value)
         {
+            // 118, not 90: the top band's caption is "5 kHz and above" and at
+            // 90 it was being cut to "5 kHz and", which reads as a different
+            // band rather than as a truncation.
             Label lbl = new Label();
             lbl.Text = label;
-            lbl.Location = new Point(10, y + 3);
-            lbl.Size = new Size(90, 18);
+            lbl.Location = new Point(10, y + 4);
+            lbl.Size = new Size(146, 20);
 
             NumericUpDown n = new NumericUpDown();
             // 20, not 15 (2026-08-09). Gordan hit the old wall twice in one
@@ -505,8 +523,14 @@ namespace Nemoviz_Book_Reader
             // above now addresses directly; the wider range is what is left
             // over for the cases it does not.
             n.Minimum = -SoundSettings.EqMaxDb; n.Maximum = SoundSettings.EqMaxDb; n.Increment = 1;
-            n.Location = new Point(120, y);
-            n.Size = new Size(70, 22);
+            // The SAME box the Speech page uses (SettingsForm.MakeNumeric is
+            // 90 x 24). It was 70 x 22 on a 24-unit pitch, so five of them
+            // stacked with no gap at all and their arrows were half the size of
+            // the ones three cells away — Gordan: "controls in EQ are too
+            // squeezed, number box and the arrows; in the speech part they are
+            // more relaxed." Two spin boxes in one dialog should be one spin box.
+            n.Location = new Point(162, y);
+            n.Size = new Size(90, 24);
             n.TextAlign = HorizontalAlignment.Right;
             n.AccessibleName = label;
             n.TabIndex = g.Controls.Count;

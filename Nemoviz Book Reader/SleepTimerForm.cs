@@ -112,38 +112,38 @@ namespace Nemoviz_Book_Reader
             grpDuration = new GroupBox();
             grpDuration.Text = Localization.T("SleepTimer.Duration.Group");
             grpDuration.Location = new Point(12, 10);
-            grpDuration.Size = new Size(356, 150);
+            grpDuration.Size = new Size(356, 164);
             grpDuration.TabIndex = 0;
 
             rb15 = new RadioButton();
             rb15.Text = Localization.T("SleepTimer.Duration.15");
             rb15.Location = new Point(15, 22);
-            rb15.Size = new Size(160, 22);
+            rb15.Size = new Size(160, 26);
             rb15.TabIndex = 0;
 
             rb30 = new RadioButton();
             rb30.Text = Localization.T("SleepTimer.Duration.30");
-            rb30.Location = new Point(15, 46);
-            rb30.Size = new Size(160, 22);
+            rb30.Location = new Point(15, 49);
+            rb30.Size = new Size(160, 26);
             rb30.TabIndex = 1;
             rb30.Checked = true; // sensible default
 
             rb45 = new RadioButton();
             rb45.Text = Localization.T("SleepTimer.Duration.45");
-            rb45.Location = new Point(15, 70);
-            rb45.Size = new Size(160, 22);
+            rb45.Location = new Point(15, 76);
+            rb45.Size = new Size(160, 26);
             rb45.TabIndex = 2;
 
             rb60 = new RadioButton();
             rb60.Text = Localization.T("SleepTimer.Duration.60");
-            rb60.Location = new Point(15, 94);
-            rb60.Size = new Size(160, 22);
+            rb60.Location = new Point(15, 103);
+            rb60.Size = new Size(160, 26);
             rb60.TabIndex = 3;
 
             rbCustom = new RadioButton();
             rbCustom.Text = Localization.T("SleepTimer.Duration.Custom");
-            rbCustom.Location = new Point(15, 118);
-            rbCustom.Size = new Size(120, 22);
+            rbCustom.Location = new Point(15, 130);
+            rbCustom.Size = new Size(120, 26);
             rbCustom.TabIndex = 4;
             rbCustom.CheckedChanged += (s, e) =>
             {
@@ -160,7 +160,7 @@ namespace Nemoviz_Book_Reader
             };
 
             numCustom = new NumericUpDown();
-            numCustom.Location = new Point(140, 118);
+            numCustom.Location = new Point(140, 129);
             numCustom.Size = new Size(80, 24);
             numCustom.Minimum = 1;
             numCustom.Maximum = 720;
@@ -185,27 +185,27 @@ namespace Nemoviz_Book_Reader
             // ── Action group ──
             grpAction = new GroupBox();
             grpAction.Text = Localization.T("SleepTimer.Action.Group");
-            grpAction.Location = new Point(12, 170);
+            grpAction.Location = new Point(12, 184);
             grpAction.Size = new Size(356, 110);
             grpAction.TabIndex = 1;
 
             rbActionStop = new RadioButton();
             rbActionStop.Text = Localization.T("SleepTimer.Action.Stop");
             rbActionStop.Location = new Point(15, 22);
-            rbActionStop.Size = new Size(330, 22);
+            rbActionStop.Size = new Size(330, 26);
             rbActionStop.TabIndex = 0;
             rbActionStop.Checked = true; // least destructive default
 
             rbActionStopClose = new RadioButton();
             rbActionStopClose.Text = Localization.T("SleepTimer.Action.StopClose");
-            rbActionStopClose.Location = new Point(15, 46);
-            rbActionStopClose.Size = new Size(330, 22);
+            rbActionStopClose.Location = new Point(15, 49);
+            rbActionStopClose.Size = new Size(330, 26);
             rbActionStopClose.TabIndex = 1;
 
             rbActionStopShutdown = new RadioButton();
             rbActionStopShutdown.Text = Localization.T("SleepTimer.Action.StopShutdown");
-            rbActionStopShutdown.Location = new Point(15, 70);
-            rbActionStopShutdown.Size = new Size(330, 22);
+            rbActionStopShutdown.Location = new Point(15, 76);
+            rbActionStopShutdown.Size = new Size(330, 26);
             rbActionStopShutdown.TabIndex = 2;
 
             grpAction.Controls.Add(rbActionStop);
@@ -220,7 +220,9 @@ namespace Nemoviz_Book_Reader
             chkBookmark = new CheckBox();
             chkBookmark.Text = Localization.T("SleepTimer.Bookmark");
             chkBookmark.AccessibleName = Localization.T("SleepTimer.Bookmark");
-            chkBookmark.SetBounds(15, 288, 350, 24);
+            // Moved with the two groups above it: they grew by 32 and 22 to give
+            // their rows room for descenders and air between them.
+            chkBookmark.SetBounds(15, 302, 350, 26);
             chkBookmark.TabIndex = 2;
             // Deliberately not restored from anywhere: see the property above.
 
@@ -228,7 +230,7 @@ namespace Nemoviz_Book_Reader
             btnStart = new Button();
             btnStart.Text = Localization.T("SleepTimer.Start");
             btnStart.Size = new Size(120, 32);
-            btnStart.Location = new Point(120, 322);
+            btnStart.Location = new Point(120, 340);
             btnStart.TabIndex = 3;
             btnStart.AccessibleName = Localization.T("SleepTimer.Start.Accessible");
             btnStart.DialogResult = DialogResult.OK;
@@ -236,7 +238,7 @@ namespace Nemoviz_Book_Reader
             btnCancel = new Button();
             btnCancel.Text = Localization.T("SleepTimer.CancelBtn");
             btnCancel.Size = new Size(120, 32);
-            btnCancel.Location = new Point(248, 322);
+            btnCancel.Location = new Point(248, 340);
             btnCancel.TabIndex = 4;
             btnCancel.AccessibleName = Localization.T("SleepTimer.CancelBtn.Accessible");
             btnCancel.DialogResult = DialogResult.Cancel;

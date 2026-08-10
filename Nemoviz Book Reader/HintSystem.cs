@@ -74,7 +74,14 @@ namespace Nemoviz_Book_Reader
             b.FlatAppearance.BorderSize = 1;
             b.BackColor = Color.FromArgb(0x12, 0x18, 0x15);
             b.ForeColor = NewPlayerSkin.Lit;
-            b.Font = DialogSkin.FSilk;
+            // NOT FSilk. That is 11 pt, whose line box is about 20 units, and the
+            // key is 22 with a 1-unit border on each side — so the glyph had 20
+            // units to live in and its tail sat on the frame. Gordan, 2026-08-10:
+            // "the ? in the hh buttons is cut off all over the dialogs." Bold at
+            // 9 pt fits with room to spare and reads better small, and it changes
+            // no layout at all, which a bigger key would have done in every
+            // dialog at once.
+            b.Font = new Font(DialogSkin.FSilk.FontFamily, 9f, FontStyle.Bold);
             // Last in its group, never first. BringToFront is needed so the key
             // draws above the sticker, but it also makes the button the first
             // CHILD — and WinForms breaks a TabIndex tie by child order, so a
