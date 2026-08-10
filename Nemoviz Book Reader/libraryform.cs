@@ -1284,6 +1284,75 @@ namespace Nemoviz_Book_Reader
         /// remembers.</para></summary>
         private BookData detailsBook;
 
+        /// <summary>Books whose durations are being measured right now, by folder
+        /// path, so selecting the same row twice does not start a second job.
+        /// </summary>
+        private readonly HashSet<string> durationJobs =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>Measures a scan-added book's durations OFF the UI thread and
+        /// fills them in when they arrive.
+        ///
+        /// <para><b>It used to be done here and now, and that was an 18-second
+        /// freeze.</b> `UiWatchdog` caught it on 2026-08-10: `RebuildShelf` sets
+        /// `ListViewItem.Selected`, which fires `SelectedIndexChanged`
+        /// SYNCHRONOUSLY, which reached `EnsureDurationDetails` and had TagLib
+        /// open every audio file of the book on the UI thread — the stack was
+        /// sitting in `CreateFile` at 13 % CPU with the wait reason `Executive`,
+        /// i.e. the disk. Three shelf rebuilds in a row, ~18 s each, on a
+        /// 145-file book. It bites once per book ever, since the answer is
+        /// cached in Book.ini, but "once" is the first time a reader arrows onto
+        /// a newly added book — and for someone driving by keyboard the whole
+        /// application stops.</para>
+        ///
+        /// <para><b>Only the MEASURING moves.</b> `BookData` is not thread-safe
+        /// and `SaveChapters` writes the ini, so the worker touches neither: it
+        /// is handed a plain list of paths and gives back a plain array of
+        /// seconds. Everything that mutates the book happens back here, on the
+        /// UI thread, where it costs a few lists and one file write.</para></summary>
+        private void QueueDurations(BookData book)
+        {
+            if (book == null) return;
+            string[] files = book.PendingDurationFiles();
+            if (files == null) return;                       // nothing to do
+            if (!durationJobs.Add(book.FolderPath)) return;  // already running
+
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                var seconds = new double[files.Length];
+                try
+                {
+                    for (int i = 0; i < files.Length; i++)
+                        seconds[i] = BookData.MeasureDuration(files[i]);
+                }
+                catch { }
+                try
+                {
+                    if (IsDisposed || Disposing || !IsHandleCreated) return;
+                    BeginInvoke((MethodInvoker)(() => DurationsArrived(book, files, seconds)));
+                }
+                catch { }
+            });
+        }
+
+        private void DurationsArrived(BookData book, string[] files, double[] seconds)
+        {
+            durationJobs.Remove(book.FolderPath);
+            if (IsDisposed || Disposing) return;
+            try
+            {
+                book.BuildChaptersFromFolder(files, seconds);
+                book.Save();
+            }
+            catch { return; }
+
+            // Redraw only if this is still the book on show, and NOT while the
+            // reader is standing in the details list — rebuilding a ListView
+            // under a screen reader's cursor is the chatter §2 spends its whole
+            // length avoiding. The value is right the next time they select it.
+            if (detailsBook == book && !listViewDetails.Focused) ShowDetails(book);
+        }
+
         private void ShowDetails(BookData book)
         {
             detailsBook = book;
@@ -1293,8 +1362,9 @@ namespace Nemoviz_Book_Reader
             book.EnsureFormatDetails();
             // Build the duration up front for scan-added plain audio books, so
             // the details show a real length before first playback (DAISY books
-            // already have theirs from import). One-time, cached in Book.ini.
-            book.EnsureDurationDetails();
+            // already have theirs from import). One-time, cached in Book.ini —
+            // but measured on a BACKGROUND thread, see QueueDurations.
+            QueueDurations(book);
 
             string dash = Localization.T("Common.Dash");
 

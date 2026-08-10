@@ -914,39 +914,73 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        /// <summary>ONE file write, not one per chapter — see
+        /// <see cref="IniFile.BeginUpdate"/>. A 387-part book was costing 1402 ms
+        /// here, more than reading all 387 audio files did.</summary>
         public void SaveChapters()
         {
-            for (int i = 0; i < Chapters.Count; i++)
+            ini.BeginUpdate();
+            try
             {
-                string val = Chapters[i].FileName + "|" +
-                    Chapters[i].Duration.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                ini.Write("Chapters", "File" + i, val);
+                for (int i = 0; i < Chapters.Count; i++)
+                {
+                    string val = Chapters[i].FileName + "|" +
+                        Chapters[i].Duration.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    ini.Write("Chapters", "File" + i, val);
+                }
             }
+            finally { ini.EndUpdate(); }
+        }
+
+        /// <summary>One file's length — the expensive half, and the only part of
+        /// a chapter build that touches the disk.
+        ///
+        /// <para>Static and separate so a caller can do the measuring OFF the UI
+        /// thread and hand the numbers back. That is not a hypothetical: the
+        /// library's details pane used to call the whole build from a ListView
+        /// selection change, and `UiWatchdog` caught it holding the UI thread
+        /// for ~18 seconds inside `CreateFile` on a 145-file book.</para>
+        /// </summary>
+        public static double MeasureDuration(string filePath)
+        {
+            double dur = 0;
+            // `using`, not a bare Dispose: on an exception thrown after Create
+            // succeeded — a malformed tag, say — the old code left the file's
+            // stream open.
+            try
+            {
+                using (var tagFile = TagLib.File.Create(filePath))
+                    dur = tagFile.Properties.Duration.TotalSeconds;
+            }
+            catch { dur = 0; }
+
+            // TagLib has no reader for some formats mpv plays perfectly
+            // (.caf, .oga, .ac3, .amr, .weba, .spx, .dff) — ask mpv instead,
+            // so the book doesn't end up with a 0:00 duration.
+            if (dur <= 0) dur = MpvDuration.TryGet(filePath);
+            return dur;
         }
 
         public void BuildChaptersFromFolder(string[] audioFiles)
+        {
+            var measured = new double[audioFiles.Length];
+            for (int i = 0; i < audioFiles.Length; i++)
+                measured[i] = MeasureDuration(audioFiles[i]);
+            BuildChaptersFromFolder(audioFiles, measured);
+        }
+
+        /// <summary>The assembly half, with the measuring already done. Cheap —
+        /// lists and an ini write — so it is what stays on the UI thread.</summary>
+        public void BuildChaptersFromFolder(string[] audioFiles, double[] durations)
         {
             Chapters.Clear();
             Offsets.Clear();
             TotalDuration = 0;
 
-            foreach (string filePath in audioFiles)
+            for (int i = 0; i < audioFiles.Length; i++)
             {
-                double dur = 0;
-                try
-                {
-                    var tagFile = TagLib.File.Create(filePath);
-                    dur = tagFile.Properties.Duration.TotalSeconds;
-                    tagFile.Dispose();
-                }
-                catch { dur = 0; }
-
-                // TagLib has no reader for some formats mpv plays perfectly
-                // (.caf, .oga, .ac3, .amr, .weba, .spx, .dff) — ask mpv instead,
-                // so the book doesn't end up with a 0:00 duration.
-                if (dur <= 0) dur = MpvDuration.TryGet(filePath);
-
-                string fileName = Path.GetFileName(filePath);
+                double dur = durations != null && i < durations.Length ? durations[i] : 0;
+                string fileName = Path.GetFileName(audioFiles[i]);
                 Chapters.Add((fileName, dur));
                 Offsets.Add(TotalDuration);
                 TotalDuration += dur;
@@ -989,8 +1023,22 @@ namespace Nemoviz_Book_Reader
         /// consistent with DAISY (whose timeline is built at import).</summary>
         public void EnsureDurationDetails()
         {
-            if (IsDaisy) return;            // DAISY already built its timeline at import
-            if (Chapters.Count > 0) return; // already built (import or a prior call)
+            string[] files = PendingDurationFiles();
+            if (files != null) BuildChaptersFromFolder(files);
+        }
+
+        /// <summary>The files a duration build would have to measure, or null
+        /// when there is nothing to do.
+        ///
+        /// <para>Split out so a caller can measure them somewhere other than the
+        /// UI thread and hand the numbers to
+        /// <see cref="BuildChaptersFromFolder(string[], double[])"/>. Deciding
+        /// WHAT to measure is cheap — one directory listing — and only the
+        /// measuring itself is worth moving.</para></summary>
+        public string[] PendingDurationFiles()
+        {
+            if (IsDaisy) return null;            // DAISY built its timeline at import
+            if (Chapters.Count > 0) return null; // already built (import or a prior call)
 
             var audioFiles = new List<string>();
             try
@@ -999,11 +1047,11 @@ namespace Nemoviz_Book_Reader
                     if (Array.IndexOf(LibraryScanner.AudioExtensions, Path.GetExtension(f).ToLower()) >= 0)
                         audioFiles.Add(f);
             }
-            catch { return; }
+            catch { return null; }
 
-            if (audioFiles.Count == 0) return;
+            if (audioFiles.Count == 0) return null;
             audioFiles.Sort(StringComparer.OrdinalIgnoreCase);
-            BuildChaptersFromFolder(audioFiles.ToArray());
+            return audioFiles.ToArray();
         }
 
         /// <summary>Caches the text book's character count (read once) so the
@@ -1072,10 +1120,15 @@ namespace Nemoviz_Book_Reader
 
         public void SaveBookmarks()
         {
-            ini.DeleteSection("Bookmarks");
-            for (int i = 0; i < Bookmarks.Count; i++)
-                ini.Write("Bookmarks", "Bookmark" + i,
-                    Bookmarks[i].ToString(System.Globalization.CultureInfo.InvariantCulture));
+            ini.BeginUpdate();
+            try
+            {
+                ini.DeleteSection("Bookmarks");
+                for (int i = 0; i < Bookmarks.Count; i++)
+                    ini.Write("Bookmarks", "Bookmark" + i,
+                        Bookmarks[i].ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+            finally { ini.EndUpdate(); }
         }
 
         // ──────────────────────────────────────────────
@@ -1311,8 +1364,16 @@ namespace Nemoviz_Book_Reader
             return string.Format("{0:D2}:{1:D2}:{2:D2}", (int)t.TotalHours, t.Minutes, t.Seconds);
         }
 
+        /// <summary>Every key in ONE file write. This method sets 37 keys plus a
+        /// heading list, a page list and a chapter list, and <see cref="IniFile"/>
+        /// puts the WHOLE file back on disk per key — so a book with any
+        /// structure at all was rewriting its own ini hundreds of times in order
+        /// to save once. See IniFile.BeginUpdate.</summary>
         public void Save()
         {
+            ini.BeginUpdate();
+            try
+            {
             ini.Write("Book", "Title", Title);
             ini.Write("Book", "Author", Author ?? "");
             ini.Write("Book", "Producer", Producer ?? "");
@@ -1363,6 +1424,8 @@ namespace Nemoviz_Book_Reader
                     + "|" + M4bChapters[i].Title);
             Sound.Save(ini);
             Analysis.Save(ini);
+            }
+            finally { ini.EndUpdate(); }
         }
     }
 }
