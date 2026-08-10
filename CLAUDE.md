@@ -4827,6 +4827,44 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     NBR hands control to code nobody here wrote; the same foreign DLL in every
     hang names the cause, and an empty list says the cause is ours.
 
+  **IT NAMED SOMETHING — 2026-08-10 15:29, Gordan's own session.** The list is
+  not empty:
+
+  ```
+  other threads: 1 Running, 7 Wait/EventPairLow, 4 Wait/Unknown, 14 Wait/UserRequest
+  injected modules: nvdaHelperRemote.dll, IAccessible2Proxy.dll, ISimpleDOM.dll, rhvoicesvr.dll
+  ```
+
+  **`nvdaHelperRemote.dll` is NVDA's in-process helper**, with the two
+  accessibility proxies it brings (`IAccessible2Proxy`, `ISimpleDOM`);
+  `rhvoicesvr.dll` is RHVoice, which is ours by choice. So the one participant
+  in `IFileDialog::Show` that nobody here wrote, and that hooks the process from
+  outside, is **the screen reader**.
+
+  **What that is and is not.** It is the first hard pointer in three weeks, and
+  it fits every fact already collected: only Ctrl+O, because that is the one
+  place NBR hands off to a shell COM dialog that fires a burst of accessibility
+  events as it builds; intermittent, because it is a race between the shell's
+  own start-up and a hook in another thread; `UserRequest` rather than
+  `LpcReceive`, because the thread is waiting on an event inside `Show` and not
+  on a call out of the process; and the dialog never reaching its message loop.
+  It is **not** proof — the module list says NVDA is in the process, not that it
+  caused the stall, and the same DLLs are loaded on the three opens in that
+  session that worked perfectly.
+
+  **The test that settles it, and it is Gordan's to run: reproduce with NVDA not
+  running.** He develops on JAWS (§2), so this costs him nothing to try. If the
+  hang goes away, the cause is named.
+
+  **The fix if it holds is two lines, and it is already understood.**
+  `OpenFileDialog.AutoUpgradeEnabled = false` drops back to the legacy
+  `GetOpenFileName` common dialog — a plain Win32 window with no shell COM
+  object, no `IFileDialog`, and twenty-five years of screen-reader support
+  behind it. NBR sets this nowhere today, so every file dialog in the app takes
+  the Vista path. The cost is a plainer-looking dialog with no modern navigation
+  pane, which for this audience is arguably not a cost at all — but it is a
+  visible change and therefore Gordan's call, not one to make on a hypothesis.
+
 - **A SEPARATE stall, fully diagnosed in the same log and NOT the Ctrl+O one**
   (2026-08-10; different stack, different wait reason, CPU 13 % against 0 %).
   `RebuildShelf` (libraryform.cs:930) sets `ListViewItem.Selected`, which fires
