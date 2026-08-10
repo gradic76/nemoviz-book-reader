@@ -892,9 +892,36 @@ namespace Nemoviz_Book_Reader
             var knob = new RectangleF(slot.X + (slot.Width - 22) * f, slot.Y - 8, 22, 28);
             NewPlayerSkin.Recess(g, knob, 4, null);
             NewPlayerSkin.SilverFace(g, knob, 4);
-            using (var pen = new Pen(Color.FromArgb(0x50, 0x50, 0x4E)))
-                for (int i = -1; i <= 1; i++)
-                    g.DrawLine(pen, knob.X + 11 + i * 5, knob.Y + 7, knob.X + 11 + i * 5, knob.Bottom - 7);
+            Grip(g, knob, 3);
+        }
+
+        /// <summary>The milled grip on a handle you are meant to take hold of.
+        ///
+        /// <para><b>Shared, since 2026-08-10.</b> The speed knob had it written
+        /// inline and the progress blade had nothing, so one read as a machined
+        /// part and the other as a flat card — Gordan: "speed looks like it has
+        /// some texture on it, progress slider looks flat." Two handles doing the
+        /// same job should be made of the same thing.</para>
+        ///
+        /// <para>The count is passed rather than fixed because the two are not
+        /// the same width — 22 for the knob against 12 for the blade — and the
+        /// spacing comes from the width, so the DENSITY matches even though the
+        /// number of lines does not. Hard-coding the knob's ±5 would have put
+        /// the blade's outer lines through its own rounded edge.</para></summary>
+        private static void Grip(Graphics g, RectangleF r, int lines)
+        {
+            float step = r.Width / (lines + 1);
+            float top = r.Y + r.Height * 0.25f, foot = r.Bottom - r.Height * 0.25f;
+            for (int i = 1; i <= lines; i++)
+            {
+                float x = r.X + step * i;
+                // A cut and the light catching its far wall: one line alone reads
+                // as a drawn stripe, the pair reads as milling.
+                using (var pen = new Pen(Color.FromArgb(0x50, 0x50, 0x4E)))
+                    g.DrawLine(pen, x, top, x, foot);
+                using (var pen = new Pen(Color.FromArgb(90, 0xFF, 0xFF, 0xFC)))
+                    g.DrawLine(pen, x + 1, top, x + 1, foot);
+            }
         }
 
         /// <summary>Read straight off the speed field, so the drawn knob and the
@@ -927,6 +954,9 @@ namespace Nemoviz_Book_Reader
             var blade = new RectangleF(bar.X + (bar.Width - 4) * f - 4, bar.Y - 7, 12, 34);
             NewPlayerSkin.Recess(g, blade, 2, null);
             NewPlayerSkin.SilverFace(g, blade, 2);
+            // Two, not the knob's three: at 12 wide against 22, two lines put the
+            // cuts at the same spacing rather than the same count.
+            Grip(g, blade, 2);
         }
 
         // ── the seconds ring ─────────────────────────────────────────
