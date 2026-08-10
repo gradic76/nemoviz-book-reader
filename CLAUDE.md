@@ -4811,6 +4811,23 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   and any application opening a Vista file dialog on that machine would do the
   same — Notepad's Open is a thirty-second confirmation.
 
+  **"But it started when CD support went in" — and that is a COINCIDENCE with a
+  cause, not a clue.** Gordan noticed the correlation and it is real: the hard
+  freeze appeared around the time `AudioCd` was built. The explanation is that
+  **the virtual optical drive was not installed until then** — he put it in to
+  test CD support, and mounted NRGs from OneDrive to do it. The drive and the
+  feature arrived together. `AudioCd`/`OpticalDrive` touch a drive only on a
+  deliberate action (the Library's rip button, the Settings device list) and hold
+  no handle open; nothing there polls. **Do not go hunting in the CD code**: this
+  note exists because the timing alone is convincing enough to send a future
+  session there for nothing.
+
+  **A separate, milder symptom is on record and unexplained**: before any of
+  this, Open file would occasionally "hit a wall" — a system ding as if something
+  were unavailable, no dialog, no freeze — and worked on a second press a couple
+  of seconds later. Gordan's words, and he rates it harmless. Left alone unless
+  it comes back.
+
   **The legacy-dialog proposal is WITHDRAWN.** It was reasoned from the wrong
   cause, and it would not have helped: `GetOpenFileName` enumerates drives for
   its own drive list too. It would have cost the modern dialog for nothing.
