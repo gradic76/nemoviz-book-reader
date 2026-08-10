@@ -523,6 +523,37 @@ namespace Nemoviz_Book_Reader
 
         // ── shared drawing ───────────────────────────────────────────
 
+        /// <summary>Which way the light falls across a recess, in degrees. It is
+        /// the direction the lip is nudged — atan2(1.2, 0.9) — written down once
+        /// so the clip and the nudge cannot drift apart.</summary>
+        internal const float LitAxisDeg = 53f;
+
+        /// <summary>Half the plane, split by the line through the rectangle's
+        /// centre at right angles to <paramref name="angleDeg"/>. <c>farSide</c>
+        /// picks the half the light falls on.
+        ///
+        /// <para>Built big enough to cover anything being drawn, so it is a
+        /// clip and not a shape anybody sees.</para></summary>
+        internal static GraphicsPath HalfPlane(RectangleF r, float angleDeg, bool farSide)
+        {
+            double a = angleDeg * Math.PI / 180.0;
+            float ux = (float)Math.Cos(a), uy = (float)Math.Sin(a);
+            if (!farSide) { ux = -ux; uy = -uy; }
+            float vx = -uy, vy = ux;                       // along the dividing line
+            float cx = r.X + r.Width / 2f, cy = r.Y + r.Height / 2f;
+            const float Big = 4000f;
+
+            var p = new GraphicsPath();
+            p.AddPolygon(new[]
+            {
+                new PointF(cx + vx * Big,             cy + vy * Big),
+                new PointF(cx - vx * Big,             cy - vy * Big),
+                new PointF(cx - vx * Big + ux * Big,  cy - vy * Big + uy * Big),
+                new PointF(cx + vx * Big + ux * Big,  cy + vy * Big + uy * Big),
+            });
+            return p;
+        }
+
         internal static GraphicsPath Round(RectangleF r, float rad)
         {
             var p = new GraphicsPath();
@@ -551,14 +582,39 @@ namespace Nemoviz_Book_Reader
         {
             RectangleF outer = RectangleF.Inflate(face, Groove, Groove);
 
-            // the lip: a light line just outside the well, low and to the right
+            // The lip: a light line just outside the well, low and to the right.
+            //
+            // CLIPPED TO ITS OWN HALF since 2026-08-10. It is a whole closed path
+            // nudged diagonally, which is the cheap way to fake a light
+            // direction — and on the straight sides it is perfect. At the corners
+            // it is not: a nudge of (+0.9, +1.2) moves the bottom-RIGHT corner
+            // outwards along its own diagonal but pushes the bottom-LEFT corner
+            // sideways INTO the well, so the two lower corners came out
+            // differently shaded and the bottom-right read as tighter than the
+            // rest. Gordan, seeing it on the running player: "upper corners are
+            // different than lower corners, and lower corners are also different
+            // from each other… right low is still too pointy."
+            //
+            // Clipping each stroke to the half it belongs to means every corner
+            // gets exactly ONE treatment. The two corners on the light's own axis
+            // are where the lip and the cut meet, which is where a real bevel
+            // changes over as well.
             if (lit)
                 using (var p = Round(RectangleF.Inflate(outer, 1f, 1f), rad + Groove + 1))
                 using (var pen = new Pen(Color.FromArgb(210, 0xF2, 0xF2, 0xEE), 1.6f))
+                using (var half = HalfPlane(outer, LitAxisDeg, true))
                 {
-                    g.TranslateTransform(0.9f, 1.2f);
+                    // NOT translated any more. The clip already says which side
+                    // the light is on, and the nudge was the thing bending the
+                    // corners: shifting a rounded path diagonally moves each
+                    // corner along a different direction relative to its own
+                    // bisector, so the lip stopped being concentric with the well
+                    // exactly where it shows most. Concentric + clipped gives one
+                    // radius everywhere and the tone still changes by side.
+                    Region saved = g.Clip;
+                    g.SetClip(half, CombineMode.Intersect);
                     g.DrawPath(pen, p);
-                    g.TranslateTransform(-0.9f, -1.2f);
+                    g.Clip = saved;
                 }
 
             // the well itself — through Angled for the same reason the face is:
@@ -568,14 +624,29 @@ namespace Nemoviz_Book_Reader
                        Color.FromArgb(0x00, 0x00, 0x00), Color.FromArgb(0x4E, 0x4E, 0x4B)))
                 g.FillPath(br, p);
 
-            // the cut edge, in shadow across the top and the left
+            // The cut edge, in shadow across the top and the left — clipped to
+            // the other half for the same reason the lip is.
             using (var p = Round(outer, rad + Groove))
             using (var pen = new Pen(Color.FromArgb(235, 0, 0, 0), 1.8f))
+            using (var half = HalfPlane(outer, LitAxisDeg, false))
             {
-                g.TranslateTransform(-0.7f, -0.9f);
+                // Centred on the well's own edge, not nudged outside it. Offset
+                // up-left, this stroke THICKENED the dark area at the top-left
+                // and nowhere else, which is why that corner read as fatter and
+                // rounder than the other three: the outer silhouette of the well
+                // was a different curve on each side. One path, one silhouette.
+                Region saved = g.Clip;
+                g.SetClip(half, CombineMode.Intersect);
                 g.DrawPath(pen, p);
-                g.TranslateTransform(0.7f, 0.9f);
+                g.Clip = saved;
             }
+
+            // The rest of the way round, both walls fade out rather than
+            // stopping dead at the dividing line. Without this the changeover
+            // corners show a step where one stroke ends and the other begins.
+            using (var p = Round(outer, rad + Groove))
+            using (var pen = new Pen(Color.FromArgb(70, 0, 0, 0), 1.2f))
+                g.DrawPath(pen, p);
 
             // Focus and the firing flash both ride INSIDE the well so the key
             // still reads as the same key, only lit — replacing the whole recess
