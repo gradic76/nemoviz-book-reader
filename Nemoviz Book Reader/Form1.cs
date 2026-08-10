@@ -3630,6 +3630,12 @@ namespace Nemoviz_Book_Reader
                     Message m = new Message(); ProcessCmdKey(ref m, k);
                 },
                 currentBook.TextColour, currentBook.TextBackColour);
+            // TEMPORARY, with the other braille test aids: pan-safe mode reports
+            // itself with a PAIR of notes, so it cannot be mistaken for the
+            // single note that answers "where is focus". Rising for on.
+            readingWindow.panTone = on => tones.Play(on
+                ? new[] { (660, 90), (990, 120) }
+                : new[] { (990, 90), (660, 120) });
             readingWindow.FormClosed += (s, e) =>
             {
                 readingWindow = null;

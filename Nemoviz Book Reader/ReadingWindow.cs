@@ -52,6 +52,18 @@ namespace Nemoviz_Book_Reader
         private readonly Func<char[]> bookChars;
         private readonly Action<Keys> forwardKey;
 
+        /// <summary>TEMPORARY, with the rest of the braille test aids: while on,
+        /// plain Up/Down are swallowed in this window so a display's pan keys
+        /// cannot land on the volume. Off by default — see ProcessCmdKey.
+        /// </summary>
+        private bool panSafe;
+
+        /// <summary>How pan-safe mode says which way it just went. Supplied by
+        /// the player because the tones belong to it and come out of the book's
+        /// own sound card, which is audible with the screen reader silent.
+        /// </summary>
+        public Action<bool> panTone;
+
         private Button btnBack, btnPlay, btnForward, btnSmaller, btnBigger;
         private ComboBox cmbFont;
         /// <summary>Holds off applying a font until the reader stops moving
@@ -547,6 +559,22 @@ namespace Nemoviz_Book_Reader
                     return base.ProcessCmdKey(ref msg, keyData);
             }
 
+            // PAN-SAFE MODE — TEMPORARY test aid (2026-08-10, for the JAWS pass).
+            //
+            // A braille display does not send keystrokes to Windows; it sends
+            // commands to the SCREEN READER (§8l). Under NVDA the FS Focus's pan
+            // keys are consumed there and never reach us. Under JAWS, on the same
+            // hardware, they arrive as plain Up/Down — which are NBR's volume — so
+            // panning the display turns the book up and down instead of moving
+            // along the line.
+            //
+            // Neutralising Up/Down for everybody would break the arrangement that
+            // already works under NVDA, where those really are the reader's
+            // volume control. So it is a switch, off by default, and nothing
+            // about the shipped behaviour changes until a tester throws it.
+            if (panSafe && (keyData == Keys.Up || keyData == Keys.Down))
+                return true;   // swallowed here: neither volume nor anything else
+
             switch (keyData)
             {
                 case Keys.Space:
@@ -575,6 +603,16 @@ namespace Nemoviz_Book_Reader
                 // out of the book's sound card and are heard either way.
                 case Keys.Control | Keys.Shift | Keys.F:
                     forwardKey?.Invoke(keyData);
+                    return true;
+
+                // TEMPORARY: throws pan-safe mode. A tone rather than words,
+                // for the same reason Ctrl+Shift+F uses one — this test runs
+                // with the reader's speech off. Two rising notes for on, two
+                // falling for off, so it cannot be confused with the single
+                // note that answers "where is focus".
+                case Keys.Control | Keys.Shift | Keys.P:
+                    panSafe = !panSafe;
+                    panTone?.Invoke(panSafe);
                     return true;
             }
             // Ctrl+1..9 — the percentage jumps.
