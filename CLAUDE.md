@@ -4883,9 +4883,35 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   - Signing out of OneDrive and Dropbox, or opening the dialog on a path far
     from any synced folder, separates the other candidate.
 
-  **The fix would sidestep both candidates at once**, which is worth knowing
-  before spending more evenings on the diagnosis: the legacy dialog loads no
-  cloud provider and raises a fraction of the accessibility traffic.
+  **THIRD capture, 15:49, under JAWS — and it hung the same way.** Every NVDA
+  module is gone and JAWS's are in their place:
+
+  ```
+  GlobalHooksDispatcher.dll, jhook.dll, HookManager.dll, GdiHooks.dll,
+  AccEventCache.dll, uiahooks.dll, FileSyncShell64.dll, DropboxExt64.96.0.dll,
+  rhvoicesvr.dll, FSDomNodeRichEdit.DLL
+  ```
+
+  Same stack, same `UserRequest`, same missing breadcrumb while the earlier open
+  in that session has it. **So NVDA-specific is dead.** What survives all three
+  hangs is: a screen reader is hooked into the process — `nvdaHelperRemote` in
+  one, `jhook`/`GdiHooks`/`uiahooks` in the other — and the stall is inside the
+  shell dialog's start-up, before it pumps.
+
+  **What this does NOT say.** A reader is hooked in during the successful opens
+  too, so its presence is not the trigger; something races. Nothing here
+  identifies which hook, and nothing here is a defect in NBR: the whole stack
+  above `IFileDialog.Show` is ours only as far as `ShowDialog`.
+
+  **The conclusion the evidence supports, and the reason to stop diagnosing.**
+  Both surviving candidates — reader hooks and cloud shell extensions — are
+  things the **Vista dialog** brings in and the **legacy one does not**.
+  `AutoUpgradeEnabled = false` gives `GetOpenFileName`: a plain Win32 window,
+  no shell COM object, no cloud provider, and a fraction of the accessibility
+  traffic. For a blind-first app that is arguably the better dialog anyway —
+  simpler, no navigation pane, and twenty-five years of reader support. It costs
+  a plainer look and nothing functional: `InitialDirectory`, `Filter`,
+  `FilterIndex` and `FileName` all behave the same.
 
   **The fix if it holds is two lines, and it is already understood.**
   `OpenFileDialog.AutoUpgradeEnabled = false` drops back to the legacy
