@@ -75,24 +75,22 @@ namespace Nemoviz_Book_Reader
                 // or audible at the time.
                 dlg.Shown += (s, e) => { try { tb.Focus(); tb.SelectAll(); } catch { } };
 
-                // AND AN EMPTY FIELD IS NOT A CANCEL. Accepting nothing closed
-                // the dialog and threw OperationCanceledException three layers
-                // down, so the reader was told they had given up on a book they
-                // were trying to open. Now it simply does not accept: focus goes
-                // back to the field and the reason is spoken, because in a
-                // password box there is nothing to see either way.
-                ok.Click += (s, e) =>
-                {
-                    if (tb.Text.Length != 0) return;
-                    dlg.DialogResult = DialogResult.None;
-                    ScreenReader.Announce(dlg, Localization.T("Dialog.ArchivePassword.Empty"));
-                    try { tb.Focus(); } catch { }
-                };
-
+                // ONE RULE, and it is Gordan's (2026-08-10): anything you CONFIRM
+                // is an attempt, and only Cancel is giving up. So an empty field
+                // comes back as an empty string and is tried like any other
+                // password — it fails, and the next prompt says "that password
+                // didn't work", which is true and is what a wrong one says.
+                //
+                // My first version refused to close on an empty field instead.
+                // That reads as helpful and sets a trap: somebody who presses OK
+                // on an empty box meaning to move on is held in a window that
+                // will not let them out. One rule beats a special case.
+                //
+                // null therefore means exactly one thing to the caller — Cancel,
+                // Escape, or the window closed — see LibraryScanner.ExtractArchive.
                 if (dlg.ShowDialog(owner) != DialogResult.OK)
                     return null;
-                string password = tb.Text;
-                return string.IsNullOrEmpty(password) ? null : password;
+                return tb.Text;
             }
         }
     }

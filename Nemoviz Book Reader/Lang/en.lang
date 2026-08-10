@@ -345,10 +345,6 @@ Dialog.ArchivePassword.Title=Password required
 Dialog.ArchivePassword.Prompt=The archive "{0}" is password-protected. Enter the password to open it:
 Dialog.ArchivePassword.Retry=That password didn't work. Try again for "{0}":
 Dialog.ArchivePassword.Field=Archive password
-; Spoken, not shown: a password box gives no sight of what is in it, so an empty
-; one needs saying. It replaced a silent close that was reported three layers
-; down as the reader having cancelled.
-Dialog.ArchivePassword.Empty=No password entered. Type the password, then press Enter.
 
 ; Steer folder-import away from archives (use Open file instead)
 

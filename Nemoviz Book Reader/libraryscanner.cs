@@ -283,10 +283,18 @@ namespace Nemoviz_Book_Reader
                 throw new ArchivePasswordRequiredException();
 
             // Encrypted — prompt until the password works or the user cancels.
+            //
+            // NULL, not empty. The provider returns null only when the reader
+            // actually gave up; an empty string is a password they confirmed and
+            // gets tried like any other, failing into the "that didn't work"
+            // prompt. Testing IsNullOrEmpty here is what turned six typed
+            // passwords into six books reported as cancelled on 2026-08-10 —
+            // the field was empty because focus had been elsewhere, and this
+            // line read that as a decision to abandon the book.
             while (true)
             {
                 string password = passwordProvider();
-                if (string.IsNullOrEmpty(password))
+                if (password == null)
                     throw new OperationCanceledException();
                 if (TryExtract(volumes, destFolder, password, progress) == ExtractOutcome.Success)
                     return;
