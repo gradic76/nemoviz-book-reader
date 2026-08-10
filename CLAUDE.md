@@ -4888,6 +4888,32 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     inherits it, an explicit per-book setting still beats it, `Book.ini` no longer
     carries `TextBrailleTable`, and the import table survives a save/load.
     **Not verified: how it reads on a display** — that is the deep test below.
+- **OPEN: a bulk folder import blocks the UI for a minute or more, and it is not
+  a hang** (2026-08-10). Gordan imported the whole of Test naslovi into an empty
+  library and the app went "not responding" after an archive password prompt.
+  `UiWatchdog` caught five samples of the same stall and they are in **five
+  different places** — a regex in `TextCleaner`, another regex mid-scan,
+  `File.InternalReadAllBytes`, `LibLouis.lou_backTranslateString`, and the first
+  regex again — with the UI thread **Running at 88 % of a core**. Nothing is
+  stuck. It is `ImportFolder` doing the whole job synchronously from
+  `MenuFileOpenFolder_Click`, so no message is pumped until every book is
+  parsed, cleaned and back-translated. The reports doubled 5 → 10 → 20 → 40 → 80
+  s and then stopped, so it finished somewhere between 80 and 160 seconds.
+
+  **This falsifies §8a's line that the post-extract steps are "seconds, not
+  minutes".** That was true of one archive and is not true of a library's worth.
+  §8a already puts EXTRACTION behind `ExtractProgressForm`; everything after it —
+  per-book parsing, text cleaning, liblouis, the rescan — has neither progress
+  nor a background thread.
+
+  **Not fixed, and deliberately not fixed on the spot**: it is a real change to
+  the Library, which §9 nails down except for faults found in use — this is one,
+  but it is a piece of work rather than a patch. The shape it wants is the whole
+  bulk import behind the progress dialog that already exists, reporting book by
+  book. **Cheap thing worth doing first either way: a breadcrumb per book in
+  `ImportOne`,** so the next capture of this says which title it was on instead
+  of stopping at "rebuilding the shelf".
+
 - ~~**OPEN BUG: the player freezes on Ctrl+O in the Library**~~ **— SOLVED
   2026-08-10, and it was never NBR's.** Gordan found it: a **virtual optical
   drive with an NRG mounted**, and that NRG living in OneDrive. Unmounting the
