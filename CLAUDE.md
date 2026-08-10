@@ -4802,12 +4802,45 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   - **It took three cycles.** Each was identical — import a book, load it, open
     the Library, Ctrl+O — and only the third hung. That shape suggests something
     accumulating rather than something happening.
-  **What the next capture adds:** the UI thread's **wait reason** (`LpcReceive` /
-  `LpcReply` = a cross-process call — COM, the shell, a screen reader; against
-  `UserRequest` = an ordinary wait handle — two completely different places to
-  look), a best-effort managed **stack**, and a breadcrumb that fires only while
-  the message loop turns, which separates "the dialog never opened" from "it
-  opened and then froze".
+  **CAUGHT WITH A STACK, 2026-08-10.** Two facts are now settled and one of them
+  narrows the search a great deal.
+  - **The dialog never opens.** `NoteWhenPumping` is a WinForms timer, so it can
+    only tick from a turning message loop — and *"file dialog is up and pumping"*
+    **never fired**, while `showing the file dialog` did. So this is not "opened,
+    then froze": the UI thread is inside `IFileDialog::Show` **before that call
+    starts pumping**.
+  - **It is not blocked on a call out of the process.** The wait reason is
+    **`UserRequest`**, not `LpcReceive`/`LpcReply`. It is waiting on an ordinary
+    handle for something *inside* the process to finish — and the shell dialog
+    does its start-up work on threads of its own. CPU 0 %, 37 threads, and
+    nothing of ours anywhere above `IFileDialog.Show` in the stack.
+  - The call site is not the problem: `OpenFileDialog` is built fresh, disposed
+    by `using`, and `InitialDirectory` is `Directory.Exists`-checked first.
+  - **Ruled out by Gordan, 2026-08-10: two screen readers at once.** He runs one
+    at a time — *"they are clashing"* — so JAWS and NVDA fighting over the dialog
+    is not it. Do not re-raise it.
+  - **What the next capture adds** (`c7c3d41`): every OTHER thread's wait reason
+    grouped by kind — one on `LpcReply` would name a provider outside, one on
+    `Executive` a disk not answering — and **the modules loaded from outside the
+    app folder and Windows**, i.e. the shell extensions, cloud providers and
+    anti-virus hooks injected into the process. The file dialog is the one place
+    NBR hands control to code nobody here wrote; the same foreign DLL in every
+    hang names the cause, and an empty list says the cause is ours.
+
+- **A SEPARATE stall, fully diagnosed in the same log and NOT the Ctrl+O one**
+  (2026-08-10; different stack, different wait reason, CPU 13 % against 0 %).
+  `RebuildShelf` (libraryform.cs:930) sets `ListViewItem.Selected`, which fires
+  `SelectedIndexChanged` **synchronously** → `ShowDetails` →
+  `EnsureDurationDetails` → `BuildChaptersFromFolder` → TagLib opening **every
+  audio file of the book on the UI thread**, waiting on `Executive` inside
+  `CreateFile`. Measured from the breadcrumbs: **~18 s per shelf rebuild**, three
+  in a row.
+  It is **once per book ever** — `EnsureDurationDetails` returns early once
+  `Chapters` is built and caches to `Book.ini`, and the log shows later rebuilds
+  are instant — so it bites the first time a big newly-added book is selected.
+  Still serious for a reader arrowing down the shelf. **Not fixed**: §9 allows a
+  bug reported from use, but moving this to a background thread needs care —
+  `BookData` is not thread-safe and `SaveChapters` writes `Book.ini`.
 - **Waiting on Gordan's own eyes and hands** (list opened 2026-08-03). None of
   these is a suspected fault — they are things that were built, measured and
   found correct by probe, and that a measurement *cannot* confirm:
