@@ -2494,20 +2494,33 @@ namespace Nemoviz_Book_Reader
                     skipped.Add(System.IO.Path.GetFileName(v) + " — " +
                                 Localization.T("Dialog.Skipped.MissingFirstVolume"));
 
+                // A BREADCRUMB PER BOOK. The whole of a bulk import runs on the
+                // UI thread, so when it takes minutes the watchdog fires and its
+                // report is the only account of where the time went — and until
+                // 2026-08-10 that report stopped at "rebuilding the shelf",
+                // because the only import crumb sat on the single-file path and
+                // not on this one. The COUNT travels in each line rather than in
+                // a header: the ring keeps the last 60 crumbs, so with several
+                // hundred books a header would have been flushed out long before
+                // anyone read it, while "book 137 of 604" says both where it got
+                // to and how far it had to go.
+                int at = 0;   // `total` is already in scope from the confirmation above
+
                 // Archives and single files, each its own book, through the same
                 // path Open file uses. Entry points only — the volumes behind
                 // them are pulled in by SharpCompress from the first part.
                 foreach (string f in plan.Archives)
-                    if (ImportOne(f, skipped)) imported++;
+                { NoteBook(++at, total, f); if (ImportOne(f, skipped)) imported++; }
                 foreach (string f in plan.TextFiles)
-                    if (ImportOne(f, skipped)) imported++;
+                { NoteBook(++at, total, f); if (ImportOne(f, skipped)) imported++; }
                 foreach (string f in plan.AudioOrphans)
-                    if (ImportOne(f, skipped)) imported++;
+                { NoteBook(++at, total, f); if (ImportOne(f, skipped)) imported++; }
 
                 // A DAISY book comes in whole, with its navigation. Found at
                 // every level now, not only on the folder that was picked.
                 foreach (string d in plan.Daisy)
                 {
+                    NoteBook(++at, total, d);
                     string why;
                     if (ImportDaisyFolder(d, true, out why) == DaisyImport.Imported) imported++;
                     else skipped.Add(System.IO.Path.GetFileName(d) +
@@ -2516,15 +2529,20 @@ namespace Nemoviz_Book_Reader
 
                 // A folder of audio is one book: its own files.
                 foreach (string bookFolder in plan.AudioFolders)
+                {
+                    NoteBook(++at, total, bookFolder);
                     if (CopyAudioInto(BookFolderFor(bookFolder), new[] { bookFolder })) imported++;
+                }
 
                 // A book split across discs is ALSO one book — every disc's files
                 // into a single folder, named after the folder that holds them.
                 foreach (string[] discs in plan.DiscSets)
                 {
                     string parent = System.IO.Path.GetDirectoryName(discs[0]);
+                    NoteBook(++at, total, parent);
                     if (CopyAudioInto(BookFolderFor(parent), discs)) imported++;
                 }
+                UiWatchdog.Note("library: import finished, " + imported + " of " + total);
 
                 LoadBooks();
                 string msg = Localization.T("Dialog.ImportFolderSuccess.Message", imported);
@@ -2550,6 +2568,18 @@ namespace Nemoviz_Book_Reader
             {
                 MessageForm.ShowInfo(this, Localization.T("Dialog.ImportFolderError.Message", ex.Message), Localization.T("Common.Error"));
             }
+        }
+
+        /// <summary>Where a bulk import has got to, for the hang log. The name is
+        /// trimmed because a crumb is one line and a full path is most of it.
+        /// </summary>
+        private static void NoteBook(int at, int total, string pathOrFolder)
+        {
+            string name = "";
+            try { name = System.IO.Path.GetFileName((pathOrFolder ?? "").TrimEnd('\\', '/')); }
+            catch { }
+            if (name.Length > 48) name = name.Substring(0, 48) + "…";
+            UiWatchdog.Note("library: book " + at + " of " + total + ": " + name);
         }
 
         /// <summary>One file, one book, quietly — and the reason it did not go in
