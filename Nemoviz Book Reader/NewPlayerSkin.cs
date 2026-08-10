@@ -42,6 +42,15 @@ namespace Nemoviz_Book_Reader
         public static readonly Color PanelLight = Color.FromArgb(0xD8, 0xD8, 0xD4);
         public static readonly Color PanelMid = Color.FromArgb(0xC0, 0xC0, 0xBC);
         public static readonly Color PanelDark = Color.FromArgb(0xA6, 0xA6, 0xA2);
+
+        /// <summary>The bed a key sits in — one flat dark, the same on every
+        /// side. Deliberately not a gradient: a gradient has a direction, and
+        /// the direction was the thing Gordan objected to (2026-08-10). Measured
+        /// against the panel it sits in, #C0C0BC, this gives a contrast ratio of
+        /// about 13:1, so the boundary of every control is far past the 3:1 a
+        /// non-text edge needs — which is what §8k asks the bed to do for a
+        /// reader who cannot rely on colour.</summary>
+        public static readonly Color BedDark = Color.FromArgb(0x14, 0x14, 0x13);
         public static readonly Color Jet = Color.FromArgb(0x0A, 0x0A, 0x0A);
 
         // A key is lit along its crown, falls away to a dark belly, and picks up a
@@ -567,14 +576,28 @@ namespace Nemoviz_Book_Reader
             return p;
         }
 
-        /// <summary>The recess. What makes a groove read as a hole rather than an
-        /// outline is not its colour but its two edges: the panel's cut edge is in
-        /// shadow at the top-left, and its far lip catches the light at the
-        /// bottom-right. Drawn as one flat ring it looks like a border — which is
-        /// exactly what the first build looked like.</summary>
-        /// <param name="lit">False on the display glass: a bright lip is the panel
-        /// metal catching light, and on near-black glass it just draws a chrome
-        /// outline round every flap tile.</param>
+        /// <summary>The bed a key sits in: a dark channel cut into the panel.
+        ///
+        /// <para><b>The same all the way round, by Gordan's decision on
+        /// 2026-08-10.</b> It used to be lit — a bright lip outside the
+        /// bottom-right, a black cut edge at the top-left, and a gradient running
+        /// between them — on the reasoning recorded in §8k that a flat ring reads
+        /// as a drawn border rather than a hole. He looked at it on the running
+        /// player through several rounds of corner and face fixes and the verdict
+        /// did not move: the side-to-side difference was the thing he kept
+        /// seeing, and once the face was symmetric it was the ONLY thing left
+        /// making the key read as left ≠ right. "The problem wasn't in the actual
+        /// button, it was on the bed."</para>
+        ///
+        /// <para>So the direction is gone entirely. What is left doing the work
+        /// is the CONTACT SHADOW the canvas lays outside each key, plus the
+        /// bed's own darkness against the silver — not a painted highlight. If
+        /// this ever reads flat again, that shadow is the dial to turn, not the
+        /// lip: bringing the lip back re-creates exactly what he rejected.</para>
+        /// </summary>
+        /// <param name="lit">Kept for the display glass, which passes false. It
+        /// no longer selects a lip — there is none — but the glass still wants a
+        /// plainer edge than the panel, and callers name their intent.</param>
         /// <param name="ring">What to light the inside of the well with, if
         /// anything: amber while the key has focus, electric blue while it is
         /// firing. A key is not a switch and does not sink — it flashes.</param>
@@ -582,83 +605,27 @@ namespace Nemoviz_Book_Reader
         {
             RectangleF outer = RectangleF.Inflate(face, Groove, Groove);
 
-            // The lip: a light line just outside the well, low and to the right.
+            // The bed itself: ONE dark, flat, all the way round.
             //
-            // CLIPPED TO ITS OWN HALF since 2026-08-10. It is a whole closed path
-            // nudged diagonally, which is the cheap way to fake a light
-            // direction — and on the straight sides it is perfect. At the corners
-            // it is not: a nudge of (+0.9, +1.2) moves the bottom-RIGHT corner
-            // outwards along its own diagonal but pushes the bottom-LEFT corner
-            // sideways INTO the well, so the two lower corners came out
-            // differently shaded and the bottom-right read as tighter than the
-            // rest. Gordan, seeing it on the running player: "upper corners are
-            // different than lower corners, and lower corners are also different
-            // from each other… right low is still too pointy."
-            //
-            // Clipping each stroke to the half it belongs to means every corner
-            // gets exactly ONE treatment. The two corners on the light's own axis
-            // are where the lip and the cut meet, which is where a real bevel
-            // changes over as well.
-            if (lit)
-                using (var p = Round(RectangleF.Inflate(outer, 1f, 1f), rad + Groove + 1))
-                using (var pen = new Pen(Color.FromArgb(210, 0xF2, 0xF2, 0xEE), 1.6f))
-                using (var half = HalfPlane(outer, LitAxisDeg, true))
-                {
-                    // NOT translated any more. The clip already says which side
-                    // the light is on, and the nudge was the thing bending the
-                    // corners: shifting a rounded path diagonally moves each
-                    // corner along a different direction relative to its own
-                    // bisector, so the lip stopped being concentric with the well
-                    // exactly where it shows most. Concentric + clipped gives one
-                    // radius everywhere and the tone still changes by side.
-                    Region saved = g.Clip;
-                    g.SetClip(half, CombineMode.Intersect);
-                    g.DrawPath(pen, p);
-                    g.Clip = saved;
-                }
-
-            // the well itself — through Angled for the same reason the face is:
-            // an angled GDI+ gradient tiles, and the wrap is a hard line.
+            // Not a gradient. Any gradient has a direction, and a direction is
+            // precisely what was being objected to — black on one side and dark
+            // grey on the other is what made the left and right of a key read
+            // differently once the face had stopped doing it.
             using (var p = Round(outer, rad + Groove))
-            using (var br = Angled(outer, 55f,
-                       Color.FromArgb(0x00, 0x00, 0x00), Color.FromArgb(0x4E, 0x4E, 0x4B)))
+            using (var br = new SolidBrush(BedDark))
                 g.FillPath(br, p);
 
-            // The cut edge, in shadow across the top and the left — clipped to
-            // the other half for the same reason the lip is.
+            // The cut where the panel is opened: one stroke, all the way round,
+            // no half-plane and no direction. Kept INSIDE the bed — half of a
+            // stroke centred on the boundary falls outside it, and when that was
+            // clipped to one side only it made the bed 8 units wide on the left
+            // against 6 on the right. Inside on every side, the channel is a true
+            // constant width.
             using (var p = Round(outer, rad + Groove))
             using (var pen = new Pen(Color.FromArgb(235, 0, 0, 0), 1.8f))
-            using (var half = HalfPlane(outer, LitAxisDeg, false))
             {
-                // Centred on the well's own edge, not nudged outside it. Offset
-                // up-left, this stroke THICKENED the dark area at the top-left
-                // and nowhere else, which is why that corner read as fatter and
-                // rounder than the other three: the outer silhouette of the well
-                // was a different curve on each side. One path, one silhouette.
-                //
-                // And KEPT INSIDE THE WELL. Even centred, half of a 1.8-unit
-                // stroke falls outside the boundary, and since it is clipped to
-                // the shadow half that spill lands on one side only. Measured off
-                // the running player: the groove came out 8 units wide on the
-                // left against 6 on the right. Clipping it to the well as well as
-                // to the half makes the ring a true constant width, which is what
-                // Gordan asked for when he said to make the right side the same
-                // as the left.
                 Region saved = g.Clip;
-                g.SetClip(half, CombineMode.Intersect);
                 g.SetClip(p, CombineMode.Intersect);
-                g.DrawPath(pen, p);
-                g.Clip = saved;
-            }
-
-            // The rest of the way round, both walls fade out rather than
-            // stopping dead at the dividing line. Without this the changeover
-            // corners show a step where one stroke ends and the other begins.
-            using (var p = Round(outer, rad + Groove))
-            using (var pen = new Pen(Color.FromArgb(70, 0, 0, 0), 1.2f))
-            {
-                Region saved = g.Clip;
-                g.SetClip(p, CombineMode.Intersect);   // inside the well, same reason
                 g.DrawPath(pen, p);
                 g.Clip = saved;
             }
