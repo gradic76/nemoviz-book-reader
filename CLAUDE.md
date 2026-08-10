@@ -4852,9 +4852,40 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   caused the stall, and the same DLLs are loaded on the three opens in that
   session that worked perfectly.
 
-  **The test that settles it, and it is Gordan's to run: reproduce with NVDA not
-  running.** He develops on JAWS (§2), so this costs him nothing to try. If the
-  hang goes away, the cause is named.
+  **A SECOND capture, 15:38 the same day, and it widens the field:**
+
+  ```
+  injected modules: nvdaHelperRemote.dll, IAccessible2Proxy.dll, ISimpleDOM.dll,
+                    FileSyncShell64.dll, DropboxExt64.96.0.dll, rhvoicesvr.dll
+  ```
+
+  **`FileSyncShell64.dll` is OneDrive's shell extension, `DropboxExt64` is
+  Dropbox's.** Those load when the shell namespace is used — which is to say
+  when this very dialog is built — and a cloud-sync extension waking up and
+  calling its own service is a textbook way for `IFileDialog::Show` to sit
+  before it pumps.
+
+  **So there are now two candidates, and the evidence splits them:**
+  - NVDA's trio and RHVoice are in **both** hangs.
+  - The two cloud extensions are in the second only. The 15:29 hang had neither,
+    and in that session no file dialog had opened yet — so they had not been
+    pulled in. **The cloud extensions are therefore not necessary for the
+    hang**, though they may make it likelier.
+  - In both sessions, earlier opens with the same modules loaded worked. Nothing
+    here is sufficient on its own; it is a race.
+
+  **The tests, and they answer different questions — do not confuse them:**
+  - **No screen reader at all** is the clean one. If it still hangs, every
+    reader-hook theory dies at once.
+  - **Switching NVDA → JAWS** (which Gordan did on 2026-08-10) tests something
+    narrower, because **JAWS injects too**. Still hanging under JAWS means "not
+    NVDA-specific", not "not the reader".
+  - Signing out of OneDrive and Dropbox, or opening the dialog on a path far
+    from any synced folder, separates the other candidate.
+
+  **The fix would sidestep both candidates at once**, which is worth knowing
+  before spending more evenings on the diagnosis: the legacy dialog loads no
+  cloud provider and raises a fraction of the accessibility traffic.
 
   **The fix if it holds is two lines, and it is already understood.**
   `OpenFileDialog.AutoUpgradeEnabled = false` drops back to the legacy
