@@ -4903,6 +4903,33 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
   identifies which hook, and nothing here is a defect in NBR: the whole stack
   above `IFileDialog.Show` is ours only as far as `ShowDialog`.
 
+  **THE PATTERN, found 2026-08-10 by pairing every open in the log with whether
+  it pumped. It is not the count — it is the IDLE GAP.**
+
+  | gap since the previous open | opens | result |
+  |---|---|---|
+  | 8, 10, 13, 33, 34, 36, 95 s | 7 | **all opened** |
+  | 153, 218, 455, 464, 468 s | 5 | **all hung** |
+
+  Clean separation with no overlap, across four sessions and both screen
+  readers. Gordan's impression that it went wrong "after the third or fourth
+  open" was the symptom: rapid repeats while testing succeed, and the one he
+  came back to after a few minutes of doing something else is the one that
+  hangs. That also explains why the failing open was the 1st in one session,
+  the 2nd in two and the 4th in another — the count never mattered.
+
+  **What behaves like that: something initialised on first use and TORN DOWN
+  after an idle timeout, whose re-initialisation is what deadlocks.** That is
+  exactly how an out-of-process COM server with an idle shutdown behaves, and
+  how a shell/cloud extension host behaves when it is unloaded and has to come
+  back. It fits the rest of the evidence — a wait on an ordinary handle inside
+  `Show`, before the dialog pumps, with the process's foreign modules being
+  cloud providers and reader hooks.
+
+  **And it makes the bug reproducible on demand, which it never was before:
+  open Ctrl+O, cancel, wait three minutes, open again.** Any test of a candidate
+  cause or of a fix should use that recipe rather than hoping.
+
   **The conclusion the evidence supports, and the reason to stop diagnosing.**
   Both surviving candidates — reader hooks and cloud shell extensions — are
   things the **Vista dialog** brings in and the **legacy one does not**.
