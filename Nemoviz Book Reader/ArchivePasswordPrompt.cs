@@ -63,6 +63,32 @@ namespace Nemoviz_Book_Reader
                 if (UiTheme.Current.BuildsOwnLayout)
                     WorkDialogSkin.ApplyPassword(dlg, lbl, tb, ok, cancel);
 
+                // FOCUS STARTS IN THE PASSWORD FIELD, and it has to be said here
+                // rather than left to the tab order. Under the new look the skin
+                // turns the message into a read-only TextBox — which is right,
+                // because a reader driven by Tab never visits a Label — but that
+                // box is focusable and comes first, so focus landed on the
+                // MESSAGE. Gordan typed six passwords into it, pressed Enter, and
+                // got six books skipped as "cancelled": the characters went
+                // nowhere, Enter fired the accept button, and an empty field
+                // reads as a cancel further down. Nothing about that was visible
+                // or audible at the time.
+                dlg.Shown += (s, e) => { try { tb.Focus(); tb.SelectAll(); } catch { } };
+
+                // AND AN EMPTY FIELD IS NOT A CANCEL. Accepting nothing closed
+                // the dialog and threw OperationCanceledException three layers
+                // down, so the reader was told they had given up on a book they
+                // were trying to open. Now it simply does not accept: focus goes
+                // back to the field and the reason is spoken, because in a
+                // password box there is nothing to see either way.
+                ok.Click += (s, e) =>
+                {
+                    if (tb.Text.Length != 0) return;
+                    dlg.DialogResult = DialogResult.None;
+                    ScreenReader.Announce(dlg, Localization.T("Dialog.ArchivePassword.Empty"));
+                    try { tb.Focus(); } catch { }
+                };
+
                 if (dlg.ShowDialog(owner) != DialogResult.OK)
                     return null;
                 string password = tb.Text;

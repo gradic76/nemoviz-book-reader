@@ -4888,6 +4888,33 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     inherits it, an explicit per-book setting still beats it, `Book.ini` no longer
     carries `TextBrailleTable`, and the import table survives a save/load.
     **Not verified: how it reads on a display** — that is the deep test below.
+- **THE SKINNED MESSAGE BOX STEALS INITIAL FOCUS FROM THE FIELD — check every
+  dialog that has one** (found 2026-08-10). Six password-protected archives came
+  out of a bulk import marked "cancelled" when Gordan had typed every password
+  and pressed Enter.
+
+  The chain: `WorkDialogSkin.ApplyPassword` replaces the prompt Label with
+  `DialogSkin.NewMessageBox`, a **read-only but FOCUSABLE** TextBox, and gives it
+  `TabIndex = 0`. A Label cannot take focus and a TextBox can, so WinForms opened
+  the dialog with focus on the MESSAGE. The characters went nowhere, Enter fired
+  the accept button, `tb.Text` was empty, `Show` maps empty to null, and
+  `ExtractArchive` throws `OperationCanceledException` for a null password — so
+  the reader was told they had given up on a book they were trying to open, with
+  nothing visible or audible at any point in between.
+
+  **Two fixes, and the second is the general one.** Focus is now put in the field
+  on `Shown`; and an empty field no longer accepts at all — the dialog stays open
+  and says so, because in a password box there is nothing to see either way.
+  Verified by driving the real dialog: focus lands on "Archive password",
+  `SendKeys` reaches it, and Enter returns the typed string.
+
+  **The trap is not specific to passwords.** §10c's message shell turns prose
+  into a focusable read-only TextBox everywhere, which is right for reading —
+  §8b's rule that a reader driven by Tab never visits a Label — and wrong for
+  initial focus in any dialog whose task is a FIELD. Anything using
+  `NewMessageBox` beside an input wants an explicit `Shown` focus. Worth auditing
+  the rename prompt and `ConfirmOnceForm` on the same grounds.
+
 - **OPEN: a bulk folder import blocks the UI for a minute or more, and it is not
   a hang** (2026-08-10). Gordan imported the whole of Test naslovi into an empty
   library and the app went "not responding" after an archive password prompt.
