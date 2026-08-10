@@ -4888,6 +4888,38 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
     inherits it, an explicit per-book setting still beats it, `Book.ini` no longer
     carries `TextBrailleTable`, and the import table survives a save/load.
     **Not verified: how it reads on a display** — that is the deep test below.
+- **JAWS AND BRAILLE: THE READING WINDOW BEING MODAL IS THE FAULT** (found by
+  elimination on Gordan's FS Focus, 2026-08-10). Six throwaway programs, kept at
+  `D:\Player\Braille A-B test\` — extend them, do not rebuild them:
+
+  | | what it changed | result |
+  |---|---|---|
+  | **A** plain `TextBox`, ordinary window | baseline | **works** |
+  | **B** `RichTextBox`, ordinary window | control type | **works** |
+  | **C** re-parented into a **modal** bordered window | + modal, + re-parent | **fails** |
+  | **D** built in a **modal** borderless window | + modal, + borderless | **fails** |
+  | **E** re-parented into a **non-modal** window | modal removed | **works** |
+  | **F** built in a **non-modal** borderless window | modal removed | **works** |
+
+  - **The `RichTextBox` is innocent.** §8l has carried the worry since
+    2026-08-03 that the switch from `TextBox` broke JAWS. It did not — B works.
+    Drop the suspicion rather than keep testing round it.
+  - **Re-parenting is innocent** (E), even though it recreates the control's
+    window handle; and **borderless is innocent** (F).
+  - **The change to make is `Show()` rather than `ShowDialog()`** for the reading
+    window, with everything that follows: who owns Escape, what the player does
+    while it is up, and whether `GiveSurfaceBack` still runs at the right moment.
+    Not done — it is a real change to a window a reader lives in, and it wants
+    doing awake.
+  - **Open and NOT the same fault:** even in E and F "rečenica se reže". In A/B
+    that was the SPEECH — the plain box cut it, the rich one read the whole
+    sentence. Unexplained; do not fold it into the modal finding.
+
+  **Method note.** C and D were built to separate two variables and both held a
+  third constant — `ShowDialog`. **Two tests that fail identically point at the
+  variable you did not vary.** E and F exist only because that was spotted
+  afterwards, and they are what produced the answer.
+
 - **THE SKINNED MESSAGE BOX STEALS INITIAL FOCUS FROM THE FIELD — check every
   dialog that has one** (found 2026-08-10). Six password-protected archives came
   out of a bulk import marked "cancelled" when Gordan had typed every password
