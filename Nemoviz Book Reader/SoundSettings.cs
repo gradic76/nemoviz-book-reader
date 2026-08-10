@@ -42,6 +42,41 @@ namespace Nemoviz_Book_Reader
         // reader a question they had no way to answer.
         public static readonly double[] SpeechnormExpansion = { 1.5, 2.0, 2.5, 3.0, 3.5 };
 
+        /// <summary>The gate's threshold in dBFS, per level. Everything quieter
+        /// than this is pushed down by up to <see cref="GateRangeDb"/>.
+        ///
+        /// <para><b>Absolute numbers only mean something because the loudness
+        /// target now stands FIRST</b> (see BuildAf). Every book arrives here at
+        /// about −16 LUFS, so one threshold means one thing; on the old chain the
+        /// same number met books running −7 to −22 LUFS.</para>
+        ///
+        /// <para><b>Measured, not chosen.</b> A level trace in 0.2 s windows over
+        /// Gordan's six samples — nothing coarser can see a pause at all — puts
+        /// the noise floor of the two he complains about at −40.0 and −46.4 dBFS
+        /// raw, which their own loudness gain lifts to about −36 and −42. His
+        /// clean reference measures −99.2, i.e. digital silence, and wants none
+        /// of this. The scale spans that working region. Four decibels of
+        /// threshold was the difference between the gate doing nothing (0.7 dB)
+        /// and doing its job (6.1 dB), so the steps are deliberately small.</para>
+        /// </summary>
+        public static readonly double[] GateThresholdDb = { -40, -37, -34, -31, -28 };
+
+        /// <summary><b>It attenuates; it never silences.</b> A gate that closes
+        /// hard is the classic way this goes wrong: constant noise is something
+        /// the ear stops hearing, while noise that switches off and on around
+        /// every phrase keeps re-alerting it — and a hard close chops the tails
+        /// off words. Capping the reduction at 20 dB leaves a bed under the
+        /// pauses so there is no on and off. Whether that is enough is an ear's
+        /// question and Gordan's to answer.</summary>
+        public const double GateRangeDb = -20;
+
+        /// <summary>Slow enough not to chew word endings, fast enough to catch
+        /// the start of a pause. A gate's release is what is heard when it is
+        /// wrong.</summary>
+        public const int GateAttackMs = 10;
+        public const int GateReleaseMs = 250;
+        public const double GateRatio = 4;
+
         /// <summary>The five EQ bands, in Hz. The last one is a SHELF; the other
         /// four are bells.
         ///
@@ -151,6 +186,24 @@ namespace Nemoviz_Book_Reader
         public bool NormalizeEnabled;
         public int NormalizeLevel;      // 0..4
 
+        /// <summary>The noise gate — what Gordan asked for as "another
+        /// compressor that pushes everything below x dB into inaudibility". It
+        /// is the opposite of a compressor and the word for it is a gate, or a
+        /// downward expander: a compressor works on what is ABOVE its threshold,
+        /// this on what is below. It only ever acts in the gaps, which is
+        /// exactly the complaint — noise that does not bother him under the
+        /// voice and does in a long pause.
+        ///
+        /// <para><b>Off by default, deliberately.</b> Every other stage has a
+        /// rule in SoundAdvisor that sets it from the measurement; this one does
+        /// not yet, because the noise floor it would key on is not measured yet
+        /// (§8d — astats' RMS_trough is −inf in 99% of segments, and the 0.2 s
+        /// window trace that DOES measure it is not in the analyser). Shipping a
+        /// rule that cannot be calibrated would be worse than shipping
+        /// none.</para></summary>
+        public bool GateEnabled;
+        public int GateLevel;           // 0..4
+
         /// <summary>Gain in dB that brings this book to <see cref="TargetLufs"/>,
         /// worked out once from the measurement. 0 means the book is already there
         /// or was never measured. Negative for a book that is too LOUD -- the
@@ -210,6 +263,8 @@ namespace Nemoviz_Book_Reader
 
             NormalizeEnabled = ReadBool(ini, "NormalizeEnabled", NormalizeEnabled);
             NormalizeLevel = ClampLevel(ReadInt(ini, "NormalizeLevel", NormalizeLevel), SpeechnormExpansion.Length);
+            GateEnabled = ReadBool(ini, "GateEnabled", GateEnabled);
+            GateLevel = ClampLevel(ReadInt(ini, "GateLevel", GateLevel), GateThresholdDb.Length);
             GainEnabled = ReadBool(ini, "GainEnabled", GainEnabled);
             GainDb = ReadDouble(ini, "GainDb", GainDb);
         }
@@ -235,6 +290,8 @@ namespace Nemoviz_Book_Reader
 
             WriteBool(ini, "NormalizeEnabled", NormalizeEnabled);
             WriteInt(ini, "NormalizeLevel", NormalizeLevel);
+            WriteBool(ini, "GateEnabled", GateEnabled);
+            WriteInt(ini, "GateLevel", GateLevel);
             WriteBool(ini, "GainEnabled", GainEnabled);
             ini.Write("Sound", "GainDb", GainDb.ToString("0.##", CultureInfo.InvariantCulture));
         }
@@ -332,6 +389,28 @@ namespace Nemoviz_Book_Reader
             {
                 int nl = ClampLevel(s.NormalizeLevel, SpeechnormExpansion.Length);
                 f.Add("speechnorm=e=" + SpeechnormExpansion[nl].ToString("0.0", ic) + ":p=0.95");
+            }
+
+            // The gate stands LAST of the shaping stages, and each half of that
+            // is a decision:
+            //   after afftdn and the highpass, so it works on what is left
+            //     rather than having its threshold chase two moving things;
+            //   after the EQ, because the treble ramp lifts as much as +8 dB and
+            //     lifts the hiss with it — ahead of the EQ the gate would be
+            //     handing back what it had just taken;
+            //   after speechnorm, which is the important one. speechnorm raises
+            //     quiet passages, which IS the pause. Ahead of it the gate would
+            //     do work speechnorm immediately undoes. Last, the gate has the
+            //     final word on the gaps.
+            if (s.GateEnabled)
+            {
+                double thr = Math.Pow(10.0, GateThresholdDb[ClampLevel(s.GateLevel, GateThresholdDb.Length)] / 20.0);
+                double range = Math.Pow(10.0, GateRangeDb / 20.0);
+                f.Add("agate=threshold=" + thr.ToString("0.######", ic) +
+                      ":ratio=" + GateRatio.ToString("0.##", ic) +
+                      ":attack=" + GateAttackMs.ToString(ic) +
+                      ":release=" + GateReleaseMs.ToString(ic) +
+                      ":range=" + range.ToString("0.######", ic));
             }
 
             // Always-on safety limiter (level=false so it only caps peaks and

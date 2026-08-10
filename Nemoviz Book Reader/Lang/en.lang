@@ -407,7 +407,16 @@ Prop.Eq.Title=Tone
 ; top one gets a word, because a shelf behaves differently from a bell: it lifts
 ; or lowers EVERYTHING above it, and that is audible as such. {0} is "5 kHz".
 Prop.Eq.Shelf={0} and above
+; The last cell holds TWO subjects, so the group name has to cover both and
+; each switch carries its own. They belong together because they FIGHT: one
+; lifts the quiet passages, the other pushes them down, and the quiet passage is
+; the pause. The cells also read the signal chain in order, and the gate acts
+; last -- so the last cell is where it goes.
+Prop.Loudness.Title=Loudness and pauses
 Prop.Normalize.Title=Automatic loudness
+; Not "noise gate": the reader is being asked about a symptom they can hear, not
+; about the name of a filter. It only ever acts where the voice is not.
+Prop.Gate.Title=Noise in pauses
 ; Preset level names — every stage uses Minimal/Light/Medium/Strong/Maximum.
 Prop.Level.Minimal=Minimal
 Prop.Level.Light=Light
@@ -603,13 +612,13 @@ Settings.Misc.Look.Restart=The look changes when NBR starts again. Restart it no
 ; Per-control help: a ? on each group opens one short explanation. F1 on the
 ; focused control opens the same text without travelling to the button.
 Hint.Button.Accessible=Help for {0}
-Hint.SoundProcessing=Using sound processing you can fine-tune the sound of the recording. You can remove different noises, boost the volume and colour the overall sound with the equaliser. There are six different controls and you can turn each of them on and off. You can also tune each control separately. You can temporarily bypass the whole sound processing chain by pressing Ctrl+B, to hear the difference between the original recording and your sound settings.
+Hint.SoundProcessing=Using sound processing you can fine-tune the sound of the recording. You can remove different noises, boost the volume and colour the overall sound with the equaliser. There are six groups of controls, each of which you can turn on and off separately. You can also tune each control separately. You can temporarily bypass the whole sound processing chain by pressing Ctrl+B, to hear the difference between the original recording and your sound settings.
 Hint.RemoveRumble=Cuts the very lowest frequencies — traffic, air conditioning, handling noise. It cannot recover a muddy recording, but it clears the bottom end so speech has room.
 Hint.NoiseRemoval=Reduces steady background hiss, the kind a tape or a cheap microphone leaves behind. Too strong a setting starts to eat the voice with it, so raise it only until the hiss goes.
 Hint.SoftenSibilance=Takes the edge off sharp S and Š sounds. Useful on close-miked readers and on recordings that were brightened too much.
 Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a whisper and a shout end up closer together. This is the one to reach for when you keep adjusting the volume.
 Hint.Tone=Bass, voice and treble, in decibels. Small moves go a long way; anything past a few dB usually means another stage is the real fix.
-Hint.AutomaticLoudness=Holds the overall level steady across a whole book, including between files recorded on different days. It follows the voice rather than the whole signal, which is what a spoken recording asks for.
+Hint.AutomaticLoudness=Two things that pull against each other, which is why they share a box. Automatic loudness holds the overall level steady across a whole book, including between files recorded on different days; it follows the voice rather than the whole signal, which is what a spoken recording asks for. Noise in pauses works the other way: anything quieter than the chosen level gets pushed down, so a hiss or a hum that sits under the reading stops being audible in the gaps between sentences. It never touches the voice itself, and it quietens rather than silences (a noise that switches off and on around every phrase is more tiring than one that simply stays). Turn loudness up and the noise underneath comes up with it, so if that happens, this is the control for it.
 Hint.Text0=Here you can choose the language and voice for reading this book. You can have different settings for each individual book in the Library. Every voice remembers its own settings — speed, volume and pitch — so there is no need to set them again after switching back from another voice.\n\nRemember that you can select "No speech" if you want to read visually or on the braille display without hearing audio.
 Hint.TextBrailleSource=This book came from a braille file, and this is the table it was read with — the one that turned the braille cells back into words.\n\nA braille file says nothing about its language, its grade, or which national standard it follows, so NBR has to work the table out from the text itself. It is usually right, but not always, and a wrong table gives words that are almost right: "Have" where the book says "How".\n\nIf that is what you are seeing, pick another table here and press OK. The book is read again from the braille file you imported, which is kept beside it, so you can try as many tables as you like and go back to the first one at any time.\n\nThe tables offered are the ones for the language above. If that language is wrong, change it and the tables will follow.\n\nThis has nothing to do with what your braille display shows. Your screen reader translates that, using the table in its own settings.
 Hint.TextVisual=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like film end credits, or instant page changes. You can also choose the background, text and highlight colours, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.

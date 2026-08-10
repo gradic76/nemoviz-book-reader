@@ -58,6 +58,7 @@ namespace Nemoviz_Book_Reader
         /// one is a change in the data and nowhere else.</summary>
         private CheckBox chkEq; private NumericUpDown[] numEq;
         private CheckBox chkNrm; private ComboBox cmbNrm;
+        private CheckBox chkGate; private ComboBox cmbGate;
 
         private Button btnResetAll;
         private CheckBox chkBypass;
@@ -218,9 +219,36 @@ namespace Nemoviz_Book_Reader
             // spoken recording wants, and the music-safe alternative was a
             // question asked of a reader who has no way to answer it. The cell
             // is now shaped like every other stage — a switch and a level.
-            GroupBox gNrm = StageBox("Prop.Normalize.Title", xC, y3, 7);
-            chkNrm = StageEnable(gNrm); chkNrm.Checked = s.NormalizeEnabled;
+            // TWO subjects in one cell, and Gordan's reasoning for pairing them
+            // beats the one I offered (2026-08-09). Two arguments:
+            //
+            //   The six cells already read the chain in order — rumble, noise,
+            //   sibilance, dynamics, tone, loudness IS highpass, afftdn,
+            //   deesser, acompressor, EQ, speechnorm. The dialog is a picture of
+            //   the signal path. The gate acts LAST, so it belongs in the last
+            //   cell; putting it with Noise reduction, as I had proposed, would
+            //   have stood it second and acted it sixth.
+            //
+            //   And these two fight each other directly: speechnorm lifts quiet
+            //   passages, the gate pushes them down, and the quiet passage is
+            //   the pause. A reader who turns loudness up and hears the noise
+            //   come up with it has the remedy in the same box — which is the
+            //   exact thing that happened to him today.
+            //
+            // It costs no layout: this cell shares row three with Tone, which is
+            // already the tall one (166 against 112), so the height is there to
+            // be used.
+            GroupBox gNrm = StageBox("Prop.Loudness.Title", xC, y3, 7, EqCellH);
+            chkNrm = StageEnable(gNrm, "Prop.Normalize.Title");
+            chkNrm.Checked = s.NormalizeEnabled;
             cmbNrm = LevelCombo(gNrm, L5, s.NormalizeLevel);
+            chkGate = StageEnable(gNrm, "Prop.Gate.Title", 78);
+            chkGate.Checked = s.GateEnabled;
+            chkGate.TabIndex = 2;
+            cmbGate = LevelCombo(gNrm, L5, s.GateLevel, 102);
+            cmbGate.TabIndex = 3;
+            cmbGate.AccessibleName = Localization.T("Prop.Gate.Title") + " — " +
+                                     Localization.T("Prop.Stage.Level");
 
             stageCells = new[] { gHp, gDn, gDs, gCmp, gEq, gNrm };
             stages = new List<(CheckBox, Control[])>
@@ -231,6 +259,7 @@ namespace Nemoviz_Book_Reader
                 (chkCmp, new Control[] { cmbCmp }),
                 (chkEq, numEq),
                 (chkNrm, new Control[] { cmbNrm }),
+                (chkGate, new Control[] { cmbGate }),
             };
 
             btnResetAll = new Button();
@@ -320,6 +349,7 @@ namespace Nemoviz_Book_Reader
                 st.Enable.CheckedChanged += (s2, e) => { UpdateEnabledStates(); OnAnyChange(); };
             WireCombo(cmbHp); WireCombo(cmbDn); WireCombo(cmbDs); WireCombo(cmbCmp);
             WireCombo(cmbNrm);
+            WireCombo(cmbGate);
             foreach (NumericUpDown n in numEq) n.ValueChanged += (s2, e) => OnAnyChange();
 
             UpdateEnabledStates();
@@ -402,26 +432,33 @@ namespace Nemoviz_Book_Reader
             return g;
         }
 
-        private CheckBox StageEnable(GroupBox g)
+        /// <summary>A stage's on/off switch. Normally unlabelled — the group
+        /// already names the stage and the check state alone says whether it is
+        /// on, so a reader hears "Soften sibilance, checkbox".
+        ///
+        /// <para><c>captionKey</c> is for the one cell that holds TWO subjects.
+        /// There the group name cannot identify either of them, so each switch
+        /// carries its own name — visibly and in its accessible name, since a
+        /// nameless second checkbox in a box called something else is exactly
+        /// how a control becomes unreachable by ear.</para></summary>
+        private CheckBox StageEnable(GroupBox g, string captionKey = null, int y = 18)
         {
-            // No "Use" label — the group already names the stage and the check
-            // state alone says whether it is on. Accessible name = the stage
-            // name so a screen reader reads e.g. "Soften sibilance, checkbox".
             CheckBox c = new CheckBox();
-            c.Text = "";
-            c.AccessibleName = g.Text;
-            c.Location = new Point(10, 18);
+            string name = captionKey == null ? g.Text : Localization.T(captionKey);
+            c.Text = captionKey == null ? "" : name;
+            c.AccessibleName = name;
+            c.Location = new Point(10, y);
             c.Size = new Size(CellW - 24, 20);
             c.TabIndex = 0;
             g.Controls.Add(c);
             return c;
         }
 
-        private ComboBox LevelCombo(GroupBox g, string[] itemKeys, int selected)
+        private ComboBox LevelCombo(GroupBox g, string[] itemKeys, int selected, int y = 46)
         {
             ComboBox cb = new ComboBox();
             cb.DropDownStyle = ComboBoxStyle.DropDownList;
-            cb.Location = new Point(10, 46);
+            cb.Location = new Point(10, y);
             cb.Size = new Size(CellW - 24, 24);
             cb.AccessibleName = g.Text + " — " + Localization.T("Prop.Stage.Level");
             cb.TabIndex = 1;
@@ -559,6 +596,12 @@ namespace Nemoviz_Book_Reader
                 "speechnorm, " + cmbNrm.Text +
                 " (e=" + SoundSettings.SpeechnormExpansion[nl].ToString("0.0") + ")");
 
+            int gl = cmbGate.SelectedIndex;
+            AppendStage(sb, "Prop.Gate.Title", chkGate.Checked,
+                "agate, " + cmbGate.Text +
+                " (" + SoundSettings.GateThresholdDb[gl].ToString("0") + " dB, " +
+                SoundSettings.GateRangeDb.ToString("0") + " dB max)");
+
             sb.AppendLine(Localization.T("Prop.Info.Protection") + ": " +
                 SoundSettings.LimiterCeilingDb.ToString("0.0") + " dB");
 
@@ -592,6 +635,8 @@ namespace Nemoviz_Book_Reader
                 numEq[i].Value = i < d.EqGain.Length ? Clamp(d.EqGain[i], -15, 15) : 0;
             chkNrm.Checked = d.NormalizeEnabled;
             cmbNrm.SelectedIndex = d.NormalizeLevel;
+            chkGate.Checked = d.GateEnabled;
+            cmbGate.SelectedIndex = d.GateLevel;
 
             suppressAnnounce = false;
             UpdateEnabledStates();
@@ -639,6 +684,9 @@ namespace Nemoviz_Book_Reader
 
             s.NormalizeEnabled = chkNrm.Checked;
             s.NormalizeLevel = cmbNrm.SelectedIndex;
+
+            s.GateEnabled = chkGate.Checked;
+            s.GateLevel = cmbGate.SelectedIndex;
 
             // CARRIED, not rebuilt. The loudness target is the one part of the
             // chain that is not a control: it is a single number worked out from
