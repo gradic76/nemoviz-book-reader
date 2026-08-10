@@ -2010,6 +2010,27 @@ namespace Nemoviz_Book_Reader
         {
             why = null;
             string destFolder = null;
+
+            // AN EMPTY FILE IS NOT A BROKEN ARCHIVE. Three zero-byte .zip files
+            // in Gordan's test set came back with SharpCompress's own words —
+            // "Cannot determine compressed stream type. Supported Archive
+            // Formats: Zip, Rar, Tar, GZip, 7Zip" — which sends a reader off to
+            // check the format of a file that has nothing in it at all. The
+            // check is here rather than in the archive path because a zero-byte
+            // anything is the same answer: docx, mp3, brf alike.
+            try
+            {
+                var fi = new System.IO.FileInfo(filePath);
+                if (fi.Exists && fi.Length == 0)
+                {
+                    why = Localization.T("Dialog.Skipped.Empty");
+                    if (!quiet)
+                        MessageForm.ShowInfo(this, Localization.T("Dialog.ImportError.Message", why),
+                                             Localization.T("Common.Error"));
+                    return false;
+                }
+            }
+            catch { }
             bool createdFolder = false;
             try
             {
