@@ -366,8 +366,8 @@ namespace Nemoviz_Book_Reader
             if (b == null) return;
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            using (var br = new SolidBrush(NewPlayerSkin.PanelMid))
-                g.FillRectangle(br, 0, 0, b.Width, b.Height);
+            // The real metal, not a flat fill — see DialogCanvas.Backdrop.
+            DialogCanvas.Backdrop(g, b, new Rectangle(0, 0, b.Width, b.Height));
             NewPlayerSkin.PaintOrigin = b.Location;
             var face = new Rectangle(NewPlayerSkin.Groove, NewPlayerSkin.Groove,
                 b.Width - 2 * NewPlayerSkin.Groove, b.Height - 2 * NewPlayerSkin.Groove);
@@ -812,7 +812,6 @@ namespace Nemoviz_Book_Reader
 
             int column = 0;
             foreach (GroupBox g in groups) column = Math.Max(column, LabelColumn(g));
-            foreach (GroupBox g in groups) PlaceValues(g, column);
 
             for (int i = 0; i < groups.Count; i++)
             {
@@ -828,6 +827,10 @@ namespace Nemoviz_Book_Reader
                 HintSystem.Attach(groups[i],
                     !string.IsNullOrEmpty(key) && key.StartsWith("Hint.") ? key : "Hint.Text" + i);
             }
+
+            // AFTER the keys exist — see the reading page for why.
+            foreach (GroupBox g in groups) PlaceValues(g, column);
+
             p.TextInfo.TabIndex = 20;
         }
 
@@ -923,7 +926,6 @@ namespace Nemoviz_Book_Reader
             // of them, so every value on the reading page starts at the same x.
             int column = 0;
             foreach (GroupBox g in groups) column = Math.Max(column, LabelColumn(g));
-            foreach (GroupBox g in groups) PlaceValues(g, column);
 
             DialogSkin.AsKey(p.Cancel, new Rectangle(836, DialogSkin.ButtonsY,
                 DialogSkin.ButtonW, DialogSkin.ButtonH));
@@ -933,6 +935,12 @@ namespace Nemoviz_Book_Reader
             HintSystem.Clear();
             for (int i = 0; i < groups.Count; i++)
                 HintSystem.Attach(groups[i], "Hint.Text" + i);
+
+            // AFTER the keys exist, never before. PlaceValues now measures the
+            // room left by the group's help key, and it cannot measure a button
+            // that has not been added yet — which is exactly why the first
+            // attempt at this changed nothing at all.
+            foreach (GroupBox g in groups) PlaceValues(g, column);
 
             for (int i = 0; i < groups.Count; i++) groups[i].TabIndex = i;
             p.TextInfo.TabIndex = 20;
@@ -992,6 +1000,22 @@ namespace Nemoviz_Book_Reader
             }
 
             int margin = g.Width - 14;
+
+            // KEEP CLEAR OF THE HELP KEY. It sits in the group's own top-right
+            // corner (HintSystem.Attach puts it at Width-30, y 4, 22 x 22), and a
+            // value stretched to `margin` runs straight underneath it: on the
+            // Speech page the first combo's top-right corner and the key's
+            // bottom-left corner were overlapping outright. Reported twice —
+            // once before the ? was made to fit its button, which changed the
+            // glyph and not the collision.
+            //
+            // Every row in a group with a key gives up the same width, not just
+            // the row that collides: a single short combo in a column of long
+            // ones looks like a mistake, where a column that stops 34 short of
+            // the edge looks like the column.
+            foreach (Control c in g.Controls)
+                if (c is Button && HintSystem.IsHelpKey((Button)c)) { margin = c.Left - 8; break; }
+
             foreach (Control c in others)
             {
                 bool labelled = false;
@@ -1048,6 +1072,39 @@ namespace Nemoviz_Book_Reader
         private Bitmap cached;
         public readonly List<Rectangle> Wells = new List<Rectangle>();
 
+        /// <summary>The canvas a control on this dialog should take its backdrop
+        /// from. Set once the canvas exists; null under the classic look.</summary>
+        internal static DialogCanvas Active;
+
+        /// <summary>Hands a control the piece of the real metal it stands on.
+        ///
+        /// <para>The same fault the panel keys had, and the same cure: a button
+        /// that fills its own rectangle with one flat colour leaves a square
+        /// patch at each corner outside its rounded bed, where the dialog's metal
+        /// is a gradient. Gordan saw it as "OK and Cancel should have rounded
+        /// beds" — the bed IS round, but the flat corners around it read as a
+        /// square one. Blitting the cached layer is exact, because it IS the
+        /// metal.</para></summary>
+        internal static void Backdrop(Graphics g, Control c, Rectangle bounds)
+        {
+            DialogCanvas dc = Active;
+            if (dc == null || c == null || dc.cached == null
+                || dc.cached.Width < 8 || dc.cached.Height < 8)
+            {
+                using (var br = new SolidBrush(NewPlayerSkin.PanelMid)) g.FillRectangle(br, bounds);
+                return;
+            }
+            Point at = c.Location;
+            Rectangle src = new Rectangle(at.X + bounds.X, at.Y + bounds.Y, bounds.Width, bounds.Height);
+            if (src.Right > dc.cached.Width || src.Bottom > dc.cached.Height
+                || src.X < 0 || src.Y < 0)
+            {
+                using (var br = new SolidBrush(NewPlayerSkin.PanelMid)) g.FillRectangle(br, bounds);
+                return;
+            }
+            g.DrawImage(dc.cached, bounds, src, GraphicsUnit.Pixel);
+        }
+
         public DialogCanvas(Form owner)
         {
             this.owner = owner;
@@ -1083,7 +1140,14 @@ namespace Nemoviz_Book_Reader
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     PaintMetal(g);
                 }
+                // The buttons draw before or after this depending on z-order, so
+                // whoever asks for a backdrop must find a layer that is already
+                // built. Repaint them once it is.
+                Active = this;
+                foreach (Control c in Parent == null ? new Control.ControlCollection(this) : Parent.Controls)
+                    if (c is Button) c.Invalidate();
             }
+            Active = this;
             e.Graphics.DrawImageUnscaled(cached, 0, 0);
         }
 

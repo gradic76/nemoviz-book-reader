@@ -95,15 +95,31 @@ namespace Nemoviz_Book_Reader
             canvas.Rebuild();
         }
 
-        /// <summary>One page: glass underneath, its groups as stickers down the
+        /// <summary>One page: METAL underneath, its groups as stickers down the
         /// full width, everything else recoloured where it stands. A page's loose
         /// controls are laid out by hand, pair by pair, and a loop that only knows
         /// "control" cannot put a label back beside the thing it labels — the
-        /// lesson the audio cells taught.</summary>
+        /// lesson the audio cells taught.
+        ///
+        /// <para><b>Metal, not glass, since 2026-08-10.</b> Gordan: the Settings
+        /// groups have "too exposed label frames" and should look like the ones
+        /// in Audio and Speech properties. Both pages already use the SAME
+        /// sticker painter, and sampling the two captures showed the borders are
+        /// near enough the same colour — #2A332E here against #474F48 there. What
+        /// differed was what lay BEHIND them: this page was glass, near-black at
+        /// #0E1210, so a sticker at #1A211D sat slightly LIGHTER than its
+        /// surround and read as a raised card with an outline drawn round it. In
+        /// Properties the same sticker sits on metal at #C6C6C2 and reads as a
+        /// panel recessed into it, which is the look he wants — and the look the
+        /// whole dialog family is built on, where dark means inset.</para>
+        ///
+        /// <para>So the fix is one line, and it is not the frame. Chasing the
+        /// border colour would have made the frame invisible and left the card
+        /// still floating the wrong way round.</para></summary>
         private static void LayOutPage(TabPage page, int pw, int ph)
         {
             page.UseVisualStyleBackColor = false;
-            page.BackColor = NewPlayerSkin.Glass;
+            page.BackColor = NewPlayerSkin.PanelMid;
             page.AutoScroll = false;      // the room is there now; nothing scrolls
 
             var groups = new List<GroupBox>();
