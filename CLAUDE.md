@@ -1044,9 +1044,14 @@ proposed):
 | Aragon | 36.5 | strong (3) | **max** | 0,0,+2,+3,+6 | −10,−15,+5,+5,+5 |
 | Torton | 42.0 | **light (1)** | **max** | 0,0,+2,+4,+8 | **identical** |
 
-- **The rumble rule is too timid — 4 of 4, unanimously.** He went to maximum on
-  every one; the advisor proposed one step lower on three and *three* steps lower
-  on Torton. That is the clearest signal in the set and it is not a close call.
+- ~~**The rumble rule is too timid — 4 of 4, unanimously.**~~ **WRONG, and
+  disproved by the re-listen on 2026-08-10 — see §8d's closing section.** He went
+  to maximum on every one *because the 200 Hz band did not exist yet*; once it
+  did, he accepted the advisor's rumble level on three of four and nudged the
+  fourth by one step. **Nothing was changed on the strength of this bullet**,
+  which is the only reason it did no harm. A user pinning a control at its limit
+  says the control they wanted is missing at least as often as it says this one
+  is too weak.
 - **The treble ramp is landing right.** Two of four are identical to the dB, and
   they are the two where he did not also raise the level.
 - **The two big low-band cuts are downstream of the missing gain**, not of the
@@ -1061,6 +1066,49 @@ proposed):
 absent and the order was different — so all four are owed a re-listen before any
 threshold is moved on their evidence. The rumble finding is the exception: it is
 unanimous and does not depend on level.
+
+### The ear's verdict, and the sound work is closed (Gordan, 2026-08-10)
+
+He re-listened to all four bad recordings against the advisor's proposals, on
+the rebuilt chain — gain first, five bands with the lowest at 200 Hz, ±20, and
+the gate. His verdict: *"ovo što smo složili zajedno sa savjetnikom je dobar
+alat i ne znam iskreno što bismo još mogli dobiti. Od loše snimke neće nikad
+ispasti kristalno čista, cilj je da se knjiga može poslušati do kraja bez
+previše nerviranja."* **Treat the sound chain as finished unless a new sample
+says otherwise.**
+
+| | advisor | his | |
+|---|---|---|---|
+| Jevtušenko | HP3 DN2 EQ 0,0,+1,+2,+5 · gain −9.1 | **accepted unchanged** | |
+| Torton | HP1 DN2 EQ 0,0,**+2,+4,+8** | HP1 DN2 EQ +1,+3,**+2,+4,+8** · norm 4 | top three identical |
+| Aragon | HP3 DN2 EQ 0,0,**+2,+3,+6** · norm 1 · gain +2.4 | HP4 DN4 EQ −12,−10,**+2,+3,+6** · norm 0 · gate 4 · gain +2.4 | top three identical |
+| Barbara | HP3 DN2 EQ 0,0,+2,+4,+7 | HP3 DN2 EQ −20,−10,+6,+3,+5 · norm 4 | within 2 dB |
+
+- **The treble ramp is solved**: three of four identical to the decibel, the
+  fourth within 2 dB. It was two of four before the recalibration.
+- **The rumble rule was right all along** — see the struck-through bullet above.
+- **The gate works and does not pump.** The one thing measurement could not
+  answer, answered by ear on Aragon at maximum: *"u pauzama je sve rezao, ispod
+  govora se čuje ali su prijelazi korektni. Vjerujem da neutrenirano uho to ne bi
+  ni primijetilo."* The attenuate-don't-silence choice (20 dB cap, 250 ms
+  release) is vindicated; do not turn it into a hard gate.
+- **The two low bands are TASTE, not a measurable, and the advisor is right to
+  leave them at zero.** Measured: Barbara and Torton sit 1.6 dB apart on LowBand
+  and got opposite treatment (−20 against +1), and the centroid is worse than
+  useless here — Torton has the LOWEST centroid of the four, i.e. the most
+  low-heavy, and is the one he **boosted**. Four points, no predictor. Do not
+  invent a rule for these two bands.
+- **Loudness matters more than noise to him**, and this is a standing priority
+  rather than a comment on these files: *"nekad je poštena glasnoća čak i
+  važnija od šumova… postoje snimke koje doslovno moraš držati na uhu zvučnik s
+  maksimalnim volumenom."* He has no such sample here. **Known limit if one turns
+  up:** the −16 LUFS lift is capped by `MaxLimitingDb` (5 dB), so a recording far
+  below target stops short rather than being limited into it. That cap is the
+  first thing to revisit for that case, and it should be revisited with the
+  sample in hand, not before.
+- He turns speechnorm up where the advisor leaves it off (4, off, 0, 4 against
+  0, 0, 1, 0) — on the two books whose gain was already zero because they measure
+  at −16. Three points, so no rule change; noted as the one gap with a direction.
 
 ### `tools/spectrum` — the analyser we already had (2026-08-08)
 
