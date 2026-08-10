@@ -571,6 +571,25 @@ namespace Nemoviz_Book_Reader
         [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)] private static extern void mpv_free(IntPtr data);
 
         private const int EventEndFile = 7;
+        private const int EventShutdown = 1;
+
+        /// <summary>How many consecutive UNCHANGED metadata reads mean decoding
+        /// has stopped. Each poll waits 20 ms, so eight is about 160 ms — long
+        /// enough not to trip between frames, and it costs nothing in the normal
+        /// case because the end-of-file event gets there first. It is only paid
+        /// when that event does not come, where it replaces a 30-second wait.
+        /// </summary>
+        private const int StillPollsMeanEnd = 8;
+
+        /// <summary>A cheap fingerprint of a reading, for spotting that it has
+        /// stopped moving. Only needs to change when the numbers do.</summary>
+        private static double Signature(Dictionary<string, double> m)
+        {
+            double s = 0;
+            foreach (var kv in m)
+                if (!double.IsNaN(kv.Value) && !double.IsInfinity(kv.Value)) s += kv.Value;
+            return s;
+        }
 
         /// <summary>Seconds taken from each sampled point.</summary>
         public const double SegmentSeconds = 20;
@@ -903,14 +922,51 @@ namespace Nemoviz_Book_Reader
                 // values on every frame, and at end-of-file the graph is torn
                 // down and the property comes back empty. So the LAST non-empty
                 // read is the answer, not the one after EOF.
+                // THE SEGMENT IS OVER WHEN THE METADATA STOPS COMING, not when an
+                // event says so.
+                //
+                // Breaking only on EndFile was a one-in-four thirty-second stall
+                // (Gordan saw the analysis hang mid-book; reproduced 2026-08-10 —
+                // twenty segments at a 1149 ms median with one at 30 672, and on
+                // a repeat of a single segment, runs of 1133, 1114, 1124 and then
+                // 30 680). It is not the file: a neighbour that had just measured
+                // in 1137 ms took 30 615 on its next run. The reading came back
+                // fine every time. What was missing was the EVENT — mpv does not
+                // reliably hand this loop an EndFile for a slice ended by
+                // `length`, and with nothing else to break on, the loop sat out
+                // its whole deadline having already had the answer.
+                //
+                // The comment below has always described a better terminator than
+                // the event: the graph is torn down at end of stream, so the
+                // property goes empty. Empty-after-non-empty IS the end, it needs
+                // no event, and it cannot be missed.
+                //
+                // Polled WHILE it plays: astats and ebur128 publish cumulative
+                // values on every frame, and at end-of-file the graph is torn
+                // down and the property comes back empty. So the LAST non-empty
+                // read is the answer, not the one after EOF.
                 Dictionary<string, double> last = null;
-                DateTime deadline = DateTime.UtcNow.AddSeconds(30);
+                double lastSig = double.NaN;
+                int still = 0;
+                DateTime deadline = DateTime.UtcNow.AddSeconds(5);   // a backstop, not the plan
                 while (DateTime.UtcNow < deadline)
                 {
                     IntPtr ev = mpv_wait_event(ctx, 0.02);
                     Dictionary<string, double> now = ReadMetadata(ctx);
-                    if (now != null && now.Count > 0) last = now;
-                    if (Marshal.ReadInt32(ev) == EventEndFile) break;
+                    if (now != null && now.Count > 0)
+                    {
+                        last = now;
+                        // astats and ebur128 ACCUMULATE, so their numbers move on
+                        // every decoded frame and freeze the moment decoding
+                        // stops. That makes stillness a reliable end-of-segment
+                        // signal that needs no event at all.
+                        double sig = Signature(now);
+                        if (sig == lastSig) { if (++still >= StillPollsMeanEnd) break; }
+                        else { lastSig = sig; still = 0; }
+                    }
+
+                    int id = Marshal.ReadInt32(ev);
+                    if (id == EventEndFile || id == EventShutdown) break;
                 }
                 return last;
             }
