@@ -109,6 +109,34 @@ namespace Nemoviz_Book_Reader
         // few hundred gradient strokes.
         private Bitmap staticLayer;
 
+        /// <summary>Hands a control the piece of the REAL panel it is standing on.
+        ///
+        /// <para><b>Why this exists</b> (Gordan, 2026-08-10: "corners of the
+        /// buttons are curved and the corners of the button beds are
+        /// rectangular"). A key's well is round, but the control it is drawn in
+        /// is a rectangle, and <c>PaintKey</c> began by filling that whole
+        /// rectangle with flat <c>PanelMid</c>. Outside the round well that left
+        /// a square patch of one flat colour where the panel has a vertical
+        /// gradient, the brushed-metal lines and the inner edge of the key's own
+        /// contact shadow — so the eye reads a square bed under a round key.
+        ///
+        /// Blitting the cached layer is exact by construction: what the corner
+        /// shows is what the panel shows, because it IS the panel.</para></summary>
+        internal void DrawBackdrop(Graphics g, Control c, Rectangle bounds)
+        {
+            EnsureStatic();
+            if (staticLayer == null || c == null)
+            {
+                using (var br = new SolidBrush(NewPlayerSkin.PanelMid)) g.FillRectangle(br, bounds);
+                return;
+            }
+            Point at = c.Location;
+            g.DrawImage(staticLayer,
+                        bounds,
+                        new Rectangle(at.X + bounds.X, at.Y + bounds.Y, bounds.Width, bounds.Height),
+                        GraphicsUnit.Pixel);
+        }
+
         private void DropStatic()
         {
             if (staticLayer != null) { staticLayer.Dispose(); staticLayer = null; }
@@ -473,7 +501,16 @@ namespace Nemoviz_Book_Reader
 
             float x = glass.X, w = glass.Width, y = glass.Y;
             bool first = true;
-            var pendingTimes = new List<string>();
+            // The LABEL travels with the time, and until 2026-08-10 it did not.
+            // PaintTimes printed "Time elapsed" and "Time remaining" from the
+            // language file whatever the line actually said — so a multi-part
+            // audio book, which lists "Part 3 elapsed", "Part 3 remaining",
+            // "Time elapsed", "Time remaining", drew TWO blocks both captioned
+            // Time elapsed / Time remaining. That is Gordan's "we see two time
+            // elapsed segments", and the same invention left a lone trailing
+            // clock captioned as elapsed when the reader could hear the info box
+            // say remaining.
+            var pendingTimes = new List<(string Label, string Value)>();
 
             for (int i = 0; i < lines.Length && y < glass.Bottom - 20; i++)
             {
@@ -498,7 +535,7 @@ namespace Nemoviz_Book_Reader
 
                 if (TimeLike.IsMatch(value))
                 {
-                    pendingTimes.Add(value);
+                    pendingTimes.Add((label, value));
                     // Elapsed and remaining share one block, side by side.
                     if (pendingTimes.Count == 2 || i == lines.Length - 1)
                     {
@@ -526,27 +563,47 @@ namespace Nemoviz_Book_Reader
             if (pendingTimes.Count > 0) PaintTimes(g, x, y, w, pendingTimes);
         }
 
-        private float PaintTimes(Graphics g, float x, float y, float w, List<string> times)
+        /// <summary>One block of up to two clocks, each under ITS OWN label —
+        /// the one the info box gave, never one this code chose. The flipper
+        /// state is keyed on the side rather than on the words, so a book whose
+        /// left clock is "Part 3 elapsed" animates exactly like one whose left
+        /// clock is "Time elapsed".</summary>
+        private float PaintTimes(Graphics g, float x, float y, float w,
+                                 List<(string Label, string Value)> times)
         {
-            NewPlayerSkin.DrawString(g, Localization.T("Player.Info.ElapsedLabel"),
-                new RectangleF(x, y, 140, 18), NewPlayerSkin.FSilk, NewPlayerSkin.Silk,
+            NewPlayerSkin.DrawString(g, Caption(times[0].Label, "Player.Info.ElapsedLabel"),
+                new RectangleF(x, y, 160, 18), NewPlayerSkin.FSilk, NewPlayerSkin.Silk,
                 StringAlignment.Near, StringAlignment.Center);
             if (times.Count > 1)
-                NewPlayerSkin.DrawString(g, Localization.T("Player.Info.RemainingLabel"),
-                    new RectangleF(x + 170, y, 140, 18), NewPlayerSkin.FSilk, NewPlayerSkin.Silk,
+                NewPlayerSkin.DrawString(g, Caption(times[1].Label, "Player.Info.RemainingLabel"),
+                    new RectangleF(x + 170, y, 160, 18), NewPlayerSkin.FSilk, NewPlayerSkin.Silk,
                     StringAlignment.Near, StringAlignment.Center);
             y += 20;
-            Flaps(g, x, y, HoursMinutes(times[0]), "elapsed");
-            if (times.Count > 1) Flaps(g, x + 170, y, HoursMinutes(times[1]), "remaining");
+            Flaps(g, x, y, HoursMinutes(times[0].Value), "elapsed");
+            if (times.Count > 1) Flaps(g, x + 170, y, HoursMinutes(times[1].Value), "remaining");
 
             // The bar's fraction comes from these two numbers, not from the
             // player's own counter: that one is per FILE and stops being
             // refreshed while playback is paused, so after a seek the blade sat
             // at zero while the display said two minutes in. Same source as
             // everything else on the glass, so it cannot disagree with it.
-            elapsedSec = Seconds(times[0]);
-            remainingSec = times.Count > 1 ? Seconds(times[1]) : -1;
+            //
+            // The LAST block painted wins, and that is deliberate: a multi-part
+            // book lists its part times first and the whole book's second, and
+            // the bar is the whole book's.
+            elapsedSec = Seconds(times[0].Value);
+            remainingSec = times.Count > 1 ? Seconds(times[1].Value) : -1;
             return y + 66;
+        }
+
+        /// <summary>The line's own caption, falling back to the language file
+        /// only when the line arrived without one — which is what every caption
+        /// here used to do unconditionally.</summary>
+        private static string Caption(string fromLine, string fallbackKey)
+        {
+            if (!string.IsNullOrEmpty(fromLine))
+                return fromLine.EndsWith(":", StringComparison.Ordinal) ? fromLine : fromLine + ":";
+            return Localization.T(fallbackKey);
         }
 
         // Elapsed and remaining, in seconds, as last drawn on the glass.

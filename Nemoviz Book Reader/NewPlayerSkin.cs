@@ -260,7 +260,7 @@ namespace Nemoviz_Book_Reader
             b.Text = "";
             b.SetBounds(x, y, CellW, BtnH + 2 * Groove);
             Flatten(b);
-            b.Paint += (s, e) => PaintKey(e.Graphics, b, new Rectangle(0, 0, b.Width, b.Height), 5);
+            b.Paint += (s, e) => PaintKey(e.Graphics, b, new Rectangle(0, 0, b.Width, b.Height), 5, canvas);
             b.Click += (s, e) => canvas.Flash(b);
         }
 
@@ -277,12 +277,16 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Recess, then silver face, then the focus glow in the groove —
         /// which is the whole reason the groove exists.</summary>
-        internal static void PaintKey(Graphics g, Control c, Rectangle bounds, int radius)
+        internal static void PaintKey(Graphics g, Control c, Rectangle bounds, int radius,
+                                      SkinCanvas canvas = null)
         {
             g.SmoothingMode = SmoothingMode.AntiAlias;
             // The canvas has already laid the panel and this key's contact shadow
-            // down behind us; we only repaint our own patch of it.
-            using (var br = new SolidBrush(PanelMid)) g.FillRectangle(br, bounds);
+            // down behind us, so we take our patch FROM it rather than filling
+            // with a flat colour — see SkinCanvas.DrawBackdrop for what the flat
+            // fill was doing to the corners.
+            if (canvas != null) canvas.DrawBackdrop(g, c, bounds);
+            else using (var br = new SolidBrush(PanelMid)) g.FillRectangle(br, bounds);
 
             PaintOrigin = c.Location;
             var face = Rectangle.Inflate(bounds, -Groove, -Groove);
@@ -557,10 +561,11 @@ namespace Nemoviz_Book_Reader
                     g.TranslateTransform(-0.9f, -1.2f);
                 }
 
-            // the well itself
+            // the well itself — through Angled for the same reason the face is:
+            // an angled GDI+ gradient tiles, and the wrap is a hard line.
             using (var p = Round(outer, rad + Groove))
-            using (var br = new LinearGradientBrush(outer,
-                       Color.FromArgb(0x00, 0x00, 0x00), Color.FromArgb(0x4E, 0x4E, 0x4B), 55f))
+            using (var br = Angled(outer, 55f,
+                       Color.FromArgb(0x00, 0x00, 0x00), Color.FromArgb(0x4E, 0x4E, 0x4B)))
                 g.FillPath(br, p);
 
             // the cut edge, in shadow across the top and the left
@@ -605,9 +610,40 @@ namespace Nemoviz_Book_Reader
             return (float)(Math.Atan2(dy, dx) * 180.0 / Math.PI);
         }
 
+        /// <summary>An angled gradient that does not seam.
+        ///
+        /// <para><b>The thin vertical line down every key and the play button came
+        /// from here</b> (Gordan, 2026-08-10; measured at <b>72 % across, on 29 of
+        /// 34 rows, on every key wherever it stood on the panel</b>). GDI+'s
+        /// <c>LinearGradientBrush(rect, c1, c2, angle)</c> sizes the gradient to
+        /// the rectangle and then TILES it. Rotate it and one period no longer
+        /// covers the shape, so the pattern wraps — and a wrap in a smooth ramp
+        /// is a hard edge. The profile across a key ran 139…199 and then jumped
+        /// 72 in one pixel.</para>
+        ///
+        /// <para>The cure is to span the real extent instead of the rectangle:
+        /// the projection of a w×h rectangle onto a unit vector is
+        /// <c>w·|cos| + h·|sin|</c>, so two points that far apart about the
+        /// centre put every pixel inside ONE period and nothing can wrap.
+        /// <c>TileFlipXY</c> on top means that if rounding ever puts a pixel a
+        /// hair outside, it mirrors instead of jumping.</para></summary>
+        internal static LinearGradientBrush Angled(RectangleF r, float angleDeg,
+                                                   Color from, Color to)
+        {
+            double a = angleDeg * Math.PI / 180.0;
+            float cx = r.X + r.Width / 2f, cy = r.Y + r.Height / 2f;
+            float span = (float)(Math.Abs(r.Width * Math.Cos(a)) + Math.Abs(r.Height * Math.Sin(a)));
+            if (span < 1f) span = 1f;
+            var d = new PointF((float)(Math.Cos(a) * span / 2f), (float)(Math.Sin(a) * span / 2f));
+            var br = new LinearGradientBrush(new PointF(cx - d.X, cy - d.Y),
+                                             new PointF(cx + d.X, cy + d.Y), from, to);
+            br.WrapMode = WrapMode.TileFlipXY;
+            return br;
+        }
+
         internal static LinearGradientBrush SilverBrush(RectangleF r)
         {
-            var br = new LinearGradientBrush(r, KeyTop, KeyFoot, LightAngle(r));
+            var br = Angled(r, LightAngle(r), KeyTop, KeyFoot);
             var blend = new ColorBlend(5);
             blend.Colors = new[] { KeyTop, PanelLight, PanelMid, KeyBelly, KeyFoot };
             blend.Positions = new[] { 0f, 0.16f, 0.46f, 0.86f, 1f };
@@ -635,8 +671,24 @@ namespace Nemoviz_Book_Reader
                                Color.FromArgb(120, 0x5E, 0x5E, 0x5A), Color.FromArgb(0, 0x5E, 0x5E, 0x5A),
                                LinearGradientMode.Horizontal))
                         g.FillRectangle(br, r.Left, r.Top, end, r.Height);
+                    // THE THIN VERTICAL LINE DOWN EVERY KEY LIVED HERE. Reported
+                    // by Gordan 2026-08-10 as "about 2/3 – 3/4 across, top to
+                    // bottom, in every button and in the play button", and
+                    // measured before it was touched: a hard step of 54–72 (RGB
+                    // summed) at x=72 of 100, on 29 of 34 rows, in the SAME place
+                    // on every key wherever it stood on the panel. That last part
+                    // is what named it — a light-angle artefact would have moved.
+                    //
+                    // A GDI+ gradient brush TILES, so the pixel column exactly at
+                    // the brush rectangle's edge can take the value from the far
+                    // end of the previous tile — here alpha 120 where alpha 0 was
+                    // wanted. The left-hand fade never showed it because its brush
+                    // already starts a pixel before its fill (r.Left - 1); this
+                    // one started at the same pixel it filled from. So it gets the
+                    // same treatment: begin the brush one pixel outside the fill,
+                    // both sides, and the wrap column lands where nothing is drawn.
                     using (var br = new LinearGradientBrush(
-                               new RectangleF(r.Right - end, r.Top, end + 1, r.Height),
+                               new RectangleF(r.Right - end - 1, r.Top, end + 2, r.Height),
                                Color.FromArgb(0, 0x5E, 0x5E, 0x5A), Color.FromArgb(120, 0x5E, 0x5E, 0x5A),
                                LinearGradientMode.Horizontal))
                         g.FillRectangle(br, r.Right - end, r.Top, end, r.Height);
