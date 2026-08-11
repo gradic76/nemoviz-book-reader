@@ -468,6 +468,14 @@ namespace Nemoviz_Book_Reader
                     appSettings.SetAudioDevice(deviceIds[i]);
             }
             if (chkKeepAlive != null) appSettings.SetKeepDeviceAlive(chkKeepAlive.Checked);
+            // Which recognizer reads image documents; index 0 is Automatic, which
+            // is stored as empty so a machine that later loses that language falls
+            // back instead of failing.
+            if (cmbOcrLanguage != null && cmbOcrLanguage.Enabled)
+            {
+                int i = cmbOcrLanguage.SelectedIndex;
+                if (i >= 0 && i < ocrTags.Count) appSettings.SetOcrLanguage(ocrTags[i]);
+            }
             // Only when the group was reachable: a disabled box reads as
             // unchecked, and saving that would quietly clear a setting made on a
             // machine that did have a drive.
@@ -521,7 +529,83 @@ namespace Nemoviz_Book_Reader
             // to one book and lives in Properties.
             page.Controls.Add(BuildVisualGroup(8, 296));
             page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 526, 480, 32, 3));
+            // Reading pictures belongs here and not on Devices: a scanned book is
+            // a TEXT book that has to be read off the page first, and what it
+            // produces is fed to the same voice and the same display as every
+            // other one.
+            page.Controls.Add(BuildOcrGroup(8, 566));
+            page.Controls.Add(MakeHint("Settings.Ocr.Hint", 14, 668, 480, 44, 5));
             return page;
+        }
+
+        private ComboBox cmbOcrLanguage;
+        private readonly List<string> ocrTags = new List<string>();
+
+        /// <summary>Which recognizer reads an image document.
+        ///
+        /// <para><b>"Automatic" is first and is the right answer nearly always.</b>
+        /// Recognition goes by SCRIPT rather than by language — an English page
+        /// through the Croatian engine measured 0.0 % character error — so one
+        /// Latin recognizer reads every Latin language, and this list matters only
+        /// when a reader has several installed and knows the book is in one of
+        /// them.</para>
+        ///
+        /// <para><b>The group is present even with nothing installed</b>, dimmed,
+        /// exactly as the optical-drive group is: a reader who has none is better
+        /// told "this exists and your Windows has not got it" than left wondering
+        /// whether they missed it — and the button beside it is how they fix that.
+        /// NBR cannot install a language itself; that needs elevation, and
+        /// elevating to add operating-system components is not something a book
+        /// reader should do.</para></summary>
+        private GroupBox BuildOcrGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.Ocr.Group");
+            box.Location = new Point(x, y);
+            box.Size = new Size(500, 92);
+            box.Tag = "span2";
+
+            List<(string Tag, string Name)> languages = WindowsOcr.Languages;
+            bool any = languages.Count > 0;
+
+            Label lbl = new Label();
+            lbl.Text = Localization.T("Settings.Ocr.Language");
+            lbl.Location = new Point(14, 29);
+            lbl.Size = new Size(200, 20);
+
+            cmbOcrLanguage = new ComboBox();
+            cmbOcrLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbOcrLanguage.Location = new Point(224, 26);
+            cmbOcrLanguage.Size = new Size(200, 24);
+            cmbOcrLanguage.AccessibleName = Localization.T("Settings.Ocr.Language");
+            cmbOcrLanguage.TabIndex = 0;
+            cmbOcrLanguage.Enabled = any;
+
+            ocrTags.Clear();
+            ocrTags.Add("");
+            cmbOcrLanguage.Items.Add(Localization.T(any ? "Settings.Ocr.Automatic" : "Settings.Ocr.None"));
+            int selected = 0;
+            string current = appSettings.OcrLanguage ?? "";
+            foreach (var l in languages)
+            {
+                if (string.Equals(l.Tag, current, StringComparison.OrdinalIgnoreCase))
+                    selected = ocrTags.Count;
+                ocrTags.Add(l.Tag);
+                cmbOcrLanguage.Items.Add(l.Name);
+            }
+            cmbOcrLanguage.SelectedIndex = Math.Min(selected, cmbOcrLanguage.Items.Count - 1);
+
+            Button add = new Button();
+            add.Text = Localization.T("Settings.Ocr.AddLanguage");
+            add.AccessibleName = add.Text;
+            add.SetBounds(14, 58, 240, 26);
+            add.TabIndex = 1;
+            add.Click += (s, e) => WindowsOcr.OpenWindowsLanguageSettings();
+
+            box.Controls.Add(lbl);
+            box.Controls.Add(cmbOcrLanguage);
+            box.Controls.Add(add);
+            return box;
         }
 
         // ── Speech: language → voice, then how that voice sounds ──────────────

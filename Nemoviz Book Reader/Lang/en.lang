@@ -394,6 +394,44 @@ Analyse.Progress.Estimating=Working out how long this will take.
 Analyse.Progress.AlmostDone=Almost done.
 Analyse.Progress.Seconds=About {0} seconds left.
 Analyse.Progress.Minutes=About {0} minutes left.
+
+; --- Reading an image document (OCR) -----------------------------------
+; A scanned book is pictures of text. Windows itself can read them, so this
+; costs nothing to ship; what it costs is TIME, about half a second a page,
+; which is why the reader is asked first rather than having a book start
+; recognising itself.
+Ocr.Ask.Title=Read the pictures
+Ocr.Ask.Question={0} has no text in it — it is {1} pages of pictures. Nemoviz can read the text off them, which should take {2}. Read it now?
+Ocr.Ask.UnderAMinute=under a minute
+Ocr.Ask.Minutes=about {0} minutes
+; NOT "OCR failed". A page that rendered and held nothing usually means the
+; document really is pictures — of anything at all.
+Ocr.Result.NoText=No text was found in the pictures. The book has been added, but there is nothing to read from it.
+; The one Windows genuinely cannot draw: the text is stored as a JBIG2 mask,
+; which its PDF renderer omits, so every page arrives as blank paper. The file
+; is not damaged, and the reader must not be sent looking for a better copy.
+Ocr.Refusal.Undrawable=This PDF keeps its text in a form Windows cannot draw, so there is nothing for Nemoviz to read. The file itself is fine — a different edition of the same book, or its DjVu or ePub version, would work.
+Ocr.Refusal.NoEngine=Windows has no text recognition installed. It comes with a Windows language: add one under Settings, Time and language, Language and region, and it arrives with it.
+Ocr.Refusal.NoPages=There are no pages in this to read.
+Ocr.Progress.Title=Reading the pictures
+Ocr.Progress.Starting=Starting to read...
+Ocr.Progress.Working=Page {0} of {1}. {2}
+Ocr.Progress.Quarter={0} per cent done. {1}
+Ocr.Progress.Cancel=Cancel
+Ocr.Progress.Cancelling=Stopping after this page. Nothing is kept.
+Ocr.Progress.Estimating=Working out how long this will take.
+Ocr.Progress.AlmostDone=Almost done.
+Ocr.Progress.Seconds=About {0} seconds left.
+Ocr.Progress.Minutes=About {0} minutes left.
+; Settings. "Automatic" is the right answer nearly always: recognition goes by
+; SCRIPT, not by language, so one Latin recognizer reads every Latin language.
+Settings.Ocr.Group=Books that are pictures
+Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. Automatic suits nearly every book: recognition works by alphabet, not by language, so one European language reads them all.
+Settings.Ocr.Language=Language for reading pictures
+Settings.Ocr.Automatic=Automatic
+Settings.Ocr.AddLanguage=Add a language in Windows...
+Settings.Ocr.None=Windows has no text recognition installed.
+
 Prop.Analysing.Done=Recording analysed, {0} stages set. Change any of them if you prefer.
 Prop.Analysing.Failed=The recording could not be analysed. The settings are unchanged.
 Prop.Stage.Level=Level

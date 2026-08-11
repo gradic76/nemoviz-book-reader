@@ -2050,7 +2050,11 @@ namespace Nemoviz_Book_Reader
                 bool isArchive = LibraryScanner.IsExtractableArchive(sourceName);
                 // A .zip that wraps an epub (how most libraries package them) is a
                 // text import, not a generic archive.
-                bool isTextImport = TextExtractor.IsTextImport(filePath);
+                // An image document is a text import too — it just has to be READ
+                // first. A pile of numbered jpegs, a multi-page tiff or a scanned
+                // PDF all become a book the same way every other document does.
+                bool isTextImport = TextExtractor.IsTextImport(filePath)
+                                    || OcrPageSource.IsImageFile(filePath);
 
                 // Multi-volume sets fold to one clean folder name (name.7z.001
                 // → name, name.part1.rar → name).
@@ -2212,6 +2216,27 @@ namespace Nemoviz_Book_Reader
                             MessageForm.ShowInfo(this, Localization.T("Dialog.DrmProtected.Message"),
                                 Localization.T("Dialog.DrmProtected.Title"));
                         return false;
+                    }
+                    // PICTURES OF TEXT. A scanned PDF, a folder of numbered
+                    // images, a multi-page tiff: nothing came out, so offer to
+                    // READ it. Above the clean, so the recognized text goes
+                    // through exactly the same path as any other document's —
+                    // including the page offsets, which CleanDoc moves with it.
+                    //
+                    // The reader is asked rather than having it start by itself:
+                    // faced with one PDF they may not know what they have, and
+                    // recognition costs real time (about half a second a page).
+                    // A bulk import never asks — a hundred books must not become
+                    // a hundred questions — so those are skipped and can be
+                    // re-imported one at a time.
+                    if (OcrImport.LooksImageOnly(doc) && OcrImport.CanOffer(filePath))
+                    {
+                        OcrText read = OcrImport.Offer(this, filePath, destFolder, quiet);
+                        if (read != null)
+                        {
+                            doc.Text = read.Text;
+                            doc.Pages = read.Pages;
+                        }
                     }
                     // Clean here, once, with the heading and page offsets moving
                     // with the text — what is written is exactly what the reader

@@ -154,6 +154,10 @@ namespace Nemoviz_Book_Reader
         /// default. Set from Settings → Device.</summary>
         public string AudioDevice { get; private set; }
 
+        /// <summary>Recognizer language for image documents; empty = automatic.
+        /// See <see cref="SetOcrLanguage"/>.</summary>
+        public string OcrLanguage { get; private set; }
+
         public AppSettings()
         {
             ini = new IniFile(SettingsPath);
@@ -181,6 +185,7 @@ namespace Nemoviz_Book_Reader
             LoadSeenLanguages();
             LanguageSeen = NoteLanguageSeen;
             AudioDevice = ini.Read("Audio", "Device", "");
+            OcrLanguage = ini.Read("Ocr", "Language", "");
             KeepDeviceAlive = ini.Read("Audio", "KeepAlive", "1") == "1";
             UseOpticalDrive = ini.Read("Audio", "UseOpticalDrive", "0") == "1";
             OpticalDriveLetter = ini.Read("Audio", "OpticalDrive", "");
@@ -427,6 +432,19 @@ namespace Nemoviz_Book_Reader
         {
             AudioDevice = device ?? "";
             ini.Write("Audio", "Device", AudioDevice);
+        }
+
+        /// <summary>Which recognizer to read image documents with. Empty means
+        /// the user's own Windows languages, which is right almost always:
+        /// recognition goes by SCRIPT, and an English page through the Croatian
+        /// engine measured 0.0 % character error. A tag that is not installed
+        /// falls back rather than failing, so a setting made on one machine
+        /// cannot break NBR on another — the same rule
+        /// <see cref="OpticalDriveLetter"/> follows.</summary>
+        public void SetOcrLanguage(string tag)
+        {
+            OcrLanguage = tag ?? "";
+            ini.Write("Ocr", "Language", OcrLanguage);
         }
 
         public void SetKeepDeviceAlive(bool on)
