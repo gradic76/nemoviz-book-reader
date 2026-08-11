@@ -218,12 +218,20 @@ namespace Nemoviz_Book_Reader
         /// to install operating-system components is not a thing a book reader
         /// should do.</para>
         ///
-        /// <para>Which settings page id is current was never verified — checking
-        /// it would have thrown a Settings window at a screen-reader user in the
-        /// middle of a session — so try them in turn rather than trusting one.</para></summary>
+        /// <para><b>The page ids are read out of Windows' own Settings binary,
+        /// not guessed.</b> The first attempt guessed <c>ms-settings:language</c>,
+        /// which simply is not a page — Gordan got the front of Settings and had
+        /// to find the rest himself. Scanning
+        /// <c>ImmersiveControlPanel\SystemSettings.dll</c> lists what really
+        /// exists: <c>regionlanguage</c>, <c>regionlanguage-adddisplaylanguage</c>,
+        /// <c>regionlanguage-languageoptions</c> and the input-method pages. An
+        /// unknown id does not fail — it opens Settings at the top, which is
+        /// exactly the useless outcome this is avoiding, so the specific page goes
+        /// first and the general one is only the safety net.</para></summary>
         public static bool OpenWindowsLanguageSettings()
         {
-            foreach (string uri in new[] { "ms-settings:language", "ms-settings:regionlanguage" })
+            foreach (string uri in new[] { "ms-settings:regionlanguage-adddisplaylanguage",
+                                           "ms-settings:regionlanguage" })
             {
                 try
                 {

@@ -32,6 +32,24 @@ namespace Nemoviz_Book_Reader
         public string Text = "";
         public System.Collections.Generic.List<(string Label, int Offset)> Pages =
             new System.Collections.Generic.List<(string, int)>();
+        /// <summary>The recognizer that produced the text.
+        ///
+        /// <para><b>It is a CLAIM about the language, of exactly the kind a file's
+        /// <c>dc:language</c> is</b> — weaker than a confident reading of the
+        /// words, better than nothing — so it is handed to
+        /// <see cref="LanguageDetector.Resolve"/> as the declaration and weighed
+        /// there rather than being applied here.</para>
+        ///
+        /// <para>It exists because of a measured failure. Two nearly identical
+        /// Croatian scans came out of import with different languages: one "hr",
+        /// the other <b>nothing at all</b>. The detector is not at fault — it was
+        /// calibrated on books, which are thousands of words of running prose, and
+        /// these are 1200-character forms that are mostly names, numbers, headings
+        /// and field labels. Measured on the six: two scored 0.200 confidence and
+        /// three scored zero. On text that thin the answer is close to a coin
+        /// toss, and the recognizer's own language is the better tiebreak we
+        /// already have in hand.</para></summary>
+        public string Language = "";
     }
 
     public static class OcrImport
@@ -118,7 +136,8 @@ namespace Nemoviz_Book_Reader
                         }
                     }
 
-                    WriteCache(bookFolder, result.Text, WindowsOcr.ResolvedLanguage(language));
+                    result.Language = WindowsOcr.ResolvedLanguage(language);
+                    WriteCache(bookFolder, result.Text, result.Language);
                     return result;
                 }
             }
@@ -167,6 +186,13 @@ namespace Nemoviz_Book_Reader
                 if (string.IsNullOrWhiteSpace(text)) return null;
 
                 var result = new OcrText { Text = text };
+                try
+                {
+                    string stamp = Path.Combine(bookFolder, CacheStampName);
+                    if (File.Exists(stamp))
+                        result.Language = File.ReadAllText(stamp, System.Text.Encoding.UTF8).Trim();
+                }
+                catch { }
                 result.Pages = new System.Collections.Generic.List<(string, int)>();
                 int at = 0, page = 1;
                 while (at <= text.Length)

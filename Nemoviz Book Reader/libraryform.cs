@@ -2236,6 +2236,14 @@ namespace Nemoviz_Book_Reader
                         {
                             doc.Text = read.Text;
                             doc.Pages = read.Pages;
+                            // The recognizer's own language, as a CLAIM — the same
+                            // standing a file's dc:language has, and weighed the
+                            // same way a few lines below. Measured why it is
+                            // needed: two near-identical Croatian scans came out
+                            // "hr" and NOTHING, because the detector is calibrated
+                            // on books and these are 1200-character forms of names
+                            // and numbers. See OcrText.Language.
+                            if (string.IsNullOrEmpty(doc.Language)) doc.Language = read.Language;
                         }
                     }
                     // Clean here, once, with the heading and page offsets moving
