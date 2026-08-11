@@ -3467,8 +3467,49 @@ Gordan's five real Croatian scans in `D:\Test naslovi\Image PDF`.
 
 **Conclusion: do not add an external OCR tool.** Tesseract would cost ~30 MB plus
 per-language data against a 16 MB installer, to do worse on Croatian. Probes kept
-in the session scratchpad (`ocrprobe.cs` … `ocrprobe4.cs`) — probe 4 is the one
+in the session scratchpad (`ocrprobe.cs` … `ocrprobe5.cs`) — probe 4 is the one
 that matters, it is the pure Windows chain with no third-party reference at all.
+
+**INPUT COVERAGE, measured (probe 5).** Every one of these reads through the same
+`BitmapDecoder` → `OcrEngine` chain: **PNG, JPEG, BMP, GIF, TIFF**. **Multi-page
+TIFF works** — `BitmapDecoder.FrameCount` reported 3 and `GetFrameAsync(i)` gave
+each page separately, all three recognized correctly, so one TIFF is a whole book.
+**A picture with no text returns 0 words and an empty string**, so "found nothing"
+is cleanly distinguishable from "the engine failed" — say so instead of importing
+an empty book. Image-only EPUB is just its images in spine order. **DjVu remains
+the only input Windows cannot open at all.**
+
+**HOW A USER GETS ANOTHER LANGUAGE — and why Gordan could not find it
+(measured 2026-08-11).**
+
+- **There is no "OCR" item to find, and that is the whole answer.** Non-elevated
+  `Get-InstalledLanguage` reports `LanguageId=hr-HR`, `Features = BasicTyping,
+  Handwriting, TextToSpeech, OCR`. **OCR is a FEATURE OF AN INSTALLED LANGUAGE**,
+  not a separate download. You do not install "OCR for German", you install
+  German and OCR arrives with it — Settings → Time & language → Language &
+  region → Add a language. Help must say exactly this; hunting for an OCR
+  checkbox finds nothing because there isn't one.
+- **NBR cannot install one. Measured, not assumed:** `Install-Language -Language
+  zz-ZZ` throws `UnauthorizedAccessException 0x80070005` **before it even
+  validates the tag** — the elevation check comes first. `Get-WindowsCapability
+  -Online` fails the same way. So a "Download language" button in our dialog
+  would be a lie unless it elevates, and elevating to install OS components is
+  not a thing a book reader should do.
+- **What NBR CAN do, all non-elevated:** list what is installed
+  (`OcrEngine.AvailableRecognizerLanguages`), and **deep-link into Settings** —
+  `ms-settings:` is registered on this machine (checked in `HKLM\SOFTWARE\
+  Classes`). Which page id is current was NOT verified (launching Settings would
+  have thrown a window at a screen-reader user mid-session), so **try a chain**
+  (`ms-settings:language`, then `ms-settings:regionlanguage`) and check the
+  `LaunchUriAsync` return rather than trusting one id.
+- An OCR model is **tiny**: `C:\Windows\OCR\hr-hr\MsOcrRes.orp` is **0.23 MB**.
+  The language pack around it is not, and its size was not measured.
+
+**NOT YET MEASURED, and it is the gap that matters if OCR goes into Lite:** every
+real scan tested was a **1–2 page official form**. Book pages bring running heads,
+page numbers, two columns, and words hyphenated across lines. `OcrResult.Lines`
+carries a `BoundingRect` per word, so reading order and column splitting are
+*possible* — but nobody has measured them. Test that before promising book OCR.
 
 **Later, and NOT for alpha — book descriptions from the internet** (Gordan,
 2026-07-29). A "fancy feature" on the Lite backlog, deliberately parked: it needs
