@@ -191,7 +191,9 @@
     <Compile Include="EpubOverlayImporter.cs" />
     <Compile Include="EpubParser.cs" />
     <Compile Include="OpticalDrive.cs" />
+    <Compile Include="OcrPageSource.cs" />
     <Compile Include="PdfParser.cs" />
+    <Compile Include="WindowsOcr.cs" />
     <Compile Include="MobiParser.cs" />
     <Compile Include="DocParser.cs" />
     <Compile Include="LibLouis.cs" />
