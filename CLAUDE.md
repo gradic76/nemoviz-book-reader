@@ -3505,11 +3505,67 @@ the only input Windows cannot open at all.**
 - An OCR model is **tiny**: `C:\Windows\OCR\hr-hr\MsOcrRes.orp` is **0.23 MB**.
   The language pack around it is not, and its size was not measured.
 
-**NOT YET MEASURED, and it is the gap that matters if OCR goes into Lite:** every
-real scan tested was a **1–2 page official form**. Book pages bring running heads,
-page numbers, two columns, and words hyphenated across lines. `OcrResult.Lines`
-carries a `BoundingRect` per word, so reading order and column splitting are
-*possible* — but nobody has measured them. Test that before promising book OCR.
+**THE REAL LIMIT IS NOT OCR, IT IS THE PDF RASTERIZER: WINDOWS DOES NOT DRAW
+JBIG2 IMAGE MASKS** (measured 2026-08-11 on two scanned books pulled from
+archive.org — 19 MB, with Gordan's go-ahead, kept in the session scratchpad).
+
+A mass-digitized scanned book is stored in two layers, DjVu-style: a **JPX
+(JPEG 2000) background** holding the paper and pictures, and a **JBIG2 bitonal
+mask** holding the text. Filter counts prove the construction —
+`meditationsofmar00marc.pdf`: `/JBIG2Decode ×256`, `/JPXDecode ×512`, one per
+page. **`Windows.Data.Pdf` renders the background and silently omits the mask.**
+The rendered page is real, correctly sized, correctly coloured paper with faint
+ghosts of the lines — and no text at all. OCR then correctly reports nothing:
+**0 words on 32 of 32 sampled pages**, and 4 words in the whole of the second
+book. Looking at the PNG is what settled it; the word counts alone read like an
+OCR failure, which is exactly the wrong diagnosis.
+
+**Gordan's own scans are unaffected** — they are `/JPXDecode` + `/FlateDecode`
+with no JBIG2, and they read perfectly. So the split is:
+
+| kind of PDF | renders | OCR |
+|---|---|---|
+| ordinary scan (DCT/JPX/Flate/CCITT) | yes | works |
+| mass-digitized book (JPX + **JBIG2** text mask) | background only | **finds nothing** |
+
+**Consequences, and they are design-level:**
+- **Detect it, do not let it look like a bad scan.** `/JBIG2Decode` is findable in
+  the raw bytes before we start, and "page rendered but zero words across many
+  pages" is a second signal. Say *"this PDF stores its text in a form Windows
+  cannot draw"*, never *"OCR failed"*.
+- This is the one place the external-tool question genuinely reopens — but for a
+  **rasterizer**, not for OCR. PDFium (BSD) handles JBIG2 at ~10 MB of native
+  dependency, against a 16 MB installer.
+- **Or write the decoder.** JBIG2-in-PDF and DjVu's JB2 are cousins — same MQ
+  arithmetic coder, same symbol-dictionary idea. **One decoder unlocks both**,
+  which changes the cost/benefit of DjVu support entirely (see below).
+
+**THE RENDER-SIZE RULE, and neither obvious answer is right.** Two real cases sit
+at opposite extremes: Gordan's scans are laid out 1:1 with their scan pixels
+(page **3507 pt**), archive.org's book uses ordinary page units (**749 pt**).
+"Natural size" gives 749 px and OCR sees nothing; "300 dpi" gives 14612 px and
+throws. **Aim the LONG SIDE at a pixel target (~3400 px) and cap at ~6800**,
+whatever the points say.
+
+**DJVU IS MUCH CHEAPER THAN IT LOOKS — THE TEXT IS ALREADY IN THE FILE.** Chunk
+dump of two real DjVu books: **`TXTz` present on 229 of 256 pages** (and 9 of 16
+in the other). DjVu was designed for scanned books *with* a searchable text layer,
+so for most real files **no OCR and no image decoding is needed at all**:
+
+- **Tier 1 — container + `TXTz`.** Walk the IFF chunks (`AT&T`/`FORM:DJVM` →
+  `DIRM`, per-page `FORM:DJVU` → `INFO`, `TXTz`), then BZZ-decompress. BZZ is
+  Burrows–Wheeler plus a ZP arithmetic coder — self-contained, a few hundred
+  lines. **The ZP state table must come from the published DjVu specification,
+  not from DjVuLibre, which is GPL and cannot be copied into NBR.** The container
+  walker already exists as `djvuprobe.cs` in the scratchpad.
+- **Tier 2 — no text layer.** Then `Sjbz` (JB2) must be decoded to an image for
+  OCR. That is the big one, and it is the same work as the JBIG2 gap above.
+
+**STILL NOT MEASURED:** how OCR handles genuine book *layout* — running heads,
+page numbers, two columns, words hyphenated across lines. The JBIG2 wall stopped
+that test before it started; the only real book scans available render textless.
+`OcrResult` gives a `BoundingRect` per word so reading order is *possible*, but
+**it is unmeasured**. Needs a scanned book PDF **without** JBIG2.
 
 **Later, and NOT for alpha — book descriptions from the internet** (Gordan,
 2026-07-29). A "fancy feature" on the Lite backlog, deliberately parked: it needs
