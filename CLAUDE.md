@@ -3529,6 +3529,14 @@ with no JBIG2, and they read perfectly. So the split is:
 | mass-digitized book (JPX + **JBIG2** text mask) | background only | **finds nothing** |
 
 **Consequences, and they are design-level:**
+- **How common is it? Measured on Gordan's own corpus: 2 of 109 local PDFs, and
+  both are the two I downloaded today.** Not one of his own ~107 files uses JBIG2
+  — they are `/JPXDecode` ×27, `/DCTDecode` ×23, `/CCITTFaxDecode` ×2. **JBIG2 is
+  a mass-digitization artefact** (archive.org, Google Books, HathiTrust), not what
+  scanners and office kit produce. So this is a *later* problem, not a blocker —
+  though blind readers who take books from digital libraries will meet it. (Sample
+  caveat: 1693 of his PDFs are OneDrive placeholders and were deliberately not
+  touched, so this is 109 files, not 1800.)
 - **Detect it, do not let it look like a bad scan.** `/JBIG2Decode` is findable in
   the raw bytes before we start, and "page rendered but zero words across many
   pages" is a second signal. Say *"this PDF stores its text in a form Windows
@@ -3536,9 +3544,25 @@ with no JBIG2, and they read perfectly. So the split is:
 - This is the one place the external-tool question genuinely reopens — but for a
   **rasterizer**, not for OCR. PDFium (BSD) handles JBIG2 at ~10 MB of native
   dependency, against a 16 MB installer.
-- **Or write the decoder.** JBIG2-in-PDF and DjVu's JB2 are cousins — same MQ
-  arithmetic coder, same symbol-dictionary idea. **One decoder unlocks both**,
-  which changes the cost/benefit of DjVu support entirely (see below).
+- **Or write the decoder — and it is smaller than "implement JBIG2" sounds.**
+  **We never need to composite the page.** For OCR the *mask alone* is what we
+  want: it is the text at full bitonal resolution, a cleaner input than the
+  finished page. So the job is "decode one image XObject", not "write a PDF
+  renderer". **Measured scope** (segment headers parsed out of the real files,
+  `jbig2probe.cs`): symbol dictionary (type 0), immediate text region (6),
+  immediate generic region (38), page info (48). **No refinement, no halftone, no
+  custom Huffman tables** — that is a large part of T.88 we would not need. There
+  is also **no `/JBIG2Globals`** in these files, so every page's stream is
+  self-contained and no shared-dictionary plumbing is required. What is left:
+  MQ arithmetic decoder, generic region with its templates, symbol dictionary,
+  text region.
+- **CORRECTION to what this file said first time round.** I wrote that JBIG2 and
+  DjVu's JB2 share "the same MQ arithmetic coder" so one decoder unlocks both.
+  **That is wrong on the coder**: JBIG2 uses the **MQ** coder, DjVu's JB2 uses
+  Bottou's **ZP** coder — different state tables, different bitstreams. What they
+  really share is the *design*: symbol dictionary, text-region placement, generic
+  region with context templates. So the second one is much cheaper after the
+  first, but it is **not free** — do not plan as if it were.
 
 **THE RENDER-SIZE RULE, and neither obvious answer is right.** Two real cases sit
 at opposite extremes: Gordan's scans are laid out 1:1 with their scan pixels
@@ -3559,7 +3583,9 @@ so for most real files **no OCR and no image decoding is needed at all**:
   not from DjVuLibre, which is GPL and cannot be copied into NBR.** The container
   walker already exists as `djvuprobe.cs` in the scratchpad.
 - **Tier 2 — no text layer.** Then `Sjbz` (JB2) must be decoded to an image for
-  OCR. That is the big one, and it is the same work as the JBIG2 gap above.
+  OCR. That is the big one. It is the *same shape* as the JBIG2 work above and
+  much cheaper once that exists — but a different coder and bitstream, so not
+  free (see the correction above).
 
 **STILL NOT MEASURED:** how OCR handles genuine book *layout* — running heads,
 page numbers, two columns, words hyphenated across lines. The JBIG2 wall stopped
