@@ -3587,11 +3587,66 @@ so for most real files **no OCR and no image decoding is needed at all**:
   much cheaper once that exists — but a different coder and bitstream, so not
   free (see the correction above).
 
-**STILL NOT MEASURED:** how OCR handles genuine book *layout* — running heads,
-page numbers, two columns, words hyphenated across lines. The JBIG2 wall stopped
-that test before it started; the only real book scans available render textless.
-`OcrResult` gives a `BoundingRect` per word so reading order is *possible*, but
-**it is unmeasured**. Needs a scanned book PDF **without** JBIG2.
+**LAYOUT: MEASURED AT LAST, AND IT PASSES — TWO-COLUMN READING ORDER IS CORRECT**
+(2026-08-11, on `D:\Test naslovi\Image PDF\Gavez mast.pdf`, which Gordan found:
+JPX + Flate, no JBIG2, no `/Font` at all, so genuinely image-only and renderable).
+
+Page 2 is a dense **two-column** Croatian page. Checked at the seam, which is the
+only place that proves it: the left column's last line —
+*"…Nakon 40 dana bolovi su nestali…"* — is immediately followed in the output by
+the right column's first line, *"Iscjeljuje sve vrste rana pa i onih najtežih…"*,
+and the text ends on the right column's last line. **It reads the left column
+whole, then the right. No interleaving.** So `OcrEngine` does its own column
+detection and we do not have to build reading order out of `BoundingRect`.
+
+**Quality on that page is poor, and the source is why.** Looking at the render
+settles it (again): a **faded photocopy with the left edge of the left column
+physically clipped** — several lines lose their first letter on paper, before any
+software is involved. Compare the clean official forms, which read almost
+perfectly. So: *clean scan → very good; bad photocopy → readable but mangled.*
+Neither is a statement about the engine.
+
+**"MORE RESOLUTION" IS NOW DISPROVED ON REAL MATERIAL TOO**, not just on synthetic
+renders. Same page, long-side target swept 1700 → 6800 px:
+
+| target px | words | median word box | OCR ms |
+|---|---|---|---|
+| 1700 | 732 | 23 px | 343 |
+| 2400 | 726 | 33 px | 490 |
+| 3400 | 692 | 47 px | 756 |
+| 4800 | 687 | 66 px | 1426 |
+| 6800 | 692 | 92 px | 2376 |
+
+Flat across a 4× range while time grows 7×. **Once the type clears the floor
+(~20 px), extra pixels are pure cost.** ~2400 px on the long side is the sweet
+spot, not 300 dpi.
+
+**PRE-PROCESSING: one thing helps a little, the obvious thing HURTS** (probe 8,
+same page):
+
+| variant | words | plausible-word % |
+|---|---|---|
+| as rendered | 692 | 65 |
+| greyscale | 691 | 65 |
+| **contrast stretch (2nd/98th pct)** | 654 | **66** |
+| **Otsu binarize** | **605** | **54** |
+| stretch + sharpen | 656 | 63 |
+| invert | 691 | 65 |
+
+- **Do NOT binarize.** Thresholding is the classic scanned-page move and it is the
+  worst result here — 87 words and 11 points lost. The engine wants greyscale and
+  does its own thing with it.
+- **A mild contrast stretch is the only gain, and it is modest.** The aggregate
+  score barely moves, but the same passage goes from `porodica (tx)raźine)` to
+  `porodica Boraginacee (boraźine)`. Worth having; not a rescue.
+- **The engine is polarity-invariant** — inverting changes nothing, so white-on-
+  black pages need no special handling.
+- **Word count is not quality.** The contrast-stretch pass returned *fewer* words
+  and *better* ones. Never tune on word count alone.
+
+**Still unmeasured:** running heads and page numbers mixed into the text flow, and
+hyphenation across line breaks — this leaflet has neither. Needs a scanned *book*
+without JBIG2.
 
 **Later, and NOT for alpha — book descriptions from the internet** (Gordan,
 2026-07-29). A "fancy feature" on the Lite backlog, deliberately parked: it needs
