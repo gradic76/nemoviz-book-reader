@@ -436,6 +436,12 @@ Settings.Tab.Ocr=OCR and Translate
 Context.ReReadOcr=Re-read in a different language
 Ocr.ReRead.Question=This book was read from {0} pages of pictures. Reading it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
 Ocr.ReRead.Done=The book has been read again and replaced.
+; For a book read before Nemoviz started keeping the pictures, or one whose
+; originals have since been moved. Asked once — they are kept afterwards.
+Ocr.ReRead.Locate=The pictures for this book are not kept with it, so Nemoviz needs to find them again. Choose the scanned file, or — if the book arrived as separate page images — any one of those pages.
+Ocr.ReRead.LocateTitle=Find the pictures for this book
+Ocr.ReRead.Filter=Scanned books and images|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|All files|*.*
+Ocr.ReRead.WholeFolder=There are {0} images in that folder. Read all of them as the pages of this book?
 Settings.Ocr.Group=Books that are pictures
 Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. The language matters: the same page read as English rather than Croatian gets the awkward letters wrong. This is only the starting choice — when you have more than one language, Nemoviz asks which to use each time it reads a book.
 Settings.Ocr.Language=Language for reading pictures

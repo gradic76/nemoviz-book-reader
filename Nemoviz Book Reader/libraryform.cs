@@ -20,6 +20,7 @@ namespace Nemoviz_Book_Reader
         private ToolStripMenuItem menuFileOpenFile;
         private ToolStripMenuItem menuFileOpenFolder;
         private ToolStripMenuItem menuFileOpenCd;
+        private ToolStripMenuItem menuFileReRead;
         private ToolStripMenuItem menuSort;
         private ToolStripMenuItem menuSortAlpha;
         private ToolStripMenuItem menuSortDate;
@@ -444,6 +445,21 @@ namespace Nemoviz_Book_Reader
                 menuFileOpenCd.Click += MenuFileOpenCd_Click;
                 menuFile.DropDownItems.Add(menuFileOpenCd);
             }
+
+            menuFile.DropDownItems.Add(new ToolStripSeparator());
+
+            // The same action as the shelf's context menu, for anyone who works
+            // the menu bar rather than the list. Dimmed rather than hidden when
+            // it does not apply, so it can be found and its state understood —
+            // the rule the optical-drive group already follows.
+            menuFileReRead = new ToolStripMenuItem(Localization.T("Context.ReReadOcr"));
+            menuFileReRead.Click += (s, e) => ReReadSelectedBook();
+            menuFile.DropDownItems.Add(menuFileReRead);
+            menuFile.DropDownOpening += (s, e) =>
+            {
+                BookData b = GetSelectedBook();
+                menuFileReRead.Enabled = b != null && OcrImport.CanReRead(b.FolderPath);
+            };
 
             menuFile.DropDownItems.Add(new ToolStripSeparator());
 

@@ -335,13 +335,31 @@ namespace Nemoviz_Book_Reader
             catch { return null; }
         }
 
-        /// <summary>Whether "read this again in another language" applies to a
-        /// book: it has to have been read from pictures, those pictures have to
-        /// still be reachable, and there has to be another language to read it
-        /// in.</summary>
+        /// <summary>Whether this book was made by reading pictures.</summary>
+        public static bool WasOcrRead(string bookFolder)
+        {
+            try
+            {
+                return !string.IsNullOrEmpty(bookFolder) &&
+                       File.Exists(Path.Combine(bookFolder, CacheName));
+            }
+            catch { return false; }
+        }
+
+        /// <summary>Whether "read this again in another language" applies: the
+        /// book was read from pictures, and there is another language to read it
+        /// in.
+        ///
+        /// <para><b>It does NOT require the pictures to be reachable, and an
+        /// earlier version did.</b> That hid the command on every book imported
+        /// before the pictures were being kept — Gordan looked for it on his three
+        /// and found nothing, with no way to tell whether the feature was missing
+        /// or the books were. It is the same hole a moved folder would leave. The
+        /// command is offered whenever the book is the right KIND, and asks where
+        /// the pictures are if it cannot find them itself.</para></summary>
         public static bool CanReRead(string bookFolder)
         {
-            return WindowsOcr.Languages.Count > 1 && SourceFor(bookFolder) != null;
+            return WindowsOcr.Languages.Count > 1 && WasOcrRead(bookFolder);
         }
 
         /// <summary>Reads a book's pictures again, in a language the reader
@@ -358,7 +376,7 @@ namespace Nemoviz_Book_Reader
         {
             try
             {
-                string path = SourceFor(bookFolder);
+                string path = SourceFor(bookFolder) ?? Locate(owner);
                 if (path == null) return null;
 
                 using (OcrPageSource source = OcrPageSource.Open(path))
@@ -397,10 +415,48 @@ namespace Nemoviz_Book_Reader
                     }
                     result.Language = WindowsOcr.ResolvedLanguage(language);
                     WriteCache(bookFolder, result.Text, result.Language);
+                    // Whatever it took to find them this time, keep them now — so
+                    // it is asked once and never again.
+                    if (SourceFor(bookFolder) == null) KeepSource(bookFolder, path);
                     return result;
                 }
             }
             catch { return null; }
+        }
+
+        /// <summary>Asks the reader where the pictures are, for a book whose copy
+        /// was never made or whose original has moved.
+        ///
+        /// <para>A file, because that is what one picks: a PDF, a multi-page TIFF,
+        /// or — for a book that arrived as loose pages — any ONE of them, after
+        /// which the rest of the folder is offered. Guessing the folder outright
+        /// would be wrong as often as right; asking about it is one question with
+        /// a number in it.</para></summary>
+        private static string Locate(IWin32Window owner)
+        {
+            MessageForm.ShowInfo(owner, Localization.T("Ocr.ReRead.Locate"),
+                Localization.T("Ocr.Ask.Title"));
+            using (var dlg = new OpenFileDialog())
+            {
+                dlg.Title = Localization.T("Ocr.ReRead.LocateTitle");
+                dlg.Filter = Localization.T("Ocr.ReRead.Filter");
+                dlg.CheckFileExists = true;
+                if (dlg.ShowDialog(owner) != DialogResult.OK) return null;
+
+                string picked = dlg.FileName;
+                if (!OcrPageSource.IsImageFile(picked)) return picked;   // a document
+
+                // Loose pages: the folder is the book, not the one page picked.
+                string folder = Path.GetDirectoryName(picked);
+                int images = 0;
+                try { images = Directory.EnumerateFiles(folder).Count(OcrPageSource.IsImageFile); }
+                catch { }
+                if (images > 1 && MessageForm.ShowConfirm(owner,
+                        Localization.T("Ocr.ReRead.WholeFolder", images),
+                        Localization.T("Ocr.Ask.Title")))
+                    return folder;
+                return picked;
+            }
         }
 
         private static void WriteCache(string bookFolder, string text, string language)
