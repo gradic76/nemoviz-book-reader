@@ -3408,6 +3408,68 @@ feature *requires*, not about a different app.
   (audiobook → synced on-screen/braille text), **OCR** (scanned image-only
   PDFs/DjVu → text), and **translation**. These are parked until Lite is done.
 
+**OCR NEEDS NO EXTERNAL ENGINE — MEASURED 2026-08-11, the whole chain is in
+Windows.** Gordan asked whether OCR could go the way OneCore voices went (first
+"impossible", then "needs the MS SDK", finally "works with neither"). It can, and
+the same trick does it: `Type.GetType("…, Windows, ContentType=WindowsRuntime")`
+plus `AsTask` from `System.Runtime.WindowsRuntime` in the GAC. **No Windows SDK
+is installed on this machine and none is needed** — `Windows.Media.winmd` ships
+in `C:\Windows\System32\WinMetadata`. Nothing to vendor, nothing to ship, no new
+licence, zero bytes on the installer.
+
+Three Windows pieces make the whole pipeline, so an image-only PDF needs no
+outside help at any step:
+
+| step | API | verified |
+|---|---|---|
+| rasterize a PDF page | `Windows.Data.Pdf.PdfDocument` → `PdfPage.RenderToStreamAsync` | yes |
+| decode to a bitmap | `Windows.Graphics.Imaging.BitmapDecoder` → `GetSoftwareBitmapAsync(Bgra8, Premultiplied)` | yes |
+| recognize | `Windows.Media.Ocr.OcrEngine.RecognizeAsync` | yes |
+
+Verified on **.NET 4.8, x64, an STA thread** (WinForms' own apartment), against
+Gordan's five real Croatian scans in `D:\Test naslovi\Image PDF`.
+
+**The measurements, and two of them overturn the obvious guess:**
+
+- **More resolution buys NOTHING.** Same page rendered 2000→7000 px tall gives
+  the **same 136 words** every time, while OCR goes from 96 ms to 915 ms. Render
+  at the page's natural size. Do not oversample "to be safe".
+- **`MaxImageDimension` lies.** The property says **10000**; 4948x7000 works and
+  5655x8000 throws `ArgumentException: The parameter is incorrect / Image
+  dimensions are too large`. **Cap well under the advertised number and be ready
+  to catch.**
+- **Scanned PDFs are often laid out 1:1 with their scan pixels** — these pages
+  are 2479x3507 *points*, not 595x842. Multiplying by `dpi/72` for "300 dpi"
+  overshoots into the failure above. Scale to a pixel target, never to a DPI.
+- **Speed:** ~1.1 s render + ~0.8 s OCR for a 2-page scan; call it **0.5 s a
+  page**, so a 300-page scanned book is ~3 minutes.
+- **Croatian is right, including diacritics** — `IZVJEŠTAJ`, `OKOLIŠA`,
+  `Smičiklasa`, `Babić` all correct. On clean text CER is **0–2 %** once cap
+  height is ≥ 20 px; below ~14 px it collapses (i/l/m mush).
+- **`đ` is the one weak letter**, consistently: `rođenja`→`rodenja`,
+  `Gospođa`→`Gospoda`, while `đačkim` usually survives. If OCR ever ships, a
+  small Croatian fix-up list is worth more than any engine change.
+- **A foreign page through the hr-HR engine cost nothing**: an English paragraph
+  came back at **0.0 % CER**. The recognizer is script-based, so one Latin pack
+  reads all Latin languages. This kills the strongest argument for bundling
+  Tesseract.
+
+**What Windows OCR does NOT cover, honestly:**
+- **DjVu** — Windows cannot open it at all, so DjVu is the one line in the Pro
+  description that still implies something external. (There is not a single
+  `.djvu` on this machine.)
+- **Languages the user's Windows lacks.** Only **hr-HR** is installed here;
+  `en-US`, `de`, `cs`, `sr-Latn` all returned "not installed". NBR cannot ship a
+  language — the user adds it in Windows' own language settings. Per the point
+  above this only really bites for non-Latin scripts.
+- Needs Windows 10 or newer (both APIs); fine for the current target, would have
+  to be re-checked if NBR ever aims lower.
+
+**Conclusion: do not add an external OCR tool.** Tesseract would cost ~30 MB plus
+per-language data against a 16 MB installer, to do worse on Croatian. Probes kept
+in the session scratchpad (`ocrprobe.cs` … `ocrprobe4.cs`) — probe 4 is the one
+that matters, it is the pure Windows chain with no third-party reference at all.
+
 **Later, and NOT for alpha — book descriptions from the internet** (Gordan,
 2026-07-29). A "fancy feature" on the Lite backlog, deliberately parked: it needs
 no translation engine, so it does not belong in Pro.
