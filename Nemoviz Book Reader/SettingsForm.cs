@@ -156,6 +156,12 @@ namespace Nemoviz_Book_Reader
 
             tabSettings.TabPages.Add(BuildGeneralTab());
             tabSettings.TabPages.Add(BuildTextBooksTab());
+            // Its own tab (Gordan, 2026-08-11), and not a group on Speech and
+            // Braille. Two reasons, both his: reading pictures has little to do
+            // with how a book is SPOKEN or FELT, and that page had just passed a
+            // visual inspection with everything sitting where it should — one more
+            // group at the bottom is how a laid-out page stops being one.
+            tabSettings.TabPages.Add(BuildOcrTab());
             tabSettings.TabPages.Add(BuildDeviceTab());
 
             btnOK = new Button();
@@ -529,12 +535,20 @@ namespace Nemoviz_Book_Reader
             // to one book and lives in Properties.
             page.Controls.Add(BuildVisualGroup(8, 296));
             page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 526, 480, 32, 3));
-            // Reading pictures belongs here and not on Devices: a scanned book is
-            // a TEXT book that has to be read off the page first, and what it
-            // produces is fed to the same voice and the same display as every
-            // other one.
-            page.Controls.Add(BuildOcrGroup(8, 566));
-            page.Controls.Add(MakeHint("Settings.Ocr.Hint", 14, 668, 480, 44, 5));
+            return page;
+        }
+
+        /// <summary>Reading pictures, and later translating them.
+        ///
+        /// <para>Named for what it will hold rather than only for what it holds
+        /// today — the tab exists because Gordan wanted OCR out of Speech and
+        /// Braille, and translation is the other member of the same family.</para></summary>
+        private TabPage BuildOcrTab()
+        {
+            TabPage page = new TabPage(Localization.T("Settings.Tab.Ocr"));
+            page.AutoScroll = true;
+            page.Controls.Add(BuildOcrGroup(8, 6));
+            page.Controls.Add(MakeHint("Settings.Ocr.Hint", 14, 108, 480, 60, 2));
             return page;
         }
 
@@ -543,12 +557,14 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Which recognizer reads an image document.
         ///
-        /// <para><b>"Automatic" is first and is the right answer nearly always.</b>
-        /// Recognition goes by SCRIPT rather than by language — an English page
-        /// through the Croatian engine measured 0.0 % character error — so one
-        /// Latin recognizer reads every Latin language, and this list matters only
-        /// when a reader has several installed and knows the book is in one of
-        /// them.</para>
+        /// <para><b>"Automatic" is the DEFAULT, not an answer.</b> It means
+        /// "whatever Windows would pick", and it lives here rather than in the
+        /// import question because at the point of reading there is no such thing:
+        /// working the language out automatically would mean reading a page to see
+        /// what language it is in, and reading a page is what needs the language.
+        /// The import asks outright whenever there is more than one recognizer —
+        /// the language really does change the reading (see
+        /// <see cref="WindowsOcr"/>).</para>
         ///
         /// <para><b>The group is present even with nothing installed</b>, dimmed,
         /// exactly as the optical-drive group is: a reader who has none is better

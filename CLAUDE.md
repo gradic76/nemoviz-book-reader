@@ -3449,10 +3449,37 @@ Gordan's five real Croatian scans in `D:\Test naslovi\Image PDF`.
 - **`đ` is the one weak letter**, consistently: `rođenja`→`rodenja`,
   `Gospođa`→`Gospoda`, while `đačkim` usually survives. If OCR ever ships, a
   small Croatian fix-up list is worth more than any engine change.
-- **A foreign page through the hr-HR engine cost nothing**: an English paragraph
-  came back at **0.0 % CER**. The recognizer is script-based, so one Latin pack
-  reads all Latin languages. This kills the strongest argument for bundling
-  Tesseract.
+- **A foreign page through the hr-HR engine cost nothing** *on that page*: an
+  English paragraph came back at **0.0 % CER**. **DO NOT GENERALISE THAT — I did,
+  and Gordan corrected it (2026-08-11).** See the correction below.
+
+**CORRECTION: "one Latin pack reads all Latin languages" IS WRONG.** I measured
+one clean synthetic paragraph at large type — the easiest case there is, where
+no glyph is ambiguous and the language model never has to decide anything. From
+that I concluded the language choice barely matters, and then repeated it in the
+code, in Settings and in the Help text. Gordan, from having listened to a great
+many real OCR'd books:
+
+- Croatian or Serbian pushed through the **English** engine gives **"Yatikan"
+  for "Vatikan"** — and the reverse in the other direction.
+- A **Serbian** recognizer on a Croatian book, where foreign names are written
+  as spelt rather than transcribed, turns **"William" into "Vvilliam"**.
+- And the argument that settles it without any measurement at all: **if it were
+  only a matter of Latin letters, Microsoft would ship ONE Latin pack, not
+  thirty-five.** The per-language models exist precisely because the language
+  decides the ambiguous glyphs.
+
+So: the recognizer language **matters**, the reader must be able to choose it,
+and any claim resting on that 0.0 % belongs to a clean synthetic page and to
+nothing else. Where a fallback still happens (a requested language that is not
+installed) it is a *fallback* — better than refusing — and never a reason to
+withhold the choice.
+
+**"Automatic" cannot exist at the point of reading, and that is not a gap to
+fill later.** Choosing the language automatically would mean reading a page to
+see what language it is in, and reading a page is the thing that needs the
+language. The loop has no start. Automatic survives only in Settings, where it
+means "whatever Windows would pick" — a default, not an answer.
 
 **What Windows OCR does NOT cover, honestly:**
 - **DjVu** — Windows cannot open it at all, so DjVu is the one line in the Pro

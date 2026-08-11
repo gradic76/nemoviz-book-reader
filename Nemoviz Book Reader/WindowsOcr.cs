@@ -48,10 +48,22 @@ namespace Nemoviz_Book_Reader
     ///
     /// <para><b>What it cannot do:</b> only the languages the user's Windows has
     /// (see <see cref="Languages"/>), and NBR cannot install one — that needs
-    /// elevation. It matters less than it sounds: recognition is by SCRIPT, and
-    /// an English page through the Croatian engine measured 0.0 % character
-    /// error. See <see cref="OcrPageSource"/> for the one input Windows really
-    /// cannot handle.</para>
+    /// elevation — <see cref="BeginInstall"/> is how that is done. See
+    /// <see cref="OcrPageSource"/> for the one input Windows really cannot
+    /// handle.</para>
+    ///
+    /// <para><b>THE LANGUAGE MATTERS, and an earlier version of this comment said
+    /// it did not.</b> One clean synthetic English paragraph through the Croatian
+    /// engine measured 0.0 % character error, and I generalised that into "one
+    /// Latin pack reads all Latin languages". Gordan corrected it out of years of
+    /// listening to real OCR'd books: the English engine turns <i>Vatikan</i> into
+    /// <i>Yatikan</i>, a Serbian recognizer on a Croatian book turns
+    /// <i>William</i> into <i>Vvilliam</i> — and if it really were only a matter
+    /// of Latin letters, Microsoft would ship ONE pack instead of thirty-five.
+    /// The per-language models exist because the language decides the ambiguous
+    /// glyphs. So the reader is offered the choice, and the fallback in
+    /// <see cref="EngineFor"/> is a way of not refusing — never a reason to skip
+    /// asking.</para>
     /// </summary>
     public static class WindowsOcr
     {
@@ -175,10 +187,11 @@ namespace Nemoviz_Book_Reader
                 catch { engine = null; }
 
                 // No tag, or a tag this machine does not have: fall back rather
-                // than fail. A Latin recognizer reads Latin script whatever the
-                // language — an English page through the hr-HR engine measured
-                // 0.0 % character error — so the fallback is genuinely useful and
-                // not just a way of avoiding an error message.
+                // than fail — a reading in the wrong language beats no reading at
+                // all, and a setting made on one machine must not break NBR on
+                // another. It is NOT a claim that the language does not matter:
+                // it does (see the class comment), which is why the reader is
+                // asked whenever there is more than one to ask about.
                 if (engine == null)
                 {
                     try

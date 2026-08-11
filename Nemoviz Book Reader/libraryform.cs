@@ -15,7 +15,7 @@ namespace Nemoviz_Book_Reader
         // because Popup adjusts which items apply to the book under the cursor.
         private ContextMenu bookMenu;
         private MenuItem ctxOpen, ctxMarkRead, ctxMarkUnread, ctxAddFav,
-                         ctxRemoveFav, ctxRename, ctxDelete, ctxProperties;
+                         ctxRemoveFav, ctxRename, ctxDelete, ctxReRead, ctxProperties;
         private ToolStripMenuItem menuFile;
         private ToolStripMenuItem menuFileOpenFile;
         private ToolStripMenuItem menuFileOpenFolder;
@@ -715,6 +715,12 @@ namespace Nemoviz_Book_Reader
             ctxDelete = new MenuItem(Localization.T("Context.Delete"));
             ctxDelete.Click += (s, e) => DeleteSelectedBook();
 
+            // An ACTION, not a setting — see OcrImport.ReRead for why it is here
+            // and not in Properties. Hidden unless it applies, which is the
+            // normal state: most books are not pictures.
+            ctxReRead = new MenuItem(Localization.T("Context.ReReadOcr"));
+            ctxReRead.Click += (s, e) => ReReadSelectedBook();
+
             ctxProperties = new MenuItem(Localization.T("Context.Properties"));
             ctxProperties.Click += (s, e) => ShowProperties();
 
@@ -728,6 +734,7 @@ namespace Nemoviz_Book_Reader
             bookMenu.MenuItems.Add(ctxRename);
             bookMenu.MenuItems.Add(ctxDelete);
             bookMenu.MenuItems.Add(new MenuItem("-"));
+            bookMenu.MenuItems.Add(ctxReRead);
             bookMenu.MenuItems.Add(ctxProperties);
 
             // Which items apply to the book under the cursor. Popup fires before
@@ -745,6 +752,10 @@ namespace Nemoviz_Book_Reader
                 ctxMarkUnread.Visible = !active && cat != CatUnread;
                 ctxAddFav.Visible = !b.Favorite;
                 ctxRemoveFav.Visible = b.Favorite;
+                // Only for a book that WAS read from pictures, whose pictures are
+                // still reachable, and only when there is another language to
+                // read them in.
+                ctxReRead.Visible = OcrImport.CanReRead(b.FolderPath);
             };
 
             // A ContextMenu is not attached the way a strip was — it is shown on
@@ -1984,6 +1995,40 @@ namespace Nemoviz_Book_Reader
                 return false;
             }
             catch { return false; }
+        }
+
+        /// <summary>Reads the selected book's pictures again, in another
+        /// language, and puts the new reading in place of the old one.
+        ///
+        /// <para>The text goes through <see cref="TextCleaner.CleanDoc"/> exactly
+        /// as it did on import, so the page marks still point at the right words
+        /// — and the book's language is re-resolved, since reading it as English
+        /// rather than Croatian says something about what it is.</para></summary>
+        private void ReReadSelectedBook()
+        {
+            BookData b = GetSelectedBook();
+            if (b == null) return;
+
+            OcrText read = OcrImport.ReRead(this, b.FolderPath);
+            if (read == null) return;
+
+            var doc = new TextDoc { Text = read.Text, Pages = read.Pages, Language = read.Language };
+            TextCleaner.CleanDoc(doc);
+            try
+            {
+                System.IO.File.WriteAllText(
+                    System.IO.Path.Combine(b.FolderPath, "content.txt"),
+                    doc.Text ?? "", new System.Text.UTF8Encoding(false));
+            }
+            catch { return; }
+
+            b.TextCleaned = true;
+            b.TextLanguage = LanguageDetector.Resolve(doc.Language, doc.Text);
+            b.SetTextPages(doc.Pages);
+            b.Save();
+            LoadBooks();
+            MessageForm.ShowInfo(this, Localization.T("Ocr.ReRead.Done"),
+                Localization.T("Ocr.Ask.Title"));
         }
 
         private void ImportFile(string filePath)

@@ -16,12 +16,15 @@ namespace Nemoviz_Book_Reader
     /// moment the reader is deciding, not buried in Settings: they have the book
     /// in front of them and know what language it is in.</para>
     ///
-    /// <para>That reverses half of what I argued earlier. I was right that the
-    /// language rarely matters — recognition goes by script, and an English page
-    /// through the Croatian engine measured 0.0 % character error — and wrong to
-    /// conclude the reader should not be offered it. Rarely mattering is not
-    /// never mattering, and the cost of offering it is one combo box that only
-    /// exists when it has something to say.</para>
+    /// <para><b>I argued the language barely mattered, and I was wrong.</b> The
+    /// evidence was one clean synthetic English paragraph read by the Croatian
+    /// engine at 0.0 % character error — the easiest case there is, where no
+    /// glyph is ambiguous. Gordan corrected it from years of real OCR'd books:
+    /// the English engine turns <i>Vatikan</i> into <i>Yatikan</i>, a Serbian
+    /// recognizer on a Croatian book turns <i>William</i> into <i>Vvilliam</i>.
+    /// And if it were only Latin letters, Microsoft would ship one pack rather
+    /// than thirty-five. The language decides the ambiguous glyphs, so the reader
+    /// gets to decide the language.</para>
     ///
     /// <para><b>Focus starts on the language.</b> Unusual for this codebase,
     /// where focus starts on the action — but the action already has Enter
@@ -82,17 +85,29 @@ namespace Nemoviz_Book_Reader
             };
             languages.AccessibleName = Localization.T("Ocr.Ask.ReadWith");
 
-            tags.Add("");
-            languages.Items.Add(Localization.T("Settings.Ocr.Automatic"));
+            // NO "Automatic" here, and Gordan is right that there could not be
+            // one: choosing the language automatically would mean reading a page
+            // to see what language it is in, and reading a page is the thing that
+            // needs the language. The loop has no start. Automatic belongs in
+            // Settings, where it means "whatever Windows would pick" and is a
+            // default rather than an answer — here the reader is being asked
+            // precisely because they know something we cannot work out.
+            //
+            // Which one is offered first: the Settings choice when it names a
+            // real recognizer, otherwise the one Windows itself would use.
+            string prefer = Language;
+            if (string.IsNullOrEmpty(prefer) || !WindowsOcr.IsInstalled(prefer))
+                prefer = WindowsOcr.ResolvedLanguage("");
             int selected = 0;
             foreach (var l in WindowsOcr.Languages)
             {
-                if (string.Equals(l.Tag, Language, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(l.Tag, prefer, StringComparison.OrdinalIgnoreCase))
                     selected = tags.Count;
                 tags.Add(l.Tag);
                 languages.Items.Add(l.Name);
             }
-            languages.SelectedIndex = Math.Min(selected, languages.Items.Count - 1);
+            if (languages.Items.Count > 0)
+                languages.SelectedIndex = Math.Min(selected, languages.Items.Count - 1);
 
             var read = new Button
             {
@@ -136,7 +151,10 @@ namespace Nemoviz_Book_Reader
             if (DialogResult == DialogResult.OK)
             {
                 int i = languages.SelectedIndex;
-                Language = i >= 0 && i < tags.Count ? tags[i] : "";
+                // A real tag, never empty: the reader picked one, and passing
+                // empty would hand the job back to "whatever Windows would do"
+                // and quietly lose the choice they just made.
+                if (i >= 0 && i < tags.Count) Language = tags[i];
             }
             base.OnFormClosing(e);
         }

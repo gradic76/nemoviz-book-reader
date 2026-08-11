@@ -435,9 +435,11 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>Which recognizer to read image documents with. Empty means
-        /// the user's own Windows languages, which is right almost always:
-        /// recognition goes by SCRIPT, and an English page through the Croatian
-        /// engine measured 0.0 % character error. A tag that is not installed
+        /// the user's own Windows languages. It is the DEFAULT and not an
+        /// answer — the language genuinely matters to the reading (see
+        /// <see cref="WindowsOcr"/>), so the import asks whenever there is more
+        /// than one recognizer to ask about, and this is what it offers first.
+        /// A tag that is not installed
         /// falls back rather than failing, so a setting made on one machine
         /// cannot break NBR on another — the same rule
         /// <see cref="OpticalDriveLetter"/> follows.</summary>

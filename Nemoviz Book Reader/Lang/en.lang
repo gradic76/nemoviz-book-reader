@@ -430,8 +430,14 @@ Ocr.Progress.Seconds=About {0} seconds left.
 Ocr.Progress.Minutes=About {0} minutes left.
 ; Settings. "Automatic" is the right answer nearly always: recognition goes by
 ; SCRIPT, not by language, so one Latin recognizer reads every Latin language.
+Settings.Tab.Ocr=OCR and Translate
+; An ACTION on the shelf, not a setting in Properties: a reading happens once,
+; from the first page to the last, and either it was right or it is done again.
+Context.ReReadOcr=Re-read in a different language
+Ocr.ReRead.Question=This book was read from {0} pages of pictures. Reading it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
+Ocr.ReRead.Done=The book has been read again and replaced.
 Settings.Ocr.Group=Books that are pictures
-Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. Automatic suits nearly every book: recognition works by alphabet, not by language, so one European language reads them all.
+Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. The language matters: the same page read as English rather than Croatian gets the awkward letters wrong. This is only the starting choice — when you have more than one language, Nemoviz asks which to use each time it reads a book.
 Settings.Ocr.Language=Language for reading pictures
 Settings.Ocr.Automatic=Automatic
 Settings.Ocr.AddLanguage=Add a language...

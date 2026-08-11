@@ -58,6 +58,23 @@ namespace Nemoviz_Book_Reader
         public const string CacheName = "ocr.txt";
         /// <summary>Records which recognizer produced <see cref="CacheName"/>.</summary>
         public const string CacheStampName = "ocr.lang";
+        /// <summary>Where the pictures came from, so the book can be read again
+        /// with a different language.</summary>
+        public const string SourceStampName = "ocr.src";
+
+        /// <summary>The pictures themselves, kept inside the book.
+        ///
+        /// <para><b>Following the precedent braille already set:</b> a .brf is
+        /// copied in beside its text so the reading can be redone with a
+        /// different table when the automatic one was wrong. This is the same
+        /// situation exactly — a scanned book read with the wrong recognizer is
+        /// worth nothing, and without the pictures there is nothing to read
+        /// again. It costs the size of the scan, and the scan IS the book.</para>
+        ///
+        /// <para>A source that is a FOLDER of images is not copied — only its
+        /// path is remembered. Copying a hundred jpegs to be able to redo a
+        /// reading is a different bargain from copying one file.</para></summary>
+        public const string SourceFolderName = "ocr-source";
 
         /// <summary>Below this share of pages carrying any text, the document is
         /// not a book — it is pictures. Deliberately low: a scanned book really
@@ -152,6 +169,7 @@ namespace Nemoviz_Book_Reader
 
                     result.Language = WindowsOcr.ResolvedLanguage(language);
                     WriteCache(bookFolder, result.Text, result.Language);
+                    KeepSource(bookFolder, path);
                     return result;
                 }
             }
@@ -218,6 +236,115 @@ namespace Nemoviz_Book_Reader
                     page++;
                 }
                 return result;
+            }
+            catch { return null; }
+        }
+
+        /// <summary>Keeps the pictures with the book, or at least remembers where
+        /// they were. See <see cref="SourceFolderName"/> for why.</summary>
+        private static void KeepSource(string bookFolder, string path)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(bookFolder) || !Directory.Exists(bookFolder)) return;
+                File.WriteAllText(Path.Combine(bookFolder, SourceStampName), path ?? "",
+                    System.Text.Encoding.UTF8);
+                if (Directory.Exists(path)) return;          // a folder: path only
+                string keep = Path.Combine(bookFolder, SourceFolderName);
+                Directory.CreateDirectory(keep);
+                string dest = Path.Combine(keep, Path.GetFileName(path));
+                if (!File.Exists(dest)) File.Copy(path, dest);
+            }
+            catch { }
+        }
+
+        /// <summary>The pictures this book was read from, or null when they are
+        /// not reachable any more. The copy inside the book wins — the original
+        /// may have been on a stick that is long gone.</summary>
+        public static string SourceFor(string bookFolder)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(bookFolder)) return null;
+                string keep = Path.Combine(bookFolder, SourceFolderName);
+                if (Directory.Exists(keep))
+                {
+                    string[] files = Directory.GetFiles(keep);
+                    if (files.Length > 0) return files[0];
+                }
+                string stamp = Path.Combine(bookFolder, SourceStampName);
+                if (!File.Exists(stamp)) return null;
+                string original = File.ReadAllText(stamp, System.Text.Encoding.UTF8).Trim();
+                if (original.Length == 0) return null;
+                return (File.Exists(original) || Directory.Exists(original)) ? original : null;
+            }
+            catch { return null; }
+        }
+
+        /// <summary>Whether "read this again in another language" applies to a
+        /// book: it has to have been read from pictures, those pictures have to
+        /// still be reachable, and there has to be another language to read it
+        /// in.</summary>
+        public static bool CanReRead(string bookFolder)
+        {
+            return WindowsOcr.Languages.Count > 1 && SourceFor(bookFolder) != null;
+        }
+
+        /// <summary>Reads a book's pictures again, in a language the reader
+        /// picks. Returns the new text, or null if they backed out.
+        ///
+        /// <para><b>Not a per-book setting, and deliberately not in Properties</b>
+        /// (Gordan, 2026-08-11). Properties holds schemes that are tuned and
+        /// remembered — the sound chain, the voice. A reading is not that: it
+        /// happens once, from the first page to the last, and either it was right
+        /// or it is done again. So it is an ACTION on the shelf, where the book
+        /// is, and it takes up no room in a dialog that has real settings in
+        /// it.</para></summary>
+        public static OcrText ReRead(IWin32Window owner, string bookFolder)
+        {
+            try
+            {
+                string path = SourceFor(bookFolder);
+                if (path == null) return null;
+
+                using (OcrPageSource source = OcrPageSource.Open(path))
+                {
+                    if (source.Refusal != OcrRefusal.None) { Explain(owner, source.Refusal); return null; }
+
+                    string was = "";
+                    try
+                    {
+                        string stamp = Path.Combine(bookFolder, CacheStampName);
+                        if (File.Exists(stamp)) was = File.ReadAllText(stamp, System.Text.Encoding.UTF8).Trim();
+                    }
+                    catch { }
+
+                    string question = Localization.T("Ocr.ReRead.Question",
+                        source.PageCount, Estimate(source.PageCount));
+                    string language;
+                    using (var ask = new OcrAskForm(question, was))
+                    {
+                        if (ask.ShowDialog(owner) != DialogResult.OK) return null;
+                        language = ask.Language;
+                    }
+
+                    var result = new OcrText();
+                    using (var dlg = new OcrProgressForm(source, language))
+                    {
+                        if (dlg.ShowDialog(owner) != DialogResult.OK) return null;
+                        result.Text = dlg.Result;
+                        result.Pages = dlg.Pages;
+                        if (string.IsNullOrWhiteSpace(result.Text))
+                        {
+                            MessageForm.ShowInfo(owner, Localization.T("Ocr.Result.NoText"),
+                                Localization.T("Ocr.Ask.Title"));
+                            return null;
+                        }
+                    }
+                    result.Language = WindowsOcr.ResolvedLanguage(language);
+                    WriteCache(bookFolder, result.Text, result.Language);
+                    return result;
+                }
             }
             catch { return null; }
         }
