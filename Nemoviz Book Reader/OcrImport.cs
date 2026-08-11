@@ -71,9 +71,33 @@ namespace Nemoviz_Book_Reader
         /// worth nothing, and without the pictures there is nothing to read
         /// again. It costs the size of the scan, and the scan IS the book.</para>
         ///
-        /// <para>A source that is a FOLDER of images is not copied — only its
-        /// path is remembered. Copying a hundred jpegs to be able to redo a
-        /// reading is a different bargain from copying one file.</para></summary>
+        /// <para><b>A folder of numbered images is copied too, and the first
+        /// version of this was wrong not to.</b> I justified the exception by the
+        /// NUMBER of files — "copying a hundred jpegs is a different bargain from
+        /// copying one" — which is not a distinction a reader has: what costs them
+        /// is bytes, and a folder of page scans is not systematically bigger than
+        /// a PDF of the same scans. Gordan put the real objection: a remembered
+        /// path breaks the moment the folder is moved or deleted, and then
+        /// "Re-read" quietly disappears from the menu with nothing to explain it.
+        /// A book that can be re-read only if the user happens not to have tidied
+        /// up is not a feature.</para>
+        ///
+        /// <para>It is also the house rule rather than an exception to it: NBR
+        /// copies audio books into the library wholesale and extracts archives
+        /// into the book's folder. The scans are this book's material in exactly
+        /// that sense.</para>
+        ///
+        /// <para><b>A SUBFOLDER, and that is not cosmetic.</b> Everything that
+        /// inspects a book's own files — <see cref="BookData"/>'s format and
+        /// content scans — reads the top level only. Loose page images beside
+        /// <c>content.txt</c> would be in the way of all of it; one level down
+        /// they are invisible to everything except the re-read.</para>
+        ///
+        /// <para><b>What it costs:</b> the scans, once. A page image at the size
+        /// this reads at runs a few hundred kilobytes, so a long book is tens to a
+        /// couple of hundred megabytes — the same order as the source the reader
+        /// already has on disk. If that ever needs a ceiling it should apply to
+        /// FILES and FOLDERS alike, since that was the flaw in the first rule.</para></summary>
         public const string SourceFolderName = "ocr-source";
 
         /// <summary>Below this share of pages carrying any text, the document is
@@ -244,18 +268,43 @@ namespace Nemoviz_Book_Reader
         /// they were. See <see cref="SourceFolderName"/> for why.</summary>
         private static void KeepSource(string bookFolder, string path)
         {
+            string keep = null;
             try
             {
                 if (string.IsNullOrEmpty(bookFolder) || !Directory.Exists(bookFolder)) return;
+                // The original location is recorded whatever happens, so a book
+                // whose copy could not be made still knows where it came from.
                 File.WriteAllText(Path.Combine(bookFolder, SourceStampName), path ?? "",
                     System.Text.Encoding.UTF8);
-                if (Directory.Exists(path)) return;          // a folder: path only
-                string keep = Path.Combine(bookFolder, SourceFolderName);
+
+                keep = Path.Combine(bookFolder, SourceFolderName);
                 Directory.CreateDirectory(keep);
-                string dest = Path.Combine(keep, Path.GetFileName(path));
-                if (!File.Exists(dest)) File.Copy(path, dest);
+
+                if (Directory.Exists(path))
+                {
+                    // Only the pages — whatever else the folder happened to hold
+                    // is not part of the book.
+                    foreach (string f in Directory.EnumerateFiles(path).Where(OcrPageSource.IsImageFile))
+                    {
+                        string to = Path.Combine(keep, Path.GetFileName(f));
+                        if (!File.Exists(to)) File.Copy(f, to);
+                    }
+                }
+                else
+                {
+                    string dest = Path.Combine(keep, Path.GetFileName(path));
+                    if (!File.Exists(dest)) File.Copy(path, dest);
+                }
             }
-            catch { }
+            catch
+            {
+                // A HALF COPY IS WORSE THAN NONE: re-reading it would produce a
+                // book missing whatever pages the disk ran out on, and nothing
+                // would say so. Throw the partial copy away and fall back to the
+                // remembered path.
+                try { if (keep != null && Directory.Exists(keep)) Directory.Delete(keep, true); }
+                catch { }
+            }
         }
 
         /// <summary>The pictures this book was read from, or null when they are
@@ -270,7 +319,12 @@ namespace Nemoviz_Book_Reader
                 if (Directory.Exists(keep))
                 {
                     string[] files = Directory.GetFiles(keep);
-                    if (files.Length > 0) return files[0];
+                    // One file is a document — a PDF, a multi-page TIFF, a single
+                    // image — and is handed over as itself. Several are the pages
+                    // of a book, and the FOLDER is what reads them, in the natural
+                    // name order OcrPageSource applies.
+                    if (files.Length == 1) return files[0];
+                    if (files.Length > 1) return keep;
                 }
                 string stamp = Path.Combine(bookFolder, SourceStampName);
                 if (!File.Exists(stamp)) return null;
