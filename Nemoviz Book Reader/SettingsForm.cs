@@ -600,12 +600,56 @@ namespace Nemoviz_Book_Reader
             add.AccessibleName = add.Text;
             add.SetBounds(14, 58, 240, 26);
             add.TabIndex = 1;
-            add.Click += (s, e) => WindowsOcr.OpenWindowsLanguageSettings();
+            // The dialog, not a jump into Windows. Windows' own route installs a
+            // whole display language to get one recognition pack, which was
+            // Gordan's objection and a fair one — this installs the pack alone.
+            // The Windows route is still in there, one button along, for anyone
+            // who wants the display language too.
+            add.Click += (s, e) =>
+            {
+                using (var dlg = new OcrLanguageForm())
+                {
+                    dlg.ShowDialog(this);
+                    // A language that has just arrived has to appear in the combo
+                    // without a restart, and the choice already made has to
+                    // survive the rebuild.
+                    if (dlg.Changed) RefillOcrLanguages();
+                }
+            };
 
             box.Controls.Add(lbl);
             box.Controls.Add(cmbOcrLanguage);
             box.Controls.Add(add);
             return box;
+        }
+
+        /// <summary>Rebuilds the recognizer list after one has been installed,
+        /// keeping whatever was chosen if it is still there.</summary>
+        private void RefillOcrLanguages()
+        {
+            if (cmbOcrLanguage == null) return;
+            string chosen = cmbOcrLanguage.SelectedIndex >= 0 && cmbOcrLanguage.SelectedIndex < ocrTags.Count
+                ? ocrTags[cmbOcrLanguage.SelectedIndex] : "";
+
+            List<(string Tag, string Name)> languages = WindowsOcr.Languages;
+            bool any = languages.Count > 0;
+
+            cmbOcrLanguage.BeginUpdate();
+            cmbOcrLanguage.Items.Clear();
+            ocrTags.Clear();
+            ocrTags.Add("");
+            cmbOcrLanguage.Items.Add(Localization.T(any ? "Settings.Ocr.Automatic" : "Settings.Ocr.None"));
+            int selected = 0;
+            foreach (var l in languages)
+            {
+                if (string.Equals(l.Tag, chosen, StringComparison.OrdinalIgnoreCase))
+                    selected = ocrTags.Count;
+                ocrTags.Add(l.Tag);
+                cmbOcrLanguage.Items.Add(l.Name);
+            }
+            cmbOcrLanguage.EndUpdate();
+            cmbOcrLanguage.Enabled = any;
+            cmbOcrLanguage.SelectedIndex = Math.Min(selected, cmbOcrLanguage.Items.Count - 1);
         }
 
         // ── Speech: language → voice, then how that voice sounds ──────────────

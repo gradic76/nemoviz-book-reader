@@ -429,7 +429,25 @@ Settings.Ocr.Group=Books that are pictures
 Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. Automatic suits nearly every book: recognition works by alphabet, not by language, so one European language reads them all.
 Settings.Ocr.Language=Language for reading pictures
 Settings.Ocr.Automatic=Automatic
-Settings.Ocr.AddLanguage=Add a language in Windows...
+Settings.Ocr.AddLanguage=Add a language...
+; Adding a recognition pack. NOT a whole Windows display language — that is the
+; overkill this avoids: the pack is the model alone, about a quarter of a
+; megabyte. Windows asks for its own permission, because installing a system
+; component needs it and a running program cannot grant itself that.
+Ocr.Add.Title=Languages for reading pictures
+Ocr.Add.List=Languages
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — already installed
+Ocr.Add.Hint=Choose a language and press Install. Windows will ask your permission, then download the recognition for that language — a small file, not a whole Windows language.
+Ocr.Add.Install=Install
+Ocr.Add.WindowsSettings=Windows settings...
+Ocr.Add.Close=Close
+Ocr.Add.Installing=Installing {0}. This can take a minute.
+Ocr.Add.Done={0} is installed and ready to use.
+; Dismissing the permission prompt is a decision, not a fault.
+Ocr.Add.NotStarted=Nothing was installed. Windows did not give permission.
+Ocr.Add.Failed={0} could not be installed. Windows reported code {1}. It may not be available for this version of Windows.
+Ocr.Add.StillWorking=Still installing. This window closes when it is finished.
 Settings.Ocr.None=Windows has no text recognition installed.
 
 Prop.Analysing.Done=Recording analysed, {0} stages set. Change any of them if you prefer.

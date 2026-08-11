@@ -243,6 +243,111 @@ namespace Nemoviz_Book_Reader
             return false;
         }
 
+        /// <summary>Every OCR pack Windows can install, as its capability name.
+        ///
+        /// <para><b>Read off a real machine, not from documentation</b> — Gordan
+        /// ran <c>Get-WindowsCapability -Online -Name "Language.OCR*"</c>
+        /// elevated on Windows 11 26200 and this is the answer, 35 packs with
+        /// hr-HR installed and the rest NotPresent. NBR cannot produce this list
+        /// itself: enumerating capabilities needs elevation, the same as
+        /// installing one.</para>
+        ///
+        /// <para><b>Note the casing, because it is not BCP-47 and guessing it
+        /// would fail.</b> The script subtag is UPPER case in a capability name —
+        /// <c>sr-LATN-RS</c>, <c>bs-LATN-BA</c>, <c>sr-CYRL-RS</c> — where the
+        /// language tag the OCR engine reports is <c>sr-Latn-RS</c>. So the two
+        /// are kept side by side rather than derived from each other.</para>
+        ///
+        /// <para>A catalogue, not a promise: it is what one build offered. A pack
+        /// that a given Windows does not have simply fails to install, and says
+        /// so, which is a better failure than a list we refuse to show.</para></summary>
+        public static readonly string[] InstallableLanguages =
+        {
+            "ar-SA", "bg-BG", "bs-LATN-BA", "cs-CZ", "da-DK", "de-DE", "el-GR",
+            "en-GB", "en-US", "es-ES", "es-MX", "fi-FI", "fr-CA", "fr-FR",
+            "hr-HR", "hu-HU", "it-IT", "ja-JP", "ko-KR", "nb-NO", "nl-NL",
+            "pl-PL", "pt-BR", "pt-PT", "ro-RO", "ru-RU", "sk-SK", "sl-SI",
+            "sr-CYRL-RS", "sr-LATN-RS", "sv-SE", "tr-TR", "zh-CN", "zh-HK", "zh-TW"
+        };
+
+        /// <summary>The Windows capability name for a pack.</summary>
+        public static string CapabilityName(string catalogueTag)
+        {
+            return "Language.OCR~~~" + catalogueTag + "~0.0.1.0";
+        }
+
+        /// <summary>A readable name for a catalogue entry, in the reader's own UI
+        /// language where Windows knows one.</summary>
+        public static string DisplayNameFor(string catalogueTag)
+        {
+            try
+            {
+                // BCP-47 wants Latn, the capability name spells LATN — normalise
+                // before asking .NET, or every scripted tag comes back unknown.
+                string[] parts = catalogueTag.Split('-');
+                for (int i = 1; i < parts.Length; i++)
+                    if (parts[i].Length == 4)
+                        parts[i] = char.ToUpperInvariant(parts[i][0]) + parts[i].Substring(1).ToLowerInvariant();
+                var ci = System.Globalization.CultureInfo.GetCultureInfo(string.Join("-", parts));
+                return ci.DisplayName;
+            }
+            catch { return catalogueTag; }
+        }
+
+        /// <summary>Whether a catalogue entry is already on this machine. Compared
+        /// on the language, not the exact tag: the catalogue says
+        /// <c>sr-LATN-RS</c> and the engine reports <c>sr-Latn-RS</c>.</summary>
+        public static bool IsInstalled(string catalogueTag)
+        {
+            string want = (catalogueTag ?? "").Replace("-", "").ToLowerInvariant();
+            foreach (var l in Languages)
+                if ((l.Tag ?? "").Replace("-", "").ToLowerInvariant() == want) return true;
+            return false;
+        }
+
+        /// <summary>Starts an elevated install of one OCR pack, and hands back the
+        /// process so the caller can wait for it.
+        ///
+        /// <para><b>A separate process, because a running one cannot elevate
+        /// itself</b> — the token is fixed at launch. Windows shows its own
+        /// consent prompt, which is the right gate: NBR asks for nothing and
+        /// decides nothing, the user approves an operating-system change in the
+        /// operating system's own dialog. (On a machine set to "never notify"
+        /// that prompt does not appear, which is that machine's setting and not
+        /// something NBR arranged.)</para>
+        ///
+        /// <para>Returns null if the user dismissed the consent prompt, or if
+        /// nothing could be started. This installs ONLY the recognition pack —
+        /// about a quarter of a megabyte of model — and not a whole Windows
+        /// display language, which was Gordan's objection to the obvious route
+        /// (<c>Install-Language</c>) and a fair one.</para></summary>
+        public static System.Diagnostics.Process BeginInstall(string catalogueTag)
+        {
+            try
+            {
+                string name = CapabilityName(catalogueTag);
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden " +
+                                "-Command \"Add-WindowsCapability -Online -Name '" + name + "'\"",
+                    UseShellExecute = true,      // required for the elevation verb
+                    Verb = "runas",
+                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                };
+                return System.Diagnostics.Process.Start(psi);
+            }
+            catch { return null; }               // includes "the user said no"
+        }
+
+        /// <summary>Forget the cached engines and re-probe the language list —
+        /// after an install, so a pack that has just arrived can be used without
+        /// restarting NBR.</summary>
+        public static void Rescan()
+        {
+            lock (gate) { engines.Clear(); }
+        }
+
         // ---------------------------------------------------------------
         // Image preparation
 
