@@ -189,9 +189,28 @@ namespace Nemoviz_Book_Reader
         private void Poll()
         {
             if (running == null) { watch.Stop(); return; }
+
+            // Ask the ENGINE, not the process. Measured on Gordan's first real
+            // install: the helper sat for eight minutes while Windows Update
+            // fetched the pack, with TrustedInstaller at zero CPU the whole time
+            // — waiting on the network looks exactly like being wedged. Watching
+            // for the pack to appear reports success the moment it is usable,
+            // whatever the helper process is doing.
+            if (++ticks % 8 == 0)
+            {
+                WindowsOcr.Rescan();
+                if (WindowsOcr.IsInstalled(installingTag)) { Settle(0); return; }
+            }
+
             try { if (!running.HasExited) return; }
             catch { }
+            Settle(-1);
+        }
 
+        private int ticks;
+
+        private void Settle(int unused)
+        {
             watch.Stop();
             int code = -1;
             try { code = running.ExitCode; } catch { }
@@ -211,7 +230,10 @@ namespace Nemoviz_Book_Reader
                 Changed = true;
                 Report(Localization.T("Ocr.Add.Done", name));
             }
-            else Report(Localization.T("Ocr.Add.Failed", name, code));
+            // NOT "failed": the helper exiting is not the same as the install
+            // being over, and saying so would send a reader looking for a fault
+            // that may be a download still in flight.
+            else Report(Localization.T("Ocr.Add.Failed", name));
         }
 
         private void Report(string text)
@@ -229,16 +251,21 @@ namespace Nemoviz_Book_Reader
             status.AccessibleName = statusText;
         }
 
-        /// <summary>An install is a download; it does not get abandoned because
-        /// the window was closed. The window waits, like the analysis dialog.</summary>
+        /// <summary>Closing while an install runs is ALLOWED, and the first
+        /// version of this was wrong to refuse it.
+        ///
+        /// <para>The analysis dialog holds its window shut because the work is
+        /// ours and stopping it takes a moment. This work is not ours: Windows is
+        /// downloading a component, NBR only started it and cannot cancel it. So
+        /// refusing to close bought nothing and cost the one thing that matters —
+        /// Gordan's first real install sat for eight minutes on a Windows Update
+        /// fetch, in a modal dialog with no cancel and no way out. The install
+        /// carries on in Windows either way; all that closing does is stop us
+        /// watching.</para></summary>
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (running != null && e.CloseReason == CloseReason.UserClosing)
-            {
-                Report(Localization.T("Ocr.Add.StillWorking"));
-                e.Cancel = true;
-                return;
-            }
+                Report(Localization.T("Ocr.Add.LeftRunning"));
             base.OnFormClosing(e);
         }
 

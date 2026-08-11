@@ -113,10 +113,24 @@ namespace Nemoviz_Book_Reader
                     string question = Localization.T("Ocr.Ask.Question",
                         Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar)),
                         source.PageCount, Estimate(source.PageCount));
-                    if (!MessageForm.ShowConfirm(owner, question, Localization.T("Ocr.Ask.Title")))
-                        return null;
-
                     string language = AppSettings.Current != null ? (AppSettings.Current.OcrLanguage ?? "") : "";
+
+                    // ONE recognizer installed → a plain yes/no, because a picker
+                    // with one entry is an obstacle dressed as a choice. TWO or
+                    // more → the choice belongs here, where the reader has the
+                    // book in front of them and knows what language it is in.
+                    // (Gordan, once he had installed a second one. My earlier
+                    // "it goes in Settings" held only while there was one.)
+                    if (WindowsOcr.Languages.Count > 1)
+                    {
+                        using (var ask = new OcrAskForm(question, language))
+                        {
+                            if (ask.ShowDialog(owner) != DialogResult.OK) return null;
+                            language = ask.Language;
+                        }
+                    }
+                    else if (!MessageForm.ShowConfirm(owner, question, Localization.T("Ocr.Ask.Title")))
+                        return null;
                     var result = new OcrText();
                     using (var dlg = new OcrProgressForm(source, language))
                     {
