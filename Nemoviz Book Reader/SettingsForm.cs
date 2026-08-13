@@ -701,6 +701,16 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Voice"), lx, y + 3));
             cmbVoice = MakeCombo(Localization.T("Settings.TextBooks.Voice"), cx, y, cw, tab++);
             cmbVoice.SelectedIndexChanged += (s, e) => VoiceChanged();
+            // Enter opens the door; walking past it does not. And walking AWAY
+            // from it puts the previous voice back, so the row can be read
+            // without consequence.
+            //
+            // NOT wired to DropDownClosed, though that looked right: closing the
+            // list is what Enter itself does, so restoring there would move the
+            // selection off the door before the key was handled and the door
+            // would never open. Leave is late enough to be safe.
+            cmbVoice.KeyDown += OnVoiceKeyDown;
+            cmbVoice.Leave += (s, e) => RestoreIfOnDoor();
             box.Controls.Add(cmbVoice);
 
             // Numeric fields rather than sliders: a screen reader speaks the value
@@ -886,19 +896,56 @@ namespace Nemoviz_Book_Reader
         /// numbers below switch to how that voice is set up.</summary>
         private void VoiceChanged()
         {
-            // The last row is a door, not a voice. Opening it must not leave that
-            // row selected either — a language whose voice is "Add new languages"
-            // would be a language with no voice and no way to tell.
-            if (!populating && cmbVoice != null
-                && cmbVoice.SelectedIndex == cmbVoice.Items.Count - 1
-                && cmbVoice.SelectedIndex >= voiceNames.Count)
+            // The last row is a DOOR, not a voice — and passing over it is not
+            // opening it (Gordan, 2026-08-14). Arrowing through an open list must
+            // be free: a reader reads the list by walking it, and a row that acts
+            // on arrival cannot be read past. So nothing happens here; the door
+            // opens on Enter, in OnVoiceKeyDown.
+            if (OnDoorRow())
             {
-                using (var dlg = new OcrLanguageForm(LanguagePackFamily.Voices)) dlg.ShowDialog(this);
-                LanguageChanged();
-                return;
+                LoadPrefsForSelectedVoice();
+                return;                     // not a voice: nothing to stage
             }
-            if (!populating) stagedLanguageVoices[SelectedLanguageCode()] = SelectedVoiceName();
+            if (!populating)
+            {
+                lastVoiceIndex = cmbVoice.SelectedIndex;
+                stagedLanguageVoices[SelectedLanguageCode()] = SelectedVoiceName();
+            }
             LoadPrefsForSelectedVoice();
+        }
+
+        /// <summary>Standing on the "add languages" row, which is the one entry
+        /// with no voice behind it in <c>voiceNames</c>.</summary>
+        private bool OnDoorRow()
+        {
+            return cmbVoice != null && cmbVoice.SelectedIndex >= 0
+                && cmbVoice.SelectedIndex >= voiceNames.Count;
+        }
+
+        /// <summary>The last row that WAS a voice, to fall back to when the
+        /// reader walks onto the door and then leaves without opening it. Without
+        /// this the language would be left with "Add new languages" for a voice,
+        /// which is a language with no voice and no way to tell.</summary>
+        private int lastVoiceIndex;
+
+        private void OnVoiceKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter || !OnDoorRow()) return;
+            e.Handled = true;
+            e.SuppressKeyPress = true;
+            using (var dlg = new OcrLanguageForm(LanguagePackFamily.Voices)) dlg.ShowDialog(this);
+            LanguageChanged();               // rebuild: a new voice may have arrived
+        }
+
+        /// <summary>Leaving the list while standing on the door puts the previous
+        /// voice back.</summary>
+        private void RestoreIfOnDoor()
+        {
+            if (!OnDoorRow()) return;
+            if (lastVoiceIndex >= 0 && lastVoiceIndex < voiceNames.Count)
+                cmbVoice.SelectedIndex = lastVoiceIndex;
+            else if (cmbVoice.Items.Count > 1)
+                cmbVoice.SelectedIndex = 0;
         }
 
         // Voices set up during this visit to the dialog. Held here rather than
