@@ -654,7 +654,17 @@ namespace Nemoviz_Book_Reader
             listNowReading.DoubleClick += ListBooks_DoubleClick;
             // The infobox follows the SELECTION, from whichever list made it —
             // see selectionOwner. Nothing is wired to Enter: entering a list is
-            // standing in it, not choosing from it.
+            // standing in it, not choosing from it. A space, an arrow or a click
+            // IS choosing, and says so even when the selection does not move,
+            // which on a one-row list it never can.
+            listNowReading.KeyDown += (s, e) =>
+            {
+                if (IsSelectionKey(e.KeyCode)) ClaimSelection(listNowReading);
+            };
+            listNowReading.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Left) ClaimSelection(listNowReading);
+            };
             listNowReading.KeyDown += ListBooks_KeyDown;
             listNowReading.SizeChanged += (s, e) =>
             {
@@ -716,6 +726,14 @@ namespace Nemoviz_Book_Reader
                     listBooks.Columns[0].Width = Math.Max(50, listBooks.ClientSize.Width - 4);
             };
             listBooks.SelectedIndexChanged += ListBooks_SelectedIndexChanged;
+            // The same rule on the shelf. Its arrows usually move and raise the
+            // ordinary event on their own, but not at the top and bottom of the
+            // list — and a reader pressing Up on the first book should still be
+            // told which book that is.
+            listBooks.KeyDown += (s, e) =>
+            {
+                if (IsSelectionKey(e.KeyCode)) ClaimSelection(listBooks);
+            };
             listBooks.DoubleClick += ListBooks_DoubleClick;
             listBooks.KeyDown += ListBooks_KeyDown;
 
@@ -1354,6 +1372,59 @@ namespace Nemoviz_Book_Reader
         /// earlier — "prva knjiga s police" appearing in the infobox for no reason
         /// the reader had given.</para></summary>
         private ListView selectionOwner;
+
+        /// <summary>A space, an arrow or a click in a list means "this one" — and
+        /// it has to say so even when the selection does not move.
+        ///
+        /// <para><b>This is what the previous version still got wrong.</b> The two
+        /// lists keep their selections independently, so after choosing on the
+        /// shelf, Now reading's row is still selected from before. Going back and
+        /// pressing space changes nothing, <c>SelectedIndexChanged</c> never fires,
+        /// and the infobox goes on showing the shelf. The arrows cannot rescue it
+        /// either: Now reading holds ONE item, so there is nowhere to move and no
+        /// event to raise. The list was, in Gordan's words, a place where the keys
+        /// are there but do not make a selection.</para>
+        ///
+        /// <para>So the keystroke claims the infobox rather than relying on the
+        /// selection having changed — which is also what Explorer does when you
+        /// arrow inside a pane that already had something chosen. If the list has
+        /// nothing selected yet, this is where the space or the arrow selects it,
+        /// the row under the marker for choice.</para></summary>
+        private void ClaimSelection(ListView list)
+        {
+            if (list == null || list.Items.Count == 0) return;
+            if (list.SelectedItems.Count == 0)
+            {
+                ListViewItem row = list.FocusedItem ?? list.Items[0];
+                row.Focused = true;
+                row.Selected = true;                 // raises the ordinary refresh
+                return;
+            }
+            selectionOwner = list;
+            BookData book = list.SelectedItems[0].Tag as BookData;
+            if (book != null) ShowDetails(book);
+        }
+
+        /// <summary>The keys that mean a reader is choosing rather than passing
+        /// through. Tab is deliberately not among them.</summary>
+        private static bool IsSelectionKey(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.Space:
+                case Keys.Up:
+                case Keys.Down:
+                case Keys.Left:
+                case Keys.Right:
+                case Keys.Home:
+                case Keys.End:
+                case Keys.PageUp:
+                case Keys.PageDown:
+                    return true;
+                default:
+                    return false;
+            }
+        }
 
         /// <summary>The book the details pane is currently DESCRIBING.
         ///
