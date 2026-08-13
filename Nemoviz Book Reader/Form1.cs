@@ -550,22 +550,22 @@ namespace Nemoviz_Book_Reader
         // on a normal focus-in.
         private void SyncVolumeField()
         {
-            string acc = Localization.T("Player.Volume.Accessible", currentVolume);
-            if (tbVolume.AccessibleName != acc)
+            string want = Localization.T("Player.Volume.Text", currentVolume);
+            if (tbVolume.Text != want)
             {
-                tbVolume.Text = Localization.T("Player.Volume.Text", currentVolume);
-                tbVolume.AccessibleName = acc;
+                tbVolume.Text = want;
+                tbVolume.AccessibleName = want;
             }
         }
 
         private void SyncSpeedField()
         {
             string speedStr = (currentSpeed / 100.0).ToString("0.0");
-            string acc = Localization.T("Player.Speed.Accessible", speedStr);
-            if (tbSpeed.AccessibleName != acc)
+            string want = Localization.T("Player.Speed.Text", speedStr);
+            if (tbSpeed.Text != want)
             {
-                tbSpeed.Text = Localization.T("Player.Speed.Text", speedStr);
-                tbSpeed.AccessibleName = acc;
+                tbSpeed.Text = want;
+                tbSpeed.AccessibleName = want;
             }
         }
 
@@ -1398,7 +1398,7 @@ namespace Nemoviz_Book_Reader
             tbVolume.Text = text;
             if (!tbVolume.Focused)
             {
-                tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", currentVolume);
+                tbVolume.AccessibleName = tbVolume.Text;
                 AnnounceToScreenReader(lblAnnounceVolume, text);
             }
 
@@ -1449,7 +1449,7 @@ namespace Nemoviz_Book_Reader
             if (!tbSpeed.Focused)
             {
                 tbSpeed.Text = text;
-                tbSpeed.AccessibleName = Localization.T("Player.Speed.Accessible", speedStr);
+                tbSpeed.AccessibleName = tbSpeed.Text;
             }
 
             AnnounceToScreenReader(lblAnnounceSpeed, text);
@@ -1802,7 +1802,7 @@ namespace Nemoviz_Book_Reader
             tbVolume.TabStop = true;
             tbVolume.TabIndex = 8;
             tbVolume.Text = Localization.T("Player.Volume.Text", 100);
-            tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", 100);
+            tbVolume.AccessibleName = tbVolume.Text;
             tbVolume.BackColor = SystemColors.Window;
             // Present as static text, not an edit: volume is changed with the
             // Up/Down arrows, which a reader otherwise treats as edit caret
@@ -1826,7 +1826,7 @@ namespace Nemoviz_Book_Reader
             tbSpeed.TabStop = true;
             tbSpeed.TabIndex = 9;
             tbSpeed.Text = Localization.T("Player.Speed.Text", "1.0");
-            tbSpeed.AccessibleName = Localization.T("Player.Speed.Accessible", "1.0");
+            tbSpeed.AccessibleName = tbSpeed.Text;
             tbSpeed.BackColor = SystemColors.Window;
             // Static text for the same reason as tbVolume (harmless for Speed,
             // which uses Page Up/Down, but keeps the two fields consistent).
@@ -1847,7 +1847,7 @@ namespace Nemoviz_Book_Reader
             tbProgress.TabStop = true;
             tbProgress.TabIndex = 10;
             tbProgress.Text = Localization.T("Player.Position.Text", FormatTime(0), FormatTime(0));
-            tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", 0);
+            tbProgress.AccessibleName = tbProgress.Text;
             tbProgress.BackColor = SystemColors.Window;
             // THE ODD ONE OUT, measured (Gordan, 2026-08-11): walking the real tab
             // ring of the running window, Volume and Speed report as static text
@@ -2002,7 +2002,7 @@ namespace Nemoviz_Book_Reader
 
                     currentProgress = 0;
                     tbProgress.Text = Localization.T("Player.Position.Text", FormatTime(0), FormatTime(0));
-                    tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", 0);
+                    tbProgress.AccessibleName = tbProgress.Text;
 
                     UpdateTitleBar();
 
@@ -2033,7 +2033,7 @@ namespace Nemoviz_Book_Reader
                     currentPlaylistIndex = 0;
                     currentProgress = 0;
                     tbProgress.Text = Localization.T("Player.Position.Text", FormatTime(0), FormatTime(0));
-                    tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", 0);
+                    tbProgress.AccessibleName = tbProgress.Text;
                 }
             }
         }
@@ -2061,7 +2061,7 @@ namespace Nemoviz_Book_Reader
                 string posText = Localization.T("Player.Position.Text",
                                                 FormatTime(virtualPos), FormatTime(totalDur));
                 tbProgress.Text = posText;
-                tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
+                tbProgress.AccessibleName = tbProgress.Text;
                 if (lblProgress != null) lblProgress.Text = posText;
                 if (tbInfo != null && this.ActiveControl != tbInfo)
                     tbInfo.Text = BuildCurrentInfoText();
@@ -2126,7 +2126,7 @@ namespace Nemoviz_Book_Reader
                 if (!reading)
                 {
                     tbProgress.Text = posText;
-                    tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
+                    tbProgress.AccessibleName = tbProgress.Text;
                     lblProgress.Text = posText;
                 }
 
@@ -5336,7 +5336,7 @@ namespace Nemoviz_Book_Reader
             if (!tbVolume.Focused)
             {
                 tbVolume.Text = text;
-                tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", currentVolume);
+                tbVolume.AccessibleName = tbVolume.Text;
             }
         }
 
@@ -5352,9 +5352,7 @@ namespace Nemoviz_Book_Reader
             if (!tbSpeed.Focused)
             {
                 tbSpeed.Text = display;
-                tbSpeed.AccessibleName = text
-                    ? Localization.T("Player.Speed.WpmAccessible", currentWpm)
-                    : Localization.T("Player.Speed.Accessible", (currentSpeed / 100.0).ToString("0.0"));
+                tbSpeed.AccessibleName = display;
             }
         }
 
@@ -5409,7 +5407,7 @@ namespace Nemoviz_Book_Reader
             {
                 lastTextPosText = posText;
                 tbProgress.Text = posText;
-                tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", percent);
+                tbProgress.AccessibleName = tbProgress.Text;
                 lblProgress.Text = posText;
                 // Live title bar + info box (same rule as audio: caption always,
                 // info box only while unfocused) so text progress advances visibly.
@@ -5480,13 +5478,13 @@ namespace Nemoviz_Book_Reader
             string volText = Localization.T("Player.Volume.Text", currentVolume);
             lblVolume.Text = volText;
             tbVolume.Text = volText;
-            tbVolume.AccessibleName = Localization.T("Player.Volume.Accessible", currentVolume);
+            tbVolume.AccessibleName = tbVolume.Text;
 
             string speedStr = (currentSpeed / 100.0).ToString("0.0");
             string spdText = Localization.T("Player.Speed.Text", speedStr);
             lblSpeed.Text = spdText;
             tbSpeed.Text = spdText;
-            tbSpeed.AccessibleName = Localization.T("Player.Speed.Accessible", speedStr);
+            tbSpeed.AccessibleName = tbSpeed.Text;
 
             mpv_set_property_string(mpvHandle, "volume", currentVolume.ToString());
             double speed = currentSpeed / 100.0;
@@ -5733,7 +5731,7 @@ namespace Nemoviz_Book_Reader
 
             currentProgress = 0;
             tbProgress.Text = Localization.T("Player.Position.Text", FormatTime(0), FormatTime(0));
-            tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", 0);
+            tbProgress.AccessibleName = tbProgress.Text;
 
             eventTimer.Start();
             progressTimer.Start();
