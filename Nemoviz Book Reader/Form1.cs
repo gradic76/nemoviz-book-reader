@@ -1849,6 +1849,14 @@ namespace Nemoviz_Book_Reader
             tbProgress.Text = Localization.T("Player.Position.Text", FormatTime(0), FormatTime(0));
             tbProgress.AccessibleName = Localization.T("Player.Position.Accessible", 0);
             tbProgress.BackColor = SystemColors.Window;
+            // THE ODD ONE OUT, measured (Gordan, 2026-08-11): walking the real tab
+            // ring of the running window, Volume and Speed report as static text
+            // and Position reported as an editable TEXT field — the only info line
+            // that did. That is what he heard as "P, and sometimes the time": in an
+            // editable field the arrows move a caret, and a reader announces the
+            // character it lands on, so Position spelled itself out one letter at a
+            // time while the other two did not.
+            tbProgress.AccessibleRole = AccessibleRole.StaticText;
 
             // ── Column C (x=490, width 140) ──
             btnProperties = new Button();
