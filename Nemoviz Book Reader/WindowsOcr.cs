@@ -131,8 +131,14 @@ namespace Nemoviz_Book_Reader
                     {
                         Type tl = l.GetType();
                         string tag = tl.GetProperty("LanguageTag").GetValue(l) as string;
-                        string name = tl.GetProperty("DisplayName").GetValue(l) as string;
-                        if (!string.IsNullOrEmpty(tag)) list.Add((tag, name ?? tag));
+                        if (string.IsNullOrEmpty(tag)) continue;
+                        // Its own language, like every other language list in NBR
+                        // — WinRT's DisplayName follows the user's Windows, which
+                        // would put "engleski" beside "Hrvatski" on this machine.
+                        string name = LanguageDetector.DisplayName(tag);
+                        if (string.IsNullOrEmpty(name))
+                            name = tl.GetProperty("NativeName").GetValue(l) as string ?? tag;
+                        list.Add((tag, name));
                     }
                 }
                 catch { }
@@ -357,22 +363,19 @@ namespace Nemoviz_Book_Reader
             return "Language.OCR~~~" + catalogueTag + "~0.0.1.0";
         }
 
-        /// <summary>A readable name for a catalogue entry, in the reader's own UI
-        /// language where Windows knows one.</summary>
+        /// <summary>A catalogue entry's name, <b>in its own language</b> — see
+        /// <see cref="LanguageDetector.DisplayName"/> for why that is the rule
+        /// everywhere, and asked THERE so there is one answer and not two.</summary>
         public static string DisplayNameFor(string catalogueTag)
         {
-            try
-            {
-                // BCP-47 wants Latn, the capability name spells LATN — normalise
-                // before asking .NET, or every scripted tag comes back unknown.
-                string[] parts = catalogueTag.Split('-');
-                for (int i = 1; i < parts.Length; i++)
-                    if (parts[i].Length == 4)
-                        parts[i] = char.ToUpperInvariant(parts[i][0]) + parts[i].Substring(1).ToLowerInvariant();
-                var ci = System.Globalization.CultureInfo.GetCultureInfo(string.Join("-", parts));
-                return ci.DisplayName;
-            }
-            catch { return catalogueTag; }
+            // BCP-47 wants Latn, the capability name spells LATN — normalise
+            // before asking .NET, or every scripted tag comes back unknown.
+            string[] parts = (catalogueTag ?? "").Split('-');
+            for (int i = 1; i < parts.Length; i++)
+                if (parts[i].Length == 4)
+                    parts[i] = char.ToUpperInvariant(parts[i][0]) + parts[i].Substring(1).ToLowerInvariant();
+            string name = LanguageDetector.DisplayName(string.Join("-", parts));
+            return string.IsNullOrEmpty(name) ? catalogueTag : name;
         }
 
         /// <summary>Whether a catalogue entry is already on this machine. Compared

@@ -279,12 +279,39 @@ namespace Nemoviz_Book_Reader
             catch { return ""; }
         }
 
-        /// <summary>The language's own name for showing to the user ("hr-HR" →
-        /// "Croatian (Croatia)"), falling back to the tag itself.</summary>
+        /// <summary>A language's name <b>in that language</b> — "hr-HR" →
+        /// "Hrvatski (Hrvatska)", "es-ES" → "Español (España)", "el-GR" →
+        /// "Ελληνικά (Ελλάδα)". Falls back to the tag itself.
+        ///
+        /// <para><b>The convention for every language list in NBR</b> (Gordan,
+        /// 2026-08-14): voices, OCR recognizers, the interface language, a book's
+        /// own language — all of them. His reasoning is better than mine would
+        /// have been: it means the names <b>never need translating</b>. A list
+        /// written in the reader's own interface language only helps someone who
+        /// already reads that language; written in each language's own words it
+        /// helps the native speaker AND anyone who knows the language, in every
+        /// localisation NBR will ever have, with no work per localisation.</para>
+        ///
+        /// <para>It replaces <c>EnglishName</c>, which gave "Croatian (Croatia)"
+        /// to a Croatian reader. <c>DisplayName</c> was no better: it follows the
+        /// APPLICATION's UI culture, so the same call returned "Croatian" here and
+        /// "hrvatski" inside the player — the one thing a convention must not
+        /// do.</para>
+        ///
+        /// <para>The first letter is raised because these are list entries, and a
+        /// lower-case row reads as a fault to anyone who can see it. Windows
+        /// itself leaves them as the culture data has them — <c>hrvatski</c>,
+        /// <c>español</c> — which is correct orthography and looks like a
+        /// mistake in a list box.</para></summary>
         public static string DisplayName(string tag)
         {
             if (string.IsNullOrWhiteSpace(tag)) return "";
-            try { return CultureInfo.GetCultureInfo(tag).EnglishName; }
+            try
+            {
+                string n = CultureInfo.GetCultureInfo(tag).NativeName;
+                if (string.IsNullOrEmpty(n)) return tag;
+                return char.ToUpper(n[0], CultureInfo.InvariantCulture) + n.Substring(1);
+            }
             catch { return tag; }
         }
 
