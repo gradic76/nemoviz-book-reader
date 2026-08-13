@@ -46,8 +46,8 @@ Btn.Forward.Accessible=Forward, Shift+Right
 Btn.Play.Accessible=Play, Space
 Btn.Pause.Accessible=Pause, Space
 Btn.Power.Accessible=Exit, Alt+F4
-Btn.VolumeUp.Accessible=Volume up, Up arrow
-Btn.VolumeDown.Accessible=Volume down, Down arrow
+Btn.VolumeUp.Accessible=Volume up, F12
+Btn.VolumeDown.Accessible=Volume down, F11
 ; Printed under the keys on the new panel. The cell is 100 units wide, so the
 ; two bookmark keys use short forms; AccessibleName keeps the full wording.
 Btn.Library.Legend=Library
@@ -162,7 +162,7 @@ Tip.Seek=Change with Shift+Up and Shift+Down; jump with Shift+Left and Shift+Rig
 Tip.GoTo=F4
 Tip.Properties=Alt+Enter
 Tip.Timer=F7
-Tip.Volume=Up and Down arrows
+Tip.Volume=F12 and F11
 Tip.Speed=Ctrl+Left and Ctrl+Right
 Tip.Progress=Ctrl+1–9: jump to 10–90%
 

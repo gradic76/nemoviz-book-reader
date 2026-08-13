@@ -1129,12 +1129,39 @@ namespace Nemoviz_Book_Reader
             {
                 // The ring's two volume keys belong to the skin, not to BuildUI, so
                 // they are the one pair FlashKey cannot be handed by name.
-                case Keys.Up:
+                // VOLUME IS ON F11 AND F12, and the bare arrows are given back to
+                // the reader (Gordan, 2026-08-11).
+                //
+                // Measured over four passes: while the focus rests on a button
+                // and a bare arrow DOES something, JAWS' "read all" keeps asking
+                // for the next line and the volume slides away underneath. Nothing
+                // inside the app can tell its Down from the user's — Insert is not
+                // a modifier, and JAWS re-injects every key, real ones included,
+                // stamped identically. The only thing that ends say-all is a focus
+                // change, and buying that would mean letting the arrows walk the
+                // focus, which is worse than the fault.
+                //
+                // So the keys move instead. Not to a modifier: Ctrl+arrows have
+                // burned us before and Alt+arrows belong to Windows' own menus.
+                // Not to the numeric keypad or the six-pack either, because not
+                // every keyboard has them. The function row does, on every
+                // machine — and Windows Media Player has put volume there for
+                // twenty years, so this leaves one convention for another rather
+                // than for nothing. F12 up, F11 down: the higher key raises.
+                //
+                // What this costs: NBR now differs from PotPlayer and Winamp,
+                // which keep volume on the bare arrows. They can — PotPlayer
+                // exposes almost nothing to a screen reader, so say-all finds
+                // nothing to walk, and Winamp has shipped JAWS scripts for two
+                // decades. We have this problem BECAUSE the window is properly
+                // accessible, and Gordan's rule is that an application should not
+                // need a script to be usable. This is the price of that rule.
+                case Keys.F12:
                     if (!infoBoxHasFocus)
                     { FlashKey(NewPlayerSkin.RingVolumeUp); ChangeVolume(+5); return true; }
                     break;
 
-                case Keys.Down:
+                case Keys.F11:
                     if (!infoBoxHasFocus)
                     { FlashKey(NewPlayerSkin.RingVolumeDown); ChangeVolume(-5); return true; }
                     break;
