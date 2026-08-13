@@ -142,19 +142,33 @@ namespace Nemoviz_Book_Reader
             // a printed page number can only be told from a sentence that starts
             // with a number by seeing the same offset repeat down the book
             // (OcrTidy.StripPageNumbers).
-            var perPage = new System.Collections.Generic.List<string>();
+            // LINES, not text: OcrResult.Text joins a page's lines with spaces and
+            // no break, so a running head or a page number sitting alone at the
+            // top cannot be told from the first words of a paragraph once it has
+            // been flattened. See WindowsOcr.OcrLine.
+            var pageLines = new System.Collections.Generic.List<System.Collections.Generic.List<string>>();
             withText = 0;
             for (int i = 0; i < source.PageCount; i++)
             {
                 if (stop) return null;
                 byte[] image = source.Page(i);
-                string text = image == null ? null : WindowsOcr.Read(image, language);
-                text = string.IsNullOrWhiteSpace(text) ? "" : OcrTidy.JoinBrokenWords(text.Trim());
-                if (text.Length > 0) withText++;
-                perPage.Add(text);
+                var lines = image == null ? null : WindowsOcr.ReadLines(image, language);
+                var texts = new System.Collections.Generic.List<string>();
+                if (lines != null)
+                    foreach (var l in lines)
+                        if (!string.IsNullOrWhiteSpace(l.Text)) texts.Add(l.Text.Trim());
+                if (texts.Count > 0) withText++;
+                pageLines.Add(texts);
                 done = i + 1;
             }
-            OcrTidy.StripPageNumbers(perPage);
+            OcrTidy.StripFurniture(pageLines);
+
+            // Only now flatten, and rejoin the words the page broke across its
+            // lines — which is unambiguous here, because a hyphen at the END of a
+            // line is a line break and nothing else.
+            var perPage = new System.Collections.Generic.List<string>();
+            foreach (var texts in pageLines)
+                perPage.Add(OcrTidy.JoinBrokenWords(string.Join(" ", texts)));
 
             var sb = new StringBuilder();
             var pages = new System.Collections.Generic.List<(string, int)>();

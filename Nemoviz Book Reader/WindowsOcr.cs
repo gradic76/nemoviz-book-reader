@@ -140,6 +140,74 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        /// <summary>One recognized line, with the two facts about it that matter
+        /// to a book: where it sits down the page, and how big its type is.
+        ///
+        /// <para><b>Line structure is only available HERE.</b>
+        /// <c>OcrResult.Text</c> joins the lines of a page with SPACES and no
+        /// break at all, so anything that has to know where a line begins or ends
+        /// — a running head, a footer, a page number sitting alone at the top —
+        /// cannot be done on the text afterwards. Measured, not assumed: splitting
+        /// a page of <c>Text</c> on newlines yields exactly one line.</para></summary>
+        public class OcrLine
+        {
+            public string Text = "";
+            /// <summary>Top of the line in page pixels.</summary>
+            public double Top;
+            /// <summary>Bottom of the line in page pixels.</summary>
+            public double Bottom;
+            /// <summary>Mean height of its words' boxes — a proxy for type size,
+            /// and <b>a poor one on short lines</b>: measured on a real book, a
+            /// line reading "temama." comes out 25 px against a body median of 35
+            /// simply for having no tall letters in it. Usable for grouping, not
+            /// for deciding that something is small print.</summary>
+            public double Height;
+        }
+
+        /// <summary>Recognizes one page image as its LINES. Null when the engine
+        /// could not be built; empty when the page holds no text.</summary>
+        public static List<OcrLine> ReadLines(byte[] pageImage, string languageTag)
+        {
+            if (pageImage == null || pageImage.Length == 0) return new List<OcrLine>();
+            object engine = EngineFor(languageTag);
+            if (engine == null) return null;
+            try
+            {
+                byte[] prepared = Stretch(pageImage);
+                object soft = Decode(prepared ?? pageImage);
+                if (soft == null) return null;
+                object res = Await(engine.GetType().GetMethod("RecognizeAsync")
+                                         .Invoke(engine, new object[] { soft }), tResult);
+
+                var lines = new List<OcrLine>();
+                foreach (object ln in (IEnumerable)tResult.GetProperty("Lines").GetValue(res))
+                {
+                    var line = new OcrLine
+                    {
+                        Text = (string)ln.GetType().GetProperty("Text").GetValue(ln) ?? "",
+                        Top = double.MaxValue
+                    };
+                    double sum = 0; int n = 0;
+                    foreach (object w in (IEnumerable)ln.GetType().GetProperty("Words").GetValue(ln))
+                    {
+                        object r = w.GetType().GetProperty("BoundingRect").GetValue(w);
+                        Type tr = r.GetType();
+                        double y = Convert.ToDouble(tr.GetProperty("Y").GetValue(r));
+                        double h = Convert.ToDouble(tr.GetProperty("Height").GetValue(r));
+                        if (y < line.Top) line.Top = y;
+                        if (y + h > line.Bottom) line.Bottom = y + h;
+                        sum += h; n++;
+                    }
+                    if (n == 0) continue;
+                    line.Height = sum / n;
+                    lines.Add(line);
+                }
+                lines.Sort((a, b) => a.Top.CompareTo(b.Top));
+                return lines;
+            }
+            catch { return null; }
+        }
+
         /// <summary>Recognizes one page image. Returns the text, or null when the
         /// engine could not be built. An image with no text in it returns an empty
         /// string, not null — measured, and the caller needs the difference to
