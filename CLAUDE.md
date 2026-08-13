@@ -3684,12 +3684,15 @@ both now fixed in `OcrTidy`:
   safe**: an author's own hyphen never has one, and every single one was left
   alone — `hip-hop`, `FPZ-u`, `PC-ju`, `DOS-u`, `sori-sori`, `kakvih-takvih`,
   `Fu-Schnickense`.
-- **The printed page number is folded into the text**, at the very start: every
-  page reads "7 PROLOG…", "9 Ali, dobro…", "11 Dobro, super…". Read aloud that is
-  a bare number at the head of every page. `StripPageNumbers` removed **15 of 24**
-  — and it does not guess: a leading number is only removed where
-  `number − pageIndex` is the SAME across most of the book, which is what a page
-  number is and what a sentence starting with a year is not.
+- **The printed page number is a LINE OF ITS OWN at the top**, which flattening
+  hides: every page reads "7 PROLOG…", "9 Ali, dobro…". Read aloud that is a bare
+  number at the head of every page. **Measured over the whole book, not a sample:
+  214 removed of 249 pages that have text, and NOT ONE missed** — every page whose
+  first line was digits was caught. The other 35 genuinely have no printed number
+  (covers, title, contents, and pages the layout leaves unnumbered), and none of
+  them has it glued to the text or sitting at the foot.
+- **Whole-book timing, on the i9-14900HX: 252 pages in 147 s = 0.58 s a page** —
+  which is what the import dialog's estimate promises, confirmed at book length.
 - **Reading order and columns were already fine** (the leaflet proved that), and
   `OcrResult.Text` returns a page as one run rather than preserving line breaks,
   which is what we want — the line breaks belong to the paper.
