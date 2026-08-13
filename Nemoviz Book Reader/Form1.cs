@@ -1090,9 +1090,44 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // ProcessCmdKey
         // ──────────────────────────────────────────────
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern short GetKeyState(int vKey);
+
+        /// <summary>True while a screen reader's own modifier key is held down.
+        ///
+        /// <para><b>Why this cannot be done with <c>ModifierKeys</c></b>
+        /// (Gordan, 2026-08-11): JAWS reads the whole book with <b>Insert+Down</b>,
+        /// and Insert is not a modifier as far as .NET is concerned — the message
+        /// that reaches <see cref="ProcessCmdKey"/> is a plain
+        /// <c>Keys.Down</c> with no flags on it. So NBR did what it is told to do
+        /// with Down, and the volume slid away on its own for as long as JAWS held
+        /// the key. He could stop it with Ctrl like any other reader command, but
+        /// it stayed wherever it had got to. NVDA does not do this because it
+        /// consumes the key instead of passing it on.</para>
+        ///
+        /// <para>The reader's modifier is therefore asked about directly: Insert,
+        /// the numeric keypad's zero (JAWS' other Insert), and Caps Lock, which is
+        /// what NVDA users on laptops usually set. A bare arrow with one of those
+        /// held is the reader talking to itself, and none of NBR's business.</para></summary>
+        private static bool ScreenReaderModifierHeld()
+        {
+            const int VK_INSERT = 0x2D, VK_NUMPAD0 = 0x60, VK_CAPITAL = 0x14;
+            return (GetKeyState(VK_INSERT) & 0x8000) != 0
+                || (GetKeyState(VK_NUMPAD0) & 0x8000) != 0
+                || (GetKeyState(VK_CAPITAL) & 0x8000) != 0;
+        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             bool infoBoxHasFocus = this.ActiveControl == tbInfo;
+            // The four BARE arrows are ours only when no screen reader is using
+            // them — see ScreenReaderModifierHeld. Everything else in this switch
+            // carries a modifier of its own and cannot be confused with a reader
+            // command.
+            bool readerKey = ScreenReaderModifierHeld() &&
+                (keyData == Keys.Up || keyData == Keys.Down ||
+                 keyData == Keys.Left || keyData == Keys.Right);
+            if (readerKey) return base.ProcessCmdKey(ref msg, keyData);
 
             switch (keyData)
             {
