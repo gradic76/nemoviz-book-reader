@@ -143,11 +143,14 @@ namespace Nemoviz_Book_Reader
             {
                 if (listNowReading == null) { listBooks.Focus(); return; }
                 listNowReading.Focus();
+                // FOCUSED, NOT SELECTED — the File Explorer rule (Gordan,
+                // 2026-08-11). The window opens standing on Now reading with the
+                // marker round it, and nothing is CHOSEN until a space or an arrow
+                // chooses it. Selecting it here is what made the infobox
+                // unpredictable: an opening selection nobody asked for, which the
+                // shelf then overwrote as soon as the reader tabbed past it.
                 if (listNowReading.Items.Count > 0)
-                {
-                    listNowReading.Items[0].Selected = true;
                     listNowReading.Items[0].Focused = true;
-                }
             }));
 
             // Posted, not called: the shelf must finish coming up before a modal
@@ -649,18 +652,9 @@ namespace Nemoviz_Book_Reader
             listNowReading.Columns.Add("", 320);
             listNowReading.SelectedIndexChanged += ListBooks_SelectedIndexChanged;
             listNowReading.DoubleClick += ListBooks_DoubleClick;
-            // THE INFOBOX FOLLOWS FOCUS, not only selection (Gordan, screen-reader
-            // pass 2026-08-11): once he had walked the shelf, nothing would bring
-            // Now reading's details back — not Space, not the arrows.
-            //
-            // Both halves of the fault are in this file and neither is wrong on
-            // its own. GetSelectedBook answers with whichever list HAS FOCUS,
-            // which is right; the infobox is refreshed on SelectedIndexChanged,
-            // which is also right. But arriving by Tab changes the focus without
-            // changing any selection, so nothing fires — and on a list holding one
-            // item there is no keystroke that could make a selection change
-            // either. It was a dead end by construction.
-            listNowReading.Enter += ListEntered;
+            // The infobox follows the SELECTION, from whichever list made it —
+            // see selectionOwner. Nothing is wired to Enter: entering a list is
+            // standing in it, not choosing from it.
             listNowReading.KeyDown += ListBooks_KeyDown;
             listNowReading.SizeChanged += (s, e) =>
             {
@@ -722,10 +716,6 @@ namespace Nemoviz_Book_Reader
                     listBooks.Columns[0].Width = Math.Max(50, listBooks.ClientSize.Width - 4);
             };
             listBooks.SelectedIndexChanged += ListBooks_SelectedIndexChanged;
-            // The other half of the same rule: coming back to the shelf must put
-            // the shelf's book in the infobox, or the fix above would simply move
-            // the dead end to the other list.
-            listBooks.Enter += ListEntered;
             listBooks.DoubleClick += ListBooks_DoubleClick;
             listBooks.KeyDown += ListBooks_KeyDown;
 
@@ -1188,12 +1178,17 @@ namespace Nemoviz_Book_Reader
         /// which is where the work is done.</para></summary>
         private BookData GetSelectedBook()
         {
-            if (listNowReading != null && listNowReading.Focused &&
-                listNowReading.SelectedItems.Count > 0)
+            // THE LAST THING CHOSEN, wherever it was chosen — see selectionOwner.
+            // Asking who has focus was the old rule and it is gone: it made the
+            // answer change when the reader merely tabbed past something, and left
+            // Now reading unreachable once the shelf had been walked.
+            if (selectionOwner != null && selectionOwner.SelectedItems.Count > 0)
+                return selectionOwner.SelectedItems[0].Tag as BookData;
+            if (listBooks != null && listBooks.SelectedItems.Count > 0)
+                return listBooks.SelectedItems[0].Tag as BookData;
+            if (listNowReading != null && listNowReading.SelectedItems.Count > 0)
                 return listNowReading.SelectedItems[0].Tag as BookData;
-            if (listBooks == null || listBooks.SelectedItems.Count == 0)
-                return null;
-            return listBooks.SelectedItems[0].Tag as BookData;
+            return null;
         }
 
         // ──────────────────────────────────────────────
@@ -1329,6 +1324,11 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         private void ListBooks_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // A list that has just LOST its selection is not making a claim on the
+            // infobox — the other list's choice, made earlier, still stands.
+            ListView list = sender as ListView;
+            if (list != null && list.SelectedItems.Count > 0) selectionOwner = list;
+
             BookData book = GetSelectedBook();
             if (book == null)
             {
@@ -1338,39 +1338,22 @@ namespace Nemoviz_Book_Reader
             ShowDetails(book);
         }
 
-        /// <summary>Puts the entered list's book in the infobox — asking the LIST
-        /// that raised the event, never asking who has focus.
+        /// <summary>Which list the reader last CHOSE something in. Not which has
+        /// focus, and the difference is the whole of this design.
         ///
-        /// <para><b>The second attempt at this, and the first one failed for the
-        /// reason written three lines below it.</b> Wiring the ordinary refresh to
-        /// <c>Enter</c> looked right and did nothing: <c>Enter</c> is raised on the
-        /// way in, BEFORE the control actually holds focus, so
-        /// <see cref="GetSelectedBook"/> — which decides by asking
-        /// <c>listNowReading.Focused</c> — still answered with the shelf. The pane
-        /// went on showing exactly what it had been showing.</para>
+        /// <para><b>Gordan's model, and it is File Explorer's</b> (2026-08-11):
+        /// focus is where you are standing, selection is what you have picked, and
+        /// a selection only changes when a space or an arrow changes it. Tabbing
+        /// through a list is standing in it, not choosing from it.</para>
         ///
-        /// <para>So this does not consult focus at all. The sender IS the list
-        /// being entered; that is not a question with a timing problem in it.
-        /// Anything that has to know "which list is the user in" during a focus
-        /// change should do the same rather than ask <c>Focused</c>.</para>
-        ///
-        /// <para>It also selects the row when the list has one and nothing is
-        /// picked, which is the other half of what Gordan reported — on a list
-        /// holding a single item there is no keystroke that can select it, so
-        /// arriving at an unselected Now reading was a place you could stand and
-        /// do nothing.</para></summary>
-        private void ListEntered(object sender, EventArgs e)
-        {
-            ListView list = sender as ListView;
-            if (list == null || list.Items.Count == 0) return;
-            if (list.SelectedItems.Count == 0)
-            {
-                list.Items[0].Selected = true;      // raises the ordinary refresh
-                return;
-            }
-            BookData book = list.SelectedItems[0].Tag as BookData;
-            if (book != null) ShowDetails(book);
-        }
+        /// <para>Two earlier attempts got this wrong in opposite directions and
+        /// both were uncomfortable to use. Deciding by focus meant the infobox
+        /// answered to wherever the reader happened to be standing, and could not
+        /// be brought back to Now reading at all. Selecting on entry meant simply
+        /// tabbing past the shelf silently replaced the choice made a moment
+        /// earlier — "prva knjiga s police" appearing in the infobox for no reason
+        /// the reader had given.</para></summary>
+        private ListView selectionOwner;
 
         /// <summary>The book the details pane is currently DESCRIBING.
         ///
