@@ -893,7 +893,7 @@ namespace Nemoviz_Book_Reader
                 && cmbVoice.SelectedIndex == cmbVoice.Items.Count - 1
                 && cmbVoice.SelectedIndex >= voiceNames.Count)
             {
-                using (var dlg = new OcrLanguageForm()) dlg.ShowDialog(this);
+                using (var dlg = new OcrLanguageForm(LanguagePackFamily.Voices)) dlg.ShowDialog(this);
                 LanguageChanged();
                 return;
             }

@@ -46,9 +46,14 @@ namespace Nemoviz_Book_Reader
         /// rebuild whatever was showing the old list.</summary>
         public bool Changed { get; private set; }
 
-        public OcrLanguageForm()
+        private readonly LanguagePackFamily family;
+
+        public OcrLanguageForm() : this(LanguagePackFamily.Ocr) { }
+
+        public OcrLanguageForm(LanguagePackFamily family)
         {
-            Text = Localization.T("Ocr.Add.Title");
+            this.family = family ?? LanguagePackFamily.Ocr;
+            Text = Localization.T(this.family.TitleKey);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MinimizeBox = false;
             MaximizeBox = false;
@@ -77,7 +82,7 @@ namespace Nemoviz_Book_Reader
             // A read-only tabbable TextBox and never a Label — a reader driven by
             // Tab never visits a label, and this line is the only place the
             // outcome of an install is reported (§8b).
-            statusText = Localization.T("Ocr.Add.Hint");
+            statusText = Localization.T(this.family.HintKey);
             status = new TextBox
             {
                 Location = new Point(12, 206),
@@ -147,10 +152,10 @@ namespace Nemoviz_Book_Reader
             list.BeginUpdate();
             list.Items.Clear();
             tags.Clear();
-            foreach (string tag in WindowsOcr.InstallableLanguages
+            foreach (string tag in family.Tags
                          .OrderBy(t => WindowsOcr.DisplayNameFor(t), StringComparer.CurrentCultureIgnoreCase))
             {
-                bool have = WindowsOcr.IsInstalled(tag);
+                bool have = family.IsInstalled(tag);
                 tags.Add(tag);
                 list.Items.Add(Localization.T(have ? "Ocr.Add.RowInstalled" : "Ocr.Add.Row",
                     WindowsOcr.DisplayNameFor(tag)));
@@ -178,7 +183,7 @@ namespace Nemoviz_Book_Reader
         {
             var want = new List<string>();
             foreach (int i in list.CheckedIndices)
-                if (i >= 0 && i < tags.Count && !WindowsOcr.IsInstalled(tags[i])) want.Add(tags[i]);
+                if (i >= 0 && i < tags.Count && !family.IsInstalled(tags[i])) want.Add(tags[i]);
             return want;
         }
 
@@ -190,7 +195,8 @@ namespace Nemoviz_Book_Reader
 
             string name = string.Join(", ", installingTags.Select(WindowsOcr.DisplayNameFor));
 
-            running = WindowsOcr.BeginInstall(installingTags.ToArray());
+            running = WindowsOcr.BeginInstallCapabilities(
+                installingTags.Select(family.Capability).ToArray());
             if (running == null)
             {
                 // The commonest cause by far is the consent prompt being
@@ -216,8 +222,8 @@ namespace Nemoviz_Book_Reader
             // whatever the helper process is doing.
             if (++ticks % 8 == 0)
             {
-                WindowsOcr.Rescan();
-                if (installingTags.All(WindowsOcr.IsInstalled)) { Settle(0); return; }
+                family.Rescan();
+                if (installingTags.All(family.IsInstalled)) { Settle(0); return; }
             }
 
             try { if (!running.HasExited) return; }
@@ -237,9 +243,9 @@ namespace Nemoviz_Book_Reader
 
             // The exit code is a hint; whether the language is THERE is the
             // answer, so ask the engine rather than the process.
-            WindowsOcr.Rescan();
-            var arrivedTags = installingTags.Where(WindowsOcr.IsInstalled).ToList();
-            var missing = installingTags.Where(t => !WindowsOcr.IsInstalled(t)).ToList();
+            family.Rescan();
+            var arrivedTags = installingTags.Where(family.IsInstalled).ToList();
+            var missing = installingTags.Where(t => !family.IsInstalled(t)).ToList();
             string name = string.Join(", ", arrivedTags.Select(WindowsOcr.DisplayNameFor));
             string missingNames = string.Join(", ", missing.Select(WindowsOcr.DisplayNameFor));
             bool arrived = arrivedTags.Count > 0;

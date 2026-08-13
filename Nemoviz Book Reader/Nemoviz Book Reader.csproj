@@ -221,6 +221,7 @@
     </Compile>
     <Compile Include="libraryscanner.cs" />
     <Compile Include="LanguageDetector.cs" />
+    <Compile Include="LanguagePacks.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="NvdaController.cs" />
     <Compile Include="PropertiesForm.cs" />

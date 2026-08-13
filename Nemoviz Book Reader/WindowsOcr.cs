@@ -408,9 +408,19 @@ namespace Nemoviz_Book_Reader
         /// (<c>Install-Language</c>) and a fair one.</para></summary>
         public static System.Diagnostics.Process BeginInstall(params string[] catalogueTags)
         {
+            if (catalogueTags == null) return null;
+            var names = new List<string>();
+            foreach (string t in catalogueTags) names.Add(CapabilityName(t));
+            return BeginInstallCapabilities(names.ToArray());
+        }
+
+        /// <summary>The same, for any Feature on Demand — voices as well as
+        /// recognition. See <see cref="LanguagePackFamily"/>.</summary>
+        public static System.Diagnostics.Process BeginInstallCapabilities(params string[] capabilityNames)
+        {
             try
             {
-                if (catalogueTags == null || catalogueTags.Length == 0) return null;
+                if (capabilityNames == null || capabilityNames.Length == 0) return null;
 
                 // ONE elevated process for the whole batch, not one per language.
                 // Each would carry its own consent prompt, and a reader choosing
@@ -418,11 +428,10 @@ namespace Nemoviz_Book_Reader
                 // single decision they have already made. The servicing stack
                 // takes them one after another anyway.
                 var sb = new StringBuilder();
-                foreach (string tag in catalogueTags)
+                foreach (string name in capabilityNames)
                 {
                     if (sb.Length > 0) sb.Append("; ");
-                    sb.Append("Add-WindowsCapability -Online -Name '")
-                      .Append(CapabilityName(tag)).Append("'");
+                    sb.Append("Add-WindowsCapability -Online -Name '").Append(name).Append("'");
                 }
 
                 var psi = new System.Diagnostics.ProcessStartInfo

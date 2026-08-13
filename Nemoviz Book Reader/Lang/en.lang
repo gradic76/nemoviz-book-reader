@@ -478,6 +478,12 @@ Ocr.Add.DonePartly={0} is installed and ready to use. {1} did not arrive — Win
 Ocr.Add.NotStarted=Nothing was installed. Windows did not give permission.
 Ocr.Add.Failed={0} was not installed. Windows may still be working on it, or the language may not be available for this version of Windows.
 Ocr.Add.LeftRunning=Windows is still installing it. It will finish on its own.
+
+; The same dialog, other family: VOICES. Separate windows by Gordan's call —
+; one list with two ticks a row would be compact but as likely to confuse, and a
+; two-state row is an odd thing for a screen reader to announce.
+Voices.Add.Title=Languages for speaking text
+Voices.Add.Hint=Tick the languages you want and press Install. Windows will ask your permission, then download the voices for that language. A voice is tied to its accent, so British and American English are separate entries.
 Settings.Ocr.None=Windows has no text recognition installed.
 
 Prop.Analysing.Done=Recording analysed, {0} stages set. Change any of them if you prefer.
