@@ -1154,9 +1154,34 @@ namespace Nemoviz_Book_Reader
         /// from the first gate as well as the second.</para></summary>
         private bool ActiveControlOwnsArrows()
         {
-            Control focused = this.ActiveControl;
+            Control focused = FocusedControl();
             return focused is ComboBox || focused is TextBoxBase
                 || focused is ListBox || focused is ListView;
+        }
+
+        /// <summary>The control the reader is actually standing on.
+        ///
+        /// <para><b><c>Form.ActiveControl</c> is not that, and assuming it was is
+        /// why the Seek step picker stayed dead after the first fix.</b> The skin
+        /// nests the panel's controls inside its own containers, so the form's
+        /// ActiveControl is the CONTAINER — the combo is its container's active
+        /// control, a level or two further down. The test for "does this control
+        /// own the arrows" was therefore being asked about a Panel, which owns
+        /// nothing, and answered no every time.</para>
+        ///
+        /// <para>The Library form already learned this and has its own
+        /// <c>FocusedControl()</c> for the same reason. Anywhere a skin can
+        /// re-parent a control, <c>ActiveControl</c> answers a different question
+        /// from the one being asked.</para></summary>
+        private Control FocusedControl()
+        {
+            Control c = this;
+            while (true)
+            {
+                ContainerControl container = c as ContainerControl;
+                if (container == null || container.ActiveControl == null) return c;
+                c = container.ActiveControl;
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
