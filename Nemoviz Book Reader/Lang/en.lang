@@ -97,7 +97,12 @@ SleepTimer.Action.StopShutdown=Stop, close and shut down the computer
 SleepTimer.Start=Start
 SleepTimer.Start.Accessible=Start sleep timer
 SleepTimer.CancelBtn=Cancel
-SleepTimer.CancelBtn.Accessible=Close without starting a timer
+; JUST "Cancel" (Gordan, screen-reader pass 2026-08-11). The accessible name was
+; a whole sentence explaining what Cancel does, and a reader hears it every time
+; they land on the button. Cancel explains itself; the sentence only made it
+; longer to get past. An accessible name that restates the caption in more words
+; is worse than none.
+SleepTimer.CancelBtn.Accessible=Cancel
 
 ; Sleep Timer announcements (via the off-screen label)
 SleepTimer.Announce.Set=Sleep timer set: {0} minutes

@@ -314,6 +314,20 @@ namespace Nemoviz_Book_Reader
             this.StartPosition = FormStartPosition.CenterParent;
             this.MinimizeBox = false;
             this.MaximizeBox = false;
+            // ONE ENTRY IN ALT+TAB, NOT TWO (Gordan, screen-reader pass
+            // 2026-08-11). The window is already modal and already owned —
+            // ShowDialog(this) — which ought to have been enough, and is why this
+            // looked like a focus problem rather than a window-style one. It is
+            // not: WinForms defaults ShowInTaskbar to true, that puts
+            // WS_EX_APPWINDOW on the window, and that flag forces an owned window
+            // into the task switcher as a task of its own. Every other dialog in
+            // this file already sets it false; the Library was simply missed.
+            //
+            // His objection was the right one to raise, too: no ordinary
+            // application offers you a second window to switch to and then hands
+            // you the first one. Settings and Properties do not, and they differ
+            // from the Library in nothing but this line.
+            this.ShowInTaskbar = false;
 
             BuildMenuStrip();
             BuildSearchRow();
@@ -635,6 +649,18 @@ namespace Nemoviz_Book_Reader
             listNowReading.Columns.Add("", 320);
             listNowReading.SelectedIndexChanged += ListBooks_SelectedIndexChanged;
             listNowReading.DoubleClick += ListBooks_DoubleClick;
+            // THE INFOBOX FOLLOWS FOCUS, not only selection (Gordan, screen-reader
+            // pass 2026-08-11): once he had walked the shelf, nothing would bring
+            // Now reading's details back — not Space, not the arrows.
+            //
+            // Both halves of the fault are in this file and neither is wrong on
+            // its own. GetSelectedBook answers with whichever list HAS FOCUS,
+            // which is right; the infobox is refreshed on SelectedIndexChanged,
+            // which is also right. But arriving by Tab changes the focus without
+            // changing any selection, so nothing fires — and on a list holding one
+            // item there is no keystroke that could make a selection change
+            // either. It was a dead end by construction.
+            listNowReading.Enter += ListBooks_SelectedIndexChanged;
             listNowReading.KeyDown += ListBooks_KeyDown;
             listNowReading.SizeChanged += (s, e) =>
             {
@@ -696,6 +722,10 @@ namespace Nemoviz_Book_Reader
                     listBooks.Columns[0].Width = Math.Max(50, listBooks.ClientSize.Width - 4);
             };
             listBooks.SelectedIndexChanged += ListBooks_SelectedIndexChanged;
+            // The other half of the same rule: coming back to the shelf must put
+            // the shelf's book in the infobox, or the fix above would simply move
+            // the dead end to the other list.
+            listBooks.Enter += ListBooks_SelectedIndexChanged;
             listBooks.DoubleClick += ListBooks_DoubleClick;
             listBooks.KeyDown += ListBooks_KeyDown;
 

@@ -1286,6 +1286,17 @@ namespace Nemoviz_Book_Reader
             chkOptical.TabIndex = 0;
             // Off by default even where a drive exists — see AppSettings.
             chkOptical.Checked = haveDrive && appSettings.UseOpticalDrive;
+            // WHICH drive follows WHETHER we use one (Gordan, screen-reader pass
+            // 2026-08-11). Choosing between two drives while the switch above says
+            // "do not use a drive" is a control offering a decision that cannot
+            // take effect — and a reader has no way to see that from the name.
+            // Dimmed rather than hidden, the rule the group already follows one
+            // level up: disabled is a state a screen reader announces, absent is
+            // not.
+            chkOptical.CheckedChanged += (s, e) =>
+            {
+                if (cmbOptical != null) cmbOptical.Enabled = haveDrive && chkOptical.Checked;
+            };
             optical.Controls.Add(chkOptical);
 
             // WHICH drive, because more than one is not a museum piece (Gordan,
@@ -1319,6 +1330,9 @@ namespace Nemoviz_Book_Reader
             }
             int pick = opticalDrives.IndexOf(appSettings.OpticalDriveLetter ?? "");
             cmbOptical.SelectedIndex = pick >= 0 ? pick : 0;
+            // The state it opens in, which the CheckedChanged above only maintains
+            // afterwards.
+            cmbOptical.Enabled = haveDrive && chkOptical.Checked;
 
             optical.Controls.Add(lblDrive);
             optical.Controls.Add(cmbOptical);
