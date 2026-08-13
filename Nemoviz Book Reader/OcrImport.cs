@@ -140,7 +140,16 @@ namespace Nemoviz_Book_Reader
             try
             {
                 OcrText cached = ReadCache(bookFolder);
-                if (cached != null) return cached;
+                if (cached != null)
+                {
+                    // A book read before we started keeping the pictures gets
+                    // them now, from the very file being re-imported. Without
+                    // this, re-importing such a book — the obvious way to repair
+                    // it, and the one Gordan reached for — would hit the cache,
+                    // return early and leave it exactly as it was.
+                    if (SourceFor(bookFolder) == null) KeepSource(bookFolder, path);
+                    return cached;
+                }
                 if (quiet || !CanOffer(path)) return null;
 
                 using (OcrPageSource source = OcrPageSource.Open(path))
