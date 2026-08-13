@@ -811,8 +811,16 @@ namespace Nemoviz_Book_Reader
             listViewDetails.GridLines = false;
             listViewDetails.BorderStyle = BorderStyle.None;
 
-            listViewDetails.Columns.Add("Field", 120);
-            listViewDetails.Columns.Add("Value", 280);
+            // NAMELESS COLUMNS, and that is the fix for "Title value The Lord of
+            // the Rings" (Gordan, screen-reader pass 2026-08-11). This infobox is
+            // a ListView, not the text control the player's and Properties' are —
+            // so the colon that fixed those does nothing here. A reader announces
+            // the COLUMN HEADER before each cell, and the header was called
+            // "Value"; hiding it with ColumnHeaderStyle.None only stops it being
+            // drawn, not being reported. With no name there is nothing to insert
+            // between the field and its value.
+            listViewDetails.Columns.Add("", 120);
+            listViewDetails.Columns.Add("", 280);
             listViewDetails.ItemActivate += DetailsRowActivated;
 
             // Rows are populated per selection in ShowDetails (nothing selected
