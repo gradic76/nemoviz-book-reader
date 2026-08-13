@@ -3671,9 +3671,45 @@ same page):
 - **Word count is not quality.** The contrast-stretch pass returned *fewer* words
   and *better* ones. Never tune on word count alone.
 
-**Still unmeasured:** running heads and page numbers mixed into the text flow, and
-hyphenation across line breaks — this leaflet has neither. Needs a scanned *book*
-without JBIG2.
+**MEASURED AT LAST on a real scanned BOOK** — Gordan's own, scanned years ago and
+exported as an image-only PDF today: `Marko Podrug - Sve samo ne romantika.pdf`,
+**252 pages, 100 MB, JPX + Flate, no JBIG2, no `/Font`**. Kept in
+`D:\Test naslovi\Image PDF`. Two faults found, both ours rather than the engine's,
+both now fixed in `OcrTidy`:
+
+- **Words broken across a line come out split**: `kono- barom`, `napisa- no`,
+  `za- boraviti`. **Two of every seven lines** end in a hyphen, so this is not a
+  rarity — and spoken aloud it is two words that are not words. `JoinBrokenWords`
+  rejoined **73 of 77** on 24 pages. **The space after the hyphen is what makes it
+  safe**: an author's own hyphen never has one, and every single one was left
+  alone — `hip-hop`, `FPZ-u`, `PC-ju`, `DOS-u`, `sori-sori`, `kakvih-takvih`,
+  `Fu-Schnickense`.
+- **The printed page number is folded into the text**, at the very start: every
+  page reads "7 PROLOG…", "9 Ali, dobro…", "11 Dobro, super…". Read aloud that is
+  a bare number at the head of every page. `StripPageNumbers` removed **15 of 24**
+  — and it does not guess: a leading number is only removed where
+  `number − pageIndex` is the SAME across most of the book, which is what a page
+  number is and what a sentence starting with a year is not.
+- **Reading order and columns were already fine** (the leaflet proved that), and
+  `OcrResult.Text` returns a page as one run rather than preserving line breaks,
+  which is what we want — the line breaks belong to the paper.
+
+**WHAT THE WRONG LANGUAGE ACTUALLY DOES, aligned character by character** on one
+page of that book, hr-HR against en-US — the evidence for Gordan's correction,
+now quantified rather than argued:
+
+| | | |
+|---|---|---|
+| `č` → `é` ×4 | `š` → `é` ×3 | `ž` → `i` ×3 |
+| `ć` → `é` ×4 | `š` → `ö` ×3 | `č` → `E`, `ö`, `e` |
+
+**30 characters changed out of 1093 — 2.7 %** — and every frequent substitution
+is a Croatian diacritic replaced by a **French or German** one, because the
+English model has no `č/ć/š/ž` but does have `é` and `ö` from loanwords. That is
+the mechanism behind his *Yatikan* for *Vatikan*. It is not only diacritics
+either: `dakle`→`dalde`, `isključen`→`isldjuéen`, `špici`→`épici`. And 2.7 % is
+worse for a reader than it sounds — those are the commonest letters in Croatian,
+and `éto` for `što` is spoken as noise.
 
 **Later, and NOT for alpha — book descriptions from the internet** (Gordan,
 2026-07-29). A "fancy feature" on the Lite backlog, deliberately parked: it needs

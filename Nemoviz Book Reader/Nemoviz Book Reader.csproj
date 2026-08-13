@@ -196,6 +196,7 @@
     <Compile Include="OcrLanguageForm.cs" />
     <Compile Include="OcrPageSource.cs" />
     <Compile Include="OcrProgressForm.cs" />
+    <Compile Include="OcrTidy.cs" />
     <Compile Include="PdfParser.cs" />
     <Compile Include="WindowsOcr.cs" />
     <Compile Include="MobiParser.cs" />

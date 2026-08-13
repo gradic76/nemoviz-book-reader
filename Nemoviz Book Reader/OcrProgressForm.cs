@@ -138,24 +138,33 @@ namespace Nemoviz_Book_Reader
         /// never had any other structure to offer.</para></summary>
         private string ReadAll(out int withText)
         {
-            var sb = new StringBuilder();
-            var pages = new System.Collections.Generic.List<(string, int)>();
+            // Collected per page first, because the tidying needs the WHOLE book:
+            // a printed page number can only be told from a sentence that starts
+            // with a number by seeing the same offset repeat down the book
+            // (OcrTidy.StripPageNumbers).
+            var perPage = new System.Collections.Generic.List<string>();
             withText = 0;
             for (int i = 0; i < source.PageCount; i++)
             {
                 if (stop) return null;
+                byte[] image = source.Page(i);
+                string text = image == null ? null : WindowsOcr.Read(image, language);
+                text = string.IsNullOrWhiteSpace(text) ? "" : OcrTidy.JoinBrokenWords(text.Trim());
+                if (text.Length > 0) withText++;
+                perPage.Add(text);
+                done = i + 1;
+            }
+            OcrTidy.StripPageNumbers(perPage);
+
+            var sb = new StringBuilder();
+            var pages = new System.Collections.Generic.List<(string, int)>();
+            for (int i = 0; i < perPage.Count; i++)
+            {
                 // A marker per page, INCLUDING the blank ones — a scanned book
                 // really does have empty leaves, and skipping them would make the
                 // page numbers stop matching the paper.
                 pages.Add(((i + 1).ToString(), sb.Length));
-                byte[] image = source.Page(i);
-                string text = image == null ? null : WindowsOcr.Read(image, language);
-                if (!string.IsNullOrWhiteSpace(text))
-                {
-                    withText++;
-                    sb.Append(text.Trim()).Append("\n\n");
-                }
-                done = i + 1;
+                if (perPage[i].Length > 0) sb.Append(perPage[i]).Append("\n\n");
             }
             Pages = pages;
             return sb.ToString();
