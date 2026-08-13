@@ -1890,6 +1890,11 @@ namespace Nemoviz_Book_Reader
             cmbSeek.Size = new Size(300, 24);
             cmbSeek.TabIndex = 4;
             cmbSeek.AccessibleName = Localization.T("Player.Seek.Accessible");
+            // NVDA does not announce a closed drop-down on arrow — the same gap
+            // Sound processing had already worked around by hand. Attached before
+            // the list is filled, so the fill itself is not spoken: it only
+            // speaks while the reader is standing on the control.
+            NvdaController.SpeakOnChange(cmbSeek);
             // Populate the steps for the current (no) book — time steps + Part.
             RebuildSeekSteps();
             // This used to swallow EVERY key, and that had to change (Gordan,

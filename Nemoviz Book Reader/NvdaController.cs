@@ -132,6 +132,39 @@ namespace Nemoviz_Book_Reader
         /// foreground.</b> Winning the display back from a Windows Update prompt
         /// would stop the reader reading the prompt, which is what they need at
         /// that moment. The caller decides; see Form1.</para></summary>
+        /// <summary>Makes a drop-down speak its new value when the arrows change
+        /// it while it is closed.
+        ///
+        /// <para><b>NVDA does not announce a collapsed DropDownList on arrow.</b>
+        /// Open it with Alt+Down and arrowing speaks every entry; closed, the
+        /// value changes in silence. Measured across the whole app with Gordan
+        /// (2026-08-11): the seven Sound-processing combos spoke and every other
+        /// combo did not, and the reason turned out to be that
+        /// <see cref="PropertiesForm"/> had already solved it by hand, for its own
+        /// combos, with this exact call.</para>
+        ///
+        /// <para>Three of them were compared through the accessibility layer
+        /// first — name, role, value, state and the whole parent chain — and they
+        /// came back <b>identical</b>. That is the useful part: the fault was
+        /// never in what the control exposes, so no amount of fixing roles or
+        /// names would have touched it. NVDA simply does not speak this, and an
+        /// application that wants it spoken has to say it.</para>
+        ///
+        /// <para>Attached centrally so a combo added next year gets it without
+        /// anyone remembering. Silent under JAWS, which announces these by
+        /// itself, and silent with no reader running.</para></summary>
+        public static void SpeakOnChange(System.Windows.Forms.ComboBox combo)
+        {
+            if (combo == null) return;
+            combo.SelectedIndexChanged += (s, e) =>
+            {
+                // Only when the reader is standing on it. A combo repopulated in
+                // the background, or set from code while the focus is elsewhere,
+                // is not something anybody asked to hear.
+                if (combo.Focused && !combo.DroppedDown) Speak(combo.Text);
+            };
+        }
+
         public static void Braille(string text)
         {
             if (dllUnavailable || string.IsNullOrEmpty(text)) return;

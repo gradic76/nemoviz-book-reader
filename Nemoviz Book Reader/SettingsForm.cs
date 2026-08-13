@@ -1022,6 +1022,11 @@ namespace Nemoviz_Book_Reader
             c.Size = new Size(w, 24);
             c.AccessibleName = name;
             c.TabIndex = tabIndex;
+            // NVDA does not announce a closed drop-down on arrow. Here rather
+            // than on each combo, so the next one added is not silent by omission
+            // — which is exactly how Settings came to be silent while Sound
+            // processing spoke. See NvdaController.SpeakOnChange.
+            NvdaController.SpeakOnChange(c);
             return c;
         }
 
