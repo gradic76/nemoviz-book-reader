@@ -1090,44 +1090,40 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // ProcessCmdKey
         // ──────────────────────────────────────────────
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern short GetKeyState(int vKey);
 
-        /// <summary>True while a screen reader's own modifier key is held down.
+        /// <summary>
+        /// <b>The bare arrows and a screen reader's "read all" cannot both have
+        /// them, and it is not a bug we can fix from in here.</b> Measured over
+        /// four passes with Gordan on JAWS (2026-08-11), each changing one thing:
         ///
-        /// <para><b>Why this cannot be done with <c>ModifierKeys</c></b>
-        /// (Gordan, 2026-08-11): JAWS reads the whole book with <b>Insert+Down</b>,
-        /// and Insert is not a modifier as far as .NET is concerned — the message
-        /// that reaches <see cref="ProcessCmdKey"/> is a plain
-        /// <c>Keys.Down</c> with no flags on it. So NBR did what it is told to do
-        /// with Down, and the volume slid away on its own for as long as JAWS held
-        /// the key. He could stop it with Ctrl like any other reader command, but
-        /// it stayed wherever it had got to. NVDA does not do this because it
-        /// consumes the key instead of passing it on.</para>
+        /// <list type="bullet">
+        /// <item><b>Modifier?</b> No. JAWS reads with Insert+Down, but Insert is
+        /// not a modifier to .NET — every trace shows a plain <c>Keys.Down</c>,
+        /// <c>mods=None</c>, Insert not even down.</item>
+        /// <item><b>Synthetic key?</b> Cannot be told. His own presses and JAWS'
+        /// injected ones arrive identical to the byte —
+        /// <c>scan=80 extraInfo=0x45789400</c> for both — because JAWS re-injects
+        /// every key, real ones included, and stamps them all the same.</item>
+        /// <item><b>Our own speech?</b> No. Silencing the volume announcement and
+        /// the name change altogether did not stop it, and it kept going after the
+        /// volume had reached zero and nothing was changing at all.</item>
+        /// <item><b>What DOES stop it: a change of FOCUS.</b> Passing the arrow
+        /// on ended say-all after one press — and set the focus walking from
+        /// control to control. Pinning the focus in <c>ProcessDialogKey</c> while
+        /// still passing the key on brought the walking back at once. So it was
+        /// never the key travelling; it was the focus moving.</item>
+        /// </list>
         ///
-        /// <para>The reader's modifier is therefore asked about directly: Insert,
-        /// the numeric keypad's zero (JAWS' other Insert), and Caps Lock, which is
-        /// what NVDA users on laptops usually set. A bare arrow with one of those
-        /// held is the reader talking to itself, and none of NBR's business.</para></summary>
-        private static bool ScreenReaderModifierHeld()
-        {
-            const int VK_INSERT = 0x2D, VK_NUMPAD0 = 0x60, VK_CAPITAL = 0x14;
-            return (GetKeyState(VK_INSERT) & 0x8000) != 0
-                || (GetKeyState(VK_NUMPAD0) & 0x8000) != 0
-                || (GetKeyState(VK_CAPITAL) & 0x8000) != 0;
-        }
-
+        /// <para>So while the focus rests on a button and a bare arrow does
+        /// something, say-all will keep asking for the next line. The only cures
+        /// are to move the volume off the bare arrows, or to scope them to the
+        /// volume controls — both change the way the player is played, which is
+        /// Gordan's decision and not a thing to slip in. Until then the behaviour
+        /// stands and is documented rather than half-fixed.</para>
+        /// </summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             bool infoBoxHasFocus = this.ActiveControl == tbInfo;
-            // The four BARE arrows are ours only when no screen reader is using
-            // them — see ScreenReaderModifierHeld. Everything else in this switch
-            // carries a modifier of its own and cannot be confused with a reader
-            // command.
-            bool readerKey = ScreenReaderModifierHeld() &&
-                (keyData == Keys.Up || keyData == Keys.Down ||
-                 keyData == Keys.Left || keyData == Keys.Right);
-            if (readerKey) return base.ProcessCmdKey(ref msg, keyData);
 
             switch (keyData)
             {
@@ -1431,14 +1427,19 @@ namespace Nemoviz_Book_Reader
             // be a second utterance) and do NOT touch AccessibleName (its
             // change re-triggers the name announcement).
             tbVolume.Text = text;
-            if (!tbVolume.Focused)
-            {
-                tbVolume.AccessibleName = tbVolume.Text;
-                AnnounceToScreenReader(lblAnnounceVolume, text);
-            }
 
+            // NOTHING IS SAID TO THE READER HERE — Gordan's call, and the right
+            // one: volume is the single setting that announces ITSELF, because you
+            // hear it. What you cannot hear is where the ends are, so those are
+            // marked with a tone: bottom, middle, top.
+            //
+            // It also removes two utterances that were fighting the speech. This is
+            // NOT, however, the cure for the JAWS say-all conflict — that was
+            // measured and it is not ours to cure from here. See ProcessCmdKey.
             if (currentVolume == 0)
                 tones.Play(300, 150);
+            else if (currentVolume == 50)
+                tones.Play(700, 120);
             else if (currentVolume == 100)
                 tones.Play(1200, 150);
         }
