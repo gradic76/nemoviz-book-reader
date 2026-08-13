@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Nemoviz_Book_Reader
@@ -405,16 +406,30 @@ namespace Nemoviz_Book_Reader
         /// about a quarter of a megabyte of model — and not a whole Windows
         /// display language, which was Gordan's objection to the obvious route
         /// (<c>Install-Language</c>) and a fair one.</para></summary>
-        public static System.Diagnostics.Process BeginInstall(string catalogueTag)
+        public static System.Diagnostics.Process BeginInstall(params string[] catalogueTags)
         {
             try
             {
-                string name = CapabilityName(catalogueTag);
+                if (catalogueTags == null || catalogueTags.Length == 0) return null;
+
+                // ONE elevated process for the whole batch, not one per language.
+                // Each would carry its own consent prompt, and a reader choosing
+                // four languages would be answering Windows four times for a
+                // single decision they have already made. The servicing stack
+                // takes them one after another anyway.
+                var sb = new StringBuilder();
+                foreach (string tag in catalogueTags)
+                {
+                    if (sb.Length > 0) sb.Append("; ");
+                    sb.Append("Add-WindowsCapability -Online -Name '")
+                      .Append(CapabilityName(tag)).Append("'");
+                }
+
                 var psi = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = "powershell.exe",
                     Arguments = "-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden " +
-                                "-Command \"Add-WindowsCapability -Online -Name '" + name + "'\"",
+                                "-Command \"" + sb + "\"",
                     UseShellExecute = true,      // required for the elevation verb
                     Verb = "runas",
                     WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden

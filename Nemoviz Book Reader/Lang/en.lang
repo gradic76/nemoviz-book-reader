@@ -460,7 +460,7 @@ Ocr.Add.Title=Languages for reading pictures
 Ocr.Add.List=Languages
 Ocr.Add.Row={0}
 Ocr.Add.RowInstalled={0} — already installed
-Ocr.Add.Hint=Choose a language and press Install. Windows will ask your permission, then download the recognition for that language — a small file, not a whole Windows language.
+Ocr.Add.Hint=Tick the languages you want and press Install. Windows will ask your permission, then download the recognition for that language — a small file, not a whole Windows language.
 Ocr.Add.Install=Install
 Ocr.Add.WindowsSettings=Windows settings...
 Ocr.Add.Close=Close
@@ -471,6 +471,9 @@ Ocr.Add.Close=Close
 ; rather than a number that would be wrong as often as right.
 Ocr.Add.Installing=Installing {0}. Windows Update fetches this, so how long it takes depends on how busy it is — a few minutes is usual, and ten is not unheard of. You can close this window and carry on; it will keep going on its own.
 Ocr.Add.Done={0} is installed and ready to use.
+; A batch can arrive in part. Saying only the good half would leave someone
+; believing they had all of them.
+Ocr.Add.DonePartly={0} is installed and ready to use. {1} did not arrive — Windows may still be working, or it may not be available for this version.
 ; Dismissing the permission prompt is a decision, not a fault.
 Ocr.Add.NotStarted=Nothing was installed. Windows did not give permission.
 Ocr.Add.Failed={0} was not installed. Windows may still be working on it, or the language may not be available for this version of Windows.
@@ -582,6 +585,10 @@ Settings.TextBooks.Language=Language:
 Settings.TextBooks.BookLanguage=Books in this language:
 Settings.TextBooks.AllOtherLanguages=All other languages
 Settings.TextBooks.VoiceNotSet=(no voice chosen)
+; The last row of the voice list is a door, not a voice: it opens the language
+; installer. It lives in the list because that is where a reader finds out their
+; language has no voice, and because the Speech page should not grow a button.
+Settings.TextBooks.AddVoices=Add new languages...
 ; {0} is the language row. Marks a language nothing installed speaks — it is on
 ; the list because the library holds a book in it.
 Settings.TextBooks.LanguageNoVoice={0} — no voice installed

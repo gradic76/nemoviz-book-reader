@@ -861,6 +861,17 @@ namespace Nemoviz_Book_Reader
                 cmbVoice.Items.Add(name);
             }
 
+            // LAST ENTRY: a way out to Windows, inside the list where the
+            // absence is felt (Gordan, 2026-08-14). A reader who finds no voice
+            // for their language is standing right here when they find it out,
+            // and a button somewhere else on the page is a worse answer than an
+            // extra row. It also keeps the Speech page from growing another
+            // control, which was his other concern.
+            //
+            // voiceNames is NOT given a matching entry, so the row cannot be
+            // mistaken for a voice by anything that reads the selection back.
+            cmbVoice.Items.Add(Localization.T("Settings.TextBooks.AddVoices"));
+
             string want;
             if (!stagedLanguageVoices.TryGetValue(code, out want))
                 want = code.Length > 0 ? appSettings.LanguageVoice(code) : (appSettings.TtsVoice ?? "");
@@ -875,6 +886,17 @@ namespace Nemoviz_Book_Reader
         /// numbers below switch to how that voice is set up.</summary>
         private void VoiceChanged()
         {
+            // The last row is a door, not a voice. Opening it must not leave that
+            // row selected either — a language whose voice is "Add new languages"
+            // would be a language with no voice and no way to tell.
+            if (!populating && cmbVoice != null
+                && cmbVoice.SelectedIndex == cmbVoice.Items.Count - 1
+                && cmbVoice.SelectedIndex >= voiceNames.Count)
+            {
+                using (var dlg = new OcrLanguageForm()) dlg.ShowDialog(this);
+                LanguageChanged();
+                return;
+            }
             if (!populating) stagedLanguageVoices[SelectedLanguageCode()] = SelectedVoiceName();
             LoadPrefsForSelectedVoice();
         }

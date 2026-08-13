@@ -32,14 +32,14 @@ namespace Nemoviz_Book_Reader
     /// </summary>
     internal class OcrLanguageForm : Form
     {
-        private readonly ListBox list;
+        private readonly CheckedListBox list;
         private readonly Button install, windows, close;
         private readonly TextBox status;
         private readonly System.Windows.Forms.Timer watch;
         private readonly List<string> tags = new List<string>();
 
         private Process running;
-        private string installingTag = "";
+        private List<string> installingTags = new List<string>();
         private string statusText = "";
 
         /// <summary>True when something was actually installed, so the caller can
@@ -56,14 +56,23 @@ namespace Nemoviz_Book_Reader
             StartPosition = FormStartPosition.CenterParent;
             ClientSize = new Size(440, 340);
 
-            list = new ListBox
+            // CHECK BOXES, not a single pick (Gordan, 2026-08-14): a reader who
+            // knows they want German, Italian and Spanish should say so once and
+            // wait once, not go round this dialog three times for three ten-minute
+            // waits. CheckOnClick so a click is a choice — the default needs a
+            // click to select and another to tick, which is a trap without sight.
+            list = new CheckedListBox
             {
+                CheckOnClick = true,
                 Location = new Point(12, 12),
                 Size = new Size(416, 186),
                 TabIndex = 0
             };
             list.AccessibleName = Localization.T("Ocr.Add.List");
             list.SelectedIndexChanged += (s, e) => Retitle();
+            // The Install button follows the TICKS, not the cursor, so it has to
+            // be re-judged when one is put in or taken out.
+            list.ItemCheck += (s, e) => BeginInvoke((MethodInvoker)Retitle);
 
             // A read-only tabbable TextBox and never a Label — a reader driven by
             // Tab never visits a label, and this line is the only place the
@@ -157,28 +166,37 @@ namespace Nemoviz_Book_Reader
         private void Retitle()
         {
             bool busy = running != null;
-            int i = list.SelectedIndex;
-            bool have = i >= 0 && i < tags.Count && WindowsOcr.IsInstalled(tags[i]);
-            install.Enabled = !busy && i >= 0 && !have;
+            install.Enabled = !busy && Ticked().Count > 0;
             list.Enabled = !busy;
             windows.Enabled = !busy;
         }
 
+        /// <summary>The languages the reader has ticked and does not already have.
+        /// An installed one that gets ticked is simply skipped rather than
+        /// refused — the tick is a wish, not an instruction to reinstall.</summary>
+        private List<string> Ticked()
+        {
+            var want = new List<string>();
+            foreach (int i in list.CheckedIndices)
+                if (i >= 0 && i < tags.Count && !WindowsOcr.IsInstalled(tags[i])) want.Add(tags[i]);
+            return want;
+        }
+
         private void Install()
         {
-            int i = list.SelectedIndex;
-            if (i < 0 || i >= tags.Count || running != null) return;
+            if (running != null) return;
+            installingTags = Ticked();
+            if (installingTags.Count == 0) return;
 
-            installingTag = tags[i];
-            string name = WindowsOcr.DisplayNameFor(installingTag);
+            string name = string.Join(", ", installingTags.Select(WindowsOcr.DisplayNameFor));
 
-            running = WindowsOcr.BeginInstall(installingTag);
+            running = WindowsOcr.BeginInstall(installingTags.ToArray());
             if (running == null)
             {
                 // The commonest cause by far is the consent prompt being
                 // dismissed, which is not an error and must not be dressed as one.
                 Report(Localization.T("Ocr.Add.NotStarted"));
-                installingTag = "";
+                installingTags.Clear();
                 return;
             }
             Report(Localization.T("Ocr.Add.Installing", name));
@@ -199,7 +217,7 @@ namespace Nemoviz_Book_Reader
             if (++ticks % 8 == 0)
             {
                 WindowsOcr.Rescan();
-                if (WindowsOcr.IsInstalled(installingTag)) { Settle(0); return; }
+                if (installingTags.All(WindowsOcr.IsInstalled)) { Settle(0); return; }
             }
 
             try { if (!running.HasExited) return; }
@@ -220,20 +238,27 @@ namespace Nemoviz_Book_Reader
             // The exit code is a hint; whether the language is THERE is the
             // answer, so ask the engine rather than the process.
             WindowsOcr.Rescan();
-            string name = WindowsOcr.DisplayNameFor(installingTag);
-            bool arrived = WindowsOcr.IsInstalled(installingTag);
-            installingTag = "";
+            var arrivedTags = installingTags.Where(WindowsOcr.IsInstalled).ToList();
+            var missing = installingTags.Where(t => !WindowsOcr.IsInstalled(t)).ToList();
+            string name = string.Join(", ", arrivedTags.Select(WindowsOcr.DisplayNameFor));
+            string missingNames = string.Join(", ", missing.Select(WindowsOcr.DisplayNameFor));
+            bool arrived = arrivedTags.Count > 0;
+            installingTags.Clear();
 
             Fill();
             if (arrived)
             {
                 Changed = true;
-                Report(Localization.T("Ocr.Add.Done", name));
+                // Some of a batch can arrive while others do not, and saying only
+                // the good half would leave a reader believing they had all four.
+                Report(missing.Count == 0
+                    ? Localization.T("Ocr.Add.Done", name)
+                    : Localization.T("Ocr.Add.DonePartly", name, missingNames));
             }
             // NOT "failed": the helper exiting is not the same as the install
             // being over, and saying so would send a reader looking for a fault
             // that may be a download still in flight.
-            else Report(Localization.T("Ocr.Add.Failed", name));
+            else Report(Localization.T("Ocr.Add.Failed", missingNames));
         }
 
         private void Report(string text)
