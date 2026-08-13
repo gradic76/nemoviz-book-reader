@@ -660,7 +660,7 @@ namespace Nemoviz_Book_Reader
             // changing any selection, so nothing fires — and on a list holding one
             // item there is no keystroke that could make a selection change
             // either. It was a dead end by construction.
-            listNowReading.Enter += ListBooks_SelectedIndexChanged;
+            listNowReading.Enter += ListEntered;
             listNowReading.KeyDown += ListBooks_KeyDown;
             listNowReading.SizeChanged += (s, e) =>
             {
@@ -725,7 +725,7 @@ namespace Nemoviz_Book_Reader
             // The other half of the same rule: coming back to the shelf must put
             // the shelf's book in the infobox, or the fix above would simply move
             // the dead end to the other list.
-            listBooks.Enter += ListBooks_SelectedIndexChanged;
+            listBooks.Enter += ListEntered;
             listBooks.DoubleClick += ListBooks_DoubleClick;
             listBooks.KeyDown += ListBooks_KeyDown;
 
@@ -1336,6 +1336,40 @@ namespace Nemoviz_Book_Reader
                 return;
             }
             ShowDetails(book);
+        }
+
+        /// <summary>Puts the entered list's book in the infobox — asking the LIST
+        /// that raised the event, never asking who has focus.
+        ///
+        /// <para><b>The second attempt at this, and the first one failed for the
+        /// reason written three lines below it.</b> Wiring the ordinary refresh to
+        /// <c>Enter</c> looked right and did nothing: <c>Enter</c> is raised on the
+        /// way in, BEFORE the control actually holds focus, so
+        /// <see cref="GetSelectedBook"/> — which decides by asking
+        /// <c>listNowReading.Focused</c> — still answered with the shelf. The pane
+        /// went on showing exactly what it had been showing.</para>
+        ///
+        /// <para>So this does not consult focus at all. The sender IS the list
+        /// being entered; that is not a question with a timing problem in it.
+        /// Anything that has to know "which list is the user in" during a focus
+        /// change should do the same rather than ask <c>Focused</c>.</para>
+        ///
+        /// <para>It also selects the row when the list has one and nothing is
+        /// picked, which is the other half of what Gordan reported — on a list
+        /// holding a single item there is no keystroke that can select it, so
+        /// arriving at an unselected Now reading was a place you could stand and
+        /// do nothing.</para></summary>
+        private void ListEntered(object sender, EventArgs e)
+        {
+            ListView list = sender as ListView;
+            if (list == null || list.Items.Count == 0) return;
+            if (list.SelectedItems.Count == 0)
+            {
+                list.Items[0].Selected = true;      // raises the ordinary refresh
+                return;
+            }
+            BookData book = list.SelectedItems[0].Tag as BookData;
+            if (book != null) ShowDetails(book);
         }
 
         /// <summary>The book the details pane is currently DESCRIBING.
