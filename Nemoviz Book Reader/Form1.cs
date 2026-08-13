@@ -1892,12 +1892,32 @@ namespace Nemoviz_Book_Reader
             cmbSeek.AccessibleName = Localization.T("Player.Seek.Accessible");
             // Populate the steps for the current (no) book — time steps + Part.
             RebuildSeekSteps();
-            // Keyboard-inert display: the step is changed only with
-            // Shift+Up/Down (from anywhere) or the mouse. Swallowing KeyDown
-            // (and the resulting KeyPress) stops the combo from reacting to
-            // arrows, type-ahead letters, Home/End, or opening its dropdown
-            // from the keyboard, so focusing it never steals those keys.
-            cmbSeek.KeyDown += (s, e) => { e.Handled = true; e.SuppressKeyPress = true; };
+            // This used to swallow EVERY key, and that had to change (Gordan,
+            // 2026-08-11). The reason for it was sound at the time: the step is
+            // set with Shift+Up/Down from anywhere, and while the BARE arrows
+            // were volume and seeking, a focused combo reacting to them would
+            // have stolen them from the player. Today the bare arrows do nothing
+            // — volume moved to F11/F12 — so there is nothing left to steal, and
+            // the reason has outlived itself.
+            //
+            // What the blanket swallow also ate was every OTHER key, which is how
+            // Gordan found it: with focus on this combo, Alt+F4 did not close the
+            // player. It worked on Play and on Forward. A control that eats the
+            // system's own keys is a trap, and it ate them for six weeks without
+            // anyone meeting it, because nobody thinks to press Alt+F4 while
+            // standing on a drop-down.
+            //
+            // So: only the type-ahead is suppressed — a letter or a digit here
+            // would jump the list to an entry, which is not how this control is
+            // meant to be driven and would fight any letter shortcut. Arrows,
+            // Home/End and anything carrying Alt or Ctrl go where they belong.
+            cmbSeek.KeyDown += (s, e) =>
+            {
+                if ((e.KeyData & (Keys.Alt | Keys.Control)) != 0) return;
+                bool typeAhead = (e.KeyCode >= Keys.A && e.KeyCode <= Keys.Z)
+                              || (e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9);
+                if (typeAhead) { e.Handled = true; e.SuppressKeyPress = true; }
+            };
 
             // Row 2: transport buttons
             btnBack = new Button();
