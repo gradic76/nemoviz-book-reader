@@ -3446,9 +3446,18 @@ Gordan's five real Croatian scans in `D:\Test naslovi\Image PDF`.
 - **Croatian is right, including diacritics** — `IZVJEŠTAJ`, `OKOLIŠA`,
   `Smičiklasa`, `Babić` all correct. On clean text CER is **0–2 %** once cap
   height is ≥ 20 px; below ~14 px it collapses (i/l/m mush).
-- **`đ` is the one weak letter**, consistently: `rođenja`→`rodenja`,
-  `Gospođa`→`Gospoda`, while `đačkim` usually survives. If OCR ever ships, a
-  small Croatian fix-up list is worth more than any engine change.
+- **`đ` is the one weak letter, and it is now MEASURED on a whole book** (Gordan's
+  252-page scan, 2026-08-14): **40.2 % of `đ` words lose the diacritic** — 98
+  correct against 66 damaged. **Uneven by WORD, not uniform by letter**:
+  `svađ`/`sviđ` lose it **84 %** of the time, `izmeđ` 21 %, `takođ` 10 %. It is
+  also the **rarest** letter in the book — 160 occurrences against š 2929, č 2113,
+  ć 1616, ž 1325 — which is why nobody notices until they hit "roden".
+  **A fix-up list is worth building, and it has a safe form: only stems whose
+  d-form is NOT a word** — izmed, takod, dogad, medut, roden, izad, svad, svid.
+  **`grad`, `led` and `prod` must stay OUT**: they are real words, and
+  "correcting" them turns *grada* into *građa*. Measuring this the first time by
+  counting `de`, `rad`, `vod`, `tud`, `dak` gave pure noise — the wrong form has
+  to be a non-word or the number means nothing.
 - **A foreign page through the hr-HR engine cost nothing** *on that page*: an
   English paragraph came back at **0.0 % CER**. **DO NOT GENERALISE THAT — I did,
   and Gordan corrected it (2026-08-11).** See the correction below.
