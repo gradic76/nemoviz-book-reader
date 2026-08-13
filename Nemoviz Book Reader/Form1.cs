@@ -1121,6 +1121,32 @@ namespace Nemoviz_Book_Reader
         /// Gordan's decision and not a thing to slip in. Until then the behaviour
         /// stands and is documented rather than half-fixed.</para>
         /// </summary>
+        /// <summary>Stops an arrow key from walking the focus around the panel.
+        ///
+        /// <para>The belt to <see cref="ProcessCmdKey"/>'s braces. That switch
+        /// swallows the arrows it knows about, but a key it declines — or one that
+        /// reaches the form by another road — still ends up here, and this is
+        /// where WinForms turns an arrow into focus navigation. Gordan found both
+        /// halves of it in one go: the vertical pair started moving him between
+        /// keys, and the horizontal pair seeked AND moved him.</para>
+        ///
+        /// <para>Controls that own their arrows are left alone. A combo box, an
+        /// edit or a list uses them for its own purpose, and taking them would
+        /// break the seek-step picker.</para></summary>
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            Keys key = keyData & Keys.KeyCode;
+            if ((key == Keys.Up || key == Keys.Down || key == Keys.Left || key == Keys.Right)
+                && (keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == 0)
+            {
+                Control focused = this.ActiveControl;
+                bool ownsArrows = focused is ComboBox || focused is TextBoxBase
+                                  || focused is ListBox || focused is ListView;
+                if (!ownsArrows) return true;       // handled: no focus navigation
+            }
+            return base.ProcessDialogKey(keyData);
+        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             bool infoBoxHasFocus = this.ActiveControl == tbInfo;
@@ -1164,6 +1190,17 @@ namespace Nemoviz_Book_Reader
                 case Keys.F11:
                     if (!infoBoxHasFocus)
                     { FlashKey(NewPlayerSkin.RingVolumeDown); ChangeVolume(-5); return true; }
+                    break;
+
+                // The bare vertical arrows now do NOTHING — but they are still
+                // swallowed. Letting them fall through hands them to WinForms,
+                // which walks the focus from control to control with them, and
+                // Gordan met that the moment the volume moved off them: the keys
+                // stopped changing anything and started moving him around the
+                // panel instead. Doing nothing has to mean nothing.
+                case Keys.Up:
+                case Keys.Down:
+                    if (!infoBoxHasFocus) return true;
                     break;
 
                 case Keys.Right:
