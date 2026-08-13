@@ -1137,14 +1137,26 @@ namespace Nemoviz_Book_Reader
         {
             Keys key = keyData & Keys.KeyCode;
             if ((key == Keys.Up || key == Keys.Down || key == Keys.Left || key == Keys.Right)
-                && (keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == 0)
-            {
-                Control focused = this.ActiveControl;
-                bool ownsArrows = focused is ComboBox || focused is TextBoxBase
-                                  || focused is ListBox || focused is ListView;
-                if (!ownsArrows) return true;       // handled: no focus navigation
-            }
+                && (keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == 0
+                && !ActiveControlOwnsArrows())
+                return true;                        // handled: no focus navigation
             return base.ProcessDialogKey(keyData);
+        }
+
+        /// <summary>Whether the focused control uses the arrows for its own work,
+        /// and must therefore be left alone.
+        ///
+        /// <para><b>It has to be asked in BOTH places.</b> Guarding only
+        /// <see cref="ProcessDialogKey"/> was not enough and Gordan found the hole
+        /// at once: <see cref="ProcessCmdKey"/> runs FIRST and was swallowing the
+        /// vertical arrows whatever had focus, so the Seek step picker stopped
+        /// responding to them. A control that owns the arrows has to be exempt
+        /// from the first gate as well as the second.</para></summary>
+        private bool ActiveControlOwnsArrows()
+        {
+            Control focused = this.ActiveControl;
+            return focused is ComboBox || focused is TextBoxBase
+                || focused is ListBox || focused is ListView;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -1200,15 +1212,17 @@ namespace Nemoviz_Book_Reader
                 // panel instead. Doing nothing has to mean nothing.
                 case Keys.Up:
                 case Keys.Down:
-                    if (!infoBoxHasFocus) return true;
+                    if (!infoBoxHasFocus && !ActiveControlOwnsArrows()) return true;
                     break;
 
+                // Seeking, and the same exemption: on a combo or an edit the
+                // horizontal arrows belong to the control, not to the transport.
                 case Keys.Right:
-                    if (!infoBoxHasFocus) { ArrowSeek(+1); return true; }
+                    if (!infoBoxHasFocus && !ActiveControlOwnsArrows()) { ArrowSeek(+1); return true; }
                     break;
 
                 case Keys.Left:
-                    if (!infoBoxHasFocus) { ArrowSeek(-1); return true; }
+                    if (!infoBoxHasFocus && !ActiveControlOwnsArrows()) { ArrowSeek(-1); return true; }
                     break;
 
                 case Keys.F8:
