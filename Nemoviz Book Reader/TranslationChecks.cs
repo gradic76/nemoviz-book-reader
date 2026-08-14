@@ -135,12 +135,21 @@ namespace Nemoviz_Book_Reader
             {
                 string stem = name.Key.Length <= 5 ? name.Key : name.Key.Substring(0, 5);
                 int inTarget = CountOccurrences(translated, stem);
+
+                // FIRES ON A NAME THAT VANISHED, NOT ON ONE THAT MERELY GOT
+                // QUIETER — and the difference was measured on a real novel.
+                // A title IS supposed to be translated: Widow went 342 -> 68 and
+                // Mrs 224 -> 57 because they became udovica and gđa, which is
+                // correct work, not a fault. A changed NAME goes to nothing:
+                // Blake rendered as Blejk leaves no "Blake" anywhere. Reporting
+                // the middle ground fills the report with correct translations
+                // and buries the one line that matters.
                 if (inTarget == 0)
                     Add(found, CheckSeverity.Note, "name",
                         "\"" + name.Key + "\" appears " + name.Value + " times in the original and not at all in the translation");
-                else if (inTarget * 3 < name.Value)
+                else if (inTarget * 8 < name.Value)
                     Add(found, CheckSeverity.Note, "name",
-                        "\"" + name.Key + "\": " + name.Value + " in the original, " + inTarget + " in the translation");
+                        "\"" + name.Key + "\": " + name.Value + " in the original, only " + inTarget + " in the translation");
             }
 
             // 7. Quotation marks. Measured changing style between pieces of one
@@ -239,7 +248,10 @@ namespace Nemoviz_Book_Reader
                     if (atStart) { starts.TryGetValue(w, out n); starts[w] = n + 1; }
                 }
                 if (sb.Length > 0) { atStart = false; sb.Clear(); }
-                if (c == '.' || c == '!' || c == '?' || c == '\n') atStart = true;
+                // The colon and semicolon start a capital as readily as a full
+                // stop does, and leaving them out is part of how "She" collected
+                // nineteen "mid-sentence" appearances it had not earned.
+                if (c == '.' || c == '!' || c == '?' || c == '\n' || c == ':' || c == ';') atStart = true;
             }
 
             var list = new List<KeyValuePair<string, int>>();
@@ -247,16 +259,24 @@ namespace Nemoviz_Book_Reader
             {
                 if (kv.Value < 5) continue;
                 int st; starts.TryGetValue(kv.Key, out st);
-                // Only throw out words that are capitalised for no reason other
-                // than opening a sentence — "The", "He", "When" — which are the
-                // ones that NEVER appear capitalised in the middle of one.
+                int mid = kv.Value - st;
+
+                // A NAME IS USED IN THE MIDDLE OF SENTENCES, AND OFTEN ENOUGH TO
+                // MEAN IT. Calibrated against a real 750 000-character novel by
+                // trying four rules and reading what each kept:
+                //   "a name is mid-sentence at least once or twice"  -> kept She,
+                //      The, You, And, When, What. "She" alone is mid-sentence 19
+                //      times in a book, which is enough to slip through any rule
+                //      that only counts a couple.
+                //   mid >= 5 AND at least a fifth of its uses -> kept exactly the
+                //      people and places: Beth, Kate, Justin, Worthy, Penrose,
+                //      Sophie, Tamar... and not one function word.
                 //
-                // The first version required a name to be mid-sentence more often
-                // than not, and that quietly discarded every character in the book:
-                // "Blake looked at..." is the commonest sentence a novel writes, so
-                // a real name is sentence-initial most of the time. Caught by a
-                // probe returning nothing at all where it should have found two.
-                if (st >= kv.Value - 1) continue;
+                // Two earlier attempts were both wrong, in opposite directions:
+                // requiring a name to be mid-sentence MORE often than not threw
+                // away every character (a novel's commonest sentence opens with a
+                // name), and allowing one or two let the pronouns back in.
+                if (mid < 5 || mid * 5 < kv.Value) continue;
                 list.Add(kv);
             }
             list.Sort((x, y) => y.Value.CompareTo(x.Value));

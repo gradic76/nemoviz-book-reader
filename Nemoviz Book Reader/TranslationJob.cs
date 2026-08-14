@@ -150,6 +150,18 @@ namespace Nemoviz_Book_Reader
                         var fi = TranslationChecks.Chunk(c, f.Text, opt.TargetLang);
                         if (!HasSuspect(fi))
                         {
+                            // Why the second engine was needed is worth recording:
+                            // over a real novel it took 22 pieces of 131 — 17 % —
+                            // and without knowing whether that was refusals or
+                            // failed checks there is no way to tell a filtering
+                            // problem from a quality one.
+                            report.Issues.Add(new TranslationIssue
+                            {
+                                Severity = CheckSeverity.Note,
+                                Kind = "second engine",
+                                Detail = r.Ok ? Describe(issues) : (r.Error + " " + r.Detail),
+                                ChunkIndex = c.Index
+                            });
                             r = f; issues = fi; bad = false; report.ViaFallback++;
                         }
                     }
@@ -218,9 +230,28 @@ namespace Nemoviz_Book_Reader
         /// <summary>Every piece ends with exactly one blank line, so the pieces
         /// join into a book rather than into a wall of text or a gappy one. The
         /// model's own trailing whitespace varies from piece to piece and is not
-        /// worth trusting.</summary>
+        /// worth trusting.
+        ///
+        /// <para><b>And the speech marks are made one style, because asking did not
+        /// work.</b> The instruction says plainly to use straight double quotes
+        /// throughout; measured over a whole novel the answer came back with THREE
+        /// conventions mixed — 1 832 straight, 2 171 of one curly pair and 1 124 of
+        /// another — which over a book means the quotes change between chapters and
+        /// reads as a broken file rather than a choice.</para>
+        ///
+        /// <para>This is the general lesson and it is worth taking further: <b>a
+        /// rule that can be enforced afterwards should be, not requested.</b> An
+        /// instruction is a request the model may honour; a substitution is a fact.
+        /// Only the mechanical rules qualify — nothing here could decide a gender
+        /// or a level of address, which is exactly why those still have to be
+        /// asked for.</para></summary>
         private static string Tidy(string s)
         {
+            s = s.Replace('„', '"')     // „
+                 .Replace('“', '"')     // “
+                 .Replace('”', '"')     // ”
+                 .Replace('«', '"')     // «
+                 .Replace('»', '"');    // »
             return s.TrimEnd('\r', '\n', ' ', '\t') + Environment.NewLine + Environment.NewLine;
         }
     }
