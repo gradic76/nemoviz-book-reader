@@ -171,7 +171,7 @@ namespace Nemoviz_Book_Reader
                 bool bad = true;
                 for (int attempt = 0; attempt < Math.Max(1, opt.PrimaryAttempts); attempt++)
                 {
-                    r = Translator.Send(opt.Primary, null, system, user, opt.MaxOutputTokens);
+                    r = Translator.Send(opt.Primary, null, system, user, opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang);
                     issues = r.Ok
                         ? TranslationChecks.Chunk(c, r.Text, opt.TargetLang)
                         : new List<TranslationIssue>();
@@ -184,7 +184,7 @@ namespace Nemoviz_Book_Reader
                 // the two engines fail at different things.
                 if (bad && opt.Fallback != null)
                 {
-                    TranslationResult f = Translator.Send(opt.Fallback, null, system, user, opt.MaxOutputTokens);
+                    TranslationResult f = Translator.Send(opt.Fallback, null, system, user, opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang);
                     if (f.Ok)
                     {
                         var fi = TranslationChecks.Chunk(c, f.Text, opt.TargetLang);

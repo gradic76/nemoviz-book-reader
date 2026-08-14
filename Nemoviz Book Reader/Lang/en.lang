@@ -471,6 +471,7 @@ Settings.Translate.State.Have={0}, key stored
 Settings.Translate.State.None={0}, no key
 Settings.Translate.Engine.Gemini=Gemini (Google)
 Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.Azure=Azure Translator
 ; PLACEHOLDER. The real text is still to be written, and it has to cover: that a
 ; key is the reader's own account with the service, that Nemoviz never sees a
 ; bill, roughly what a book costs, and that the key is stored in readable form.

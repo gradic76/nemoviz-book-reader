@@ -18,7 +18,19 @@ namespace Nemoviz_Book_Reader
         /// its OpenAI-compatible door for one reason: the compatibility shape cannot
         /// carry <c>safetySettings</c>, and switching the content filters off is a
         /// decision this feature depends on.</summary>
-        Gemini
+        Gemini,
+        /// <summary>Azure Translator v3 — not a model you talk to, but a
+        /// translator. Text in, text out, no prompt and no model name.
+        ///
+        /// <para><b>That is its whole value and its whole limitation, and the two
+        /// are the same fact.</b> It never refuses, because there is nobody in
+        /// there to refuse — which is why it is the engine of last resort for a
+        /// passage the language models decline. But for the same reason it cannot
+        /// be TOLD anything: the standing prompt, the reader's notes, the narrator's
+        /// gender, the level of address between two characters — none of it
+        /// reaches it. A passage rescued here has those decided by nothing at
+        /// all.</para></summary>
+        AzureTranslator
     }
 
     /// <summary>One translation service, as far as the transport is concerned.</summary>
@@ -45,12 +57,21 @@ namespace Nemoviz_Book_Reader
     /// odluči štititi korisnike same od sebe" — the two filter different things, so
     /// they cover each other.</para>
     ///
-    /// <para><b>Kimi was dropped</b> (dearer than DeepSeek, trained with the same
-    /// English/Chinese weighting so its weakness is the same rather than
-    /// complementary), and <b>Azure is deferred</b>: its one virtue is that it never
-    /// refuses, and DeepSeek now holds that job. It comes in if a real book turns up
-    /// that both LLMs refuse — which the feature measures for itself, by reporting
-    /// how many passages did not pass.</para>
+    /// <para><b>Kimi was dropped</b> — dearer than DeepSeek and trained with the
+    /// same English/Chinese weighting, so its weakness is the same rather than
+    /// complementary.</para>
+    ///
+    /// <para><b>Azure was deferred and then a measurement brought it back.</b> It
+    /// was to enter "if a real book turns up that both language models refuse —
+    /// which the feature measures for itself". The feature measured it: Gemini
+    /// declines roughly a sixth of an ordinary published novel, and not for its
+    /// content — the first passage refused is the copyright page, the second is a
+    /// widow talking about a boy who wants to go to school. It looks like a model
+    /// declining to reproduce a book it recognises, and NO setting prevents it
+    /// (measured four ways, from no safetySettings through to everything OFF, all
+    /// identical). DeepSeek covered those passages this time, but it has filters of
+    /// its own, so the case for an engine that cannot refuse anything is no longer
+    /// hypothetical.</para>
     ///
     /// <para><b>DeepL is not here at all and cannot be: it has no Croatian.</b>
     /// Nor Serbian, Bosnian or Montenegrin.</para>
@@ -59,6 +80,13 @@ namespace Nemoviz_Book_Reader
     {
         public const string Gemini = "gemini";
         public const string DeepSeek = "deepseek";
+        public const string Azure = "azure";
+
+        /// <summary>Azure keeps a second value beside its key: the region a
+        /// regional resource was made in. A single-service GLOBAL resource needs
+        /// none, which is why the setup guidance says to choose Global — it makes
+        /// Azure look like every other service, one field and done.</summary>
+        public const string AzureRegion = "azure-region";
 
         /// <summary><b>Model names are settings in waiting, never constants to rely
         /// on.</b> Gemini 2.5 Flash-Lite retires 2026-10-16 and Moonshot's old
@@ -82,6 +110,20 @@ namespace Nemoviz_Book_Reader
                 Kind = EngineKind.OpenAiCompatible,
                 Endpoint = "https://api.deepseek.com/chat/completions",
                 Model = "deepseek-v4-flash"
+            },
+            // Deferred once, and then a measurement brought it back: Gemini
+            // refuses roughly a sixth of an ordinary published novel — not for
+            // its content but, by every sign, because it recognises the book —
+            // and no setting prevents that. DeepSeek covered those passages, but
+            // it has filters of its own. Azure is the only one of the three that
+            // cannot refuse anything, so it belongs at the end of the chain.
+            new TranslationEngine
+            {
+                Id = Azure,
+                NameKey = "Settings.Translate.Engine.Azure",
+                Kind = EngineKind.AzureTranslator,
+                Endpoint = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0",
+                Model = ""      // there is no model to choose
             }
         };
 
@@ -148,13 +190,14 @@ namespace Nemoviz_Book_Reader
             // authenticates but is barred from the model would otherwise pass.
             return Send(engine, key,
                         "Translate from English into Croatian. Output only the translation.",
-                        "Good evening.", 64);
+                        "Good evening.", 64, "en", "hr");
         }
 
         /// <summary>Sends one system instruction and one piece of text, and returns
         /// what came back. The whole surface the layers above need.</summary>
         public static TranslationResult Send(TranslationEngine engine, string key,
-                                             string system, string user, int maxTokens)
+                                             string system, string user, int maxTokens,
+                                             string sourceLang = null, string targetLang = null)
         {
             if (engine == null) return Fail("Settings.Translate.Test.NoEngine");
             if (string.IsNullOrEmpty(key)) key = TranslationKeys.Get(engine.Id);
@@ -163,7 +206,20 @@ namespace Nemoviz_Book_Reader
             string url, body;
             var headers = new Dictionary<string, string>();
 
-            if (engine.Kind == EngineKind.Gemini)
+            if (engine.Kind == EngineKind.AzureTranslator)
+            {
+                // The languages are in the URL because there is no prompt to put
+                // them in. The caller's system instruction is DROPPED here, and
+                // that is not an oversight — see EngineKind.AzureTranslator.
+                url = engine.Endpoint
+                      + (string.IsNullOrEmpty(sourceLang) ? "" : "&from=" + Uri.EscapeDataString(sourceLang))
+                      + "&to=" + Uri.EscapeDataString(targetLang ?? "");
+                headers["Ocp-Apim-Subscription-Key"] = key;
+                string region = TranslationKeys.Get(TranslationEngines.AzureRegion);
+                if (!string.IsNullOrEmpty(region)) headers["Ocp-Apim-Subscription-Region"] = region;
+                body = "[{\"Text\":" + Json.Str(user) + "}]";
+            }
+            else if (engine.Kind == EngineKind.Gemini)
             {
                 url = engine.Endpoint + engine.Model + ":generateContent";
                 // The key goes in a HEADER, not ?key=, so it cannot come back inside
@@ -232,9 +288,13 @@ namespace Nemoviz_Book_Reader
                                                Detail = msg };
             }
 
-            string text = engine.Kind == EngineKind.Gemini
-                ? Json.PathString(json, "candidates", "0", "content", "parts", "0", "text")
-                : Json.PathString(json, "choices", "0", "message", "content");
+            string text;
+            if (engine.Kind == EngineKind.AzureTranslator)
+                text = Json.PathString(json, "0", "translations", "0", "text");
+            else if (engine.Kind == EngineKind.Gemini)
+                text = Json.PathString(json, "candidates", "0", "content", "parts", "0", "text");
+            else
+                text = Json.PathString(json, "choices", "0", "message", "content");
 
             if (string.IsNullOrEmpty(text))
             {
