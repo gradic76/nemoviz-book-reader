@@ -164,6 +164,8 @@
     <Compile Include="TextChunker.cs" />
     <Compile Include="TranslationChecks.cs" />
     <Compile Include="TranslationJob.cs" />
+    <Compile Include="TranslationProgressForm.cs" />
+    <Compile Include="TranslateBookForm.cs" />
     <Compile Include="TranslationKeys.cs" />
     <Compile Include="Translator.cs" />
     <Compile Include="TranslationKeyForm.cs" />

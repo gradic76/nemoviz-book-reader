@@ -490,6 +490,33 @@ Dialog.TranslateKey.Testing=Checking the key...
 Dialog.TranslateKey.Works=The key works.
 Dialog.TranslateKey.Stored=A key is stored for this service.
 Dialog.TranslateKey.NotStored=No key is stored for this service.
+; Translating a book. Longer than any other wait in Nemoviz, so the window says
+; out loud that stopping is cheap - everything already translated is kept, and
+; starting again carries on from there rather than beginning afresh.
+Translate.Progress.Title=Translating the book
+Translate.Progress.Starting=Getting ready. You can stop at any time; whatever has been translated is kept, and starting again carries on from there.
+Translate.Progress.Working=Passage {0} of {1}. About {2} left. You can stop at any time — what is done is kept.
+Translate.Progress.Quarter={0} per cent translated, about {1} left.
+Translate.Progress.Cancel=Stop
+Translate.Progress.Cancelling=Stopping after this passage. What is already translated is kept.
+Translate.Progress.Estimating=working out how long this will take
+Translate.Progress.AlmostDone=a moment
+Translate.Progress.Seconds={0} seconds
+Translate.Progress.Minutes={0} minutes
+; Asking before a book is sent away. As little as possible: the language it is in
+; Nemoviz already worked out from the words, and the language you read in does
+; not change from book to book.
+Translate.Ask.Title=Translate the book
+Translate.Ask.Info={0} — about {1} characters, roughly {2}. The translation becomes a new book; this one is not changed.
+Translate.Ask.HybridNote=This book has a recording as well as text. Only the text can be translated, so the translation will be a text book without the narration.
+Translate.Ask.From=Language of the book:
+Translate.Ask.To=Translate into:
+Translate.Ask.Engine=Translation service:
+Translate.Ask.Fallback=If a passage is refused:
+Translate.Ask.NoFallback=Leave it in the original
+Translate.Ask.NoEngine=No service has a key yet
+Translate.Ask.Notes=Anything the translator should know (optional) — for example that the narrator is a woman, or how two characters address each other:
+Translate.Ask.Start=Translate
 ; Adding a recognition pack. NOT a whole Windows display language — that is the
 ; overkill this avoids: the pack is the model alone, about a quarter of a
 ; megabyte. Windows asks for its own permission, because installing a system
