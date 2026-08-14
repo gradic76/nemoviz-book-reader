@@ -549,7 +549,88 @@ namespace Nemoviz_Book_Reader
             page.AutoScroll = true;
             page.Controls.Add(BuildOcrGroup(8, 6));
             page.Controls.Add(MakeHint("Settings.Ocr.Hint", 14, 108, 480, 60, 2));
+            page.Controls.Add(BuildTranslationGroup(8, 176));
             return page;
+        }
+
+        private ComboBox cmbTranslateEngine;
+
+        /// <summary>Which services may translate a book, and whether each has a key.
+        ///
+        /// <para><b>A combo and ONE button, not a button per service.</b> Gordan
+        /// offered either; this way the group does not grow a control every time a
+        /// service is added — and Azure is already waiting in the wings for the day
+        /// a book turns up that both language models refuse.</para>
+        ///
+        /// <para><b>The row says in TEXT whether a key is stored</b> — "Gemini, key
+        /// stored" against "Gemini, no key". Without that a reader who cannot see
+        /// the dialog has to open the key window to find out whether they already
+        /// did this, which is the same reason a book's status on the shelf is spoken
+        /// and not only coloured.</para>
+        ///
+        /// <para>Nothing here is a setting in <c>Settings.ini</c>: what is
+        /// configured IS which keys exist, so there is no second place for the two
+        /// to disagree. Keys live in their own file — see
+        /// <see cref="TranslationKeys"/> for why not this one.</para></summary>
+        private GroupBox BuildTranslationGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.Translate.Group");
+            box.Location = new Point(x, y);
+            box.Size = new Size(500, 92);
+            box.Tag = "span2";
+
+            Label lbl = new Label();
+            lbl.Text = Localization.T("Settings.Translate.Service");
+            lbl.Location = new Point(14, 29);
+            lbl.Size = new Size(200, 20);
+
+            cmbTranslateEngine = new ComboBox();
+            cmbTranslateEngine.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbTranslateEngine.Location = new Point(224, 26);
+            cmbTranslateEngine.Size = new Size(200, 24);
+            cmbTranslateEngine.AccessibleName = Localization.T("Settings.Translate.Service");
+            cmbTranslateEngine.TabIndex = 0;
+            // NVDA says nothing when a closed DropDownList changes on the arrow
+            // keys; this is the app-wide remedy, and a no-op under JAWS so nothing
+            // is said twice.
+            NvdaController.SpeakOnChange(cmbTranslateEngine);
+            RefillTranslationEngines();
+
+            Button key = new Button();
+            key.Text = Localization.T("Settings.Translate.Key");
+            key.AccessibleName = key.Text;
+            key.SetBounds(14, 58, 240, 26);
+            key.TabIndex = 1;
+            key.Click += (s, e) =>
+            {
+                int i = cmbTranslateEngine.SelectedIndex;
+                if (i < 0 || i >= TranslationEngines.All.Count) return;
+                if (TranslationKeyForm.Show(this, TranslationEngines.All[i]))
+                    RefillTranslationEngines();     // the row has to stop lying at once
+            };
+
+            box.Controls.Add(lbl);
+            box.Controls.Add(cmbTranslateEngine);
+            box.Controls.Add(key);
+            return box;
+        }
+
+        /// <summary>Rebuilds the service list so each row carries its current
+        /// state, keeping whichever service was selected.</summary>
+        private void RefillTranslationEngines()
+        {
+            if (cmbTranslateEngine == null) return;
+            int keep = Math.Max(0, cmbTranslateEngine.SelectedIndex);
+            cmbTranslateEngine.BeginUpdate();
+            cmbTranslateEngine.Items.Clear();
+            foreach (var e in TranslationEngines.All)
+                cmbTranslateEngine.Items.Add(Localization.T(
+                    e.HasKey ? "Settings.Translate.State.Have" : "Settings.Translate.State.None",
+                    e.DisplayName));
+            cmbTranslateEngine.EndUpdate();
+            if (cmbTranslateEngine.Items.Count > 0)
+                cmbTranslateEngine.SelectedIndex = Math.Min(keep, cmbTranslateEngine.Items.Count - 1);
         }
 
         private ComboBox cmbOcrLanguage;

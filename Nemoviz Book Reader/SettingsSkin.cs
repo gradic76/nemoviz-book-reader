@@ -352,6 +352,12 @@ namespace Nemoviz_Book_Reader
             // to be an inline box the skin removed.
             if (name == Localization.T("Settings.Tab.Device"))
                 return new[] { "Settings.Device.KeepAlive.Hint" };
+            // OCR and Translate: reading pictures, then translating. The first group
+            // still carries its explanation as an inline box, so it gets no ? — two
+            // routes to the same text on one group is one route too many. The
+            // translation group has no inline box and needs the key.
+            if (name == Localization.T("Settings.Tab.Ocr"))
+                return new[] { "", "Settings.Translate.Hint" };
             return new string[0];
         }
 

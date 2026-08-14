@@ -160,6 +160,10 @@
     <Compile Include="UiTheme.cs" />
     <Compile Include="DialogSkin.cs" />
     <Compile Include="HintSystem.cs" />
+    <Compile Include="Json.cs" />
+    <Compile Include="TranslationKeys.cs" />
+    <Compile Include="Translator.cs" />
+    <Compile Include="TranslationKeyForm.cs" />
     <Compile Include="NewPlayerSkin.cs" />
     <Compile Include="SkinCanvas.cs" />
     <Compile Include="SpeechInventory.cs" />

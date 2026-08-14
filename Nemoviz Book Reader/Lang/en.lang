@@ -461,6 +461,35 @@ Settings.Ocr.Hint=Some books are photographs of their pages rather than text —
 Settings.Ocr.Language=Language for reading pictures
 Settings.Ocr.Automatic=Automatic
 Settings.Ocr.AddLanguage=Add a language...
+; Translation. The service list carries its own state in the text, because a
+; reader who cannot see the dialog would otherwise have to open the key window to
+; learn whether they have already set this up.
+Settings.Translate.Group=Translation
+Settings.Translate.Service=Translation service
+Settings.Translate.Key=API key...
+Settings.Translate.State.Have={0}, key stored
+Settings.Translate.State.None={0}, no key
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+; PLACEHOLDER. The real text is still to be written, and it has to cover: that a
+; key is the reader's own account with the service, that Nemoviz never sees a
+; bill, roughly what a book costs, and that the key is stored in readable form.
+Settings.Translate.Hint=Nemoviz can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; Nemoviz never handles payment. Setting this up is not part of reading a book, and nothing here is needed unless you want translation. This text is not finished yet.
+Settings.Translate.Test.NoEngine=No translation service is selected.
+Settings.Translate.Test.NoKey=There is no key to check.
+Settings.Translate.Test.NoNetwork=Nemoviz could not reach the service.
+Settings.Translate.Test.Refused=The service refused the request ({0}).
+Settings.Translate.Test.Empty=The service answered with nothing.
+Dialog.TranslateKey.Title=API key for {0}
+Dialog.TranslateKey.Prompt=Paste the key you got from {0}. It is kept on this computer in a file of its own, in readable form, so treat it as you would a password. You can replace or remove it at any time, and you can cancel the key at the service itself.
+Dialog.TranslateKey.Field=API key
+Dialog.TranslateKey.Status=Result
+Dialog.TranslateKey.Test=Check the key
+Dialog.TranslateKey.Remove=Remove
+Dialog.TranslateKey.Testing=Checking the key...
+Dialog.TranslateKey.Works=The key works.
+Dialog.TranslateKey.Stored=A key is stored for this service.
+Dialog.TranslateKey.NotStored=No key is stored for this service.
 ; Adding a recognition pack. NOT a whole Windows display language — that is the
 ; overkill this avoids: the pack is the model alone, about a quarter of a
 ; megabyte. Windows asks for its own permission, because installing a system
