@@ -17,35 +17,6 @@ namespace Nemoviz_Book_Reader
     /// </summary>
     public static class OcrTidy
     {
-        /// <summary>Puts back the bar on <c>đ</c>, which the recognizer drops more
-        /// than any other Croatian letter.
-        ///
-        /// <para><b>Measured on a whole book</b> (252 pages, 2026-08-14): of the
-        /// words that should carry it, roughly a third lose it. <c>đ</c> is also
-        /// the rarest of the five — 160 occurrences against 2929 for <c>š</c> —
-        /// which is why it goes unnoticed until someone hits "roden".</para>
-        ///
-        /// <para><b>The rule is the document's own evidence, not a word list I
-        /// wrote.</b> A word is only corrected when the corrected spelling ALREADY
-        /// APPEARS IN THE SAME BOOK, more often than the damaged one. That is what
-        /// makes it safe, and the safety is not theoretical — the same book
-        /// contains <c>tvrdi</c> 46 times against <c>tvrđi</c> once, and
-        /// <c>medu</c> 30 times against <c>među</c> twice. A list of stems written
-        /// out of my own head would have corrupted all 76 of those; the majority
-        /// rule leaves them alone because the evidence points the other way.</para>
-        ///
-        /// <para><b>What it costs: it only catches half.</b> Where the damaged
-        /// spelling outnumbers the good one — <c>dode</c> 10 against <c>dođe</c>
-        /// once — the rule declines, and rightly, because from inside the document
-        /// that looks exactly like the <c>tvrdi</c> case. Those need
-        /// <see cref="AlwaysWrong"/>, which is a short list of forms that are not
-        /// Croatian words in any spelling.</para>
-        ///
-        /// <para><b>Two entries I nearly put in that list and must not.</b>
-        /// <c>svidjeti se</c> is spelt with <c>dj</c> and <c>svadba</c> has no bar
-        /// at all — measured, 13 of 17 <c>svid…</c> hits and 1 of 16 <c>svad…</c>
-        /// hits were ordinary words. My first count called all of them damage,
-        /// which is where the inflated "40 %" came from.</para></summary>
         /// <summary>Whether <see cref="FixCroatianDiacritics"/> applies to a
         /// language.
         ///
@@ -76,16 +47,45 @@ namespace Nemoviz_Book_Reader
                 || t.StartsWith("me", StringComparison.Ordinal);   // …and the tag Windows would likelier use
         }
 
+        /// <summary>Puts the bar back on <c>đ</c>, the letter the recognizer drops
+        /// more often than any other.
+        ///
+        /// <para><b>Measured:</b> on a 252-page Croatian scan roughly a third of
+        /// the words that should carry it lose it. It is also the rarest of the
+        /// five — 160 occurrences against 2929 for <c>š</c> — which is why nobody
+        /// notices until they hit "roden".</para>
+        ///
+        /// <para><b>It only corrects forms that are not words in any spelling, and
+        /// two earlier attempts at something cleverer both had to be thrown
+        /// away.</b> That history is the point of this comment, because both
+        /// looked right:</para>
+        ///
+        /// <list type="number">
+        /// <item><b>A stem list from memory.</b> Killed by <c>tvrdi</c> (46
+        /// occurrences in one book against a single <c>tvrđi</c>) and <c>medu</c>
+        /// (30 against 2). I would have corrupted all 76.</item>
+        /// <item><b>"Correct it when the barred spelling is commoner in this same
+        /// book."</b> Self-calibrating, needs no dictionary, and safe on the one
+        /// book it was built against. Run over Gordan's own library it proposed
+        /// <c>gospoda→gospođa</c>, <c>mlada→mlađa</c> and <c>grade→građe</c> — all
+        /// three ordinary words. <b>Serbian is full of legitimate plain-d words
+        /// whose barred twin also occurs</b>, and there the majority points the
+        /// wrong way. Deciding this from inside the text cannot be done.</item>
+        /// </list>
+        ///
+        /// <para><b>Short stems must be whole words, not prefixes</b> — the same
+        /// corpus caught <c>dode</c> reaching <c>dodeliti</c> (Serbian, correct
+        /// with plain d) and <c>prode</c> reaching <c>prodere</c>. Long stems are
+        /// safe as prefixes because nothing else begins that way.</para>
+        ///
+        /// <para><b>Every change is read by eye against a real book before an
+        /// entry is added.</b> That pass has caught something every single time:
+        /// <c>doduše</c> turning into <c>dođuše</c>, and before that the false
+        /// "40 %" that came from counting <c>svidjeti</c> (spelt with dj) and
+        /// <c>svadba</c> (no bar at all) as damage.</para></summary>
         public static string FixCroatianDiacritics(string text)
         {
             if (string.IsNullOrEmpty(text) || text.IndexOf('d') < 0) return text;
-
-            // What this document itself says is right.
-            var seen = new Dictionary<string, int>(StringComparer.Ordinal);
-            foreach (string w in Words(text))
-            {
-                int n; seen.TryGetValue(w, out n); seen[w] = n + 1;
-            }
 
             var sb = new StringBuilder(text.Length);
             int i = 0;
@@ -94,7 +94,7 @@ namespace Nemoviz_Book_Reader
                 if (!IsWordChar(text[i])) { sb.Append(text[i++]); continue; }
                 int start = i;
                 while (i < text.Length && IsWordChar(text[i])) i++;
-                sb.Append(Fix(text.Substring(start, i - start), seen));
+                sb.Append(Fix(text.Substring(start, i - start)));
             }
             return sb.ToString();
         }
@@ -115,14 +115,30 @@ namespace Nemoviz_Book_Reader
             ("meduvre",  "međuvre"),    // meduvremenu
             ("roden",    "rođen"),      // roden, rodeni, rodenja, rodendan
             ("izad",     "izađ"),       // izade, izadeš, izadu
-            ("dode",     "dođe"),
-            ("dodu",     "dođu"),
-            ("prode",    "prođe"),
             ("gradevin", "građevin"),
             ("potvrduj", "potvrđuj"),
-            ("zaradiv",  "zarađiv"),
+            ("zaradiv",  "zarađiv"),    // zaradivati, zaradivši
             ("izvodač",  "izvođač"),
             ("palamud",  "palamuđ"),
+        };
+
+        /// <summary>Short forms that are only safe as WHOLE WORDS.
+        ///
+        /// <para>These began life in the list above, as prefixes, and Gordan's own
+        /// library showed what that costs: <c>dode</c> reached
+        /// <c>dodeliti</c> — Serbian for "to assign", correct with a plain d — and
+        /// <c>prode</c> reached <c>prodere</c>. Four letters are not enough to
+        /// identify a word, and the longer stems above are only safe because
+        /// nothing else begins that way.</para></summary>
+        private static readonly (string Bad, string Good)[] AlwaysWrongWords =
+        {
+            ("dode", "dođe"), ("dodem", "dođem"), ("dodemo", "dođemo"),
+            ("dodes", "dođeš"), ("dodeš", "dođeš"), ("dodu", "dođu"),
+            ("prode", "prođe"), ("prodem", "prođem"), ("prodeš", "prođeš"),
+            ("produ", "prođu"),
+            // NOT "podu" → "pođu": "na podu" is a floor, and it turned up 14
+            // times in the library where the rule would have taken every one.
+            // "pode" goes with it — one occurrence is not worth the neighbour.
         };
 
         /// <summary>Forms that LOOK like the ones above but are ordinary words.
@@ -139,7 +155,7 @@ namespace Nemoviz_Book_Reader
                           // the eyeball pass over every change is what caught it.
         };
 
-        private static string Fix(string word, Dictionary<string, int> seen)
+        private static string Fix(string word)
         {
             if (word.IndexOf('d') < 0) return word;
             string lower = word.ToLowerInvariant();
@@ -147,21 +163,23 @@ namespace Nemoviz_Book_Reader
             foreach (string safe in NeverTouch)
                 if (lower.StartsWith(safe, StringComparison.Ordinal)) return word;
 
+            foreach (var rule in AlwaysWrongWords)
+                if (lower == rule.Bad) return Splice(word, rule.Bad.Length, rule.Good);
+
             foreach (var rule in AlwaysWrong)
                 if (lower.StartsWith(rule.Bad, StringComparison.Ordinal))
                     return Splice(word, rule.Bad.Length, rule.Good);
 
-            // Otherwise ask the document: is the barred spelling here, and more
-            // common than this one?
-            int at = lower.IndexOf('d');
-            while (at >= 0)
-            {
-                string candidate = word.Substring(0, at) + "đ" + word.Substring(at + 1);
-                int mine, theirs;
-                seen.TryGetValue(word, out mine);
-                if (seen.TryGetValue(candidate, out theirs) && theirs > mine) return candidate;
-                at = lower.IndexOf('d', at + 1);
-            }
+            // THE MAJORITY RULE IS GONE, and it deserved to go. It corrected a
+            // word whenever the barred spelling was commoner in the same book,
+            // which looked safe on the one book it was built against and was
+            // not. Run over Gordan's own library it proposed gospoda→gospođa,
+            // mlada→mlađa and grade→građe — all three ordinary words — because
+            // Serbian is full of legitimate plain-d words whose barred twin also
+            // occurs, and there the majority points the wrong way.
+            //
+            // Nothing replaces it. Deciding this without a dictionary is exactly
+            // the thing that cannot be done from inside the text.
             return word;
         }
 
