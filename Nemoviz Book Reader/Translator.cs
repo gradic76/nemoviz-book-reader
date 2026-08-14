@@ -178,9 +178,38 @@ namespace Nemoviz_Book_Reader
                 body = OpenAiBody(engine.Model, system, user, maxTokens);
             }
 
-            string raw;
-            int status;
-            string transport = Post(url, headers, body, out raw, out status);
+            // A RATE LIMIT AND A HICCUP ARE NORMAL STATES OVER A BOOK, NOT FAULTS.
+            // A hundred-odd requests in a row will meet one; the free tiers are
+            // measured per minute, and a single 429 that ends a translation would
+            // be absurd. Backoff is generous rather than eager: these limits are
+            // per minute, so waiting is what actually clears them.
+            //
+            // The service often says how long to wait (Gemini returns retryDelay);
+            // that is believed over our own schedule when it is there.
+            string raw = "";
+            int status = 0;
+            string transport = null;
+            int[] waits = { 2000, 6000, 20000, 45000 };
+            for (int attempt = 0; ; attempt++)
+            {
+                transport = Post(url, headers, body, out raw, out status);
+                bool worthRetrying = transport != null || status == 429 || status == 408 || status >= 500;
+                if (!worthRetrying || attempt >= waits.Length) break;
+
+                int wait = waits[attempt];
+                object err = Json.Parse(raw);
+                string told = Json.PathString(err, "error", "details", "2", "retryDelay")
+                              ?? Json.PathString(err, "error", "details", "0", "retryDelay");
+                if (!string.IsNullOrEmpty(told) && told.EndsWith("s", StringComparison.Ordinal))
+                {
+                    double secs;
+                    if (double.TryParse(told.Substring(0, told.Length - 1),
+                                        NumberStyles.Float, CultureInfo.InvariantCulture, out secs))
+                        wait = Math.Max(wait, (int)(secs * 1000) + 500);
+                }
+                System.Threading.Thread.Sleep(wait);
+            }
+
             if (transport != null)
                 return new TranslationResult { Ok = false, Status = status,
                                                Error = Localization.T("Settings.Translate.Test.NoNetwork"),
