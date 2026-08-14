@@ -80,9 +80,22 @@ namespace Nemoviz_Book_Reader
         ///
         /// <para><b>Every change is read by eye against a real book before an
         /// entry is added.</b> That pass has caught something every single time:
-        /// <c>doduše</c> turning into <c>dođuše</c>, and before that the false
-        /// "40 %" that came from counting <c>svidjeti</c> (spelt with dj) and
-        /// <c>svadba</c> (no bar at all) as damage.</para></summary>
+        /// <c>doduše</c> turning into <c>dođuše</c>, <c>podu</c> ("na podu" is a
+        /// floor) turning into <c>pođu</c>, and before those the false "40 %" that
+        /// came from counting <c>svidjeti</c> (spelt with dj) and <c>svadba</c>
+        /// (no bar at all) as damage.</para>
+        ///
+        /// <para><b>THIS IS AT ITS CEILING, and a dictionary would not raise it.</b>
+        /// Measured over 24 scan-derived Croatian and Serbian books: 18
+        /// corrections made, against a long tail it declines — <c>nađe/nade</c> in
+        /// 17 files, <c>mlađi/mladi</c> in 16, <c>leđa/leda</c> in 15,
+        /// <c>vođa/voda</c> in 15, then <c>gospođa/gospoda</c>, <c>građa/grada</c>,
+        /// <c>među/medu</c>, <c>posuđe/posude</c>, <c>rađa/rada</c>. <b>Both sides
+        /// of every one of those is a real word.</b> A word list answers "is this a
+        /// word", and here the answer is yes either way; only CONTEXT separates
+        /// them, which means a language model and not a table. So the honest place
+        /// to stop is here: take what is certain, leave what would be a
+        /// guess.</para></summary>
         public static string FixCroatianDiacritics(string text)
         {
             if (string.IsNullOrEmpty(text) || text.IndexOf('d') < 0) return text;
