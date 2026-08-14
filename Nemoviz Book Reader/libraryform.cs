@@ -1772,6 +1772,31 @@ namespace Nemoviz_Book_Reader
         {
             BookData book = GetSelectedBook();
             if (book == null) return;
+
+            // A BOOK THAT IS STILL PICTURES MUST NOT REACH THE PLAYER (Gordan,
+            // 2026-08-14). Bulk import cannot ask, so such a book sits in the
+            // library unread; pressing Enter on it opened a reading with nothing
+            // in it and simply played silence. There is no way to tell that from
+            // a book that has genuinely gone quiet, which is the worst kind of
+            // fault for someone who cannot look at the screen.
+            //
+            // So the offer is made HERE, at the moment the reader asks for the
+            // book, which is also the moment they can answer for THIS one — and a
+            // folder of scans can hold several languages. Declining leaves them on
+            // the shelf rather than in a silent player.
+            // Two ways in: a book we KNOW is unread pictures, and an older one
+            // that is simply a text book with no text — those predate the
+            // pictures being kept, so nothing marks them and only the symptom
+            // gives them away. Both are caught, because both play silence.
+            if (OcrImport.NeedsReading(book.FolderPath) || OcrImport.IsEmptyTextBook(book.FolderPath))
+            {
+                if (!MessageForm.ShowConfirm(this, Localization.T("Ocr.Unread.Message"),
+                        Localization.T("Ocr.Ask.Title")))
+                    return;
+                if (!ReadSelectedBookNow(book)) return;
+                book = GetSelectedBook() ?? book;
+            }
+
             SelectedBook = book;
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -2157,9 +2182,21 @@ namespace Nemoviz_Book_Reader
         {
             BookData b = GetSelectedBook();
             if (b == null) return;
+            if (ReadSelectedBookNow(b))
+                MessageForm.ShowInfo(this, Localization.T("Ocr.ReRead.Done"),
+                    Localization.T("Ocr.Ask.Title"));
+        }
 
+        /// <summary>Reads a book's pictures and puts the result in place of
+        /// whatever text it had. True when a reading was made and kept.
+        ///
+        /// <para>Shared by the shelf command and by opening a book that has never
+        /// been read, because the two differ only in what is said afterwards —
+        /// the command reports, the open just carries on into the book.</para></summary>
+        private bool ReadSelectedBookNow(BookData b)
+        {
             OcrText read = OcrImport.ReRead(this, b.FolderPath);
-            if (read == null) return;
+            if (read == null) return false;
 
             var doc = new TextDoc { Text = read.Text, Pages = read.Pages, Language = read.Language };
             TextCleaner.CleanDoc(doc);
@@ -2169,15 +2206,14 @@ namespace Nemoviz_Book_Reader
                     System.IO.Path.Combine(b.FolderPath, "content.txt"),
                     doc.Text ?? "", new System.Text.UTF8Encoding(false));
             }
-            catch { return; }
+            catch { return false; }
 
             b.TextCleaned = true;
             b.TextLanguage = LanguageDetector.Resolve(doc.Language, doc.Text);
             b.SetTextPages(doc.Pages);
             b.Save();
             LoadBooks();
-            MessageForm.ShowInfo(this, Localization.T("Ocr.ReRead.Done"),
-                Localization.T("Ocr.Ask.Title"));
+            return true;
         }
 
         private void ImportFile(string filePath)

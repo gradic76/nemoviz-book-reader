@@ -397,6 +397,33 @@ namespace Nemoviz_Book_Reader
             return !WasOcrRead(bookFolder) && SourceFor(bookFolder) != null;
         }
 
+        /// <summary>A text book with no text in it.
+        ///
+        /// <para><b>The books Gordan already has.</b> Before the bulk import kept
+        /// the pictures, a folder of scanned PDFs produced exactly this: a book
+        /// whose <c>content.txt</c> is empty and whose source is gone. Nothing
+        /// marks them, so <see cref="NeedsReading"/> cannot see them — and opening
+        /// one plays silence, which is indistinguishable from a book that has
+        /// simply gone quiet. That is the worst kind of fault for someone who
+        /// cannot look at the screen, so it is worth catching by the symptom even
+        /// though the cause is no longer being created.</para>
+        ///
+        /// <para>The threshold is a few hundred characters rather than zero: a
+        /// scanned book that yielded one stray page number is just as unreadable
+        /// as one that yielded nothing.</para></summary>
+        public static bool IsEmptyTextBook(string bookFolder)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(bookFolder)) return false;
+                string p = Path.Combine(bookFolder, "content.txt");
+                if (!File.Exists(p)) return false;
+                if (new FileInfo(p).Length > 4096) return false;   // cheap: no read
+                return File.ReadAllText(p, System.Text.Encoding.UTF8).Trim().Length < 200;
+            }
+            catch { return false; }
+        }
+
         /// <summary>Reads a book's pictures again, in a language the reader
         /// picks. Returns the new text, or null if they backed out.
         ///

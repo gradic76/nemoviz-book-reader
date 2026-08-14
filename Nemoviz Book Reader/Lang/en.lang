@@ -443,6 +443,10 @@ Settings.Tab.Ocr=OCR and Translate
 ; heard a word of it.
 Context.ReadOcr=Read the pictures in this book
 Context.ReReadOcr=Re-read in a different language
+; Enter on a book that is still pictures. It must never reach the player: a
+; reading with nothing in it plays silence, and silence is indistinguishable
+; from a book that has simply gone quiet.
+Ocr.Unread.Message=This book has not been read yet — it is still pictures of its pages, so there is nothing to speak. Read it now?
 Ocr.Read.Question=This book is {0} pages of pictures and has not been read yet. Reading it takes {1}.
 Ocr.ReRead.Question=This book was read from {0} pages of pictures. Reading it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
 Ocr.ReRead.Done=The book has been read again and replaced.
