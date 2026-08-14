@@ -1995,6 +1995,38 @@ which voice they use. NBR supplies the tool, the user supplies the content.
 
 ---
 
+### A Library action that changes a book on disk must hand back a FRESH BookData
+
+Found 2026-08-14, chasing a book that had just been read by OCR and still made
+no sound. Everything on disk was right — 2009 characters of text, `hr-HR`, a
+Croatian voice installed and mapped — so the fault was in what the player
+*received*.
+
+`ReadSelectedBookNow` writes `content.txt`, then calls `LoadBooks()`, which
+**rebuilds the shelf and can lose the selection**. The fallback was then the
+`BookData` object built while `content.txt` was still empty, and that is what
+went to `LoadBook`. The player was handed a description of the book as it used
+to be.
+
+**The rule: after writing to a book's folder, re-read it —
+`new BookData(folder)` — rather than reusing the object you wrote through or
+whatever `GetSelectedBook()` happens to return afterwards.** The same shape will
+bite any future command that edits a book in place.
+
+Two smaller ones from the same hunt, both worth knowing:
+
+- **`b.Save()` writes the in-memory value, stale or not.** The book kept
+  `TextChars=0` — what import recorded when it had no text — because nothing
+  updated it. It self-heals on the next `EnsureTextInfo`, which is exactly why it
+  went unnoticed, and until then the reading-time estimate is wrong.
+- **`IsTextBook` is true for a book whose `content.txt` is EMPTY.** That is how a
+  scanned PDF imported in bulk became a text book with nothing to say, and
+  pressing Enter played silence — indistinguishable, to someone who cannot see
+  the screen, from a book that has simply gone quiet. Hence
+  `OcrImport.IsEmptyTextBook`, which catches it by the symptom.
+
+---
+
 ## 8k. Two looks side by side (temporary, for the redesign)
 
 > ### THE NBR DEFAULT LOOK IS CLOSED — 2026-08-10 (Gordan)
