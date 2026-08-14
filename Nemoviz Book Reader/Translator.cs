@@ -259,17 +259,26 @@ namespace Nemoviz_Book_Reader
 
         private static string GeminiBody(string system, string user, int maxTokens)
         {
-            // ALL FOUR ADJUSTABLE CATEGORIES OFF, and that is a decision rather than
-            // a default. Measured 2026-08-14: the setting is accepted on the FREE
-            // tier, so it costs nothing. What it buys is that a refusal which still
-            // gets through has hit Google's non-adjustable core — and a novel is
-            // refused for perfectly ordinary reasons otherwise, which leaves a
-            // reader with holes in a book and no idea why. What we cannot switch off
-            // is stated in the hint instead of being silently suffered.
+            // All four adjustable categories off. Accepted on the free tier, so it
+            // costs nothing — but do NOT expect it to solve refusals, and the
+            // measurement that settles this is worth keeping.
             //
-            // Not proven: that the setting takes EFFECT. It is accepted; whether it
-            // changes an outcome needs a book that is refused by default, and we do
-            // not have one yet.
+            // MEASURED 2026-08-15 on passages a real novel was actually refused
+            // over: the same three pieces were sent four ways — no safetySettings
+            // at all, BLOCK_ONLY_HIGH, BLOCK_NONE and OFF — and every one came back
+            // identically as finishReason PROHIBITED_CONTENT with an empty answer.
+            // THE SETTING CHANGES NOTHING FOR THIS KIND OF REFUSAL, because
+            // PROHIBITED_CONTENT is Google's non-adjustable layer and not one of
+            // the four categories these switches reach.
+            //
+            // What that leaves unproven, precisely: whether the switches do
+            // anything for the four categories they DO cover. We never saw a block
+            // of that kind (which would arrive as finishReason SAFETY with
+            // safetyRatings attached), so there was nothing to compare.
+            //
+            // Which is why the fallback engine is load-bearing rather than a
+            // nicety: 17 % of a mainstream novel came back refused, and there is no
+            // setting that would have prevented it.
             string[] cats = { "HARM_CATEGORY_HARASSMENT", "HARM_CATEGORY_HATE_SPEECH",
                               "HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_DANGEROUS_CONTENT" };
             var safety = new StringBuilder();
