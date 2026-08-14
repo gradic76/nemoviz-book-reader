@@ -14,6 +14,7 @@ namespace Nemoviz_Book_Reader
         public int Chunks;
         public int FromCache;
         public int ViaFallback;
+        public int RetriedOk;
         public int LeftInOriginal;          // refused by every engine we had
         public bool Cancelled;
         public string Error;
@@ -70,8 +71,22 @@ namespace Nemoviz_Book_Reader
             sb.AppendLine("- Keep the paragraph structure exactly: the same number of paragraphs, in the same order, separated by a blank line.");
             sb.AppendLine("- Do not summarise, do not omit, do not add.");
             sb.AppendLine("- Leave passages written in a language other than the source exactly as they are.");
-            sb.AppendLine("- Do not translate or transliterate proper names; keep their original spelling.");
+            // "KEEP THEIR ORIGINAL SPELLING" WAS DOING HARM, and it was found by
+            // comparing our output against a human translation of the same manual.
+            // A model obeying that literally will not DECLINE a foreign name — and
+            // in Croatian, where declension is ordinary, it then pads around the
+            // problem: "u programu Tobi" where a translator writes "u Tobiju".
+            // Keeping a name and inflecting it are different things, and the rule
+            // has to say so.
+            sb.AppendLine("- Do not translate or transliterate proper names, but DO inflect them as the target language's grammar requires (cases, endings). Keeping a name is not the same as leaving it unchanged in every position.");
             sb.AppendLine("- Use straight double quotes for speech throughout.");
+            // The same comparison showed our version running 100 % of the source's
+            // length where the human translation ran 92 %, and reading as a
+            // word-for-word trace of the English: "je uređivanje teksta omogućeno
+            // putem zasebnog dijaloškog okvira" against "se tekst uređuje u
+            // zasebnom dijalogu". Wordiness is not a separate fault from
+            // literalness; it is what literalness looks like in the target.
+            sb.AppendLine("- Write natural, idiomatic prose in the target language. Do not mirror the source's sentence structure where the target would put it differently, and do not reach for a loanword when the target has its own word.");
             sb.AppendLine("- Stay consistent with the rest of the book: the same character names, the same terms, the same level of address between the same people, and the same gender for the same speaker.");
             if (!string.IsNullOrWhiteSpace(readerNotes))
             {
@@ -101,6 +116,11 @@ namespace Nemoviz_Book_Reader
             public string CachePath;                // null = do not cache
             public int MaxChars = TextChunker.DefaultMaxChars;
             public int MaxOutputTokens = 8000;
+            /// <summary>How many times the chosen engine is asked before the
+            /// fallback is tried. Three, because a refusal is a throw of the dice
+            /// and most passages that can get through do so within two or three
+            /// asks — see the loop that uses this.</summary>
+            public int PrimaryAttempts = 3;
             /// <summary>Called after each piece: (done, total, message). Return
             /// false to stop — the pieces already done stay in the cache.</summary>
             public Func<int, int, string, bool> Progress;
@@ -132,12 +152,32 @@ namespace Nemoviz_Book_Reader
                 }
 
                 string user = BuildUserMessage(c);
-                TranslationResult r = Translator.Send(opt.Primary, null, system, user, opt.MaxOutputTokens);
-                var issues = r.Ok
-                    ? TranslationChecks.Chunk(c, r.Text, opt.TargetLang)
-                    : new List<TranslationIssue>();
 
-                bool bad = !r.Ok || HasSuspect(issues);
+                // ASK THE SAME ENGINE AGAIN BEFORE GIVING UP ON IT, because a
+                // refusal is not a verdict about the text — it is a throw of the
+                // dice. Measured 2026-08-15 on seven passages a novel had been
+                // refused over: sent four times each, FOUR OF THE SEVEN went
+                // through at least once, and the pattern was plainly random —
+                // one passed on the first two attempts and was refused on the
+                // third, another passed three times and failed the fourth.
+                //
+                // It matters for quality, not just for coverage: a piece that
+                // goes through on a second ask keeps the engine the reader chose,
+                // where dropping to the fallback trades the prose away. And a
+                // retry costs one request against a free allowance, where the
+                // fallback costs money.
+                TranslationResult r = null;
+                List<TranslationIssue> issues = null;
+                bool bad = true;
+                for (int attempt = 0; attempt < Math.Max(1, opt.PrimaryAttempts); attempt++)
+                {
+                    r = Translator.Send(opt.Primary, null, system, user, opt.MaxOutputTokens);
+                    issues = r.Ok
+                        ? TranslationChecks.Chunk(c, r.Text, opt.TargetLang)
+                        : new List<TranslationIssue>();
+                    bad = !r.Ok || HasSuspect(issues);
+                    if (!bad) { if (attempt > 0) report.RetriedOk++; break; }
+                }
 
                 // The second engine is tried for a refusal AND for a piece that
                 // came back wrong, because the remedy is the same either way and
