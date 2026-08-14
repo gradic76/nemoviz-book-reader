@@ -1794,7 +1794,14 @@ namespace Nemoviz_Book_Reader
                         Localization.T("Ocr.Ask.Title")))
                     return;
                 if (!ReadSelectedBookNow(book)) return;
-                book = GetSelectedBook() ?? book;
+                // A FRESH BookData, read back off the disk. Not the object we
+                // just wrote through, and not GetSelectedBook() either: the
+                // reading calls LoadBooks(), which rebuilds the shelf and can
+                // lose the selection, and the fallback was then the very object
+                // that was built while content.txt was still empty. What the
+                // player receives has to be the book as it now IS.
+                try { book = new BookData(book.FolderPath); }
+                catch { }
             }
 
             SelectedBook = book;
