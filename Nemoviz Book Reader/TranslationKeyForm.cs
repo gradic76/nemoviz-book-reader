@@ -54,11 +54,33 @@ namespace Nemoviz_Book_Reader
                 tb.AccessibleName = Localization.T("Dialog.TranslateKey.Field");
                 tb.Text = TranslationKeys.Get(engine.Id) ?? "";
 
+                // AZURE IS THE ONE SERVICE WITH TWO VALUES, and the extra field
+                // only appears for it. A resource made as single-service GLOBAL
+                // needs no region at all — which is what the setup guidance tells
+                // people to choose, precisely so this box can be left empty and
+                // Azure behaves like the others.
+                bool needsRegion = engine.Kind == EngineKind.AzureTranslator;
+                Label lblRegion = null;
+                TextBox tbRegion = null;
+                if (needsRegion)
+                {
+                    dlg.ClientSize = new Size(470, 250);
+                    lblRegion = new Label();
+                    lblRegion.Text = Localization.T("Dialog.TranslateKey.Region");
+                    lblRegion.SetBounds(12, 102, 446, 20);
+                    tbRegion = new TextBox();
+                    tbRegion.SetBounds(12, 124, 446, 24);
+                    tbRegion.AccessibleName = Localization.T("Dialog.TranslateKey.Region");
+                    tbRegion.Text = TranslationKeys.Get(TranslationEngines.AzureRegion) ?? "";
+                    // Everything below it moves down by the height of the pair.
+                }
+                int drop = needsRegion ? 54 : 0;
+
                 // A read-only, TABBABLE line: the whole point is that the answer to
                 // "did that work" can be reached and read. A Label would never be
                 // visited by a reader driven by Tab.
                 TextBox status = new TextBox();
-                status.SetBounds(12, 102, 446, 24);
+                status.SetBounds(12, 102 + drop, 446, 24);
                 status.ReadOnly = true;
                 status.AccessibleName = Localization.T("Dialog.TranslateKey.Status");
                 status.Text = TranslationKeys.Has(engine.Id)
@@ -68,27 +90,28 @@ namespace Nemoviz_Book_Reader
                 Button test = new Button();
                 test.Text = Localization.T("Dialog.TranslateKey.Test");
                 test.AccessibleName = test.Text;
-                test.SetBounds(12, 140, 140, 30);
+                test.SetBounds(12, 140 + drop, 140, 30);
 
                 Button remove = new Button();
                 remove.Text = Localization.T("Dialog.TranslateKey.Remove");
                 remove.AccessibleName = remove.Text;
-                remove.SetBounds(158, 140, 100, 30);
+                remove.SetBounds(158, 140 + drop, 100, 30);
                 remove.Enabled = TranslationKeys.Has(engine.Id);
 
                 Button ok = new Button();
                 ok.Text = Localization.T("Btn.OK");
-                ok.SetBounds(248, 176, 100, 30);
+                ok.SetBounds(248, 176 + drop, 100, 30);
                 ok.DialogResult = DialogResult.OK;
 
                 Button cancel = new Button();
                 cancel.Text = Localization.T("Btn.Cancel");
-                cancel.SetBounds(358, 176, 100, 30);
+                cancel.SetBounds(358, 176 + drop, 100, 30);
                 cancel.DialogResult = DialogResult.Cancel;
 
                 test.Click += (s, e) =>
                 {
                     string key = tb.Text.Trim();
+                    string regionNow = needsRegion ? tbRegion.Text.Trim() : null;
                     if (key.Length == 0)
                     {
                         status.Text = Localization.T("Settings.Translate.Test.NoKey");
@@ -105,7 +128,7 @@ namespace Nemoviz_Book_Reader
                     // and the reader cannot tell a slow answer from a dead one.
                     Thread t = new Thread(() =>
                     {
-                        TranslationResult r = Translator.TestKey(engine, key);
+                        TranslationResult r = Translator.TestKey(engine, key, regionNow);
                         try
                         {
                             dlg.BeginInvoke((MethodInvoker)delegate
@@ -139,6 +162,7 @@ namespace Nemoviz_Book_Reader
 
                 dlg.Controls.Add(lbl);
                 dlg.Controls.Add(tb);
+                if (needsRegion) { dlg.Controls.Add(lblRegion); dlg.Controls.Add(tbRegion); }
                 dlg.Controls.Add(status);
                 dlg.Controls.Add(test);
                 dlg.Controls.Add(remove);
@@ -156,6 +180,15 @@ namespace Nemoviz_Book_Reader
                 {
                     string key = tb.Text.Trim();
                     string existing = TranslationKeys.Get(engine.Id) ?? "";
+                    if (needsRegion)
+                    {
+                        string reg = tbRegion.Text.Trim();
+                        if (reg != (TranslationKeys.Get(TranslationEngines.AzureRegion) ?? ""))
+                        {
+                            TranslationKeys.Set(TranslationEngines.AzureRegion, reg.Length == 0 ? null : reg);
+                            changed = true;
+                        }
+                    }
                     if (key != existing)
                     {
                         // An empty field on OK means "no key for this service",

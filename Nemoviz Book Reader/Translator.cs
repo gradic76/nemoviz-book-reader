@@ -181,7 +181,7 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>A short call used to prove a key works. Kept tiny on purpose:
         /// it costs a fraction of a cent and answers in about a second.</summary>
-        public static TranslationResult TestKey(TranslationEngine engine, string key)
+        public static TranslationResult TestKey(TranslationEngine engine, string key, string azureRegion = null)
         {
             if (engine == null) return Fail("Settings.Translate.Test.NoEngine");
             if (string.IsNullOrWhiteSpace(key)) return Fail("Settings.Translate.Test.NoKey");
@@ -190,14 +190,15 @@ namespace Nemoviz_Book_Reader
             // authenticates but is barred from the model would otherwise pass.
             return Send(engine, key,
                         "Translate from English into Croatian. Output only the translation.",
-                        "Good evening.", 64, "en", "hr");
+                        "Good evening.", 64, "en", "hr", azureRegion);
         }
 
         /// <summary>Sends one system instruction and one piece of text, and returns
         /// what came back. The whole surface the layers above need.</summary>
         public static TranslationResult Send(TranslationEngine engine, string key,
                                              string system, string user, int maxTokens,
-                                             string sourceLang = null, string targetLang = null)
+                                             string sourceLang = null, string targetLang = null,
+                                             string azureRegion = null)
         {
             if (engine == null) return Fail("Settings.Translate.Test.NoEngine");
             if (string.IsNullOrEmpty(key)) key = TranslationKeys.Get(engine.Id);
@@ -215,7 +216,12 @@ namespace Nemoviz_Book_Reader
                       + (string.IsNullOrEmpty(sourceLang) ? "" : "&from=" + Uri.EscapeDataString(sourceLang))
                       + "&to=" + Uri.EscapeDataString(targetLang ?? "");
                 headers["Ocp-Apim-Subscription-Key"] = key;
-                string region = TranslationKeys.Get(TranslationEngines.AzureRegion);
+                // The CALLER's region wins over the stored one. Without this the
+                // Check button would test a freshly pasted key against whatever
+                // region was saved before it — the same shape of fault as a dialog
+                // rebuilding its settings from controls and losing the one value
+                // that has no control.
+                string region = azureRegion ?? TranslationKeys.Get(TranslationEngines.AzureRegion);
                 if (!string.IsNullOrEmpty(region)) headers["Ocp-Apim-Subscription-Region"] = region;
                 body = "[{\"Text\":" + Json.Str(user) + "}]";
             }

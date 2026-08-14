@@ -484,6 +484,9 @@ Settings.Translate.Test.Empty=The service answered with nothing.
 Dialog.TranslateKey.Title=API key for {0}
 Dialog.TranslateKey.Prompt=Paste the key you got from {0}. It is kept on this computer in a file of its own, in readable form, so treat it as you would a password. You can replace or remove it at any time, and you can cancel the key at the service itself.
 Dialog.TranslateKey.Field=API key
+; Azure only. Empty is correct for a single-service Global resource, which is
+; what the setup guidance tells people to make.
+Dialog.TranslateKey.Region=Region (leave empty if the resource was made as Global):
 Dialog.TranslateKey.Status=Result
 Dialog.TranslateKey.Test=Check the key
 Dialog.TranslateKey.Remove=Remove
