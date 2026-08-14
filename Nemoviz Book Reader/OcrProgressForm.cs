@@ -181,7 +181,20 @@ namespace Nemoviz_Book_Reader
                 if (perPage[i].Length > 0) sb.Append(perPage[i]).Append("\n\n");
             }
             Pages = pages;
-            return sb.ToString();
+
+            // The bar on đ goes back LAST, over the whole book at once, because
+            // the rule weighs each spelling against how often the other appears —
+            // a judgement that needs the whole text and would be worthless page by
+            // page. Safe to run after the page offsets are fixed: every correction
+            // swaps one letter for one letter, so not a single offset moves.
+            //
+            // Only for the languages that have the letter. An English book has no
+            // business being measured against Croatian spelling.
+            string text = sb.ToString();
+            string lang = (language ?? WindowsOcr.ResolvedLanguage("")).ToLowerInvariant();
+            if (lang.StartsWith("hr") || lang.StartsWith("bs") || lang.StartsWith("sr"))
+                text = OcrTidy.FixCroatianDiacritics(text);
+            return text;
         }
 
         private void Refresh1()
