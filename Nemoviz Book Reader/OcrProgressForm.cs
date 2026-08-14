@@ -188,11 +188,9 @@ namespace Nemoviz_Book_Reader
             // page. Safe to run after the page offsets are fixed: every correction
             // swaps one letter for one letter, so not a single offset moves.
             //
-            // Only for the languages that have the letter. An English book has no
-            // business being measured against Croatian spelling.
+            // Only for the languages this applies to — see SharesCroatianSpelling.
             string text = sb.ToString();
-            string lang = (language ?? WindowsOcr.ResolvedLanguage("")).ToLowerInvariant();
-            if (lang.StartsWith("hr") || lang.StartsWith("bs") || lang.StartsWith("sr"))
+            if (OcrTidy.SharesCroatianSpelling(language ?? WindowsOcr.ResolvedLanguage("")))
                 text = OcrTidy.FixCroatianDiacritics(text);
             return text;
         }

@@ -46,6 +46,36 @@ namespace Nemoviz_Book_Reader
         /// at all — measured, 13 of 17 <c>svid…</c> hits and 1 of 16 <c>svad…</c>
         /// hits were ordinary words. My first count called all of them damage,
         /// which is where the inflated "40 %" came from.</para></summary>
+        /// <summary>Whether <see cref="FixCroatianDiacritics"/> applies to a
+        /// language.
+        ///
+        /// <para><b>Croatian, Bosnian, Serbian and Montenegrin, and no others</b>
+        /// (Gordan, 2026-08-14). Those four share the orthography AND the word
+        /// forms, which is what matters here: the list of damaged spellings is
+        /// made of <i>između</i>, <i>također</i>, <i>događaj</i>, <i>rođen</i>,
+        /// and those are the same words in all four.</para>
+        ///
+        /// <para><b>Slovenian and Macedonian are excluded although Slovenian has
+        /// the letter</b>, and that is his call rather than an oversight: a shared
+        /// letter is not a shared vocabulary, and every rule here is about
+        /// particular WORDS. A Slovenian book would be judged against a list that
+        /// has nothing to do with it — the majority rule would mostly decline, but
+        /// the always-wrong list would not, and it has no business firing on a
+        /// language nobody checked it against.</para>
+        ///
+        /// <para>Serbian in CYRILLIC costs nothing to allow: the rules look for a
+        /// Latin <c>d</c> beside a Latin <c>đ</c>, and Cyrillic text contains
+        /// neither, so it is a no-op rather than a risk.</para></summary>
+        public static bool SharesCroatianSpelling(string languageTag)
+        {
+            string t = (languageTag ?? "").ToLowerInvariant();
+            return t.StartsWith("hr", StringComparison.Ordinal)    // Croatian
+                || t.StartsWith("bs", StringComparison.Ordinal)    // Bosnian
+                || t.StartsWith("sr", StringComparison.Ordinal)    // Serbian
+                || t.StartsWith("cnr", StringComparison.Ordinal)   // Montenegrin (ISO 639-3)
+                || t.StartsWith("me", StringComparison.Ordinal);   // …and the tag Windows would likelier use
+        }
+
         public static string FixCroatianDiacritics(string text)
         {
             if (string.IsNullOrEmpty(text) || text.IndexOf('d') < 0) return text;
