@@ -150,7 +150,22 @@ namespace Nemoviz_Book_Reader
                     if (SourceFor(bookFolder) == null) KeepSource(bookFolder, path);
                     return cached;
                 }
-                if (quiet || !CanOffer(path)) return null;
+                if (!CanOffer(path)) return null;
+
+                // A BULK IMPORT STILL CANNOT ASK — a hundred books must not become
+                // a hundred questions — but it must not throw the pictures away
+                // either. Gordan imported a folder of scanned PDFs and got books
+                // that were silently empty: pressing Enter on one started a
+                // reading with nothing in it. Keeping the source turns each of
+                // them into a book that can be read later, ONE AT A TIME, which is
+                // also the right shape for his reason — a folder can hold several
+                // languages, and one answer for all of them would be wrong for
+                // most.
+                if (quiet)
+                {
+                    KeepSource(bookFolder, path);
+                    return null;
+                }
 
                 using (OcrPageSource source = OcrPageSource.Open(path))
                 {
@@ -371,6 +386,17 @@ namespace Nemoviz_Book_Reader
             return WindowsOcr.Languages.Count > 1 && WasOcrRead(bookFolder);
         }
 
+        /// <summary>A book that IS pictures and has never been read — imported in
+        /// bulk, where nothing could be asked.
+        ///
+        /// <para>Unlike <see cref="CanReRead"/> this does not want a second
+        /// language: the point is to read the book at all, not to read it
+        /// differently. One recognizer is enough for that.</para></summary>
+        public static bool NeedsReading(string bookFolder)
+        {
+            return !WasOcrRead(bookFolder) && SourceFor(bookFolder) != null;
+        }
+
         /// <summary>Reads a book's pictures again, in a language the reader
         /// picks. Returns the new text, or null if they backed out.
         ///
@@ -400,7 +426,10 @@ namespace Nemoviz_Book_Reader
                     }
                     catch { }
 
-                    string question = Localization.T("Ocr.ReRead.Question",
+                    // "Re-read" would be a lie to someone who has never heard a word
+                    // of this book — a bulk import leaves it unread by design.
+                    string question = Localization.T(
+                        WasOcrRead(bookFolder) ? "Ocr.ReRead.Question" : "Ocr.Read.Question",
                         source.PageCount, Estimate(source.PageCount));
                     string language;
                     using (var ask = new OcrAskForm(question, was))

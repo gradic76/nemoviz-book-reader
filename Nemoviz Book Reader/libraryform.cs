@@ -475,7 +475,9 @@ namespace Nemoviz_Book_Reader
             menuFile.DropDownOpening += (s, e) =>
             {
                 BookData b = GetSelectedBook();
-                menuFileReRead.Enabled = b != null && OcrImport.CanReRead(b.FolderPath);
+                bool unread = b != null && OcrImport.NeedsReading(b.FolderPath);
+                menuFileReRead.Enabled = unread || (b != null && OcrImport.CanReRead(b.FolderPath));
+                menuFileReRead.Text = Localization.T(unread ? "Context.ReadOcr" : "Context.ReReadOcr");
             };
 
             menuFile.DropDownItems.Add(new ToolStripSeparator());
@@ -809,7 +811,12 @@ namespace Nemoviz_Book_Reader
                 // Only for a book that WAS read from pictures, whose pictures are
                 // still reachable, and only when there is another language to
                 // read them in.
-                ctxReRead.Visible = OcrImport.CanReRead(b.FolderPath);
+                // Two states, one command: a book that is pictures and has never
+                // been read says so plainly, because "re-read" would be a lie to
+                // someone who has never heard a word of it.
+                bool unread = OcrImport.NeedsReading(b.FolderPath);
+                ctxReRead.Visible = unread || OcrImport.CanReRead(b.FolderPath);
+                ctxReRead.Text = Localization.T(unread ? "Context.ReadOcr" : "Context.ReReadOcr");
             };
 
             // A ContextMenu is not attached the way a strip was — it is shown on

@@ -241,9 +241,18 @@ namespace Nemoviz_Book_Reader
             Say(statusText);
         }
 
+        /// <summary>Pages that must be read before a time is worth quoting.
+        ///
+        /// <para>One page is not a rate (Gordan, 2026-08-14). Pages differ — a
+        /// blank leaf is quick and a dense one is not — and an estimate built on
+        /// the first of them lurches for the rest of the job. Below this the
+        /// dialog says it is still working the time out, which is true and is
+        /// better than a number that changes under the reader.</para></summary>
+        private const int PagesBeforeEstimating = 6;
+
         private string Remaining(int d)
         {
-            if (d < 1) return Localization.T("Ocr.Progress.Estimating");
+            if (d < PagesBeforeEstimating) return Localization.T("Ocr.Progress.Estimating");
             double each = (DateTime.UtcNow - started).TotalSeconds / d;
             int left = (int)Math.Round(each * (bar.Maximum - d));
             if (left <= 5) return Localization.T("Ocr.Progress.AlmostDone");

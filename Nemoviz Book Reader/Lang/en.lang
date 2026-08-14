@@ -438,7 +438,12 @@ Ocr.Progress.Minutes=About {0} minutes left.
 Settings.Tab.Ocr=OCR and Translate
 ; An ACTION on the shelf, not a setting in Properties: a reading happens once,
 ; from the first page to the last, and either it was right or it is done again.
+; A book that IS pictures and has never been read — imported in bulk, where
+; nothing could be asked. "Re-read" would be a lie to someone who has never
+; heard a word of it.
+Context.ReadOcr=Read the pictures in this book
 Context.ReReadOcr=Re-read in a different language
+Ocr.Read.Question=This book is {0} pages of pictures and has not been read yet. Reading it takes {1}.
 Ocr.ReRead.Question=This book was read from {0} pages of pictures. Reading it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
 Ocr.ReRead.Done=The book has been read again and replaced.
 ; For a book read before Nemoviz started keeping the pictures, or one whose
