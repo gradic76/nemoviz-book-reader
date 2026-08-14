@@ -2216,6 +2216,11 @@ namespace Nemoviz_Book_Reader
             catch { return false; }
 
             b.TextCleaned = true;
+            // The count goes with the text. Left at its old value, Save writes
+            // the ZERO that import recorded when this book had no text, and the
+            // reading estimate stays wrong until something else happens to
+            // recompute it.
+            b.TextChars = (doc.Text ?? "").Length;
             b.TextLanguage = LanguageDetector.Resolve(doc.Language, doc.Text);
             b.SetTextPages(doc.Pages);
             b.Save();
