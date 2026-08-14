@@ -4591,8 +4591,21 @@ namespace Nemoviz_Book_Reader
             tbReadingSurface.BackColor = NewPlayerSkin.Glass;
             tbReadingSurface.ForeColor = NewPlayerSkin.Lit;
             tbReadingSurface.BorderStyle = BorderStyle.FixedSingle;
-            tbReadingSurface.TabStop = true;
-            tbReadingSurface.TabIndex = 900;
+            // OUT OF THE TAB ORDER, like the info box one screen above — and for
+            // the same reason (Gordan, 2026-08-14, second report of it).
+            //
+            // This control is PARKED BELOW THE CLIENT AREA; it is never on the
+            // panel a reader is looking at. As a tab stop it put an invisible
+            // rich edit full of the book's text into the ring, which is what he
+            // first described as "some not very readable rich edit that is not
+            // the infobox". It only appears for TEXT books, which is why the tab
+            // ring I dumped from a running player never showed it — that player
+            // had an audiobook open.
+            //
+            // TabStop only governs the Tab key. The reading window still borrows
+            // this control and focuses it directly, so braille and the caret are
+            // untouched.
+            tbReadingSurface.TabStop = false;
             tbReadingSurface.AccessibleName = Localization.T("Player.ReadingSurface.Accessible");
             // A focused multiline TextBox selects everything, which a reader
             // announces as a selection and braille shows as a solid block. The
