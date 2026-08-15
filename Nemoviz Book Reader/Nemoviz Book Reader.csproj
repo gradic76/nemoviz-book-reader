@@ -203,6 +203,7 @@
     <Compile Include="EpubOverlayImporter.cs" />
     <Compile Include="EpubParser.cs" />
     <Compile Include="OpticalDrive.cs" />
+    <Compile Include="GoogleCloudVoices.cs" />
     <Compile Include="OcrAskForm.cs" />
     <Compile Include="OcrImport.cs" />
     <Compile Include="OcrLanguageForm.cs" />

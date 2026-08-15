@@ -435,6 +435,8 @@ Ocr.Progress.Minutes=About {0} minutes left.
 ; Settings. "Automatic" is the right answer nearly always: recognition goes by
 ; SCRIPT, not by language, so one Latin recognizer reads every Latin language.
 Settings.Tab.Advanced=Advanced
+Google.Cred.NotJson=That file is not readable as JSON, so it is not the one Google gave you. The file you want was downloaded when you created the service account, and its name ends in .json.
+Google.Cred.NotServiceAccount=That JSON is readable but it is not a service account — it has no account address and no private key in it. Google offers several kinds of credential; the one for these voices is the service account key.
 ; An ACTION on the shelf, not a setting in Properties: a reading happens once,
 ; from the first page to the last, and either it was right or it is done again.
 ; A book that IS pictures and has never been read — imported in bulk, where
