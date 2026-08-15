@@ -3426,9 +3426,46 @@ folder is gone, or the last book was already finished.
 ### Editions: Lite vs Pro (Gordan, Session 15)
 
 NBR ships in two editions. **The player binary is the same** — Pro is simply
-Lite plus a set of add-on features that depend on **external resources and
-open decisions about which of them to use**. The distinction is about what a
-feature *requires*, not about a different app.
+Lite plus a set of add-on features. The distinction is about what a feature
+*requires*, not about a different app.
+
+> ### THE LINE MOVED — 2026-08-15, and this section's own test was replaced
+>
+> The old test was *"does this need an external service"*. Gordan's is **"does
+> this change what the user has to install"**, and it is better because it is
+> the only one the reader can see: *"Ovo sve što smo dosad napravili nam
+> faktički nije povećalo ni installer niti traženi prostor pa što ne bi ostalo
+> ovdje?"*
+>
+> - **Lite** — the whole player as built, **plus translation, plus cloud
+>   voices, plus OCR**. All three cost **zero installer bytes**: translation and
+>   cloud TTS are ~100 lines of HTTP over the hand-rolled JSON parser, and
+>   Windows OCR is reflection into WinRT with no SDK and nothing vendored (see
+>   the section immediately below, which proves it).
+> - **Pro** — **STT / ASR** (a model of hundreds of MB plus a runtime) and
+>   **BRLTTY / BrlAPI** (a service install needing administrator rights, plus a
+>   USB driver swap that can take the display away from NVDA's own driver).
+>   Those two change the user's machine; nothing else does.
+>
+> **The wrinkle, and it argues for Help rather than against the line:** ease of
+> entry and quality are inversely arranged. Azure Speech takes a plain key and
+> already has portal-free ARM provisioning (§ memory), but its Croatian voices
+> were judged nothing special; Google's Chirp 3 HD, accepted by ear
+> 2026-08-15, **takes no API key at all** — service account and a downloaded
+> JSON. Translation's Help says "paste a key"; cloud voices' Help must say much
+> more.
+>
+> **The price, accepted knowingly: Lite ships later.** Cloud voices need a
+> backend, service-account auth, key storage, chunking at the 5000-byte request
+> ceiling, and the untested question of an audible seam between requests.
+> Agreed placement: **the end of the Lite queue**, behind Help and behind
+> everything already reported from use.
+>
+> **The workflow rule below still stands, but its list is now longer** — Lite
+> items now include translation, cloud voices and OCR; only STT and BRLTTY are
+> held back.
+
+Superseded, kept as the record of what the split used to mean:
 
 - **Lite** — everything self-contained: the whole player as built so far
   (audio + text + DAISY + M4B playback, all the file-format parsers, sound
@@ -3596,7 +3633,60 @@ with no JBIG2, and they read perfectly. So the split is:
 | ordinary scan (DCT/JPX/Flate/CCITT) | yes | works |
 | mass-digitized book (JPX + **JBIG2** text mask) | background only | **finds nothing** |
 
-**Consequences, and they are design-level:**
+### CORRECTION, 2026-08-15: MOST OF THESE BOOKS NEVER NEED THE IMAGE AT ALL
+
+Gordan asked the question this whole section failed to ask — *"ako taj pdf ima
+text layer, zašto ga uopće provlačimo kroz OCR?"* — and it lands squarely.
+Everything above measured **OCR of our own render**. Nobody asked whether the
+same file carries a text layer, which a mass-digitized book usually does,
+because searchability is the point of digitizing it.
+
+**Measured through `PdfPig`, using exactly what `PdfParser.cs` does**
+(`ContentOrderTextExtractor`, falling back to `page.Text`), on three JBIG2 books
+from three different scanning centres:
+
+| book | scanner | chars | pages with text |
+|---|---|---|---|
+| `meditationsofmar00marc` | scribe3 Boston | **320 048** | 213 / 256 |
+| `principlesofpsyc01jame` | scribe6 Boston | **1 679 249** | 701 / 716 |
+| `onliberty00millgoog` | **google** | 2 970 | **1 / 227** |
+
+`meditationsofmar00marc` **is the very file this section measured at "0 words on
+32 of 32 sampled pages"**. It yields 320 000 characters of real text — page 40
+reads *"appear with modesty, obligingness, and dignity of behaviour"*. The
+rasterizer finding is still true and still irrelevant to it: **NBR already reads
+this book correctly today**, because `PdfParser` runs before OCR is ever offered.
+
+**So PDFium and the hand-written JBIG2 decoder are OFF the plan for the common
+case.** They come back only for a scan with no text layer — which the Google-
+scanned item is, so the case is real but much narrower than "mass-digitized".
+
+**`/Font` per page is the cheap tell**, and it agrees: 230, 231 and 723 against
+256, 227 and 716 pages, where a genuinely image-only PDF has none at all.
+
+**AND IT EXPOSED A DEFECT — `OcrImport.IsEmptyTextBook` uses an ABSOLUTE
+threshold** (`< 200` characters). The Google scan yields **2 970**, so it passes
+as a real text book: 227 pages of unreadable scan import silently, OCR is never
+offered, and to someone who cannot see the screen the book simply stops after
+twenty seconds. **The measured distribution says the test must be PER PAGE:**
+
+| | chars/page |
+|---|---|
+| genuinely image-only (Gordan's 7 own PDFs) | **0** |
+| broken text layer (Google scan) | **13** |
+| real text layer (archive.org scribe) | **1 250 – 2 345** |
+
+Two orders of magnitude of clear air, so anything in 50–500 chars/page separates
+them; this is not a fine judgement. The page count is already in hand —
+`PdfParser` fills `doc.Pages`. Keep the absolute test for a book with no pages.
+**Not implemented — Gordan's call.**
+
+**Also seen, and already solved elsewhere:** the extracted text carries running
+heads with page numbers glued to the first line (*"14 MEDITATIONS."*, *"20
+PSYCHOLOGY."*) — exactly what §10g's `RunningHeads.Strip` and `OcrTidy` were
+built for. Whether the PDF text path runs them is unchecked.
+
+**Consequences of the rasterizer limit, for the narrower case that remains:**
 - **How common is it? Measured on Gordan's own corpus: 2 of 109 local PDFs, and
   both are the two I downloaded today.** Not one of his own ~107 files uses JBIG2
   — they are `/JPXDecode` ×27, `/DCTDecode` ×23, `/CCITTFaxDecode` ×2. **JBIG2 is
@@ -3858,8 +3948,9 @@ no translation engine, so it does not belong in Pro.
   pattern — read-only, tabbable, Escape closes. That is how NBR already shows
   prose to a reader, and it adds nothing to any window that is already crowded.
 **Workflow rule:** until Lite is finished, when reporting "where we stopped"
-or "what's left", list **Lite items only**. Treat STT/OCR/translate as a
-separate Pro backlog — mention them only when explicitly asked about Pro.
+or "what's left", list **Lite items only**. **Since 2026-08-15 that includes
+translation, cloud voices and OCR**; the separate Pro backlog is now just
+**STT and BRLTTY**, mentioned only when explicitly asked about Pro.
 See memory `project-lite-pro-editions`.
 
 **Intended sequence going forward (Gordan, Session 10):**

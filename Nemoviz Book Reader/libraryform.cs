@@ -1812,9 +1812,28 @@ namespace Nemoviz_Book_Reader
             // that is simply a text book with no text — those predate the
             // pictures being kept, so nothing marks them and only the symptom
             // gives them away. Both are caught, because both play silence.
-            if (OcrImport.NeedsReading(book.FolderPath) || OcrImport.IsEmptyTextBook(book.FolderPath))
+            // A THIRD way in, added 2026-08-15: a book whose pages are almost all
+            // empty. A mass-digitized scan carries an invisible OCR text layer,
+            // and a BROKEN one still yields a few thousand characters — past the
+            // absolute test above, so such a book used to import as real and read
+            // for twenty seconds. It gets its own question because it is a
+            // different state and the old wording would be a lie: this book does
+            // have some text, it just has almost none of it.
+            int pagesWithText, pageCount;
+            bool pictures = OcrImport.NeedsReading(book.FolderPath) || OcrImport.IsEmptyTextBook(book.FolderPath);
+            bool sparse = OcrImport.IsSparseTextBook(book, out pagesWithText, out pageCount);
+
+            if (pictures || sparse)
             {
-                if (!MessageForm.ShowConfirm(this, Localization.T("Ocr.Unread.Message"),
+                // WHICH question, and the order is not cosmetic. A plain scan
+                // with no text layer at all measures as sparse TOO — Gordan's
+                // own 252-page book comes out 0 of 252 — and telling him its
+                // "text layer is broken" would name a cause it does not have.
+                // The broken-layer wording is only honest for a book that has
+                // some text and almost none of it.
+                if (!MessageForm.ShowConfirm(this,
+                        pictures ? Localization.T("Ocr.Unread.Message")
+                                 : Localization.T("Ocr.Sparse.Message", pagesWithText, pageCount),
                         Localization.T("Ocr.Ask.Title")))
                     return;
                 if (!ReadSelectedBookNow(book)) return;

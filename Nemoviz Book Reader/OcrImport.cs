@@ -424,6 +424,99 @@ namespace Nemoviz_Book_Reader
             catch { return false; }
         }
 
+        /// <summary>A book whose pages are almost all EMPTY — a scan whose text
+        /// layer is broken, as against one that has none at all.
+        ///
+        /// <para><b>Why the absolute threshold above cannot do this</b>
+        /// (measured 2026-08-15). A mass-digitized PDF usually carries an
+        /// invisible OCR text layer, and when that layer is broken it still
+        /// yields a few thousand characters of fragments — comfortably past
+        /// <see cref="IsEmptyTextBook"/>'s 200. Measured on a Google-scanned
+        /// book: <b>2 970 characters over 227 pages</b>. So it imported as a
+        /// real text book, OCR was never offered, and the reading stopped after
+        /// twenty seconds with nothing said — the silent failure this whole
+        /// area exists to prevent.</para>
+        ///
+        /// <para><b>The test is the SHARE OF PAGES that carry any text, not the
+        /// average, and Gordan is why.</b> He objected to a chars-per-page
+        /// threshold with the case that breaks it: a photo monograph whose
+        /// every caption is a name, a date and a place is genuinely sparse and
+        /// genuinely fine. An average cannot tell it from a broken layer.
+        /// A share can — the monograph has its caption on MOST pages, a broken
+        /// layer has nothing on nearly all of them.</para>
+        ///
+        /// <para><b>Measured, and the separation is not a fine judgement:</b>
+        /// broken or absent layer 0,0–0,4 % of pages (a Google scan and all
+        /// seven of Gordan's own image-only PDFs), real layer 83–98 %
+        /// (archive.org's own scans). The per-page bar barely matters either —
+        /// at 1, 20 and 100 characters the shares come out 89,5 / 85,5 / 83,2
+        /// on the same book, because a page either has its text or it has
+        /// none.</para>
+        ///
+        /// <para>It <b>offers</b>, it does not decide: the caller asks. A book
+        /// whose layer covers only its first thirty pages would land near the
+        /// threshold, and the reader knows what their book is where no rule
+        /// does.</para></summary>
+        public static bool IsSparseTextBook(BookData book, out int withText, out int pages)
+        {
+            withText = 0;
+            pages = 0;
+            try
+            {
+                if (book == null || !book.IsTextBook) return false;
+                var marks = book.TextPages;
+                // Too few pages to read a distribution off. A short document is
+                // the absolute test's business, not this one's.
+                if (marks == null || marks.Count < 5) return false;
+
+                string p = Path.Combine(book.FolderPath, "content.txt");
+                if (!File.Exists(p)) return false;
+
+                // Cheap pre-filter, no read at all: a book carrying real text on
+                // its pages is not in question, and slicing a big one costs.
+                // It may only ever say "fine" — it must never say "sparse", or
+                // it would be the average test again under another name.
+                long bytes = new FileInfo(p).Length;
+                if (bytes / Math.Max(1, marks.Count) > BytesPerPageNotInQuestion) return false;
+
+                string text = File.ReadAllText(p, System.Text.Encoding.UTF8);
+                pages = marks.Count;
+                for (int i = 0; i < marks.Count; i++)
+                {
+                    int start = Clamp(marks[i].Offset, 0, text.Length);
+                    int end = Clamp(i + 1 < marks.Count ? marks[i + 1].Offset : text.Length,
+                                    start, text.Length);
+                    if (HasWords(text, start, end)) withText++;
+                }
+                return withText * 100 < pages * SparsePagesPercent;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>A page counts as carrying text if it has a single letter or
+        /// digit. Deliberately the lowest bar there is — see the measurement in
+        /// <see cref="IsSparseTextBook"/>: raising it changes almost nothing,
+        /// and a monograph's caption must count.</summary>
+        private static bool HasWords(string s, int start, int end)
+        {
+            for (int i = start; i < end; i++)
+                if (char.IsLetterOrDigit(s[i])) return true;
+            return false;
+        }
+
+        private static int Clamp(int v, int lo, int hi)
+        {
+            return v < lo ? lo : (v > hi ? hi : v);
+        }
+
+        /// <summary>Below this many bytes per page the share is worth computing.
+        /// Generous on purpose: it only skips work, never reaches a verdict.</summary>
+        private const int BytesPerPageNotInQuestion = 400;
+
+        /// <summary>Fewer than this share of pages carrying text and the book is
+        /// worth asking about. 0,4 % below it and 83 % above it, measured.</summary>
+        private const int SparsePagesPercent = 20;
+
         /// <summary>Reads a book's pictures again, in a language the reader
         /// picks. Returns the new text, or null if they backed out.
         ///
