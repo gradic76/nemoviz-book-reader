@@ -119,6 +119,31 @@ namespace Nemoviz_Book_Reader
             Controls.Add(chainNote);
             y += 40;
 
+            // THE STANDING NOTE IS SHOWN, NOT MERELY APPLIED. A rule that acts on
+            // every book while being visible nowhere is the invisible dependency
+            // this project keeps refusing: the reader would see a spelling or a
+            // register they did not ask for here and have no way to learn where it
+            // came from. Read-only and tabbable, so it is reachable.
+            string standing = settings != null ? settings.TranslationNotes : "";
+            if (!string.IsNullOrWhiteSpace(standing))
+            {
+                var std = new TextBox
+                {
+                    Multiline = true,
+                    ReadOnly = true,
+                    BorderStyle = BorderStyle.None,
+                    BackColor = SystemColors.Control,
+                    Location = new Point(12, y),
+                    Size = new Size(476, 30),
+                    TabIndex = 8,
+                    Text = Localization.T("Translate.Ask.Standing", standing.Replace("\r\n", " ").Replace("\n", " "))
+                };
+                std.AccessibleName = std.Text;
+                Controls.Add(std);
+                y += 36;
+                Height += 36;
+            }
+
             var lblNotes = new Label
             {
                 Text = Localization.T("Translate.Ask.Notes"),

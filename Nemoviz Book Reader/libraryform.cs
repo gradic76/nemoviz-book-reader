@@ -2268,7 +2268,10 @@ namespace Nemoviz_Book_Reader
                     Chain = ask.Chain,
                     SourceLang = ask.SourceLanguage,
                     TargetLang = ask.TargetLanguage,
-                    ReaderNotes = ask.Notes,
+                    // The standing note first, then this book's — a habit of the
+                    // reader, then an exception for the book, in that order so the
+                    // more specific one is read last.
+                    ReaderNotes = JoinNotes(appSettings != null ? appSettings.TranslationNotes : null, ask.Notes),
                     // Beside the SOURCE book, so stopping and starting again costs
                     // nothing even after the window has been closed.
                     CachePath = System.IO.Path.Combine(book.FolderPath, "translation.cache"),
@@ -2302,6 +2305,16 @@ namespace Nemoviz_Book_Reader
                     ? Localization.T("Translate.DoneLeft", report.Chunks, report.LeftInOriginal)
                     : Localization.T("Translate.Done", report.Chunks),
                 Localization.T("Translate.Ask.Title"));
+        }
+
+        /// <summary>The standing note and the book's own, in that order.</summary>
+        private static string JoinNotes(string standing, string book)
+        {
+            standing = (standing ?? "").Trim();
+            book = (book ?? "").Trim();
+            if (standing.Length == 0) return book;
+            if (book.Length == 0) return standing;
+            return standing + Environment.NewLine + book;
         }
 
         /// <summary>Writes the translation out as a book of its own. Returns the

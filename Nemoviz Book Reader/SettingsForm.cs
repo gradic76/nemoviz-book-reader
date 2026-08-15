@@ -482,6 +482,8 @@ namespace Nemoviz_Book_Reader
                 int i = cmbOcrLanguage.SelectedIndex;
                 if (i >= 0 && i < ocrTags.Count) appSettings.SetOcrLanguage(ocrTags[i]);
             }
+
+            if (tbTranslateNotes != null) appSettings.SetTranslationNotes(tbTranslateNotes.Text);
             // Only when the group was reachable: a disabled box reads as
             // unchecked, and saving that would quietly clear a setting made on a
             // machine that did have a drive.
@@ -610,11 +612,43 @@ namespace Nemoviz_Book_Reader
                     RefillTranslationEngines();     // the row has to stop lying at once
             };
 
+            // THE READER'S STANDING INSTRUCTION TO THE TRANSLATOR, and it belongs
+            // here rather than beside a book because some of what one wants to say
+            // is a habit rather than a property of the book. British spelling is the
+            // measured case: one sentence flips all six markers on every language
+            // model, and it does not change from one book to the next. Same shape as
+            // the language-to-voice rule — the global rule lives in Settings, the
+            // exception beside the book.
+            //
+            // FREE TEXT AND NOT A SET OF TICK BOXES, and Gordan's reasoning is the
+            // one that settles it: our own standing rules were written from Croatian,
+            // and a fixed set of questions would harden that bias — someone
+            // translating into Finnish would be offered our questions and not
+            // theirs. It also reaches the model as prose, so it can be written in
+            // any language the reader thinks in.
+            Label lblNotes = new Label();
+            lblNotes.Text = Localization.T("Settings.Translate.Notes");
+            lblNotes.Location = new Point(14, 92);
+            lblNotes.Size = new Size(470, 20);
+
+            tbTranslateNotes = new TextBox();
+            tbTranslateNotes.Multiline = true;
+            tbTranslateNotes.ScrollBars = ScrollBars.Vertical;
+            tbTranslateNotes.SetBounds(14, 114, 470, 48);
+            tbTranslateNotes.TabIndex = 2;
+            tbTranslateNotes.AccessibleName = Localization.T("Settings.Translate.Notes");
+            tbTranslateNotes.Text = appSettings != null ? appSettings.TranslationNotes : "";
+
+            box.Size = new Size(500, 176);
             box.Controls.Add(lbl);
             box.Controls.Add(cmbTranslateEngine);
             box.Controls.Add(key);
+            box.Controls.Add(lblNotes);
+            box.Controls.Add(tbTranslateNotes);
             return box;
         }
+
+        private TextBox tbTranslateNotes;
 
         /// <summary>Rebuilds the service list so each row carries its current
         /// state, keeping whichever service was selected.</summary>

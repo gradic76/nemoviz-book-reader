@@ -478,6 +478,9 @@ Settings.Translate.Engine.Azure=Azure Translator
 ; key is the reader's own account with the service, that Nemoviz never sees a
 ; bill, roughly what a book costs, and that the key is stored in readable form.
 Settings.Translate.Hint=Nemoviz can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; Nemoviz never handles payment. Setting this up is not part of reading a book, and nothing here is needed unless you want translation. This text is not finished yet.
+; The standing note. Free text on purpose: a fixed set of questions would be
+; OUR questions, and ours were written from Croatian.
+Settings.Translate.Notes=Anything the translator should know about every book — for example which spelling you prefer:
 Settings.Translate.Test.NoEngine=No translation service is selected.
 Settings.Translate.Test.NoKey=There is no key to check.
 Settings.Translate.Test.NoNetwork=Nemoviz could not reach the service.
@@ -523,7 +526,8 @@ Translate.Ask.Engine=Translation service:
 ; which translation they would rather read.
 Translate.Ask.ChainNote=If a passage is refused, Nemoviz tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
 Translate.Ask.NoEngine=No service has a key yet
-Translate.Ask.Notes=Anything the translator should know (optional) — for example that the narrator is a woman, or how two characters address each other:
+Translate.Ask.Standing=Your standing note is applied to this book as well: {0}
+Translate.Ask.Notes=Anything the translator should know about THIS book (optional) — for example that the narrator is a woman, or how two characters address each other:
 Translate.Ask.Start=Translate
 ; The notice that goes INTO the book around a passage the last-resort service had
 ; to rescue. It is not a courtesy: that service sets the narrator's gender and the

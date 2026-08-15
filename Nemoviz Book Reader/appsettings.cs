@@ -164,6 +164,24 @@ namespace Nemoviz_Book_Reader
         /// does not change from book to book the way the source language does.</summary>
         public string LastTranslationTarget { get; private set; }
 
+        /// <summary>What the reader wants said to the translator about EVERY book.
+        ///
+        /// <para>Some of what one wants to tell a translator is not a property of
+        /// the book but a habit of the reader — British spelling rather than
+        /// American is the measured case, and it does not change from one book to
+        /// the next. Same shape as the language-to-voice rule: the standing rule
+        /// lives here, the exception beside the book, and the two are joined when a
+        /// translation starts.</para>
+        ///
+        /// <para><b>Free text and deliberately not a set of choices.</b> NBR's own
+        /// standing instructions were written from Croatian — inflect names, hold
+        /// the level of address, hold the speaker's gender — and a fixed set of
+        /// questions would harden that bias into the interface, offering our
+        /// questions to someone translating into a language where they do not
+        /// arise. It reaches the model as prose, so it may be written in whatever
+        /// language the reader thinks in.</para></summary>
+        public string TranslationNotes { get; private set; }
+
         public AppSettings()
         {
             ini = new IniFile(SettingsPath);
@@ -193,6 +211,7 @@ namespace Nemoviz_Book_Reader
             AudioDevice = ini.Read("Audio", "Device", "");
             OcrLanguage = ini.Read("Ocr", "Language", "");
             LastTranslationTarget = ini.Read("Translate", "Target", "");
+            TranslationNotes = ini.Read("Translate", "Notes", "");
             KeepDeviceAlive = ini.Read("Audio", "KeepAlive", "1") == "1";
             UseOpticalDrive = ini.Read("Audio", "UseOpticalDrive", "0") == "1";
             OpticalDriveLetter = ini.Read("Audio", "OpticalDrive", "");
@@ -460,6 +479,12 @@ namespace Nemoviz_Book_Reader
         {
             LastTranslationTarget = tag ?? "";
             ini.Write("Translate", "Target", LastTranslationTarget);
+        }
+
+        public void SetTranslationNotes(string text)
+        {
+            TranslationNotes = (text ?? "").Trim();
+            ini.Write("Translate", "Notes", TranslationNotes);
         }
 
         public void SetKeepDeviceAlive(bool on)
