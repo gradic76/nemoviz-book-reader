@@ -2247,22 +2247,42 @@ namespace Nemoviz_Book_Reader
         /// place.</para></summary>
         /// <summary>A book's chapter starts, sorted and without repeats.
         ///
-        /// <para>Only the TOP level. A book with headings four deep would
-        /// otherwise offer a boundary every few paragraphs, and a rule meant to
-        /// keep chapters whole would end up cutting the book at every
-        /// sub-heading — the opposite of what it is for.</para></summary>
+        /// <para>The SHALLOWEST level that actually looks like a chapter list,
+        /// which is not always the shallowest level there is. A book four
+        /// headings deep would otherwise offer a boundary every few paragraphs,
+        /// and a rule meant to keep chapters whole would cut at every
+        /// sub-heading — the opposite of what it is for.</para>
+        ///
+        /// <para><b>"At least two, past the beginning" is the test, and a real
+        /// book taught it.</b> Measured 2026-08-15: <i>Harvest Home</i> has nine
+        /// level-1 headings and the rule works — seven of them fall inside the
+        /// body and all seven land exactly on a paragraph start. <i>Lady</i> has
+        /// <b>one</b>, at offset 0, and thirty-seven chapters a level below: the
+        /// single top-level heading is the BOOK'S OWN TITLE, not a structure. On
+        /// the first version of this rule that book came out with no chapter
+        /// boundaries whatever, so the whole widow-and-orphan pass quietly did
+        /// nothing to it. One heading is a name; two are a list.</para></summary>
         private static List<int> ChapterOffsets(BookData book)
         {
             var list = new List<int>();
             if (book == null || book.TextHeadings == null) return list;
 
-            int top = int.MaxValue;
-            foreach (var h in book.TextHeadings) if (h.Level < top) top = h.Level;
-
+            // Levels present, shallowest first.
+            var levels = new List<int>();
             foreach (var h in book.TextHeadings)
-                if (h.Level == top && h.Offset > 0 && !list.Contains(h.Offset))
-                    list.Add(h.Offset);
-            list.Sort();
+                if (!levels.Contains(h.Level)) levels.Add(h.Level);
+            levels.Sort();
+
+            foreach (int level in levels)
+            {
+                var found = new List<int>();
+                foreach (var h in book.TextHeadings)
+                    if (h.Level == level && h.Offset > 0 && !found.Contains(h.Offset))
+                        found.Add(h.Offset);
+                if (found.Count < 2) continue;      // a name, not a chapter list
+                found.Sort();
+                return found;
+            }
             return list;
         }
 
