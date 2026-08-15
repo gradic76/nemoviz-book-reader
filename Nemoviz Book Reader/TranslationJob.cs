@@ -214,6 +214,7 @@ namespace Nemoviz_Book_Reader
             report.Chunks = chunks.Count;
 
             StartLog(opt, bookText.Length, parts, chunks.Count);
+            var chainState = new ChainState(opt);
 
             var cache = TranslationCache.Open(opt.CachePath);
             string system = BuildSystemPrompt(opt.SourceLang, opt.TargetLang, opt.ReaderNotes);
@@ -231,7 +232,7 @@ namespace Nemoviz_Book_Reader
                 }
 
                 string user = BuildUserMessage(c);
-                Piece piece = TranslateOne(c, user, system, opt, report);
+                Piece piece = TranslateOne(c, user, system, opt, report, chainState);
                 if (piece.Text != null) cache.Put(c.Start, c.Text, piece.Text);
                 else { piece.Text = c.Text; }        // left as it was written
 
@@ -277,17 +278,97 @@ namespace Nemoviz_Book_Reader
         /// <para>It matters for quality and not only for coverage: a piece that goes
         /// through on a second ask keeps the engine the reader chose, where moving
         /// down the chain trades the prose away.</para></summary>
+        /// <summary>What the chain has learned about itself as the job runs: which
+        /// engine the reader actually chose, and which have stopped answering.
+        ///
+        /// <para><b>An engine that has refused three pieces running is not having
+        /// a bad minute, it is out</b> — a day's quota, a dead key, a service
+        /// down. Reported from use, 2026-08-15: Gordan's second novel logged
+        /// <c>deepseek, 4 asks</c> on every single piece, meaning three Gemini
+        /// attempts thrown away each time because his Gemini allowance had gone
+        /// on the book before. Three quarters of every request wasted, a hundred
+        /// and twelve times, and the run went from seventy minutes to an
+        /// estimated four hundred.</para>
+        ///
+        /// <para>Standing an engine down is for THIS JOB only. Nothing is stored,
+        /// so tomorrow's quota is tried afresh — the state is a fact about the
+        /// last few minutes, not a verdict.</para></summary>
+        private sealed class ChainState
+        {
+            public const int StandDownAfter = 3;
+
+            private readonly Dictionary<string, int> misses =
+                new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            private readonly HashSet<string> down =
+                new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            private readonly string primaryId;
+
+            public ChainState(Options opt)
+            {
+                primaryId = opt != null && opt.Chain != null && opt.Chain.Count > 0
+                    ? opt.Chain[0].Id : "";
+            }
+
+            /// <summary><b>The engine the reader asked for</b>, which is not the
+            /// same as "first in the chain" once anything can be stood down — and
+            /// that distinction is load-bearing. The in-book last-resort notice
+            /// exists to say "you did not choose this"; keyed on position it
+            /// would fall silent exactly when everything above Azure had dropped
+            /// out and Azure was carrying the book on its own, which is the one
+            /// case the notice is for.</summary>
+            public bool IsPrimary(TranslationEngine e)
+            {
+                return e != null && string.Equals(e.Id, primaryId, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public bool IsDown(TranslationEngine e)
+            {
+                return e != null && down.Contains(e.Id);
+            }
+
+            public void Worked(TranslationEngine e)
+            {
+                if (e != null) misses.Remove(e.Id);
+            }
+
+            /// <summary>Records a piece this engine would not take. Returns true
+            /// the moment it is stood down, so the caller can say so once.</summary>
+            public bool Missed(TranslationEngine e, int enginesStillUp)
+            {
+                if (e == null || down.Contains(e.Id)) return false;
+                // Never the last one standing. A chain with nothing left in it
+                // does not fail faster, it just fails.
+                if (enginesStillUp <= 1) return false;
+
+                int n;
+                misses.TryGetValue(e.Id, out n);
+                misses[e.Id] = ++n;
+                if (n < StandDownAfter) return false;
+                down.Add(e.Id);
+                return true;
+            }
+
+            public int StillUp(List<TranslationEngine> chain)
+            {
+                int n = 0;
+                foreach (var e in chain) if (!down.Contains(e.Id)) n++;
+                return n;
+            }
+        }
+
         private static Piece TranslateOne(TextChunk c, string user, string system,
-                                          Options opt, TranslationReport report)
+                                          Options opt, TranslationReport report, ChainState state)
         {
             TranslationResult last = null;
             List<TranslationIssue> lastIssues = null;
             var clock = System.Diagnostics.Stopwatch.StartNew();
             int asks = 0;
+            var refused = new List<TranslationEngine>();
 
             for (int stop = 0; stop < opt.Chain.Count; stop++)
             {
                 TranslationEngine engine = opt.Chain[stop];
+                if (state.IsDown(engine)) continue;
                 int attempts = Math.Max(1, engine.Attempts);
 
                 for (int attempt = 0; attempt < attempts; attempt++)
@@ -300,7 +381,13 @@ namespace Nemoviz_Book_Reader
                         : new List<TranslationIssue>();
                     last = r; lastIssues = issues;
 
-                    if (!r.Ok || HasSuspect(issues)) continue;
+                    if (!r.Ok || HasSuspect(issues))
+                    {
+                        // Only the LAST attempt counts as this engine refusing the
+                        // piece — the earlier ones are the retries it is allowed.
+                        if (attempt == attempts - 1 && !refused.Contains(engine)) refused.Add(engine);
+                        continue;
+                    }
 
                     if (stop == 0 && attempt > 0) report.RetriedOk++;
                     if (stop > 0)
@@ -329,10 +416,18 @@ namespace Nemoviz_Book_Reader
                     // consecutive-merge would wrap the entire book in a warning
                     // about a decision the reader made themselves.
                     clock.Stop();
+                    // This one answered; anything above it that would not, on this
+                    // piece, has its count moved on.
+                    state.Worked(engine);
+                    foreach (var miss in refused)
+                        if (state.Missed(miss, state.StillUp(opt.Chain)))
+                            Log(opt, string.Format(CultureInfo.InvariantCulture,
+                                "  stood down   {0} — {1} pieces in a row it would not take",
+                                miss.DisplayName, ChainState.StandDownAfter));
                     return new Piece
                     {
                         Text = r.Text,
-                        LastResort = engine.LastResort && stop > 0,
+                        LastResort = engine.LastResort && !state.IsPrimary(engine),
                         Engine = engine.Id,
                         Asks = asks,
                         Ms = clock.ElapsedMilliseconds
@@ -344,6 +439,12 @@ namespace Nemoviz_Book_Reader
             // the reader has to be able to find out that these paragraphs are in the
             // language the book came in.
             clock.Stop();
+            // Nobody took it, so every engine that was asked refused it.
+            foreach (var miss in refused)
+                if (state.Missed(miss, state.StillUp(opt.Chain)))
+                    Log(opt, string.Format(CultureInfo.InvariantCulture,
+                        "  stood down   {0} — {1} pieces in a row it would not take",
+                        miss.DisplayName, ChainState.StandDownAfter));
             report.LeftInOriginal++;
             report.Issues.Add(new TranslationIssue
             {
