@@ -66,6 +66,28 @@ namespace Nemoviz_Book_Reader
     /// need this nor could use it, and a synthesiser that is free and faster than
     /// listening has nothing worth storing. It is the cloud voices that are paid
     /// for once and should not be paid for twice.</para></summary>
+    /// <summary>A backend that can hand back a sentence as audio instead of
+    /// speaking it.
+    ///
+    /// <para>What an export needs, and what a local voice could not do until now:
+    /// <c>Sapi5Backend</c> speaks straight to the sound card. The cloud voices
+    /// never needed it — everything they make passes through a buffer
+    /// anyway.</para>
+    ///
+    /// <para><b>Always at the voice's own speed, volume and pitch.</b> The first
+    /// two are the speech cache's rule, since they belong to the listening and
+    /// not to the audio. Pitch is here for a duller reason: nothing downstream
+    /// can change it — mpv preserves pitch, it does not set it — so a rendered
+    /// sentence would have to carry it, and then changing the pitch would
+    /// silently strand every sentence already made. Until the cache key can carry
+    /// a per-backend identity, exported audio is at the voice's natural
+    /// pitch.</para></summary>
+    public interface ISpeechRenderer
+    {
+        /// <summary>The sentence as a WAV, or null when it could not be made.</summary>
+        byte[] Render(string text);
+    }
+
     public interface ISpeechCacheAware
     {
         /// <summary>Where the book being read lives, so its speech can be kept

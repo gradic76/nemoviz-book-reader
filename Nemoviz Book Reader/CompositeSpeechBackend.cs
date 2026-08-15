@@ -12,8 +12,19 @@ namespace Nemoviz_Book_Reader
     /// alongside the in-process voices. Rate/volume/pitch are cached so they carry
     /// over when the active backend changes.
     /// </summary>
-    public class CompositeSpeechBackend : ISpeechBackend, ISpeechCacheAware
+    public class CompositeSpeechBackend : ISpeechBackend, ISpeechCacheAware, ISpeechRenderer
     {
+        /// <summary>Renders through whichever backend owns the SELECTED voice, or
+        /// answers null when that one cannot render. Null is a real answer: the
+        /// 32-bit satellite renders behind an IPC line and has no command for it
+        /// yet, so a book read by a 32-bit voice cannot be exported and should say
+        /// so rather than produce silence.</summary>
+        public byte[] Render(string text)
+        {
+            var r = active as ISpeechRenderer;
+            return r == null ? null : r.Render(text);
+        }
+
         private string bookFolder = "";
 
         /// <summary>Passed on to whichever backends can keep what they make, and

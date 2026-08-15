@@ -18,7 +18,7 @@ namespace Nemoviz_Book_Reader
     /// only needs sentence-level completion, not word boundaries. All calls stay on
     /// the creating (UI/STA) thread.
     /// </summary>
-    public class Sapi5Backend : ISpeechBackend
+    public class Sapi5Backend : ISpeechBackend, ISpeechRenderer
     {
         private const int SVSFlagsAsync = 1;
         private const int SVSFPurgeBeforeSpeak = 2;
@@ -177,6 +177,70 @@ namespace Nemoviz_Book_Reader
         }
 
         public bool IsPaused { get { return paused; } }
+
+        // ── Rendering, for the export ─────────────────────────────────────────
+
+        private readonly object renderLock = new object();
+        private dynamic renderVoice;
+
+        /// <summary>A sentence as a WAV rather than a sound.
+        ///
+        /// <para><b>Its own SpVoice, and that is not tidiness.</b> The one this
+        /// backend speaks through may be mid-sentence; pointing its
+        /// <c>AudioOutputStream</c> at a file would take the reader's voice away
+        /// and give them silence. A second object costs a COM instance and
+        /// nothing else.</para>
+        ///
+        /// <para>Rate 0 and volume 100 always — the cache holds the voice as it
+        /// is, and the reader's own speed and volume happen at playback. Pitch is
+        /// left alone too; see <see cref="ISpeechRenderer"/> for why that one is
+        /// a limitation rather than a rule.</para>
+        ///
+        /// <para>Through a file rather than a memory stream because that is the
+        /// shape already proven here: the 32-bit host renders every voice this
+        /// way, eSpeak included, which is why it was moved off System.Speech in
+        /// the first place.</para></summary>
+        public byte[] Render(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return null;
+            string path = null;
+            try
+            {
+                path = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+                    "nbr-render-" + Guid.NewGuid().ToString("N") + ".wav");
+                lock (renderLock)
+                {
+                    if (renderVoice == null)
+                    {
+                        Type t = Type.GetTypeFromProgID("SAPI.SpVoice");
+                        if (t == null) return null;
+                        renderVoice = Activator.CreateInstance(t);
+                    }
+                    try { renderVoice.Voice = voice.Voice; } catch { }
+                    try { renderVoice.Rate = 0; renderVoice.Volume = 100; } catch { }
+
+                    dynamic fs = Activator.CreateInstance(Type.GetTypeFromProgID("SAPI.SpFileStream"));
+                    fs.Open(path, 3, false);          // SSFMCreateForWrite
+                    try
+                    {
+                        renderVoice.AudioOutputStream = fs;
+                        renderVoice.Speak(text, SVSFIsNotXML);   // synchronous
+                    }
+                    finally
+                    {
+                        try { renderVoice.AudioOutputStream = null; } catch { }
+                        try { fs.Close(); } catch { }
+                    }
+                }
+                byte[] wav = System.IO.File.ReadAllBytes(path);
+                return wav.Length > 44 ? SapiWavPlayer.TrimTrailingSilence(wav) : null;
+            }
+            catch { return null; }
+            finally
+            {
+                if (path != null) { try { System.IO.File.Delete(path); } catch { } }
+            }
+        }
 
         public void Speak(string text)
         {

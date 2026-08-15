@@ -160,16 +160,36 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>A voice that is not a cloud one. There is no service to ask
         /// and nothing to pay, but the speech still has to exist before it can be
-        /// joined — so it is made here, through an ordinary backend, and kept like
-        /// any other. This is the one case where a local voice fills the cache,
-        /// and it fills it because the reader asked for a file.</summary>
+        /// joined — so it is made here and kept like any other. <b>This is the one
+        /// case where a local voice fills the cache</b>, and it fills it because
+        /// the reader asked for a file.</summary>
         private void MakeLocally()
         {
-            // Not built yet: a local backend renders to a buffer only through the
-            // 32-bit host and OneCore, and the in-process SAPI one speaks straight
-            // to the card. Until that has a render path, a local book exports only
-            // what is already cached — and says how much was missing.
-            done = spoken.Count;
+            CompositeSpeechBackend speech = null;
+            try
+            {
+                speech = new CompositeSpeechBackend();
+                speech.SelectVoice(voice);
+                var renderer = speech as ISpeechRenderer;
+
+                for (int i = 0; i < spoken.Count && !stop; i++)
+                {
+                    done = i;
+                    string s = spoken[i];
+                    if (string.IsNullOrWhiteSpace(s) || SpeechCache.Has(bookFolder, voice, s)) continue;
+
+                    byte[] wav = renderer.Render(s);
+                    // Nothing came back — a 32-bit voice, which renders behind an
+                    // IPC line that has no command for this yet. Stop rather than
+                    // grind through a thousand sentences producing nothing; the
+                    // count of what is missing then says what happened.
+                    if (wav == null) break;
+                    SpeechCache.Put(bookFolder, voice, s, wav);
+                }
+                done = spoken.Count;
+            }
+            catch { }
+            finally { if (speech != null) try { speech.Dispose(); } catch { } }
         }
 
         private void Refresh1()

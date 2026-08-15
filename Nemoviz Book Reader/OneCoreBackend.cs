@@ -30,7 +30,7 @@ namespace Nemoviz_Book_Reader
     /// end. The next sentence is rendered ahead so sentences follow without a
     /// gap.</para>
     /// </summary>
-    public class OneCoreBackend : ISpeechBackend
+    public class OneCoreBackend : ISpeechBackend, ISpeechRenderer
     {
         private readonly object synth;                 // Windows.Media.SpeechSynthesis.SpeechSynthesizer
         private readonly Type tSynth;
@@ -173,6 +173,21 @@ namespace Nemoviz_Book_Reader
             catch { }
         }
 
+        /// <summary>Reads one back, so a render can set it aside and put it
+        /// where it was. Answers 1.0 — the neutral value for all three of these —
+        /// when it cannot be read at all.</summary>
+        private double GetOption(string name)
+        {
+            try
+            {
+                object opts = tSynth.GetProperty("Options").GetValue(synth);
+                PropertyInfo p = opts.GetType().GetProperty(name);
+                if (p == null) return 1.0;
+                return Convert.ToDouble(p.GetValue(opts));
+            }
+            catch { return 1.0; }
+        }
+
         public void SetAudioDevice(string deviceId) { player.SetDevice(deviceId); }
 
         public void Speak(string text)
@@ -240,6 +255,28 @@ namespace Nemoviz_Book_Reader
         private void DropAhead()
         {
             lock (aheadLock) { aheadText = null; aheadWav = null; }
+        }
+
+        /// <summary>Already renders to a buffer for its own playback, so an export
+        /// costs it nothing new. The speaking rate and volume it carries are the
+        /// reader's, though — see the note below.</summary>
+        public byte[] Render(string text)
+        {
+            // The cache holds the voice as it IS: speed and volume belong to the
+            // listening and are applied at playback. Set aside and put back, so a
+            // render never disturbs a reading in progress.
+            double wasRate = 1.0, wasVolume = 1.0;
+            try { wasRate = GetOption("SpeakingRate"); wasVolume = GetOption("AudioVolume"); } catch { }
+            try
+            {
+                SetOption("SpeakingRate", 1.0);
+                SetOption("AudioVolume", 1.0);
+                return Synthesize(text);
+            }
+            finally
+            {
+                try { SetOption("SpeakingRate", wasRate); SetOption("AudioVolume", wasVolume); } catch { }
+            }
         }
 
         private byte[] Synthesize(string text)
