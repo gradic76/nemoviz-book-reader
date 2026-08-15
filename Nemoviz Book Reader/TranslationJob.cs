@@ -271,7 +271,14 @@ namespace Nemoviz_Book_Reader
                         });
                     }
                     foreach (var i in issues) report.Issues.Add(i);
-                    return new Piece { Text = r.Text, LastResort = engine.LastResort };
+                    // A LAST RESORT IS A FALLBACK, NOT A CHOICE — so the notice
+                    // goes into the book only when the reader did NOT ask for this
+                    // engine. Choosing Azure for a whole book is a legitimate thing
+                    // to want (it is free, and it is instant), and it never fails,
+                    // so without this test every piece would be marked and the
+                    // consecutive-merge would wrap the entire book in a warning
+                    // about a decision the reader made themselves.
+                    return new Piece { Text = r.Text, LastResort = engine.LastResort && stop > 0 };
                 }
             }
 
