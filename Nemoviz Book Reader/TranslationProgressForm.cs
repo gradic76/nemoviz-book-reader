@@ -45,6 +45,12 @@ namespace Nemoviz_Book_Reader
         private int shownDone = -1;
         private DateTime started;
         private bool finished;
+        /// <summary>When the passage now in flight began — the heartbeat's clock.
+        /// The job reports only completions, so this is the window's own.</summary>
+        private DateTime pieceStarted = DateTime.UtcNow;
+        /// <summary>Whole minutes already spoken about the current passage, so the
+        /// heartbeat says something once a minute rather than once a tick.</summary>
+        private int spokenWait;
         private string statusText = "";
 
         public TranslationProgressForm(string bookText, TranslationJob.Options options)
@@ -145,9 +151,41 @@ namespace Nemoviz_Book_Reader
             if (!Cancelled && d != shownDone)
             {
                 shownDone = d;
+                pieceStarted = DateTime.UtcNow;
+                spokenWait = 0;
                 statusText = d < 1
                     ? Localization.T("Translate.Progress.Starting")
                     : Localization.T("Translate.Progress.Working", d, t, Remaining(d, t));
+            }
+
+            // THE HEARTBEAT. Reported from use, 2026-08-15: the window stood on
+            // "Getting ready" for minutes and read as a frozen program. It was not
+            // — a single passage can take four minutes when the service is
+            // throttling, and the job only reports when one LANDS. Between those
+            // moments nothing changed on screen at all, and for a reader who cannot
+            // see it there was nothing to distinguish work from a hang.
+            //
+            // So the line carries how long the current passage has been going.
+            // It costs no request and asks the job for nothing: the window already
+            // has a clock of its own.
+            if (!Cancelled && !finished)
+            {
+                int waited = (int)(DateTime.UtcNow - pieceStarted).TotalSeconds;
+                if (waited >= 10)
+                    statusText = (d < 1
+                        ? Localization.T("Translate.Progress.Starting")
+                        : Localization.T("Translate.Progress.Working", d, t, Remaining(d, t)))
+                        + " " + Localization.T("Translate.Progress.StillOn", waited);
+
+                // SPOKEN RARELY, and only once a passage has plainly gone long.
+                // Every second would be noise over the reader's own work; silence
+                // for four minutes is what caused the report. A minute apart is
+                // the compromise, and it stops the moment a passage lands.
+                if (waited >= 60 && waited / 60 > spokenWait)
+                {
+                    spokenWait = waited / 60;
+                    Say(Localization.T("Translate.Progress.StillWorking", Math.Max(1, d + 1), t));
+                }
             }
             PushStatus();
 

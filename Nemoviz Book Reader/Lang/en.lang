@@ -508,6 +508,11 @@ Translate.Progress.Working=Passage {0} of {1}. About {2} left. You can stop at a
 Translate.Progress.Quarter={0} per cent translated, about {1} left.
 Translate.Progress.Cancel=Stop
 Translate.Progress.Cancelling=Stopping after this passage. What is already translated is kept.
+; The heartbeat. A passage can take minutes when the service is throttling, and
+; the job only reports when one lands - so between those moments the window said
+; nothing at all and read as frozen.
+Translate.Progress.StillOn=Still on this one, {0} seconds so far.
+Translate.Progress.StillWorking=Still translating passage {0} of {1}. The service is answering slowly.
 Translate.Progress.Estimating=working out how long this will take
 Translate.Progress.AlmostDone=a moment
 Translate.Progress.Seconds={0} seconds
