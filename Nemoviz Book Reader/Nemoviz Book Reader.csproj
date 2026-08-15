@@ -207,6 +207,7 @@
     <Compile Include="Mp3Encoder.cs" />
     <Compile Include="MpvClipPlayer.cs" />
     <Compile Include="SpeechCache.cs" />
+    <Compile Include="SpeechPrefill.cs" />
     <Compile Include="GoogleCloudVoices.cs" />
     <Compile Include="OcrAskForm.cs" />
     <Compile Include="OcrImport.cs" />

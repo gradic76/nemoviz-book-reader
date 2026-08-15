@@ -331,6 +331,22 @@ namespace Nemoviz_Book_Reader
         /// with the user's dictionary applied. This is the ONLY place the text is
         /// rewritten — what is stored, displayed, brailled or counted for a
         /// position is always the book's own.</summary>
+        /// <summary>Every sentence of the book exactly as the engine will hear it
+        /// — the pronunciation dictionary already applied.
+        ///
+        /// <para>For preparing a book ahead of the reader. It has to come from
+        /// HERE and not from the raw sentences, because the speech cache is keyed
+        /// on what reaches the engine: filled from the untouched text, every
+        /// entry would sit under a key nothing ever looks up, and a book prepared
+        /// for forty minutes would be paid for a second time on the first
+        /// listening.</para></summary>
+        public List<string> SpokenSentences()
+        {
+            var list = new List<string>(sentenceText.Count);
+            foreach (string s in sentenceText) list.Add(Spoken(s));
+            return list;
+        }
+
         private string Spoken(string sentence)
         {
             return Dictionaries == null || Dictionaries.Count == 0
