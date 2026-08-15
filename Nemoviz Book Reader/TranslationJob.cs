@@ -138,6 +138,13 @@ namespace Nemoviz_Book_Reader
             /// whether its printed table of contents is kept — see
             /// <see cref="BookMatter.Find"/>.</summary>
             public bool HasHeadings;
+            /// <summary>Where to write a line per piece. Null writes none.
+            ///
+            /// <para><b>What a summary cannot tell you afterwards</b>: which stop
+            /// took each piece, how many asks it cost and how long it waited. Over a
+            /// book that refuses a sixth of its passages those three are the whole
+            /// story, and the counters at the end flatten them into one number.</para></summary>
+            public string LogPath;
             /// <summary>Called after each piece: (done, total, message). Return
             /// false to stop — the pieces already done stay in the cache.</summary>
             public Func<int, int, string, bool> Progress;
@@ -150,6 +157,11 @@ namespace Nemoviz_Book_Reader
         {
             public string Text;
             public bool LastResort;
+            /// <summary>Which stop took it, how many asks it cost, and how long —
+            /// the three things a summary cannot tell you afterwards.</summary>
+            public string Engine;
+            public int Asks;
+            public long Ms;
         }
 
         public static TranslationReport Run(string bookText, Options opt)
@@ -177,6 +189,8 @@ namespace Nemoviz_Book_Reader
             List<TextChunk> chunks = TextChunker.Split(parts.Body, opt.MaxChars);
             report.Chunks = chunks.Count;
 
+            StartLog(opt, bookText.Length, parts, chunks.Count);
+
             var cache = TranslationCache.Open(opt.CachePath);
             string system = BuildSystemPrompt(opt.SourceLang, opt.TargetLang, opt.ReaderNotes);
 
@@ -198,6 +212,14 @@ namespace Nemoviz_Book_Reader
                 else { piece.Text = c.Text; }        // left as it was written
 
                 pieces.Add(piece);
+                Log(opt, string.Format(CultureInfo.InvariantCulture,
+                    "{0,4}/{1}  {2,6} chars  {3,-14} {4} ask{5}  {6,7:N1} s  {7}",
+                    c.Index + 1, chunks.Count, c.Text.Length,
+                    piece.Engine ?? "-", piece.Asks, piece.Asks == 1 ? " " : "s",
+                    piece.Ms / 1000.0,
+                    piece.Engine == null ? "LEFT IN THE ORIGINAL"
+                                         : (piece.LastResort ? "last resort" : "ok")));
+
                 if (!Report(opt, c.Index + 1, chunks.Count,
                             piece.LastResort ? "last resort" : "translated"))
                 { report.Cancelled = true; break; }
@@ -205,6 +227,7 @@ namespace Nemoviz_Book_Reader
 
             cache.Flush();
             report.Text = Assemble(parts, pieces, opt);
+            FinishLog(opt, report, pieces, DateTime.UtcNow - started);
             if (!report.Cancelled)
             {
                 report.Issues.AddRange(TranslationChecks.Book(bookText, report.Text));
@@ -235,6 +258,8 @@ namespace Nemoviz_Book_Reader
         {
             TranslationResult last = null;
             List<TranslationIssue> lastIssues = null;
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            int asks = 0;
 
             for (int stop = 0; stop < opt.Chain.Count; stop++)
             {
@@ -243,6 +268,7 @@ namespace Nemoviz_Book_Reader
 
                 for (int attempt = 0; attempt < attempts; attempt++)
                 {
+                    asks++;
                     TranslationResult r = Translator.Send(engine, null, system, user,
                                                           opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang);
                     List<TranslationIssue> issues = r.Ok
@@ -278,13 +304,22 @@ namespace Nemoviz_Book_Reader
                     // so without this test every piece would be marked and the
                     // consecutive-merge would wrap the entire book in a warning
                     // about a decision the reader made themselves.
-                    return new Piece { Text = r.Text, LastResort = engine.LastResort && stop > 0 };
+                    clock.Stop();
+                    return new Piece
+                    {
+                        Text = r.Text,
+                        LastResort = engine.LastResort && stop > 0,
+                        Engine = engine.Id,
+                        Asks = asks,
+                        Ms = clock.ElapsedMilliseconds
+                    };
                 }
             }
 
             // Nothing would take it. Counted and reported, never silently dropped —
             // the reader has to be able to find out that these paragraphs are in the
             // language the book came in.
+            clock.Stop();
             report.LeftInOriginal++;
             report.Issues.Add(new TranslationIssue
             {
@@ -294,7 +329,7 @@ namespace Nemoviz_Book_Reader
                        : last != null ? (last.Error + " " + last.Detail) : "no engine answered",
                 ChunkIndex = c.Index
             });
-            return new Piece { Text = null };
+            return new Piece { Text = null, Asks = asks, Ms = clock.ElapsedMilliseconds };
         }
 
         /// <summary>
@@ -413,6 +448,74 @@ namespace Nemoviz_Book_Reader
                     });
             }
             return found;
+        }
+
+        /// <summary>A line in the run's log. <b>Never allowed to fail the job</b> —
+        /// a translation that stops because a diagnostic could not be written would
+        /// be the instrument breaking the thing it measures.</summary>
+        private static void Log(Options opt, string line)
+        {
+            if (opt == null || string.IsNullOrEmpty(opt.LogPath)) return;
+            try { File.AppendAllText(opt.LogPath, line + Environment.NewLine, new UTF8Encoding(false)); }
+            catch { }
+        }
+
+        private static void StartLog(Options opt, int bookChars, BookMatter.Split parts, int chunks)
+        {
+            if (opt == null || string.IsNullOrEmpty(opt.LogPath)) return;
+            try { File.Delete(opt.LogPath); } catch { }
+            var sb = new StringBuilder();
+            sb.AppendLine("Nemoviz translation log");
+            sb.AppendLine("started      " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                "book         {0:N0} characters; front {1:N0}, body {2:N0}, back {3:N0}",
+                bookChars, parts.Front.Length, parts.Body.Length, parts.Back.Length));
+            if (parts.Note != null) sb.AppendLine("matter       " + parts.Note);
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                "from {0} into {1}, {2} pieces", opt.SourceLang, opt.TargetLang, chunks));
+            var chain = new StringBuilder();
+            foreach (TranslationEngine e in opt.Chain)
+            {
+                if (chain.Length > 0) chain.Append(" -> ");
+                chain.Append(e.Id).Append(" x").Append(e.Attempts);
+            }
+            sb.AppendLine("chain        " + chain);
+            sb.AppendLine();
+            Log(opt, sb.ToString().TrimEnd());
+        }
+
+        private static void FinishLog(Options opt, TranslationReport report,
+                                      List<Piece> pieces, TimeSpan elapsed)
+        {
+            if (opt == null || string.IsNullOrEmpty(opt.LogPath)) return;
+            var byEngine = new Dictionary<string, int>(StringComparer.Ordinal);
+            long slowest = 0; int slowestAt = 0; long asked = 0;
+            for (int i = 0; i < pieces.Count; i++)
+            {
+                string e = pieces[i].Engine ?? "(none)";
+                int n; byEngine.TryGetValue(e, out n); byEngine[e] = n + 1;
+                asked += pieces[i].Asks;
+                if (pieces[i].Ms > slowest) { slowest = pieces[i].Ms; slowestAt = i + 1; }
+            }
+            var sb = new StringBuilder();
+            sb.AppendLine();
+            sb.AppendLine("finished     " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                "elapsed      {0:hh\\:mm\\:ss}  ({1:N1} s for {2} pieces, {3:N1} s each)",
+                elapsed, elapsed.TotalSeconds, Math.Max(1, pieces.Count),
+                elapsed.TotalSeconds / Math.Max(1, pieces.Count)));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                "requests     {0} for {1} pieces", asked, pieces.Count));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                "slowest      piece {0}, {1:N1} s", slowestAt, slowest / 1000.0));
+            foreach (var kv in byEngine)
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                    "  {0,-14} {1} piece(s)", kv.Key, kv.Value));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                "cached {0}, retried ok {1}, later engine {2}, left in the original {3}{4}",
+                report.FromCache, report.RetriedOk, report.ViaFallback, report.LeftInOriginal,
+                report.Cancelled ? ", STOPPED" : ""));
+            Log(opt, sb.ToString().TrimEnd());
         }
 
         private static bool Report(Options opt, int done, int total, string what)

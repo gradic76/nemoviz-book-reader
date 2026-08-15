@@ -2275,6 +2275,10 @@ namespace Nemoviz_Book_Reader
                     // Beside the SOURCE book, so stopping and starting again costs
                     // nothing even after the window has been closed.
                     CachePath = System.IO.Path.Combine(book.FolderPath, "translation.cache"),
+                    // Beside the cache, and rewritten each run: what took each
+                    // piece, how many asks it cost and how long it waited. The
+                    // counters at the end flatten exactly that away.
+                    LogPath = System.IO.Path.Combine(book.FolderPath, "translation.log"),
                     HasHeadings = book.TextHeadings != null && book.TextHeadings.Count > 0
                 };
 
@@ -2300,10 +2304,14 @@ namespace Nemoviz_Book_Reader
             // book's folder, re-read it rather than trusting what is in hand.
             try { RebuildShelf(new BookData(folder)); } catch { }
 
+            string took = report.Elapsed.TotalSeconds < 90
+                ? Localization.T("Translate.Progress.Seconds", (int)report.Elapsed.TotalSeconds)
+                : Localization.T("Translate.Progress.Minutes", (int)Math.Round(report.Elapsed.TotalMinutes));
             MessageForm.ShowInfo(this,
-                report.LeftInOriginal > 0
+                (report.LeftInOriginal > 0
                     ? Localization.T("Translate.DoneLeft", report.Chunks, report.LeftInOriginal)
-                    : Localization.T("Translate.Done", report.Chunks),
+                    : Localization.T("Translate.Done", report.Chunks))
+                + " " + Localization.T("Translate.Took", took),
                 Localization.T("Translate.Ask.Title"));
         }
 

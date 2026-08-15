@@ -545,6 +545,7 @@ Translate.Empty=There is no text in this book to translate.
 Translate.NoService=No translation service has a key yet. Add one in Settings, under OCR and translation.
 Translate.Done={0} passages translated. The translation is on the shelf as a new book.
 Translate.DoneLeft={0} passages translated, {1} left in the original language.
+Translate.Took=It took {0}. A line-by-line record is in translation.log beside the original book.
 Translate.Failed=The book could not be translated: {0}
 Translate.Suffix={0} ({1})
 ; Adding a recognition pack. NOT a whole Windows display language — that is the
