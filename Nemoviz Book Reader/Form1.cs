@@ -4503,14 +4503,15 @@ namespace Nemoviz_Book_Reader
         /// English merely because that is what Settings happens to name.</summary>
         private string DefaultVoiceForBook(out VoiceSource how)
         {
-            how = VoiceSource.GlobalDefault;
-            string settingsVoice = appSettings.TtsVoice ?? "";
+            // No global default any more: an unknown language asks rather than
+            // taking whatever Settings happened to name. See VoiceChooser.
+            how = VoiceSource.NoVoice;
             string lang = currentBook != null ? currentBook.TextLanguage : "";
-            if (tts == null || string.IsNullOrEmpty(lang)) return settingsVoice;
+            if (tts == null || string.IsNullOrEmpty(lang)) return "";
 
             List<(string Name, string Vendor, string Language)> voices;
             try { voices = tts.GetVoiceInfos(); }
-            catch { return settingsVoice; }
+            catch { return ""; }
 
             // The whole rule lives in VoiceChooser, which Properties asks too —
             // this used to be a second copy of it, and the two had already begun

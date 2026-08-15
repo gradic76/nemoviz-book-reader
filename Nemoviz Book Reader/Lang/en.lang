@@ -434,7 +434,7 @@ Ocr.Progress.Seconds=About {0} seconds left.
 Ocr.Progress.Minutes=About {0} minutes left.
 ; Settings. "Automatic" is the right answer nearly always: recognition goes by
 ; SCRIPT, not by language, so one Latin recognizer reads every Latin language.
-Settings.Tab.Ocr=OCR and Translate
+Settings.Tab.Advanced=Advanced
 ; An ACTION on the shelf, not a setting in Properties: a reading happens once,
 ; from the first page to the last, and either it was right or it is done again.
 ; A book that IS pictures and has never been read — imported in bulk, where

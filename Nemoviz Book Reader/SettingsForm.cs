@@ -442,16 +442,13 @@ namespace Nemoviz_Book_Reader
             foreach (var kv in stagedPrefs.All())
                 appSettings.SetVoicePrefs(kv.Key, kv.Value);
 
-            string globalVoice = appSettings.TtsVoice ?? "";
+            // Per language and nothing else. The global default went with its row
+            // (see PopulateLanguages): an empty key can no longer arrive here,
+            // because there is no row that carries one. An empty VALUE still
+            // does, and it means revoke — SetLanguageVoice removes the language
+            // rather than storing a blank.
             foreach (var kv in stagedLanguageVoices)
-            {
-                if (kv.Key.Length == 0) globalVoice = kv.Value;      // "all other languages"
-                else appSettings.SetLanguageVoice(kv.Key, kv.Value);
-            }
-            // The global default's own numbers, not whichever voice happens to be
-            // on screen: the selected row may well be another language's voice.
-            VoicePrefs gp = stagedPrefs.Get(globalVoice, appSettings.PrefsFor(globalVoice));
-            appSettings.SetTtsDefaults(globalVoice, gp.Wpm, gp.Pitch, gp.Volume);
+                if (kv.Key.Length > 0) appSettings.SetLanguageVoice(kv.Key, kv.Value);
 
             // Text Books — how a book looks on screen, when the book itself has
             // not been given a look of its own. These six wrote nowhere at all
@@ -545,9 +542,15 @@ namespace Nemoviz_Book_Reader
         /// <para>Named for what it will hold rather than only for what it holds
         /// today — the tab exists because Gordan wanted OCR out of Speech and
         /// Braille, and translation is the other member of the same family.</para></summary>
+        // "Advanced", not "OCR and Translate" (Gordan, 2026-08-15). The name had
+        // to change once cloud voices joined it, and his reasoning picked the
+        // word: this is where keys and tokens are fetched, which is not for
+        // everyone, and "Advanced" reads as do-not-touch-unless-you-know where
+        // "Extras" reads as bonuses. Misc is not it either — that was for
+        // trifles, and it is gone.
         private TabPage BuildOcrTab()
         {
-            TabPage page = new TabPage(Localization.T("Settings.Tab.Ocr"));
+            TabPage page = new TabPage(Localization.T("Settings.Tab.Advanced"));
             page.AutoScroll = true;
             page.Controls.Add(BuildOcrGroup(8, 6));
             page.Controls.Add(MakeHint("Settings.Ocr.Hint", 14, 108, 480, 60, 2));
@@ -881,22 +884,43 @@ namespace Nemoviz_Book_Reader
             return box;
         }
 
-        /// <summary>Two sources, because neither is enough on its own: the
-        /// languages something installed <b>speaks</b>, and the languages this
-        /// library has a <b>book</b> in. A French book with no French voice is
-        /// precisely the case a rule is wanted for, and it could not be set if
-        /// French were not on the list — which is what "go to Settings and sort it
-        /// out there" requires. Rows with no voice say so, because otherwise
-        /// "French" and "Croatian" look identical and behave nothing alike.
-        /// <para>Index 0 is the global default and carries the empty code: it is
-        /// what a book whose language could not be worked out is read with.</para></summary>
+        /// <summary>The languages this page can assign a default voice to:
+        /// **languages something installed SPEAKS, plus any language that already
+        /// has a rule**. Nothing else.
+        ///
+        /// <para><b>Rewritten 2026-08-15, and both things that went had become
+        /// wrong for the same reason</b> — this page assigns per-language
+        /// DEFAULTS, so a row that cannot lead to a default has no business on
+        /// it.</para>
+        ///
+        /// <para><b>The languages the LIBRARY has a book in are gone.</b> They
+        /// were collected append-only and never pruned, so one German book that
+        /// had long since been deleted left German on this list for ever
+        /// (Gordan). Deriving them instead would have needed a rebuild on every
+        /// scan and a hook on every delete path — and books also vanish outside
+        /// NBR. The whole question dissolves once the list is what is installed:
+        /// no store, no pruning, and it cannot go stale.</para>
+        ///
+        /// <para><b>"All other languages" — the global default — is gone too,
+        /// and Gordan found the fault by reasoning about it.</b> He put it as: if
+        /// that row is set to Matej, a book in a language nobody supports opens
+        /// in Matej instead of asking. Measured, he is right, though by a route
+        /// he did not name: a KNOWN language with no voice already answered
+        /// <see cref="VoiceSource.NoVoice"/> and asked. But an exotic language is
+        /// usually not known at all — <see cref="LanguageDetector"/> covers about
+        /// twenty and stays silent rather than guess — so the book arrived with
+        /// an EMPTY language, and an empty language took the global default. The
+        /// row's name was the lie: it read "all the other languages" and behaved
+        /// as "the language could not be worked out".</para>
+        ///
+        /// <para>A language that keeps a rule stays listed even with nothing to
+        /// speak it, because a rule you cannot see is a rule you cannot revoke —
+        /// and the first row of the voice list, "(no voice chosen)", is how it
+        /// is revoked.</para></summary>
         private void PopulateLanguages()
         {
             cmbLanguage.Items.Clear();
             languageCodes.Clear();
-
-            languageCodes.Add("");
-            cmbLanguage.Items.Add(Localization.T("Settings.TextBooks.AllOtherLanguages"));
 
             var codes = new List<string>();
             foreach (var c in voiceCatalog)
@@ -904,8 +928,6 @@ namespace Nemoviz_Book_Reader
                 string p = LanguageDetector.Primary(c.Language);
                 if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
             }
-            foreach (string p in appSettings.SeenLanguages)
-                if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
             foreach (string p in appSettings.LanguagesWithVoice)
                 if (p.Length > 0 && !codes.Contains(p)) codes.Add(p);
 
@@ -999,7 +1021,7 @@ namespace Nemoviz_Book_Reader
 
             string want;
             if (!stagedLanguageVoices.TryGetValue(code, out want))
-                want = code.Length > 0 ? appSettings.LanguageVoice(code) : (appSettings.TtsVoice ?? "");
+                want = appSettings.LanguageVoice(code);
             int wi = voiceNames.IndexOf(want ?? "");
             cmbVoice.SelectedIndex = wi >= 0 ? wi : 0;
 

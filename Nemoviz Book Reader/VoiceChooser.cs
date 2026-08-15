@@ -16,9 +16,6 @@ namespace Nemoviz_Book_Reader
         /// <summary>No choice was made, so the first installed voice that speaks
         /// the language.</summary>
         LanguageInstalled,
-        /// <summary>The book's language is unknown, so there was nothing to match
-        /// on and the global default is simply it.</summary>
-        GlobalDefault,
     }
 
     /// <summary>
@@ -50,14 +47,17 @@ namespace Nemoviz_Book_Reader
                                          IEnumerable<(string Name, string Group, string Language)> voices,
                                          string lang, out VoiceSource how)
         {
-            string global = settings != null ? (settings.TtsVoice ?? "") : "";
-
-            // Nothing was worked out about the book, so there is nothing to match
-            // against and the global default is all there is to go on.
+            // AN UNKNOWN LANGUAGE IS NOT A LICENCE TO PICK ONE (Gordan,
+            // 2026-08-15). This used to fall through to a global default, and it
+            // is how a book in a language nobody here supports came to be read
+            // out in Croatian: the detector covers about twenty languages and
+            // stays silent rather than guess, so an exotic book arrives with an
+            // empty language — and the empty language took the default. Not
+            // knowing what a book is in is exactly when NOT to decide.
             if (string.IsNullOrEmpty(lang))
             {
-                how = VoiceSource.GlobalDefault;
-                return global;
+                how = VoiceSource.NoVoice;
+                return "";
             }
 
             string code = LanguageDetector.Primary(lang);

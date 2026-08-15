@@ -1419,9 +1419,10 @@ namespace Nemoviz_Book_Reader
         /// player asks with the same book, so the two cannot disagree.</summary>
         private string DefaultVoiceForLanguage()
         {
-            string settingsVoice = appSettings != null ? (appSettings.TtsVoice ?? "") : "";
+            // Empty, not a global default — an unknown language is the one case
+            // where nothing may be chosen for the reader. See VoiceChooser.
             string lang = book.TextLanguage;
-            if (string.IsNullOrEmpty(lang) || textCatalog == null) return settingsVoice;
+            if (string.IsNullOrEmpty(lang) || textCatalog == null) return "";
 
             return VoiceChooser.ForLanguage(appSettings, textCatalog, lang);
         }
