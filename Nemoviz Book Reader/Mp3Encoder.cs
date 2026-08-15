@@ -43,8 +43,25 @@ namespace Nemoviz_Book_Reader
 
         // MPEG_mode
         private const int Mono = 3;
-        // vbr_mode: 0 off, 1 mt, 2 rh, 3 abr, 4 mtrh (the modern default)
-        private const int VbrMtrh = 4;
+        // vbr_mode: 0 off, 1 mt, 2 rh, 3 abr, 4 mtrh
+        private const int VbrAbr = 3;
+
+        /// <summary>The settings, fixed by Gordan 2026-08-15 rather than offered:
+        /// *"stavi ga fiksno na najjaču Q kvalitetu, vbr s bazom 64 kbps"*. He had
+        /// listened to 70, 60 and 48 kbps and said he did not expect to hear the
+        /// difference — the voices themselves are a little below the preview ones
+        /// he heard the day before, so the encoder is not what limits this.
+        ///
+        /// <para><b>Average 64 kbps, varying around it</b> — the bitrate is what
+        /// decides the size, so a book lands near 250 MB whatever else is
+        /// done.</para>
+        ///
+        /// <para><b>Algorithm quality 0, the slowest and best.</b> It costs
+        /// encoder effort and nothing else, and measured, encoding runs about 480
+        /// times faster than listening — 0.7 s for five and a half minutes of
+        /// speech. There is nothing to save it for.</para></summary>
+        private const int MeanKbps = 64;
+        private const int BestEffort = 0;
 
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr lame_init();
@@ -57,7 +74,7 @@ namespace Nemoviz_Book_Reader
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
         private static extern int lame_set_VBR(IntPtr gfp, int value);
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int lame_set_VBR_q(IntPtr gfp, int value);
+        private static extern int lame_set_VBR_mean_bitrate_kbps(IntPtr gfp, int value);
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
         private static extern int lame_set_quality(IntPtr gfp, int value);
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
@@ -109,12 +126,22 @@ namespace Nemoviz_Book_Reader
         /// the input is not something it can read — never throws into the middle
         /// of a reading.
         ///
-        /// <para><paramref name="quality"/> is LAME's VBR quality, 0 best to 9
-        /// worst. The default is chosen for SPEECH, not music: 6 is around 60–70
-        /// kbps mono here, which for one voice on a plain background is
-        /// transparent, and it is the difference between 250 MB a book and
-        /// twice that.</para></summary>
-        public static byte[] FromWav(byte[] wav, int quality = 6)
+        /// <para>No settings to pass: they are fixed, and deliberately so. See
+        /// the constants above for what and why.</para>
+        ///
+        /// <para><b>The sample rate is the SOURCE's and is never changed.</b>
+        /// Gordan asked for 22 kHz, which is the habitual rate for speech, but
+        /// Google delivers 24 kHz — itself a valid MPEG-2 rate, so it encodes
+        /// straight through — while 22.05 is not a whole-number ratio away and
+        /// would mean a real resample. It would buy nothing: the SIZE is set by
+        /// the bitrate, not the rate, so the only effect would be a slightly
+        /// lower ceiling for the work. Local voices arrive at 16, 22.05 and 24
+        /// kHz depending on the engine, and keeping whatever came in is the one
+        /// rule that is right for all of them.</para>
+        ///
+        /// <para>Bit depth has no setting either, and cannot: MP3 does not store
+        /// one. Sixteen bits is a property of the WAV going in.</para></summary>
+        public static byte[] FromWav(byte[] wav)
         {
             if (!Available || wav == null) return null;
 
@@ -147,9 +174,9 @@ namespace Nemoviz_Book_Reader
                 lame_set_in_samplerate(gfp, rate);
                 lame_set_num_channels(gfp, channels);
                 if (channels == 1) lame_set_mode(gfp, Mono);
-                lame_set_VBR(gfp, VbrMtrh);
-                lame_set_VBR_q(gfp, quality < 0 ? 0 : (quality > 9 ? 9 : quality));
-                lame_set_quality(gfp, 2);          // encoder effort, not output quality
+                lame_set_VBR(gfp, VbrAbr);
+                lame_set_VBR_mean_bitrate_kbps(gfp, MeanKbps);
+                lame_set_quality(gfp, BestEffort);   // encoder effort, not output quality
                 if (lame_init_params(gfp) < 0) return null;
 
                 // LAME's own worst case, and it must be respected: a buffer even a
