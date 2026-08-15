@@ -1779,6 +1779,55 @@ Yakovleva"); Gordan wants to consult the authors before any relabeling.
 
 ---
 
+## 8g′. The speech cache — pay once (built 2026-08-15)
+
+Speech already made, kept beside the book as MP3, so a sentence bought from a
+cloud voice is not bought twice. `SpeechCache` · `Mp3Encoder` (vendored
+`libmp3lame.dll`, LAME 3.100) · `MpvClipPlayer` · `SpeechPrefill`.
+
+**Keyed on the text that reaches the ENGINE** — `TtsReader.Spoken`, so after the
+pronunciation dictionary — plus the voice. Change a dictionary rule and the key
+changes, so the sentence is made afresh, which is what a reader who just rewrote
+a rule expects. **Speed and volume are deliberately NOT in the key**: they are a
+listening habit and they change, while the audio is an asset bought once. That
+forced the playback move — `SapiWavPlayer` cannot change speed, mpv can, through
+the same `scaletempo2` §6 already uses for audiobooks. Volume left the key with
+it, free, because mpv has a volume property.
+
+**Cloud voices cache by default; local ones only when asked.** A local voice is
+free and faster than listening, so keeping it buys nothing for ordinary reading
+and costs ~214 MB a book. There the cache is for the EXPORT.
+
+**`SpeechPrefill` is Gordan's runaway look-ahead**: reading starts at once and
+the rest of the book is made behind it, ~10× faster than listening, so a
+nine-hour book is done in about three quarters of an hour. Its own path to the
+service, never the backend the reader is listening through. **Deliberate, never
+automatic** — it commits the reader to the whole book's cost at the moment they
+press play, and the free allowance is ~2 average books a month (measured on this
+library: 472 000 characters a book, 2.1 books per million).
+
+### Measured, and the export is NOT just concatenation
+
+| | |
+|---|---|
+| second render of a sentence | **10 ms** against 1 686 ms, no network |
+| MP3 at ABR 64 | 14.1 % of the WAV, 54 kbps actual |
+| encoding | ~480× real time at quality 2, 79× at quality 0 |
+| mpv speed | 1.0 → 4.4 s, 2.0 → 2.1 s, 0.5 → 9.0 s on a 4.6 s sentence |
+| prefill, second pass | 0 made, everything already there skipped at once |
+
+**THE EXPORT TRAP, measured 2026-08-15 before it was built.** Laying cached
+sentences end to end *plays* correctly — mpv reports 10.23 s for a file whose
+pieces sum to 10.20 — but the result carries **one Xing header per piece**, and
+the first one describes only the first piece: it announces **106 frames /
+17 688 bytes = 2.54 s** for a 73 296-byte, 10.23-second file. mpv survives it by
+noticing the byte count disagrees and rescanning. A player that trusts the header
+would report two and a half seconds for a whole book and seek accordingly — and
+the export exists precisely to be played OUTSIDE NBR.
+
+So the export must strip each piece's Xing frame, walk the frames to count them,
+and write one correct header at the front. Not built.
+
 ## 8h. Supported formats + official names
 
 `BookData.FriendlyFormatName` is the **single source of truth** for the format
