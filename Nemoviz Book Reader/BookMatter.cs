@@ -228,6 +228,12 @@ namespace Nemoviz_Book_Reader
             public string Back = "";
             /// <summary>For the report. Null when nothing was set aside.</summary>
             public string Note;
+
+            /// <summary>Where <see cref="Body"/> begins in the text handed in.
+            /// Anything holding offsets into the WHOLE book — chapter starts, for
+            /// one — has to subtract this before it can mean anything to code
+            /// working on the body alone.</summary>
+            public int BodyStart;
         }
 
         public static Split Divide(string text, bool hasHeadings)
@@ -255,6 +261,7 @@ namespace Nemoviz_Book_Reader
             int bodyStart = blocks[first].Start;
             int bodyEnd = blocks[last].Start + blocks[last].Text.Length;
             s.Body = text.Substring(bodyStart, bodyEnd - bodyStart);
+            s.BodyStart = bodyStart;
             s.Note = Describe(blocks);
             return s;
         }

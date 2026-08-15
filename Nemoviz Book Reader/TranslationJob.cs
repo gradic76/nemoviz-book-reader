@@ -138,6 +138,13 @@ namespace Nemoviz_Book_Reader
             /// whether its printed table of contents is kept — see
             /// <see cref="BookMatter.Find"/>.</summary>
             public bool HasHeadings;
+
+            /// <summary>Where each chapter begins, as offsets into the book text
+            /// handed to <see cref="Run"/>. Used only to keep a chapter from
+            /// starting three sentences before the end of a piece — see
+            /// <see cref="TextChunker.Split(string,int,IList{int})"/>. Null or
+            /// empty simply means the cutting knows nothing about chapters.</summary>
+            public IList<int> ChapterStarts;
             /// <summary>Where to write a line per piece. Null writes none.
             ///
             /// <para><b>What a summary cannot tell you afterwards</b>: which stop
@@ -186,7 +193,24 @@ namespace Nemoviz_Book_Reader
                     Detail = parts.Note
                 });
 
-            List<TextChunk> chunks = TextChunker.Split(parts.Body, opt.MaxChars);
+            // Chapter starts are offsets into the WHOLE book; the cutting happens
+            // on the body, which begins further in. Shifting them here rather
+            // than making the chunker aware of matter keeps the two jobs apart —
+            // and an offset that lands outside the body (a heading inside the
+            // front matter) is dropped rather than clamped, since clamping would
+            // invent a chapter boundary at the first paragraph.
+            List<int> bodyChapters = null;
+            if (opt.ChapterStarts != null && opt.ChapterStarts.Count > 0)
+            {
+                bodyChapters = new List<int>();
+                foreach (int off in opt.ChapterStarts)
+                {
+                    int at = off - parts.BodyStart;
+                    if (at > 0 && at < parts.Body.Length) bodyChapters.Add(at);
+                }
+            }
+
+            List<TextChunk> chunks = TextChunker.Split(parts.Body, opt.MaxChars, bodyChapters);
             report.Chunks = chunks.Count;
 
             StartLog(opt, bookText.Length, parts, chunks.Count);

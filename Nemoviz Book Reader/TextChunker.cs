@@ -64,7 +64,41 @@ namespace Nemoviz_Book_Reader
         /// short enough not to dominate the request.</summary>
         public const int LeadChars = 700;
 
+        /// <summary>How much of a NEW chapter may trail at the end of a piece
+        /// before it is pushed into the next one instead. An eighth of a piece is
+        /// a handful of sentences — Gordan asked for about three.
+        ///
+        /// <para>Only a SMALL tail is moved, and that is the whole economy of it:
+        /// the piece is nearly full already, so ending it at the chapter costs
+        /// almost nothing, while cutting at a boundary halfway through would
+        /// throw away half a piece and buy an extra seam — and this class exists
+        /// because every seam costs consistency.</para></summary>
+        public const int ChapterTailShare = 8;
+
         public static List<TextChunk> Split(string text, int maxChars = DefaultMaxChars)
+        {
+            return Split(text, maxChars, null);
+        }
+
+        /// <summary>Cuts the book, and where <paramref name="chapterStarts"/> is
+        /// given, avoids leaving the first few sentences of a chapter stranded at
+        /// the end of the piece before it.
+        ///
+        /// <para><b>Gordan's, 2026-08-15, and he named it: widow and orphan
+        /// control.</b> A piece that ends three sentences into the next chapter
+        /// hands the model two chapters at once, and hands the piece AFTER it a
+        /// <see cref="TextChunk.Lead"/> taken from the wrong one — the context
+        /// meant to carry a speaker and a register across the seam instead
+        /// carries the end of a scene that has finished. The cut is moved back to
+        /// the chapter's own beginning, so a chapter starts a piece rather than
+        /// finishing someone else's.</para>
+        ///
+        /// <para>Offsets are into the same cleaned text the chunking is done on
+        /// (<see cref="BookData.TextHeadings"/> is in exactly those coordinates).
+        /// A boundary that does not fall on a paragraph edge is ignored rather
+        /// than forced — cutting inside a paragraph is the one cut this class
+        /// refuses to make.</para></summary>
+        public static List<TextChunk> Split(string text, int maxChars, IList<int> chapterStarts)
         {
             var chunks = new List<TextChunk>();
             if (string.IsNullOrEmpty(text)) return chunks;
@@ -75,9 +109,25 @@ namespace Nemoviz_Book_Reader
             var paras = Paragraphs(text);
             if (paras.Count == 0) return chunks;
 
+            // Chapter starts that really are paragraph starts, as paragraph
+            // indices — resolved once rather than searched per piece.
+            var breakAt = new HashSet<int>();
+            if (chapterStarts != null)
+            {
+                var startOf = new Dictionary<int, int>();
+                for (int p = 0; p < paras.Count; p++) startOf[paras[p].Start] = p;
+                foreach (int off in chapterStarts)
+                {
+                    int p;
+                    if (startOf.TryGetValue(off, out p) && p > 0) breakAt.Add(p);
+                }
+            }
+            int tailLimit = Math.Max(1, maxChars / ChapterTailShare);
+
             int i = 0;
             while (i < paras.Count)
             {
+                int first = i;
                 int start = paras[i].Start;
                 int end = paras[i].End;
                 int count = 1;
@@ -87,6 +137,22 @@ namespace Nemoviz_Book_Reader
                     end = paras[i].End;
                     count++;
                     i++;
+                }
+
+                // The last chapter to begin inside this piece. Moved back to only
+                // if what follows it here is short AND something is left behind —
+                // a piece that would become empty is no improvement.
+                if (breakAt.Count > 0 && i < paras.Count)
+                {
+                    for (int p = i - 1; p > first; p--)
+                    {
+                        if (!breakAt.Contains(p)) continue;
+                        if (end - paras[p].Start > tailLimit) break;
+                        end = paras[p - 1].End;
+                        count = p - first;
+                        i = p;
+                        break;
+                    }
                 }
 
                 var c = new TextChunk

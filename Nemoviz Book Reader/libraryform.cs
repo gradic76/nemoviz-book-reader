@@ -2245,6 +2245,27 @@ namespace Nemoviz_Book_Reader
         /// Properties — that window changes the book you are looking at, and a
         /// Translate button there would reasonably be read as translating it in
         /// place.</para></summary>
+        /// <summary>A book's chapter starts, sorted and without repeats.
+        ///
+        /// <para>Only the TOP level. A book with headings four deep would
+        /// otherwise offer a boundary every few paragraphs, and a rule meant to
+        /// keep chapters whole would end up cutting the book at every
+        /// sub-heading — the opposite of what it is for.</para></summary>
+        private static List<int> ChapterOffsets(BookData book)
+        {
+            var list = new List<int>();
+            if (book == null || book.TextHeadings == null) return list;
+
+            int top = int.MaxValue;
+            foreach (var h in book.TextHeadings) if (h.Level < top) top = h.Level;
+
+            foreach (var h in book.TextHeadings)
+                if (h.Level == top && h.Offset > 0 && !list.Contains(h.Offset))
+                    list.Add(h.Offset);
+            list.Sort();
+            return list;
+        }
+
         private void TranslateSelectedBook()
         {
             BookData book = GetSelectedBook();
@@ -2298,7 +2319,11 @@ namespace Nemoviz_Book_Reader
                     // piece, how many asks it cost and how long it waited. The
                     // counters at the end flatten exactly that away.
                     LogPath = System.IO.Path.Combine(book.FolderPath, "translation.log"),
-                    HasHeadings = book.TextHeadings != null && book.TextHeadings.Count > 0
+                    HasHeadings = book.TextHeadings != null && book.TextHeadings.Count > 0,
+                    // So a chapter does not begin three sentences before the end
+                    // of a piece — see TextChunker. These are already in cleaned
+                    // text coordinates, the same ones the chunking works in.
+                    ChapterStarts = ChapterOffsets(book)
                 };
 
                 using (var work = new TranslationProgressForm(text, options))
