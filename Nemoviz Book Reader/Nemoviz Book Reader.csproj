@@ -208,6 +208,7 @@
     <Compile Include="MpvClipPlayer.cs" />
     <Compile Include="SpeechCache.cs" />
     <Compile Include="SpeechExport.cs" />
+    <Compile Include="SpeechExportForm.cs" />
     <Compile Include="SpeechPrefill.cs" />
     <Compile Include="GoogleCloudVoices.cs" />
     <Compile Include="OcrAskForm.cs" />

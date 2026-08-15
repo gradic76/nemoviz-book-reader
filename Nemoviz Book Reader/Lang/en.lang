@@ -435,6 +435,20 @@ Ocr.Progress.Minutes=About {0} minutes left.
 ; Settings. "Automatic" is the right answer nearly always: recognition goes by
 ; SCRIPT, not by language, so one Latin recognizer reads every Latin language.
 Settings.Tab.Advanced=Advanced
+Menu.File.ExportAudio=Export as an audiobook...
+Export.NotText=Only a text book can be made into an audiobook. This one is already audio.
+Export.NoVoice=This book has no voice to read it with, so there is nothing to record. Give it one in its Properties first.
+Export.Empty=There is no text in this book to read.
+Export.Filter=Audio file (*.mp3)|*.mp3
+Export.Ask.Ready=All {0} passages of this book have already been spoken, so this is only the joining and will take moments. Make the file?
+Export.Ask.Missing={0} of this book's {1} passages have not been spoken yet and will be now. That is roughly {2} minutes, and you can stop at any time — whatever is spoken is kept, and starting again carries on from there. Make the file?
+Export.Progress.Title=Making the audiobook
+Export.Progress.Starting=Getting ready. You can stop at any time; whatever has been spoken is kept, and starting again carries on from there.
+Export.Progress.Making=Passage {0} of {1}. About {2} left.
+Export.Progress.Joining=Joining it all into one file.
+Export.Done=Done — {0} passages, saved as {1}
+Export.DoneShort=Saved as {2}, but {1} of the {0} passages could not be spoken and are missing from it.
+Export.Failed=The audiobook could not be made.
 Settings.Cloud.Group=Google Cloud voices
 Settings.Cloud.State.None=No service account is stored, so none of these voices are available.
 Settings.Cloud.State.Have={0} voices are available, reading {1} languages between them.

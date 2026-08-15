@@ -22,6 +22,7 @@ namespace Nemoviz_Book_Reader
         private ToolStripMenuItem menuFileOpenCd;
         private ToolStripMenuItem menuFileReRead;
         private ToolStripMenuItem menuFileTranslate;
+        private ToolStripMenuItem menuFileExport;
         private ToolStripMenuItem menuSort;
         private ToolStripMenuItem menuSortAlpha;
         private ToolStripMenuItem menuSortDate;
@@ -482,6 +483,13 @@ namespace Nemoviz_Book_Reader
             menuFileTranslate.Click += (s, e) => TranslateSelectedBook();
             menuFile.DropDownItems.Add(menuFileTranslate);
 
+            // Turning a text book into an audio one. Like translating, it makes a
+            // FILE rather than changing the book, which is why it is here and not
+            // in Properties.
+            menuFileExport = new ToolStripMenuItem(Localization.T("Menu.File.ExportAudio"));
+            menuFileExport.Click += (s, e) => ExportSelectedBook();
+            menuFile.DropDownItems.Add(menuFileExport);
+
             menuFile.DropDownOpening += (s, e) =>
             {
                 BookData b = GetSelectedBook();
@@ -491,6 +499,7 @@ namespace Nemoviz_Book_Reader
                 // Dimmed rather than hidden, the rule the re-read item already
                 // follows: it can be found and its state understood.
                 menuFileTranslate.Enabled = b != null && (b.IsTextBook || b.IsHybrid);
+                menuFileExport.Enabled = b != null && b.IsTextBook;
             };
 
             menuFile.DropDownItems.Add(new ToolStripSeparator());
@@ -2284,6 +2293,109 @@ namespace Nemoviz_Book_Reader
                 return found;
             }
             return list;
+        }
+
+        /// <summary>A text book as one MP3 — a real audiobook, playable anywhere.
+        ///
+        /// <para><b>One command and no state, which is Gordan's simplification</b>
+        /// (2026-08-16). There is no "is it prepared yet" to wait for: whatever is
+        /// missing is made when the command runs. For a cloud book read through
+        /// once there is nothing missing and this is only the joining; for one
+        /// never opened it is the whole book.</para></summary>
+        private void ExportSelectedBook()
+        {
+            BookData book = GetSelectedBook();
+            if (book == null || !book.IsTextBook)
+            {
+                MessageForm.ShowInfo(this, Localization.T("Export.NotText"),
+                                     Localization.T("Menu.File.ExportAudio"));
+                return;
+            }
+
+            // The voice this book reads with — the book's own, else the one the
+            // player would pick for its language. Asked HERE rather than inside
+            // the job, because the cache is keyed on it and getting it wrong
+            // would quietly export an empty file.
+            string voice = book.TextVoice ?? "";
+            if (voice.Length == 0)
+            {
+                try
+                {
+                    using (var speech = new CompositeSpeechBackend())
+                        voice = VoiceChooser.ForLanguage(AppSettings.Current, speech.GetVoiceCatalog(),
+                                                         book.TextLanguage);
+                }
+                catch { }
+            }
+            if (string.IsNullOrEmpty(voice))
+            {
+                MessageForm.ShowInfo(this, Localization.T("Export.NoVoice"),
+                                     Localization.T("Menu.File.ExportAudio"));
+                return;
+            }
+
+            // The sentences exactly as the engine hears them — the pronunciation
+            // dictionary applied — because that is what the cache is keyed on.
+            List<string> spoken;
+            try
+            {
+                var reader = new TtsReader();
+                reader.Dictionaries = SpeechDictionaries.Active(voice, book.TextLanguage);
+                reader.LoadText(TtsReader.ReadFile(book.TextFilePath), book.TextCleaned);
+                spoken = reader.SpokenSentences();
+            }
+            catch { spoken = null; }
+            if (spoken == null || spoken.Count == 0)
+            {
+                MessageForm.ShowInfo(this, Localization.T("Export.Empty"),
+                                     Localization.T("Menu.File.ExportAudio"));
+                return;
+            }
+
+            int have = 0;
+            foreach (string s in spoken) if (SpeechCache.Has(book.FolderPath, voice, s)) have++;
+            int missing = spoken.Count - have;
+
+            // Said before anything starts, because "this will take three quarters
+            // of an hour" is the one fact that decides whether to begin.
+            string ask = missing == 0
+                ? Localization.T("Export.Ask.Ready", spoken.Count)
+                : Localization.T("Export.Ask.Missing", missing, spoken.Count,
+                                 Math.Max(1, (int)Math.Round(missing * 1.0 / 60.0)));
+            if (!MessageForm.ShowConfirm(this, ask, Localization.T("Menu.File.ExportAudio"))) return;
+
+            string outPath;
+            using (var dlg = new SaveFileDialog())
+            {
+                dlg.Title = Localization.T("Menu.File.ExportAudio");
+                dlg.Filter = Localization.T("Export.Filter");
+                dlg.FileName = SafeFileName(book.Title) + ".mp3";
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                outPath = dlg.FileName;
+            }
+
+            using (var work = new SpeechExportForm(book.FolderPath, voice, spoken, outPath))
+            {
+                work.ShowDialog(this);
+                if (work.Cancelled) return;
+                MessageForm.ShowInfo(this,
+                    work.Ok
+                        ? (work.Missing == 0
+                            ? Localization.T("Export.Done", work.Written, outPath)
+                            : Localization.T("Export.DoneShort", work.Written, work.Missing, outPath))
+                        : Localization.T("Export.Failed"),
+                    Localization.T("Menu.File.ExportAudio"));
+            }
+        }
+
+        /// <summary>A title with the characters Windows will not take in a name
+        /// removed — a book called "Where? / When!" must still save.</summary>
+        private static string SafeFileName(string title)
+        {
+            string s = (title ?? "book").Trim();
+            foreach (char c in System.IO.Path.GetInvalidFileNameChars()) s = s.Replace(c, ' ');
+            s = s.Trim();
+            return s.Length == 0 ? "book" : s;
         }
 
         private void TranslateSelectedBook()
