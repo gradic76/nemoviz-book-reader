@@ -158,6 +158,12 @@ namespace Nemoviz_Book_Reader
         /// See <see cref="SetOcrLanguage"/>.</summary>
         public string OcrLanguage { get; private set; }
 
+        /// <summary>The language a book was last translated INTO. Remembered so the
+        /// question is only really asked once: the first time the Windows display
+        /// language is offered, and after that whatever the reader chose — which
+        /// does not change from book to book the way the source language does.</summary>
+        public string LastTranslationTarget { get; private set; }
+
         public AppSettings()
         {
             ini = new IniFile(SettingsPath);
@@ -186,6 +192,7 @@ namespace Nemoviz_Book_Reader
             LanguageSeen = NoteLanguageSeen;
             AudioDevice = ini.Read("Audio", "Device", "");
             OcrLanguage = ini.Read("Ocr", "Language", "");
+            LastTranslationTarget = ini.Read("Translate", "Target", "");
             KeepDeviceAlive = ini.Read("Audio", "KeepAlive", "1") == "1";
             UseOpticalDrive = ini.Read("Audio", "UseOpticalDrive", "0") == "1";
             OpticalDriveLetter = ini.Read("Audio", "OpticalDrive", "");
@@ -447,6 +454,12 @@ namespace Nemoviz_Book_Reader
         {
             OcrLanguage = tag ?? "";
             ini.Write("Ocr", "Language", OcrLanguage);
+        }
+
+        public void SetLastTranslationTarget(string tag)
+        {
+            LastTranslationTarget = tag ?? "";
+            ini.Write("Translate", "Target", LastTranslationTarget);
         }
 
         public void SetKeepDeviceAlive(bool on)

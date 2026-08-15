@@ -160,6 +160,7 @@
     <Compile Include="UiTheme.cs" />
     <Compile Include="DialogSkin.cs" />
     <Compile Include="HintSystem.cs" />
+    <Compile Include="AzureProvision.cs" />
     <Compile Include="Json.cs" />
     <Compile Include="TextChunker.cs" />
     <Compile Include="TranslationChecks.cs" />
