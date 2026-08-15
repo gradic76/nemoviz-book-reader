@@ -205,6 +205,7 @@
     <Compile Include="OpticalDrive.cs" />
     <Compile Include="GoogleCloudBackend.cs" />
     <Compile Include="Mp3Encoder.cs" />
+    <Compile Include="MpvClipPlayer.cs" />
     <Compile Include="SpeechCache.cs" />
     <Compile Include="GoogleCloudVoices.cs" />
     <Compile Include="OcrAskForm.cs" />
