@@ -234,7 +234,6 @@ namespace Nemoviz_Book_Reader
         private static void Explain(IWin32Window owner, OcrRefusal why)
         {
             string key =
-                why == OcrRefusal.UndrawablePdf ? "Ocr.Refusal.Undrawable" :
                 why == OcrRefusal.NoEngine ? "Ocr.Refusal.NoEngine" :
                 "Ocr.Refusal.NoPages";
             MessageForm.ShowInfo(owner, Localization.T(key), Localization.T("Ocr.Ask.Title"));

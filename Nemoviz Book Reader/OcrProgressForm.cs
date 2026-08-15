@@ -50,8 +50,18 @@ namespace Nemoviz_Book_Reader
         private int spokenQuarter;
         private int shownDone = -1;
         private bool finished;
+        private bool askedEarly;
         private DateTime started;
         private string statusText = "";
+
+        /// <summary>How many pages may come back blank IN A ROW before the reader
+        /// is asked whether this is worth finishing. Twenty is about twelve
+        /// seconds of work, and no ordinary book has twenty blank leaves
+        /// together.</summary>
+        private const int BlankPagesBeforeAsking = 20;
+
+        /// <summary>Blank pages since the last one that had anything on it.</summary>
+        private int blankRun;
 
         public OcrProgressForm(OcrPageSource source, string language)
         {
@@ -157,9 +167,34 @@ namespace Nemoviz_Book_Reader
                 if (lines != null)
                     foreach (var l in lines)
                         if (!string.IsNullOrWhiteSpace(l.Text)) texts.Add(l.Text.Trim());
-                if (texts.Count > 0) withText++;
+                if (texts.Count > 0) { withText++; blankRun = 0; } else blankRun++;
                 pageLines.Add(texts);
                 done = i + 1;
+
+                // ASK EARLY WHEN NOTHING IS COMING OUT (Gordan, 2026-08-15).
+                // A blank-rendering book used to be refused before it started;
+                // that threw away a JBIG2 book that reads perfectly well, so the
+                // book is now always attempted. The cost of attempting one that
+                // really is blank is the whole run — two and a half minutes on a
+                // 252-page book — spent to arrive at "nothing".
+                //
+                // TWENTY BLANK PAGES IN A ROW, not the first twenty, and the
+                // measurement is why: an archive.org book gave text on 4 of its
+                // first 20 pages and nothing at all thereafter. Those four are
+                // the title page, the imprint and the contents — FRONT MATTER
+                // RENDERS EVEN WHEN THE BODY DOES NOT, because it is not built
+                // the same way. A rule looking at the opening of the book would
+                // have measured the one part of it that works.
+                //
+                // PAGES that gave anything, never a word COUNT. Gordan's own
+                // objection to the sparse-import rule applies to his own
+                // proposal here: an average cannot tell a genuinely sparse book
+                // from a blank one, and a page either has its text or it has not.
+                if (blankRun >= BlankPagesBeforeAsking && !askedEarly)
+                {
+                    askedEarly = true;
+                    if (!AskWhetherToGoOn()) return null;
+                }
             }
             OcrTidy.StripFurniture(pageLines);
 
@@ -261,6 +296,36 @@ namespace Nemoviz_Book_Reader
         }
 
         private void Say(string text) { ScreenReader.Announce(this, text); }
+
+        /// <summary>Puts the question from the WORKER thread and waits for the
+        /// answer. True to carry on.
+        ///
+        /// <para>The answer is a CANCEL, not a failure — <see cref="Finish"/>
+        /// keys off <see cref="Cancelled"/> rather than off a null result, and
+        /// without setting it a reader who had just said "no thanks" would be
+        /// told a moment later that no text was found. They know.</para>
+        ///
+        /// <para>If the question cannot be put at all, the job CARRIES ON. A
+        /// window that has gone away is not the reader saying stop, and the
+        /// existing end-of-job message still tells them the truth.</para></summary>
+        private bool AskWhetherToGoOn()
+        {
+            try
+            {
+                if (IsDisposed || Disposing || !IsHandleCreated) return true;
+                bool go = true;
+                Invoke((MethodInvoker)(() =>
+                {
+                    go = MessageForm.ShowConfirm(this,
+                        Localization.T(source.Jbig2 ? "Ocr.Blank.Jbig2" : "Ocr.Blank.Question",
+                                       BlankPagesBeforeAsking, source.PageCount),
+                        Localization.T("Ocr.Ask.Title"));
+                    if (!go) { Cancelled = true; stop = true; }
+                }));
+                return go;
+            }
+            catch { return true; }
+        }
 
         private void Finish(string text, int withText)
         {

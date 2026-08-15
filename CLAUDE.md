@@ -3708,14 +3708,42 @@ are built differently and the filter counts already said so — Meditations has
 and Windows draws it fine. Rendered sizes agree: ~1.4 MB a page against
 200–400 kB of near-blank paper.
 
-**Proposed, and it is Gordan's call: stop refusing, and PROBE instead.** Render
-and recognize about three pages spread through the book — ~2 seconds. Any words
-at all → read the whole book. None → *then* report `UndrawablePdf` when the file
-uses JBIG2, which keeps the specific honest sentence and stops it being a
-generic "OCR failed". The detection becomes the EXPLANATION rather than the
-gate, no book is lost, and the worst case costs two seconds instead of a whole
-title. It is also the same shape as everything else decided this day: offer and
-report, do not decide for the reader.
+**BUILT the same day, and the shape is Gordan's, not mine.** I proposed probing
+three pages up front; he proposed reading and asking when the result looks
+hopeless, assuming it was not viable because it needs the whole book first. It
+is viable, because the question does not have to wait for the end — the worker
+already goes page by page behind `OcrProgressForm`.
+
+- `OcrRefusal.UndrawablePdf` is **gone**, along with `Ocr.Refusal.Undrawable`
+  whose wording ("there is nothing for Nemoviz to read") is the claim this
+  measurement disproved. `OcrPageSource.Jbig2` replaces it: a **diagnosis
+  carried forward**, never a gate.
+- `OcrProgressForm` asks after **twenty blank pages IN A ROW**, once, and a "no"
+  is a Cancel rather than a failure — `Finish` keys off `Cancelled`, and without
+  setting it a reader who had just declined would then be told no text was
+  found.
+- **Not the first twenty, and the measurement is the whole reason.** Meditations
+  gives text on 4 of its first 20 pages — title page, imprint, contents — and
+  nothing for the 240 after. **Front matter renders even when the body does
+  not**, so a rule reading the opening of the book measures the one part of it
+  that works. My first version did exactly that and would never have fired.
+- **Pages, never a word count.** Gordan's own monograph objection to the sparse
+  rule applies to his own "1 500 words in 500 pages" formulation, and he took the
+  correction.
+
+**Measured by walking every page of three whole books through the shipped
+classes:**
+
+| book | pages with text | longest blank run | outcome |
+|---|---|---|---|
+| `meditationsofmar00marc` | 5 / 256 | **240**, from page 9 | **asks at page 28, ~10 s** |
+| `onliberty00millgoog` | 218 / 227 | 4 | never asks, reads to the end |
+| `Marko Podrug` (control) | 249 / 252 | 1 | never asks |
+
+The longest legitimate blank run in a real book is **4** against a threshold of
+20, so the margin is fivefold. The book the old code threw away now reads, and
+the one that really is blank costs ten seconds instead of two and a half
+minutes.
 
 **Method note worth keeping.** The refusal was justified by "0 words on 32 of 32
 sampled pages" of `meditationsofmar00marc` — a true measurement of ONE book,

@@ -15,10 +15,6 @@ namespace Nemoviz_Book_Reader
         None = 0,
         /// <summary>OCR is not available at all — no recognizer language installed.</summary>
         NoEngine,
-        /// <summary>The PDF stores its text as a JBIG2 mask, which Windows will not
-        /// draw. See <see cref="OcrPageSource.UsesJbig2"/> — this is emphatically
-        /// NOT an OCR failure and must not be reported as one.</summary>
-        UndrawablePdf,
         /// <summary>Nothing in it that could hold text.</summary>
         NoPages
     }
@@ -35,15 +31,28 @@ namespace Nemoviz_Book_Reader
     /// so one TIFF can be a whole book), and any single <b>PNG / JPEG / BMP /
     /// GIF / TIFF</b>.</para>
     ///
-    /// <para><b>The one thing Windows cannot do</b> is draw a JBIG2 image mask,
-    /// which is exactly how a mass-digitized scanned book stores its text: a
-    /// JPEG 2000 background holding the paper, and a JBIG2 bitonal mask holding
-    /// the words. Windows renders the background and silently omits the mask, so
-    /// every page comes out as blank paper and OCR honestly reports nothing —
-    /// measured, 0 words on 32 of 32 sampled pages of one archive.org book. That
-    /// looks exactly like a broken scan and is not one, so it is detected up
-    /// front (<see cref="UsesJbig2"/>) and reported as its own refusal. Rare in
-    /// practice: 2 of 109 real local PDFs, both of them mass-digitized.</para>
+    /// <para><b>The one thing Windows cannot do</b> is draw a JBIG2 image
+    /// <i>mask</i>: a mass-digitized book may store its text as a JPEG 2000
+    /// background holding the paper with a JBIG2 bitonal mask holding the words,
+    /// and Windows renders the background and silently omits the mask, so the
+    /// page comes out as blank paper and OCR honestly reports nothing.</para>
+    ///
+    /// <para><b>That used to REFUSE the book up front, and it was wrong —
+    /// measured 2026-08-15 after Gordan asked whether the reader is simply told
+    /// "nothing from this book".</b> They were, without a single page being
+    /// tried. Of the two JBIG2 books here, one reads perfectly well: six of six
+    /// sampled pages of a Google-scanned <i>On Liberty</i> gave 1 590 words of
+    /// real text, while an archive.org <i>Meditations</i> gave none. The filter
+    /// counts said why and nobody had read them — Meditations carries 512 JPX
+    /// over 256 pages, a background with a mask over it; On Liberty carries 5
+    /// JPX over 227 pages, so its JBIG2 <b>is</b> the page and Windows draws
+    /// it.</para>
+    ///
+    /// <para>So <see cref="UsesJbig2"/> is a <b>diagnosis, not a gate</b>: the
+    /// book is read, and if the pages really do come back blank the progress
+    /// window asks early and can say precisely why (see
+    /// <c>OcrProgressForm</c>). The worst case costs seconds; the old refusal
+    /// cost a whole title. Rare either way: 2 of 109 real local PDFs.</para>
     /// </summary>
     public class OcrPageSource : IDisposable
     {
@@ -58,6 +67,12 @@ namespace Nemoviz_Book_Reader
 
         public int PageCount { get; private set; }
         public OcrRefusal Refusal { get; private set; }
+
+        /// <summary>This PDF uses the JBIG2 filter. NOT a refusal and not a
+        /// prediction — one such book here reads and the other does not. It is
+        /// carried so that a book whose pages DO come back blank can be told
+        /// what happened, instead of being handed a bare "no text found".</summary>
+        public bool Jbig2 { get; private set; }
 
         private OcrPageSource() { }
 
@@ -90,7 +105,9 @@ namespace Nemoviz_Book_Reader
                 }
                 else if ((Path.GetExtension(path) ?? "").ToLowerInvariant() == ".pdf")
                 {
-                    if (UsesJbig2(path)) { src.Refusal = OcrRefusal.UndrawablePdf; return src; }
+                    // Noted, never a gate — see the class comment. Refusing here
+                    // threw away a book that reads.
+                    src.Jbig2 = UsesJbig2(path);
                     src.OpenPdf(path);
                 }
                 else if (IsImageFile(path))

@@ -420,7 +420,6 @@ Ocr.Result.NoText=No text was found in the pictures. The book has been added, bu
 ; The one Windows genuinely cannot draw: the text is stored as a JBIG2 mask,
 ; which its PDF renderer omits, so every page arrives as blank paper. The file
 ; is not damaged, and the reader must not be sent looking for a better copy.
-Ocr.Refusal.Undrawable=This PDF keeps its text in a form Windows cannot draw, so there is nothing for Nemoviz to read. The file itself is fine — a different edition of the same book, or its DjVu or ePub version, would work.
 Ocr.Refusal.NoEngine=Windows has no text recognition installed. It comes with a Windows language: add one under Settings, Time and language, Language and region, and it arrives with it.
 Ocr.Refusal.NoPages=There are no pages in this to read.
 Ocr.Progress.Title=Reading the pictures
@@ -448,6 +447,8 @@ Context.ReReadOcr=Re-read in a different language
 ; from a book that has simply gone quiet.
 Ocr.Unread.Message=This book has not been read yet — it is still pictures of its pages, so there is nothing to speak. Read it now?
 Ocr.Sparse.Message=Only {0} of this book's {1} pages carry any text. It is most likely a scan whose text layer is broken, so the words are still pictures. Read the pictures now?
+Ocr.Blank.Question={0} pages in a row came back with no text on them at all. The rest of the {1} may be the same, and reading them would take a while. Keep going?
+Ocr.Blank.Jbig2={0} pages in a row came back with no text on them at all. This PDF stores its words in a form Windows cannot draw, so those pages arrive as blank paper with nothing to recognize — reading the remaining {1} would most likely find nothing. Keep going?
 Ocr.Read.Question=This book is {0} pages of pictures and has not been read yet. Reading it takes {1}.
 Ocr.ReRead.Question=This book was read from {0} pages of pictures. Reading it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
 Ocr.ReRead.Done=The book has been read again and replaced.
