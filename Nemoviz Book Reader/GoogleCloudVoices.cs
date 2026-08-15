@@ -351,7 +351,8 @@ namespace Nemoviz_Book_Reader
         /// documentation lists pitch control as unavailable for hr-HR, and
         /// sending a parameter the service ignores would make a control that does
         /// nothing look like a control that is broken.</para></summary>
-        public static byte[] Synthesize(string text, string googleName, string language, double rate)
+        public static byte[] Synthesize(string text, string googleName, string language,
+                                        double rate, double volumeDb)
         {
             if (string.IsNullOrEmpty(text)) return null;
             try
@@ -361,13 +362,17 @@ namespace Nemoviz_Book_Reader
 
                 if (rate < 0.25) rate = 0.25;
                 if (rate > 4.0) rate = 4.0;
+                if (volumeDb < -96) volumeDb = -96;
+                if (volumeDb > 16) volumeDb = 16;
 
+                var inv = System.Globalization.CultureInfo.InvariantCulture;
                 string body =
                     "{\"input\":{\"text\":" + Json.Str(text) + "}," +
                     "\"voice\":{\"languageCode\":" + Json.Str(language) +
                     ",\"name\":" + Json.Str(googleName) + "}," +
                     "\"audioConfig\":{\"audioEncoding\":\"LINEAR16\",\"sampleRateHertz\":24000" +
-                    ",\"speakingRate\":" + rate.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
+                    ",\"speakingRate\":" + rate.ToString("0.###", inv) +
+                    ",\"volumeGainDb\":" + volumeDb.ToString("0.##", inv) +
                     "}}";
 
                 string reply = Post(SynthesizeUrl, "application/json; charset=utf-8",

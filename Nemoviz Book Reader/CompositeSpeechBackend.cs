@@ -37,6 +37,14 @@ namespace Nemoviz_Book_Reader
             try { Add(new Sapi5Backend(), 64); } catch { }
             try { Add(new OneCoreBackend(), 64); } catch { }
             try { Add(new Sapi5SatelliteBackend(), 32); } catch { }
+            // The cloud voices go in LAST, so a name they happen to share with
+            // something installed resolves to the installed one — and they are
+            // added whatever the reader's "use cloud voices" switch says, because
+            // that switch governs what the PICKER offers, not what can be played.
+            // A book that already has a cloud voice must not fall silent because
+            // the switch is off. Costs nothing when no credential is stored: the
+            // backend then reports no voices at all.
+            try { Add(new GoogleCloudBackend(), 64); } catch { }
 
             active = backends.Count > 0 ? backends[0] : null;
 
