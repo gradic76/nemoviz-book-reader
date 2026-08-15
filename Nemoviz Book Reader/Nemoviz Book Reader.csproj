@@ -99,9 +99,9 @@
     <Reference Include="TagLibSharp, Version=2.3.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <HintPath>..\packages\TagLibSharp.2.3.0\lib\net462\TagLibSharp.dll</HintPath>
     </Reference>
-    <!-- PdfPig (Apache-2.0) â€” PDF text extraction; net471 build for .NET 4.8.
+    <!-- PdfPig (Apache-2.0) — PDF text extraction; net471 build for .NET 4.8.
          Split across several assemblies, all needed at runtime; System.HashCode
-         polyfill via Microsoft.Bcl.HashCode. Other deps (System.Memory/Buffers/â€¦)
+         polyfill via Microsoft.Bcl.HashCode. Other deps (System.Memory/Buffers/…)
          are already vendored above via SharpCompress. -->
     <Reference Include="UglyToad.PdfPig">
       <HintPath>..\packages\PdfPig.0.1.15\lib\net471\UglyToad.PdfPig.dll</HintPath>
@@ -207,6 +207,7 @@
     <Compile Include="Mp3Encoder.cs" />
     <Compile Include="MpvClipPlayer.cs" />
     <Compile Include="SpeechCache.cs" />
+    <Compile Include="SpeechExport.cs" />
     <Compile Include="SpeechPrefill.cs" />
     <Compile Include="GoogleCloudVoices.cs" />
     <Compile Include="OcrAskForm.cs" />
@@ -333,7 +334,7 @@
     <Content Include="libmpv-2.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <!-- liblouis (LGPL 2.1+) â€” braille back-translation, plus its table set.
+    <!-- liblouis (LGPL 2.1+) — braille back-translation, plus its table set.
          The tables are data files resolved at runtime from louis\tables. -->
     <Content Include="libmp3lame.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
