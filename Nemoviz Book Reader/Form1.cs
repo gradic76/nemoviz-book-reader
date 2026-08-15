@@ -2994,10 +2994,27 @@ namespace Nemoviz_Book_Reader
             sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -")
               .Append(FormatTime(totalSec - elapsed));
 
-            // THE ONE TRANSIENT LINE, and it is here because spending must be
-            // visible. A book with a cloud voice is being made ahead of the
-            // reader, which costs money — quietly would be the wrong way to do
-            // that. It goes last, so nothing above it moves as it comes and goes.
+            // WHAT IS ALREADY MADE, and whether more is being made right now.
+            //
+            // Reported by Gordan, 2026-08-16: the first version of this line
+            // showed only a prefill IN PROGRESS, so a book already prepared, or
+            // one read by a local voice, said nothing at all — and the question a
+            // reader actually has is "will exporting this take a moment or three
+            // quarters of an hour". That is answered by what is on disk, not by
+            // whether something is running.
+            //
+            // Counted by looking in the folder once rather than by asking after
+            // every sentence: a book has thousands, and this line is rebuilt
+            // whenever anyone tabs into the box.
+            int pieces; long bytes;
+            SpeechCache.Measure(currentBook != null ? currentBook.FolderPath : null,
+                                out pieces, out bytes);
+            if (pieces > 0)
+                sb.Append(nl).Append(Localization.T("Player.Info.Prepared",
+                    pieces, (bytes / (1024.0 * 1024.0)).ToString("0.#")));
+
+            // And the transient half, because spending must be visible: a cloud
+            // book is being made ahead of the reader and that costs money.
             if (prefill != null && prefill.Running)
                 sb.Append(nl).Append(Localization.T("Player.Info.Preparing",
                     prefill.Done, prefill.Total));

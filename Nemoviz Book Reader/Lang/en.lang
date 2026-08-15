@@ -435,6 +435,7 @@ Ocr.Progress.Minutes=About {0} minutes left.
 ; Settings. "Automatic" is the right answer nearly always: recognition goes by
 ; SCRIPT, not by language, so one Latin recognizer reads every Latin language.
 Settings.Tab.Advanced=Advanced
+Player.Info.Prepared=Speech kept: {0} passages, {1} MB
 Player.Info.Preparing=Preparing the rest of this book: {0} of {1} passages
 Menu.File.ExportAudio=Export as an audiobook...
 Export.NotText=Only a text book can be made into an audiobook. This one is already audio.
