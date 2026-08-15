@@ -1037,7 +1037,6 @@ namespace Nemoviz_Book_Reader
             {
                 // No speech has no preferences to load and nothing to preview —
                 // previewing it would start the 32-bit speech host to say nothing.
-                DimPitchForCloudVoice();
                 if (cmbTVoice.SelectedIndex == 0) { UpdateTextEnabled(); RefreshTextInfo(); return; }
                 LoadPrefsForSelectedVoice(); UpdateTextEnabled(); RefreshTextInfo(); PreviewText();
             };
@@ -1409,7 +1408,19 @@ namespace Nemoviz_Book_Reader
             // number a reader on braille or on the screen is steering with
             // (Gordan). Volume and pitch describe a voice that is not there.
             bool noSpeech = cmbTVoice != null && cmbTVoice.SelectedIndex == 0;
-            SettingsForm.SetEnabled(!noSpeech, numTVolume, numTPitch);
+            SettingsForm.SetEnabled(!noSpeech, numTVolume);
+
+            // PITCH ALSO GOES WHEN THE VOICE IS A CLOUD ONE. Google documents
+            // pitch as unavailable for hr-HR and simply ignores it, so a spin box
+            // that moves while nothing changes is worse than one that plainly
+            // cannot be moved.
+            //
+            // The test belongs HERE and nowhere else, which is the whole fix: the
+            // first version dimmed the box from the voice-changed handler and this
+            // method turned it straight back on a line later. Reported by Gordan,
+            // 2026-08-15. Every caller of this method would have had to remember
+            // to re-dim afterwards, and one of them would not have.
+            SettingsForm.SetEnabled(!noSpeech && !SelectedVoiceIsCloud(), numTPitch);
 
             // The visual switch stands alone now. It used to be forced on and then
             // disabled whenever braille was ticked, along with the whole group
@@ -1446,22 +1457,13 @@ namespace Nemoviz_Book_Reader
             return (dash > 0 ? n.Substring(0, dash) : n).Trim();
         }
 
-        /// <summary>A cloud voice has no pitch, so the control must not pretend
-        /// otherwise. Google documents pitch as unavailable for hr-HR and simply
-        /// ignores it — and a spin box that moves while nothing changes is worse
-        /// than one that plainly cannot be moved.
-        ///
-        /// <para>Dimmed rather than hidden: a control that vanishes and returns as
-        /// the voice changes moves everything below it, and the reader loses their
-        /// place. Windows drops a disabled control from the tab order, which here
-        /// is the right outcome — there is nothing to set.</para></summary>
-        private void DimPitchForCloudVoice()
+        /// <summary>Is the voice on screen one of the cloud ones? Asked by
+        /// <see cref="UpdateTextEnabled"/> and nobody else — see the note there
+        /// about why it is not asked at the call sites.</summary>
+        private bool SelectedVoiceIsCloud()
         {
-            if (numTPitch == null || cmbTVoice == null) return;
-            string name = cmbTVoice.SelectedIndex > 0 ? (cmbTVoice.SelectedItem as string) : null;
-            string google, lang;
-            bool cloud = name != null && GoogleCloudVoices.Split(name, out google, out lang);
-            numTPitch.Enabled = !cloud;
+            if (cmbTVoice == null || cmbTVoice.SelectedIndex <= 0) return false;
+            return GoogleCloudVoices.IsOne(cmbTVoice.SelectedItem as string);
         }
 
         private void TextVoicesForSelection()
@@ -1488,7 +1490,6 @@ namespace Nemoviz_Book_Reader
                 want = cmbTVoice.Items.IndexOf(book.TextVoice);
             if (want < 0) want = cmbTVoice.Items.Count > 1 ? 1 : 0;
             cmbTVoice.SelectedIndex = want;
-            DimPitchForCloudVoice();
         }
 
         /// <summary>The voice catalog for the pickers. Created on demand (it starts

@@ -33,19 +33,13 @@ namespace Nemoviz_Book_Reader
     /// </summary>
     public class GoogleCloudBackend : ISpeechBackend
     {
-        /// <summary>Rate 0 — the middle of NBR's scale — is the voice's own
-        /// natural speed, and every step is 7% of it. Gordan, 2026-08-15: every
-        /// voice should sit at the speed it was built to read at until someone
-        /// moves it.
-        ///
-        /// <para>The span is deliberately narrower than Google's 0.25–4.0. Nobody
-        /// here has heard Chirp at four times speed, and a range whose ends are
-        /// unusable is a range whose middle is hard to find.</para>
-        ///
-        /// <para>The WPM-versus-multiplier question is open (Gordan is thinking
-        /// about showing every voice on a plain 1.0, 1.1, 1.2 scale instead). It
-        /// changes this constant and nothing else.</para></summary>
-        private const double StepPerRate = 0.07;
+        /// <summary>The fastest this voice may be driven, and it is the player's
+        /// own ceiling rather than Google's. Gordan, 2026-08-15, after trying it:
+        /// *"do 4 x vjerojatno neće biti smisla ali možemo ostaviti do 3 x kao i
+        /// sve ostalo"* — the transport has run 50–300% since it was built, and a
+        /// voice that could go faster than the player would be the odd one
+        /// out.</summary>
+        private const double TopSpeed = 3.0;
 
         private readonly SapiWavPlayer player = new SapiWavPlayer();
         private readonly System.Windows.Forms.Timer poll;
@@ -162,7 +156,19 @@ namespace Nemoviz_Book_Reader
 
         public void SetAudioDevice(string deviceId) { player.SetDevice(deviceId); }
 
-        private double Speed { get { return 1.0 + rate * StepPerRate; } }
+        /// <summary>NBR's −10…10 as Google's multiplier.
+        ///
+        /// <para><b>Geometric, not linear, and it has to be.</b> Rate 0 is the
+        /// voice's own natural speed — Gordan's rule, that every voice sits where
+        /// it was built to read until someone moves it — and the top is 3×. A
+        /// straight step of that size would put the bottom of the scale at −1.0,
+        /// which is not a speed. Halving and doubling are what the ear hears as
+        /// symmetric anyway, so ±10 comes out 3× and one third.</para>
+        ///
+        /// <para>The WPM-versus-multiplier question is still open — Gordan is
+        /// weighing showing every voice on a plain 1.0, 1.1, 1.2 scale. It changes
+        /// this one expression and nothing else.</para></summary>
+        private double Speed { get { return Math.Pow(TopSpeed, rate / 10.0); } }
 
         public void Speak(string text)
         {
