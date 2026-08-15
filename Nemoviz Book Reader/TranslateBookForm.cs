@@ -190,38 +190,31 @@ namespace Nemoviz_Book_Reader
             return y + 32;
         }
 
-        /// <summary>The languages offered are the ones this library actually holds
-        /// books in, plus the reader's own — the same set Settings uses for voices,
-        /// and for the same reason: a list of three hundred and fifty languages is
-        /// not a choice, it is an obstacle.</summary>
+        /// <summary>Every language the services translate into, not the ones this
+        /// library happens to hold books in.
+        ///
+        /// <para><b>That earlier rule was borrowed from the voice picker and does
+        /// not transfer</b> — see <see cref="TranslationLanguages"/>. A voice must be
+        /// installed; a translation service does not care what is on your shelf.
+        /// Gordan met it with two books in the library and three languages
+        /// offered.</para>
+        ///
+        /// <para>A long list is not the obstacle here that it is for voices either,
+        /// because every row is equally reachable: there is no installed-and-not
+        /// split, so no separator is needed and the type-ahead a combo already has
+        /// is enough to reach any of them.</para></summary>
         private void BuildLanguages(AppSettings settings, string detected)
         {
-            var codes = new List<string>();
-            void Note(string c)
-            {
-                c = LanguageDetector.Primary(c ?? "");
-                if (c.Length > 0 && !codes.Contains(c)) codes.Add(c);
-            }
-
-            Note(detected);
-            if (settings != null) foreach (string c in settings.SeenLanguages) Note(c);
-            Note(CultureInfo.InstalledUICulture.TwoLetterISOLanguageName);
-            Note("en");
-            Note("hr");
-
-            codes.Sort((a, b) => string.Compare(LanguageDetector.DisplayName(a),
-                                                LanguageDetector.DisplayName(b), StringComparison.CurrentCulture));
             langCodes.Clear();
-            langCodes.AddRange(codes);
-            foreach (string c in langCodes)
+            foreach (var l in TranslationLanguages.All)
             {
-                // Every language is written in its own language, everywhere.
-                string name = LanguageDetector.DisplayName(c);
-                cmbSource.Items.Add(name);
-                cmbTarget.Items.Add(name);
+                langCodes.Add(l.Code);
+                cmbSource.Items.Add(l.DisplayName);
+                cmbTarget.Items.Add(l.DisplayName);
             }
 
-            cmbSource.SelectedIndex = Math.Max(0, langCodes.IndexOf(LanguageDetector.Primary(detected ?? "")));
+            int si = TranslationLanguages.IndexOf(detected);
+            cmbSource.SelectedIndex = si >= 0 ? si : Math.Max(0, TranslationLanguages.IndexOf("en"));
 
             // FIRST TIME the Windows display language; AFTER THAT whatever was
             // chosen last. The system decides once, and habit decides from then on.
@@ -231,8 +224,8 @@ namespace Nemoviz_Book_Reader
             string want = settings != null && !string.IsNullOrEmpty(settings.LastTranslationTarget)
                 ? settings.LastTranslationTarget
                 : CultureInfo.InstalledUICulture.TwoLetterISOLanguageName;
-            int ti = langCodes.IndexOf(LanguageDetector.Primary(want));
-            cmbTarget.SelectedIndex = ti >= 0 ? ti : Math.Max(0, langCodes.IndexOf("hr"));
+            int ti = TranslationLanguages.IndexOf(want);
+            cmbTarget.SelectedIndex = ti >= 0 ? ti : Math.Max(0, TranslationLanguages.IndexOf("en"));
 
             foreach (var e in engines) cmbEngine.Items.Add(e.DisplayName);
             if (engines.Count > 0) cmbEngine.SelectedIndex = 0;
