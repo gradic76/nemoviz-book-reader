@@ -1674,10 +1674,63 @@ through late-bound `dynamic`).
 > feature. **Anything below about the two-combo picker describes what was built
 > in Session 15, not what ships.**
 
-**Phase 2 (superseded, see above):** Settings → Text Books was a two-combo
-picker — "Speech Engine" (vendor + architecture, e.g. "eSpeak (32-bit)",
-"Microsoft (64-bit)", "SAPI 5 (32-bit)") filtering the "Voice" combo to that
-group. Backends now report a
+### Cloud voices — where they live, settled with Gordan 2026-08-15 (spec, not yet built)
+
+Chirp 3 HD passed by ear (see memory). The whole difficulty was never the
+synthesis but **where 30 voices that speak 53 languages can go without wrecking
+two dialogs that are already full**. Measured first, because it decides
+everything: the catalogue holds 2066 entries, 1568 of them Chirp 3 HD — but only
+**30 distinct speakers**, and the same 30 in every language checked (hr, en, ja,
+ar, verified). **A cloud voice is a SPEAKER, not a voice-plus-language.** The
+language is a parameter of the request. That is the opposite of SAPI/OneCore,
+where Matej *is* Croatian and Zira *is* English, and it is why one voice is
+called the same thing for Croatian and for English.
+
+**The design, Gordan's, and every part of it has a reason he gave:**
+
+- **Settings → Speech and Braille keeps ONLY installed voices.** That page
+  assigns per-language DEFAULTS, and a cloud voice may never be a default — so
+  it has no business being offered there. The rule is enforced by the place not
+  existing, not by a rule somebody has to remember.
+- **A new group on the OCR and Translate tab: "Google Cloud Voices"** — the
+  button that loads the credential, and the "use them" check. It goes there
+  because that tab already holds every other service credential, and because it
+  is the only one of the three candidate pages with room: measured, its content
+  ends at y=352 of about 500, where Text Books' Speech group ends at 234 of 246
+  and Properties' at 212 of 212.
+- **The check IS persisted** — a reversal of the session-only rule agreed an
+  hour earlier, and Gordan's reason is the better one: *"pošto je na neočekivanom
+  mjestu ipak mora pamtiti"*. A switch a reader had to hunt for must not have to
+  be hunted for again every launch.
+- **With the check on, cloud voices appear in PROPERTIES only**, and a chosen
+  one is remembered **for that book alone**.
+- **`NoVoiceForm` never shows them, on purpose.** The reader reaching a book
+  whose language nothing speaks is answering a question about *this book now*;
+  the way to a cloud voice is to get past that and open Properties from the
+  shelf. **This also kills an edge case by construction**: the "remember this
+  voice for this language" tick being designed for that dialog can never create
+  a per-language rule pointing at the cloud, because the cloud is not in the
+  list to be picked.
+
+**The credential is NOT a key, and the group cannot look like the others.**
+Cloud TTS refuses API keys outright (*"API keys are not supported by this
+API"*); it takes a **service account**, a JSON file of a few kB with a private
+key in it. So: a button that LOADS the file, storing its **contents and not its
+path** (Gordan keeps his on a custom drive and it must survive being moved), and
+"check the credential" means minting a token once rather than asking a service
+whether a string is valid.
+
+**The session flag must be reachable from two places** — `SettingsForm` and
+`PropertiesForm` each build their own catalogue through `GetVoiceCatalog()`.
+
+**Open:** the tab is called "OCR and Translate" and that name stops covering its
+contents; "Cloud" in the title would mislead the other way, since OCR is local.
+Gordan names it.
+
+**Phase 2 (superseded — the engine picker is gone, see the correction above):**
+Settings → Text Books was a two-combo picker — "Speech Engine" (vendor +
+architecture, e.g. "eSpeak (32-bit)", "Microsoft (64-bit)", "SAPI 5 (32-bit)")
+filtering the "Voice" combo to that group. Backends now report a
 per-voice **vendor**; `CompositeSpeechBackend.GetVoiceCatalog()` derives the
 engine label (`EngineLabel`: eSpeak from its URL vendor, Microsoft, else "SAPI 5").
 Only the voice is persisted (`TtsVoice`); the engine is derived from it on open.
