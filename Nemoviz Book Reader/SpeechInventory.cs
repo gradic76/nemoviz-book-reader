@@ -158,15 +158,26 @@ namespace Nemoviz_Book_Reader
         /// <summary>Writes the inventory to <c>%TEMP%\NBR-speech-inventory.log</c>,
         /// once per run. On someone else's machine this is the first thing worth
         /// looking at when a voice they expect isn't in the list.</summary>
-        public static void LogOnce(IEnumerable<(string Name, string Engine, string Language)> catalog)
+        /// <summary><paramref name="cloudVoices"/> is how many were left out of
+        /// the catalogue because they come from a cloud service. They are counted
+        /// rather than listed — a credentialled machine has well over a thousand,
+        /// and this file is opened to find the INSTALLED voice that is missing.
+        /// Naming the number keeps that honest: their absence from the list below
+        /// is deliberate, not a failure to find them.</summary>
+        public static void LogOnce(IEnumerable<(string Name, string Engine, string Language)> catalog,
+                                   int cloudVoices = 0)
         {
             if (logged) return;
             logged = true;
             try
             {
+                string cloud = cloudVoices > 0
+                    ? Environment.NewLine + "Cloud voices available and not listed here: " +
+                      cloudVoices + Environment.NewLine
+                    : "";
                 File.WriteAllText(Path.Combine(Path.GetTempPath(), "NBR-speech-inventory.log"),
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + Environment.NewLine
-                    + Describe(catalog));
+                    + Describe(catalog) + cloud);
             }
             catch { }
         }

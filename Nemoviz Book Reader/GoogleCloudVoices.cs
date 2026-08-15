@@ -336,6 +336,39 @@ namespace Nemoviz_Book_Reader
             return true;
         }
 
+        /// <summary>Is this one of ours? Told by the NAME parsing back into a
+        /// Google id — never by a vendor or engine LABEL, which is a display
+        /// string and would quietly stop matching the day somebody reworded
+        /// it.</summary>
+        public static bool IsOne(string displayName)
+        {
+            string g, l;
+            return Split(displayName, out g, out l);
+        }
+
+        /// <summary>The same catalogue with the cloud voices taken out, and how
+        /// many were taken.
+        ///
+        /// <para>Wanted in three places at once, which is why it lives here and
+        /// not in a dialog: Settings never offers them, Properties only when the
+        /// reader has switched them on, and the speech inventory LOG must not
+        /// drown in them — measured, a machine with a credential has 1568 of them
+        /// against 7 installed voices, and that log exists precisely to find the
+        /// installed one that is missing.</para></summary>
+        public static List<(string Name, string Engine, string Language)> Exclude(
+            IEnumerable<(string Name, string Engine, string Language)> all, out int removed)
+        {
+            var kept = new List<(string, string, string)>();
+            removed = 0;
+            if (all == null) return kept;
+            foreach (var v in all)
+            {
+                if (IsOne(v.Name)) { removed++; continue; }
+                kept.Add(v);
+            }
+            return kept;
+        }
+
         // ── Synthesis ─────────────────────────────────────────────────────────
 
         /// <summary>One request: text in, a finished WAV out — which is exactly

@@ -51,7 +51,12 @@ namespace Nemoviz_Book_Reader
             // Record what this machine actually has — including sources NBR cannot
             // drive yet (SAPI 4). On another user's setup that log is the first
             // place to look when an expected voice is missing from the list.
-            SpeechInventory.LogOnce(GetVoiceCatalog());
+            // The cloud voices are COUNTED here, not listed. A machine with a
+            // credential carries 1568 of them against 7 installed ones, and this
+            // log exists to find the installed one that is missing — so listing
+            // them would bury the only thing anybody opens it for.
+            int cloud;
+            SpeechInventory.LogOnce(GoogleCloudVoices.Exclude(GetVoiceCatalog(), out cloud), cloud);
         }
 
         private void Add(ISpeechBackend b, int arch)

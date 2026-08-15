@@ -1037,6 +1037,7 @@ namespace Nemoviz_Book_Reader
             {
                 // No speech has no preferences to load and nothing to preview —
                 // previewing it would start the 32-bit speech host to say nothing.
+                DimPitchForCloudVoice();
                 if (cmbTVoice.SelectedIndex == 0) { UpdateTextEnabled(); RefreshTextInfo(); return; }
                 LoadPrefsForSelectedVoice(); UpdateTextEnabled(); RefreshTextInfo(); PreviewText();
             };
@@ -1082,6 +1083,15 @@ namespace Nemoviz_Book_Reader
 
             try { textCatalog = TextSpeech().GetVoiceCatalog(); }
             catch { textCatalog = new List<(string, string, string)>(); }
+
+            // THE ONE PLACE THE CLOUD VOICES ARE OFFERED, and only when the reader
+            // has switched them on over in Settings → Advanced. They are still
+            // PLAYABLE either way — the composite knows them regardless, so a book
+            // that already has one does not fall silent because the switch is off.
+            // What the switch governs is whether they clutter this list for
+            // somebody who has no intention of using them.
+            if (appSettings == null || !appSettings.UseCloudVoices)
+                textCatalog = SettingsForm.WithoutCloudVoices(textCatalog);
             PopulateTextLanguages();
 
             // The saved name may predate the switch to plain voice names (it could
@@ -1436,6 +1446,24 @@ namespace Nemoviz_Book_Reader
             return (dash > 0 ? n.Substring(0, dash) : n).Trim();
         }
 
+        /// <summary>A cloud voice has no pitch, so the control must not pretend
+        /// otherwise. Google documents pitch as unavailable for hr-HR and simply
+        /// ignores it — and a spin box that moves while nothing changes is worse
+        /// than one that plainly cannot be moved.
+        ///
+        /// <para>Dimmed rather than hidden: a control that vanishes and returns as
+        /// the voice changes moves everything below it, and the reader loses their
+        /// place. Windows drops a disabled control from the tab order, which here
+        /// is the right outcome — there is nothing to set.</para></summary>
+        private void DimPitchForCloudVoice()
+        {
+            if (numTPitch == null || cmbTVoice == null) return;
+            string name = cmbTVoice.SelectedIndex > 0 ? (cmbTVoice.SelectedItem as string) : null;
+            string google, lang;
+            bool cloud = name != null && GoogleCloudVoices.Split(name, out google, out lang);
+            numTPitch.Enabled = !cloud;
+        }
+
         private void TextVoicesForSelection()
         {
             if (cmbTVoice == null || textCatalog == null) return;
@@ -1460,6 +1488,7 @@ namespace Nemoviz_Book_Reader
                 want = cmbTVoice.Items.IndexOf(book.TextVoice);
             if (want < 0) want = cmbTVoice.Items.Count > 1 ? 1 : 0;
             cmbTVoice.SelectedIndex = want;
+            DimPitchForCloudVoice();
         }
 
         /// <summary>The voice catalog for the pickers. Created on demand (it starts

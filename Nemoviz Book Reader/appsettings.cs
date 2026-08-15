@@ -212,6 +212,7 @@ namespace Nemoviz_Book_Reader
             OcrLanguage = ini.Read("Ocr", "Language", "");
             LastTranslationTarget = ini.Read("Translate", "Target", "");
             TranslationNotes = ini.Read("Translate", "Notes", "");
+            UseCloudVoices = ini.Read("TextToSpeech", "UseCloudVoices", "0") == "1";
             KeepDeviceAlive = ini.Read("Audio", "KeepAlive", "1") == "1";
             UseOpticalDrive = ini.Read("Audio", "UseOpticalDrive", "0") == "1";
             OpticalDriveLetter = ini.Read("Audio", "OpticalDrive", "");
@@ -508,6 +509,27 @@ namespace Nemoviz_Book_Reader
             if (letter == OpticalDriveLetter) return;
             OpticalDriveLetter = letter;
             ini.Write("Audio", "OpticalDrive", letter);
+        }
+
+        /// <summary>Whether the cloud voices are offered in Properties.
+        ///
+        /// <para><b>Remembered rather than session-only, and Gordan reversed his
+        /// own earlier call to get here</b> (2026-08-15): the switch lives on the
+        /// Advanced tab, a page away from the picker it affects, and *"pošto je
+        /// na neočekivanom mjestu ipak mora pamtiti"* — something a reader had to
+        /// hunt for once must not have to be hunted for again at every
+        /// launch.</para>
+        ///
+        /// <para>It governs what the PICKER OFFERS and nothing else. A book that
+        /// already has a cloud voice keeps reading with it whatever this says —
+        /// see <see cref="GoogleCloudBackend"/>, which reports its voices to the
+        /// composite either way.</para></summary>
+        public bool UseCloudVoices { get; private set; }
+
+        public void SetUseCloudVoices(bool on)
+        {
+            UseCloudVoices = on;
+            ini.Write("TextToSpeech", "UseCloudVoices", on ? "1" : "0");
         }
 
         /// <summary>Stores the default voice and how it is set up. The numbers are

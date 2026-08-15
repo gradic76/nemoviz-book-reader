@@ -442,6 +442,9 @@ namespace Nemoviz_Book_Reader
             foreach (var kv in stagedPrefs.All())
                 appSettings.SetVoicePrefs(kv.Key, kv.Value);
 
+            if (chkCloudVoices != null && appSettings != null)
+                appSettings.SetUseCloudVoices(chkCloudVoices.Checked);
+
             // Per language and nothing else. The global default went with its row
             // (see PopulateLanguages): an empty key can no longer arrive here,
             // because there is no row that carries one. An empty VALUE still
@@ -555,7 +558,190 @@ namespace Nemoviz_Book_Reader
             page.Controls.Add(BuildOcrGroup(8, 6));
             page.Controls.Add(MakeHint("Settings.Ocr.Hint", 14, 108, 480, 60, 2));
             page.Controls.Add(BuildTranslationGroup(8, 176));
+            page.Controls.Add(BuildCloudVoicesGroup(8, 360));
             return page;
+        }
+
+        /// <summary>The same catalogue without the cloud voices — the rule itself
+        /// lives in <see cref="GoogleCloudVoices.Exclude"/>, because three places
+        /// need it and none of them is a dialog.</summary>
+        internal static List<(string Name, string Engine, string Language)> WithoutCloudVoices(
+            List<(string Name, string Engine, string Language)> all)
+        {
+            int dropped;
+            return GoogleCloudVoices.Exclude(all, out dropped);
+        }
+
+        private CheckBox chkCloudVoices;
+        private TextBox tbCloudState, tbCloudWhy;
+        private Button btnCloudForget;
+
+        /// <summary>The Google Cloud voices: the credential and the switch.
+        ///
+        /// <para><b>Why they are HERE and not beside the voice list</b> (settled
+        /// with Gordan, 2026-08-15). Settings → Speech and Braille assigns
+        /// per-language DEFAULTS, and a cloud voice may never be a default — so
+        /// it has no business on that page, and the rule is kept by the place not
+        /// existing rather than by a rule someone must remember. This tab already
+        /// holds every other service credential, and measured, it is the only one
+        /// of the three candidate pages with room: its content ended at y=352 of
+        /// about 500, where the Speech group ends at 234 of 246 and Properties'
+        /// at 212 of 212.</para>
+        ///
+        /// <para><b>The credential is not a key and this group cannot look like
+        /// its neighbour.</b> Cloud TTS refuses API keys outright — measured, it
+        /// answers "API keys are not supported by this API" — and takes a service
+        /// account, a JSON file of a few kB. So a button that LOADS a file, and
+        /// its contents are stored rather than its path: a reader downloads it
+        /// once and it lands wherever their browser puts it.</para>
+        ///
+        /// <para><b>The check is disabled without a credential, which hides it
+        /// from a screen reader</b> — Windows skips a disabled control in the tab
+        /// order, so someone would never learn it exists or why it is off. The
+        /// line beneath says so, the same answer §8l reached for the visual and
+        /// braille pair.</para></summary>
+        private GroupBox BuildCloudVoicesGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.Cloud.Group");
+            box.Location = new Point(x, y);
+            box.Size = new Size(500, 150);
+            box.Tag = "Hint.Settings.Cloud";
+
+            // Read-only but TABBABLE, never a Label: a reader driven by Tab never
+            // visits a label, and this line is how they find out whether they
+            // already did this.
+            tbCloudState = new TextBox();
+            tbCloudState.Multiline = true;
+            tbCloudState.ReadOnly = true;
+            tbCloudState.BorderStyle = BorderStyle.None;
+            tbCloudState.BackColor = SystemColors.Control;
+            tbCloudState.SetBounds(14, 22, 470, 32);
+            tbCloudState.TabIndex = 0;
+
+            Button load = new Button();
+            load.Text = Localization.T("Settings.Cloud.Load");
+            load.AccessibleName = load.Text;
+            load.SetBounds(14, 58, 240, 26);
+            load.TabIndex = 1;
+            load.Click += (s, e) => LoadCloudCredential();
+
+            btnCloudForget = new Button();
+            btnCloudForget.Text = Localization.T("Settings.Cloud.Forget");
+            btnCloudForget.AccessibleName = btnCloudForget.Text;
+            btnCloudForget.SetBounds(264, 58, 220, 26);
+            btnCloudForget.TabIndex = 2;
+            btnCloudForget.Click += (s, e) =>
+            {
+                if (!MessageForm.ShowConfirm(this, Localization.T("Settings.Cloud.ForgetAsk"),
+                                             Localization.T("Settings.Cloud.Group"))) return;
+                GoogleCloudVoices.Forget();
+                if (chkCloudVoices != null) chkCloudVoices.Checked = false;
+                ShowCloudState();
+            };
+
+            chkCloudVoices = new CheckBox();
+            chkCloudVoices.Text = Localization.T("Settings.Cloud.Use");
+            chkCloudVoices.AccessibleName = chkCloudVoices.Text;
+            chkCloudVoices.SetBounds(14, 92, 470, 22);
+            chkCloudVoices.TabIndex = 3;
+            chkCloudVoices.Checked = appSettings != null && appSettings.UseCloudVoices;
+
+            tbCloudWhy = new TextBox();
+            tbCloudWhy.Multiline = true;
+            tbCloudWhy.ReadOnly = true;
+            tbCloudWhy.BorderStyle = BorderStyle.None;
+            tbCloudWhy.BackColor = SystemColors.Control;
+            tbCloudWhy.SetBounds(14, 116, 470, 28);
+            tbCloudWhy.TabIndex = 4;
+
+            box.Controls.Add(tbCloudState);
+            box.Controls.Add(load);
+            box.Controls.Add(btnCloudForget);
+            box.Controls.Add(chkCloudVoices);
+            box.Controls.Add(tbCloudWhy);
+            ShowCloudState();
+            return box;
+        }
+
+        /// <summary>Puts the group's three moving parts in agreement with what is
+        /// actually stored — called after every change, so nothing on it can go
+        /// on claiming something that has stopped being true.</summary>
+        private void ShowCloudState()
+        {
+            bool have = GoogleCloudVoices.Have;
+
+            if (tbCloudState != null)
+            {
+                string text;
+                if (!have) text = Localization.T("Settings.Cloud.State.None");
+                else
+                {
+                    var speakers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    var langs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var v in GoogleCloudVoices.Voices())
+                    {
+                        speakers.Add(GoogleCloudVoices.Speaker(v.Name));
+                        langs.Add(v.Language);
+                    }
+                    text = speakers.Count == 0
+                        ? Localization.T("Settings.Cloud.State.HaveNoList")
+                        : Localization.T("Settings.Cloud.State.Have", speakers.Count, langs.Count);
+                }
+                tbCloudState.Text = text;
+                tbCloudState.AccessibleName = text;
+            }
+
+            if (btnCloudForget != null) btnCloudForget.Enabled = have;
+            if (chkCloudVoices != null)
+            {
+                if (!have) chkCloudVoices.Checked = false;
+                chkCloudVoices.Enabled = have;
+            }
+            if (tbCloudWhy != null)
+            {
+                // Only says something when there is something to say. A permanent
+                // line explaining a control that is working is noise on every Tab
+                // through the page.
+                string why = have ? "" : Localization.T("Settings.Cloud.Why");
+                tbCloudWhy.Text = why;
+                tbCloudWhy.AccessibleName = why;
+                tbCloudWhy.TabStop = why.Length > 0;
+            }
+        }
+
+        private void LoadCloudCredential()
+        {
+            string path;
+            using (var dlg = new OpenFileDialog())
+            {
+                dlg.Title = Localization.T("Settings.Cloud.Load");
+                dlg.Filter = Localization.T("Settings.Cloud.Filter");
+                dlg.CheckFileExists = true;
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                path = dlg.FileName;
+            }
+
+            string why = GoogleCloudVoices.LoadFrom(path);
+            if (why != null)
+            {
+                MessageForm.ShowInfo(this, why, Localization.T("Settings.Cloud.Group"));
+                return;
+            }
+
+            // Fetch the catalogue now, while the reader is standing here and can
+            // be told it failed — rather than at the moment they open Properties
+            // hoping to pick a voice.
+            Cursor old = Cursor.Current;
+            Cursor.Current = Cursors.WaitCursor;
+            bool got;
+            try { got = GoogleCloudVoices.Refresh(); }
+            finally { Cursor.Current = old; }
+
+            ShowCloudState();
+            if (!got)
+                MessageForm.ShowInfo(this, Localization.T("Settings.Cloud.NoList"),
+                                     Localization.T("Settings.Cloud.Group"));
         }
 
         private ComboBox cmbTranslateEngine;
@@ -878,6 +1064,14 @@ namespace Nemoviz_Book_Reader
 
             try { voiceCatalog = EnsureSpeech().GetVoiceCatalog(); }
             catch { voiceCatalog = new List<(string, string, string)>(); }
+
+            // THE CLOUD VOICES ARE NEVER OFFERED HERE, whatever the switch on the
+            // Advanced tab says. This page assigns per-language DEFAULTS and a
+            // cloud voice may not be one; leaving them out is how that rule is
+            // kept, rather than by a rule somebody has to remember. It also stops
+            // the language list below jumping from three entries to fifty-three,
+            // since thirty speakers between them read that many languages.
+            voiceCatalog = WithoutCloudVoices(voiceCatalog);
 
             PopulateLanguages();
             cmbLanguage.SelectedIndex = 0;      // "all other languages" — cascades

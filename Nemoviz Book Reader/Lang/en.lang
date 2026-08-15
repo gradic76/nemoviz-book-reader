@@ -435,6 +435,18 @@ Ocr.Progress.Minutes=About {0} minutes left.
 ; Settings. "Automatic" is the right answer nearly always: recognition goes by
 ; SCRIPT, not by language, so one Latin recognizer reads every Latin language.
 Settings.Tab.Advanced=Advanced
+Settings.Cloud.Group=Google Cloud voices
+Settings.Cloud.State.None=No service account is stored, so none of these voices are available.
+Settings.Cloud.State.Have={0} voices are available, reading {1} languages between them.
+Settings.Cloud.State.HaveNoList=A service account is stored, but the list of voices has not been fetched yet. Load it again while you are connected.
+Settings.Cloud.Load=Service account file...
+Settings.Cloud.Filter=Service account (*.json)|*.json|All files (*.*)|*.*
+Settings.Cloud.Forget=Forget the service account
+Settings.Cloud.ForgetAsk=Forget the stored service account? These voices stop being offered, and a book already reading with one falls silent until you give it another voice.
+Settings.Cloud.Use=Use these voices
+Settings.Cloud.Why=There is nothing to switch on yet: load a service account first, and this becomes available.
+Settings.Cloud.NoList=The account was accepted, but the list of voices could not be fetched. That is usually the network; the voices will appear once it can be reached.
+Hint.Settings.Cloud=These voices are read by Google's own service rather than by anything installed on this computer, so they need an internet connection and an account with Google, and long books cost money beyond the free monthly allowance.\n\nThey are not a key you can paste. Google gives them out as a service account: a small file ending in .json, downloaded once when you create the account. Nemoviz keeps what is inside that file, so you may move or delete the download afterwards.\n\nThey are never assigned automatically and never become a language's default voice. Switch them on here, then choose one for a particular book in that book's Properties.
 Google.Cred.NotJson=That file is not readable as JSON, so it is not the one Google gave you. The file you want was downloaded when you created the service account, and its name ends in .json.
 Google.Cred.NotServiceAccount=That JSON is readable but it is not a service account — it has no account address and no private key in it. Google offers several kinds of credential; the one for these voices is the service account key.
 ; An ACTION on the shelf, not a setting in Properties: a reading happens once,
