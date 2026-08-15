@@ -146,8 +146,11 @@ namespace Nemoviz_Book_Reader
                         written = SpeechExport.ToFile(bookFolder, voice, spoken, OutPath,
                                                       out missing, (i, n) => !stop);
                     }
+                    // The MP3 is written; what was made to build it is no longer
+                    // worth its disk. Only for a local voice — see DropLocalPieces.
+                    DropLocalPieces();
                 }
-                catch { }
+                catch { DropLocalPieces(); }
                 try
                 {
                     if (IsDisposed || Disposing || !IsHandleCreated) return;
@@ -190,6 +193,49 @@ namespace Nemoviz_Book_Reader
             }
             catch { }
             finally { if (speech != null) try { speech.Dispose(); } catch { } }
+        }
+
+        /// <summary>Throws away the pieces this export made with a LOCAL voice.
+        ///
+        /// <para><b>The cache is kept only where re-making costs something</b>
+        /// (Gordan, 2026-08-16). A cloud sentence was paid for and must not be
+        /// paid for twice; a local one is free and, measured on his own book,
+        /// about ninety times faster than listening — an hour and three quarters
+        /// of speech remade in seventy seconds. Keeping 41 MB a book to save
+        /// seventy seconds is the wrong way round, and it was accumulating
+        /// invisibly behind a command whose whole output is the MP3.</para>
+        ///
+        /// <para>Done whether the export finished or was given up on, so the rule
+        /// is one a reader can predict rather than one they have to work
+        /// out.</para></summary>
+        private void DropLocalPieces()
+        {
+            // ONLY for a voice that costs nothing to use again. A cloud voice's
+            // pieces are money already spent and are never touched here.
+            if (GoogleCloudVoices.IsOne(voice)) return;
+
+            // Every piece belonging to THIS voice, not merely the ones this run
+            // made. An export that found most of them already there would
+            // otherwise leave them for ever — which is exactly what the first
+            // version of this did, and how 41 MB came to sit behind a command
+            // whose whole output is one MP3. Addressed by key, so a piece
+            // belonging to some other voice in the same folder is untouched.
+            foreach (string s in spoken)
+            {
+                if (string.IsNullOrWhiteSpace(s)) continue;
+                string p = SpeechCache.PathFor(bookFolder, voice, s);
+                try { if (p != null && System.IO.File.Exists(p)) System.IO.File.Delete(p); } catch { }
+            }
+            // The folder too, but only if this left it empty — a book with cloud
+            // speech in it keeps everything.
+            try
+            {
+                string dir = SpeechCache.FolderFor(bookFolder);
+                if (dir != null && System.IO.Directory.Exists(dir) &&
+                    System.IO.Directory.GetFileSystemEntries(dir).Length == 0)
+                    System.IO.Directory.Delete(dir);
+            }
+            catch { }
         }
 
         private void Refresh1()
