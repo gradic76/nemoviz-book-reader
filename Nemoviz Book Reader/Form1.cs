@@ -2869,6 +2869,48 @@ namespace Nemoviz_Book_Reader
         /// the on-focus snapshot and the I key. Returns the placeholder
         /// when nothing is loaded.
         /// </summary>
+        // ── Making the rest of a cloud book while it is being read ────────────
+
+        private SpeechPrefill prefill;
+
+        /// <summary>Starts making the rest of the book, for a book read by a
+        /// CLOUD voice and no other.
+        ///
+        /// <para><b>Automatic, which is a reversal Gordan made on the evening of
+        /// 2026-08-15 and the reasoning is his.</b> The cache and the running
+        /// ahead exist only for the cloud voices, where the money is already
+        /// committed by reading at all — so there was nothing left for a switch
+        /// to decide, and a switch nobody needs is a switch somebody has to find.
+        /// A local voice starts nothing: its speech is free and faster than
+        /// listening, so making it early would spend a quarter of a gigabyte to
+        /// save nothing.</para>
+        ///
+        /// <para><b>It stops when the book does</b>, which is what bounds the
+        /// cost: a minute of sampling a book buys about ten minutes of audio, not
+        /// the whole of it. The one real exposure is leaving a book open and
+        /// walking away, and the info line is there so that is a thing the reader
+        /// can see rather than discover on a bill.</para></summary>
+        private void StartPrefillIfCloud()
+        {
+            StopPrefill();
+            try
+            {
+                if (currentBook == null || !currentBook.IsTextBook || tts == null) return;
+                string voice = tts.CurrentVoice;
+                if (!GoogleCloudVoices.IsOne(voice)) return;
+
+                prefill = SpeechPrefill.For(currentBook.FolderPath, voice, tts.SpokenSentences());
+                if (prefill != null) prefill.Start();
+            }
+            catch { prefill = null; }
+        }
+
+        private void StopPrefill()
+        {
+            try { if (prefill != null) prefill.Stop(); } catch { }
+            prefill = null;
+        }
+
         private string BuildTextInfoText()
         {
             string dash = Localization.T("Common.Dash");
@@ -2951,6 +2993,15 @@ namespace Nemoviz_Book_Reader
               .Append(FormatTime(elapsed)).Append("  ").Append(TextPercentString()).Append('%').Append(nl);
             sb.Append(Localization.T("Player.Info.RemainingLabel")).Append(" -")
               .Append(FormatTime(totalSec - elapsed));
+
+            // THE ONE TRANSIENT LINE, and it is here because spending must be
+            // visible. A book with a cloud voice is being made ahead of the
+            // reader, which costs money — quietly would be the wrong way to do
+            // that. It goes last, so nothing above it moves as it comes and goes.
+            if (prefill != null && prefill.Running)
+                sb.Append(nl).Append(Localization.T("Player.Info.Preparing",
+                    prefill.Done, prefill.Total));
+
             return sb.ToString();
         }
 
@@ -4392,6 +4443,7 @@ namespace Nemoviz_Book_Reader
             // made now will go. Set before a word is spoken, because the first
             // sentence is cached like every other one.
             tts.BookFolder = currentBook.FolderPath;
+            StopPrefill();                      // whatever the last book was doing
 
             currentBook.CleanTextFileOnce();
             string bookText = TtsReader.ReadFile(currentBook.TextFilePath);
@@ -4413,6 +4465,11 @@ namespace Nemoviz_Book_Reader
             // previous state.
             ApplyTtsSettings();
             tts.SeekToChar(currentBook.TextPosition);
+
+            // AFTER the voice is settled, never before: which voice this book
+            // reads with is the whole test, and asking a moment too early would
+            // read the last book's answer.
+            StartPrefillIfCloud();
 
             // The book's own setting decides whether the reading view appears —
             // F9 is the way BACK after Escape, not the way in (Gordan). Deferred
@@ -6001,6 +6058,9 @@ namespace Nemoviz_Book_Reader
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            // FIRST, before anything is torn down: it is spending money in the
+            // background, and a closing player must not leave it doing that.
+            StopPrefill();
             // Give the media keys back to the system / other players.
             foreach (int id in new[] { HotkeyPlayPause, HotkeyNext, HotkeyPrev, HotkeyStop })
                 try { UnregisterHotKey(this.Handle, id); } catch { }
