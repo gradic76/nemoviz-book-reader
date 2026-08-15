@@ -2131,6 +2131,12 @@ namespace Nemoviz_Book_Reader
             // being worked out. A theme that eventually brings its own LAYOUT
             // takes over above instead (UiTheme.BuildsOwnLayout).
             if (UiTheme.Current.BuildsOwnLayout) UiTheme.Current.BuildPlayerLayout(this);
+            // The classic look is no longer left where it was built: since
+            // 2026-08-16 it is arranged like the new one — same window size, the
+            // information on the left and the controls to the right of it — in
+            // ordinary controls and ordinary colours. See ClassicLayout, which
+            // moves things and paints nothing.
+            else ClassicLayout.ApplyPlayer(this);
             UiTheme.Current.Apply(this);
         }
 
