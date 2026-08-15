@@ -58,4 +58,18 @@ namespace Nemoviz_Book_Reader
         /// cancelled (a stop/seek) rather than finishing naturally.</summary>
         event Action<bool> Completed;
     }
+
+    /// <summary>A backend that can keep what it makes.
+    ///
+    /// <para>Deliberately NOT part of <see cref="ISpeechBackend"/>. Speaking has
+    /// no business knowing what a book is — three of the four backends neither
+    /// need this nor could use it, and a synthesiser that is free and faster than
+    /// listening has nothing worth storing. It is the cloud voices that are paid
+    /// for once and should not be paid for twice.</para></summary>
+    public interface ISpeechCacheAware
+    {
+        /// <summary>Where the book being read lives, so its speech can be kept
+        /// beside it. Empty or null means keep nothing.</summary>
+        string BookFolder { get; set; }
+    }
 }

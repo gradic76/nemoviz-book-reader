@@ -104,6 +104,18 @@ namespace Nemoviz_Book_Reader
             backend.Completed += OnCompleted;
         }
 
+        /// <summary>The book being read, for the backends that keep what they
+        /// make. Empty while nothing is loaded — and it must be CLEARED then, or
+        /// the next book's speech would be filed under the last one's.</summary>
+        public string BookFolder
+        {
+            set
+            {
+                var keeper = backend as ISpeechCacheAware;
+                if (keeper != null) keeper.BookFolder = value ?? "";
+            }
+        }
+
         public List<string> GetVoices() { return backend.GetVoices(); }
         /// <summary>Voices with their vendor and the language they speak — what
         /// picking a voice for a book's language needs.</summary>

@@ -31,8 +31,13 @@ namespace Nemoviz_Book_Reader
     /// able to speak it. Settings filters them out always, Properties unless the
     /// switch is on.</para>
     /// </summary>
-    public class GoogleCloudBackend : ISpeechBackend
+    public class GoogleCloudBackend : ISpeechBackend, ISpeechCacheAware
     {
+        /// <summary>Where to keep what is made. Set when a book is loaded; empty
+        /// while nothing is loaded, and then nothing is kept — a test utterance
+        /// from Settings belongs to no book.</summary>
+        public string BookFolder { get; set; }
+
         /// <summary>The fastest this voice may be driven, and it is the player's
         /// own ceiling rather than Google's. Gordan, 2026-08-15, after trying it:
         /// *"do 4 x vjerojatno neće biti smisla ali možemo ostaviti do 3 x kao i
@@ -41,7 +46,11 @@ namespace Nemoviz_Book_Reader
         /// out.</summary>
         private const double TopSpeed = 3.0;
 
-        private readonly SapiWavPlayer player = new SapiWavPlayer();
+        // mpv rather than SAPI's player, and the cache is the whole reason: audio
+        // kept on disk must have no speed printed into it, so the speeding up
+        // happens here instead — scaletempo2, pitch intact, and it applies to
+        // what is already sounding.
+        private readonly MpvClipPlayer player = new MpvClipPlayer();
         private readonly System.Windows.Forms.Timer poll;
 
         // display name -> (google id, language)
@@ -128,26 +137,14 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        // Both drop the look-ahead, and they must: the gain and the speed are
-        // baked into audio that has already been fetched, so a sentence rendered
-        // a moment ago would come back at the old setting.
-        public void SetRate(int r) { rate = Clamp(r, -10, 10); DropAhead(); }
-        public void SetVolume(int v) { volume = Clamp(v, 0, 100); DropAhead(); }
-
-        /// <summary>NBR's 0–100 as Google's gain in decibels. The service has no
-        /// notion of a percentage — it takes dB — and volume is applied at
-        /// synthesis rather than at playback because <see cref="SapiWavPlayer"/>
-        /// has no volume of its own; OneCore does the same thing through its
-        /// synthesiser. 100 is the voice's own level, 0 is silence.</summary>
-        private double VolumeDb
-        {
-            get
-            {
-                if (volume >= 100) return 0;
-                if (volume <= 0) return -96;
-                return 20.0 * Math.Log10(volume / 100.0);
-            }
-        }
+        // NEITHER DROPS THE LOOK-AHEAD ANY MORE, and that is the change worth
+        // noticing. While speed and volume were printed into the audio, a
+        // sentence fetched a moment earlier was stale the instant either moved,
+        // so every nudge threw away work already paid for. Both are properties of
+        // the PLAYER now, so they apply to what is already sounding and to
+        // everything held ahead of it.
+        public void SetRate(int r) { rate = Clamp(r, -10, 10); player.SetSpeed(Speed); }
+        public void SetVolume(int v) { volume = Clamp(v, 0, 100); player.SetVolume(volume); }
 
         /// <summary>Ignored, and it has to be: Google documents pitch control as
         /// unavailable for hr-HR, so sending it would make a control that does
@@ -248,21 +245,53 @@ namespace Nemoviz_Book_Reader
         {
             if (string.IsNullOrEmpty(currentGoogle)) return null;
             List<string> parts = SplitForRequest(text);
-            if (parts.Count == 1)
-                return SapiWavPlayer.TrimTrailingSilence(
-                    GoogleCloudVoices.Synthesize(parts[0], currentGoogle, currentLanguage, Speed, VolumeDb));
 
-            var wavs = new List<byte[]>();
-            foreach (string p in parts)
+            // ALREADY PAID FOR ONCE. The stored piece is MP3 and mpv plays that
+            // as readily as a WAV, so a second reading of a book costs nothing
+            // and needs no network at all.
+            byte[] kept = SpeechCache.Get(BookFolder, currentVoice, text);
+            if (kept != null) return kept;
+
+            byte[] wav;
+            if (parts.Count == 1)
+                wav = GoogleCloudVoices.Synthesize(parts[0], currentGoogle, currentLanguage,
+                                                   NaturalSpeed, NaturalVolumeDb);
+            else
             {
-                byte[] w = GoogleCloudVoices.Synthesize(p, currentGoogle, currentLanguage, Speed, VolumeDb);
-                if (w == null) return null;          // a hole in a sentence is worse than none of it
-                wavs.Add(w);
+                var wavs = new List<byte[]>();
+                foreach (string p in parts)
+                {
+                    byte[] w = GoogleCloudVoices.Synthesize(p, currentGoogle, currentLanguage,
+                                                            NaturalSpeed, NaturalVolumeDb);
+                    if (w == null) return null;      // a hole in a sentence is worse than none of it
+                    wavs.Add(w);
+                }
+                // Joined first, trimmed after: the silence between two halves of
+                // one sentence is the pause its punctuation asks for.
+                wav = Concat(wavs);
             }
-            // Trimmed AFTER joining, never per piece: the silence between two
-            // halves of one sentence is the pause its punctuation asks for.
-            return SapiWavPlayer.TrimTrailingSilence(Concat(wavs));
+            wav = SapiWavPlayer.TrimTrailingSilence(wav);
+
+            // Kept on the way past, on the worker thread that made it — and what
+            // gets PLAYED is what was kept, so the first hearing of a sentence
+            // and every later one are the same audio. A failure to store is not a
+            // failure to read: the sentence is spoken from the original and
+            // simply made again next time.
+            if (wav == null) return null;
+            byte[] kept2 = SpeechCache.Put(BookFolder, currentVoice, text, wav);
+            return kept2 ?? wav;
         }
+
+        /// <summary>Made and played at the voice's OWN pace and level, always.
+        ///
+        /// <para>They used to be sent to Google, printed into the audio that came
+        /// back. That is fine until the audio is kept: a sentence stored at one
+        /// speed is useless at another, so a reader who nudged the speed once
+        /// would have stranded a whole prepared book and paid for it again. Speed
+        /// and volume now happen at playback, where <see cref="MpvClipPlayer"/>
+        /// can change them on what is already sounding.</para></summary>
+        private const double NaturalSpeed = 1.0;
+        private const double NaturalVolumeDb = 0.0;
 
         /// <summary>Cuts a piece too big for one request, preferring a sentence
         /// end, then a space, and only then a hard cut. Measured in UTF-8 bytes,

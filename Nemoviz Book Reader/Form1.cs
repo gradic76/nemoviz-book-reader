@@ -4388,6 +4388,11 @@ namespace Nemoviz_Book_Reader
             // date once, here: content.txt is rewritten cleaned and every stored
             // character offset (headings, pages, the reading position, bookmarks)
             // moves with it. After that the reader takes the file as it stands.
+            // Where speech already made for THIS book is kept, and where what is
+            // made now will go. Set before a word is spoken, because the first
+            // sentence is cached like every other one.
+            tts.BookFolder = currentBook.FolderPath;
+
             currentBook.CleanTextFileOnce();
             string bookText = TtsReader.ReadFile(currentBook.TextFilePath);
             tts.LoadText(bookText, currentBook.TextCleaned);

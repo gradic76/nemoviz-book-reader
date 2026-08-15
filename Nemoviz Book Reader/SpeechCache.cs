@@ -87,32 +87,39 @@ namespace Nemoviz_Book_Reader
             catch { return null; }
         }
 
-        /// <summary>Encodes and stores. Returns false if it could not be kept —
-        /// which is never allowed to stop the reading, only to mean it will be
-        /// made again next time.
+        /// <summary>Encodes and stores, and hands back WHAT IT STORED — or null
+        /// if it could not be kept, which is never allowed to stop the reading
+        /// and only means the sentence will be made again next time.
+        ///
+        /// <para><b>The encoded bytes come back so the caller can play those
+        /// rather than the original.</b> Otherwise a sentence sounds one way the
+        /// first time, off the WAV, and another way ever after, off the MP3 —
+        /// audible or not, one of the two is what the reader will live with, and
+        /// it should be the one they get every time. It is also the smaller of
+        /// them by seven to one.</para>
         ///
         /// <para>Written to a temporary name and moved into place, so a reader
         /// who closes the player mid-write is left with no file rather than half
         /// a one. A half file is worse than none: it would be found, read, and
         /// played as a truncated sentence for ever.</para></summary>
-        public static bool Put(string bookFolder, string voice, string spoken, byte[] wav)
+        public static byte[] Put(string bookFolder, string voice, string spoken, byte[] wav)
         {
             try
             {
                 string p = PathFor(bookFolder, voice, spoken);
-                if (p == null || wav == null) return false;
+                if (p == null || wav == null) return null;
 
                 byte[] mp3 = Mp3Encoder.FromWav(wav);
-                if (mp3 == null || mp3.Length == 0) return false;
+                if (mp3 == null || mp3.Length == 0) return null;
 
                 Directory.CreateDirectory(Path.GetDirectoryName(p));
                 string tmp = p + ".part";
                 File.WriteAllBytes(tmp, mp3);
                 if (File.Exists(p)) File.Delete(p);
                 File.Move(tmp, p);
-                return true;
+                return mp3;
             }
-            catch { return false; }
+            catch { return null; }
         }
 
         public static bool Has(string bookFolder, string voice, string spoken)

@@ -12,8 +12,27 @@ namespace Nemoviz_Book_Reader
     /// alongside the in-process voices. Rate/volume/pitch are cached so they carry
     /// over when the active backend changes.
     /// </summary>
-    public class CompositeSpeechBackend : ISpeechBackend
+    public class CompositeSpeechBackend : ISpeechBackend, ISpeechCacheAware
     {
+        private string bookFolder = "";
+
+        /// <summary>Passed on to whichever backends can keep what they make, and
+        /// ignored by the rest. Set when a book is loaded and cleared when one is
+        /// not, so a test utterance from Settings is never filed under a book.</summary>
+        public string BookFolder
+        {
+            get { return bookFolder; }
+            set
+            {
+                bookFolder = value ?? "";
+                foreach (ISpeechBackend b in backends)
+                {
+                    var keeper = b as ISpeechCacheAware;
+                    if (keeper != null) keeper.BookFolder = bookFolder;
+                }
+            }
+        }
+
         private readonly List<ISpeechBackend> backends = new List<ISpeechBackend>();
         // Voice name (case-insensitive) → owning backend, in merge order.
         private readonly Dictionary<string, ISpeechBackend> owner =
