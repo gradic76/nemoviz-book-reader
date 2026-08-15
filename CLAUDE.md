@@ -3538,7 +3538,32 @@ folder is gone, or the last book was already finished.
 
 ## 10. Roadmap / suggested order
 
-### Editions: Lite vs Pro (Gordan, Session 15)
+### Editions — and FEATURE FREEZE, 2026-08-16
+
+> ## THE FUNCTIONALITY IS CLOSED (Gordan, 2026-08-16)
+>
+> *"Sve funkcije su tu, više se ništa ne dodaje, zatvaramo opcije i mogućnosti."*
+> **Nothing further is added.** Everything from here is verification, polish,
+> cosmetics, and the visual and braille checks that need eyes and hands.
+>
+> A new capability is not a small change to this file — it is a reopening, and it
+> takes Gordan saying so. A fault found in use is of course still a fault.
+>
+> ### The editions are named, not tiered
+>
+> **Lite is gone as a name. The two editions are:**
+>
+> - **Nemoviz Book Reader** — what was Lite. The whole player: audio, text,
+>   DAISY, M4B, braille, OCR, translation, cloud voices, the speech cache and the
+>   audiobook export.
+> - **Nemoviz Book Reader Plus** — what was Pro. **STT** and **BRLTTY**, the two
+>   things that change what the user must install.
+>
+> The line itself is unchanged — see below — only what the two sides are called.
+> "Lite" reads as a cut-down thing, and after 2026-08-15 the smaller edition is
+> not cut down: it is the reader, whole.
+
+### The line itself (Gordan, Session 15, redrawn 2026-08-15)
 
 NBR ships in two editions. **The player binary is the same** — Pro is simply
 Lite plus a set of add-on features. The distinction is about what a feature
