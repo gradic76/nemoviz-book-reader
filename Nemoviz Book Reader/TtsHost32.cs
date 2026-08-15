@@ -165,6 +165,17 @@ class TtsHost32
                 break;
             case "SPEAK": Speak(DecodeB64(arg)); break;
             case "PRERENDER": PreRender(DecodeB64(arg)); break;
+            // THE ONE COMMAND WITH AN ANSWER. Everything else here is
+            // send-and-forget, with DONE arriving later as an event; this one is
+            // asked and waited on, because the parent has nothing to do until the
+            // audio exists.
+            //
+            // The audio comes back as a PATH, not as bytes. A sentence is around
+            // 150 kB, and base64 on one line of a line-based protocol is 200 000
+            // characters that both sides must buffer whole. The host already
+            // renders through a temporary file; handing over its name costs
+            // nothing and the parent deletes it.
+            case "RENDERFILE": Emit("AUDIO\t" + (RenderToFile(DecodeB64(arg)) ?? "")); break;
             // Buffered playback can't pause mid-stream; the reader doesn't use
             // these anyway (it pauses by cancelling and re-speaking the sentence).
             case "PAUSE": break;
@@ -300,6 +311,53 @@ class TtsHost32
     /// stream. Every SAPI voice can do this — including eSpeak, which
     /// System.Speech could not render — so there is no real-time fallback any
     /// more, and with it went the crackle and the missing device choice.</summary>
+    /// <summary>Renders a sentence and KEEPS the file, handing back its name.
+    /// For an export: the parent reads it and deletes it.
+    ///
+    /// <para>At the voice's own rate and volume, set aside and put back, because
+    /// what is being made is going into a cache that must not carry either — the
+    /// reader's speed and loudness happen at playback. Pitch is left as it is,
+    /// since nothing downstream can apply it.</para></summary>
+    private static string RenderToFile(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return null;
+        string path = Path.Combine(Path.GetTempPath(), "nbr-export-" + Guid.NewGuid().ToString("N") + ".wav");
+        try
+        {
+            lock (synthLock)
+            {
+                int wasRate = 0, wasVol = 100;
+                try { wasRate = (int)synth.Rate; wasVol = (int)synth.Volume; } catch { }
+                try { synth.Rate = 0; synth.Volume = 100; } catch { }
+                try
+                {
+                    dynamic fs = Activator.CreateInstance(Type.GetTypeFromProgID("SAPI.SpFileStream"));
+                    fs.Open(path, 3, false);
+                    try
+                    {
+                        synth.AudioOutputStream = fs;
+                        synth.Speak(text, 16);              // SVSFIsNotXML, synchronous
+                    }
+                    finally
+                    {
+                        try { synth.AudioOutputStream = null; } catch { }
+                        try { fs.Close(); } catch { }
+                    }
+                }
+                finally
+                {
+                    try { synth.Rate = wasRate; synth.Volume = wasVol; } catch { }
+                }
+            }
+            return new FileInfo(path).Length > 44 ? path : null;
+        }
+        catch
+        {
+            try { File.Delete(path); } catch { }
+            return null;
+        }
+    }
+
     private static byte[] Render(string text)
     {
         string path = null;

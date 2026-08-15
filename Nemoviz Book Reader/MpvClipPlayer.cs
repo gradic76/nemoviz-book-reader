@@ -57,10 +57,36 @@ namespace Nemoviz_Book_Reader
 
         // ── Setup ─────────────────────────────────────────────────────────────
 
+        private static bool swept;
+
+        /// <summary>Removes scratch files an earlier run left behind.
+        ///
+        /// <para><b>Disposing properly is not enough and cannot be.</b> A process
+        /// that is killed, or that faults, never reaches its tidying — so the only
+        /// reliable moment to clear these is the next start. Found by looking:
+        /// four were sitting in the temp folder while this was being
+        /// built.</para>
+        ///
+        /// <para>An hour old, so a second copy of the player running right now
+        /// keeps its own.</para></summary>
+        private static void SweepOldScratch()
+        {
+            if (swept) return;
+            swept = true;
+            try
+            {
+                DateTime cutoff = DateTime.UtcNow.AddHours(-1);
+                foreach (string f in Directory.GetFiles(Path.GetTempPath(), "nbr-speech-*.bin"))
+                    try { if (File.GetLastWriteTimeUtc(f) < cutoff) File.Delete(f); } catch { }
+            }
+            catch { }
+        }
+
         private bool Ready()
         {
             if (dead) return false;
             if (ctx != IntPtr.Zero) return true;
+            SweepOldScratch();
 
             ctx = mpv_create();
             if (ctx == IntPtr.Zero) { dead = true; return false; }

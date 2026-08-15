@@ -16,7 +16,7 @@ namespace Nemoviz_Book_Reader
     /// be launched the backend is simply inert (no voices), so the player still
     /// works with the in-process voices.
     /// </summary>
-    public class Sapi5SatelliteBackend : ISpeechBackend
+    public class Sapi5SatelliteBackend : ISpeechBackend, ISpeechRenderer
     {
         private Process proc;
         private StreamWriter toHost;
@@ -80,6 +80,14 @@ namespace Nemoviz_Book_Reader
                         bool cancelled = line.Substring(5) == "cancelled";
                         Completed?.Invoke(cancelled);
                     }
+                    else if (line.StartsWith("AUDIO\t"))
+                    {
+                        // The answer to the one command that has one. Handed over
+                        // through the field the waiting thread reads, then the
+                        // gate is opened — in that order, or it wakes to nothing.
+                        renderedPath = line.Substring(6);
+                        try { rendered.Set(); } catch { }
+                    }
                 }
             }
             catch { }
@@ -108,6 +116,56 @@ namespace Nemoviz_Book_Reader
             if (string.IsNullOrEmpty(name)) return;
             currentVoice = name;
             Send("VOICE\t" + name);
+        }
+
+        // ── Rendering, for the export ─────────────────────────────────────────
+
+        private readonly System.Threading.ManualResetEvent rendered =
+            new System.Threading.ManualResetEvent(false);
+        private readonly object renderLock = new object();
+        private volatile string renderedPath;
+
+        /// <summary>A sentence as a WAV, from the 32-bit host.
+        ///
+        /// <para><b>The one place this protocol asks a question and waits for the
+        /// answer.</b> Everything else is send-and-forget with DONE arriving later
+        /// as an event; here the caller has nothing to do until the audio exists.
+        /// One at a time, because there is one host and one gate.</para>
+        ///
+        /// <para><b>With a deadline, and that is not defensive habit.</b> The host
+        /// is another process: if it dies mid-render, or a voice hangs — which is
+        /// the sort of thing 32-bit engines do — a wait with no end would freeze
+        /// an export for ever with a progress bar that never moves. A minute is
+        /// far past any real sentence; measured, the slowest local voice here
+        /// takes half a second.</para>
+        ///
+        /// <para>The file is the host's, made for us and left behind on purpose;
+        /// it is read once and deleted here.</para></summary>
+        public byte[] Render(string text)
+        {
+            if (proc == null || string.IsNullOrEmpty(text)) return null;
+            lock (renderLock)
+            {
+                string path = null;
+                try
+                {
+                    renderedPath = null;
+                    rendered.Reset();
+                    Send("RENDERFILE\t" + Convert.ToBase64String(Encoding.UTF8.GetBytes(text)));
+                    if (!rendered.WaitOne(60000)) return null;
+
+                    path = renderedPath;
+                    if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return null;
+                    byte[] wav = System.IO.File.ReadAllBytes(path);
+                    return wav.Length > 44 ? SapiWavPlayer.TrimTrailingSilence(wav) : null;
+                }
+                catch { return null; }
+                finally
+                {
+                    if (!string.IsNullOrEmpty(path))
+                        try { System.IO.File.Delete(path); } catch { }
+                }
+            }
         }
 
         public void SetRate(int rate) { Send("RATE\t" + rate); }

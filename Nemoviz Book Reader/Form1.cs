@@ -6078,6 +6078,10 @@ namespace Nemoviz_Book_Reader
             // FIRST, before anything is torn down: it is spending money in the
             // background, and a closing player must not leave it doing that.
             StopPrefill();
+            // The reader was never disposed — found 2026-08-16 by finding its
+            // scratch files still in the temp folder. It owns the speech
+            // backends, which own the 32-bit host process and mpv's own context.
+            try { if (tts != null) tts.Dispose(); } catch { }
             // Give the media keys back to the system / other players.
             foreach (int id in new[] { HotkeyPlayPause, HotkeyNext, HotkeyPrev, HotkeyStop })
                 try { UnregisterHotKey(this.Handle, id); } catch { }
