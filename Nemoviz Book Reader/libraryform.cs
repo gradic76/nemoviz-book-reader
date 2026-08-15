@@ -2355,12 +2355,34 @@ namespace Nemoviz_Book_Reader
                 System.IO.File.WriteAllText(System.IO.Path.Combine(folder, "content.txt"),
                                             text, new System.Text.UTF8Encoding(false));
 
+                // THE DESCRIPTION TRAVELS WITH THE BOOK, and it is not translated.
+                // It lives in its own file rather than in Book.ini, so a new book
+                // that is not given one simply has none — which is what the first
+                // build did, and Gordan reasonably read as the translator having
+                // skipped it. It is kept in the SOURCE language on purpose: a blurb
+                // is the publisher's copy about the edition that exists, and a
+                // machine translation of it would be a description of a book nobody
+                // published.
+                try
+                {
+                    string from = BookData.DescriptionFileIn(source.FolderPath);
+                    if (from != null && System.IO.File.Exists(from))
+                        System.IO.File.Copy(from, BookData.DescriptionFileIn(folder), true);
+                }
+                catch { }
+
                 var fresh = new BookData(folder);
                 fresh.Title = string.IsNullOrEmpty(source.Title)
                     ? baseName
                     : Localization.T("Translate.Suffix", source.Title, lang);
                 fresh.Author = source.Author;
                 fresh.TextLanguage = targetLang;
+                // WITHOUT THIS THE INFO BOX SAYS "unknown format". The format is
+                // normally worked out from the file a book was imported FROM, and a
+                // translation was imported from nothing — it is written straight out
+                // as content.txt. So it has to be named here, and what it is now is
+                // plain text, whatever the original happened to be.
+                fresh.Format = BookData.FriendlyFormatName(".txt");
                 // Already clean: it came out of the translator paragraph by
                 // paragraph, so a second cleaning would only move offsets that are
                 // about to be built from this very text.
