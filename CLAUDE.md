@@ -3681,6 +3681,48 @@ them; this is not a fine judgement. The page count is already in hand —
 `PdfParser` fills `doc.Pages`. Keep the absolute test for a book with no pages.
 **Not implemented — Gordan's call.**
 
+### AND THE REFUSAL IS WRONG — it throws away books that OCR perfectly well
+
+Gordan's question, and it is the one nobody asked: *"Ovo zadnje bi značilo da
+korisnik dobije poruku da od te knjige ništa umjesto da je prepoznaje za par
+znakova?"* Measured through the shipped classes, driving `OpenPdf` /
+`RenderPdfPage` past the refusal and asking the real `WindowsOcr`, six pages
+spread through each book:
+
+| book | `UsesJbig2` | pages that yielded words | words |
+|---|---|---|---|
+| `onliberty00millgoog` | **true** | **6 / 6** | **1 590** |
+| `meditationsofmar00marc` | true | 0 / 6 | 0 |
+| `Gavez mast` (control) | false | 6 / 6 | 2 253 |
+
+**One of these books reads.** *"only an indirect interest ; comprehending all
+that portion of a person's life and conduct"* — mediocre against modern type
+(`LIBEBTY`, `tbey`) but a readable book. And `OcrPageSource.Open` returns
+`UndrawablePdf` before a single page is tried, so NBR hands the reader nothing.
+
+**The heading of this section was right and the TEST is too coarse.** Windows
+does not draw JBIG2 **masks**; `UsesJbig2` looks for the filter. The two books
+are built differently and the filter counts already said so — Meditations has
+512 JPX over 256 pages, a background with a mask painted over it; On Liberty has
+**5 JPX over 227 pages**, so its JBIG2 *is* the page rather than a mask on one,
+and Windows draws it fine. Rendered sizes agree: ~1.4 MB a page against
+200–400 kB of near-blank paper.
+
+**Proposed, and it is Gordan's call: stop refusing, and PROBE instead.** Render
+and recognize about three pages spread through the book — ~2 seconds. Any words
+at all → read the whole book. None → *then* report `UndrawablePdf` when the file
+uses JBIG2, which keeps the specific honest sentence and stops it being a
+generic "OCR failed". The detection becomes the EXPLANATION rather than the
+gate, no book is lost, and the worst case costs two seconds instead of a whole
+title. It is also the same shape as everything else decided this day: offer and
+report, do not decide for the reader.
+
+**Method note worth keeping.** The refusal was justified by "0 words on 32 of 32
+sampled pages" of `meditationsofmar00marc` — a true measurement of ONE book,
+generalised to a whole class by its filter. The class turned out to contain the
+opposite case. One sample cannot establish a rule about a family of files, and
+this file has now made that mistake twice about JBIG2 in one week.
+
 **Also seen, and already solved elsewhere:** the extracted text carries running
 heads with page numbers glued to the first line (*"14 MEDITATIONS."*, *"20
 PSYCHOLOGY."*) — exactly what §10g's `RunningHeads.Strip` and `OcrTidy` were
