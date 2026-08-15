@@ -204,6 +204,7 @@
     <Compile Include="EpubParser.cs" />
     <Compile Include="OpticalDrive.cs" />
     <Compile Include="GoogleCloudBackend.cs" />
+    <Compile Include="Mp3Encoder.cs" />
     <Compile Include="GoogleCloudVoices.cs" />
     <Compile Include="OcrAskForm.cs" />
     <Compile Include="OcrImport.cs" />
@@ -331,6 +332,9 @@
     </Content>
     <!-- liblouis (LGPL 2.1+) â€” braille back-translation, plus its table set.
          The tables are data files resolved at runtime from louis\tables. -->
+    <Content Include="libmp3lame.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="liblouis.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
