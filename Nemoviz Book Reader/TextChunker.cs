@@ -104,6 +104,8 @@ namespace Nemoviz_Book_Reader
                 chunks.Add(c);
             }
 
+            chunks = MergeSlivers(chunks);
+
             for (int k = 1; k < chunks.Count; k++)
             {
                 string prev = chunks[k - 1].Text;
@@ -112,6 +114,69 @@ namespace Nemoviz_Book_Reader
                     : prev.Substring(prev.Length - LeadChars);
             }
             return chunks;
+        }
+
+        /// <summary>Joins a piece with almost nothing in it to the one after it.
+        ///
+        /// <para><b>Found in use, 2026-08-15.</b> A reader translated a braille book
+        /// and was told three passages had been left in the original. Nothing was
+        /// missing from the book: the three were <b>five and six characters long</b>
+        /// — a blank line and the start of a word — and every one of them sat beside
+        /// a chapter number standing on a line of its own (" X.", " XI.", " XV.").
+        /// Sent away, a five-character request cannot pass a length ratio whatever
+        /// comes back, so the checks condemned it and the count reported a failure
+        /// that was not one.</para>
+        ///
+        /// <para><b>Merging forward, never dropping</b> — the invariant that the
+        /// pieces rebuild the source character for character is what makes the
+        /// resume cache safe, and it survives joining two neighbours. The measure is
+        /// LETTERS rather than length, because what makes a piece worth sending is
+        /// words: a line of roman numerals and full stops has nothing to translate
+        /// however long it is.</para></summary>
+        private static List<TextChunk> MergeSlivers(List<TextChunk> chunks)
+        {
+            const int MinLetters = 15;
+            var merged = new List<TextChunk>(chunks.Count);
+            TextChunk held = null;
+
+            foreach (TextChunk c in chunks)
+            {
+                if (held != null)
+                {
+                    c.Start = held.Start;
+                    c.Text = held.Text + c.Text;
+                    c.Length = c.Text.Length;
+                    c.ParagraphCount += held.ParagraphCount;
+                    held = null;
+                }
+                if (Letters(c.Text) < MinLetters) { held = c; continue; }
+                merged.Add(c);
+            }
+
+            // A sliver at the very end has nothing after it to join, so it goes back
+            // onto the piece before — and if it is the only piece, it stands alone
+            // rather than being lost.
+            if (held != null)
+            {
+                if (merged.Count > 0)
+                {
+                    TextChunk last = merged[merged.Count - 1];
+                    last.Text += held.Text;
+                    last.Length = last.Text.Length;
+                    last.ParagraphCount += held.ParagraphCount;
+                }
+                else merged.Add(held);
+            }
+
+            for (int k = 0; k < merged.Count; k++) merged[k].Index = k;
+            return merged;
+        }
+
+        private static int Letters(string s)
+        {
+            int n = 0;
+            foreach (char c in s) if (char.IsLetter(c)) n++;
+            return n;
         }
 
         private struct Para { public int Start; public int End; }
