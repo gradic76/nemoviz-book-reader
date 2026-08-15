@@ -1662,9 +1662,22 @@ MSBuild `Exec` target compiles it x86 with `$(MSBuildToolsPath)\Roslyn\csc.exe`
 shared `SapiWavPlayer.cs` and a `Microsoft.CSharp` reference (both drive SAPI
 through late-bound `dynamic`).
 
-**Phase 2 (done):** Settings → Text Books is a two-combo picker — "Speech
-Engine" (vendor + architecture, e.g. "eSpeak (32-bit)", "Microsoft (64-bit)",
-"SAPI 5 (32-bit)") filters the "Voice" combo to that group. Backends now report a
+> **STALE — CORRECTED 2026-08-15, read off the code after Gordan said so.**
+> **There is no Speech Engine combo and has not been for some time.**
+> `SettingsForm` has `cmbLanguage` and `cmbVoice` and nothing between them:
+> Settings → Text Books asks for a LANGUAGE and then offers every voice that
+> speaks it (`cmbTranslateEngine` is the translation service, a different thing
+> entirely). The `Engine` field survives inside the `voiceCatalog` tuple with no
+> control over it. §10c records the removal and its reason — grouping voices by
+> the vendor they report is not a question a reader has an opinion about — but
+> this paragraph was never updated, and it was quoted back at Gordan as a live
+> feature. **Anything below about the two-combo picker describes what was built
+> in Session 15, not what ships.**
+
+**Phase 2 (superseded, see above):** Settings → Text Books was a two-combo
+picker — "Speech Engine" (vendor + architecture, e.g. "eSpeak (32-bit)",
+"Microsoft (64-bit)", "SAPI 5 (32-bit)") filtering the "Voice" combo to that
+group. Backends now report a
 per-voice **vendor**; `CompositeSpeechBackend.GetVoiceCatalog()` derives the
 engine label (`EngineLabel`: eSpeak from its URL vendor, Microsoft, else "SAPI 5").
 Only the voice is persisted (`TtsVoice`); the engine is derived from it on open.
