@@ -71,14 +71,29 @@ namespace Nemoviz_Book_Reader
             sb.AppendLine("- Keep the paragraph structure exactly: the same number of paragraphs, in the same order, separated by a blank line.");
             sb.AppendLine("- Do not summarise, do not omit, do not add.");
             sb.AppendLine("- Leave passages written in a language other than the source exactly as they are.");
-            // "KEEP THEIR ORIGINAL SPELLING" WAS DOING HARM, and it was found by
-            // comparing our output against a human translation of the same manual.
-            // A model obeying that literally will not DECLINE a foreign name — and
-            // in Croatian, where declension is ordinary, it then pads around the
-            // problem: "u programu Tobi" where a translator writes "u Tobiju".
-            // Keeping a name and inflecting it are different things, and the rule
-            // has to say so.
-            sb.AppendLine("- Do not translate or transliterate proper names, but DO inflect them as the target language's grammar requires (cases, endings). Keeping a name is not the same as leaving it unchanged in every position.");
+            // THIS RULE HAS BEEN WRONG TWICE, IN OPPOSITE DIRECTIONS, and both were
+            // found by measurement rather than by reading it.
+            //
+            // First it said "keep their original spelling", which a model obeys
+            // literally and so will not DECLINE a name — in Croatian it then pads
+            // around the problem: "u programu Tobi" where a translator writes "u
+            // Tobiju". Keeping a name and inflecting it are different things.
+            //
+            // Then it said "do not transliterate", which is a LATIN-SCRIPT
+            // ASSUMPTION and wrong for a good third of the 138 languages on offer.
+            // Measured 2026-08-15 on one passage carrying four names: into Russian,
+            // Greek and Japanese it left all four standing in Latin, and into
+            // SERBIAN CYRILLIC it produced a translation with not one Cyrillic
+            // character in it — the rule did not merely spare the names, it dragged
+            // the whole passage out of the script that was asked for. Gordan's
+            // question is what exposed it: we cannot write guidance for languages
+            // we do not know, and this line was doing exactly that.
+            //
+            // What it wants to say is the convention plus the consistency, and to
+            // let each language answer for its own script. Re-measured: Croatian
+            // still gives "u Tobiju" and still keeps the names in Latin, Russian
+            // now transliterates and comes back in Cyrillic.
+            sb.AppendLine("- Render proper names the way the target language normally does, transliterating them into its own script where that is its convention, and inflect them as its grammar requires (cases, endings). Be consistent throughout the book.");
             sb.AppendLine("- Use straight double quotes for speech throughout.");
             // The same comparison showed our version running 100 % of the source's
             // length where the human translation ran 92 %, and reading as a
