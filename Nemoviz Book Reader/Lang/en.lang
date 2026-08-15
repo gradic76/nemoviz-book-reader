@@ -471,6 +471,8 @@ Settings.Translate.State.Have={0}, key stored
 Settings.Translate.State.None={0}, no key
 Settings.Translate.Engine.Gemini=Gemini (Google)
 Settings.Translate.Engine.DeepSeek=DeepSeek
+; The dearer model of the same account, so it needs no key of its own.
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (larger model)
 Settings.Translate.Engine.Azure=Azure Translator
 ; PLACEHOLDER. The real text is still to be written, and it has to cover: that a
 ; key is the reader's own account with the service, that Nemoviz never sees a
@@ -516,11 +518,31 @@ Translate.Ask.HybridNote=This book has a recording as well as text. Only the tex
 Translate.Ask.From=Language of the book:
 Translate.Ask.To=Translate into:
 Translate.Ask.Engine=Translation service:
-Translate.Ask.Fallback=If a passage is refused:
-Translate.Ask.NoFallback=Leave it in the original
+; One choice, and a chain follows from it. Asking for a fallback as well was
+; asking the reader to design a retry policy; what they have an opinion about is
+; which translation they would rather read.
+Translate.Ask.ChainNote=If a passage is refused, Nemoviz tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
 Translate.Ask.NoEngine=No service has a key yet
 Translate.Ask.Notes=Anything the translator should know (optional) — for example that the narrator is a woman, or how two characters address each other:
 Translate.Ask.Start=Translate
+; The notice that goes INTO the book around a passage the last-resort service had
+; to rescue. It is not a courtesy: that service sets the narrator's gender and the
+; level of address wrongly for a whole passage, and no check can catch the second,
+; so this is the only thing that reports the fault at all. Translated into the
+; book's own language by the engine already doing the work.
+Translate.LastResort.Begin=The next part was translated by Microsoft Azure — expect the impossible.
+Translate.LastResort.End=End of the part translated by Microsoft Azure.
+; The Library commands. Translating makes a NEW book, which is why this lives on
+; the shelf and not in Properties: Properties changes the book you are looking at.
+Menu.File.Translate=Translate the book...
+Context.Translate=Translate the book...
+Translate.NotText=Only a text book can be translated. This one is a recording.
+Translate.Empty=There is no text in this book to translate.
+Translate.NoService=No translation service has a key yet. Add one in Settings, under OCR and translation.
+Translate.Done={0} passages translated. The translation is on the shelf as a new book.
+Translate.DoneLeft={0} passages translated, {1} left in the original language.
+Translate.Failed=The book could not be translated: {0}
+Translate.Suffix={0} ({1})
 ; Adding a recognition pack. NOT a whole Windows display language — that is the
 ; overkill this avoids: the pack is the model alone, about a quarter of a
 ; megabyte. Windows asks for its own permission, because installing a system

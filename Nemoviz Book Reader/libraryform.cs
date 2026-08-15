@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
@@ -15,12 +15,13 @@ namespace Nemoviz_Book_Reader
         // because Popup adjusts which items apply to the book under the cursor.
         private ContextMenu bookMenu;
         private MenuItem ctxOpen, ctxMarkRead, ctxMarkUnread, ctxAddFav,
-                         ctxRemoveFav, ctxRename, ctxDelete, ctxReRead, ctxProperties;
+                         ctxRemoveFav, ctxRename, ctxDelete, ctxReRead, ctxTranslate, ctxProperties;
         private ToolStripMenuItem menuFile;
         private ToolStripMenuItem menuFileOpenFile;
         private ToolStripMenuItem menuFileOpenFolder;
         private ToolStripMenuItem menuFileOpenCd;
         private ToolStripMenuItem menuFileReRead;
+        private ToolStripMenuItem menuFileTranslate;
         private ToolStripMenuItem menuSort;
         private ToolStripMenuItem menuSortAlpha;
         private ToolStripMenuItem menuSortDate;
@@ -472,12 +473,24 @@ namespace Nemoviz_Book_Reader
             menuFileReRead = new ToolStripMenuItem(Localization.T("Context.ReReadOcr"));
             menuFileReRead.Click += (s, e) => ReReadSelectedBook();
             menuFile.DropDownItems.Add(menuFileReRead);
+
+            // Translating makes a NEW book, which is why the command lives here and
+            // on the shelf rather than in Properties. Properties describes the book
+            // you are looking at and changes it; a reader would reasonably expect a
+            // Translate button there to translate THAT book in place.
+            menuFileTranslate = new ToolStripMenuItem(Localization.T("Menu.File.Translate"));
+            menuFileTranslate.Click += (s, e) => TranslateSelectedBook();
+            menuFile.DropDownItems.Add(menuFileTranslate);
+
             menuFile.DropDownOpening += (s, e) =>
             {
                 BookData b = GetSelectedBook();
                 bool unread = b != null && OcrImport.NeedsReading(b.FolderPath);
                 menuFileReRead.Enabled = unread || (b != null && OcrImport.CanReRead(b.FolderPath));
                 menuFileReRead.Text = Localization.T(unread ? "Context.ReadOcr" : "Context.ReReadOcr");
+                // Dimmed rather than hidden, the rule the re-read item already
+                // follows: it can be found and its state understood.
+                menuFileTranslate.Enabled = b != null && (b.IsTextBook || b.IsHybrid);
             };
 
             menuFile.DropDownItems.Add(new ToolStripSeparator());
@@ -777,6 +790,12 @@ namespace Nemoviz_Book_Reader
             ctxReRead = new MenuItem(Localization.T("Context.ReReadOcr"));
             ctxReRead.Click += (s, e) => ReReadSelectedBook();
 
+            // Like the re-read above it, an ACTION rather than a setting — and one
+            // that makes a second book rather than changing this one. Hidden unless
+            // it applies, which is the normal state on an audio shelf.
+            ctxTranslate = new MenuItem(Localization.T("Context.Translate"));
+            ctxTranslate.Click += (s, e) => TranslateSelectedBook();
+
             ctxProperties = new MenuItem(Localization.T("Context.Properties"));
             ctxProperties.Click += (s, e) => ShowProperties();
 
@@ -791,6 +810,7 @@ namespace Nemoviz_Book_Reader
             bookMenu.MenuItems.Add(ctxDelete);
             bookMenu.MenuItems.Add(new MenuItem("-"));
             bookMenu.MenuItems.Add(ctxReRead);
+            bookMenu.MenuItems.Add(ctxTranslate);
             bookMenu.MenuItems.Add(ctxProperties);
 
             // Which items apply to the book under the cursor. Popup fires before
@@ -817,6 +837,10 @@ namespace Nemoviz_Book_Reader
                 bool unread = OcrImport.NeedsReading(b.FolderPath);
                 ctxReRead.Visible = unread || OcrImport.CanReRead(b.FolderPath);
                 ctxReRead.Text = Localization.T(unread ? "Context.ReadOcr" : "Context.ReReadOcr");
+                // Only a book that HAS text. The hybrid case is offered too — its
+                // text half can be translated, and the dialog says plainly that the
+                // result is a text book without the narration.
+                ctxTranslate.Visible = b.IsTextBook || b.IsHybrid;
             };
 
             // A ContextMenu is not attached the way a strip was — it is shown on
@@ -2192,6 +2216,137 @@ namespace Nemoviz_Book_Reader
             if (ReadSelectedBookNow(b))
                 MessageForm.ShowInfo(this, Localization.T("Ocr.ReRead.Done"),
                     Localization.T("Ocr.Ask.Title"));
+        }
+
+        /// <summary>Translates the selected book into a NEW book on the shelf.
+        ///
+        /// <para><b>The original is never touched</b>, which is the whole reason
+        /// this is a Library command: a reader who dislikes the translation deletes
+        /// it and still has the book. It is also why the command is not in
+        /// Properties — that window changes the book you are looking at, and a
+        /// Translate button there would reasonably be read as translating it in
+        /// place.</para></summary>
+        private void TranslateSelectedBook()
+        {
+            BookData book = GetSelectedBook();
+            if (book == null) return;
+
+            if (!book.IsTextBook && !book.IsHybrid)
+            {
+                MessageForm.ShowInfo(this, Localization.T("Translate.NotText"),
+                                     Localization.T("Translate.Ask.Title"));
+                return;
+            }
+            if (TranslationEngines.Configured().Count == 0)
+            {
+                MessageForm.ShowInfo(this, Localization.T("Translate.NoService"),
+                                     Localization.T("Translate.Ask.Title"));
+                return;
+            }
+
+            string text = null;
+            try { if (!string.IsNullOrEmpty(book.TextFilePath)) text = TtsReader.ReadFile(book.TextFilePath); }
+            catch { }
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                MessageForm.ShowInfo(this, Localization.T("Translate.Empty"),
+                                     Localization.T("Translate.Ask.Title"));
+                return;
+            }
+
+            string title = string.IsNullOrEmpty(book.Title) ? System.IO.Path.GetFileName(book.FolderPath) : book.Title;
+            TranslationReport report;
+            string target;
+            using (var ask = new TranslateBookForm(appSettings, title, book.TextLanguage,
+                                                   text.Length, book.IsHybrid))
+            {
+                if (ask.ShowDialog(this) != DialogResult.OK || ask.Primary == null) return;
+                target = ask.TargetLanguage;
+
+                var options = new TranslationJob.Options
+                {
+                    Chain = ask.Chain,
+                    SourceLang = ask.SourceLanguage,
+                    TargetLang = ask.TargetLanguage,
+                    ReaderNotes = ask.Notes,
+                    // Beside the SOURCE book, so stopping and starting again costs
+                    // nothing even after the window has been closed.
+                    CachePath = System.IO.Path.Combine(book.FolderPath, "translation.cache"),
+                    HasHeadings = book.TextHeadings != null && book.TextHeadings.Count > 0
+                };
+
+                using (var work = new TranslationProgressForm(text, options))
+                {
+                    work.ShowDialog(this);
+                    report = work.Report;
+                    if (work.Cancelled || report == null || !report.Ok) return;
+                }
+            }
+
+            string folder = CreateTranslatedBook(book, report.Text, target);
+            if (folder == null)
+            {
+                MessageForm.ShowInfo(this, Localization.T("Translate.Failed", ""),
+                                     Localization.T("Translate.Ask.Title"));
+                return;
+            }
+
+            LoadBooks();
+            // A FRESH BookData off the disk, and then the shelf is moved onto it —
+            // the rule this file already learned the hard way: after writing a
+            // book's folder, re-read it rather than trusting what is in hand.
+            try { RebuildShelf(new BookData(folder)); } catch { }
+
+            MessageForm.ShowInfo(this,
+                report.LeftInOriginal > 0
+                    ? Localization.T("Translate.DoneLeft", report.Chunks, report.LeftInOriginal)
+                    : Localization.T("Translate.Done", report.Chunks),
+                Localization.T("Translate.Ask.Title"));
+        }
+
+        /// <summary>Writes the translation out as a book of its own. Returns the
+        /// folder, or null.
+        ///
+        /// <para><b>The title keeps the original and gains the language in
+        /// brackets.</b> Translating the title would invent a name that exists
+        /// nowhere else — and when an official edition appears years later under a
+        /// quite different one, the reader has a book they cannot match to
+        /// anything. Gordan's example: <i>The Whole Nine Yards</i> published as
+        /// <i>Ubojica mekog srca</i>.</para></summary>
+        private string CreateTranslatedBook(BookData source, string text, string targetLang)
+        {
+            try
+            {
+                string lang = LanguageDetector.DisplayName(targetLang) ?? targetLang;
+                string baseName = Localization.T("Translate.Suffix",
+                                                 System.IO.Path.GetFileName(source.FolderPath), lang);
+                foreach (char bad in System.IO.Path.GetInvalidFileNameChars())
+                    baseName = baseName.Replace(bad, ' ');
+                baseName = baseName.Trim();
+
+                string folder = System.IO.Path.Combine(appSettings.LibraryPath, baseName);
+                int n = 2;
+                while (System.IO.Directory.Exists(folder))
+                    folder = System.IO.Path.Combine(appSettings.LibraryPath,
+                                                    baseName + " " + (n++).ToString(CultureInfo.InvariantCulture));
+                System.IO.Directory.CreateDirectory(folder);
+
+                System.IO.File.WriteAllText(System.IO.Path.Combine(folder, "content.txt"),
+                                            text, new System.Text.UTF8Encoding(false));
+
+                var fresh = new BookData(folder);
+                fresh.Title = string.IsNullOrEmpty(source.Title)
+                    ? baseName
+                    : Localization.T("Translate.Suffix", source.Title, lang);
+                fresh.Author = source.Author;
+                fresh.TextLanguage = targetLang;
+                // Already clean: it came out of the translator paragraph by
+                // paragraph, so a second cleaning would only move offsets that are
+                // about to be built from this very text.
+                fresh.Save();
+                return folder;
+            }
+            catch { return null; }
         }
 
         /// <summary>Reads a book's pictures and puts the result in place of

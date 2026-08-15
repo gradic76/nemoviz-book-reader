@@ -37,13 +37,21 @@ namespace Nemoviz_Book_Reader
         public string SourceLanguage { get; private set; }
         public string TargetLanguage { get; private set; }
         public TranslationEngine Primary { get; private set; }
-        public TranslationEngine Fallback { get; private set; }
         public string Notes { get; private set; }
+
+        /// <summary><b>One choice, and a chain follows from it.</b> The dialog used
+        /// to ask for a fallback as well, which was asking a reader to design a
+        /// retry policy — what they have an opinion about is which translation they
+        /// would rather read. The rest of the order is fixed and explained by the
+        /// help key beside the engine.</summary>
+        public List<TranslationEngine> Chain
+        {
+            get { return TranslationEngines.Chain(Primary); }
+        }
 
         private readonly ComboBox cmbSource = new ComboBox();
         private readonly ComboBox cmbTarget = new ComboBox();
         private readonly ComboBox cmbEngine = new ComboBox();
-        private readonly ComboBox cmbFallback = new ComboBox();
         private readonly TextBox tbNotes = new TextBox();
         private readonly List<string> langCodes = new List<string>();
         private readonly List<TranslationEngine> engines;
@@ -59,7 +67,7 @@ namespace Nemoviz_Book_Reader
             MaximizeBox = false;
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(500, fromHybrid ? 372 : 348);
+            ClientSize = new Size(500, fromHybrid ? 380 : 356);
 
             int y = 12;
 
@@ -91,7 +99,25 @@ namespace Nemoviz_Book_Reader
             y = Row(Localization.T("Translate.Ask.From"), cmbSource, y, 1);
             y = Row(Localization.T("Translate.Ask.To"), cmbTarget, y, 3);
             y = Row(Localization.T("Translate.Ask.Engine"), cmbEngine, y, 5);
-            y = Row(Localization.T("Translate.Ask.Fallback"), cmbFallback, y, 7);
+
+            // What happens when the chosen engine will not take a passage — the
+            // whole of the chain in one tabbable line, because "why does it name
+            // three services when I picked one" is the question this control
+            // raises and there is nowhere else to answer it.
+            var chainNote = new TextBox
+            {
+                Multiline = true,
+                ReadOnly = true,
+                BorderStyle = BorderStyle.None,
+                BackColor = SystemColors.Control,
+                Location = new Point(12, y),
+                Size = new Size(476, 32),
+                TabIndex = 7,
+                Text = Localization.T("Translate.Ask.ChainNote")
+            };
+            chainNote.AccessibleName = chainNote.Text;
+            Controls.Add(chainNote);
+            y += 40;
 
             var lblNotes = new Label
             {
@@ -144,11 +170,6 @@ namespace Nemoviz_Book_Reader
                 TargetLanguage = Code(cmbTarget);
                 Primary = cmbEngine.SelectedIndex >= 0 && cmbEngine.SelectedIndex < engines.Count
                           ? engines[cmbEngine.SelectedIndex] : null;
-                // The fallback list has "leave it in the original" as its first row,
-                // so everything after it is shifted by one.
-                int fi = cmbFallback.SelectedIndex - 1;
-                Fallback = fi >= 0 && fi < engines.Count ? engines[fi] : null;
-                if (Fallback == Primary) Fallback = null;
                 Notes = tbNotes.Text.Trim();
             };
         }
@@ -216,18 +237,11 @@ namespace Nemoviz_Book_Reader
             foreach (var e in engines) cmbEngine.Items.Add(e.DisplayName);
             if (engines.Count > 0) cmbEngine.SelectedIndex = 0;
 
-            cmbFallback.Items.Add(Localization.T("Translate.Ask.NoFallback"));
-            foreach (var e in engines) cmbFallback.Items.Add(e.DisplayName);
-            // The second engine, when there is one: they refuse different things,
-            // so the other one is usually the one that will take the passage.
-            cmbFallback.SelectedIndex = engines.Count > 1 ? 2 : 0;
-
             if (engines.Count == 0)
             {
                 cmbEngine.Items.Add(Localization.T("Translate.Ask.NoEngine"));
                 cmbEngine.SelectedIndex = 0;
                 cmbEngine.Enabled = false;
-                cmbFallback.Enabled = false;
             }
         }
 

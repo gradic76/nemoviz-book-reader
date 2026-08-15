@@ -108,22 +108,33 @@ namespace Nemoviz_Book_Reader
 
         public sealed class Options
         {
-            public TranslationEngine Primary;
-            public TranslationEngine Fallback;      // may be null
+            /// <summary>The stops, in the order they are tried. Built by
+            /// <see cref="TranslationEngines.Chain"/> from the one engine the reader
+            /// chose — they pick a translation they would rather read, not a retry
+            /// policy.</summary>
+            public List<TranslationEngine> Chain = new List<TranslationEngine>();
             public string SourceLang = "en";
             public string TargetLang = "hr";
             public string ReaderNotes;
             public string CachePath;                // null = do not cache
             public int MaxChars = TextChunker.DefaultMaxChars;
             public int MaxOutputTokens = 8000;
-            /// <summary>How many times the chosen engine is asked before the
-            /// fallback is tried. Three, because a refusal is a throw of the dice
-            /// and most passages that can get through do so within two or three
-            /// asks — see the loop that uses this.</summary>
-            public int PrimaryAttempts = 3;
+            /// <summary>Whether the book has headings of its own, which decides
+            /// whether its printed table of contents is kept — see
+            /// <see cref="BookMatter.Find"/>.</summary>
+            public bool HasHeadings;
             /// <summary>Called after each piece: (done, total, message). Return
             /// false to stop — the pieces already done stay in the cache.</summary>
             public Func<int, int, string, bool> Progress;
+
+            public TranslationEngine First { get { return Chain.Count > 0 ? Chain[0] : null; } }
+        }
+
+        /// <summary>One piece as it came out, and by whom.</summary>
+        private sealed class Piece
+        {
+            public string Text;
+            public bool LastResort;
         }
 
         public static TranslationReport Run(string bookText, Options opt)
@@ -131,115 +142,255 @@ namespace Nemoviz_Book_Reader
             var report = new TranslationReport();
             var started = DateTime.UtcNow;
             if (string.IsNullOrEmpty(bookText)) { report.Error = "no text"; return report; }
-            if (opt == null || opt.Primary == null) { report.Error = "no engine"; return report; }
+            if (opt == null || opt.First == null) { report.Error = "no engine"; return report; }
 
-            List<TextChunk> chunks = TextChunker.Split(bookText, opt.MaxChars);
+            // WHAT IS NOT THE BOOK DOES NOT GO TO THE TRANSLATOR. The cover, the
+            // imprint and the printed contents list are kept as they were written —
+            // and keeping the original is the right answer for them in the same way
+            // it is for a title: a machine-invented Croatian name for a book exists
+            // nowhere but in this file, and an official edition may later choose
+            // something else entirely.
+            BookMatter.Split parts = BookMatter.Divide(bookText, opt.HasHeadings);
+            if (parts.Note != null)
+                report.Issues.Add(new TranslationIssue
+                {
+                    Severity = CheckSeverity.Note,
+                    Kind = "front and back matter",
+                    Detail = parts.Note
+                });
+
+            List<TextChunk> chunks = TextChunker.Split(parts.Body, opt.MaxChars);
             report.Chunks = chunks.Count;
 
             var cache = TranslationCache.Open(opt.CachePath);
             string system = BuildSystemPrompt(opt.SourceLang, opt.TargetLang, opt.ReaderNotes);
 
-            var outText = new StringBuilder(bookText.Length);
+            var pieces = new List<Piece>(chunks.Count);
             foreach (TextChunk c in chunks)
             {
                 string done = cache.Get(c.Start, c.Text);
                 if (done != null)
                 {
                     report.FromCache++;
-                    outText.Append(Tidy(done));
+                    pieces.Add(new Piece { Text = done });
                     if (!Report(opt, c.Index + 1, chunks.Count, "cached")) { report.Cancelled = true; break; }
                     continue;
                 }
 
                 string user = BuildUserMessage(c);
+                Piece piece = TranslateOne(c, user, system, opt, report);
+                if (piece.Text != null) cache.Put(c.Start, c.Text, piece.Text);
+                else { piece.Text = c.Text; }        // left as it was written
 
-                // ASK THE SAME ENGINE AGAIN BEFORE GIVING UP ON IT, because a
-                // refusal is not a verdict about the text — it is a throw of the
-                // dice. Measured 2026-08-15 on seven passages a novel had been
-                // refused over: sent four times each, FOUR OF THE SEVEN went
-                // through at least once, and the pattern was plainly random —
-                // one passed on the first two attempts and was refused on the
-                // third, another passed three times and failed the fourth.
-                //
-                // It matters for quality, not just for coverage: a piece that
-                // goes through on a second ask keeps the engine the reader chose,
-                // where dropping to the fallback trades the prose away. And a
-                // retry costs one request against a free allowance, where the
-                // fallback costs money.
-                TranslationResult r = null;
-                List<TranslationIssue> issues = null;
-                bool bad = true;
-                for (int attempt = 0; attempt < Math.Max(1, opt.PrimaryAttempts); attempt++)
-                {
-                    r = Translator.Send(opt.Primary, null, system, user, opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang);
-                    issues = r.Ok
-                        ? TranslationChecks.Chunk(c, r.Text, opt.TargetLang)
-                        : new List<TranslationIssue>();
-                    bad = !r.Ok || HasSuspect(issues);
-                    if (!bad) { if (attempt > 0) report.RetriedOk++; break; }
-                }
-
-                // The second engine is tried for a refusal AND for a piece that
-                // came back wrong, because the remedy is the same either way and
-                // the two engines fail at different things.
-                if (bad && opt.Fallback != null)
-                {
-                    TranslationResult f = Translator.Send(opt.Fallback, null, system, user, opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang);
-                    if (f.Ok)
-                    {
-                        var fi = TranslationChecks.Chunk(c, f.Text, opt.TargetLang);
-                        if (!HasSuspect(fi))
-                        {
-                            // Why the second engine was needed is worth recording:
-                            // over a real novel it took 22 pieces of 131 — 17 % —
-                            // and without knowing whether that was refusals or
-                            // failed checks there is no way to tell a filtering
-                            // problem from a quality one.
-                            report.Issues.Add(new TranslationIssue
-                            {
-                                Severity = CheckSeverity.Note,
-                                Kind = "second engine",
-                                Detail = r.Ok ? Describe(issues) : (r.Error + " " + r.Detail),
-                                ChunkIndex = c.Index
-                            });
-                            r = f; issues = fi; bad = false; report.ViaFallback++;
-                        }
-                    }
-                }
-
-                if (bad)
-                {
-                    // Left as it was written. Counted and reported, never silently
-                    // dropped — the reader has to be able to find out that these
-                    // three paragraphs are in the original language.
-                    report.LeftInOriginal++;
-                    report.Issues.Add(new TranslationIssue
-                    {
-                        Severity = CheckSeverity.Suspect,
-                        Kind = "left in the original",
-                        Detail = r.Ok ? Describe(issues) : (r.Error + " " + r.Detail),
-                        ChunkIndex = c.Index
-                    });
-                    outText.Append(Tidy(c.Text));
-                }
-                else
-                {
-                    foreach (var i in issues) report.Issues.Add(i);
-                    cache.Put(c.Start, c.Text, r.Text);
-                    outText.Append(Tidy(r.Text));
-                }
-
-                if (!Report(opt, c.Index + 1, chunks.Count, bad ? "left in the original" : "translated"))
+                pieces.Add(piece);
+                if (!Report(opt, c.Index + 1, chunks.Count,
+                            piece.LastResort ? "last resort" : "translated"))
                 { report.Cancelled = true; break; }
             }
 
             cache.Flush();
-            report.Text = outText.ToString();
+            report.Text = Assemble(parts, pieces, opt);
             if (!report.Cancelled)
+            {
                 report.Issues.AddRange(TranslationChecks.Book(bookText, report.Text));
+                report.Issues.AddRange(GenderIssues(pieces));
+            }
             report.Ok = !report.Cancelled && report.Text.Length > 0;
             report.Elapsed = DateTime.UtcNow - started;
             return report;
+        }
+
+        /// <summary>One piece down the chain. Returns a piece whose Text is null
+        /// when every stop refused it.
+        ///
+        /// <para><b>Each stop is asked more than once before the chain moves on</b>,
+        /// because a refusal is not a verdict about the text — it is a throw of the
+        /// dice. Measured on seven passages a novel had been refused over: sent four
+        /// times each, FOUR OF THE SEVEN went through at least once, and plainly at
+        /// random — one passed twice then failed, another passed three times and
+        /// failed the fourth. What does not clear within four asks never clears,
+        /// being systematic rather than moody, which is why three is the number and
+        /// five would only add hours to the one book that needs them.</para>
+        ///
+        /// <para>It matters for quality and not only for coverage: a piece that goes
+        /// through on a second ask keeps the engine the reader chose, where moving
+        /// down the chain trades the prose away.</para></summary>
+        private static Piece TranslateOne(TextChunk c, string user, string system,
+                                          Options opt, TranslationReport report)
+        {
+            TranslationResult last = null;
+            List<TranslationIssue> lastIssues = null;
+
+            for (int stop = 0; stop < opt.Chain.Count; stop++)
+            {
+                TranslationEngine engine = opt.Chain[stop];
+                int attempts = Math.Max(1, engine.Attempts);
+
+                for (int attempt = 0; attempt < attempts; attempt++)
+                {
+                    TranslationResult r = Translator.Send(engine, null, system, user,
+                                                          opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang);
+                    List<TranslationIssue> issues = r.Ok
+                        ? TranslationChecks.Chunk(c, r.Text, opt.TargetLang)
+                        : new List<TranslationIssue>();
+                    last = r; lastIssues = issues;
+
+                    if (!r.Ok || HasSuspect(issues)) continue;
+
+                    if (stop == 0 && attempt > 0) report.RetriedOk++;
+                    if (stop > 0)
+                    {
+                        report.ViaFallback++;
+                        // Why a later stop was needed is worth recording: over a
+                        // real novel the second engine took 29 pieces of 159, and
+                        // without knowing whether that was refusals or failed
+                        // checks there is no telling a filtering problem from a
+                        // quality one.
+                        report.Issues.Add(new TranslationIssue
+                        {
+                            Severity = CheckSeverity.Note,
+                            Kind = engine.LastResort ? "last resort" : "later engine",
+                            Detail = engine.DisplayName + " — " +
+                                     (last.Ok ? Describe(lastIssues) : (last.Error + " " + last.Detail)),
+                            ChunkIndex = c.Index
+                        });
+                    }
+                    foreach (var i in issues) report.Issues.Add(i);
+                    return new Piece { Text = r.Text, LastResort = engine.LastResort };
+                }
+            }
+
+            // Nothing would take it. Counted and reported, never silently dropped —
+            // the reader has to be able to find out that these paragraphs are in the
+            // language the book came in.
+            report.LeftInOriginal++;
+            report.Issues.Add(new TranslationIssue
+            {
+                Severity = CheckSeverity.Suspect,
+                Kind = "left in the original",
+                Detail = last != null && last.Ok ? Describe(lastIssues)
+                       : last != null ? (last.Error + " " + last.Detail) : "no engine answered",
+                ChunkIndex = c.Index
+            });
+            return new Piece { Text = null };
+        }
+
+        /// <summary>
+        /// Puts the book back together: what was kept, what was translated, and a
+        /// notice around anything the last resort had to rescue.
+        ///
+        /// <para><b>A last-resort passage announces itself IN THE BOOK</b> (Gordan,
+        /// 2026-08-15), and that is not a courtesy. Azure sets the narrator's sex
+        /// and the level of address wrongly for a whole passage; the first of those
+        /// a check can catch, and the second no check ever will, because a real book
+        /// carries both registers between different pairs of characters. So the
+        /// notice is the only mechanism that reports the fault at all.</para>
+        ///
+        /// <para><b>Two notices, not one</b> — without the closing one the reader
+        /// never learns where the weaker translation stops and reads the rest of the
+        /// book suspicious of it. <b>And consecutive pieces share one pair</b>: five
+        /// in a row are one stretch of thirty thousand characters, not five, and
+        /// unmerged a heavily-refused book would carry forty of these.</para>
+        /// </summary>
+        private static string Assemble(BookMatter.Split parts, List<Piece> pieces, Options opt)
+        {
+            string open = null, close = null;
+            foreach (Piece p in pieces) if (p.LastResort) { NoticePair(opt, out open, out close); break; }
+
+            var sb = new StringBuilder();
+            if (parts.Front.Length > 0) sb.Append(Tidy(parts.Front));
+
+            bool inside = false;
+            foreach (Piece p in pieces)
+            {
+                if (p.LastResort && !inside) { sb.Append(Tidy(open)); inside = true; }
+                else if (!p.LastResort && inside) { sb.Append(Tidy(close)); inside = false; }
+                sb.Append(Tidy(p.Text));
+            }
+            if (inside) sb.Append(Tidy(close));
+
+            if (parts.Back.Length > 0) sb.Append(Tidy(parts.Back));
+            return sb.ToString();
+        }
+
+        /// <summary><b>The notice is written in the BOOK's language, not in ours.</b>
+        /// `en.lang` is the only language file there is, and an English sentence
+        /// inside a French book would be read aloud by the French voice under French
+        /// rules. So the engine that is already translating this book translates the
+        /// notice too — one small request at the start, no new language table, and no
+        /// half-supported languages.
+        ///
+        /// <para>If that request fails the English stands rather than nothing: a
+        /// notice in the wrong language still tells the reader something, where
+        /// silence tells them nothing at all.</para></summary>
+        private static void NoticePair(Options opt, out string open, out string close)
+        {
+            open = Localization.T("Translate.LastResort.Begin");
+            close = Localization.T("Translate.LastResort.End");
+            if (string.IsNullOrEmpty(opt.TargetLang) ||
+                opt.TargetLang.StartsWith("en", StringComparison.OrdinalIgnoreCase)) return;
+
+            try
+            {
+                TranslationResult r = Translator.Send(opt.First, null,
+                    "You are translating two short notices that a reading program shows inside a book. " +
+                    "Translate from English into " + (LanguageDetector.DisplayName(opt.TargetLang) ?? opt.TargetLang) +
+                    ". Keep them as two lines, in the same order. Output only the two lines.",
+                    open + "\n" + close, 400, "en", opt.TargetLang);
+                if (!r.Ok || string.IsNullOrWhiteSpace(r.Text)) return;
+                string[] lines = r.Text.Replace("\r\n", "\n").Split('\n');
+                var kept = new List<string>();
+                foreach (string l in lines) if (l.Trim().Length > 0) kept.Add(l.Trim());
+                if (kept.Count >= 2) { open = kept[0]; close = kept[1]; }
+            }
+            catch { /* the English stands */ }
+        }
+
+        /// <summary>The narrator does not change sex halfway through a book.
+        ///
+        /// <para>Croatian marks the speaker's gender in every first-person past
+        /// form, so a piece that disagrees with the book around it is measurable —
+        /// and it is the ONE check that separated the engines when paragraph counts,
+        /// length ratios and figures agreed across all of them.</para></summary>
+        private static List<TranslationIssue> GenderIssues(List<Piece> pieces)
+        {
+            var found = new List<TranslationIssue>();
+            int bookM = 0, bookF = 0;
+            var perPiece = new List<int[]>();
+            foreach (Piece p in pieces)
+            {
+                int m, f;
+                TranslationChecks.GenderCounts(p.Text, out m, out f);
+                perPiece.Add(new[] { m, f });
+                bookM += m; bookF += f;
+            }
+            int total = bookM + bookF;
+            // Below a handful of forms in the whole book there is nothing to be
+            // consistent with — a third-person narrative has no first person at all.
+            if (total < 12) return found;
+            bool bookIsFeminine = bookF > bookM;
+            // A book that is genuinely half and half has more than one narrator, and
+            // then a piece disagreeing with the average means nothing.
+            int major = Math.Max(bookM, bookF);
+            if (major * 4 < total * 3) return found;
+
+            for (int i = 0; i < perPiece.Count; i++)
+            {
+                int m = perPiece[i][0], f = perPiece[i][1];
+                if (m + f < 3) continue;
+                int against = bookIsFeminine ? m : f;
+                int with = bookIsFeminine ? f : m;
+                if (against > with)
+                    found.Add(new TranslationIssue
+                    {
+                        Severity = CheckSeverity.Note,
+                        Kind = "narrator's gender",
+                        Detail = "this piece reads as " + (bookIsFeminine ? "masculine" : "feminine") +
+                                 " where the book reads as " + (bookIsFeminine ? "feminine" : "masculine"),
+                        ChunkIndex = i
+                    });
+            }
+            return found;
         }
 
         private static bool Report(Options opt, int done, int total, string what)

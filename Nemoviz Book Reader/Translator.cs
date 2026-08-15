@@ -36,14 +36,37 @@ namespace Nemoviz_Book_Reader
     /// <summary>One translation service, as far as the transport is concerned.</summary>
     internal sealed class TranslationEngine
     {
-        public string Id;            // stable, used as the key-store key
+        public string Id;            // stable, identifies this stop in the chain
         public string NameKey;       // en.lang key for the human name
         public EngineKind Kind;
         public string Endpoint;      // chat/completions, or the Gemini base
         public string Model;
 
+        /// <summary>Which stored key this engine authenticates with, when that is
+        /// not its own id. <b>Two stops can share one account</b>: DeepSeek's cheap
+        /// and dear models are one subscription and one key, so asking the reader
+        /// for a second would be asking for the same string twice.</summary>
+        public string KeyId;
+
+        /// <summary>How many times this stop is asked before the chain moves on.
+        ///
+        /// <para>Three for a language model, because a refusal is a throw of the
+        /// dice — measured on seven passages a novel had been refused over, four of
+        /// the seven went through within four asks, and what does not clear in four
+        /// never clears, being systematic rather than moody. <b>One for Azure</b>,
+        /// which has nobody in it to refuse: a failure there is the network, and the
+        /// transport already retries that itself.</para></summary>
+        public int Attempts = 3;
+
+        /// <summary>True for the stop that translates without being able to be told
+        /// anything — see <see cref="EngineKind.AzureTranslator"/>. A passage
+        /// rescued here is MARKED IN THE BOOK, because the two faults it makes are
+        /// invisible to every check we have.</summary>
+        public bool LastResort;
+
         public string DisplayName { get { return Localization.T(NameKey); } }
-        public bool HasKey { get { return TranslationKeys.Has(Id); } }
+        public string KeyName { get { return string.IsNullOrEmpty(KeyId) ? Id : KeyId; } }
+        public bool HasKey { get { return TranslationKeys.Has(KeyName); } }
     }
 
     /// <summary>
@@ -80,6 +103,7 @@ namespace Nemoviz_Book_Reader
     {
         public const string Gemini = "gemini";
         public const string DeepSeek = "deepseek";
+        public const string DeepSeekPro = "deepseek-pro";
         public const string Azure = "azure";
 
         /// <summary>Azure keeps a second value beside its key: the region a
@@ -111,6 +135,25 @@ namespace Nemoviz_Book_Reader
                 Endpoint = "https://api.deepseek.com/chat/completions",
                 Model = "deepseek-v4-flash"
             },
+            // THE DEARER MODEL IS ITS OWN STOP, not a different service. It shares
+            // DeepSeek's account and key, so it costs the reader no second signup
+            // and appears in no key dialog of its own.
+            //
+            // Why it earns a place: measured on a French chapter (2026-08-15) it
+            // held the narrator's gender and the formal register as cleanly as
+            // Gemini, where the cheap model slipped once on gender. It is also
+            // several times the price, which is exactly why it stands AFTER the
+            // cheap one — it is asked only for the passages that have already
+            // defeated two attempts at a third of the cost.
+            new TranslationEngine
+            {
+                Id = DeepSeekPro,
+                NameKey = "Settings.Translate.Engine.DeepSeekPro",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.deepseek.com/chat/completions",
+                Model = "deepseek-v4-pro",
+                KeyId = DeepSeek
+            },
             // Deferred once, and then a measurement brought it back: Gemini
             // refuses roughly a sixth of an ordinary published novel — not for
             // its content but, by every sign, because it recognises the book —
@@ -123,9 +166,52 @@ namespace Nemoviz_Book_Reader
                 NameKey = "Settings.Translate.Engine.Azure",
                 Kind = EngineKind.AzureTranslator,
                 Endpoint = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0",
-                Model = ""      // there is no model to choose
+                Model = "",      // there is no model to choose
+                Attempts = 1,
+                LastResort = true
             }
         };
+
+        /// <summary>The order the stops are tried in, starting from whichever the
+        /// reader chose. Only services with a key appear.
+        ///
+        /// <para><b>The reader picks ONE engine and gets a chain</b>, which is what
+        /// the help text on this control has to explain. Offering four separate
+        /// choices would be asking someone to design a retry policy; what they have
+        /// an opinion about is which translation they would rather read.</para>
+        ///
+        /// <para><b>Azure is always last and never anywhere else</b>, and that was
+        /// measured rather than assumed. On a French chapter it narrated a girl's
+        /// first-person story in the masculine eight times out of nine, and rendered
+        /// a formal confrontation between two adults as if they were friends —
+        /// nine <i>vous</i> in the source, no polite form in the output. Both faults
+        /// are set wrongly for a whole passage rather than clumsily in a phrase, and
+        /// the second cannot be checked for at all, since a real book carries both
+        /// registers between different pairs of characters.</para>
+        ///
+        /// <para><b>But it belongs in the chain, and the comparison that settles
+        /// that is not against Gemini.</b> At the last stop the choice is Azure
+        /// against leaving the passage in the source language — and an English
+        /// paragraph inside a Croatian book is read aloud by a Croatian voice under
+        /// Croatian rules, which is noise. A readable sentence with the narrator's
+        /// sex wrong still carries the plot; the other carries nothing.</para></summary>
+        public static List<TranslationEngine> Chain(TranslationEngine primary)
+        {
+            // The preference order among the rest: cheapest capable first, the
+            // dearer model of the same family after it, and the one that cannot
+            // refuse at the very end.
+            string[] order = { Gemini, DeepSeek, DeepSeekPro, Azure };
+            var chain = new List<TranslationEngine>();
+            if (primary != null && primary.HasKey) chain.Add(primary);
+            foreach (string id in order)
+            {
+                var e = ById(id);
+                if (e == null || !e.HasKey) continue;
+                if (primary != null && string.Equals(e.Id, primary.Id, StringComparison.OrdinalIgnoreCase)) continue;
+                chain.Add(e);
+            }
+            return chain;
+        }
 
         public static TranslationEngine ById(string id)
         {
@@ -201,7 +287,9 @@ namespace Nemoviz_Book_Reader
                                              string azureRegion = null)
         {
             if (engine == null) return Fail("Settings.Translate.Test.NoEngine");
-            if (string.IsNullOrEmpty(key)) key = TranslationKeys.Get(engine.Id);
+            // KeyName, not Id: two stops can share one account, so the dearer
+            // DeepSeek model authenticates with the key stored for the cheap one.
+            if (string.IsNullOrEmpty(key)) key = TranslationKeys.Get(engine.KeyName);
             if (string.IsNullOrEmpty(key)) return Fail("Settings.Translate.Test.NoKey");
 
             string url, body;

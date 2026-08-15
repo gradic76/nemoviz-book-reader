@@ -117,7 +117,60 @@ namespace Nemoviz_Book_Reader
                 Add(found, CheckSeverity.Suspect, "repetition",
                     "\"" + Trim(looped, 60) + "\" repeats", chunk.Index);
 
+            // 8. FIGURES. Measured on Azure, which turned "forty pounds" into
+            //    "četrdeset kilograma" — it swapped the unit word and kept the
+            //    number, doubling the man. That class of error is worse for this
+            //    audience than any clumsiness: a calque sounds wrong and the ear
+            //    catches it, while a converted-but-false figure reads perfectly
+            //    naturally and is simply untrue.
+            //
+            //    A NUMBER THAT MERELY CHANGED IS NOT REPORTED, because a good
+            //    translation converts: forty pounds SHOULD become about twenty
+            //    kilograms, and flagging that would fill the report with correct
+            //    work. What is reported is a figure that VANISHED with nothing
+            //    numeric put in its place, and a translation that grew figures the
+            //    source never had.
+            string figures = FigureTrouble(chunk.Text, translated);
+            if (figures != null)
+                Add(found, CheckSeverity.Note, "figures", figures, chunk.Index);
+
             return found;
+        }
+
+        /// <summary>Masculine and feminine first-person past forms, which is how
+        /// Croatian and its neighbours carry the speaker's sex in every sentence.
+        ///
+        /// <para><b>This is the one check that separated the engines.</b> On a
+        /// French chapter narrated by a girl, the paragraph count, the length ratio
+        /// and the figures agreed across all four services and told us nothing;
+        /// counting these two endings put Azure at eight masculine forms to one
+        /// feminine while the language models sat at nought. It also caught the one
+        /// slip a good engine made.</para>
+        ///
+        /// <para>Crude by design and it does not need to be otherwise: it is not
+        /// parsing the sentence, only counting an ending that means one thing.</para></summary>
+        public static void GenderCounts(string s, out int masculine, out int feminine)
+        {
+            masculine = 0; feminine = 0;
+            if (string.IsNullOrEmpty(s)) return;
+            var words = new List<string>();
+            var sb = new StringBuilder();
+            foreach (char c in s + " ")
+            {
+                if (char.IsLetter(c)) sb.Append(char.ToLowerInvariant(c));
+                else { if (sb.Length > 0) words.Add(sb.ToString()); sb.Clear(); }
+            }
+            for (int i = 0; i < words.Count; i++)
+            {
+                // "sam" on one side or the other is what makes it FIRST person and
+                // therefore the narrator, rather than any character being described.
+                bool first = (i > 0 && words[i - 1] == "sam") || (i + 1 < words.Count && words[i + 1] == "sam");
+                if (!first) continue;
+                string w = words[i];
+                if (w.Length < 4) continue;
+                if (w.EndsWith("ao", StringComparison.Ordinal) || w.EndsWith("io", StringComparison.Ordinal)) masculine++;
+                else if (w.EndsWith("la", StringComparison.Ordinal)) feminine++;
+            }
         }
 
         /// <summary>Checks that hold only across the WHOLE book — the ones a single
@@ -281,6 +334,42 @@ namespace Nemoviz_Book_Reader
             }
             list.Sort((x, y) => y.Value.CompareTo(x.Value));
             if (list.Count > 12) list.RemoveRange(12, list.Count - 12);
+            return list;
+        }
+
+        /// <summary>Reports a figure that disappeared, or figures that appeared out
+        /// of nowhere. Deliberately blind to a figure that merely CHANGED, since a
+        /// good translation converts units and reporting that would drown the one
+        /// line worth reading.</summary>
+        private static string FigureTrouble(string source, string translated)
+        {
+            List<string> a = Figures(source), b = Figures(translated);
+            if (a.Count == 0 && b.Count == 0) return null;
+
+            // A whole passage's figures gone is the loud case: a list of dates or
+            // measurements dropped rather than translated.
+            if (a.Count >= 3 && b.Count * 3 <= a.Count)
+                return string.Format(CultureInfo.InvariantCulture,
+                    "{0} figures in the source, {1} in the translation", a.Count, b.Count);
+
+            // Figures invented. Rarer, and it means the model has written something
+            // the author did not.
+            if (b.Count >= 3 && a.Count * 3 <= b.Count)
+                return string.Format(CultureInfo.InvariantCulture,
+                    "{0} figures in the source, {1} in the translation", a.Count, b.Count);
+
+            return null;
+        }
+
+        private static List<string> Figures(string s)
+        {
+            var list = new List<string>();
+            var sb = new StringBuilder();
+            foreach (char c in (s ?? "") + " ")
+            {
+                if (char.IsDigit(c)) sb.Append(c);
+                else if (sb.Length > 0) { list.Add(sb.ToString()); sb.Clear(); }
+            }
             return list;
         }
 

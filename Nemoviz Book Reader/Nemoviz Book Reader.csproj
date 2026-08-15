@@ -162,6 +162,7 @@
     <Compile Include="HintSystem.cs" />
     <Compile Include="AzureProvision.cs" />
     <Compile Include="Json.cs" />
+    <Compile Include="BookMatter.cs" />
     <Compile Include="TextChunker.cs" />
     <Compile Include="TranslationChecks.cs" />
     <Compile Include="TranslationJob.cs" />
