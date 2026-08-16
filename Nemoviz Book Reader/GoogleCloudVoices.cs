@@ -332,6 +332,15 @@ namespace Nemoviz_Book_Reader
             if (open < 0 || !displayName.EndsWith(")", StringComparison.Ordinal)) return false;
             string speaker = displayName.Substring(0, open);
             language = displayName.Substring(open + 2, displayName.Length - open - 3);
+            // IT HAS TO LOOK LIKE A LANGUAGE TAG, and that guard arrived with the
+            // second cloud (2026-08-16). This used to accept whatever stood
+            // between the brackets, so "Gabrijela (hr-HR, Azure)" parsed happily
+            // and built the Google id "hr-HR, Azure-Chirp3-HD-Gabrijela" — an
+            // Azure voice claimed as Google's, which would have sent its
+            // synthesis to the wrong service and its cost to the wrong
+            // allowance. A BCP-47 tag has letters, digits and hyphens and
+            // nothing else.
+            if (!LooksLikeLanguage(language)) { googleName = null; language = null; return false; }
             googleName = language + "-Chirp3-HD-" + speaker;
             return true;
         }
@@ -344,6 +353,14 @@ namespace Nemoviz_Book_Reader
         {
             string g, l;
             return Split(displayName, out g, out l);
+        }
+
+        private static bool LooksLikeLanguage(string s)
+        {
+            if (string.IsNullOrEmpty(s) || s.Length > 20) return false;
+            foreach (char c in s)
+                if (!char.IsLetterOrDigit(c) && c != '-') return false;
+            return true;
         }
 
         /// <summary>The same catalogue with the cloud voices taken out, and how

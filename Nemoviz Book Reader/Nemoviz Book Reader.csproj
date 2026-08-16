@@ -211,6 +211,7 @@
     <Compile Include="SpeechExport.cs" />
     <Compile Include="SpeechExportForm.cs" />
     <Compile Include="SpeechPrefill.cs" />
+    <Compile Include="AzureVoices.cs" />
     <Compile Include="CloudVoices.cs" />
     <Compile Include="GoogleCloudVoices.cs" />
     <Compile Include="OcrAskForm.cs" />

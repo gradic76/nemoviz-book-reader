@@ -43,13 +43,35 @@ namespace Nemoviz_Book_Reader
         public static bool IsOne(string displayName)
         {
             if (string.IsNullOrEmpty(displayName)) return false;
-            return GoogleCloudVoices.IsOne(displayName);
+            return GoogleCloudVoices.IsOne(displayName) || AzureVoices.IsOne(displayName);
+        }
+
+        /// <summary>One passage from whichever service owns this voice, or null.
+        /// The look-ahead and the export both need to make speech without caring
+        /// whose it is; everything else about a vendor stays in its own file.</summary>
+        public static byte[] Synthesize(string displayName, string text)
+        {
+            string a, b;
+            if (GoogleCloudVoices.Split(displayName, out a, out b))
+                return GoogleCloudVoices.Synthesize(text, a, b, 1.0, 0.0);
+            if (AzureVoices.Split(displayName, out a, out b))
+                return AzureVoices.Synthesize(text, AzureVoices.ShortNameFor(displayName), a, 1.0, 0.0);
+            return null;
+        }
+
+        /// <summary>The largest request a vendor will take, for the chunker that
+        /// splits an over-long passage. The smaller of the two is safe for
+        /// either, and they are the same number today.</summary>
+        public static int MaxRequestBytes(string displayName)
+        {
+            return AzureVoices.IsOne(displayName)
+                ? AzureVoices.MaxRequestBytes : GoogleCloudVoices.MaxRequestBytes;
         }
 
         /// <summary>Is any cloud voice service set up at all? Used to decide
         /// whether there is anything to offer, not whether to offer a
         /// particular voice.</summary>
-        public static bool Any { get { return GoogleCloudVoices.Have; } }
+        public static bool Any { get { return GoogleCloudVoices.Have || AzureVoices.Have; } }
 
         /// <summary>Roughly what one passage costs to make, in seconds — a round
         /// trip for a cloud voice against a local render.
@@ -72,7 +94,19 @@ namespace Nemoviz_Book_Reader
         public static List<(string Name, string Engine, string Language)> Exclude(
             IEnumerable<(string Name, string Engine, string Language)> all, out int removed)
         {
-            return GoogleCloudVoices.Exclude(all, out removed);
+            // Filtered HERE against CloudVoices.IsOne, not delegated to one
+            // vendor's own Exclude — that would have kept the other vendor's
+            // voices in Settings, which is exactly the silent per-language
+            // default §8g forbids, and nothing would have complained.
+            var kept = new List<(string, string, string)>();
+            removed = 0;
+            if (all == null) return kept;
+            foreach (var v in all)
+            {
+                if (IsOne(v.Name)) { removed++; continue; }
+                kept.Add(v);
+            }
+            return kept;
         }
     }
 }
