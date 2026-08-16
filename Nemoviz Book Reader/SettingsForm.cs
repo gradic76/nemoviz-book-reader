@@ -713,7 +713,7 @@ namespace Nemoviz_Book_Reader
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.Azure.Group");
             box.Location = new Point(x, y);
-            box.Size = new Size(500, 150);
+            box.Size = new Size(500, 186);
             box.Tag = "Hint.Settings.Azure";
 
             tbAzureState = new TextBox();
@@ -745,18 +745,35 @@ namespace Nemoviz_Book_Reader
             tbAzureKey.AccessibleName = lk.Text;
             tbAzureKey.TabIndex = 2;
 
+            // THE WAY IN FOR SOMEONE WHO HAS NOTHING YET. The two fields above are
+            // for a reader who already made the resource; this makes it for them
+            // and then fills the fields itself. The portal is the thing it exists
+            // to avoid, which is why it is offered rather than buried.
+            Button setup = new Button();
+            setup.Text = Localization.T("Azure.Setup.Open");
+            setup.AccessibleName = setup.Text;
+            setup.SetBounds(14, 112, 240, 26);
+            setup.TabIndex = 3;
+            setup.Click += (s, e) =>
+            {
+                using (var dlg = new AzureSpeechSetupForm()) dlg.ShowDialog(this);
+                tbAzureResource.Text = AzureVoices.Resource;
+                ShowAzureState();
+                ShowCloudState();
+            };
+
             Button save = new Button();
             save.Text = Localization.T("Settings.Azure.Save");
             save.AccessibleName = save.Text;
-            save.SetBounds(14, 112, 240, 26);
-            save.TabIndex = 3;
+            save.SetBounds(264, 112, 240, 26);
+            save.TabIndex = 4;
             save.Click += (s, e) => SaveAzureCredential();
 
             btnAzureForget = new Button();
             btnAzureForget.Text = Localization.T("Settings.Azure.Forget");
             btnAzureForget.AccessibleName = btnAzureForget.Text;
-            btnAzureForget.SetBounds(264, 112, 220, 26);
-            btnAzureForget.TabIndex = 4;
+            btnAzureForget.SetBounds(264, 152, 220, 26);
+            btnAzureForget.TabIndex = 5;
             btnAzureForget.Click += (s, e) =>
             {
                 if (!MessageForm.ShowConfirm(this, Localization.T("Settings.Azure.ForgetAsk"),
@@ -771,6 +788,7 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(tbAzureState);
             box.Controls.Add(lr); box.Controls.Add(tbAzureResource);
             box.Controls.Add(lk); box.Controls.Add(tbAzureKey);
+            box.Controls.Add(setup);
             box.Controls.Add(save);
             box.Controls.Add(btnAzureForget);
 
@@ -796,8 +814,9 @@ namespace Nemoviz_Book_Reader
                 tbAzureResource.SetBounds(col, 54, Math.Max(60, right - col), 24);
                 tbAzureKey.SetBounds(col, 88, Math.Max(60, right - col), 24);
                 int bw = Math.Min(240, (right - 14 - 12) / 2);
-                save.SetBounds(14, 120, bw, 26);
-                btnAzureForget.SetBounds(right - bw, 120, bw, 26);
+                setup.SetBounds(14, 120, bw, 26);
+                save.SetBounds(right - bw, 120, bw, 26);
+                btnAzureForget.SetBounds(right - bw, 152, bw, 26);
             };
             // ON THE LABELS TOO, and that is the whole trick. The skin widens
             // them AFTER it resizes the group, so a handler listening only to the
