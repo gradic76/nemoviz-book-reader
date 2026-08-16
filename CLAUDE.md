@@ -5829,6 +5829,32 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
 
 ## 11. TODO (open items)
 
+### WHAT IS LEFT TO TEST, as of 2026-08-16 (Gordan's own list)
+
+He worked through the whole untested list that day. **Cleared, by ear, nothing
+outstanding:** the message dialogs under classic (the `?` hint and the bulk
+import Continue both read properly — the one real risk of the parity change),
+the classic player's **tab order**, and the **EQ band names** (a reader hears
+"5 kHz and above" off the accessible name while the caption says "5k+"). OCR had
+nothing new to test — no new samples.
+
+**These two are what remain:**
+
+1. **Everything under "speech and export", RE-TEST** — because four faults were
+   found and fixed on 2026-08-16 after he reported them, and none of the fixes
+   has been heard yet: the look-ahead now following playback rather than the
+   book being open, its being voice-aware, the info box tab-stop leak, the
+   32-bit host's stand-down, and the export's corrected time estimate and
+   wording. See §8g′.
+2. **The translator**, untouched since 2026-08-15: the heartbeat during long
+   silences, the **Azure last-resort marker that has never once appeared in a
+   real book** (the test is to park the DeepSeek key and run a short book), and
+   the widow/orphan seams at chunk and chapter boundaries.
+
+**Verified in passing and worth not re-deriving:** the exported audiobook was
+walked frame by frame — one Xing header, claiming exactly what the frames add up
+to. NBR's own shorter figure is the WPM estimate, not a measurement. See §8g′.
+
 - ~~**The braille settings are largely inert, and one of them lies**~~ **— DONE
   2026-08-04.** Gordan reasoned it out from the tables, the code confirmed every
   part of it, and the cleanup is in. What the trace found and what became of it:
