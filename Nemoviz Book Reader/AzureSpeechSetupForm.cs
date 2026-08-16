@@ -40,7 +40,7 @@ namespace Nemoviz_Book_Reader
         public bool Made { get; private set; }
 
         private readonly TextBox status, code;
-        private readonly Button act, cancel;
+        private readonly Button act, cancel, openLink;
         private readonly ComboBox subs;
         private readonly TextBox tenant, tenantHint;
         private readonly Label tenantLabel;
@@ -67,7 +67,7 @@ namespace Nemoviz_Book_Reader
             StartPosition = FormStartPosition.CenterParent;
             MinimizeBox = false;
             MaximizeBox = false;
-            ClientSize = new Size(520, 346);
+            ClientSize = new Size(520, 384);
 
             status = Line(14, 14, 492, 76);
             status.Text = Localization.T("Azure.Setup.Intro");
@@ -79,6 +79,35 @@ namespace Nemoviz_Book_Reader
             code.TabIndex = 1;
             code.Visible = false;
 
+            // A BUTTON, NOT A LINK IN THE TEXT. Gordan had to copy the address out
+            // of the line and paste it into a browser, which is a step nobody
+            // should have to work out. A LinkLabel would also be reachable — it
+            // takes a tab stop, unlike a plain Label — but this is an ACTION, and
+            // the app's convention is that actions are buttons: a reader hears
+            // "Open the sign-in page, button" and knows what pressing it does.
+            //
+            // It does NOT open by itself when the code appears. That would throw
+            // the browser in front of a reader who is still reading the code, and
+            // the code is the thing they need first.
+            openLink = new Button();
+            openLink.Text = Localization.T("Azure.Setup.OpenPage");
+            openLink.AccessibleName = openLink.Text;
+            openLink.SetBounds(14, 132, 240, 26);
+            openLink.TabIndex = 2;
+            openLink.Visible = false;
+            openLink.Click += (s, e) =>
+            {
+                // The address comes from Microsoft's own device-code reply, and
+                // only ever after the reader pressed Start — never from anything
+                // typed into this window.
+                try
+                {
+                    if (request != null && !string.IsNullOrEmpty(request.VerificationUri))
+                        System.Diagnostics.Process.Start(request.VerificationUri);
+                }
+                catch { ScreenReader.Announce(this, Localization.T("Azure.Setup.OpenFailed")); }
+            };
+
             // ASKED UP FRONT, because it is the one thing that decides whether the
             // sign-in can happen at all. A personal Microsoft account cannot sign
             // in at the front door for an Azure scope — see AzureProvision.Tenant
@@ -87,48 +116,49 @@ namespace Nemoviz_Book_Reader
             tenantLabel = new Label();
             tenantLabel.Text = Localization.T("Azure.Setup.Directory");
             tenantLabel.AutoSize = false;
-            tenantLabel.SetBounds(14, 136, 160, 20);
+            tenantLabel.SetBounds(14, 172, 160, 20);
 
             tenant = new TextBox();
-            tenant.SetBounds(180, 134, 326, 24);
+            tenant.SetBounds(180, 170, 326, 24);
             tenant.AccessibleName = tenantLabel.Text;
-            tenant.TabIndex = 2;
+            tenant.TabIndex = 3;
             tenant.Text = AzureProvision.Tenant == "common" ? "" : AzureProvision.Tenant;
 
-            tenantHint = Line(14, 164, 492, 40);
+            tenantHint = Line(14, 200, 492, 40);
             tenantHint.Text = Localization.T("Azure.Setup.DirectoryHint");
             tenantHint.AccessibleName = tenantHint.Text;
-            tenantHint.TabIndex = 3;
+            tenantHint.TabIndex = 4;
 
             subsLabel = new Label();
             subsLabel.Text = Localization.T("Azure.Setup.Subscription");
             subsLabel.AutoSize = false;
-            subsLabel.SetBounds(14, 210, 160, 20);
+            subsLabel.SetBounds(14, 248, 160, 20);
             subsLabel.Visible = false;
 
             subs = new ComboBox();
             subs.DropDownStyle = ComboBoxStyle.DropDownList;
-            subs.SetBounds(180, 208, 326, 24);
+            subs.SetBounds(180, 246, 326, 24);
             subs.AccessibleName = subsLabel.Text;
-            subs.TabIndex = 4;
+            subs.TabIndex = 5;
             subs.Visible = false;
 
             act = new Button();
             act.Text = Localization.T("Azure.Setup.Start");
             act.AccessibleName = act.Text;
-            act.SetBounds(14, 296, 200, 30);
-            act.TabIndex = 5;
+            act.SetBounds(14, 334, 200, 30);
+            act.TabIndex = 6;
             act.Click += (s, e) => Act();
 
             cancel = new Button();
             cancel.Text = Localization.T("Btn.Cancel");
             cancel.AccessibleName = cancel.Text;
-            cancel.SetBounds(316, 296, 190, 30);
-            cancel.TabIndex = 6;
+            cancel.SetBounds(316, 334, 190, 30);
+            cancel.TabIndex = 7;
             cancel.DialogResult = DialogResult.Cancel;
 
             Controls.Add(status);
             Controls.Add(code);
+            Controls.Add(openLink);
             Controls.Add(tenantLabel);
             Controls.Add(tenant);
             Controls.Add(tenantHint);
@@ -266,6 +296,7 @@ namespace Nemoviz_Book_Reader
                     if (!code.Visible && request != null)
                     {
                         code.Visible = true;
+                        openLink.Visible = true;
                         code.Text = request.UserCode;
                         code.AccessibleName = Localization.T("Azure.Setup.CodeLabel") + " " + request.UserCode;
                         // THE ONE PLACE FOCUS DOES NOT START ON THE ACTION: there
@@ -295,6 +326,7 @@ namespace Nemoviz_Book_Reader
                     {
                         Made = true;
                         code.Visible = false;
+                        openLink.Visible = false;
                         act.Text = Localization.T("Btn.Close");
                         act.AccessibleName = act.Text;
                         act.Enabled = true;
@@ -310,6 +342,7 @@ namespace Nemoviz_Book_Reader
                         status.AccessibleName = status.Text;
                         ScreenReader.Announce(this, status.Text);
                         code.Visible = false;
+                        openLink.Visible = false;
                         act.Text = Localization.T("Btn.Close");
                         act.AccessibleName = act.Text;
                         act.Enabled = true;
