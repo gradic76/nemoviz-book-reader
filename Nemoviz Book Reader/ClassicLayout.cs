@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -227,14 +228,133 @@ namespace Nemoviz_Book_Reader
             return null;
         }
 
+        // ── The dialogs ───────────────────────────────────────────────────────
+        //
+        // Same policy as the player: the sizes and the places the skinned look
+        // uses, in the controls and colours the classic look already has. Every
+        // number below is the skin's own, so the two windows are the same window
+        // in two coats — which is the whole request.
+
+        private const int BtnW = 112, BtnFullH = 36;
+
+        /// <summary>Go To, at the large work-dialog size.
+        ///
+        /// <para><b>The hint box stays.</b> The skinned look replaced it with a
+        /// <c>?</c> key, which is a painted control; here there is nothing to
+        /// paint it with, and the always-on hint is what the classic look has
+        /// always shown. So it keeps its place above the check box and the list
+        /// gives up the height — the one place these two layouts differ, and it
+        /// differs because the classic one cannot draw.</para></summary>
+        public static void ApplyGoTo(GoToForm f)
+        {
+            GoToParts p = f.SkinParts;
+            if (p == null || p.List == null) return;
+
+            f.SuspendLayout();
+            try
+            {
+                f.ClientSize = new Size(WorkDialogSkin.LargeW, WorkDialogSkin.LargeH);
+                DialogSkin.AnchorToOwner(f, DialogAnchor.BottomRight);
+
+                int w = WorkDialogSkin.LargeW - 2 * Margin;
+                int buttonsY = WorkDialogSkin.LargeH - Margin - BtnFullH;
+                int checkY = buttonsY - 12 - 24;
+                // NOT p.AutoPlayHint.Visible, and this cost a measurement to find:
+                // a control whose form has not been shown yet reports Visible =
+                // false whatever its own setting, because Visible is the EFFECTIVE
+                // visibility and the parent is not up. This runs from the
+                // constructor, so the test was false every time — the hint kept
+                // its original place across the middle of the list, and the list
+                // took the height meant for both. §10b records the same trap for a
+                // tab page that is not the selected one.
+                int hintH = p.AutoPlayHint != null ? p.AutoPlayHint.Height : 0;
+                int hintY = checkY - (hintH > 0 ? hintH + 8 : 0);
+
+                // The list takes what is left, and never less than nothing: the
+                // hint box sizes itself to its text, and a longer translation of
+                // it could otherwise eat past the top of the window and hand
+                // SetBounds a negative height.
+                Place(p.List, Margin, Margin, w, Math.Max(80, hintY - 12 - Margin));
+                if (hintH > 0) Place(p.AutoPlayHint, Margin, hintY, w, hintH);
+                Place(p.AutoPlay, Margin, checkY, w, 24);
+                Place(p.OK, WorkDialogSkin.LargeW - Margin - 2 * BtnW - 12, buttonsY, BtnW, BtnFullH);
+                Place(p.Cancel, WorkDialogSkin.LargeW - Margin - BtnW, buttonsY, BtnW, BtnFullH);
+            }
+            finally { f.ResumeLayout(true); }
+        }
+
+        /// <summary>Manage Bookmarks, the same size and the same three keys along
+        /// the foot — Delete out on the left where it cannot be hit by somebody
+        /// reaching for OK.</summary>
+        public static void ApplyBookmarks(ManageBookmarksForm f)
+        {
+            BookmarksParts p = f.SkinParts;
+            if (p == null || p.List == null) return;
+
+            f.SuspendLayout();
+            try
+            {
+                f.ClientSize = new Size(WorkDialogSkin.LargeW, WorkDialogSkin.LargeH);
+                DialogSkin.AnchorToOwner(f, DialogAnchor.BottomRight);
+
+                int w = WorkDialogSkin.LargeW - 2 * Margin;
+                int buttonsY = WorkDialogSkin.LargeH - Margin - BtnFullH;
+
+                Place(p.List, Margin, Margin, w, buttonsY - 12 - Margin);
+                Place(p.Delete, Margin, buttonsY, BtnW, BtnFullH);
+                Place(p.OK, WorkDialogSkin.LargeW - Margin - 2 * BtnW - 12, buttonsY, BtnW, BtnFullH);
+                Place(p.Cancel, WorkDialogSkin.LargeW - Margin - BtnW, buttonsY, BtnW, BtnFullH);
+            }
+            finally { f.ResumeLayout(true); }
+        }
+
+        /// <summary>The sleep timer, at the small size — its two groups keep
+        /// whatever height they built themselves at, since what is in them is
+        /// radio buttons and those size their own box.</summary>
+        public static void ApplyTimer(SleepTimerForm f)
+        {
+            TimerParts p = f.SkinParts;
+            if (p == null || p.Duration == null) return;
+
+            f.SuspendLayout();
+            try
+            {
+                f.ClientSize = new Size(WorkDialogSkin.SmallW, WorkDialogSkin.TimerHeight);
+                DialogSkin.AnchorToOwner(f, DialogAnchor.BottomLeft);
+
+                int w = WorkDialogSkin.SmallW - 2 * Margin;
+                int buttonsY = WorkDialogSkin.TimerHeight - Margin - BtnFullH;
+
+                Place(p.Duration, Margin, Margin, w, p.Duration.Height);
+                int actionY = Margin + p.Duration.Height + 12;
+                Place(p.Action, Margin, actionY, w, p.Action.Height);
+                if (p.Bookmark != null)
+                    Place(p.Bookmark, Margin, actionY + p.Action.Height + 14, w, 24);
+
+                Place(p.Start, WorkDialogSkin.SmallW - Margin - 2 * BtnW - 12, buttonsY, BtnW, BtnFullH);
+                Place(p.Cancel, WorkDialogSkin.SmallW - Margin - BtnW, buttonsY, BtnW, BtnFullH);
+            }
+            finally { f.ResumeLayout(true); }
+        }
+
         /// <summary>Moves one control, and only if it is really there. A layout
         /// that throws on a control somebody removed would take the whole player
         /// down with it — and this one runs before anything is on screen to say
-        /// so.</summary>
+        /// so.
+        ///
+        /// <para><b>The anchor goes first, and without that nothing here works.</b>
+        /// These windows grow: Go To from 420×380 to 580×600. A control anchored
+        /// to more than its top left is re-computed by the next layout pass from
+        /// the offsets it was BUILT with, so <c>ResumeLayout</c> quietly undoes
+        /// the bounds just set. Measured before it was understood — Go To's list
+        /// came out 485 tall where it had been told 442, and its hint box never
+        /// moved at all and sat across the middle of the list.</para></summary>
         private static void Place(Control c, int x, int y, int w, int h)
         {
             if (c == null) return;
+            c.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             c.SetBounds(x, y, w, h);
         }
+
     }
 }

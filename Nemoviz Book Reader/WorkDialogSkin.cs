@@ -66,6 +66,9 @@ namespace Nemoviz_Book_Reader
         /// than a bigger SmallH, because Manage Bookmarks and the password prompt
         /// share that one and neither grew.</summary>
         private const int TimerH = 396;
+        /// <summary>The same number, for the classic layout — so the two looks
+        /// cannot drift apart by one of them being edited.</summary>
+        internal static int TimerHeight { get { return TimerH; } }
         private const int Margin = 12;
 
         public static void ApplyGoTo(GoToForm f)

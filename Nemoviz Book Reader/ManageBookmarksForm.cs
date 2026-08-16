@@ -116,6 +116,7 @@ namespace Nemoviz_Book_Reader
             // Built exactly as before, then handed over — the classic path does
             // nothing here, the new look restyles and relays out what was built.
             if (UiTheme.Current.BuildsOwnLayout) WorkDialogSkin.ApplyBookmarks(this);
+            else ClassicLayout.ApplyBookmarks(this);
         }
 
         internal BookmarksParts SkinParts
