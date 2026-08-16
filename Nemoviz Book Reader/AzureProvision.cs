@@ -202,6 +202,42 @@ namespace Nemoviz_Book_Reader
         public static AzureResult CreateTranslator(string token, string subscriptionId,
                                                    string resourceGroup, string accountName)
         {
+            // Global, because a single-service global Translator resource needs no
+            // region header — which is what lets its key dialog have one field.
+            return CreateAccount(token, subscriptionId, resourceGroup, accountName,
+                                 "TextTranslation", "global", false);
+        }
+
+        /// <summary>The region a Speech resource is made in.
+        ///
+        /// <para><b>Speech has no "global", and that is the whole reason this is
+        /// a constant rather than a question.</b> Translator does, which is why
+        /// its account above says so; Speech publishes a table of some thirty-five
+        /// regions and no global entry. Somebody has to choose, and asking a
+        /// reader to pick a datacentre is asking a question they have no way to
+        /// answer — so NBR picks the one its resource group already lives in, and
+        /// the nearest large one to where this is being written.</para></summary>
+        public const string SpeechRegion = "westeurope";
+
+        /// <summary>A Speech resource on the free tier, its region known because
+        /// we chose it. <see cref="AzureVoices"/> stores all three parts and the
+        /// reader types none of them.</summary>
+        public static AzureResult CreateSpeech(string token, string subscriptionId,
+                                               string resourceGroup, string accountName)
+        {
+            // The custom subdomain is asked for as well as the region, because the
+            // documentation disagrees with itself about which endpoint form Speech
+            // accepts (see AzureVoices.RegionId) and this costs nothing: the name
+            // is ours already, and having both means the fallback has something to
+            // fall back TO.
+            return CreateAccount(token, subscriptionId, resourceGroup, accountName,
+                                 "SpeechServices", SpeechRegion, true);
+        }
+
+        private static AzureResult CreateAccount(string token, string subscriptionId,
+                                                 string resourceGroup, string accountName,
+                                                 string kind, string location, bool customSubdomain)
+        {
             // THE SUBSCRIPTION HAS TO BE TOLD IT MAY HAVE THIS KIND OF RESOURCE AT
             // ALL, and this step exists because a live run found it: without it,
             // creating the account comes back
@@ -236,8 +272,10 @@ namespace Nemoviz_Book_Reader
                              "/resourceGroups/" + Uri.EscapeDataString(resourceGroup) +
                              "/providers/Microsoft.CognitiveServices/accounts/" +
                              Uri.EscapeDataString(accountName) + "?api-version=2023-05-01";
-            string acct = "{\"location\":\"global\",\"kind\":\"TextTranslation\"," +
-                          "\"sku\":{\"name\":\"F0\"},\"properties\":{}}";
+            string props = customSubdomain
+                ? "{\"customSubDomainName\":\"" + accountName + "\"}" : "{}";
+            string acct = "{\"location\":\"" + location + "\",\"kind\":\"" + kind + "\"," +
+                          "\"sku\":{\"name\":\"F0\"},\"properties\":" + props + "}";
             t = Put(acctUrl, token, acct, out raw, out status);
             if (t != null) return Fail(t);
             if (status < 200 || status >= 300) return Refused(raw, status);

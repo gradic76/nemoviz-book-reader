@@ -50,6 +50,24 @@ namespace Nemoviz_Book_Reader
         public const string CredentialId = "azure-tts";
         public const string ResourceId = "azure-tts-resource";
 
+        /// <summary>The region, when it is known — and it is what the endpoints
+        /// are built from whenever it is.
+        ///
+        /// <para><b>Microsoft's own documentation disagrees with itself here, so
+        /// neither form is chosen on faith.</b> The text-to-speech REST reference
+        /// demonstrates the resource-name host for both the voice list and the
+        /// synthesis call, and says the subscription key "works with all endpoint
+        /// formats". The custom-subdomains article says the opposite for this one
+        /// service: *"Speech resources use custom subdomains with private
+        /// endpoints only. In all other cases, use regional endpoints."*</para>
+        ///
+        /// <para>So <see cref="Hosts"/> returns BOTH, regional first because that
+        /// is the form the warning endorses, and a call that fails on one is
+        /// tried on the other. One extra request, only ever on failure, and the
+        /// working host is remembered for the session. Reading harder would not
+        /// have settled it; asking the service does.</para></summary>
+        public const string RegionId = "azure-tts-region";
+
         public const string Vendor = "Azure Speech";
 
         /// <summary>The tag that makes a display name unmistakably ours. See
@@ -68,9 +86,29 @@ namespace Nemoviz_Book_Reader
         // neural models are built at; asking for more only upsamples.
         private const string OutputFormat = "riff-24khz-16bit-mono-pcm";
 
+        /// <summary>A key, and at least one way to address the service. Either
+        /// half of the address will do — see <see cref="RegionId"/>; provisioning
+        /// supplies the region, a reader pasting from the portal supplies the
+        /// name, and whichever is present is tried.</summary>
         public static bool Have
         {
-            get { return TranslationKeys.Has(CredentialId) && TranslationKeys.Has(ResourceId); }
+            get
+            {
+                return TranslationKeys.Has(CredentialId)
+                       && (TranslationKeys.Has(ResourceId) || TranslationKeys.Has(RegionId));
+            }
+        }
+
+        /// <summary>What provisioning stores, having created the resource itself:
+        /// it knows all three and the reader types none of them.</summary>
+        public static void SaveProvisioned(string resource, string region, string key)
+        {
+            TranslationKeys.Set(ResourceId, (resource ?? "").Trim());
+            TranslationKeys.Set(RegionId, (region ?? "").Trim());
+            TranslationKeys.Set(CredentialId, (key ?? "").Trim());
+            cache = null;
+            goodHost = null;
+            Refresh();
         }
 
         public static string Resource
@@ -80,7 +118,34 @@ namespace Nemoviz_Book_Reader
 
         private static string Key { get { return (TranslationKeys.Get(CredentialId) ?? "").Trim(); } }
 
-        private static string Host { get { return Resource + ".cognitiveservices.azure.com"; } }
+        public static string Region { get { return (TranslationKeys.Get(RegionId) ?? "").Trim(); } }
+
+        // The host that last answered. Tried first next time, so the fallback is
+        // paid for once per session rather than once per sentence.
+        private static string goodHost;
+
+        /// <summary>Every host worth trying, best first. See <see cref="RegionId"/>
+        /// for why there is more than one.</summary>
+        private static List<string> Hosts()
+        {
+            var h = new List<string>();
+            if (!string.IsNullOrEmpty(goodHost)) h.Add(goodHost);
+            string r = Region, n = Resource;
+            if (r.Length > 0 && !h.Contains(r + ".tts.speech.microsoft.com"))
+                h.Add(r + ".tts.speech.microsoft.com");
+            if (n.Length > 0 && !h.Contains(n + ".cognitiveservices.azure.com"))
+                h.Add(n + ".cognitiveservices.azure.com");
+            return h;
+        }
+
+        /// <summary>Where the voice list lives on a given host. The two forms put
+        /// it in different places: the regional Speech host serves it under
+        /// /cognitiveservices, the resource-name host under /tts/cognitiveservices.</summary>
+        private static string VoicesPath(string host)
+        {
+            return host.EndsWith(".tts.speech.microsoft.com", StringComparison.OrdinalIgnoreCase)
+                ? "/cognitiveservices/voices/list" : "/tts/cognitiveservices/voices/list";
+        }
 
         /// <summary>Stores the pair and says what is wrong, or null if it works.
         /// Checking means ASKING the service for its voice list — a key is not a
@@ -102,19 +167,23 @@ namespace Nemoviz_Book_Reader
             TranslationKeys.Set(ResourceId, resource);
             TranslationKeys.Set(CredentialId, key);
             cache = null;
+            goodHost = null;
             if (Refresh()) return null;
 
             TranslationKeys.Set(ResourceId, oldR);
             TranslationKeys.Set(CredentialId, oldK);
             cache = null;
+            goodHost = null;
             return Localization.T("Settings.Azure.Refused");
         }
 
         public static void Forget()
         {
             TranslationKeys.Set(ResourceId, null);
+            TranslationKeys.Set(RegionId, null);
             TranslationKeys.Set(CredentialId, null);
             cache = null;
+            goodHost = null;
             try { if (File.Exists(CachePath)) File.Delete(CachePath); } catch { }
         }
 
@@ -148,7 +217,12 @@ namespace Nemoviz_Book_Reader
             try
             {
                 if (!Have) return list;
-                string reply = Get("https://" + Host + "/tts/cognitiveservices/voices/list");
+                string reply = null;
+                foreach (string host in Hosts())
+                {
+                    reply = Get("https://" + host + VoicesPath(host));
+                    if (reply != null) { goodHost = host; break; }
+                }
                 if (reply == null) return list;
 
                 var arr = Json.Parse(reply) as List<object>;
@@ -287,8 +361,13 @@ namespace Nemoviz_Book_Reader
                 if (prosody) ssml.Append("</prosody>");
                 ssml.Append("</voice></speak>");
 
-                return PostAudio("https://" + Host + "/cognitiveservices/v1",
-                                 Encoding.UTF8.GetBytes(ssml.ToString()));
+                byte[] body = Encoding.UTF8.GetBytes(ssml.ToString());
+                foreach (string host in Hosts())
+                {
+                    byte[] wav = PostAudio("https://" + host + "/cognitiveservices/v1", body);
+                    if (wav != null) { goodHost = host; return wav; }
+                }
+                return null;
             }
             catch { return null; }
         }
