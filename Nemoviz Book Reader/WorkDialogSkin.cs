@@ -85,10 +85,13 @@ namespace Nemoviz_Book_Reader
             int checkY = buttonsY - 12 - 24;
             int listBottom = checkY - 12;
 
-            p.List.BorderStyle = BorderStyle.None;
-            p.List.BackColor = NewPlayerSkin.Glass;
-            p.List.ForeColor = NewPlayerSkin.Lit;
             p.List.Font = DialogSkin.FBody;
+            if (DialogSkin.Painting)
+            {
+                p.List.BorderStyle = BorderStyle.None;
+                p.List.BackColor = NewPlayerSkin.Glass;
+                p.List.ForeColor = NewPlayerSkin.Lit;
+            }
             p.List.SetBounds(Margin, Margin, LargeW - 2 * Margin, listBottom - Margin);
 
             // The always-on hint box is gone — the checkbox gets a ? like every
@@ -134,10 +137,13 @@ namespace Nemoviz_Book_Reader
             int buttonsY = LargeH - Margin - DialogSkin.ButtonH;
             int listBottom = buttonsY - 12;
 
-            p.List.BorderStyle = BorderStyle.None;
-            p.List.BackColor = NewPlayerSkin.Glass;
-            p.List.ForeColor = NewPlayerSkin.Lit;
             p.List.Font = DialogSkin.FBody;
+            if (DialogSkin.Painting)
+            {
+                p.List.BorderStyle = BorderStyle.None;
+                p.List.BackColor = NewPlayerSkin.Glass;
+                p.List.ForeColor = NewPlayerSkin.Lit;
+            }
             p.List.SetBounds(Margin, Margin, LargeW - 2 * Margin, listBottom - Margin);
 
             DialogSkin.AsKey(p.Delete, new Rectangle(Margin, buttonsY, DialogSkin.ButtonW, DialogSkin.ButtonH));
@@ -256,7 +262,7 @@ namespace Nemoviz_Book_Reader
 
             password.SetBounds(Margin, well.Bottom + 16, SmallW - 2 * Margin, 26);
             DialogSkin.OnGlass(password);
-            password.BorderStyle = BorderStyle.FixedSingle;
+            if (DialogSkin.Painting) password.BorderStyle = BorderStyle.FixedSingle;
             password.TabIndex = 1;
 
             DialogSkin.AsKey(cancel, new Rectangle(SmallW - Margin - DialogSkin.ButtonW, buttonsY,

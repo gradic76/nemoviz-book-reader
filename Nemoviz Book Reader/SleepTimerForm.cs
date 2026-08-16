@@ -252,10 +252,8 @@ namespace Nemoviz_Book_Reader
             this.AcceptButton = btnStart;
             this.CancelButton = btnCancel;
 
-            // Built exactly as before, then handed over — the classic path does
-            // nothing here, the new look restyles and relays out what was built.
-            if (UiTheme.Current.BuildsOwnLayout) WorkDialogSkin.ApplyTimer(this);
-            else ClassicLayout.ApplyTimer(this);
+            // One layout pass for both looks — see DialogSkin.Painting.
+            WorkDialogSkin.ApplyTimer(this);
         }
 
         internal TimerParts SkinParts

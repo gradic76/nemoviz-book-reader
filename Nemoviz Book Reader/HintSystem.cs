@@ -65,15 +65,22 @@ namespace Nemoviz_Book_Reader
             if (string.IsNullOrEmpty(forName)) forName = anchor.AccessibleName ?? anchor.Text ?? "";
             titles[anchor] = forName;
 
+            DialogSkin.EnsureFonts();
             var b = new Button();
             b.Text = "?";
             b.AccessibleName = Localization.T("Hint.Button.Accessible", forName);
             b.SetBounds(buttonBounds.X, buttonBounds.Y, buttonBounds.Width, buttonBounds.Height);
-            b.FlatStyle = FlatStyle.Flat;
-            b.FlatAppearance.BorderColor = NewPlayerSkin.Silk;
-            b.FlatAppearance.BorderSize = 1;
-            b.BackColor = Color.FromArgb(0x12, 0x18, 0x15);
-            b.ForeColor = NewPlayerSkin.Lit;
+            // Only the colours are the new look's; the key itself is an ordinary
+            // Button in both, which is why the classic look gets the SAME help
+            // keys rather than doing without them (Gordan, 2026-08-16).
+            if (DialogSkin.Painting)
+            {
+                b.FlatStyle = FlatStyle.Flat;
+                b.FlatAppearance.BorderColor = NewPlayerSkin.Silk;
+                b.FlatAppearance.BorderSize = 1;
+                b.BackColor = Color.FromArgb(0x12, 0x18, 0x15);
+                b.ForeColor = NewPlayerSkin.Lit;
+            }
             // NOT FSilk. That is 11 pt, whose line box is about 20 units, and the
             // key is 22 with a 1-unit border on each side — so the glyph had 20
             // units to live in and its tail sat on the frame. Gordan, 2026-08-10:

@@ -374,8 +374,8 @@ namespace Nemoviz_Book_Reader
             // The new look takes the dialog over here, at the very end, exactly as
             // it does with the player — after everything is built and wired, so
             // nothing it does can be mistaken for the user editing.
-            if (UiTheme.Current.BuildsOwnLayout) PropertiesSkin.Apply(this);
-            else ClassicLayout.ApplyProperties(this);
+            // One layout pass for both looks — see DialogSkin.Painting.
+            PropertiesSkin.Apply(this);
         }
 
         /// <summary>F1 opens the help for whatever the focus is sitting in, so the

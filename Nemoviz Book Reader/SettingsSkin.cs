@@ -118,8 +118,11 @@ namespace Nemoviz_Book_Reader
         /// still floating the wrong way round.</para></summary>
         private static void LayOutPage(TabPage page, int pw, int ph)
         {
-            page.UseVisualStyleBackColor = false;
-            page.BackColor = NewPlayerSkin.PanelMid;
+            if (DialogSkin.Painting)
+            {
+                page.UseVisualStyleBackColor = false;
+                page.BackColor = NewPlayerSkin.PanelMid;
+            }
             page.AutoScroll = false;      // the room is there now; nothing scrolls
 
             var groups = new List<GroupBox>();

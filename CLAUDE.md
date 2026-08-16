@@ -2175,6 +2175,60 @@ Two smaller ones from the same hunt, both worth knowing:
 > regular testing runs on, and §8k's rule that `ClassicTheme.Style` is empty so
 > it cannot drift still holds.
 
+> ### ONE LAYOUT PASS SERVES BOTH LOOKS — 2026-08-16
+>
+> Gordan, reformulating the whole classic job: *"Otvoriš npr. Settings, napraviš
+> screenshot … i kompletno ga iskopiraš u klasičnoj formi. Buttoni ostaju
+> buttoni, combo ostaje combo, text box ostaje text box, samo što nije crtan,
+> šminkan i farban nego je classic koji izvlači stilove i boje iz windows teme.
+> Naravno, sve u dimenzijama koje jesu na nbr default."*
+>
+> **`DialogSkin.Painting`** is that sentence in code. Every primitive
+> (`Shell`, `AsKey`, `AsSticker`, `AsGlass`, `OnGlass`, `AsSwitch`,
+> `StyleTabStrip`, `EnsureFonts`) now sets **bounds and structure
+> unconditionally** and skips only the metal, the glass and the owner-drawing.
+> So the six dialogs call the skin's `Apply` in **both** looks — the
+> `if (BuildsOwnLayout) … else ClassicLayout.…` branch is gone from Settings,
+> Properties, Go To, Bookmarks, Sleep Timer, Library and the archive password
+> prompt.
+>
+> **Why this rather than maintaining the second layout:** `ClassicLayout`'s
+> dialog half had already begun to differ — it kept the old always-on hint box
+> where the new look has a `?` key — which is exactly the drift he was asking to
+> remove. A classic path built by the same code **cannot be missing a control
+> the new one has.** The dialog half is deleted; `ClassicLayout` is now the
+> player only, which genuinely differs (a drawn ring has no classic equivalent;
+> his answer was five square buttons in a cross).
+>
+> **What classic gets that it did not have:** the `?` help keys (an ordinary
+> `Button` all along — only its colours were the skin's), the Library's
+> Load/Close naming, and the new look's own dimensions and places.
+>
+> **What differs, by design:** the window keeps its **title bar and border**
+> (there is no drawn power key to close it with), and the type is the Windows
+> theme's rather than 12 pt Segoe — so labels and combos come out a few units
+> shorter and the value column, which is measured from the real text, moves
+> left with them. `Shell` returns an **unparented** `DialogCanvas` so callers'
+> `Wells.Add`/`Rebuild` stay inert without a null check at every site;
+> `DialogCanvas.Active` is set only from `OnPaint`, so it stays null exactly as
+> before. `MessageForm` still falls back to a real `MessageBox` under classic.
+>
+> **Measured, because this touches code §8k closes.** A harness dumps every
+> control of all six dialogs as `path type name x y w h tab`, with every tab
+> page selected first (§10c's trap):
+> - **The new look is byte-identical to the build before the change** — diff
+>   clean across all six dialogs, in both the audio and the text Properties page.
+> - **Structurally, classic differs from the new look by one line per dialog:
+>   the `DialogCanvas`** — the painted metal, and nothing else. Same controls,
+>   same tree, same order.
+> - A collision/overflow sweep inside every container reports **11 for classic
+>   against 15 for the new look, and classic's are a strict subset** — so every
+>   one of them predates this and is in the look Gordan already accepted.
+>
+> **Not covered by the sweep:** a **hybrid** book's two-tab Properties page —
+> there is no hybrid in the library to open. It uses the same primitives plus
+> the per-page canvas, which is guarded, but it is unverified.
+
 > ### High contrast is the DEFAULT, not a lock (2026-08-03)
 >
 > Gordan asked the question that fixed this: *does a reader with a high-contrast

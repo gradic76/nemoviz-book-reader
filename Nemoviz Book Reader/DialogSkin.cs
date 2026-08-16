@@ -141,12 +141,15 @@ namespace Nemoviz_Book_Reader
         {
             if (tabs == null) return;
             EnsureFonts();
+            tabs.Font = FBody;
+            // A real TabControl either way; classic just lets Windows draw the
+            // strip, which is also what keeps its own focus and hover states.
+            if (!Painting) return;
             tabs.SizeMode = TabSizeMode.Fixed;
             tabs.ItemSize = new Size(TabW, TabH);
             tabs.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabs.DrawItem -= PaintTab;
             tabs.DrawItem += PaintTab;
-            tabs.Font = FBody;
         }
 
         private static void PaintTab(object sender, DrawItemEventArgs e)
@@ -179,9 +182,40 @@ namespace Nemoviz_Book_Reader
 
         public static Font FTitle, FBody, FSilk;
 
+        /// <summary>Whether this pass paints, or only places.
+        ///
+        /// <para>Gordan, 2026-08-16: the classic look is to be the NEW look's
+        /// window in classic form — the same controls in the same places, a
+        /// button still a button and a combo still a combo, only unpainted, with
+        /// its styles and colours coming from the Windows theme. So there is one
+        /// layout pass and not two: every primitive here sets bounds and
+        /// structure unconditionally, and skips the metal, the glass and the
+        /// owner-drawing when this is false. That is what stops the two looks
+        /// drifting — the classic path cannot be missing a control the new one
+        /// has, because it is the same code that put it there.</para></summary>
+        public static bool Painting
+        {
+            get { return UiTheme.Current != null && UiTheme.Current.BuildsOwnLayout; }
+        }
+
+        // Which face the cached fonts were built for, so a look chosen after
+        // they were first needed cannot be served the other one's type.
+        private static bool fontsArePainted;
+
         public static void EnsureFonts()
         {
-            if (FBody != null) return;
+            if (FBody != null && fontsArePainted == Painting) return;
+            fontsArePainted = Painting;
+            if (!Painting)
+            {
+                // The Windows theme's own type, at the theme's own size — the
+                // whole point of the classic look. 12 pt Segoe is the DEVICE's
+                // type and belongs with the metal.
+                FBody = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
+                FTitle = new Font(FBody, FontStyle.Bold);
+                FSilk = FBody;
+                return;
+            }
             FTitle = new Font("Segoe UI", 12f, FontStyle.Bold);
             FBody = new Font("Segoe UI", 12f);
             FSilk = new Font("Segoe UI", 11f);
@@ -201,6 +235,18 @@ namespace Nemoviz_Book_Reader
         public static DialogCanvas Shell(Form f, int width, int height)
         {
             EnsureFonts();
+            if (!Painting)
+            {
+                // Same room, ordinary window: the title bar stays (there is no
+                // drawn power key to close it with), the colours stay the
+                // theme's. The canvas is built and NOT parented, so the callers'
+                // Wells.Add and Rebuild are inert rather than needing a null
+                // check at every one of them — it never paints, and
+                // DialogCanvas.Active is set only from OnPaint, so it stays null
+                // and every Backdrop falls back exactly as it does today.
+                f.ClientSize = new Size(width, height);
+                return new DialogCanvas(f);
+            }
             f.FormBorderStyle = FormBorderStyle.None;
             f.ClientSize = new Size(width, height);
             f.BackColor = NewPlayerSkin.PanelMid;
@@ -266,10 +312,14 @@ namespace Nemoviz_Book_Reader
         {
             if (t == null) return;
             t.SetBounds(where.X, where.Y, where.Width, where.Height);
-            t.BorderStyle = BorderStyle.None;
-            t.BackColor = NewPlayerSkin.Glass;
-            t.ForeColor = NewPlayerSkin.Lit;
+            EnsureFonts();
             t.Font = FBody;
+            if (Painting)
+            {
+                t.BorderStyle = BorderStyle.None;
+                t.BackColor = NewPlayerSkin.Glass;
+                t.ForeColor = NewPlayerSkin.Lit;
+            }
             // It is first in the tab order, so it opens focused and a focused
             // multiline TextBox selects everything — a solid blue block where the
             // display should be. The caret goes to the start instead; the field is
@@ -291,8 +341,12 @@ namespace Nemoviz_Book_Reader
         {
             if (g == null) return;
             g.SetBounds(where.X, where.Y, where.Width, where.Height);
-            g.ForeColor = NewPlayerSkin.Lit;
+            EnsureFonts();
             g.Font = FBody;
+            // Unpainted, a GroupBox draws its own frame and legend from the
+            // theme — which is precisely the classic form of a sticker.
+            if (!Painting) return;
+            g.ForeColor = NewPlayerSkin.Lit;
             g.BackColor = Color.Transparent;
             g.Paint -= PaintSticker;
             g.Paint += PaintSticker;
@@ -324,7 +378,9 @@ namespace Nemoviz_Book_Reader
         public static void OnGlass(Control c)
         {
             if (c == null) return;
+            EnsureFonts();
             c.Font = FBody;
+            if (!Painting) return;
             c.ForeColor = NewPlayerSkin.Lit;
 
             // Only the controls that paint their own background accept a
@@ -348,6 +404,11 @@ namespace Nemoviz_Book_Reader
         {
             if (b == null) return;
             b.SetBounds(where.X, where.Y, where.Width, where.Height);
+            EnsureFonts();
+            b.Font = FBody;
+            // A button stays a button; unpainted it is the theme's own button,
+            // which is the whole of what "classic" means here.
+            if (!Painting) return;
             b.FlatStyle = FlatStyle.Flat;
             b.FlatAppearance.BorderSize = 0;
             b.FlatAppearance.MouseOverBackColor = Color.Transparent;
@@ -388,6 +449,12 @@ namespace Nemoviz_Book_Reader
         {
             if (c == null) return;
             c.SetBounds(where.X, where.Y, where.Width, where.Height);
+            EnsureFonts();
+            c.Font = FBody;
+            // Unpainted it stays an ordinary tick box KEEPING ITS CAPTION — the
+            // rocker below hides the text in Tag, and a classic check box with
+            // no text is a control a reader cannot identify by sight at all.
+            if (!Painting) return;
             c.Appearance = Appearance.Button;
             c.FlatStyle = FlatStyle.Flat;
             c.FlatAppearance.BorderSize = 0;
@@ -589,12 +656,15 @@ namespace Nemoviz_Book_Reader
             HintSystem.Clear();
             foreach (TabPage page in tabs.TabPages)
             {
-                page.UseVisualStyleBackColor = false;
-                page.BackColor = NewPlayerSkin.PanelMid;
                 page.AutoScroll = false;   // the room is made below; nothing scrolls
                 var canvas = new DialogCanvas(f);
-                page.Controls.Add(canvas);
-                canvas.SendToBack();
+                if (DialogSkin.Painting)
+                {
+                    page.UseVisualStyleBackColor = false;
+                    page.BackColor = NewPlayerSkin.PanelMid;
+                    page.Controls.Add(canvas);
+                    canvas.SendToBack();
+                }
 
                 // Which page is which is decided by what is ON it, not by index —
                 // the same rule the single-page path uses, and it survives someone

@@ -62,11 +62,14 @@ namespace Nemoviz_Book_Reader
                 // Setting BackColor is not enough and the system render mode did
                 // not take it either — a ToolStrip paints its own background over
                 // both. The colours have to come from a renderer, so it gets one.
-                p.Menu.Renderer = new SkinMenuRenderer();
-                p.Menu.BackColor = NewPlayerSkin.Glass;
-                p.Menu.ForeColor = NewPlayerSkin.Lit;
                 p.Menu.Font = DialogSkin.FBody;
-                foreach (ToolStripItem it in p.Menu.Items) Recolour(it);
+                if (DialogSkin.Painting)
+                {
+                    p.Menu.Renderer = new SkinMenuRenderer();
+                    p.Menu.BackColor = NewPlayerSkin.Glass;
+                    p.Menu.ForeColor = NewPlayerSkin.Lit;
+                    foreach (ToolStripItem it in p.Menu.Items) Recolour(it);
+                }
                 p.Menu.BringToFront();
             }
 
@@ -85,13 +88,13 @@ namespace Nemoviz_Book_Reader
             if (p.SearchRow != null)
             {
                 p.SearchRow.SetBounds(0, y, DialogSkin.W, RowH);
-                p.SearchRow.BackColor = NewPlayerSkin.PanelMid;
+                if (DialogSkin.Painting) p.SearchRow.BackColor = NewPlayerSkin.PanelMid;
             }
             if (p.Search != null)
             {
                 p.Search.SetBounds(AbX, 2, AbW, 24);
                 DialogSkin.OnGlass(p.Search);
-                p.Search.BorderStyle = BorderStyle.FixedSingle;
+                if (DialogSkin.Painting) p.Search.BorderStyle = BorderStyle.FixedSingle;
             }
             if (p.Filter != null)
             {
@@ -103,7 +106,7 @@ namespace Nemoviz_Book_Reader
 
             // The shelf and the info box, in the same two columns.
             p.Split.SetBounds(0, y, DialogSkin.W, DialogSkin.ButtonsY - Gap - y);
-            p.Split.BackColor = NewPlayerSkin.PanelMid;
+            if (DialogSkin.Painting) p.Split.BackColor = NewPlayerSkin.PanelMid;
             p.Split.SplitterWidth = CX - (AbX + AbW);
             p.Split.Panel1MinSize = 200;
             p.Split.Panel2MinSize = 200;
@@ -117,7 +120,8 @@ namespace Nemoviz_Book_Reader
             // The hairline between the two lists, in the colour the stickers use
             // for their edge — visible on the glass without becoming a bar.
             if (p.NowReadingRule != null)
-                p.NowReadingRule.BackColor = DialogSkin.StickerEdge;
+                p.NowReadingRule.BackColor = DialogSkin.Painting
+                    ? DialogSkin.StickerEdge : SystemColors.ControlDark;
             // Less the panel's own 10-unit padding on each side and the vertical
             // scroll bar, or the columns add up to more than the list and it grows
             // a horizontal bar under itself.
@@ -202,10 +206,11 @@ namespace Nemoviz_Book_Reader
         private static void AsShelf(ListView v)
         {
             if (v == null) return;
+            v.Font = DialogSkin.FBody;
+            if (!DialogSkin.Painting) return;
             v.BorderStyle = BorderStyle.None;
             v.BackColor = NewPlayerSkin.Glass;
             v.ForeColor = NewPlayerSkin.Lit;
-            v.Font = DialogSkin.FBody;
         }
 
         /// <summary>Gives a button the short name and keeps its spoken name in

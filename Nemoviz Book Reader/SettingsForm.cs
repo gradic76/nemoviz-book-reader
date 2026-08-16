@@ -200,10 +200,11 @@ namespace Nemoviz_Book_Reader
             this.AcceptButton = btnOK;
             this.CancelButton = btnCancel;
 
-            // Built exactly as before, then handed over — the classic path does
-            // nothing here, the new look restyles and relays out what was built.
-            if (UiTheme.Current.BuildsOwnLayout) SettingsSkin.Apply(this);
-            else ClassicLayout.ApplySettings(this);
+            // Built exactly as before, then handed over — ONE layout pass for
+            // both looks (Gordan, 2026-08-16). The classic look is this same
+            // window in classic form: same controls, same places, same
+            // dimensions, only unpainted. See DialogSkin.Painting.
+            SettingsSkin.Apply(this);
         }
 
         /// <summary>What the skin is allowed to touch. Everything else it finds by

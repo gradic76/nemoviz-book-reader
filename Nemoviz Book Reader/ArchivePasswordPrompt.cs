@@ -57,11 +57,8 @@ namespace Nemoviz_Book_Reader
                 dlg.AcceptButton = ok;
                 dlg.CancelButton = cancel;
 
-                // Built exactly as before, then handed over — the classic path
-                // does nothing here, the new look restyles and relays out what
-                // was built.
-                if (UiTheme.Current.BuildsOwnLayout)
-                    WorkDialogSkin.ApplyPassword(dlg, lbl, tb, ok, cancel);
+                // One layout pass for both looks — see DialogSkin.Painting.
+                WorkDialogSkin.ApplyPassword(dlg, lbl, tb, ok, cancel);
 
                 // FOCUS STARTS IN THE PASSWORD FIELD, and it has to be said here
                 // rather than left to the tab order. Under the new look the skin
