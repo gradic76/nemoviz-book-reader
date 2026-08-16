@@ -29,31 +29,40 @@ namespace Nemoviz_Book_Reader
         private const int CellW = 214;
         private const int CellH = 112;
 
-        /// <summary>The Tone cell alone is taller: five rows at 40, 64, 88, 112,
-        /// 136 and a spin box 22 tall end at 158.
+        /// <summary>The Tone cell: five bands in TWO COLUMNS, 3 + 2
+        /// (Gordan, 2026-08-16).
         ///
-        /// <para>Only this one, because under the NEW look the skin stretches
-        /// every cell to DialogSkin.StageH (166 since Properties gave up its
-        /// Playback row) and the difference never shows — while under the
-        /// CLASSIC look nothing resizes anything, and at 112 the bottom two
-        /// bands would simply have been cut off the page. A cell built for three
-        /// rows cannot hold five.</para></summary>
-        /// <summary>The Tone cell and the pitch of its five rows.
+        /// <para><b>Why one column could not work, and had not since §8d took the
+        /// EQ from three bands to five.</b> A <c>NumericUpDown</c> forces its own
+        /// height from the font — <b>29</b> at 12 pt, whatever the 24 it is given
+        /// — while the pitch here was 25, so the five boxes each ate 4 units of
+        /// the next. The arithmetic this comment used to carry ("five rows from
+        /// y=36 at 25 end at 160, four clear of the cell") was right about the
+        /// CELL and wrong about the BOXES: they fit the cell only by overlapping
+        /// one another. And the pitch cannot simply grow, for the reason that
+        /// comment already gave — at 29 the last band ends at 181 in a cell that
+        /// is 166 and cannot get any taller, because it shares row three with the
+        /// loudness cell and the skin pins that row's bottom at 570.</para>
         ///
-        /// <para>The cell CANNOT grow: it shares row three with the loudness
-        /// cell and the skin pins that row bottom at 570, so 166 is all there is.
-        /// Tried 30 and the fifth band fell off the bottom of the dialog
-        /// altogether — measured on a render, which is the only way that was ever
-        /// going to be noticed.</para>
+        /// <para><b>Two columns need three rows instead of five</b>, so at a pitch
+        /// of 33 — real height plus air — they end at 131 and the cell has 35 to
+        /// spare. It fits the hybrid page's narrower cell too.</para>
         ///
-        /// <para>So the box gets the space instead of the gap. Gordan asked about
-        /// "the number box and the arrows", and those are what 70 x 22 was
-        /// starving — the spin arrows came out half the size of the ones on the
-        /// Speech page. At 90 x 24 they match, and the pitch pays for it: five
-        /// rows from y=36 at 25 end at 160, four clear of the cell.</para>
-        /// </summary>
-        private const int EqRowH = 25;
+        /// <para><b>The spin box KEEPS its 90 × 24</b>, which is the whole point:
+        /// that size is Gordan's own — *"controls in EQ are too squeezed, number
+        /// box and the arrows; in the speech part they are more relaxed"* — and
+        /// shrinking it to make room for two columns would have put back exactly
+        /// what he objected to. The CAPTION gives way instead, to the short form
+        /// every equalizer uses (see <see cref="ShortBandLabel"/>), with the full
+        /// wording kept on the spin box's <c>AccessibleName</c> where a screen
+        /// reader actually takes it.</para>
+        ///
+        /// <para>Widths are worked out against the NARROWER of the two cells — a
+        /// hybrid book's page, 292 — so both fit: 10 + 132 + 38 + 4 + 90 = 274
+        /// against 282 available.</para></summary>
+        private const int EqRowH = 33;
         private const int EqCellH = 166;
+        private const int EqColW = 132, EqLabelW = 38, EqSpinW = 90;
 
         private readonly BookData book;
 
@@ -224,9 +233,25 @@ namespace Nemoviz_Book_Reader
 
             GroupBox gEq = StageBox("Prop.Eq.Title", xB, y3, 6, EqCellH);
             chkEq = StageEnable(gEq); chkEq.Checked = s.EqEnabled;
+            // FIVE BANDS IN TWO COLUMNS, 3 + 2 (Gordan, 2026-08-16). One column
+            // did not fit and had not since §8d took the EQ from three bands to
+            // five: a NumericUpDown forces its own height from the font — 29 at
+            // 12 pt, whatever the 24 it is given — while EqRowH is 25, so the
+            // five boxes were each eating 4 units of the next. Widening the pitch
+            // alone cannot work, because at 29 the last band ends at 181 inside a
+            // 166-unit cell. Two columns need three rows instead of five and fit
+            // with room to spare.
             numEq = new NumericUpDown[SoundSettings.EqBandHz.Length];
+            int perCol = (numEq.Length + 1) / 2;          // 3 of 5, then 2
             for (int i = 0; i < numEq.Length; i++)
-                numEq[i] = EqBand(gEq, BandLabel(i), 36 + i * EqRowH,
+                // 40, not the old 36: the stage's enable check runs the full width
+                // of the cell and ends at 38, so a first row at 36 ran under it —
+                // by 2 units, in ONE column before and in both after. Measured, not
+                // eyeballed; it had been there all along and was hidden among the
+                // band-on-band overlaps.
+                numEq[i] = EqBand(gEq, i,
+                                  10 + (i / perCol) * EqColW,
+                                  40 + (i % perCol) * EqRowH,
                                   i < s.EqGain.Length ? s.EqGain[i] : 0);
 
             // One method, not a choice of two (Gordan, decided long before
@@ -489,6 +514,18 @@ namespace Nemoviz_Book_Reader
         /// word for 1800 Hz, and the number is what the reader is actually
         /// choosing. The top one says so, because a shelf behaves differently
         /// from a bell and the reader can hear that it does.</summary>
+        /// <summary>The band as an equalizer prints it: "200", "1.8k", "5k+".
+        /// Screen only — <see cref="BandLabel"/> is what a screen reader gets.
+        /// Built from the frequency, never by cutting the localized phrase down,
+        /// so a translation cannot break it.</summary>
+        private static string ShortBandLabel(int i)
+        {
+            int hz = SoundSettings.EqBandHz[i];
+            var ic = System.Globalization.CultureInfo.InvariantCulture;
+            string n = hz >= 1000 ? (hz / 1000.0).ToString("0.#", ic) + "k" : hz.ToString(ic);
+            return i == SoundSettings.EqShelfIndex ? n + "+" : n;
+        }
+
         private static string BandLabel(int i)
         {
             int hz = SoundSettings.EqBandHz[i];
@@ -505,15 +542,30 @@ namespace Nemoviz_Book_Reader
             return string.Join(", ", parts.ToArray()) + " dB";
         }
 
-        private NumericUpDown EqBand(GroupBox g, string label, int y, int value)
+        private NumericUpDown EqBand(GroupBox g, int band, int x, int y, int value)
         {
-            // 118, not 90: the top band's caption is "5 kHz and above" and at
-            // 90 it was being cut to "5 kHz and", which reads as a different
-            // band rather than as a truncation.
+            string label = BandLabel(band);
+            // THE CAPTION IS THE SHORT FORM, the ACCESSIBLE NAME the long one —
+            // "200", "800", "1.8k", "3.5k", "5k+" on screen, "5 kHz and above" to
+            // the reader (set on the spin box below).
+            //
+            // This is what makes two columns possible while the SPIN BOX KEEPS
+            // ITS 90 × 24, which is the size Gordan asked for and the whole point
+            // of the earlier fix: "controls in EQ are too squeezed, number box
+            // and the arrows; in the speech part they are more relaxed." A column
+            // is 132 units; 90 of them are spoken for, so the caption gets 38 and
+            // "1.8 kHz" does not fit in 38 while "1.8k" does. Shrinking the box
+            // instead would have put back exactly what he objected to.
+            //
+            // It is also the conventional notation — every graphic equalizer ever
+            // built labels its bands 200, 800, 1.8k — so the short form is the
+            // FAMILIAR one here, not a compromise. The old comment warned that
+            // cutting this caption makes it read as a different band; that was
+            // about losing "and above", which "+" carries.
             Label lbl = new Label();
-            lbl.Text = label;
-            lbl.Location = new Point(10, y + 4);
-            lbl.Size = new Size(146, 20);
+            lbl.Text = ShortBandLabel(band);
+            lbl.Location = new Point(x, y + 4);
+            lbl.Size = new Size(EqLabelW, 20);
 
             NumericUpDown n = new NumericUpDown();
             // 20, not 15 (2026-08-09). Gordan hit the old wall twice in one
@@ -530,8 +582,8 @@ namespace Nemoviz_Book_Reader
             // the ones three cells away — Gordan: "controls in EQ are too
             // squeezed, number box and the arrows; in the speech part they are
             // more relaxed." Two spin boxes in one dialog should be one spin box.
-            n.Location = new Point(162, y);
-            n.Size = new Size(90, 24);
+            n.Location = new Point(x + EqLabelW + 4, y);
+            n.Size = new Size(EqSpinW, 24);
             n.TextAlign = HorizontalAlignment.Right;
             n.AccessibleName = label;
             n.TabIndex = g.Controls.Count;

@@ -244,6 +244,14 @@ namespace Nemoviz_Book_Reader
                 // check at every one of them — it never paints, and
                 // DialogCanvas.Active is set only from OnPaint, so it stays null
                 // and every Backdrop falls back exactly as it does today.
+                //
+                // FIXED, because the skinned window is: it is borderless at a
+                // size worked out to the unit, so nothing here can survive being
+                // dragged wider. Most of these forms already ask for FixedDialog
+                // themselves and this only agrees with them; the two that did not
+                // — the message box and the Library — came out Sizable, which is
+                // WinForms' default and nobody's decision.
+                f.FormBorderStyle = FormBorderStyle.FixedDialog;
                 f.ClientSize = new Size(width, height);
                 return new DialogCanvas(f);
             }

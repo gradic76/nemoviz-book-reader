@@ -12,12 +12,17 @@ namespace Nemoviz_Book_Reader
     /// player and two other dialogs, each with its own icon and button
     /// combination. One dialog, changed only by its text and its buttons.
     ///
-    /// <para><b>Under the classic theme this changes NOTHING.</b> Every call
-    /// falls straight back to a real <see cref="MessageBox"/> when
-    /// <c>UiTheme.Current.BuildsOwnLayout</c> is false, so the well-tested
-    /// classic path — and every screen reader's built-in handling of a genuine
-    /// system dialog — is untouched. Only the new look gets the skinned
-    /// version.</para>
+    /// <para><b>BOTH LOOKS TAKE THE SAME ROUTE</b> (Gordan, 2026-08-16: *"Kako se
+    /// ponaša skin, tako se ponaša i classic. To je pravilo za sve."*). This used
+    /// to say the classic theme fell straight back to a real <see
+    /// cref="MessageBox"/> for everything, which was both a divergence and an
+    /// imprecise description of one: <see cref="ShowInfo"/> and <see
+    /// cref="ShowConfirm"/> are a real <c>MessageBox</c> in <b>both</b> looks and
+    /// always were — a notice is an event, not material — so they were never the
+    /// difference. Only <see cref="ShowHint"/> and <see cref="ShowContinue"/> had
+    /// two paths, and now they have one. Under classic the shell simply does not
+    /// paint (see <see cref="DialogSkin.Painting"/>): same window, same controls,
+    /// same words, in the Windows theme's own colours.</para>
     ///
     /// <para><b>The message box GROWS DIAGONALLY with its text, then only
     /// taller</b> (Gordan's call): width and height scale together up to a
@@ -45,11 +50,6 @@ namespace Nemoviz_Book_Reader
         /// system dialog that speaks once and expects an answer.</para></summary>
         public static void ShowHint(IWin32Window owner, string text, string title)
         {
-            if (!UiTheme.Current.BuildsOwnLayout)
-            {
-                MessageBox.Show(owner, text, title);
-                return;
-            }
             using (Form f = Build(text, title, false))
                 f.ShowDialog(owner);
         }
@@ -90,16 +90,14 @@ namespace Nemoviz_Book_Reader
         /// dialog is several lines of numbers to weigh rather than a single
         /// sentence to agree with (the bulk import warning).
         ///
-        /// <para>Windows cannot relabel the buttons of a real message box, so
-        /// the classic look gets <c>OK / Cancel</c> — the same two answers under
-        /// the names that box does have. The new look draws its own buttons and
-        /// says exactly what was asked for.</para></summary>
+        /// <para>Windows cannot relabel the buttons of a real message box, which
+        /// is why this is our own window rather than one: it says <b>Continue</b>
+        /// and <b>Cancel</b>, the words that were asked for. The classic look used
+        /// to fall back to a real box and settle for <c>OK / Cancel</c>; under
+        /// Gordan's parity rule it no longer does, so both looks now ask the
+        /// question in the same words.</para></summary>
         public static bool ShowContinue(IWin32Window owner, string text, string title)
         {
-            if (!UiTheme.Current.BuildsOwnLayout)
-                return MessageBox.Show(owner, text, title, MessageBoxButtons.OKCancel,
-                    MessageBoxIcon.Question) == DialogResult.OK;
-
             using (Form f = Build(text, title, true, false, "Btn.Continue", "Btn.Cancel"))
                 return f.ShowDialog(owner) == DialogResult.Yes;
         }

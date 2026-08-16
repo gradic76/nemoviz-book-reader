@@ -2376,13 +2376,72 @@ Two smaller ones from the same hunt, both worth knowing:
 > documented sequence, has no duplicate index, and carries the two non-stops
 > explicitly rather than by omission.
 >
-> **ONE DIFFERENCE IS LEFT AND IS NOT DRIFT: `MessageForm`.** Under classic every
-> message and confirmation still falls back to a real `MessageBox` (§10c), which
-> is a different control set, not a different coat — kept deliberately for the
-> well-tested classic path and every screen reader's built-in handling of a
-> genuine system dialog. Making it identical means every confirmation becomes a
-> custom window under classic too, which is a screen-reader change rather than a
-> visual one. **Gordan's call; not made.**
+> ### THE RULE, in Gordan's words (2026-08-16)
+>
+> > *"Kako se ponaša skin, tako se ponaša i classic. To je pravilo za sve."*
+>
+> Not a decision about one window — the standing rule. Anything the two looks do
+> differently is drift unless there is a reason written down beside it.
+>
+> **`MessageForm` was the last of it, and the description of it here was
+> imprecise as well as out of date.** `ShowInfo` and `ShowConfirm` are a real
+> `MessageBox` in **both** looks and always were — a notice is an event, not
+> material — so they were never the difference. Only **`ShowHint`** and
+> **`ShowContinue`** had two paths. They now have one, and `ShowContinue` gains
+> by it: Windows cannot relabel a real message box, so the classic path had been
+> settling for **OK / Cancel** where the question asked for **Continue /
+> Cancel**. Both looks now ask it in the same words.
+>
+> **`Shell` fixes the border under classic** (`FormBorderStyle.FixedDialog`).
+> The skinned window is borderless at a size worked out to the unit, so nothing
+> can survive being dragged wider. Most forms already ask for `FixedDialog`
+> themselves; the two that did not — **the message box and the Library** — came
+> out `Sizable`, which is WinForms' default and nobody's decision. All six
+> dialogs now report `FixedDialog` at exactly the skin's sizes.
+
+### The EQ is 3 + 2 (Gordan, 2026-08-16)
+
+The overlap above is fixed, and by the shape he expected rather than by nudging
+a number. `PropertiesForm`: five bands in **two columns, 3 + 2**, pitch 33.
+
+- **Why one column could never be made to work.** The pitch cannot simply grow:
+  at 29 the last band ends at 181 in a cell that is 166 and **cannot get any
+  taller**, because it shares row three with the loudness cell and the skin pins
+  that row's bottom at 570. Two columns need three rows instead of five and end
+  at 131, with 35 to spare — and fit the hybrid page's narrower cell too.
+- **The spin box KEEPS its 90 × 24**, which is the whole point. That size is
+  Gordan's own (*"controls in EQ are too squeezed, number box and the arrows"*),
+  and shrinking it to buy the second column would have put back exactly what he
+  objected to. Measured after: the spin arrows are 16 × 27, the same as the
+  Speech page's.
+- **The CAPTION gave way instead** — `ShortBandLabel`: **200 · 800 · 1.8k ·
+  3.5k · 5k+** on screen, with the full "5 kHz and above" kept on the spin box's
+  `AccessibleName`, which is where a screen reader takes it. This is §10d's rule
+  exactly, and the short form is the **familiar** one here rather than a
+  compromise — every graphic equalizer ever built labels its bands that way.
+  Built from the frequency, never by cutting the localized phrase down, so a
+  translation cannot break it.
+- **A second, older overlap fell out of it**: the stage's enable check runs the
+  full width of the cell and ends at 38, so a first band row at 36 ran under it.
+  Bands start at 40 now. It had been there all along, hidden among the
+  band-on-band overlaps.
+
+**Measured, per page, in both looks:**
+
+| | before | after |
+|---|---|---|
+| audio Properties, new look | 15 | **10** |
+| audio Properties, classic | 11 | **10** |
+| hybrid Properties, new look | 6 | **1** |
+| hybrid Properties, classic | 2 | **1** |
+
+**The two looks now report the same count on both pages**, and what is left is
+the known artefact of the single-page path (controls moved onto the form while
+the hidden `TabControl` still fills the client area) plus one `?` key.
+
+**The new look's other five dialogs are still byte-identical to the build
+before any of this work** — re-checked after every change in this run, since
+that is the invariant §8k's closure depends on.
 
 > ### High contrast is the DEFAULT, not a lock (2026-08-03)
 >
