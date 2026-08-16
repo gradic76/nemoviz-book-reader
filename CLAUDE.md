@@ -2269,6 +2269,53 @@ Two smaller ones from the same hunt, both worth knowing:
 > function of the panel size** and so needs no `Form1` — instantiating the real
 > player drives mpv and loads a book, and hangs a harness. 18 boxes, **no
 > overlaps, nothing off the panel**.
+>
+> ### The hybrid page passes — and the sweep found a real fault in the NEW look
+>
+> The two-tab hybrid Properties page, left unverified above, has since been
+> measured on a real hybrid (`NBR Library\S13304`, 84 audio files with
+> `content.txt` + `sync.map`). **It lays out**, and classic reports **fewer**
+> problems than the new look on it — 2 against 6.
+>
+> That gap is the finding. **The five EQ spin boxes overlap each other by 4
+> units, on BOTH Properties pages, in the new look only.**
+>
+> | | asked for | actual | pitch |
+> |---|---|---|---|
+> | `PropertiesForm.EqBand` | `new Size(90, 24)` | **29** at 12 pt Segoe | `EqRowH = 25` |
+>
+> **A `NumericUpDown` forces its own height from the font** — it ignores the 24
+> it is given. So the pitch has been 4 units short of the control ever since the
+> box was enlarged. The enlargement itself was right and is Gordan's own
+> (*"controls in EQ are too squeezed… in the speech part they are more
+> relaxed"*); what was missed is that the ROW did not grow with the box.
+>
+> **Classic is unaffected**, and by accident rather than design: the theme's
+> smaller type makes the box 23 tall, which clears the 25 pitch.
+>
+> **It cannot be fixed by widening the pitch alone — the cell is too small.**
+> Bands run 36, 61, 86, 111, 136 and the last ends at 165 inside a 166-unit
+> cell, so they *fit* only because they overlap. At a pitch of 29 the last would
+> end at 181. The cell needs about **187 and has 166 — short by ~21**, and has
+> been since §8d took the EQ from three bands to five while §10b's cell was
+> sized for three.
+>
+> **NOT FIXED — it needs a design decision, and §8k closes this dialog.** Three
+> ways, for Gordan:
+> 1. **Two columns inside the EQ cell** (3 + 2). Fits with room to spare and
+>    keeps the box size he asked for; the cell is 308 wide and the value column
+>    sits at x=162.
+> 2. **Give the FORM page the per-row measuring the hybrid page already has** —
+>    rows as tall as what stands in them, so EQ's row grows and the two above
+>    give up what they are not using. The form page still uses fixed
+>    `StageRowY`/`StageH`.
+> 3. **Leave it.** Four units is a hairline and he has been using the dialog.
+>
+> **Method note, and it is a correction:** this was first reported here as *"the
+> audio page is fine, both looks agree"*. That was read off a **truncated**
+> harness dump — `-Context 0,10` cut the output at ten lines and the EQ rows
+> were below the cut. The full count is **15 for the new look against 11 for
+> classic**. A sweep is only as good as the part of it you actually read.
 
 > ### High contrast is the DEFAULT, not a lock (2026-08-03)
 >
