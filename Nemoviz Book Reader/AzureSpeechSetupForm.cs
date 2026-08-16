@@ -271,7 +271,7 @@ namespace Nemoviz_Book_Reader
                     failure = Why(made, "the resource could not be created");
                     phase = 5; return;
                 }
-                AzureVoices.SaveProvisioned(name, AzureProvision.SpeechRegion, made.Value);
+                AzureVoices.SaveProvisioned(name, made.Region, made.Value);
                 pendingStatus = AzureVoices.Have
                     ? Localization.T("Azure.Setup.Done", AzureVoices.Voices().Count)
                     : Localization.T("Azure.Setup.DoneNoList");

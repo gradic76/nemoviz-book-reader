@@ -27,6 +27,10 @@ namespace Nemoviz_Book_Reader
         public string Value;        // a key, a subscription id, whatever was asked for
         public string Error;
         public string Detail;
+
+        /// <summary>Which region the resource ended up in, when the caller had to
+        /// try more than one. See AzureProvision.SpeechRegions.</summary>
+        public string Region;
     }
 
     /// <summary>
@@ -75,23 +79,6 @@ namespace Nemoviz_Book_Reader
         /// to ship.</para></summary>
         public const string ClientId = "71525ffa-8165-4e6a-a739-39035de66904";
 
-        /// <summary>Which directory the reader signs in through.
-        ///
-        /// <para><b>"common" does NOT work for this, and the reason is worth
-        /// keeping.</b> Azure Resource Manager has no notion of a personal
-        /// Microsoft account: when a scope of management.azure.com is asked for,
-        /// Microsoft narrows the sign-in to work or school accounts, and a reader
-        /// whose Azure was opened with a Gmail address is told flatly that his
-        /// account will not do — even though it is the owner of the subscription.
-        /// What happened when the subscription was created is that Microsoft made
-        /// a DIRECTORY for it and put that account inside; the sign-in has to go
-        /// through that directory rather than through the front door.</para>
-        ///
-        /// <para>So the tenant is a parameter. A shipped NBR cannot know it in
-        /// advance — it is different for every reader — which leaves it as the one
-        /// thing still to be worked out: either discovered before this step, or
-        /// asked for once. It is printed on the app registration page as
-        /// "Directory (tenant) ID".</para></summary>
         /// <summary>Where the directory is stored between runs, so the reader
         /// gives it once.</summary>
         public const string TenantId = "azure-tenant";
@@ -236,30 +223,65 @@ namespace Nemoviz_Book_Reader
                                  "TextTranslation", "global", false);
         }
 
-        /// <summary>The region a Speech resource is made in.
+        /// <summary>The regions a Speech resource may be made in, nearest first.
         ///
-        /// <para><b>Speech has no "global", and that is the whole reason this is
-        /// a constant rather than a question.</b> Translator does, which is why
-        /// its account above says so; Speech publishes a table of some thirty-five
-        /// regions and no global entry. Somebody has to choose, and asking a
-        /// reader to pick a datacentre is asking a question they have no way to
-        /// answer — so NBR picks the one its resource group already lives in, and
-        /// the nearest large one to where this is being written.</para></summary>
-        public const string SpeechRegion = "westeurope";
+        /// <para><b>A LIST, because one region is a bet that keeps losing.</b>
+        /// Speech has no "global" — that is Translator — so somebody must choose,
+        /// and asking a reader to pick a datacentre is asking a question they have
+        /// no way to answer. The first version chose <c>westeurope</c> once, and
+        /// Azure refused it outright: *"The selected region is currently not
+        /// accepting new customers"*. That is capacity, it is not about the
+        /// account, and it changes without notice — so it cannot be answered by
+        /// picking a better constant, only by trying the next one.</para>
+        ///
+        /// <para>Ordered by distance from where this is used, and every entry is
+        /// in Microsoft's own published table of text-to-speech endpoints, since
+        /// a region that takes the resource but cannot speak from it would be a
+        /// worse failure than a refusal.</para></summary>
+        public static readonly string[] SpeechRegions =
+        {
+            "westeurope", "germanywestcentral", "italynorth", "francecentral",
+            "switzerlandnorth", "northeurope", "swedencentral", "uksouth",
+        };
 
-        /// <summary>A Speech resource on the free tier, its region known because
-        /// we chose it. <see cref="AzureVoices"/> stores all three parts and the
-        /// reader types none of them.</summary>
+        /// <summary>A Speech resource on the free tier, in the first region that
+        /// will have it — <see cref="AzureResult.Region"/> says which, and
+        /// <see cref="AzureVoices"/> stores it, so the reader types none of it.</summary>
         public static AzureResult CreateSpeech(string token, string subscriptionId,
                                                string resourceGroup, string accountName)
         {
-            // The custom subdomain is asked for as well as the region, because the
-            // documentation disagrees with itself about which endpoint form Speech
-            // accepts (see AzureVoices.RegionId) and this costs nothing: the name
-            // is ours already, and having both means the fallback has something to
-            // fall back TO.
-            return CreateAccount(token, subscriptionId, resourceGroup, accountName,
-                                 "SpeechServices", SpeechRegion, true);
+            AzureResult last = null;
+            foreach (string region in SpeechRegions)
+            {
+                // The custom subdomain is asked for as well, because the
+                // documentation disagrees with itself about which endpoint form
+                // Speech accepts (see AzureVoices.RegionId) and it costs nothing:
+                // the name is ours already, and having both gives the fallback
+                // something to fall back TO.
+                var r = CreateAccount(token, subscriptionId, resourceGroup, accountName,
+                                      "SpeechServices", region, true);
+                if (r != null && r.Ok) { r.Region = region; return r; }
+                last = r;
+                // Only a region that will not have us is worth walking past. Any
+                // other refusal — a permission, a quota, a policy — will say the
+                // same thing in every region, and trying eight of them would turn
+                // one clear answer into eight slow ones.
+                if (!RegionUnavailable(r)) break;
+            }
+            return last ?? Fail("the resource could not be created");
+        }
+
+        /// <summary>Whether a refusal means "not here" rather than "not you".
+        /// Matched on Azure's own wording plus the help link it always attaches,
+        /// so a reworded sentence still lands as long as either survives.</summary>
+        private static bool RegionUnavailable(AzureResult r)
+        {
+            if (r == null || string.IsNullOrEmpty(r.Detail)) return false;
+            string d = r.Detail.ToLowerInvariant();
+            return d.Contains("not accepting new customers")
+                || d.Contains("locationineligible")
+                || d.Contains("not available in the region")
+                || d.Contains("subscriptionisoverquotaforsku");
         }
 
         private static AzureResult CreateAccount(string token, string subscriptionId,
