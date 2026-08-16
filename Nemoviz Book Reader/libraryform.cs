@@ -2364,12 +2364,12 @@ namespace Nemoviz_Book_Reader
             // roughly 0.06 s a passage, so the figure was out by seventeen times
             // and told him nothing useful before he committed to it.
             //
-            // 0.15 rather than his measured 0.06 because eSpeak is the fastest of
-            // the local engines and RHVoice and OneCore synthesise rather more
-            // slowly; there is one measurement, not a curve. Being early is the
-            // safe direction, and the progress window's own figure is measured
-            // from the passages already done and corrects this within seconds.
-            double perPiece = GoogleCloudVoices.IsOne(voice) ? 1.0 : 0.15;
+            // The rates and the reasoning behind them live in CloudVoices, since
+            // "what does one passage cost" is a question about the KIND of voice
+            // and not about any one vendor. The progress window's own figure is
+            // measured from the passages already done and corrects this within
+            // seconds either way.
+            double perPiece = CloudVoices.SecondsPerPassage(voice);
             string ask = missing == 0
                 ? Localization.T("Export.Ask.Ready", spoken.Count)
                 : Localization.T("Export.Ask.Missing", missing, spoken.Count,

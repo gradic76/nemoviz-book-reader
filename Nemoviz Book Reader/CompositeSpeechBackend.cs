@@ -86,7 +86,7 @@ namespace Nemoviz_Book_Reader
             // log exists to find the installed one that is missing — so listing
             // them would bury the only thing anybody opens it for.
             int cloud;
-            SpeechInventory.LogOnce(GoogleCloudVoices.Exclude(GetVoiceCatalog(), out cloud), cloud);
+            SpeechInventory.LogOnce(CloudVoices.Exclude(GetVoiceCatalog(), out cloud), cloud);
         }
 
         private void Add(ISpeechBackend b, int arch)

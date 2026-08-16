@@ -2921,7 +2921,7 @@ namespace Nemoviz_Book_Reader
             try { if (tts != null) voice = tts.CurrentVoice; } catch { }
 
             bool want = isPlaying && currentBook != null && currentBook.IsTextBook
-                        && !string.IsNullOrEmpty(voice) && GoogleCloudVoices.IsOne(voice);
+                        && !string.IsNullOrEmpty(voice) && CloudVoices.IsOne(voice);
 
             if (want && prefill != null && prefill.Running && prefillVoice == voice) return;
             if (!want && prefill == null) return;      // nothing running, nothing to do

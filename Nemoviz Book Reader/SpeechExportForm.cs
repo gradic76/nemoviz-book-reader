@@ -212,7 +212,7 @@ namespace Nemoviz_Book_Reader
         {
             // ONLY for a voice that costs nothing to use again. A cloud voice's
             // pieces are money already spent and are never touched here.
-            if (GoogleCloudVoices.IsOne(voice)) return;
+            if (CloudVoices.IsOne(voice)) return;
 
             // Every piece belonging to THIS voice, not merely the ones this run
             // made. An export that found most of them already there would

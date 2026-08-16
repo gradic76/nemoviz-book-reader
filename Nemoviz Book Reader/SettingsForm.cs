@@ -571,7 +571,7 @@ namespace Nemoviz_Book_Reader
             List<(string Name, string Engine, string Language)> all)
         {
             int dropped;
-            return GoogleCloudVoices.Exclude(all, out dropped);
+            return CloudVoices.Exclude(all, out dropped);
         }
 
         private CheckBox chkCloudVoices;

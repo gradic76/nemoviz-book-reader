@@ -1516,7 +1516,7 @@ namespace Nemoviz_Book_Reader
         private bool SelectedVoiceIsCloud()
         {
             if (cmbTVoice == null || cmbTVoice.SelectedIndex <= 0) return false;
-            return GoogleCloudVoices.IsOne(cmbTVoice.SelectedItem as string);
+            return CloudVoices.IsOne(cmbTVoice.SelectedItem as string);
         }
 
         private void TextVoicesForSelection()
