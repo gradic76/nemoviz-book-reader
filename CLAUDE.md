@@ -1674,6 +1674,51 @@ through late-bound `dynamic`).
 > feature. **Anything below about the two-combo picker describes what was built
 > in Session 15, not what ships.**
 
+### AZURE SPEECH VOICES WORK — end to end, on a real account (Gordan, 2026-08-17)
+
+*"azzure glasovi rade."* The second cloud is in and heard. What it took, and
+every step of it was a thing checked rather than assumed:
+
+- **`AzureVoices` + `CloudSpeechBackend`.** One backend serves both clouds —
+  eight of its four hundred lines knew a vendor's name, so a second class would
+  have been a twin that drifts. Azure names carry a vendor tag
+  (`Gabrijela (hr-HR, Azure)`) because Google rebuilds its ids by parsing its
+  own names and would otherwise have claimed an Azure voice, sent it to the
+  wrong service and charged the wrong allowance, silently.
+- **No region field.** The endpoint is regional *and* a resource-name form
+  exists; Microsoft's docs contradict themselves about which Speech accepts, so
+  both are tried and whichever answers is remembered.
+- **`AzureSpeechSetupForm` — NBR creates the resource itself.** The ARM engine
+  had existed since 2026-08-15 and had never been reachable: no dialog called
+  it. The portal is what this replaces, which is the whole point.
+
+**Three live failures, each of which taught something:**
+
+1. **`/common` refuses a personal Microsoft account** for an ARM scope — the
+   thing memory already recorded as the one open piece, and it caught us again
+   because `AzureProvision.Tenant` was a static nothing ever set. It is a stored
+   setting now, asked for once, and it takes a **domain** as readily as a GUID.
+2. **The dialog was discarding Azure's own reason.** `AzureResult.Error` is
+   always set and always generic; `Detail` carries the sentence Azure sent. It
+   was written `Error ?? Detail`, so the coalesce could never fire. Two attempts
+   were spent on a bare "403" that had an explanation attached the whole time.
+3. **West Europe is closed to new Cognitive Services customers** — *"The
+   selected region is currently not accepting new customers"*. That is capacity,
+   it says nothing about the account, and it changes without notice. `SpeechRegion`
+   became **`SpeechRegions`**, eight of them nearest-first, each verified to be in
+   Microsoft's own text-to-speech endpoint table; the list is walked only for a
+   refusal that means "not here", since a permission or quota would say the same
+   in all eight.
+
+**The switch lives in its own group**, between the two services: it governs
+cloud voices as a KIND and reads as one vendor's if it sits inside one. Gordan
+found that by looking for it in the Azure group and not finding it.
+
+**Still true and worth repeating before anyone leans on these voices:** the free
+allowance is ~0.5 M characters a month — about ONE book, against Google's two to
+nine — and Azure's `hr-HR` has no custom pronunciations, so §8j's dictionary
+works less well there than with a local voice.
+
 ### Cloud voices — where they live, settled with Gordan 2026-08-15 (spec, not yet built)
 
 Chirp 3 HD passed by ear (see memory). The whole difficulty was never the
@@ -5983,6 +6028,28 @@ to. NBR's own shorter figure is the WPM estimate, not a measurement. See §8g′
   book. **Cheap thing worth doing first either way: a breadcrumb per book in
   `ImportOne`,** so the next capture of this says which title it was on instead
   of stopping at "rebuilding the shelf".
+
+  **AND IT LEFT SIX NON-BOOKS ON THE SHELF, found 2026-08-17.** The library held
+  `base_library`, `portable.bouncycastle.1.8.9` and `sharpziplib.1.3.3`, each
+  twice — a PyInstaller stdlib bundle of 154 `.pyc` files and two NuGet packages,
+  21 MB in all, every one with `Format=Unknown` and neither audio nor text.
+  Gordan deleted them; the finding is why they were there.
+
+  - **Nothing of his was destroyed**, which was the first thing to check because
+    §9 says `AbsorbArchives` deletes the original: `packages` is whole with all
+    17 `.nupkg`, neither package is even referenced by the project, and
+    `base_library.zip` still sits in `SlušajKnjigu_Portable\_internal\`. The
+    "Open folder" path does not delete, and that held.
+  - **NBR never decided they were not books** — Gordan's guess was that it
+    realised and then left both copies alone. Nothing in the import asks: an
+    archive is a book, so it imported them as books.
+  - **The duplicates are `MakeUniqueBookFolder` working as written.** Two bulk
+    imports 26 minutes apart; the second found the names taken and appended the
+    extension rather than clobber an existing book. Hence `X` and `X (zip)`.
+  - **The gap worth naming:** an imported archive with no audio and no text still
+    becomes a book. `OcrImport.IsEmptyTextBook` catches the same shape one layer
+    later, for a scanned PDF that yields nothing; there is no equivalent at
+    import. Not built — recorded so the next bulk import does not re-teach it.
 
 - ~~**OPEN BUG: the player freezes on Ctrl+O in the Library**~~ **— SOLVED
   2026-08-10, and it was never NBR's.** Gordan found it: a **virtual optical
