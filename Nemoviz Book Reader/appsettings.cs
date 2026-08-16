@@ -522,7 +522,7 @@ namespace Nemoviz_Book_Reader
         ///
         /// <para>It governs what the PICKER OFFERS and nothing else. A book that
         /// already has a cloud voice keeps reading with it whatever this says —
-        /// see <see cref="GoogleCloudBackend"/>, which reports its voices to the
+        /// see <see cref="CloudSpeechBackend"/>, which reports its voices to the
         /// composite either way.</para></summary>
         public bool UseCloudVoices { get; private set; }
 

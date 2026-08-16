@@ -204,7 +204,7 @@
     <Compile Include="EpubOverlayImporter.cs" />
     <Compile Include="EpubParser.cs" />
     <Compile Include="OpticalDrive.cs" />
-    <Compile Include="GoogleCloudBackend.cs" />
+    <Compile Include="CloudSpeechBackend.cs" />
     <Compile Include="Mp3Encoder.cs" />
     <Compile Include="MpvClipPlayer.cs" />
     <Compile Include="SpeechCache.cs" />

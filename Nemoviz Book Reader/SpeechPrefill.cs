@@ -80,10 +80,11 @@ namespace Nemoviz_Book_Reader
         {
             if (string.IsNullOrEmpty(bookFolder) || spokenSentences == null || spokenSentences.Count == 0)
                 return null;
-            string google, lang;
-            if (!GoogleCloudVoices.Split(voiceName, out google, out lang)) return null;
-            if (!GoogleCloudVoices.Have) return null;
-            return new SpeechPrefill(bookFolder, voiceName, google, lang, spokenSentences);
+            // Any cloud voice, not Google's alone — the look-ahead exists because
+            // making speech over a network is slow and costs money, which is true
+            // of every one of them.
+            if (!CloudVoices.IsOne(voiceName)) return null;
+            return new SpeechPrefill(bookFolder, voiceName, null, null, spokenSentences);
         }
 
         /// <summary>How much of this book is already made, so the reader is told
@@ -120,7 +121,7 @@ namespace Nemoviz_Book_Reader
                     // having listened past this point. Nothing is ever made twice.
                     if (string.IsNullOrWhiteSpace(s) || SpeechCache.Has(bookFolder, voice, s)) continue;
 
-                    byte[] wav = GoogleCloudVoices.Synthesize(s, googleName, language, 1.0, 0.0);
+                    byte[] wav = CloudVoices.Synthesize(voice, s);
                     if (wav == null) { failed++; }
                     else
                     {

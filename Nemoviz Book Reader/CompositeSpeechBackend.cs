@@ -74,7 +74,7 @@ namespace Nemoviz_Book_Reader
             // A book that already has a cloud voice must not fall silent because
             // the switch is off. Costs nothing when no credential is stored: the
             // backend then reports no voices at all.
-            try { Add(new GoogleCloudBackend(), 64); } catch { }
+            try { Add(new CloudSpeechBackend(), 64); } catch { }
 
             active = backends.Count > 0 ? backends[0] : null;
 

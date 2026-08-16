@@ -33,7 +33,7 @@ namespace Nemoviz_Book_Reader
     ///
     /// <para><b>Deliberately thin.</b> It does not wrap synthesis, voice lists or
     /// credentials: those differ per vendor in ways worth seeing at the call
-    /// site, and <see cref="GoogleCloudBackend"/> owns Google's. This answers
+    /// site, and <see cref="CloudSpeechBackend"/> owns Google's. This answers
     /// only the questions whose answer is the same for all of them.</para>
     /// </summary>
     internal static class CloudVoices

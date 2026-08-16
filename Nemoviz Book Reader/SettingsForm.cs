@@ -561,6 +561,10 @@ namespace Nemoviz_Book_Reader
             page.Controls.Add(MakeHint("Settings.Ocr.Hint", 14, 108, 480, 60, 2));
             page.Controls.Add(BuildTranslationGroup(8, 176));
             page.Controls.Add(BuildCloudVoicesGroup(8, 360));
+            // The skin reflows the page into two columns when one will not hold
+            // them (§10c), which is what makes room for this without anything
+            // here having to know where it lands.
+            page.Controls.Add(BuildAzureVoicesGroup(8, 518));
             return page;
         }
 
@@ -662,8 +666,184 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(btnCloudForget);
             box.Controls.Add(chkCloudVoices);
             box.Controls.Add(tbCloudWhy);
+
+            // Same as the Azure group below, and it fixes a fault that was already
+            // here: this group is built 500 wide and the skin's two-column reflow
+            // lands it in about 293, so "Forget the service account" has been
+            // hanging off its own right edge. Found by measuring the new group and
+            // noticing the old one reported the same thing.
+            box.Resize += (s, e) =>
+            {
+                int right = box.ClientSize.Width - 14;
+                if (right < 80) return;
+                tbCloudState.SetBounds(14, 22, right - 14, 32);
+                chkCloudVoices.SetBounds(14, 92, right - 14, 22);
+                tbCloudWhy.SetBounds(14, 116, right - 14, 28);
+                int bw = Math.Min(240, (right - 14 - 12) / 2);
+                load.SetBounds(14, 58, bw, 26);
+                btnCloudForget.SetBounds(right - bw, 58, bw, 26);
+            };
+
             ShowCloudState();
             return box;
+        }
+
+        private TextBox tbAzureState, tbAzureResource, tbAzureKey;
+        private Button btnAzureForget;
+
+        /// <summary>The second cloud, beside the first and built the same way.
+        ///
+        /// <para><b>Two fields, and neither of them is a region.</b> Azure's
+        /// synthesis endpoint is regional and has no "global" — that is Translator,
+        /// a different service. What it does have is an endpoint carrying the
+        /// RESOURCE NAME, which takes the plain key with no token exchange, so the
+        /// reader copies two strings off one page instead of hunting a region out
+        /// of a list of thirty-five. See <see cref="AzureVoices"/>.</para>
+        ///
+        /// <para><b>There is no second "use these voices" switch.</b> That one
+        /// governs whether Properties offers cloud voices at all, which is a
+        /// question about the kind and not the vendor; it now turns on
+        /// <see cref="CloudVoices.Any"/>, so either credential lights it.</para>
+        ///
+        /// <para>The key is shown rather than masked, which is what every other
+        /// key field here does: dots are unreadable to a screen reader and this is
+        /// the reader's own machine.</para></summary>
+        private GroupBox BuildAzureVoicesGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.Azure.Group");
+            box.Location = new Point(x, y);
+            box.Size = new Size(500, 150);
+            box.Tag = "Hint.Settings.Azure";
+
+            tbAzureState = new TextBox();
+            tbAzureState.Multiline = true;
+            tbAzureState.ReadOnly = true;
+            tbAzureState.BorderStyle = BorderStyle.None;
+            tbAzureState.BackColor = SystemColors.Control;
+            tbAzureState.SetBounds(14, 22, 470, 28);
+            tbAzureState.TabIndex = 0;
+
+            Label lr = new Label();
+            lr.Text = Localization.T("Settings.Azure.Resource");
+            lr.AutoSize = false;
+            lr.SetBounds(14, 58, 112, 20);
+
+            tbAzureResource = new TextBox();
+            tbAzureResource.SetBounds(130, 54, 354, 22);
+            tbAzureResource.AccessibleName = lr.Text;
+            tbAzureResource.TabIndex = 1;
+            tbAzureResource.Text = AzureVoices.Resource;
+
+            Label lk = new Label();
+            lk.Text = Localization.T("Settings.Azure.Key");
+            lk.AutoSize = false;
+            lk.SetBounds(14, 92, 112, 20);
+
+            tbAzureKey = new TextBox();
+            tbAzureKey.SetBounds(130, 82, 354, 22);
+            tbAzureKey.AccessibleName = lk.Text;
+            tbAzureKey.TabIndex = 2;
+
+            Button save = new Button();
+            save.Text = Localization.T("Settings.Azure.Save");
+            save.AccessibleName = save.Text;
+            save.SetBounds(14, 112, 240, 26);
+            save.TabIndex = 3;
+            save.Click += (s, e) => SaveAzureCredential();
+
+            btnAzureForget = new Button();
+            btnAzureForget.Text = Localization.T("Settings.Azure.Forget");
+            btnAzureForget.AccessibleName = btnAzureForget.Text;
+            btnAzureForget.SetBounds(264, 112, 220, 26);
+            btnAzureForget.TabIndex = 4;
+            btnAzureForget.Click += (s, e) =>
+            {
+                if (!MessageForm.ShowConfirm(this, Localization.T("Settings.Azure.ForgetAsk"),
+                                             Localization.T("Settings.Azure.Group"))) return;
+                AzureVoices.Forget();
+                tbAzureResource.Text = "";
+                tbAzureKey.Text = "";
+                ShowAzureState();
+                ShowCloudState();
+            };
+
+            box.Controls.Add(tbAzureState);
+            box.Controls.Add(lr); box.Controls.Add(tbAzureResource);
+            box.Controls.Add(lk); box.Controls.Add(tbAzureKey);
+            box.Controls.Add(save);
+            box.Controls.Add(btnAzureForget);
+
+            // LAID OUT FROM THE GROUP'S REAL WIDTH, not the 500 it is built at.
+            // The skin drops this page into two columns when one will not hold it
+            // (§10c), and a group built for 500 lands in about 293 — measured, and
+            // measured on the group next door too, whose Forget button has been
+            // hanging off its own edge ever since the page grew. The numbers here
+            // are a starting shape; this is what makes them true.
+            Action rows = () =>
+            {
+                int right = box.ClientSize.Width - 14;
+                if (right < 80) return;
+                tbAzureState.SetBounds(14, 22, right - 14, 28);
+                // THE FIELDS FOLLOW THE LABELS, they do not sit at a number.
+                // SettingsSkin computes a label column for the whole page and
+                // widens every caption to it — measured, "Resource name:" came
+                // back 180 wide where it was built at 112 — so a field pinned at
+                // x=130 was sliced in half by its own caption. Both fields take
+                // the wider of the two labels, or they do not line up.
+                int col = Math.Max(lr.Right, lk.Right) + 6;
+                if (col > right - 60) col = right - 60;
+                tbAzureResource.SetBounds(col, 54, Math.Max(60, right - col), 24);
+                tbAzureKey.SetBounds(col, 88, Math.Max(60, right - col), 24);
+                int bw = Math.Min(240, (right - 14 - 12) / 2);
+                save.SetBounds(14, 120, bw, 26);
+                btnAzureForget.SetBounds(right - bw, 120, bw, 26);
+            };
+            // ON THE LABELS TOO, and that is the whole trick. The skin widens
+            // them AFTER it resizes the group, so a handler listening only to the
+            // group reads the old caption width and lays the fields under the new
+            // one. Measured: the field stayed at 130 while its caption grew to
+            // 194, one over the other.
+            box.Resize += (s, e) => rows();
+            lr.SizeChanged += (s, e) => rows();
+            lk.SizeChanged += (s, e) => rows();
+
+            ShowAzureState();
+            return box;
+        }
+
+        /// <summary>Keeps the pair, having ASKED Azure whether it works — a key is
+        /// not a string that can be checked by looking at it. A refusal says so
+        /// and changes nothing, so a good credential is never lost to a typo in
+        /// the field beside it.</summary>
+        private void SaveAzureCredential()
+        {
+            string why = AzureVoices.Save(tbAzureResource.Text, tbAzureKey.Text);
+            if (why != null)
+            {
+                MessageForm.ShowInfo(this, why, Localization.T("Settings.Azure.Group"));
+                return;
+            }
+            tbAzureResource.Text = AzureVoices.Resource;
+            ShowAzureState();
+            ShowCloudState();
+        }
+
+        private void ShowAzureState()
+        {
+            if (tbAzureState == null) return;
+            string text;
+            if (!AzureVoices.Have) text = Localization.T("Settings.Azure.State.None");
+            else
+            {
+                var langs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                int n = 0;
+                foreach (var v in AzureVoices.Voices()) { n++; langs.Add(v.Language); }
+                text = Localization.T("Settings.Azure.State.Have", n, langs.Count);
+            }
+            tbAzureState.Text = text;
+            tbAzureState.AccessibleName = text;
+            if (btnAzureForget != null) btnAzureForget.Enabled = AzureVoices.Have;
         }
 
         /// <summary>Puts the group's three moving parts in agreement with what is
@@ -695,17 +875,24 @@ namespace Nemoviz_Book_Reader
             }
 
             if (btnCloudForget != null) btnCloudForget.Enabled = have;
+
+            // THE SWITCH IS ABOUT THE KIND, NOT THE VENDOR: it decides whether
+            // Properties offers cloud voices at all, so EITHER credential lights
+            // it. Left on Google's alone, an Azure-only reader would have had a
+            // full catalogue and a dead switch, with the line below telling them
+            // to load a Google service account they do not want.
+            bool anyCloud = CloudVoices.Any;
             if (chkCloudVoices != null)
             {
-                if (!have) chkCloudVoices.Checked = false;
-                chkCloudVoices.Enabled = have;
+                if (!anyCloud) chkCloudVoices.Checked = false;
+                chkCloudVoices.Enabled = anyCloud;
             }
             if (tbCloudWhy != null)
             {
                 // Only says something when there is something to say. A permanent
                 // line explaining a control that is working is noise on every Tab
                 // through the page.
-                string why = have ? "" : Localization.T("Settings.Cloud.Why");
+                string why = anyCloud ? "" : Localization.T("Settings.Cloud.Why");
                 tbCloudWhy.Text = why;
                 tbCloudWhy.AccessibleName = why;
                 tbCloudWhy.TabStop = why.Length > 0;

@@ -7,7 +7,17 @@ using System.Windows.Forms;
 namespace Nemoviz_Book_Reader
 {
     /// <summary>
-    /// The Google Cloud voices as an ordinary speech backend.
+    /// The cloud voices — Google's and Azure's — as one ordinary speech backend.
+    ///
+    /// <para><b>One backend for both, and that was measured before it was
+    /// chosen.</b> Eight lines in here knew the vendor's name; everything else —
+    /// the mpv playback, the look-ahead, the polling, the joining of a split
+    /// passage, the request chunking, the cache — is the same work whoever made
+    /// the audio. A second class would have been four hundred lines of twin with
+    /// four lines of difference, and twins drift. The vendor now lives in the
+    /// catalogue, the label and one call to <see cref="CloudVoices.Synthesize"/>.
+    /// It was called <c>GoogleCloudBackend</c> until Azure joined it, which would
+    /// have been a name that lies.</para>
     ///
     /// <para>Built on <see cref="OneCoreBackend"/>, almost line for line, because
     /// the two do the same thing: render a sentence to a WAV in memory, then hand
@@ -31,7 +41,7 @@ namespace Nemoviz_Book_Reader
     /// able to speak it. Settings filters them out always, Properties unless the
     /// switch is on.</para>
     /// </summary>
-    public class GoogleCloudBackend : ISpeechBackend, ISpeechCacheAware
+    public class CloudSpeechBackend : ISpeechBackend, ISpeechCacheAware
     {
         /// <summary>Where to keep what is made. Set when a book is loaded; empty
         /// while nothing is loaded, and then nothing is kept — a test utterance
@@ -53,13 +63,11 @@ namespace Nemoviz_Book_Reader
         private readonly MpvClipPlayer player = new MpvClipPlayer();
         private readonly System.Windows.Forms.Timer poll;
 
-        // display name -> (google id, language)
-        private readonly List<(string Name, string Google, string Language)> voices =
+        // display name -> (vendor label, language)
+        private readonly List<(string Name, string Vendor, string Language)> voices =
             new List<(string, string, string)>();
 
         private string currentVoice = "";
-        private string currentGoogle = "";
-        private string currentLanguage = "";
         private int rate;
         private int volume = 100;
 
@@ -75,7 +83,7 @@ namespace Nemoviz_Book_Reader
 
         public event Action<bool> Completed;
 
-        public GoogleCloudBackend()
+        public CloudSpeechBackend()
         {
             LoadVoices();
             poll = new System.Windows.Forms.Timer { Interval = 60 };
@@ -85,12 +93,20 @@ namespace Nemoviz_Book_Reader
         private void LoadVoices()
         {
             voices.Clear();
-            if (!GoogleCloudVoices.Have) return;
-            foreach (var v in GoogleCloudVoices.Voices())
-            {
-                string display = GoogleCloudVoices.DisplayName(v.Name, v.Language);
-                voices.Add((display, v.Name, v.Language));
-            }
+            // BOTH CLOUDS THROUGH ONE BACKEND. Everything below this method —
+            // the mpv playback, the look-ahead, the polling, the joining, the
+            // splitting, the cache — is the same work whoever made the audio, so
+            // a second backend would have been four hundred lines of twin with
+            // four lines of difference, and twins drift. Only the catalogue, the
+            // vendor label and the synthesis call know whose voice this is.
+            if (GoogleCloudVoices.Have)
+                foreach (var v in GoogleCloudVoices.Voices())
+                    voices.Add((GoogleCloudVoices.DisplayName(v.Name, v.Language),
+                                GoogleCloudVoices.Vendor, v.Language));
+            if (AzureVoices.Have)
+                foreach (var v in AzureVoices.Voices())
+                    voices.Add((AzureVoices.DisplayName(v.Display, v.Language),
+                                AzureVoices.Vendor, v.Language));
             if (voices.Count > 0) SelectVoice(voices[0].Name);
         }
 
@@ -105,7 +121,7 @@ namespace Nemoviz_Book_Reader
         {
             var list = new List<(string, string, string)>();
             foreach (var v in voices)
-                list.Add((v.Name, GoogleCloudVoices.Vendor, v.Language));
+                list.Add((v.Name, v.Vendor, v.Language));
             return list;
         }
 
@@ -118,21 +134,17 @@ namespace Nemoviz_Book_Reader
                 if (string.Equals(v.Name, name, StringComparison.OrdinalIgnoreCase))
                 {
                     currentVoice = v.Name;
-                    currentGoogle = v.Google;
-                    currentLanguage = v.Language;
                     DropAhead();
                     return;
                 }
 
             // Not in the list — but a book saved with a cloud voice must still be
             // able to speak it when the catalogue has not been fetched on this
-            // machine yet. The name carries everything the request needs.
-            string google, lang;
-            if (GoogleCloudVoices.Split(name, out google, out lang))
+            // machine yet. The name carries everything the request needs, which is
+            // why the vendor tag is part of it.
+            if (CloudVoices.IsOne(name))
             {
                 currentVoice = name;
-                currentGoogle = google;
-                currentLanguage = lang;
                 DropAhead();
             }
         }
@@ -243,8 +255,8 @@ namespace Nemoviz_Book_Reader
         /// position still advances by exactly one.</para></summary>
         private byte[] Render(string text)
         {
-            if (string.IsNullOrEmpty(currentGoogle)) return null;
-            List<string> parts = SplitForRequest(text);
+            if (!CloudVoices.IsOne(currentVoice)) return null;
+            List<string> parts = SplitForRequest(text, currentVoice);
 
             // ALREADY PAID FOR ONCE. The stored piece is MP3 and mpv plays that
             // as readily as a WAV, so a second reading of a book costs nothing
@@ -254,15 +266,13 @@ namespace Nemoviz_Book_Reader
 
             byte[] wav;
             if (parts.Count == 1)
-                wav = GoogleCloudVoices.Synthesize(parts[0], currentGoogle, currentLanguage,
-                                                   NaturalSpeed, NaturalVolumeDb);
+                wav = CloudVoices.Synthesize(currentVoice, parts[0]);
             else
             {
                 var wavs = new List<byte[]>();
                 foreach (string p in parts)
                 {
-                    byte[] w = GoogleCloudVoices.Synthesize(p, currentGoogle, currentLanguage,
-                                                            NaturalSpeed, NaturalVolumeDb);
+                    byte[] w = CloudVoices.Synthesize(currentVoice, p);
                     if (w == null) return null;      // a hole in a sentence is worse than none of it
                     wavs.Add(w);
                 }
@@ -296,20 +306,20 @@ namespace Nemoviz_Book_Reader
         /// <summary>Cuts a piece too big for one request, preferring a sentence
         /// end, then a space, and only then a hard cut. Measured in UTF-8 bytes,
         /// because the limit is bytes and Croatian is not ASCII.</summary>
-        internal static List<string> SplitForRequest(string text)
+        internal static List<string> SplitForRequest(string text, string voice = null)
         {
+            int max = CloudVoices.MaxRequestBytes(voice);
             var parts = new List<string>();
             string s = text ?? "";
             while (s.Length > 0)
             {
-                if (Encoding.UTF8.GetByteCount(s) <= GoogleCloudVoices.MaxRequestBytes)
+                if (Encoding.UTF8.GetByteCount(s) <= max)
                 {
                     parts.Add(s);
                     break;
                 }
                 int take = s.Length;
-                while (take > 0 && Encoding.UTF8.GetByteCount(s.Substring(0, take))
-                                   > GoogleCloudVoices.MaxRequestBytes)
+                while (take > 0 && Encoding.UTF8.GetByteCount(s.Substring(0, take)) > max)
                     take = take * 9 / 10;
 
                 int cut = s.LastIndexOfAny(new[] { '.', '!', '?', ';' }, Math.Max(0, take - 1));
