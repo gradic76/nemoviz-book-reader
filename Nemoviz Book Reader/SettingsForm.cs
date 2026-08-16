@@ -565,6 +565,8 @@ namespace Nemoviz_Book_Reader
             // them (§10c), which is what makes room for this without anything
             // here having to know where it lands.
             page.Controls.Add(BuildAzureVoicesGroup(8, 518));
+            // Between the two services, because it belongs to neither.
+            page.Controls.Add(BuildCloudUseGroup(8, 716));
             return page;
         }
 
@@ -646,26 +648,9 @@ namespace Nemoviz_Book_Reader
                 ShowCloudState();
             };
 
-            chkCloudVoices = new CheckBox();
-            chkCloudVoices.Text = Localization.T("Settings.Cloud.Use");
-            chkCloudVoices.AccessibleName = chkCloudVoices.Text;
-            chkCloudVoices.SetBounds(14, 92, 470, 22);
-            chkCloudVoices.TabIndex = 3;
-            chkCloudVoices.Checked = appSettings != null && appSettings.UseCloudVoices;
-
-            tbCloudWhy = new TextBox();
-            tbCloudWhy.Multiline = true;
-            tbCloudWhy.ReadOnly = true;
-            tbCloudWhy.BorderStyle = BorderStyle.None;
-            tbCloudWhy.BackColor = SystemColors.Control;
-            tbCloudWhy.SetBounds(14, 116, 470, 28);
-            tbCloudWhy.TabIndex = 4;
-
             box.Controls.Add(tbCloudState);
             box.Controls.Add(load);
             box.Controls.Add(btnCloudForget);
-            box.Controls.Add(chkCloudVoices);
-            box.Controls.Add(tbCloudWhy);
 
             // Same as the Azure group below, and it fixes a fault that was already
             // here: this group is built 500 wide and the skin's two-column reflow
@@ -677,8 +662,6 @@ namespace Nemoviz_Book_Reader
                 int right = box.ClientSize.Width - 14;
                 if (right < 80) return;
                 tbCloudState.SetBounds(14, 22, right - 14, 32);
-                chkCloudVoices.SetBounds(14, 92, right - 14, 22);
-                tbCloudWhy.SetBounds(14, 116, right - 14, 28);
                 int bw = Math.Min(240, (right - 14 - 12) / 2);
                 load.SetBounds(14, 58, bw, 26);
                 btnCloudForget.SetBounds(right - bw, 58, bw, 26);
@@ -690,6 +673,61 @@ namespace Nemoviz_Book_Reader
 
         private TextBox tbAzureState, tbAzureResource, tbAzureKey;
         private Button btnAzureForget;
+
+        /// <summary>The one switch that governs cloud voices, in a group of its
+        /// own between the two services.
+        ///
+        /// <para><b>It used to sit inside the Google group, and Gordan caught what
+        /// that meant</b> (2026-08-17): with Azure added he went looking for the
+        /// same switch in the Azure group and there was none. The switch was
+        /// already shared — it turns on <see cref="CloudVoices.Any"/>, so either
+        /// credential lights it — but a control that governs BOTH while living
+        /// inside ONE reads as belonging to that one.</para>
+        ///
+        /// <para>Not duplicated into both groups: two check boxes for one setting
+        /// is worse than none, especially for a reader who cannot see at a glance
+        /// that the other one moved too. It gets its own group, which is what it
+        /// is — a question about the KIND of voice, asked once.</para></summary>
+        private GroupBox BuildCloudUseGroup(int x, int y)
+        {
+            GroupBox box = new GroupBox();
+            box.Text = Localization.T("Settings.Cloud.UseGroup");
+            box.Location = new Point(x, y);
+            box.Size = new Size(500, 96);
+            box.Tag = "Hint.Settings.CloudUse";
+
+            chkCloudVoices = new CheckBox();
+            chkCloudVoices.Text = Localization.T("Settings.Cloud.Use");
+            chkCloudVoices.AccessibleName = chkCloudVoices.Text;
+            chkCloudVoices.SetBounds(14, 24, 470, 22);
+            chkCloudVoices.TabIndex = 0;
+            chkCloudVoices.Checked = appSettings != null && appSettings.UseCloudVoices;
+
+            tbCloudWhy = new TextBox();
+            tbCloudWhy.Multiline = true;
+            tbCloudWhy.ReadOnly = true;
+            tbCloudWhy.BorderStyle = BorderStyle.None;
+            tbCloudWhy.BackColor = SystemColors.Control;
+            tbCloudWhy.SetBounds(14, 52, 470, 34);
+            tbCloudWhy.TabIndex = 1;
+
+            box.Controls.Add(chkCloudVoices);
+            box.Controls.Add(tbCloudWhy);
+            box.Resize += (s, e) =>
+            {
+                int right = box.ClientSize.Width - 14;
+                if (right < 80) return;
+                chkCloudVoices.SetBounds(14, 24, right - 14, 22);
+                tbCloudWhy.SetBounds(14, 52, right - 14, 34);
+            };
+            // AND ONLY NOW can the state be shown. The Google group calls
+            // ShowCloudState at the end of its own build, which is before these
+            // two exist — the null guards in there let that pass quietly, and
+            // without this the switch would sit enabled with no credential behind
+            // it and the line under it would be blank.
+            ShowCloudState();
+            return box;
+        }
 
         /// <summary>The second cloud, beside the first and built the same way.
         ///
