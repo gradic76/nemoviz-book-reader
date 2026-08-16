@@ -2357,10 +2357,23 @@ namespace Nemoviz_Book_Reader
 
             // Said before anything starts, because "this will take three quarters
             // of an hour" is the one fact that decides whether to begin.
+            // A CLOUD voice costs a round trip a passage; a local one is made on
+            // this machine and is far quicker. One second each was the only rate
+            // here, and it is a cloud rate: Gordan exported a book with eSpeak
+            // (2026-08-16) that was announced at 87 minutes and took about five —
+            // roughly 0.06 s a passage, so the figure was out by seventeen times
+            // and told him nothing useful before he committed to it.
+            //
+            // 0.15 rather than his measured 0.06 because eSpeak is the fastest of
+            // the local engines and RHVoice and OneCore synthesise rather more
+            // slowly; there is one measurement, not a curve. Being early is the
+            // safe direction, and the progress window's own figure is measured
+            // from the passages already done and corrects this within seconds.
+            double perPiece = GoogleCloudVoices.IsOne(voice) ? 1.0 : 0.15;
             string ask = missing == 0
                 ? Localization.T("Export.Ask.Ready", spoken.Count)
                 : Localization.T("Export.Ask.Missing", missing, spoken.Count,
-                                 Math.Max(1, (int)Math.Round(missing * 1.0 / 60.0)));
+                                 Math.Max(1, (int)Math.Round(missing * perPiece / 60.0)));
             if (!MessageForm.ShowConfirm(this, ask, Localization.T("Menu.File.ExportAudio"))) return;
 
             string outPath;

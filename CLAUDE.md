@@ -1828,6 +1828,75 @@ the export exists precisely to be played OUTSIDE NBR.
 So the export must strip each piece's Xing frame, walk the frames to count them,
 and write one correct header at the front. Not built.
 
+### The export is VERIFIED on a real book, and NBR's own figure is the wrong one
+
+Gordan's eSpeak export, 2026-08-16 — *Isčezli svet*, 144 MB — walked frame by
+frame with an independent parser:
+
+| | |
+|---|---|
+| Xing headers in the file | **1** (the fault above was one per piece) |
+| header claims | 5:33:19 |
+| real, counted from 765 621 frames | **5:33:19 — the header is CORRECT** |
+| format | 22 050 Hz, mono, 60 kbps average |
+
+**Winamp's 333:14 was right and NBR's "5:56" was not**, which is the opposite of
+what it looked like. That figure is the **estimated reading time** computed from
+WPM (§8e, CPM = WPM × 6), not a measurement — it runs 6.9 % long here. Nothing
+to fix in the export; worth knowing before anyone chases a duration bug that is
+an estimate behaving like one.
+
+### The look-ahead follows PLAYBACK, not the book being open (Gordan, 2026-08-16)
+
+> *"Dok se svira troši se, dok se ne svira ne troši se."*
+
+It used to start from `LoadTextBookPlayback`, so opening a cloud book began
+buying the whole of it and a paused book went on spending with nobody
+listening. It now lives in **`Form1.SyncPrefillToPlayback`**, called from
+`SetPlayPauseState` — the one place that knows whether anything is sounding, and
+already the home of the sound-card keep-alive (§10f) for exactly the same
+argument. Nothing is lost: the look-ahead runs ~10× faster than listening so it
+stays far ahead of the ear anyway, and a resumed pass skips what is on disk at
+once.
+
+**It is voice-aware now, which it was not.** Gordan switched a book to eSpeak
+and the cloud look-ahead carried on — it had been started for the previous voice
+and nothing ever asked again. The voice it was started for is remembered;
+a change restarts it, or stops it dead when the new voice is a local one.
+
+**And the info box parity he reported was a REAL bug, in neither look.**
+`ToggleInfoBoxFocus` set `tbInfo.TabStop = true` on the way in with **F8 and
+never restored it**, so after one press the box was a permanent tab stop in both
+looks. Focus could then land on it — and §2's focus echo guard correctly blocks
+every refresh while it is focused, because it must not change text under a
+reader's cursor. What Gordan saw as *"classic shows Speech kept and it does not
+advance"* was that box holding focus. It was not stale; it was focused. Restored
+on the way out now, **after** focus has moved.
+
+### The 32-bit host: a dead one must not be paid for once per sentence
+
+Gordan's first eSpeak export "blocked" and left a player process behind; the
+second, after a restart, went through. **Nothing was deadlocked.**
+`Sapi5SatelliteBackend.Render` already had a 60-second deadline and it was
+working exactly as written — but it is a minute **each**, and a book of five
+thousand passages against a host that has stopped answering is **83 hours** of
+perfectly correct waiting, which from outside is a hang.
+
+Three timeouts in a row now mean the host is gone rather than slow
+(`GiveUpAfter = 3`, `RenderingGaveUp`) — the same number and the same reasoning
+as the translation chain's stand-down. The export then finishes and says how
+many passages are missing (`Export.DoneShort`) instead of running until somebody
+kills it. A successful render clears the count.
+
+**The export's up-front estimate was a CLOUD rate applied to everything.** One
+second a passage: announced 87 minutes for a book eSpeak recorded in about five,
+out by seventeen times, before he had committed to it. Now 1.0 s for a cloud
+voice and 0.15 for a local one — 0.15 rather than his measured 0.06 because
+eSpeak is the fastest local engine and there is one measurement, not a curve;
+being early is the safe direction and the progress window's own figure is
+measured from the passages already done. The wording says which number it is:
+*"that is how long the making takes, not how long the book is to listen to"*.
+
 ## 8h. Supported formats + official names
 
 `BookData.FriendlyFormatName` is the **single source of truth** for the format

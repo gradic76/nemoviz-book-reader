@@ -2896,25 +2896,72 @@ namespace Nemoviz_Book_Reader
         /// the whole of it. The one real exposure is leaving a book open and
         /// walking away, and the info line is there so that is a thing the reader
         /// can see rather than discover on a bill.</para></summary>
-        private void StartPrefillIfCloud()
+        /// <summary>Keeps the look-ahead in step with whether anything is actually
+        /// sounding.
+        ///
+        /// <para><b>Gordan, 2026-08-16 — "dok se svira troši se, dok se ne svira
+        /// ne troši se."</b> It used to start from <c>LoadTextBookPlayback</c>, so
+        /// merely opening a cloud book began buying the whole of it, and a book
+        /// left paused went on spending with nobody listening. Reading is the
+        /// thing that says the reader means to have this book; pausing is the
+        /// thing that says they have stopped. Nothing is lost by it — the
+        /// look-ahead runs about ten times faster than listening, so it stays far
+        /// ahead of the ear anyway, and a resumed pass skips everything already
+        /// on disk at once (measured: second pass makes 0).</para>
+        ///
+        /// <para><b>It is voice-aware, which the old code was not.</b> Gordan
+        /// switched a book to eSpeak and the cloud look-ahead carried on
+        /// regardless — it had been started for the previous voice and nothing
+        /// ever asked again. The voice it was started for is remembered, and a
+        /// change restarts it, or stops it outright when the new voice is a local
+        /// one that costs nothing to make.</para></summary>
+        private void SyncPrefillToPlayback()
         {
+            string voice = null;
+            try { if (tts != null) voice = tts.CurrentVoice; } catch { }
+
+            bool want = isPlaying && currentBook != null && currentBook.IsTextBook
+                        && !string.IsNullOrEmpty(voice) && GoogleCloudVoices.IsOne(voice);
+
+            if (want && prefill != null && prefill.Running && prefillVoice == voice) return;
+            if (!want && prefill == null) return;      // nothing running, nothing to do
+
             StopPrefill();
+            if (want)
+            {
+                try
+                {
+                    prefill = SpeechPrefill.For(currentBook.FolderPath, voice, tts.SpokenSentences());
+                    if (prefill != null) { prefill.Start(); prefillVoice = voice; }
+                }
+                catch { prefill = null; }
+            }
+            // The info line carries "preparing"; it has just become true or false,
+            // and nothing else will rewrite the box while a book sits paused.
+            RefreshInfoBoxQuietly();
+        }
+
+        /// <summary>Rebuilds the info box unless a screen reader is standing in
+        /// it — §2's focus echo guard, which every writer of this box obeys.</summary>
+        private void RefreshInfoBoxQuietly()
+        {
             try
             {
-                if (currentBook == null || !currentBook.IsTextBook || tts == null) return;
-                string voice = tts.CurrentVoice;
-                if (!GoogleCloudVoices.IsOne(voice)) return;
-
-                prefill = SpeechPrefill.For(currentBook.FolderPath, voice, tts.SpokenSentences());
-                if (prefill != null) prefill.Start();
+                if (tbInfo == null || currentBook == null) return;
+                if (this.ActiveControl == tbInfo) return;
+                string s = BuildCurrentInfoText();
+                if (s != tbInfo.Text) tbInfo.Text = s;
             }
-            catch { prefill = null; }
+            catch { }
         }
+
+        private string prefillVoice;
 
         private void StopPrefill()
         {
             try { if (prefill != null) prefill.Stop(); } catch { }
             prefill = null;
+            prefillVoice = null;
         }
 
         private string BuildTextInfoText()
@@ -3398,6 +3445,14 @@ namespace Nemoviz_Book_Reader
                 }
             }
             catch { }
+            // The look-ahead follows the same rule the keep-alive above does, and
+            // for the same reason: this is the one place that knows whether
+            // anything is sounding. Spending money to make speech nobody is
+            // listening to is the money version of holding a sound card open all
+            // night. Gordan, 2026-08-16: "dok se svira troši se, dok se ne svira
+            // ne troši se."
+            SyncPrefillToPlayback();
+
             UpdateTitleBar();
         }
 
@@ -3968,6 +4023,16 @@ namespace Nemoviz_Book_Reader
                 infoBoxCameFrom = null;
                 if (back != null && back.CanSelect && !back.IsDisposed) back.Focus();
                 else SelectNextControl(tbInfo, true, true, true, true);
+                // AND OUT OF THE TAB ORDER AGAIN. Letting it in was the whole
+                // point on the way in; leaving it in is a leak, and a costly one:
+                // after a single F8 the box became a permanent stop in both looks,
+                // so focus could land on it — and the §2 focus guard then blocks
+                // every refresh, because it must not change text under a reader's
+                // cursor. Gordan saw the far end of that (2026-08-16): a classic
+                // player whose "Speech kept" line never moved while the same book
+                // on the new look advanced. The box was not stale; it was focused.
+                // Set AFTER the focus has moved, never while it still holds it.
+                tbInfo.TabStop = false;
                 return;
             }
             infoBoxCameFrom = this.ActiveControl;
@@ -4489,10 +4554,9 @@ namespace Nemoviz_Book_Reader
             ApplyTtsSettings();
             tts.SeekToChar(currentBook.TextPosition);
 
-            // AFTER the voice is settled, never before: which voice this book
-            // reads with is the whole test, and asking a moment too early would
-            // read the last book's answer.
-            StartPrefillIfCloud();
+            // NOT STARTED HERE ANY MORE. Opening a book is not a decision to buy
+            // the whole of it — see SyncPrefillToPlayback. The state below settles
+            // play or pause, and that is what turns the look-ahead on.
 
             // The book's own setting decides whether the reading view appears —
             // F9 is the way BACK after Escape, not the way in (Gordan). Deferred
@@ -5588,6 +5652,12 @@ namespace Nemoviz_Book_Reader
             RememberCurrentVoicePrefs();
             UpdateVolumeDisplay();
             UpdateSpeedDisplay();
+
+            // The voice may just have changed, and the look-ahead is bought for
+            // ONE voice — its pieces are keyed on it. Gordan switched a book to
+            // eSpeak and watched the cloud look-ahead carry on regardless
+            // (2026-08-16), because nothing ever asked again after it started.
+            SyncPrefillToPlayback();
         }
 
         /// <summary>Refreshes the Volume field and its spoken name from

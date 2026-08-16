@@ -141,9 +141,33 @@ namespace Nemoviz_Book_Reader
         ///
         /// <para>The file is the host's, made for us and left behind on purpose;
         /// it is read once and deleted here.</para></summary>
+        /// <summary>How many timeouts running mean the host is gone rather than
+        /// slow. Same number and the same reasoning as the translation chain's
+        /// stand-down: an engine that has refused three in a row is not having a
+        /// bad minute.</summary>
+        private const int GiveUpAfter = 3;
+        private int timeouts;
+
+        /// <summary>Whether the host has stopped answering altogether. Public so a
+        /// caller can say so rather than silently producing a book of gaps.</summary>
+        public bool RenderingGaveUp { get { return timeouts >= GiveUpAfter; } }
+
         public byte[] Render(string text)
         {
             if (proc == null || string.IsNullOrEmpty(text)) return null;
+            // A DEAD HOST MUST NOT BE PAID FOR ONCE PER SENTENCE, and this is what
+            // Gordan hit on 2026-08-16: an eSpeak export that "blocked", with the
+            // player still running afterwards. Nothing was deadlocked — the
+            // deadline below was working exactly as written. But it is a minute
+            // EACH, and a book of five thousand passages against a host that has
+            // stopped answering is eighty-three hours of perfectly correct
+            // waiting. Indistinguishable, from outside, from a hang.
+            //
+            // So the first three timeouts are treated as bad luck and the rest as
+            // the answer. After that every call returns at once and the export
+            // finishes and says how many passages are missing, instead of running
+            // until somebody kills it.
+            if (RenderingGaveUp) return null;
             lock (renderLock)
             {
                 string path = null;
@@ -152,7 +176,8 @@ namespace Nemoviz_Book_Reader
                     renderedPath = null;
                     rendered.Reset();
                     Send("RENDERFILE\t" + Convert.ToBase64String(Encoding.UTF8.GetBytes(text)));
-                    if (!rendered.WaitOne(60000)) return null;
+                    if (!rendered.WaitOne(60000)) { timeouts++; return null; }
+                    timeouts = 0;       // it answered, so whatever that was is over
 
                     path = renderedPath;
                     if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return null;
