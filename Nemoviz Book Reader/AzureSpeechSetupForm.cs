@@ -70,6 +70,9 @@ namespace Nemoviz_Book_Reader
             ClientSize = new Size(520, 384);
 
             status = Line(14, 14, 492, 76);
+            // Azure's own refusals run long and are the whole point of reading
+            // this line, so it has to be possible to reach the end of one.
+            status.ScrollBars = ScrollBars.Vertical;
             status.Text = Localization.T("Azure.Setup.Intro");
             status.AccessibleName = status.Text;
             status.TabIndex = 0;
@@ -214,7 +217,8 @@ namespace Nemoviz_Book_Reader
                 var req = AzureProvision.BeginSignIn();
                 if (req == null || !string.IsNullOrEmpty(req.Error))
                 {
-                    failure = req != null ? req.Error : "sign-in could not be started";
+                    failure = req != null && !string.IsNullOrEmpty(req.Error)
+                        ? req.Error : "sign-in could not be started";
                     phase = 5; return;
                 }
                 request = req;
@@ -225,7 +229,7 @@ namespace Nemoviz_Book_Reader
                 var signed = AzureProvision.CompleteSignIn(req, () => stop);
                 if (signed == null || !signed.Ok)
                 {
-                    failure = signed != null ? signed.Error : "sign-in did not finish";
+                    failure = Why(signed, "sign-in did not finish");
                     phase = 5; return;
                 }
                 token = signed.Value;
@@ -264,7 +268,7 @@ namespace Nemoviz_Book_Reader
                 var made = AzureProvision.CreateSpeech(token, subId, "nemoviz", name);
                 if (made == null || !made.Ok)
                 {
-                    failure = made != null ? (made.Error ?? made.Detail) : "the resource could not be created";
+                    failure = Why(made, "the resource could not be created");
                     phase = 5; return;
                 }
                 AzureVoices.SaveProvisioned(name, AzureProvision.SpeechRegion, made.Value);
@@ -350,6 +354,23 @@ namespace Nemoviz_Book_Reader
                     }
                     break;
             }
+        }
+
+        /// <summary>Both halves of a refusal, and this exists because the first
+        /// version showed neither useful one.
+        ///
+        /// <para><c>AzureResult.Error</c> is always set and always generic —
+        /// "Azure refused the request (403)" — while <c>Detail</c> carries the
+        /// sentence Azure actually sent, dug out of <c>error.message</c>. Written
+        /// as <c>Error ?? Detail</c>, the coalesce could never fire, so the one
+        /// line that explains the failure was thrown away every time. Gordan got
+        /// the bare 403 and neither of us could tell whether it was a permission,
+        /// a quota, a policy or a lapsed subscription.</para></summary>
+        private static string Why(AzureResult r, string fallback)
+        {
+            if (r == null) return fallback;
+            string head = string.IsNullOrEmpty(r.Error) ? fallback : r.Error;
+            return string.IsNullOrEmpty(r.Detail) ? head : head + " — " + r.Detail;
         }
 
         private void Say(string text, bool speak)
