@@ -92,7 +92,35 @@ namespace Nemoviz_Book_Reader
         /// thing still to be worked out: either discovered before this step, or
         /// asked for once. It is printed on the app registration page as
         /// "Directory (tenant) ID".</para></summary>
-        public static string Tenant = "common";
+        /// <summary>Where the directory is stored between runs, so the reader
+        /// gives it once.</summary>
+        public const string TenantId = "azure-tenant";
+
+        /// <summary>Which directory to sign in against.
+        ///
+        /// <para><b>"common" does not work for a personal account, and this is the
+        /// one thing about Azure that has caught us twice.</b> ARM has no notion
+        /// of a personal Microsoft account: ask for a
+        /// <c>management.azure.com</c> scope and Microsoft narrows sign-in to work
+        /// or school accounts, so a Gmail-opened Azure is refused BY THE OWNER OF
+        /// THE SUBSCRIPTION. Creating the subscription quietly made a DIRECTORY
+        /// and put the account inside it, and sign-in has to go through that
+        /// directory rather than the front door.</para>
+        ///
+        /// <para>NBR cannot know it in advance and nothing can derive it, so it is
+        /// asked for once and remembered. It does NOT have to be the GUID:
+        /// Microsoft documents the authority as taking "the tenant ID … or its
+        /// tenant domain", and the domain is the readable half —
+        /// <c>something.onmicrosoft.com</c>.</para></summary>
+        public static string Tenant
+        {
+            get
+            {
+                string t = (TranslationKeys.Get(TenantId) ?? "").Trim();
+                return t.Length > 0 ? t : "common";
+            }
+            set { TranslationKeys.Set(TenantId, (value ?? "").Trim()); }
+        }
 
         private static string Authority { get { return "https://login.microsoftonline.com/" + Tenant + "/oauth2/v2.0"; } }
         private const string ArmScope = "https://management.azure.com/user_impersonation offline_access";

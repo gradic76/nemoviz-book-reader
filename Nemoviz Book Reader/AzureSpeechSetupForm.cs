@@ -42,6 +42,8 @@ namespace Nemoviz_Book_Reader
         private readonly TextBox status, code;
         private readonly Button act, cancel;
         private readonly ComboBox subs;
+        private readonly TextBox tenant, tenantHint;
+        private readonly Label tenantLabel;
         private readonly Label subsLabel;
 
         private volatile bool stop;
@@ -65,7 +67,7 @@ namespace Nemoviz_Book_Reader
             StartPosition = FormStartPosition.CenterParent;
             MinimizeBox = false;
             MaximizeBox = false;
-            ClientSize = new Size(520, 300);
+            ClientSize = new Size(520, 346);
 
             status = Line(14, 14, 492, 76);
             status.Text = Localization.T("Azure.Setup.Intro");
@@ -77,35 +79,59 @@ namespace Nemoviz_Book_Reader
             code.TabIndex = 1;
             code.Visible = false;
 
+            // ASKED UP FRONT, because it is the one thing that decides whether the
+            // sign-in can happen at all. A personal Microsoft account cannot sign
+            // in at the front door for an Azure scope — see AzureProvision.Tenant
+            // — and finding that out after the code has been typed wastes the
+            // reader's time and the code.
+            tenantLabel = new Label();
+            tenantLabel.Text = Localization.T("Azure.Setup.Directory");
+            tenantLabel.AutoSize = false;
+            tenantLabel.SetBounds(14, 136, 160, 20);
+
+            tenant = new TextBox();
+            tenant.SetBounds(180, 134, 326, 24);
+            tenant.AccessibleName = tenantLabel.Text;
+            tenant.TabIndex = 2;
+            tenant.Text = AzureProvision.Tenant == "common" ? "" : AzureProvision.Tenant;
+
+            tenantHint = Line(14, 164, 492, 40);
+            tenantHint.Text = Localization.T("Azure.Setup.DirectoryHint");
+            tenantHint.AccessibleName = tenantHint.Text;
+            tenantHint.TabIndex = 3;
+
             subsLabel = new Label();
             subsLabel.Text = Localization.T("Azure.Setup.Subscription");
             subsLabel.AutoSize = false;
-            subsLabel.SetBounds(14, 140, 160, 20);
+            subsLabel.SetBounds(14, 210, 160, 20);
             subsLabel.Visible = false;
 
             subs = new ComboBox();
             subs.DropDownStyle = ComboBoxStyle.DropDownList;
-            subs.SetBounds(180, 138, 326, 24);
+            subs.SetBounds(180, 208, 326, 24);
             subs.AccessibleName = subsLabel.Text;
-            subs.TabIndex = 2;
+            subs.TabIndex = 4;
             subs.Visible = false;
 
             act = new Button();
             act.Text = Localization.T("Azure.Setup.Start");
             act.AccessibleName = act.Text;
-            act.SetBounds(14, 250, 200, 30);
-            act.TabIndex = 3;
+            act.SetBounds(14, 296, 200, 30);
+            act.TabIndex = 5;
             act.Click += (s, e) => Act();
 
             cancel = new Button();
             cancel.Text = Localization.T("Btn.Cancel");
             cancel.AccessibleName = cancel.Text;
-            cancel.SetBounds(316, 250, 190, 30);
-            cancel.TabIndex = 4;
+            cancel.SetBounds(316, 296, 190, 30);
+            cancel.TabIndex = 6;
             cancel.DialogResult = DialogResult.Cancel;
 
             Controls.Add(status);
             Controls.Add(code);
+            Controls.Add(tenantLabel);
+            Controls.Add(tenant);
+            Controls.Add(tenantHint);
             Controls.Add(subsLabel);
             Controls.Add(subs);
             Controls.Add(act);
@@ -147,6 +173,11 @@ namespace Nemoviz_Book_Reader
         private void StartSignIn()
         {
             act.Enabled = false;
+            tenant.Enabled = false;
+            // Kept before the sign-in, so a reader who gets it right once never
+            // types it again — and so a failed attempt still leaves the value in
+            // the field to correct rather than to retype.
+            AzureProvision.Tenant = tenant.Text;
             Say(Localization.T("Azure.Setup.SigningIn"), true);
             worker = new Thread(() =>
             {
