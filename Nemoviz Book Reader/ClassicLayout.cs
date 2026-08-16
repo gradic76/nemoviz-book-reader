@@ -73,6 +73,14 @@ namespace Nemoviz_Book_Reader
                 if (p.Info != null)
                     p.Info.SetBounds(8, 8, LeftW - 16, H - 16);
 
+                // The three captions that only repeat their own field — see
+                // PlayerBoxes. The new look hides these same labels (plus the
+                // seek one, which it redraws); classic keeps the seek label
+                // because its combo names nothing.
+                if (p.VolumeLabel != null) p.VolumeLabel.Visible = false;
+                if (p.SpeedLabel != null) p.SpeedLabel.Visible = false;
+                if (p.ProgressLabel != null) p.ProgressLabel.Visible = false;
+
                 MakeVolumeKeys(form, p);
                 LayOutControls(p);
             }
@@ -133,18 +141,34 @@ namespace Nemoviz_Book_Reader
 
             // Volume and speed side by side: each is one number and neither needs
             // the width.
+            //
+            // NO CAPTION LABEL OVER ANY OF THE THREE, and that is not a saving of
+            // space — it is a duplicate removed. Each of these fields already
+            // SAYS what it is: "Volume: 80%", "Speed: 1.0x",
+            // "Position: 00:00:41 / 07:58:38". They have to, because of §2 — the
+            // arrow keys make a screen reader read the focused field's own line,
+            // so the line has to name itself or the reader hears a bare number.
+            // And Form1 writes that same finished string into the LABEL as well
+            // (`lblVolume.Text = text`, `lblProgress.Text = posText`), so every
+            // one of these appeared on screen twice, one above the other.
+            //
+            // It is as old as the project — the initial commit already does it —
+            // and it went unseen because the new look hides all four labels while
+            // it draws its own legends, and nobody had looked at the classic
+            // panel. Gordan's describer found it: *"pozicija je ispisana dvaput"*.
+            //
+            // The FIELD is the one that has to keep the prefix, so the LABEL is
+            // what goes. Hidden rather than re-captioned: "Position" standing
+            // over "Position: 00:00:41 / 07:58:38" is still saying it twice.
+            // ApplyPlayer does the hiding; nothing is placed for them here.
+            // (`SeekLabel` stays — its combo reads "5 minutes" and names nothing.)
             int halfW = (w - Margin) / 2;
             int half2 = x + halfW + Margin;
-            list.Add(("VolumeLabel", new Rectangle(x, y, halfW, LabelH)));
-            list.Add(("SpeedLabel", new Rectangle(half2, y, halfW, LabelH)));
-            y += LabelH + 2;
             list.Add(("VolumeField", new Rectangle(x, y, halfW, RowH)));
             list.Add(("SpeedField", new Rectangle(half2, y, halfW, RowH)));
             y += RowH + 14;
 
             // Position, the width of the column — the longest line on the panel.
-            list.Add(("ProgressLabel", new Rectangle(x, y, w, LabelH)));
-            y += LabelH + 2;
             list.Add(("ProgressField", new Rectangle(x, y, w, RowH)));
 
             // Column C: the eight commands in one column, the app above the book —

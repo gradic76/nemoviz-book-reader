@@ -2228,6 +2228,47 @@ Two smaller ones from the same hunt, both worth knowing:
 > **Not covered by the sweep:** a **hybrid** book's two-tab Properties page —
 > there is no hybrid in the library to open. It uses the same primitives plus
 > the per-page canvas, which is guarded, but it is unverified.
+>
+> ### Volume, Speed and Position were each on the classic panel TWICE
+>
+> Found by Gordan's describer on the new classic player: *"pozicija je ispisana
+> dvaput"*. It is right, and it is wider than reported — **all three value rows
+> did it**, and it dates from the **initial commit**, not from this work.
+>
+> Form1 writes one finished, self-describing string — `"Volume: 80%"`,
+> `"Speed: 1.0x"`, `"Position: 00:00:41 / 07:58:38"` — into the field **and into
+> the caption label above it** (`lblVolume.Text = text`, `lblSpeed.Text = text`,
+> `lblProgress.Text = posText`, at six call sites). Two identical lines, one
+> above the other.
+>
+> **The field is the half that must keep the prefix**, because of §2: the arrow
+> keys make a reader speak the focused field's own line, so the line has to name
+> itself or the reader hears a bare number. So the LABEL is what goes —
+> **hidden, not re-captioned**, since "Position" standing over "Position:
+> 00:00:41 / 07:58:38" is still saying it twice. `ClassicLayout.ApplyPlayer`
+> hides Volume, Speed and Progress and `PlayerBoxes` no longer reserves a row
+> for them. **`SeekLabel` stays** — its combo reads "5 minutes" and names
+> nothing.
+>
+> **Why it went unseen for the life of the project:** the new look hides all
+> four labels while it draws its own legends (`NewPlayerSkin`), so it was only
+> ever visible on the classic panel, which nobody had looked at.
+>
+> **There is NO slider on the player, and there never was one** — checked
+> against every `panelBottom.Controls.Add` call: no `TrackBar`, no
+> `ProgressBar`. What the describer read as "duga vodoravna traka (slider)" is
+> the Position box itself, a read-only `TextBox` 350 wide and 24 tall with a
+> border. The new look's draggable progress blade is **painted on the canvas**,
+> not a control, so under classic there is nothing to drag and the position is
+> read-only. Whether classic should gain a real seek bar is **Gordan's call and
+> not made** — there is room (the boxes end at y=370 of a 480 panel), but §8k
+> already reasons that a slider here must not consume the arrows, which are
+> global.
+>
+> Checked with a harness over `ClassicLayout.PlayerBoxes`, which is a **pure
+> function of the panel size** and so needs no `Form1` — instantiating the real
+> player drives mpv and loads a book, and hangs a harness. 18 boxes, **no
+> overlaps, nothing off the panel**.
 
 > ### High contrast is the DEFAULT, not a lock (2026-08-03)
 >
