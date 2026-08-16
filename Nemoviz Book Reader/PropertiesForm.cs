@@ -375,6 +375,7 @@ namespace Nemoviz_Book_Reader
             // it does with the player — after everything is built and wired, so
             // nothing it does can be mistaken for the user editing.
             if (UiTheme.Current.BuildsOwnLayout) PropertiesSkin.Apply(this);
+            else ClassicLayout.ApplyProperties(this);
         }
 
         /// <summary>F1 opens the help for whatever the focus is sitting in, so the

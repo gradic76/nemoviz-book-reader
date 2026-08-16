@@ -337,6 +337,194 @@ namespace Nemoviz_Book_Reader
             finally { f.ResumeLayout(true); }
         }
 
+        /// <summary>The Library, at the big dialog size and in the same three
+        /// columns: the shelf across A and B, the details box in C.
+        ///
+        /// <para>Every number is <see cref="LibrarySkin"/>'s own, including the
+        /// split at 628 that puts the boundary exactly where the skinned window
+        /// has it. The <see cref="SplitContainer"/> does the columns in both
+        /// looks — the skin paints over it and this does not, which is the only
+        /// difference.</para>
+        ///
+        /// <para><b>The buttons stay in their panel here.</b> The skinned look
+        /// moves them onto its metal, which cost it a bug worth not repeating —
+        /// re-parenting a button removes it from the form for an instant, and the
+        /// form drops <c>AcceptButton</c> and <c>CancelButton</c> when the control
+        /// they point at goes, so Escape stopped closing the Library. Nothing
+        /// here re-parents anything, so nothing here can lose that.</para></summary>
+        public static void ApplyLibrary(LibraryForm f)
+        {
+            LibraryParts p = f.SkinParts;
+            if (p == null || p.Split == null) return;
+
+            const int MenuH = 26, RowH = 28, Gap = 8;
+            const int AbX = 12, AbW = 616, CX = 640, CW = 308;
+
+            f.SuspendLayout();
+            try
+            {
+                f.ClientSize = new Size(DialogSkin.W, DialogSkin.H);
+
+                if (p.Menu != null)
+                {
+                    p.Menu.Dock = DockStyle.None;
+                    // AutoSize wins over Size: without this the bar shrinks to the
+                    // width of its own items and stops a fifth of the way across.
+                    p.Menu.AutoSize = false;
+                    p.Menu.SetBounds(Margin, Margin, DialogSkin.W - 2 * Margin, MenuH);
+                    p.Menu.BringToFront();
+                }
+
+                int y = Margin + MenuH + Gap;
+                Place(p.SearchRow, 0, y, DialogSkin.W, RowH);
+                Place(p.Search, AbX, 2, AbW, 24);
+                Place(p.Filter, CX, 2, CW, 24);
+                y += RowH + Gap;
+
+                Place(p.Split, 0, y, DialogSkin.W, DialogSkin.ButtonsY - Gap - y);
+                p.Split.SplitterWidth = CX - (AbX + AbW);
+                p.Split.Panel1MinSize = 200;
+                p.Split.Panel2MinSize = 200;
+                p.Split.SplitterDistance = AbX + AbW;
+                p.Split.Panel1.Padding = new Padding(AbX, 0, 0, 0);
+                p.Split.Panel2.Padding = new Padding(0, 0, DialogSkin.W - (CX + CW), 0);
+
+                // The three keys along the foot, in the panel they were built in —
+                // which has to be told it is now the width of the window.
+                if (p.BottomPanel != null)
+                    Place(p.BottomPanel, 0, DialogSkin.ButtonsY - 8, DialogSkin.W,
+                          DialogSkin.H - (DialogSkin.ButtonsY - 8));
+                int by = p.BottomPanel != null ? 8 : DialogSkin.ButtonsY;
+                Place(p.Refresh, Margin, by, DialogSkin.ButtonW, DialogSkin.ButtonH);
+                Place(p.Load, 716, by, DialogSkin.ButtonW, DialogSkin.ButtonH);
+                Place(p.Close, 836, by, DialogSkin.ButtonW, DialogSkin.ButtonH);
+            }
+            finally { f.ResumeLayout(true); }
+        }
+
+        /// <summary>Settings, at the big dialog size: the tabs over the whole
+        /// client area and the three keys along the foot, at the skin's own
+        /// coordinates.
+        ///
+        /// <para><b>The hints STAY.</b> The skinned look removes them outright —
+        /// the switch and every box — because it has a <c>?</c> key per group
+        /// instead, and that key is painted. Here there is nothing to paint it
+        /// with, so the classic look keeps the hint boxes it has always had. They
+        /// are read-only tabbable text boxes, which is how a reader driven by Tab
+        /// reaches an explanation at all (§8b), and taking them away without
+        /// putting anything in their place would leave that reader with
+        /// nothing.</para></summary>
+        public static void ApplySettings(SettingsForm f)
+        {
+            SettingsParts p = f.SkinParts;
+            if (p == null || p.Tabs == null) return;
+
+            f.SuspendLayout();
+            try
+            {
+                f.ClientSize = new Size(DialogSkin.W, DialogSkin.H);
+
+                // THE HINT SWITCH KEEPS ITS PLACE ABOVE THE TABS, and the tabs
+                // start under it. The skinned look removes the switch outright,
+                // so its layout begins at the margin; putting the tabs there here
+                // laid them straight over a control that still exists — found by
+                // measuring, which is the only way it could have been.
+                int tabsY = Margin;
+                if (p.ShowHints != null && p.ShowHints.Parent == f)
+                {
+                    Place(p.ShowHints, Margin, Margin, DialogSkin.W - 2 * Margin, 24);
+                    tabsY = Margin + 24 + 8;
+                }
+
+                TabControl tabs = p.Tabs;
+                Place(tabs, Margin, tabsY, DialogSkin.W - 2 * Margin,
+                      DialogSkin.ButtonsY - Margin - tabsY);
+
+                Place(p.OK, 596, DialogSkin.ButtonsY, DialogSkin.ButtonW, DialogSkin.ButtonH);
+                Place(p.Cancel, 716, DialogSkin.ButtonsY, DialogSkin.ButtonW, DialogSkin.ButtonH);
+                Place(p.Apply, 836, DialogSkin.ButtonsY, DialogSkin.ButtonW, DialogSkin.ButtonH);
+            }
+            finally { f.ResumeLayout(true); }
+        }
+
+        // A pass that re-flowed each Settings page's groups into columns stood
+        // here and has been taken out. It moved the GROUPS and left every loose
+        // control where it was — and a Settings page is groups and loose hint
+        // boxes together, so three pages came out with a group sitting on top of
+        // the explanation belonging to the group above it. Measured, 12 faults
+        // where there had been none.
+        //
+        // Doing it properly means moving each hint with the group it explains,
+        // which is a real piece of work and not this one. So Settings takes the
+        // size and the buttons and leaves its pages alone — the same thing §10c
+        // records the skinned look doing with the loose controls on General,
+        // Device and Misc, which sit in the left third of a much wider page.
+
+        /// <summary>Properties, at the big dialog size and in the three columns
+        /// the skinned look uses: the information down the left, the stages in
+        /// the two columns beside it.
+        ///
+        /// <para><b>The geometry is computed, not copied</b> —
+        /// <see cref="DialogSkin.PropGeom.For"/> works the numbers out from the
+        /// space it is given, and §10b proved it reproduces the hand-tuned
+        /// constants to the unit. So the classic page, which is smaller than the
+        /// form by a tab strip and a border, gets a set of its own that is right
+        /// rather than a set of absolutes that would be off by that
+        /// difference.</para>
+        ///
+        /// <para><b>Nothing is re-parented.</b> The skinned look lifts the page's
+        /// controls onto the form and hides the strip, which is what lets it fill
+        /// the window — and what cost the Library its Escape key when the same
+        /// move was made there. Here the strip stays and the page keeps its
+        /// children; a tab strip on a one-tab dialog is a small price for not
+        /// touching what binds Enter and Escape.</para>
+        ///
+        /// <para>A TEXT-only or HYBRID book keeps its own page layout for now and
+        /// gets the size only. Its pages are built by the form rather than by a
+        /// grid of stage cells, so spreading them is a separate piece of work and
+        /// is honestly not done.</para></summary>
+        public static void ApplyProperties(PropertiesForm f)
+        {
+            PropParts p = f.SkinParts;
+            if (p == null || p.Tabs == null || p.Tabs.TabPages.Count == 0) return;
+
+            f.SuspendLayout();
+            try
+            {
+                f.ClientSize = new Size(DialogSkin.W, DialogSkin.H);
+
+                TabControl tabs = p.Tabs;
+                Place(tabs, Margin, Margin, DialogSkin.W - 2 * Margin,
+                      DialogSkin.ButtonsY - 2 * Margin);
+
+                Place(p.OK, 716, DialogSkin.ButtonsY, DialogSkin.ButtonW, DialogSkin.ButtonH);
+                Place(p.Cancel, 836, DialogSkin.ButtonsY, DialogSkin.ButtonW, DialogSkin.ButtonH);
+
+                // Only the single AUDIO page is arranged; see the note above.
+                if (tabs.TabPages.Count != 1 || p.Stages == null) return;
+                TabPage only = tabs.TabPages[0];
+                if (p.TextInfo != null && only.Controls.Contains(p.TextInfo)) return;
+
+                // From the TAB CONTROL, never off the page — inside SuspendLayout a
+                // page still answers with the size it was built at (§10b).
+                int pw = tabs.Width - 8, ph = tabs.Height - DialogSkin.TabH - 8;
+                DialogSkin.PropGeom g = DialogSkin.PropGeom.For(pw, ph, ph - Margin);
+
+                Place(p.Info, g.InfoPanel.X, g.InfoPanel.Y, g.InfoPanel.Width, g.InfoPanel.Height);
+
+                // The strip: the master switch, then Bypass and Reset all at the
+                // far end of it.
+                Place(p.Master, g.ColA, g.StripY + 4, g.ColW, 24);
+                Place(p.Bypass, g.ColB, g.StripY + 4, g.ColW / 2 - 6, 24);
+                Place(p.ResetAll, g.ColB + g.ColW / 2 + 6, g.StripY, g.ColW / 2 - 6, g.StripH);
+
+                for (int i = 0; i < p.Stages.Length; i++)
+                    Place(p.Stages[i], i % 2 == 0 ? g.ColA : g.ColB,
+                          g.StageRowY[i / 2], g.ColW, g.StageH);
+            }
+            finally { f.ResumeLayout(true); }
+        }
+
         /// <summary>Moves one control, and only if it is really there. A layout
         /// that throws on a control somebody removed would take the whole player
         /// down with it — and this one runs before anything is on screen to say

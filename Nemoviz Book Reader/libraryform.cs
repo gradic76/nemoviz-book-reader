@@ -342,6 +342,7 @@ namespace Nemoviz_Book_Reader
             // Built exactly as before, then handed over — the classic path does
             // nothing here, the new look restyles and relays out what was built.
             if (UiTheme.Current.BuildsOwnLayout) LibrarySkin.Apply(this);
+            else ClassicLayout.ApplyLibrary(this);
         }
 
         /// <summary>What the skin is allowed to move and repaint.</summary>
