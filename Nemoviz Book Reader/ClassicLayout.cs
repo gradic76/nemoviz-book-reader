@@ -59,6 +59,7 @@ namespace Nemoviz_Book_Reader
                 if (p.Info != null)
                     p.Info.SetBounds(8, 8, LeftW - 16, H - 16);
 
+                MakeVolumeKeys(form, p);
                 LayOutControls(p);
             }
             finally { form.ResumeLayout(true); }
@@ -81,49 +82,108 @@ namespace Nemoviz_Book_Reader
             PlayerBoxes(int panelW, int panelH)
         {
             var list = new System.Collections.Generic.List<(string, Rectangle)>();
-            int x = Margin;
-            int w = panelW - 2 * Margin;
-            int colW = (w - Margin) / 2;
-            int col2 = x + colW + Margin;
+
+            // THREE COLUMNS, the same shape the dialogs take: the information on
+            // the left (its own panel), then the transport, then the commands.
+            // The two on this panel are B and C.
+            int cmdW = 150;
+            int cx = panelW - Margin - cmdW;          // column C
+            int x = Margin;                           // column B
+            int w = cx - Margin - x;
             int y = Margin;
 
-            // Seek step — a label over a full-width combo.
-            list.Add(("SeekLabel", new Rectangle(x, y, colW, LabelH)));
+            // Seek step — a label over the combo.
+            list.Add(("SeekLabel", new Rectangle(x, y, w, LabelH)));
             y += LabelH + 2;
             list.Add(("Seek", new Rectangle(x, y, w, RowH)));
             y += RowH + 14;
 
-            // Transport, three across, Play/Pause in the middle as it is in the ring.
-            int tw = (w - 2 * 13) / 3;
-            list.Add(("Back", new Rectangle(x, y, tw, BtnH + 4)));
-            list.Add(("PlayPause", new Rectangle(x + tw + 13, y, tw, BtnH + 4)));
-            list.Add(("Forward", new Rectangle(x + 2 * (tw + 13), y, tw, BtnH + 4)));
-            y += BtnH + 4 + 14;
+            // THE CROSS (Gordan, 2026-08-16): five square keys of one size, the
+            // middle one Play/Pause and the other four on its sides. It is the
+            // ring's own mapping in ordinary buttons — up and down are volume,
+            // left and right the seek step — so a reader who learns one look has
+            // learned the other, which was the whole reason for asking.
+            //
+            // Three across and three down at this size do not fit beside
+            // everything else in one column, which is what put the commands into
+            // a column of their own and gave this panel the three-column shape.
+            int cell = 64, gap = 8;
+            int span = 3 * cell + 2 * gap;
+            int cxL = x + (w - span) / 2;             // the cross's own left edge
+            list.Add(("VolumeUp", new Rectangle(cxL + cell + gap, y, cell, cell)));
+            list.Add(("Back", new Rectangle(cxL, y + cell + gap, cell, cell)));
+            list.Add(("PlayPause", new Rectangle(cxL + cell + gap, y + cell + gap, cell, cell)));
+            list.Add(("Forward", new Rectangle(cxL + 2 * (cell + gap), y + cell + gap, cell, cell)));
+            list.Add(("VolumeDown", new Rectangle(cxL + cell + gap, y + 2 * (cell + gap), cell, cell)));
+            y += span + 14;
 
             // Volume and speed side by side: each is one number and neither needs
             // the width.
-            list.Add(("VolumeLabel", new Rectangle(x, y, colW, LabelH)));
-            list.Add(("SpeedLabel", new Rectangle(col2, y, colW, LabelH)));
+            int halfW = (w - Margin) / 2;
+            int half2 = x + halfW + Margin;
+            list.Add(("VolumeLabel", new Rectangle(x, y, halfW, LabelH)));
+            list.Add(("SpeedLabel", new Rectangle(half2, y, halfW, LabelH)));
             y += LabelH + 2;
-            list.Add(("VolumeField", new Rectangle(x, y, colW, RowH)));
-            list.Add(("SpeedField", new Rectangle(col2, y, colW, RowH)));
+            list.Add(("VolumeField", new Rectangle(x, y, halfW, RowH)));
+            list.Add(("SpeedField", new Rectangle(half2, y, halfW, RowH)));
             y += RowH + 14;
 
-            // Position, full width — the longest line on the panel.
+            // Position, the width of the column — the longest line on the panel.
             list.Add(("ProgressLabel", new Rectangle(x, y, w, LabelH)));
             y += LabelH + 2;
             list.Add(("ProgressField", new Rectangle(x, y, w, RowH)));
-            y += RowH + 18;
 
-            // The eight commands, four and four: the app on the left, the book on
-            // the right — the split the classic look already had across its outer
-            // columns, and the one the new look keeps.
+            // Column C: the eight commands in one column, the app above the book —
+            // the order they already had across the classic panel's outer columns.
             for (int i = 0; i < 4; i++)
             {
-                list.Add(("Left" + i, new Rectangle(x, y + i * Pitch, colW, BtnH)));
-                list.Add(("Right" + i, new Rectangle(col2, y + i * Pitch, colW, BtnH)));
+                list.Add(("Left" + i, new Rectangle(cx, Margin + i * Pitch, cmdW, BtnH)));
+                list.Add(("Right" + i, new Rectangle(cx, Margin + (i + 4) * Pitch, cmdW, BtnH)));
             }
             return list;
+        }
+
+        /// <summary>The cross's two extra arms.
+        ///
+        /// <para>The classic panel has never had a volume button — volume was the
+        /// Up and Down keys and a read-only field. The cross needs four arms, so
+        /// these two are built here, exactly as <see cref="NewPlayerSkin"/> builds
+        /// its own: the same accessible names, the same <c>SkinVolume</c> hook,
+        /// the same five-per-press step. Two looks, one set of controls, which is
+        /// the point of the cross.</para>
+        ///
+        /// <para><b>Last in the tab order, after everything BuildUI made.</b> The
+        /// keyboard has had Up and Down for volume since long before either look,
+        /// and a reader who tabs does not need two more stops in the middle of the
+        /// transport to reach what a key already does. Put at the end they can be
+        /// found by anyone hunting, and are in nobody's way.</para>
+        ///
+        /// <para>Built once. This runs whenever the player builds itself, and a
+        /// second pair would be two invisible buttons stacked on the first.</para></summary>
+        private static void MakeVolumeKeys(Form1 form, PlayerParts p)
+        {
+            if (volumeUp != null && volumeUp.Parent == p.Bottom) return;
+
+            volumeUp = MakeKey(form, "Btn.VolumeUp.Accessible", +5);
+            volumeDown = MakeKey(form, "Btn.VolumeDown.Accessible", -5);
+            int tab = 0;
+            foreach (Control c in p.Bottom.Controls) if (c.TabIndex > tab) tab = c.TabIndex;
+            volumeUp.TabIndex = tab + 1;
+            volumeDown.TabIndex = tab + 2;
+            p.Bottom.Controls.Add(volumeUp);
+            p.Bottom.Controls.Add(volumeDown);
+        }
+
+        private static Button volumeUp, volumeDown;
+
+        private static Button MakeKey(Form1 form, string nameKey, int step)
+        {
+            var b = new Button();
+            b.Text = step > 0 ? "+" : "−";
+            b.AccessibleName = Localization.T(nameKey);
+            b.UseVisualStyleBackColor = true;
+            b.Click += delegate { form.SkinVolume(step); };
+            return b;
         }
 
         private static void LayOutControls(PlayerParts p)
@@ -151,6 +211,8 @@ namespace Nemoviz_Book_Reader
                 case "SpeedField": return p.SpeedField;
                 case "ProgressLabel": return p.ProgressLabel;
                 case "ProgressField": return p.ProgressField;
+                case "VolumeUp": return volumeUp;
+                case "VolumeDown": return volumeDown;
             }
             if (name.StartsWith("Left") && p.Left != null)
             {
