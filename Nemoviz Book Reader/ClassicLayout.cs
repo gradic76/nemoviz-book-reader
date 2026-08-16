@@ -33,12 +33,14 @@ namespace Nemoviz_Book_Reader
     /// five ordinary square buttons in a cross, and that is a different layout
     /// rather than the same one unpainted.</para>
     ///
-    /// <para><b>What is deliberately NOT copied is the tab order.</b> §5's
-    /// column-major order — app column, then playback, then book tools — is what
-    /// the classic look has always had, and every accessible name and shortcut
-    /// was learned against it. Moving controls on screen costs a sighted reader
-    /// nothing; renumbering them would move the ground under everybody
-    /// else.</para>
+    /// <para><b>The tab order IS copied</b>, key for key — see
+    /// <see cref="SetTabRing"/>. This paragraph used to say the opposite, on the
+    /// argument that §5's column-major order was what every accessible name and
+    /// shortcut had been learned against. Gordan overruled it on 2026-08-16:
+    /// *"sredi tab order na classic, sve mora biti identično u svim temama"*. A
+    /// reader who learns one look must not have to relearn the other, and the
+    /// shortcuts are untouched either way — only the order of the stops
+    /// changes.</para>
     /// </summary>
     internal static class ClassicLayout
     {
@@ -83,6 +85,7 @@ namespace Nemoviz_Book_Reader
 
                 MakeVolumeKeys(form, p);
                 LayOutControls(p);
+                SetTabRing(p);
             }
             finally { form.ResumeLayout(true); }
         }
@@ -171,13 +174,10 @@ namespace Nemoviz_Book_Reader
             // Position, the width of the column — the longest line on the panel.
             list.Add(("ProgressField", new Rectangle(x, y, w, RowH)));
 
-            // Column C: the eight commands in one column, the app above the book —
-            // the order they already had across the classic panel's outer columns.
-            for (int i = 0; i < 4; i++)
-            {
-                list.Add(("Left" + i, new Rectangle(cx, Margin + i * Pitch, cmdW, BtnH)));
-                list.Add(("Right" + i, new Rectangle(cx, Margin + (i + 4) * Pitch, cmdW, BtnH)));
-            }
+            // Column C: the eight commands in one column, in the NEW LOOK'S OWN
+            // ORDER — its column A read down, then its column D. See Command().
+            for (int i = 0; i < 8; i++)
+                list.Add(("Cmd" + i, new Rectangle(cx, Margin + i * Pitch, cmdW, BtnH)));
             return list;
         }
 
@@ -190,11 +190,12 @@ namespace Nemoviz_Book_Reader
         /// the same five-per-press step. Two looks, one set of controls, which is
         /// the point of the cross.</para>
         ///
-        /// <para><b>Last in the tab order, after everything BuildUI made.</b> The
-        /// keyboard has had Up and Down for volume since long before either look,
-        /// and a reader who tabs does not need two more stops in the middle of the
-        /// transport to reach what a key already does. Put at the end they can be
-        /// found by anyone hunting, and are in nobody's way.</para>
+        /// <para><b>They stand third and fourth in the tab ring</b>, where the new
+        /// look's two ring arrows stand — see <see cref="SetTabRing"/>, which is
+        /// what assigns it. This file used to put them last, on the argument that
+        /// the keyboard has had Up and Down for volume since before either look;
+        /// that argument survives, but it is no longer ours to make, because the
+        /// two looks now share one keyboard.</para>
         ///
         /// <para>Built once. This runs whenever the player builds itself, and a
         /// second pair would be two invisible buttons stacked on the first.</para></summary>
@@ -204,10 +205,6 @@ namespace Nemoviz_Book_Reader
 
             volumeUp = MakeKey(form, "Btn.VolumeUp.Accessible", +5);
             volumeDown = MakeKey(form, "Btn.VolumeDown.Accessible", -5);
-            int tab = 0;
-            foreach (Control c in p.Bottom.Controls) if (c.TabIndex > tab) tab = c.TabIndex;
-            volumeUp.TabIndex = tab + 1;
-            volumeDown.TabIndex = tab + 2;
             p.Bottom.Controls.Add(volumeUp);
             p.Bottom.Controls.Add(volumeDown);
         }
@@ -252,17 +249,86 @@ namespace Nemoviz_Book_Reader
                 case "VolumeUp": return volumeUp;
                 case "VolumeDown": return volumeDown;
             }
-            if (name.StartsWith("Left") && p.Left != null)
+            if (name.StartsWith("Cmd")) return Command(p, name[3] - '0');
+            return null;
+        }
+
+        /// <summary>The eight command keys, in the order the new look reads them:
+        /// its column A down (Library, Settings, Properties, Help) and then its
+        /// column D (Go To, Bookmark, Bookmarks, Timer).
+        ///
+        /// <para><b>Not the order of <c>p.Left</c> and <c>p.Right</c></b>, which is
+        /// the order <c>BuildUI</c> happens to declare them in — Timer sits third
+        /// in <c>Left</c> and Properties first in <c>Right</c>. Reading the arrays
+        /// straight through gave the classic column a different order from the new
+        /// look's, which is the thing Gordan asked to be rid of: *"sve mora biti
+        /// identično u svim temama"*. `NewPlayerSkin.LayOutButtons` picks the same
+        /// eight the same way; the two lists have to be read together.</para></summary>
+        private static Control Command(PlayerParts p, int i)
+        {
+            if (p.Left == null || p.Right == null) return null;
+            switch (i)
             {
-                int i = name[4] - '0';
-                return i >= 0 && i < p.Left.Length ? p.Left[i] : null;
-            }
-            if (name.StartsWith("Right") && p.Right != null)
-            {
-                int i = name[5] - '0';
-                return i >= 0 && i < p.Right.Length ? p.Right[i] : null;
+                case 0: return p.Left[0];    // Library
+                case 1: return p.Left[1];    // Settings
+                case 2: return p.Right[0];   // Properties
+                case 3: return p.Left[3];    // Help
+                case 4: return p.Right[1];   // Go To
+                case 5: return p.Right[2];   // Set Bookmark
+                case 6: return p.Right[3];   // Manage Bookmarks
+                case 7: return p.Left[2];    // Sleep Timer
             }
             return null;
+        }
+
+        /// <summary>The tab ring, taken from <see cref="NewPlayerSkin"/> key for
+        /// key so the two looks are one keyboard.
+        ///
+        /// <para><b>This reverses what this file used to say.</b> It argued that
+        /// §5's column-major order should stay because every accessible name and
+        /// shortcut was learned against it. Gordan overruled it on 2026-08-16 —
+        /// *"sredi tab order na classic, sve mora biti identično u svim temama"* —
+        /// and he is right that a reader who learns one look must not have to
+        /// relearn the other. The shortcuts are untouched either way; only the
+        /// order of the stops changes.</para>
+        ///
+        /// <para>Two of these are <b>TabStop = false</b> rather than an index, and
+        /// both come straight from §8k. The volume READOUT leaves the ring because
+        /// the two volume keys already speak on every step, so it would only add a
+        /// stop. The INFO BOX leaves it because it is reached with F8 — twice to
+        /// put focus inside it — and keeping it out means the arrows never have two
+        /// owners. The F8 path sets <c>TabStop</c> back on while focus is in there,
+        /// and that code is look-independent, so it works here unchanged.</para></summary>
+        /// <summary>The ring as plain data, split out for the same reason
+        /// <see cref="PlayerBoxes"/> is: nobody here can look at a tab order, so it
+        /// has to be readable without a window. <c>-1</c> means
+        /// <c>TabStop = false</c> — in the ring's list rather than left implicit,
+        /// because "not a stop" is a decision and not an omission.</summary>
+        internal static System.Collections.Generic.List<(string Name, int Index)> PlayerTabRing()
+        {
+            var r = new System.Collections.Generic.List<(string, int)>
+            {
+                ("PlayPause", 0), ("Forward", 1), ("Back", 2),
+                ("VolumeUp", 3), ("VolumeDown", 4),
+                ("Seek", 5), ("SpeedField", 6), ("ProgressField", 7),
+                ("VolumeField", -1), ("Info", -1),
+            };
+            // 20..27, which is what NewPlayerSkin assigns as colA 20+i and
+            // colD 24+i — the same eight keys in the same order.
+            for (int i = 0; i < 8; i++) r.Add(("Cmd" + i, 20 + i));
+            return r;
+        }
+
+        private static void SetTabRing(PlayerParts p)
+        {
+            foreach (var e in PlayerTabRing())
+            {
+                Control c = e.Name == "Info" ? p.Info : Named(p, e.Name);
+                if (c == null) continue;
+                if (e.Index < 0) { c.TabStop = false; continue; }
+                c.TabStop = true;
+                c.TabIndex = e.Index;
+            }
         }
 
     }

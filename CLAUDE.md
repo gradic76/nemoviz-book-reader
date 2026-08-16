@@ -2316,6 +2316,73 @@ Two smaller ones from the same hunt, both worth knowing:
 > harness dump — `-Context 0,10` cut the output at ten lines and the EQ rows
 > were below the cut. The full count is **15 for the new look against 11 for
 > classic**. A sweep is only as good as the part of it you actually read.
+>
+> **THE EQ WAS NEVER LAID OUT 3 + 2.** Gordan asked whether it had been since the
+> bands went to five. It has not, and three things say so together: `EqBand`
+> takes only a `y` and hard-codes `x = 162`; the runtime rectangles are one
+> column at 36, 61, 86, 111, 136; and the only commit ever to touch `EqRowH` is
+> `a2d9f91`, the one that enlarged the boxes. §8d's own note agrees — *"two more
+> rows is a layout change"*. **Two columns was proposed as the repair and never
+> built.**
+>
+> **What 3 + 2 costs, measured, because it is not free.** A column needs a
+> caption plus a 90-wide spin box. The cell's usable inner width is ~272 on the
+> hybrid page, so a column gets ~136 and the caption ~46 — and the captions are
+> "200 Hz", "800 Hz", "1.8 kHz", "3.5 kHz" and **"5 kHz and above"**, the last of
+> which was deliberately given room (§ the comment in `EqBand`) so it would not
+> read as a different band. So 3 + 2 needs the visible captions shortened —
+> `"5 kHz+"` is the conventional shelf notation — with the full wording kept in
+> `AccessibleName`, which is where a reader gets it anyway. **Not built: that is
+> a caption change and Gordan's call.**
+
+### The tab order is the same in every theme (Gordan, 2026-08-16)
+
+> *"sredi tab order na classic, sve mora biti identično u svim temama. Primijeni
+> i na druge prozore ako se razlikuje."*
+>
+> **This reverses what `ClassicLayout` used to say.** It had argued that §5's
+> column-major order should stay because every accessible name and shortcut was
+> learned against it. Overruled, and rightly: a reader who learns one look must
+> not have to relearn the other, and the shortcuts are untouched either way —
+> only the order of the stops changes.
+>
+> **Measured first, so only the one that differed was touched. The DIALOGS were
+> already identical** — comparing name + `TabIndex` + `TabStop` across both
+> looks, the only line that differs is the `DialogCanvas`, which has
+> `TabStop = false` and `AccessibleRole.Graphic` and is not in the ring at all.
+> That is what running one layout pass for both looks bought.
+>
+> **Only the player differed**, and it now takes the new look's ring key for key
+> (`ClassicLayout.SetTabRing`): Play/Pause 0, Forward 1, Back 2, volume up 3,
+> down 4, seek step 5, speed 6, position 7, then the eight commands 20–27. The
+> volume READOUT and the INFO BOX are `TabStop = false`, both for §8k's own
+> reasons — the volume keys already speak on every step, and the info box is
+> reached with **F8** so the arrows never have two owners. The F8 path sets
+> `TabStop` back on while focus is inside it and is look-independent, so it
+> works here unchanged.
+>
+> **The command COLUMN was re-ordered with it**, and that was the hidden half.
+> `p.Left` is `{Library, Settings, Timer, Help}` and `p.Right` is
+> `{Properties, GoTo, SetBookmark, ManageBookmarks}` — the order `BuildUI`
+> happens to declare them in, not the order they are read. Classic walked those
+> arrays straight through and so put Timer third and Properties fifth, where the
+> new look reads Library, Settings, Properties, Help, then Go To, Bookmark,
+> Bookmarks, Timer. `ClassicLayout.Command()` now picks the same eight the same
+> way `NewPlayerSkin.LayOutButtons` does; **the two lists have to be read
+> together.**
+>
+> Checked by `ClassicLayout.PlayerTabRing()`, which is plain data for the same
+> reason `PlayerBoxes` is — nobody here can look at a tab order. It matches §8k's
+> documented sequence, has no duplicate index, and carries the two non-stops
+> explicitly rather than by omission.
+>
+> **ONE DIFFERENCE IS LEFT AND IS NOT DRIFT: `MessageForm`.** Under classic every
+> message and confirmation still falls back to a real `MessageBox` (§10c), which
+> is a different control set, not a different coat — kept deliberately for the
+> well-tested classic path and every screen reader's built-in handling of a
+> genuine system dialog. Making it identical means every confirmation becomes a
+> custom window under classic too, which is a screen-reader change rather than a
+> visual one. **Gordan's call; not made.**
 
 > ### High contrast is the DEFAULT, not a lock (2026-08-03)
 >
