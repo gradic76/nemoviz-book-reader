@@ -462,7 +462,7 @@ Settings.Cloud.ForgetAsk=Forget the stored service account? These voices stop be
 Settings.Cloud.UseGroup=Using cloud voices
 Settings.Cloud.Use=Offer cloud voices
 Settings.Cloud.Why=There is nothing to switch on yet: set up Google or Azure above, and this becomes available.
-Hint.Settings.CloudUse=This one switch covers every cloud voice, from Google and from Azure alike, which is why it is not inside either of their groups.\n\nIt decides whether those voices are OFFERED when you choose a voice for a particular book. They are never assigned automatically and never become a language's default voice — that stays with the voices installed on this computer, which cost nothing and need no connection.\n\nA book already reading with a cloud voice keeps it whether this is on or off; the switch governs the picker, not what can be played.
+Hint.Settings.CloudUse=This one turns on and off your use of cloud voices, meaning all the voices from the Internet, not your installed SAPI or One Core voices.\n\nIt decides whether those voices are OFFERED when you choose a voice for a particular book. They are never assigned automatically and never become a language's default voice — that stays with the voices installed on this computer, which cost nothing and need no connection.\n\nA book already reading with a cloud voice keeps it whether this is on or off; the switch governs the picker, not what can be played.
 Settings.Cloud.NoList=The account was accepted, but the list of voices could not be fetched. That is usually the network; the voices will appear once it can be reached.
 Btn.Close=Close
 Azure.Setup.Title=Set up Azure Speech
@@ -495,8 +495,8 @@ Settings.Azure.State.None=No key is stored, so none of these voices are availabl
 Settings.Azure.State.Have={0} voices are available, reading {1} languages between them.
 Settings.Azure.Forget=Forget the key
 Settings.Azure.ForgetAsk=Forget the stored Azure key? These voices stop being offered, and a book already reading with one falls silent until you give it another voice.
-Hint.Settings.Azure=A second set of cloud voices, from Microsoft's Azure Speech. They need an internet connection and an Azure account, and they are offered the same way Google's are: never assigned automatically, never a language's default, chosen for one book in that book's Properties.\n\nAzure asks for two things, both on one page of the Azure portal: the key, and the resource NAME — the first part of the endpoint address, before the first dot. There is no region to choose.\n\nTwo things worth knowing before you lean on them. The free allowance is about half a million characters a month, roughly one book, where Google's is several. And for Croatian, Azure does not support custom pronunciations, so the pronunciation dictionary works less well with these voices than with a voice installed on this computer. For English and many other languages they are very good.
-Hint.Settings.Cloud=These voices are read by Google's own service rather than by anything installed on this computer, so they need an internet connection and an account with Google, and long books cost money beyond the free monthly allowance.\n\nThey are not a key you can paste. Google gives them out as a service account: a small file ending in .json, downloaded once when you create the account. Nemoviz keeps what is inside that file, so you may move or delete the download afterwards.\n\nThey are never assigned automatically and never become a language's default voice. Switch them on here, then choose one for a particular book in that book's Properties.
+Hint.Settings.Azure=The use of Google and Azure voices requires some Google, Microsoft and Azure credentials and a bit of work on their web. Read more in Help.
+Hint.Settings.Cloud=
 Google.Cred.NotJson=That file is not readable as JSON, so it is not the one Google gave you. The file you want was downloaded when you created the service account, and its name ends in .json.
 Google.Cred.NotServiceAccount=That JSON is readable but it is not a service account — it has no account address and no private key in it. Google offers several kinds of credential; the one for these voices is the service account key.
 ; An ACTION on the shelf, not a setting in Properties: a reading happens once,
@@ -523,7 +523,7 @@ Ocr.ReRead.LocateTitle=Find the pictures for this book
 Ocr.ReRead.Filter=Scanned books and images|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|All files|*.*
 Ocr.ReRead.WholeFolder=There are {0} images in that folder. Read all of them as the pages of this book?
 Settings.Ocr.Group=Books that are pictures
-Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. The language matters: the same page read as English rather than Croatian gets the awkward letters wrong. This is only the starting choice — when you have more than one language, Nemoviz asks which to use each time it reads a book.
+Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. This is only the starting choice — when you have more than one language, Nemoviz asks which to use each time it reads a book.
 Settings.Ocr.Language=Recognition language
 Settings.Ocr.Automatic=Automatic
 Settings.Ocr.AddLanguage=Add a language...
@@ -543,7 +543,7 @@ Settings.Translate.Engine.Azure=Azure Translator
 ; PLACEHOLDER. The real text is still to be written, and it has to cover: that a
 ; key is the reader's own account with the service, that Nemoviz never sees a
 ; bill, roughly what a book costs, and that the key is stored in readable form.
-Settings.Translate.Hint=Nemoviz can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; Nemoviz never handles payment. Setting this up is not part of reading a book, and nothing here is needed unless you want translation. This text is not finished yet.
+Settings.Translate.Hint=Nemoviz can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; Nemoviz never handles payment, that's on you on the service providers web or any other means. If you don't need AI machine translation, just leave it unchecked.
 ; The standing note. Free text on purpose: a fixed set of questions would be
 ; OUR questions, and ours were written from Croatian.
 Settings.Translate.Notes=Anything the translator should know about every book — for example which spelling you prefer:
@@ -627,7 +627,7 @@ Ocr.Add.Title=Languages for reading pictures
 Ocr.Add.List=Languages
 Ocr.Add.Row={0}
 Ocr.Add.RowInstalled={0} — already installed
-Ocr.Add.Hint=Tick the languages you want and press Install. Windows will ask your permission, then download the recognition for that language — a small file, not a whole Windows language.
+Ocr.Add.Hint=Choose the languages you want and press Install. Depending on your settings Windows could ask your permission, then download the recognition for that language — a small file, not a whole Windows language.
 Ocr.Add.Install=Install
 Ocr.Add.WindowsSettings=Windows settings...
 Ocr.Add.Close=Close
@@ -650,7 +650,7 @@ Ocr.Add.LeftRunning=Windows is still installing it. It will finish on its own.
 ; one list with two ticks a row would be compact but as likely to confuse, and a
 ; two-state row is an odd thing for a screen reader to announce.
 Voices.Add.Title=Languages for speaking text
-Voices.Add.Hint=Tick the languages you want and press Install. Windows will ask your permission, then download the voices for that language. A voice is tied to its accent, so British and American English are separate entries.
+Voices.Add.Hint=Choose the languages you want and press Install. Depending on your settings Windows could ask your permission, then download the voices for that language. A voice is tied to its accent, so British and American English are separate entries.
 Settings.Ocr.None=Windows has no text recognition installed.
 
 Prop.Analysing.Done=Recording analyzed, {0} stages set. Change any of them if you prefer.
@@ -750,7 +750,6 @@ Settings.General.Language=Language:
 ; The two hints below are WRITTEN BUT NOT YET SHOWN — the Language and Media
 ; keys groups have no help key attached, unlike Book details below. Kept
 ; because the text is written; delete only if those groups are dropped.
-Settings.General.Language.Hint=The language NBR speaks to you in. It has nothing to do with the language a book is read in, which each book decides for itself.
 Settings.General.UseMultimediaKeysGlobally.Hint=This allows you to manage NBR from anywhere in the system. Multimedia keys will not work with other players while NBR has them.
 Settings.General.UseMetadata=Use embedded metadata
 Settings.General.UseMetadata.Hint=Some file formats have metadata with additional information about the author, title, publisher, producer and so on. NBR can read and display that information where it exists. However, if that information is wrong or missing, NBR can take the basic details from folder and file names instead. As a last resort, you can always rename books in the Library.
@@ -824,7 +823,7 @@ Settings.Apply.Accessible=Apply
 Settings.General.UseMultimediaKeys.Hint=You can use your keyboard multimedia keys or headset keys to play, pause and navigate the book using the seek step you have chosen.
 Settings.General.LibraryLocation.Hint=This is the place where NBR copies imported books. You can leave it as default on your system partition, but if you plan to have a large library, another partition or disk would be a much better solution. NBR also keeps the information for each book in there, so if you want to save your reading positions, bookmarks, speed and other reading settings, note that you need to copy the content from the old library folder manually to the new location. And within the same price range: by changing the library location to somewhere other than the system partition, you are preserving your books from accidental system crashes and the usual data loss accompanying them.
 Settings.TextBooks.Speech.Hint=Here is the list of the languages and the voices installed on your system. You can choose the default voice for every language shown here, so every new title in that language opens with the selected voice. Choosing a voice for a language is what makes it the default — there is nothing else to press. If your new book is written in a language that is not on the list, it is best not to set a default voice for it here. You can always set a voice in the Properties of the book itself, on its Text page, or choose No speech and go on reading in braille or on screen. You will also see a notice when a language has no voice installed.
-Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears. Switched on here, the window opens by itself every time you press Play. It can also be opened and closed by hand at any time with F9, whether this is switched on or not — so you can try it on a book without changing its settings.
+Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears. Switched on here, the window opens by itself every time you press Play. It can also be opened and closed by hand at any time with F9, whether this is switched on or not — so you can try it on a book without changing its Properties.
 Cue.Track=Track {0}
 ; ── User speech dictionary (ships empty; only what the user writes runs) ──
 Dict.Title=Pronunciation dictionary
@@ -883,12 +882,12 @@ Hint.SoundProcessing=Using sound processing you can fine-tune the sound of the r
 Hint.RemoveRumble=Cuts the very lowest frequencies — traffic, air conditioning, handling noise. It cannot recover a muddy recording, but it clears the bottom end so speech has room.
 Hint.NoiseRemoval=Reduces steady background hiss, the kind a tape or a cheap microphone leaves behind. Too strong a setting starts to eat the voice with it, so raise it only until the hiss goes.
 Hint.SoftenSibilance=Takes the edge off sharp S and Š sounds. Useful on close-miked readers and on recordings that were brightened too much.
-Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a whisper and a shout end up closer together. This is the one to reach for when you keep adjusting the volume.
+Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a whisper and a shout end up closer together. This is the one to reach for when you keep turning the volume knob.
 Hint.Tone=Five bands, in decibels, named by their frequency. The lowest sits at 200 Hz, which is where a boomy or muddy recording usually is; the top one is a shelf, so it lifts or lowers everything above it rather than one region. The bands overlap on purpose, which makes a smooth curve possible but also means they add up -- three neighboring bands at +4 give rather more than +4 between them. Small moves go a long way, and anything past a few dB usually means another stage is the real fix.
 Hint.AutomaticLoudness=Two things that pull against each other, which is why they share a box. Automatic loudness holds the overall level steady across a whole book, including between files recorded on different days; it follows the voice rather than the whole signal, which is what a spoken recording asks for. Noise in pauses works the other way: anything quieter than the chosen level gets pushed down, so a hiss or a hum that sits under the reading stops being audible in the gaps between sentences. It never touches the voice itself, and it quietens rather than silences (a noise that switches off and on around every phrase is more tiring than one that simply stays). Turn loudness up and the noise underneath comes up with it, so if that happens, this is the control for it.
 Hint.Text0=Here you can choose the language and voice for reading this book. You can have different settings for each individual book in the Library. Every voice remembers its own settings — speed, volume and pitch — so there is no need to set them again after switching back from another voice.\n\nRemember that you can select "No speech" if you want to read visually or on the braille display without hearing audio.
 Hint.TextBrailleSource=This book came from a braille file, and this is the table it was read with — the one that turned the braille cells back into words.\n\nA braille file says nothing about its language, its grade, or which national standard it follows, so NBR has to work the table out from the text itself. It is usually right, but not always, and a wrong table gives words that are almost right: "Have" where the book says "How".\n\nIf that is what you are seeing, pick another table here and press OK. The book is read again from the braille file you imported, which is kept beside it, so you can try as many tables as you like and go back to the first one at any time.\n\nThe tables offered are the ones for the language above. If that language is wrong, change it and the tables will follow.\n\nThis has nothing to do with what your braille display shows. Your screen reader translates that, using the table in its own settings.
-Hint.TextVisual=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like film end credits, or instant page changes. You can also choose the background, text and highlight colors, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
+Hint.TextVisual=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like movie end credits, or instant page changes. You can also choose the background, text and highlight colors, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
 
 ; Reading window - the on-screen visual output (CLAUDE.md 8l).
 ; Captions stay short; the explanation belongs in the hint, per the 30-character

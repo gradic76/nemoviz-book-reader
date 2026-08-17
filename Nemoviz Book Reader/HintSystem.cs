@@ -54,6 +54,18 @@ namespace Nemoviz_Book_Reader
                                   string subject = null)
         {
             if (anchor == null || parent == null) return;
+
+            // AN EMPTY HINT IS AN UNWRITTEN HINT, and gets no key (§10c's rule,
+            // which until now was only half implemented). That rule was built for
+            // a MISSING key — an unwritten one renders as the key itself, and
+            // "Hint.Settings.General.0" is worse than no button. A key that is
+            // present but EMPTY slipped through: Localization.T hands back the
+            // empty string rather than the key, so the `?` was attached and
+            // opened a window with nothing in it. Gordan cleared a hint's text in
+            // docs\Help hints.txt on 2026-08-17 expecting the button to go with
+            // it, which is the only reading that makes sense.
+            if (string.IsNullOrWhiteSpace(Localization.T(bodyKey))) return;
+
             hints[anchor] = bodyKey;
 
             // A group names itself, and a control usually does too. But a caption

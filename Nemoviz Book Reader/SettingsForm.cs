@@ -161,8 +161,13 @@ namespace Nemoviz_Book_Reader
             // with how a book is SPOKEN or FELT, and that page had just passed a
             // visual inspection with everything sitting where it should — one more
             // group at the bottom is how a laid-out page stops being one.
-            tabSettings.TabPages.Add(BuildOcrTab());
+            // ADVANCED LAST (Gordan, 2026-08-17). It had drifted in front of
+            // Devices, which reads wrongly: everything before it is something a
+            // reader sets and forgets, and Advanced is the one page that sends
+            // them out to other people's services. The last page is where a
+            // reader expects the deep end.
             tabSettings.TabPages.Add(BuildDeviceTab());
+            tabSettings.TabPages.Add(BuildOcrTab());
 
             btnOK = new Button();
             btnOK.Text = Localization.T("Btn.OK");
