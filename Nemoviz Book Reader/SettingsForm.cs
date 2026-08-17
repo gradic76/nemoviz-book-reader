@@ -278,6 +278,7 @@ namespace Nemoviz_Book_Reader
 
             // ── 2. Library location ──────────────────────────────────────
             GroupBox gLib = MakeGroup(Localization.T("Settings.General.LibraryGroup"), y, GW, 62);
+            gLib.Name = "Settings.General.LibraryLocation.Hint";
             // Read-only so the path can only be changed through Browse, but
             // tabbable and carrying the folder as its value, so a reader hears
             // where the library is.
@@ -302,6 +303,7 @@ namespace Nemoviz_Book_Reader
 
             // ── 3. Media keys ────────────────────────────────────────────
             GroupBox gKeys = MakeGroup(Localization.T("Settings.General.MediaKeysGroup"), y, GW, 84);
+            gKeys.Name = "Settings.General.UseMultimediaKeys.Hint";
             chkUseMultimediaKeys = new CheckBox();
             chkUseMultimediaKeys.Text = Localization.T("Settings.General.UseMultimediaKeys");
             chkUseMultimediaKeys.AccessibleName = Localization.T("Settings.General.UseMultimediaKeys");
@@ -327,6 +329,7 @@ namespace Nemoviz_Book_Reader
             // DAISY and EPUB exactly as much as for audio, and a reader of text
             // books never goes looking on a page called Audio Books.
             GroupBox gMeta = MakeGroup(Localization.T("Settings.General.MetadataGroup"), y, GW, 56);
+            gMeta.Name = "Settings.General.UseMetadata.Hint";
             chkUseMetadata = new CheckBox();
             chkUseMetadata.Text = Localization.T("Settings.General.UseMetadata");
             chkUseMetadata.AccessibleName = Localization.T("Settings.General.UseMetadata");
@@ -339,6 +342,7 @@ namespace Nemoviz_Book_Reader
 
             // ── 5. Look ──────────────────────────────────────────────────
             GroupBox gLook = MakeGroup(Localization.T("Settings.General.LookGroup"), y, GW, 62);
+            gLook.Name = "Settings.Misc.Look.Hint";
             gLook.Controls.Add(MakeLabel(Localization.T("Settings.Misc.Look"), LX, 26));
             cmbLook = MakeCombo(Localization.T("Settings.Misc.Look"), CX, 22, CW, tab++);
             // Follow Windows first, and it is where a reader who has never
@@ -377,30 +381,6 @@ namespace Nemoviz_Book_Reader
             SetEnabled(chkUseMultimediaKeys != null && chkUseMultimediaKeys.Checked,
                        chkUseMultimediaKeysGlobally);
         }
-
-        /// <summary>An explanatory hint under a control — the same read-only,
-        /// TABBABLE textbox the Go To dialog uses. It has to be tabbable: a plain
-        /// label is invisible to a screen reader driven by Tab, which is how this
-        /// app is used, so the first version of these hints simply could not be
-        /// read. The "Show help hints" switch takes them out of the tab order and
-        /// off the screen together — which is exactly why they may be tabbable in
-        /// the first place.</summary>
-        private TextBox MakeHint(string key, int x, int y, int w, int h, int tabIndex)
-        {
-            TextBox t = new TextBox();
-            t.Multiline = true;
-            t.ReadOnly = true;
-            t.Text = Localization.T(key);
-            t.AccessibleName = Localization.T("GoTo.Hint.Accessible");
-            t.Location = new Point(x, y);
-            t.Size = new Size(w, h);
-            t.TabIndex = tabIndex;
-            t.TabStop = appSettings.ShowHints;
-            t.Visible = appSettings.ShowHints;
-            hints.Add(t);
-            return t;
-        }
-
         /// <summary>Browse for a new library folder; only stages the choice
         /// (updates the read-only textbox) — it isn't persisted until OK or
         /// Apply.</summary>
@@ -534,7 +514,6 @@ namespace Nemoviz_Book_Reader
             // Everything below the speech group moved up by the 34 units the
             // engine row used to take.
             page.Controls.Add(BuildSpeechGroup());
-            page.Controls.Add(MakeHint("Settings.TextBooks.Speech.Hint", 14, 258, 480, 32, 1));
             // The braille group is GONE (2026-08-04), not merely shortened. It
             // held one check box, "Use braille output", and braille does not work
             // that way: the display is fed by the screen reader following focus
@@ -543,7 +522,6 @@ namespace Nemoviz_Book_Reader
             // of braille in NBR is the table a .brf was READ with, which belongs
             // to one book and lives in Properties.
             page.Controls.Add(BuildVisualGroup(8, 296));
-            page.Controls.Add(MakeHint("Settings.TextBooks.Visual.Hint", 14, 526, 480, 32, 3));
             return page;
         }
 
@@ -563,7 +541,6 @@ namespace Nemoviz_Book_Reader
             TabPage page = new TabPage(Localization.T("Settings.Tab.Advanced"));
             page.AutoScroll = true;
             page.Controls.Add(BuildOcrGroup(8, 6));
-            page.Controls.Add(MakeHint("Settings.Ocr.Hint", 14, 108, 480, 60, 2));
             page.Controls.Add(BuildTranslationGroup(8, 176));
             page.Controls.Add(BuildCloudVoicesGroup(8, 360));
             // The skin reflows the page into two columns when one will not hold
@@ -617,9 +594,9 @@ namespace Nemoviz_Book_Reader
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.Cloud.Group");
+            box.Name = "Hint.Settings.Cloud";
             box.Location = new Point(x, y);
             box.Size = new Size(500, 150);
-            box.Tag = "Hint.Settings.Cloud";
 
             // Read-only but TABBABLE, never a Label: a reader driven by Tab never
             // visits a label, and this line is how they find out whether they
@@ -697,9 +674,9 @@ namespace Nemoviz_Book_Reader
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.Cloud.UseGroup");
+            box.Name = "Hint.Settings.CloudUse";
             box.Location = new Point(x, y);
             box.Size = new Size(500, 96);
-            box.Tag = "Hint.Settings.CloudUse";
 
             chkCloudVoices = new CheckBox();
             chkCloudVoices.Text = Localization.T("Settings.Cloud.Use");
@@ -755,9 +732,9 @@ namespace Nemoviz_Book_Reader
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.Azure.Group");
+            box.Name = "Hint.Settings.Azure";
             box.Location = new Point(x, y);
             box.Size = new Size(500, 186);
-            box.Tag = "Hint.Settings.Azure";
 
             tbAzureState = new TextBox();
             tbAzureState.Multiline = true;
@@ -1018,6 +995,7 @@ namespace Nemoviz_Book_Reader
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.Translate.Group");
+            box.Name = "Settings.Translate.Hint";
             box.Location = new Point(x, y);
             box.Size = new Size(500, 92);
             box.Tag = "span2";
@@ -1132,6 +1110,7 @@ namespace Nemoviz_Book_Reader
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.Ocr.Group");
+            box.Name = "Settings.Ocr.Hint";
             box.Location = new Point(x, y);
             box.Size = new Size(500, 92);
             box.Tag = "span2";
@@ -1238,6 +1217,7 @@ namespace Nemoviz_Book_Reader
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.TextBooks.SpeechGroup");
+            box.Name = "Settings.TextBooks.Speech.Hint";
             box.Location = new Point(8, 6);
             box.Size = new Size(500, 246);
             // Two of the three columns. This is the widest group in Settings —
@@ -1569,6 +1549,7 @@ namespace Nemoviz_Book_Reader
         {
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.TextBooks.VisualGroup");
+            box.Name = "Settings.TextBooks.Visual.Hint";
             box.Location = new Point(x, y);
             // 232, not 224: the last row (Background colour) ended one pixel below
             // the box that was meant to contain it.
@@ -1840,6 +1821,7 @@ namespace Nemoviz_Book_Reader
             // somewhere to put the ?; that is what brings the text back.
             GroupBox box = new GroupBox();
             box.Text = Localization.T("Settings.Device.OutputGroup");
+            box.Name = "Settings.Device.KeepAlive.Hint";
             box.Location = new Point(8, 6);
             box.Size = new Size(500, 92);
             // Two columns: sound cards report themselves at length
@@ -1911,7 +1893,6 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(chkKeepAlive);
 
             page.Controls.Add(box);
-            page.Controls.Add(MakeHint("Settings.Device.KeepAlive.Hint", 22, 106, 452, 60, 2));
 
             // ── Optical drive (Gordan, 2026-08-07) ───────────────────────────
             // Its own group, which is why the tab is "Devices" now: a sound card
@@ -1927,6 +1908,7 @@ namespace Nemoviz_Book_Reader
 
             GroupBox optical = new GroupBox();
             optical.Text = Localization.T("Settings.Device.OpticalGroup");
+            optical.Name = "Settings.Device.UseOptical.Hint";
             optical.Location = new Point(8, 172);
             // 92, the same as the sound-card group above: a checkbox on one row
             // and a labelled combo on the next is exactly the shape that group
@@ -1994,7 +1976,6 @@ namespace Nemoviz_Book_Reader
             optical.Controls.Add(cmbOptical);
 
             page.Controls.Add(optical);
-            page.Controls.Add(MakeHint("Settings.Device.UseOptical.Hint", 22, 270, 452, 76, 3));
             return page;
         }
 

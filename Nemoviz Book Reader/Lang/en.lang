@@ -750,7 +750,6 @@ Settings.General.Language=Language:
 ; The two hints below are WRITTEN BUT NOT YET SHOWN — the Language and Media
 ; keys groups have no help key attached, unlike Book details below. Kept
 ; because the text is written; delete only if those groups are dropped.
-Settings.General.UseMultimediaKeysGlobally.Hint=This allows you to manage NBR from anywhere in the system. Multimedia keys will not work with other players while NBR has them.
 Settings.General.UseMetadata=Use embedded metadata
 Settings.General.UseMetadata.Hint=Some file formats have metadata with additional information about the author, title, publisher, producer and so on. NBR can read and display that information where it exists. However, if that information is wrong or missing, NBR can take the basic details from folder and file names instead. As a last resort, you can always rename books in the Library.
 Settings.TextBooks.Language=Language:
@@ -821,6 +820,8 @@ Settings.Cancel.Accessible=Cancel
 Settings.Apply=Apply
 Settings.Apply.Accessible=Apply
 Settings.General.UseMultimediaKeys.Hint=You can use your keyboard multimedia keys or headset keys to play, pause and navigate the book using the seek step you have chosen.
+
+The second switch takes them system-wide, so they reach NBR from anywhere — at the price of taking them from every other player while NBR is running.
 Settings.General.LibraryLocation.Hint=This is the place where NBR copies imported books. You can leave it as default on your system partition, but if you plan to have a large library, another partition or disk would be a much better solution. NBR also keeps the information for each book in there, so if you want to save your reading positions, bookmarks, speed and other reading settings, note that you need to copy the content from the old library folder manually to the new location. And within the same price range: by changing the library location to somewhere other than the system partition, you are preserving your books from accidental system crashes and the usual data loss accompanying them.
 Settings.TextBooks.Speech.Hint=Here is the list of the languages and the voices installed on your system. You can choose the default voice for every language shown here, so every new title in that language opens with the selected voice. Choosing a voice for a language is what makes it the default — there is nothing else to press. If your new book is written in a language that is not on the list, it is best not to set a default voice for it here. You can always set a voice in the Properties of the book itself, on its Text page, or choose No speech and go on reading in braille or on screen. You will also see a notice when a language has no voice installed.
 Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears. Switched on here, the window opens by itself every time you press Play. It can also be opened and closed by hand at any time with F9, whether this is switched on or not — so you can try it on a book without changing its Properties.

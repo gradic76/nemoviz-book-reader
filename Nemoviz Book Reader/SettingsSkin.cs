@@ -153,15 +153,23 @@ namespace Nemoviz_Book_Reader
         /// keys exactly as much as one laid out in columns.</summary>
         private static void AttachGroupHints(TabPage page, List<GroupBox> groups)
         {
-            string[] keys = HintKeys(page);
             for (int i = 0; i < groups.Count; i++)
             {
                 groups[i].TabIndex = i;
-                // No key, no ?. A help key nobody wrote shows the key itself,
-                // which is worse than no help at all — and a reader would be told
-                // to press a button that says "Hint.Settings.General.0".
-                if (i < keys.Length && !string.IsNullOrEmpty(keys[i]))
-                    HintSystem.Attach(groups[i], keys[i]);
+                // THE KEY COMES FROM THE GROUP, not from its position in a list.
+                // It used to be a per-page array matched up by index, which §8i
+                // had already been bitten by once in Properties: a group that is
+                // only sometimes present shifts every key after it, and the wrong
+                // text under the right button is worse than no text. It also made
+                // three groups on the Advanced page silently keyless, because the
+                // array was two long and the page had five.
+                //
+                // No key, no ?. And an EMPTY hint counts as no key —
+                // HintSystem.Attach makes that decision, so clearing a hint's
+                // text is all it takes to remove its button.
+                string key = groups[i].Name;
+                if (!string.IsNullOrEmpty(key) && key.IndexOf("Hint", System.StringComparison.Ordinal) >= 0)
+                    HintSystem.Attach(groups[i], key);
             }
         }
 
@@ -323,45 +331,6 @@ namespace Nemoviz_Book_Reader
             if (string.IsNullOrEmpty(tag) || !tag.StartsWith("span")) return 1;
             int n;
             return int.TryParse(tag.Substring(4), out n) ? n : 1;
-        }
-        /// <summary>The help text behind each group's <c>?</c>, in the order the
-        /// groups were added to the page. These are the keys the hint boxes used:
-        /// the words were written for exactly these groups, so they move to the
-        /// pop-up rather than being written again.</summary>
-        private static string[] HintKeys(TabPage page)
-        {
-            string name = page.Text ?? "";
-            if (name == Localization.T("Settings.Tab.TextBooks"))
-                // Braille lost its group on this page (2026-08-04): the reading
-                // window is the braille output, so there was nothing left to set.
-                return new[] { "Settings.TextBooks.Speech.Hint",
-                               "Settings.TextBooks.Visual.Hint" };
-            // General, in the order Gordan set: Language, Library location,
-            // Media keys, Metadata, Look. Five groups now, where five loose
-            // controls used to need machinery of their own to carry a key.
-            if (name == Localization.T("Settings.Tab.General"))
-                // No key on Language (Gordan, 2026-08-03), for the reason the
-                // sound card has none: a list of languages under a label that
-                // says "Language" explains itself, and a help text that only
-                // restates the caption costs a reader the same time to hear as
-                // one that tells them something. The empty string is how this
-                // table says "no ?" — see the loop that reads it.
-                return new[] { "",
-                               "Settings.General.LibraryLocation.Hint",
-                               "Settings.General.UseMultimediaKeys.Hint",
-                               "Settings.General.UseMetadata.Hint",
-                               "Settings.Misc.Look.Hint" };
-            // Device: one group, and the ? carries the keep-alive text that used
-            // to be an inline box the skin removed.
-            if (name == Localization.T("Settings.Tab.Device"))
-                return new[] { "Settings.Device.KeepAlive.Hint" };
-            // OCR and Translate: reading pictures, then translating. The first group
-            // still carries its explanation as an inline box, so it gets no ? — two
-            // routes to the same text on one group is one route too many. The
-            // translation group has no inline box and needs the key.
-            if (name == Localization.T("Settings.Tab.Ocr"))
-                return new[] { "", "Settings.Translate.Hint" };
-            return new string[0];
         }
 
     }
