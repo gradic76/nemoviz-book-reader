@@ -34,7 +34,7 @@ namespace Nemoviz_Book_Reader
     internal static class LibrarySkin
     {
         private const int Margin = 12;
-        private const int MenuH = 26, RowH = 28, Gap = 8;
+        private const int MenuH = 26, RowH = 34, Gap = 8;
         // AB and C. The split mirrors the proportions Properties uses, the wide
         // part simply being on the other side: the shelf is what you read here.
         private const int AbX = 12, AbW = 616;
@@ -92,6 +92,10 @@ namespace Nemoviz_Book_Reader
             }
             if (p.Search != null)
             {
+                // THE ROW FOLLOWS THE CONTROL, not a number. A TextBox and a ComboBox are
+                // 29 tall at 12 pt whatever height they are given, and the row was 28 -- so
+                // both hung a pixel out of it. The same font-driven overflow the EQ bands
+                // and the Azure fields had; classic escapes it by having a smaller font.
                 p.Search.SetBounds(AbX, 2, AbW, 24);
                 DialogSkin.OnGlass(p.Search);
                 if (DialogSkin.Painting) p.Search.BorderStyle = BorderStyle.FixedSingle;

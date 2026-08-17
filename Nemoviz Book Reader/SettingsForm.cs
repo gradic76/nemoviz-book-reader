@@ -1046,13 +1046,21 @@ namespace Nemoviz_Book_Reader
             // any language the reader thinks in.
             Label lblNotes = new Label();
             lblNotes.Text = Localization.T("Settings.Translate.Notes");
+            // AUTOSIZE OFF, and it is not tidiness. A Label auto-sizes to its text, and
+            // at 12 pt this caption measured 705 wide inside a 598 group -- over the
+            // edge and across its own field. The classic look escaped it only because
+            // the theme font is smaller, which is luck rather than a design.
+            lblNotes.AutoSize = false;
             lblNotes.Location = new Point(14, 92);
             lblNotes.Size = new Size(470, 20);
 
             tbTranslateNotes = new TextBox();
             tbTranslateNotes.Multiline = true;
             tbTranslateNotes.ScrollBars = ScrollBars.Vertical;
-            tbTranslateNotes.SetBounds(14, 114, 470, 48);
+            // 124, not 114: the caption above is 27 tall at 12 pt whatever the 20
+            // it is given, so the field started five units inside it. Classic
+            // escaped it with a smaller font, which is luck and not a layout.
+            tbTranslateNotes.SetBounds(14, 124, 470, 44);
             tbTranslateNotes.TabIndex = 2;
             tbTranslateNotes.AccessibleName = Localization.T("Settings.Translate.Notes");
             tbTranslateNotes.Text = appSettings != null ? appSettings.TranslationNotes : "";

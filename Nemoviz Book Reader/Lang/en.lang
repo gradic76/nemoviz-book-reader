@@ -546,7 +546,7 @@ Settings.Translate.Engine.Azure=Azure Translator
 Settings.Translate.Hint=Nemoviz can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; Nemoviz never handles payment, that's on you on the service providers web or any other means. If you don't need AI machine translation, just leave it unchecked.
 ; The standing note. Free text on purpose: a fixed set of questions would be
 ; OUR questions, and ours were written from Croatian.
-Settings.Translate.Notes=Anything the translator should know about every book — for example which spelling you prefer:
+Settings.Translate.Notes=Notes for the translator:
 Settings.Translate.Test.NoEngine=No translation service is selected.
 Settings.Translate.Test.NoKey=There is no key to check.
 Settings.Translate.Test.NoNetwork=Nemoviz could not reach the service.
