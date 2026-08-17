@@ -45,6 +45,9 @@ namespace Nemoviz_Book_Reader
         private readonly TextBox tenant, tenantHint;
         private readonly Label tenantLabel;
         private readonly Label subsLabel;
+        private readonly TextBox resource, key;
+        private readonly Label manualLabel, resourceLabel, keyLabel;
+        private readonly Button keep;
 
         private volatile bool stop;
         private Thread worker;
@@ -67,7 +70,7 @@ namespace Nemoviz_Book_Reader
             StartPosition = FormStartPosition.CenterParent;
             MinimizeBox = false;
             MaximizeBox = false;
-            ClientSize = new Size(520, 384);
+            ClientSize = new Size(520, 480);
 
             status = Line(14, 14, 492, 76);
             // Azure's own refusals run long and are the whole point of reading
@@ -145,18 +148,64 @@ namespace Nemoviz_Book_Reader
             subs.TabIndex = 5;
             subs.Visible = false;
 
+            // THE OTHER DOOR, and it is not a nicety (restored 2026-08-17). Everything
+            // above makes a resource for someone who has none. A reader who ALREADY
+            // has one — made in the portal, made on another machine, or made here
+            // before a reinstall — needs only to hand over the pair, and this dialog
+            // is the whole Azure job now that Settings keeps just the switch.
+            //
+            // It matters more for Azure than it would for anything else, because the
+            // provisioning path is the one with a history of refusing: a personal
+            // account outside its own directory, a region closed to new customers, a
+            // provider registration that lags. When that path fails, this is the way
+            // through, and losing it would have made a bad day unrecoverable.
+            manualLabel = new Label();
+            manualLabel.Text = Localization.T("Azure.Setup.HaveOne");
+            manualLabel.AutoSize = false;
+            manualLabel.SetBounds(14, 290, 492, 22);
+
+            resourceLabel = new Label();
+            resourceLabel.Text = Localization.T("Settings.Azure.Resource");
+            resourceLabel.AutoSize = false;
+            resourceLabel.SetBounds(14, 320, 160, 20);
+
+            resource = new TextBox();
+            resource.SetBounds(180, 318, 326, 24);
+            resource.AccessibleName = resourceLabel.Text;
+            resource.TabIndex = 6;
+            resource.Text = AzureVoices.Resource;
+
+            keyLabel = new Label();
+            keyLabel.Text = Localization.T("Settings.Azure.Key");
+            keyLabel.AutoSize = false;
+            keyLabel.SetBounds(14, 352, 160, 20);
+
+            // Shown, not masked, exactly as every other key field in this app: dots
+            // are unreadable to a screen reader and this is the reader's own machine.
+            key = new TextBox();
+            key.SetBounds(180, 350, 326, 24);
+            key.AccessibleName = keyLabel.Text;
+            key.TabIndex = 7;
+
+            keep = new Button();
+            keep.Text = Localization.T("Settings.Azure.Save");
+            keep.AccessibleName = keep.Text;
+            keep.SetBounds(180, 382, 200, 30);
+            keep.TabIndex = 8;
+            keep.Click += (s, e) => KeepTypedPair();
+
             act = new Button();
             act.Text = Localization.T("Azure.Setup.Start");
             act.AccessibleName = act.Text;
-            act.SetBounds(14, 334, 200, 30);
-            act.TabIndex = 6;
+            act.SetBounds(14, 430, 200, 30);
+            act.TabIndex = 9;
             act.Click += (s, e) => Act();
 
             cancel = new Button();
             cancel.Text = Localization.T("Btn.Cancel");
             cancel.AccessibleName = cancel.Text;
-            cancel.SetBounds(316, 334, 190, 30);
-            cancel.TabIndex = 7;
+            cancel.SetBounds(316, 430, 190, 30);
+            cancel.TabIndex = 10;
             cancel.DialogResult = DialogResult.Cancel;
 
             Controls.Add(status);
@@ -167,6 +216,12 @@ namespace Nemoviz_Book_Reader
             Controls.Add(tenantHint);
             Controls.Add(subsLabel);
             Controls.Add(subs);
+            Controls.Add(manualLabel);
+            Controls.Add(resourceLabel);
+            Controls.Add(resource);
+            Controls.Add(keyLabel);
+            Controls.Add(key);
+            Controls.Add(keep);
             Controls.Add(act);
             Controls.Add(cancel);
             AcceptButton = act;
@@ -179,6 +234,27 @@ namespace Nemoviz_Book_Reader
             // Focus on the action, which is where a reader has something to DO.
             Shown += (s, e) => { try { act.Focus(); } catch { } };
             FormClosing += (s, e) => { stop = true; poll.Stop(); };
+        }
+
+        /// <summary>Keeps a typed resource-and-key pair, having ASKED Azure whether
+        /// it works — a key is not a string that can be checked by looking at it. A
+        /// refusal says so and changes nothing, so a credential that was already
+        /// good is never lost to a typo in the field beside it.</summary>
+        private void KeepTypedPair()
+        {
+            string why = AzureVoices.Save(resource.Text, key.Text);
+            if (why != null)
+            {
+                MessageForm.ShowInfo(this, why, Localization.T("Settings.Azure.Group"));
+                return;
+            }
+            resource.Text = AzureVoices.Resource;
+            // Says so in the line a reader is already using to follow this dialog,
+            // rather than in a box they have to dismiss to carry on.
+            status.Text = Localization.T("Azure.Setup.Kept");
+            status.AccessibleName = status.Text;
+            ScreenReader.Announce(this, status.Text);
+            DialogResult = DialogResult.OK;
         }
 
         private static TextBox Line(int x, int y, int w, int h)

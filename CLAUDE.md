@@ -1719,7 +1719,7 @@ allowance is ~0.5 M characters a month — about ONE book, against Google's two 
 nine — and Azure's `hr-HR` has no custom pronunciations, so §8j's dictionary
 works less well there than with a local voice.
 
-### The Advanced tab is to be split — agreed 2026-08-17, NOT YET BUILT
+### The Advanced tab is split — agreed AND BUILT 2026-08-17
 
 Gordan: *"zakompliciralo se sve u Settings/Advanced, treba to malo podijeliti."*
 Five groups now, three of them credential dialogs, on a page a reader visits
@@ -1746,10 +1746,44 @@ once. The split he asked for:
   EMPTY, which since 2026-08-17 means no `?` at all rather than a button
   opening nothing.
 
-**Open:** the name (proposed *Services and accounts*), and whether the guides
-cover only the four that need an account — Google Cloud TTS, Azure Speech,
-DeepSeek, Gemini — or also the two that need only a Windows install, OCR
-languages and OneCore voices.
+**Both halves are now built.** The window came first (`ServicesForm`), and the
+stripping followed the same day. Settled while doing it: the name is *Services and
+accounts*, and the guides cover **only the four that need an account** — for a
+Windows service *"je dovoljan hint, ne zahtijeva izlazak na web niti kakve
+registracije"*, so OCR languages and OneCore voices stay where they are.
+
+**What Advanced holds now: three groups, no credential dialog.** OCR untouched;
+Translation keeps the service combo (which still SAYS "key stored" or "no key") and
+the standing notes, minus its key button; and **one** cloud-voices group where there
+were three — the switch first, then a line for Google and a line for Azure, then the
+line pointing at Help. Measured 0 problems in both looks with `tools/check-layout`.
+
+**THREE THINGS THE STRIP TURNED UP, and each was a real loss waiting to happen.**
+The lesson is the general one: moving a job is not moving a dialog, and what the old
+place did *besides* the obvious has to be counted first.
+
+- **`Forget` had nowhere to go.** Google's and Azure's only removal path was the
+  button on Advanced, so stripping the page would have left a stored credential
+  impossible to remove. `ServicesForm` has a Forget button now, per service, using
+  each service's own warning text. (The two translation engines already had Remove
+  inside their own key dialog.)
+- **The Services window never fetched the catalogue.** `LoadCloudCredential` on
+  Advanced called `GoogleCloudVoices.Refresh()` and reported failure while the
+  reader stood there; the version written into `ServicesForm` the day before only
+  stored the file. A reader setting Google up through the new window would have been
+  left with *"a service account is stored, but the list of voices has not been
+  fetched yet"* and nothing to do about it. Fixed there, and it is the reason the
+  old method was read before being deleted rather than after.
+- **Azure's manual pair had no other door.** `AzureVoices.Save(resource, key)` was
+  called from Advanced alone — `AzureSpeechSetupForm` only ever provisioned — so
+  stripping it would have removed the way in for anyone who ALREADY has a resource.
+  That matters most for Azure precisely because provisioning is the path with a
+  history of refusing (personal account outside its directory, a region closed to
+  new customers, a lagging provider registration). The pair fields are in the setup
+  dialog now, under *"Or, if you already have a Speech resource"*, so that dialog is
+  the whole Azure job.
+
+**Still Gordan's to run by eye and ear**, as every layout change here is.
 
 ### Cloud voices — where they live, settled with Gordan 2026-08-15 (spec, not yet built)
 

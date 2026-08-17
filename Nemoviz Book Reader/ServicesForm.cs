@@ -37,15 +37,16 @@ namespace Nemoviz_Book_Reader
     {
         private sealed class Service
         {
-            public string NameKey, GuideKey;
+            public string NameKey, GuideKey, ForgetAskKey;
             public Func<bool> IsSet;
             public Action<IWin32Window> SetUp;
+            public Action Forget;
         }
 
         private readonly List<Service> services = new List<Service>();
         private readonly ListBox list;
         private readonly TextBox body;
-        private readonly Button setUp, close;
+        private readonly Button setUp, forget, close;
 
         public ServicesForm()
         {
@@ -82,16 +83,30 @@ namespace Nemoviz_Book_Reader
             setUp.TabIndex = 2;
             setUp.Click += (s, e) => SetUpChosen();
 
+            // THE OTHER HALF OF SETTING SOMETHING UP, and it is here because
+            // Settings/Advanced no longer has it. Stripping the credential dialogs
+            // off that page would otherwise have taken the only way to REMOVE a
+            // stored credential with them — a silent loss of function, which is not
+            // what "move the job" meant. Disabled until there is something to
+            // forget, and the line above says whether there is.
+            forget = new Button();
+            forget.Text = Localization.T("Services.Forget");
+            forget.AccessibleName = forget.Text;
+            forget.SetBounds(14, 242, 200, 30);
+            forget.TabIndex = 3;
+            forget.Click += (s, e) => ForgetChosen();
+
             close = new Button();
             close.Text = Localization.T("Btn.Close");
             close.AccessibleName = close.Text;
             close.SetBounds(14, 380, 200, 30);
-            close.TabIndex = 3;
+            close.TabIndex = 4;
             close.DialogResult = DialogResult.Cancel;
 
             Controls.Add(list);
             Controls.Add(body);
             Controls.Add(setUp);
+            Controls.Add(forget);
             Controls.Add(close);
             CancelButton = close;
 
@@ -110,6 +125,11 @@ namespace Nemoviz_Book_Reader
                 GuideKey = "GoogleVoices",
                 IsSet = () => GoogleCloudVoices.Have,
                 SetUp = o => LoadGoogleAccount(o),
+                // Gordan's own warnings are kept rather than replaced by one
+                // generic question: they say the thing a reader actually needs to
+                // hear, that a book reading aloud right now goes quiet.
+                ForgetAskKey = "Settings.Cloud.ForgetAsk",
+                Forget = () => GoogleCloudVoices.Forget(),
             });
             services.Add(new Service
             {
@@ -117,6 +137,8 @@ namespace Nemoviz_Book_Reader
                 GuideKey = "AzureVoices",
                 IsSet = () => AzureVoices.Have,
                 SetUp = o => { using (var d = new AzureSpeechSetupForm()) d.ShowDialog(o); },
+                ForgetAskKey = "Settings.Azure.ForgetAsk",
+                Forget = () => AzureVoices.Forget(),
             });
             AddEngine("Services.Item.DeepSeek", "DeepSeek", TranslationEngines.DeepSeek);
             AddEngine("Services.Item.Gemini", "Gemini", TranslationEngines.Gemini);
@@ -135,20 +157,57 @@ namespace Nemoviz_Book_Reader
                 GuideKey = guideKey,
                 IsSet = () => TranslationKeys.Has(engine.KeyId ?? engine.Id),
                 SetUp = o => TranslationKeyForm.Show(o, engine),
+                // These two can also be cleared from inside their own key dialog,
+                // which is where a reader who thinks of it as editing will look.
+                // The button is here anyway so that all four services answer the
+                // same question the same way — a control that appears for some
+                // items and not others is worse for someone driving by Tab than
+                // one extra way to do a harmless thing.
+                ForgetAskKey = "Services.ForgetAsk",
+                Forget = () => TranslationKeys.Set(engine.KeyId ?? engine.Id, null),
             });
         }
 
+        /// <summary>Takes the service-account file, and then FETCHES THE CATALOGUE.
+        ///
+        /// <para><b>The fetch was missing when this window was first built</b> —
+        /// found 2026-08-17 while stripping Settings/Advanced, because the version
+        /// there did it and this one did not. Half the job silently: the account
+        /// would be accepted and the reader left with "a service account is stored,
+        /// but the list of voices has not been fetched yet", with nothing saying
+        /// what to do about it.</para>
+        ///
+        /// <para>It happens HERE, while the reader is standing in front of the
+        /// window and can be told it failed, rather than at the moment they open
+        /// Properties hoping to choose a voice.</para></summary>
         private void LoadGoogleAccount(IWin32Window owner)
         {
+            string path;
             using (var dlg = new OpenFileDialog())
             {
                 dlg.Title = Localization.T("Settings.Cloud.Load");
                 dlg.Filter = Localization.T("Settings.Cloud.Filter");
+                dlg.CheckFileExists = true;
                 if (dlg.ShowDialog(owner) != DialogResult.OK) return;
-                string why = GoogleCloudVoices.LoadFrom(dlg.FileName);
-                if (why != null)
-                    MessageForm.ShowInfo(this, why, Localization.T("Settings.Cloud.Group"));
+                path = dlg.FileName;
             }
+
+            string why = GoogleCloudVoices.LoadFrom(path);
+            if (why != null)
+            {
+                MessageForm.ShowInfo(this, why, Localization.T("Settings.Cloud.Group"));
+                return;
+            }
+
+            Cursor old = Cursor.Current;
+            Cursor.Current = Cursors.WaitCursor;
+            bool got;
+            try { got = GoogleCloudVoices.Refresh(); }
+            finally { Cursor.Current = old; }
+
+            if (!got)
+                MessageForm.ShowInfo(this, Localization.T("Settings.Cloud.NoList"),
+                                     Localization.T("Settings.Cloud.Group"));
         }
 
         private Service Chosen
@@ -183,6 +242,12 @@ namespace Nemoviz_Book_Reader
             body.Text = text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             body.AccessibleName = Localization.T(s.NameKey);
             body.Select(0, 0);
+
+            // A disabled control is skipped in the tab order, so someone driving by
+            // Tab never learns it is there — which is why the state line above says
+            // in words whether anything is stored, exactly as §8l settled for the
+            // cloud switch. The button is the action; the line is the answer.
+            if (forget != null) forget.Enabled = ready && s.Forget != null;
         }
 
         private void SetUpChosen()
@@ -191,6 +256,16 @@ namespace Nemoviz_Book_Reader
             if (s == null) return;
             try { s.SetUp(this); } catch { }
             ShowChosen();          // it may have just become set up
+        }
+
+        private void ForgetChosen()
+        {
+            Service s = Chosen;
+            if (s == null || s.Forget == null) return;
+            if (!MessageForm.ShowConfirm(this, Localization.T(s.ForgetAskKey, Localization.T(s.NameKey)),
+                                         Localization.T(s.NameKey))) return;
+            try { s.Forget(); } catch { }
+            ShowChosen();          // it has just stopped being set up
         }
     }
 }
