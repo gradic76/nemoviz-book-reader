@@ -89,7 +89,7 @@ SleepTimer.Custom.Accessible=Custom duration in minutes
 ; Neither a duration nor an expiry action - a third question, about the BOOK.
 ; A reader who falls asleep wakes up somewhere they were not listening; this
 ; marks where they were still awake.
-SleepTimer.Bookmark=Set bookmark on timer's start position
+SleepTimer.Bookmark=Bookmark the start point
 SleepTimer.Action.Group=When the time expires
 SleepTimer.Action.Stop=Stop playback
 SleepTimer.Action.StopClose=Stop and close the program
@@ -106,7 +106,7 @@ SleepTimer.CancelBtn.Accessible=Cancel
 
 ; Sleep Timer announcements (via the off-screen label)
 SleepTimer.Announce.Set=Sleep timer set: {0} minutes
-SleepTimer.Announce.Cancelled=Sleep timer cancelled
+SleepTimer.Announce.Cancelled=Sleep timer canceled
 SleepTimer.Announce.Finished=Sleep timer finished, playback stopped
 
 ; Player - seek dropdown
@@ -187,7 +187,7 @@ Dialog.Help.Title=Help
 ; plainly rather than showing a blank window: what is missing is the text.
 Dialog.Description.Title=Description - {0}
 Dialog.About.Title=About NBR
-Dialog.About.Text=Nemoviz Book Reader\n\nThis window is waiting for its text.\n\nWhat belongs here — the version, who made it, the licences of the parts NBR is built from, and how to get in touch — has not been written yet. The window is wired up so the menu item leads somewhere, and so that whoever writes it has a place to put it.
+Dialog.About.Text=Nemoviz Book Reader\n\nThis window is waiting for its text.\n\nWhat belongs here — the version, who made it, the licenses of the parts NBR is built from, and how to get in touch — has not been written yet. The window is wired up so the menu item leads somewhere, and so that whoever writes it has a place to put it.
 Dialog.Timer.Title=Sleep Timer
 Dialog.GoTo.Title=Go To
 Dialog.ManageBookmarks.Title=Manage Bookmarks
@@ -383,16 +383,16 @@ Prop.SoundProcessing=Sound processing
 ; Spoken, not shown: switching sound processing on measures the recording and
 ; sets the six stages from it, which takes about a second and a half. Nothing is
 ; disabled meanwhile, so these three lines are the only sign it is happening.
-Prop.Analysing=Analysing the recording
+Prop.Analysing=Analyzing the recording
 ; The wait while a recording is measured. It was 1.6 s with three segments and
 ; is 22 s with twenty on a fast machine, four to seven minutes on the minimum
 ; one -- hence a dialog with a bar, a spoken quarter, and a way out. {1} is a
 ; phrase like "about a minute", measured from how long this machine has taken
 ; so far rather than guessed.
-Analyse.Progress.Title=Analysing the recording
+Analyse.Progress.Title=Analyzing the recording
 Analyse.Progress.Starting=Starting the analysis...
 Analyse.Progress.Working=Segment {0} of {1}. {2}
-Analyse.Progress.Quarter={0} per cent done. {1}
+Analyse.Progress.Quarter={0} percent done. {1}
 Analyse.Progress.Cancel=Cancel
 Analyse.Progress.Cancelling=Stopping after this segment. The settings are left unchanged.
 Analyse.Progress.Estimating=Working out how long this will take.
@@ -425,7 +425,7 @@ Ocr.Refusal.NoPages=There are no pages in this to read.
 Ocr.Progress.Title=Reading the pictures
 Ocr.Progress.Starting=Starting to read...
 Ocr.Progress.Working=Page {0} of {1}. {2}
-Ocr.Progress.Quarter={0} per cent done. {1}
+Ocr.Progress.Quarter={0} percent done. {1}
 Ocr.Progress.Cancel=Cancel
 Ocr.Progress.Cancelling=Stopping after this page. Nothing is kept.
 Ocr.Progress.Estimating=Working out how long this will take.
@@ -460,7 +460,7 @@ Settings.Cloud.Filter=Service account (*.json)|*.json|All files (*.*)|*.*
 Settings.Cloud.Forget=Forget the service account
 Settings.Cloud.ForgetAsk=Forget the stored service account? These voices stop being offered, and a book already reading with one falls silent until you give it another voice.
 Settings.Cloud.UseGroup=Using cloud voices
-Settings.Cloud.Use=Offer cloud voices in a book's Properties
+Settings.Cloud.Use=Offer cloud voices
 Settings.Cloud.Why=There is nothing to switch on yet: set up Google or Azure above, and this becomes available.
 Hint.Settings.CloudUse=This one switch covers every cloud voice, from Google and from Azure alike, which is why it is not inside either of their groups.\n\nIt decides whether those voices are OFFERED when you choose a voice for a particular book. They are never assigned automatically and never become a language's default voice — that stays with the voices installed on this computer, which cost nothing and need no connection.\n\nA book already reading with a cloud voice keeps it whether this is on or off; the switch governs the picker, not what can be played.
 Settings.Cloud.NoList=The account was accepted, but the list of voices could not be fetched. That is usually the network; the voices will appear once it can be reached.
@@ -504,7 +504,7 @@ Google.Cred.NotServiceAccount=That JSON is readable but it is not a service acco
 ; A book that IS pictures and has never been read — imported in bulk, where
 ; nothing could be asked. "Re-read" would be a lie to someone who has never
 ; heard a word of it.
-Context.ReadOcr=Read the pictures in this book
+Context.ReadOcr=Read the pictures
 Context.ReReadOcr=Re-read in a different language
 ; Enter on a book that is still pictures. It must never reach the player: a
 ; reading with nothing in it plays silence, and silence is indistinguishable
@@ -524,7 +524,7 @@ Ocr.ReRead.Filter=Scanned books and images|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg
 Ocr.ReRead.WholeFolder=There are {0} images in that folder. Read all of them as the pages of this book?
 Settings.Ocr.Group=Books that are pictures
 Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. The language matters: the same page read as English rather than Croatian gets the awkward letters wrong. This is only the starting choice — when you have more than one language, Nemoviz asks which to use each time it reads a book.
-Settings.Ocr.Language=Language for reading pictures
+Settings.Ocr.Language=Recognition language
 Settings.Ocr.Automatic=Automatic
 Settings.Ocr.AddLanguage=Add a language...
 ; Translation. The service list carries its own state in the text, because a
@@ -557,7 +557,7 @@ Dialog.TranslateKey.Prompt=Paste the key you got from {0}. It is kept on this co
 Dialog.TranslateKey.Field=API key
 ; Azure only. Empty is correct for a single-service Global resource, which is
 ; what the setup guidance tells people to make.
-Dialog.TranslateKey.Region=Region (leave empty if the resource was made as Global):
+Dialog.TranslateKey.Region=Region (empty if Global):
 Dialog.TranslateKey.Status=Result
 Dialog.TranslateKey.Test=Check the key
 Dialog.TranslateKey.Remove=Remove
@@ -571,7 +571,7 @@ Dialog.TranslateKey.NotStored=No key is stored for this service.
 Translate.Progress.Title=Translating the book
 Translate.Progress.Starting=Getting ready. You can stop at any time; whatever has been translated is kept, and starting again carries on from there.
 Translate.Progress.Working=Passage {0} of {1}. About {2} left. You can stop at any time — what is done is kept.
-Translate.Progress.Quarter={0} per cent translated, about {1} left.
+Translate.Progress.Quarter={0} percent translated, about {1} left.
 Translate.Progress.Cancel=Stop
 Translate.Progress.Cancelling=Stopping after this passage. What is already translated is kept.
 ; The heartbeat. A passage can take minutes when the service is throttling, and
@@ -653,8 +653,8 @@ Voices.Add.Title=Languages for speaking text
 Voices.Add.Hint=Tick the languages you want and press Install. Windows will ask your permission, then download the voices for that language. A voice is tied to its accent, so British and American English are separate entries.
 Settings.Ocr.None=Windows has no text recognition installed.
 
-Prop.Analysing.Done=Recording analysed, {0} stages set. Change any of them if you prefer.
-Prop.Analysing.Failed=The recording could not be analysed. The settings are unchanged.
+Prop.Analysing.Done=Recording analyzed, {0} stages set. Change any of them if you prefer.
+Prop.Analysing.Failed=The recording could not be analyzed. The settings are unchanged.
 Prop.Stage.Level=Level
 Prop.Highpass.Title=Remove rumble
 Prop.Denoise.Title=Noise reduction
@@ -708,7 +708,7 @@ Dialog.ImportFolderSuccess.Skipped={0} were left out.
 Dialog.ImportFolderSuccess.SkippedList=These did not go in:
 ; Reasons, kept short: they stand after a file name in that list.
 Dialog.Skipped.Drm=protected
-Dialog.Skipped.Cancelled=cancelled
+Dialog.Skipped.Cancelled=canceled
 Dialog.Skipped.MissingFirstVolume=the first part of this set is missing
 ; A zero-byte file. Said plainly, because the archive reader's own words for it
 ; ("cannot determine compressed stream type, supported formats are...") send a
@@ -740,7 +740,7 @@ Settings.General.LookGroup=Look
 ; braille and the screen (Gordan, 2026-08-03).
 Settings.Tab.TextBooks=Speech and Braille
 Settings.Tab.Device=Devices
-Settings.General.UseMultimediaKeys=Use keyboard multimedia keys
+Settings.General.UseMultimediaKeys=Use multimedia keys
 Settings.General.UseMultimediaKeysGlobally=Use multimedia keys globally
 Settings.General.LibraryLocation=Library location:
 Settings.General.LibraryLocation.Browse=Choose the folder where your book library is stored
@@ -796,9 +796,9 @@ Settings.TextBooks.Highlight.None=No highlight
 ; The line is what a reader is looking for anyway — it is the display's own unit.
 Settings.TextBooks.Highlight.Line=Current line
 Settings.TextBooks.Highlight.Sentence=Current sentence
-Settings.TextBooks.HighlightColour=Highlight colour:
-Settings.TextBooks.TextColour=Text colour:
-Settings.TextBooks.BackColour=Background colour:
+Settings.TextBooks.HighlightColour=Highlight color:
+Settings.TextBooks.TextColour=Text color:
+Settings.TextBooks.BackColour=Background color:
 Settings.Colour.White=White
 Settings.Colour.Black=Black
 Settings.Colour.Yellow=Yellow
@@ -813,7 +813,7 @@ Settings.Device.Default=System default (auto)
 ; The optical-drive group. The tab is "Devices" because a sound card and a CD
 ; drive are two different pieces of hardware; it was named for having only one.
 Settings.Device.OpticalGroup=Optical drive
-Settings.Device.UseOptical=Use the optical drive for audio CDs
+Settings.Device.UseOptical=Use the optical drive
 Settings.Device.OpticalWhich=Drive:
 Settings.Device.OpticalAuto=Whichever has a disc in it
 Settings.Device.UseOptical.Hint=Books were once published on ordinary audio CDs, and NBR can play them. It reads the disc itself rather than leaving it spinning: the whole side is read in one pass, straight through and without going back, so the drive works for a few minutes and is then silent for the rest of the book. Reading slowly would be quieter for a second and noisier for an hour. Turn this on only if you want it - it is off to begin with, even on a machine that has a drive, and while it is off NBR never touches the drive at all.
@@ -863,32 +863,32 @@ Dict.Match.Regex=Regular expression
 Dict.Error.Title=This rule cannot be used
 Dict.Error.NoPattern=Fill in what is written in the book.
 Dict.Error.TooSlow=This pattern takes too long to match. Simplify it.
-Settings.TextBooks.Dictionary.Hint=This is where you can change what speech synthesisers get wrong. You can correct the pronunciation of names and places, fix wrong stress, and much more — just use your imagination. The best part is that you can do this separately by language and by voice, because different synthesisers make different mistakes in the same language.
+Settings.TextBooks.Dictionary.Hint=This is where you can change what speech synthesizers get wrong. You can correct the pronunciation of names and places, fix wrong stress, and much more — just use your imagination. The best part is that you can do this separately by language and by voice, because different synthesizers make different mistakes in the same language.
 Btn.Close=Close
 Dict.Help=Regex help...
 Dict.Help.Title=Regular expressions in the pronunciation dictionary
 Dict.Help.Text=The old Zen wisdom says:\n\n    Developer had a problem.\n    Developer decided to solve the problem with regular expressions.\n    Developer had two problems.\n\nRegEx, or regular expressions, are something you would rather not deal with, but it is fancy to have that option, so here it is.\n\nIf you know what you are doing, knock yourself out. If not, just don't use it, or ask Google.
 Settings.Misc.Look=Look:
 Settings.Misc.Look.Follow=Follow Windows
-Settings.Misc.Look.Classic=System colours
+Settings.Misc.Look.Classic=System colors
 Settings.Misc.Look.New=NBR design
-Settings.Misc.Look.Hint=How NBR draws itself.\n\nFollow Windows is the usual answer: NBR uses its own design, except when you have a high contrast theme switched on in Windows, and then it steps aside and uses your colours instead.\n\nSystem colours makes it do that always — plain windows in whatever colours and fonts Windows is set to, which is also what works best with a magnifier.\n\nNBR design makes it use its own look always, high contrast or not. That is your call to make: if it turns out not to suit you, the keyboard and your screen reader are unaffected, and F2 brings you back here.
+Settings.Misc.Look.Hint=How NBR draws itself.\n\nFollow Windows is the usual answer: NBR uses its own design, except when you have a high contrast theme switched on in Windows, and then it steps aside and uses your colors instead.\n\nSystem colors makes it do that always — plain windows in whatever colors and fonts Windows is set to, which is also what works best with a magnifier.\n\nNBR design makes it use its own look always, high contrast or not. That is your call to make: if it turns out not to suit you, the keyboard and your screen reader are unaffected, and F2 brings you back here.
 Settings.Misc.Look.RestartTitle=Change the look
 Settings.Misc.Look.Restart=The look changes when NBR starts again. Restart it now? Your place in the book is saved either way.
 
 ; Per-control help: a ? on each group opens one short explanation. F1 on the
 ; focused control opens the same text without travelling to the button.
 Hint.Button.Accessible=Help for {0}
-Hint.SoundProcessing=Using sound processing you can fine-tune the sound of the recording. You can remove different noises, boost the volume and colour the overall sound with the equaliser. There are six groups of controls, each of which you can turn on and off separately. You can also tune each control separately. You can temporarily bypass the whole sound processing chain by pressing Ctrl+B, to hear the difference between the original recording and your sound settings.
+Hint.SoundProcessing=Using sound processing you can fine-tune the sound of the recording. You can remove different noises, boost the volume and color the overall sound with the equalizer. There are six groups of controls, each of which you can turn on and off separately. You can also tune each control separately. You can temporarily bypass the whole sound processing chain by pressing Ctrl+B, to hear the difference between the original recording and your sound settings.
 Hint.RemoveRumble=Cuts the very lowest frequencies — traffic, air conditioning, handling noise. It cannot recover a muddy recording, but it clears the bottom end so speech has room.
 Hint.NoiseRemoval=Reduces steady background hiss, the kind a tape or a cheap microphone leaves behind. Too strong a setting starts to eat the voice with it, so raise it only until the hiss goes.
 Hint.SoftenSibilance=Takes the edge off sharp S and Š sounds. Useful on close-miked readers and on recordings that were brightened too much.
 Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a whisper and a shout end up closer together. This is the one to reach for when you keep adjusting the volume.
-Hint.Tone=Five bands, in decibels, named by their frequency. The lowest sits at 200 Hz, which is where a boomy or muddy recording usually is; the top one is a shelf, so it lifts or lowers everything above it rather than one region. The bands overlap on purpose, which makes a smooth curve possible but also means they add up -- three neighbouring bands at +4 give rather more than +4 between them. Small moves go a long way, and anything past a few dB usually means another stage is the real fix.
+Hint.Tone=Five bands, in decibels, named by their frequency. The lowest sits at 200 Hz, which is where a boomy or muddy recording usually is; the top one is a shelf, so it lifts or lowers everything above it rather than one region. The bands overlap on purpose, which makes a smooth curve possible but also means they add up -- three neighboring bands at +4 give rather more than +4 between them. Small moves go a long way, and anything past a few dB usually means another stage is the real fix.
 Hint.AutomaticLoudness=Two things that pull against each other, which is why they share a box. Automatic loudness holds the overall level steady across a whole book, including between files recorded on different days; it follows the voice rather than the whole signal, which is what a spoken recording asks for. Noise in pauses works the other way: anything quieter than the chosen level gets pushed down, so a hiss or a hum that sits under the reading stops being audible in the gaps between sentences. It never touches the voice itself, and it quietens rather than silences (a noise that switches off and on around every phrase is more tiring than one that simply stays). Turn loudness up and the noise underneath comes up with it, so if that happens, this is the control for it.
 Hint.Text0=Here you can choose the language and voice for reading this book. You can have different settings for each individual book in the Library. Every voice remembers its own settings — speed, volume and pitch — so there is no need to set them again after switching back from another voice.\n\nRemember that you can select "No speech" if you want to read visually or on the braille display without hearing audio.
 Hint.TextBrailleSource=This book came from a braille file, and this is the table it was read with — the one that turned the braille cells back into words.\n\nA braille file says nothing about its language, its grade, or which national standard it follows, so NBR has to work the table out from the text itself. It is usually right, but not always, and a wrong table gives words that are almost right: "Have" where the book says "How".\n\nIf that is what you are seeing, pick another table here and press OK. The book is read again from the braille file you imported, which is kept beside it, so you can try as many tables as you like and go back to the first one at any time.\n\nThe tables offered are the ones for the language above. If that language is wrong, change it and the tables will follow.\n\nThis has nothing to do with what your braille display shows. Your screen reader translates that, using the table in its own settings.
-Hint.TextVisual=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like film end credits, or instant page changes. You can also choose the background, text and highlight colours, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
+Hint.TextVisual=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like film end credits, or instant page changes. You can also choose the background, text and highlight colors, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
 
 ; Reading window - the on-screen visual output (CLAUDE.md 8l).
 ; Captions stay short; the explanation belongs in the hint, per the 30-character
