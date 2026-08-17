@@ -128,7 +128,7 @@ namespace Nemoviz_Book_Reader
                 return !stop;
             };
 
-            ThreadPool.QueueUserWorkItem(_ =>
+            Background.Queue(_ =>
             {
                 TranslationReport r = null;
                 try { r = TranslationJob.Run(bookText, options); }

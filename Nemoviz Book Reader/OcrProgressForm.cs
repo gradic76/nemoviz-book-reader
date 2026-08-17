@@ -126,7 +126,7 @@ namespace Nemoviz_Book_Reader
             started = DateTime.UtcNow;
             poll.Start();
             Say(statusText);
-            ThreadPool.QueueUserWorkItem(_ =>
+            Background.Queue(_ =>
             {
                 string text = null;
                 int withText = 0;

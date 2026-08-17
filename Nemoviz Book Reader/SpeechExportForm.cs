@@ -115,7 +115,7 @@ namespace Nemoviz_Book_Reader
             poll.Start();
             Say(statusText);
 
-            ThreadPool.QueueUserWorkItem(_ =>
+            Background.Queue(_ =>
             {
                 int written = 0, missing = 0;
                 try

@@ -136,7 +136,7 @@ namespace Nemoviz_Book_Reader
             // this the window opens saying "Cancel, button" and nothing about
             // what it is cancelling.
             Say(statusText);
-            ThreadPool.QueueUserWorkItem(_ =>
+            Background.Queue(_ =>
             {
                 SoundAnalysis r = null;
                 try { r = SoundAnalyser.Measure(book, () => stop, null); }

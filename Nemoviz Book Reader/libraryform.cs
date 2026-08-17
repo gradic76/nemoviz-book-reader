@@ -1523,7 +1523,7 @@ namespace Nemoviz_Book_Reader
             if (files == null) return;                       // nothing to do
             if (!durationJobs.Add(book.FolderPath)) return;  // already running
 
-            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            Background.Queue(_ =>
             {
                 var seconds = new double[files.Length];
                 try
@@ -3753,7 +3753,7 @@ namespace Nemoviz_Book_Reader
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            System.Threading.Tasks.Task.Run(() =>
+            Background.Run(() =>
             {
                 try
                 {
@@ -3844,7 +3844,7 @@ namespace Nemoviz_Book_Reader
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            System.Threading.Tasks.Task.Run(() =>
+            Background.Run(() =>
             {
                 try
                 {

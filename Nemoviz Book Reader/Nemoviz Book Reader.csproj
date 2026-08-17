@@ -184,6 +184,7 @@
     <Compile Include="VoicePrefs.cs" />
     <Compile Include="VoiceChooser.cs" />
     <Compile Include="NoVoiceForm.cs" />
+    <Compile Include="Background.cs" />
     <Compile Include="ServicesForm.cs" />
     <Compile Include="SettingsSkin.cs" />
     <Compile Include="LibrarySkin.cs" />
