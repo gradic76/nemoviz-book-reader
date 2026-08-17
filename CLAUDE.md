@@ -1719,6 +1719,38 @@ allowance is ~0.5 M characters a month — about ONE book, against Google's two 
 nine — and Azure's `hr-HR` has no custom pronunciations, so §8j's dictionary
 works less well there than with a local voice.
 
+### The Advanced tab is to be split — agreed 2026-08-17, NOT YET BUILT
+
+Gordan: *"zakompliciralo se sve u Settings/Advanced, treba to malo podijeliti."*
+Five groups now, three of them credential dialogs, on a page a reader visits
+once. The split he asked for:
+
+- **A new place under Help** — one page per service: what it is, what it does,
+  a **step-by-step account guide**, and its configuration dialog. His example
+  format is numbered and literal ("1. Open deepseek.com  2. Find Signup and
+  click…"), and he is explicit about why: *"sam sam se kao iskusan korisnik
+  pogubio, manje iskusni korisnici će posijediti."* Google and Azure will be the
+  hairy ones and that cannot be avoided.
+- **Settings → Advanced keeps only** the list of services, a hint saying what
+  each is for, the on/off checks, and one line saying where they are configured.
+
+**Two things settled while the rest waits:**
+
+- **The cloud-voices check goes FIRST in the voices group** when the page is
+  rearranged (Gordan, 2026-08-17). It is one group then, not the separate
+  "Using cloud voices" box that stands there now.
+- **Google's own group needs no hint of its own.** He wrote the text on the
+  CHECK — *"This one turns on and off your use of cloud voices… the switch
+  governs the picker, not what can be played"* — and judged that enough:
+  *"mislim da ne treba više od toga."* `Hint.Settings.Cloud` is deliberately
+  EMPTY, which since 2026-08-17 means no `?` at all rather than a button
+  opening nothing.
+
+**Open:** the name (proposed *Services and accounts*), and whether the guides
+cover only the four that need an account — Google Cloud TTS, Azure Speech,
+DeepSeek, Gemini — or also the two that need only a Windows install, OCR
+languages and OneCore voices.
+
 ### Cloud voices — where they live, settled with Gordan 2026-08-15 (spec, not yet built)
 
 Chirp 3 HD passed by ear (see memory). The whole difficulty was never the
