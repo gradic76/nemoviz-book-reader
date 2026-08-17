@@ -566,6 +566,20 @@ namespace Nemoviz_Book_Reader
             menuHelpAbout = new ToolStripMenuItem(Localization.T("Menu.Help.About"));
             menuHelpAbout.Click += (s, e) => HintSystem.ShowAbout(this);
             menuHelp.DropDownItems.Add(menuHelpHelp);
+
+            // Setting a service up is a JOB with steps, done once on a web site -- not a
+
+            // setting. So it lives beside Help rather than in Settings (Gordan,
+
+            // 2026-08-17), and Settings keeps only the switches.
+
+            menuHelp.DropDownItems.Add(new ToolStripSeparator());
+
+            var menuHelpServices = new ToolStripMenuItem(Localization.T("Menu.Help.Services"));
+
+            menuHelpServices.Click += (s, e) => { using (var d = new ServicesForm()) d.ShowDialog(this); };
+
+            menuHelp.DropDownItems.Add(menuHelpServices);
             menuHelp.DropDownItems.Add(new ToolStripSeparator());
             menuHelp.DropDownItems.Add(menuHelpAbout);
 
