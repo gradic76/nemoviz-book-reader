@@ -107,19 +107,19 @@ namespace Nemoviz_Book_Reader
             services.Add(new Service
             {
                 NameKey = "Services.Item.GoogleVoices",
-                GuideKey = "Services.Guide.GoogleVoices",
+                GuideKey = "GoogleVoices",
                 IsSet = () => GoogleCloudVoices.Have,
                 SetUp = o => LoadGoogleAccount(o),
             });
             services.Add(new Service
             {
                 NameKey = "Services.Item.AzureVoices",
-                GuideKey = "Services.Guide.AzureVoices",
+                GuideKey = "AzureVoices",
                 IsSet = () => AzureVoices.Have,
                 SetUp = o => { using (var d = new AzureSpeechSetupForm()) d.ShowDialog(o); },
             });
-            AddEngine("Services.Item.DeepSeek", "Services.Guide.DeepSeek", TranslationEngines.DeepSeek);
-            AddEngine("Services.Item.Gemini", "Services.Guide.Gemini", TranslationEngines.Gemini);
+            AddEngine("Services.Item.DeepSeek", "DeepSeek", TranslationEngines.DeepSeek);
+            AddEngine("Services.Item.Gemini", "Gemini", TranslationEngines.Gemini);
         }
 
         private void AddEngine(string nameKey, string guideKey, string engineId)
@@ -167,11 +167,19 @@ namespace Nemoviz_Book_Reader
 
             bool ready = false;
             try { ready = s.IsSet(); } catch { }
-            // THE STATE FIRST, because it is the one thing a reader wants before
-            // reading a page of steps: whether they already did this.
+            // FOUR PARTS, and the order is Gordan's (2026-08-17). The STATE
+            // first, because whether they already did this is what a reader wants
+            // before a page of steps. Then the PROSE — what the thing is and what
+            // has to happen in what order. Then the DISCLAIMER, and only then the
+            // steps: the prose stays true when a web site is redesigned and the
+            // numbered steps are the half that goes stale, so the warning belongs
+            // between them rather than at the top where it would shade
+            // everything.
+            string nl = Environment.NewLine;
             string text = Localization.T(ready ? "Services.State.Ready" : "Services.State.NotSet")
-                          + Environment.NewLine + Environment.NewLine
-                          + Localization.T(s.GuideKey);
+                          + nl + nl + Localization.T("Services.About." + s.GuideKey)
+                          + nl + nl + Localization.T("Services.Disclaimer")
+                          + nl + nl + Localization.T("Services.Steps." + s.GuideKey);
             body.Text = text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             body.AccessibleName = Localization.T(s.NameKey);
             body.Select(0, 0);

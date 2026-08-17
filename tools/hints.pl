@@ -33,13 +33,28 @@ my %where = (
 my %order = ('Player and dialogs' => 1, 'Properties - sound' => 2,
              'Properties - reading' => 3, 'Settings' => 4);
 
-my $lang = shift @ARGV or die "usage: hints.pl <en.lang> [--import <doc>]\n";
+my $lang = shift @ARGV
+    or die "usage: hints.pl <en.lang> [--keys <regex>] [--import <doc>]\n";
+
+# WHICH KEYS THIS DOCUMENT IS FOR. Hints by default; --keys makes the same round
+# trip serve any family of long strings. The service guides needed it the day
+# they were written (Gordan, 2026-08-17): they are prose a reader edits, and
+# they are not hints.
+my $pat = qr/[A-Za-z0-9._]*[Hh]int[A-Za-z0-9._]*/;
+my $what = 'help hint';
+if (@ARGV && $ARGV[0] eq '--keys') {
+    shift @ARGV;
+    my $p = shift @ARGV;
+    $pat = qr/$p/;
+    $what = 'service guide';
+}
+
 my $mode = shift @ARGV || '';
 my $doc  = shift @ARGV || '';
 
 sub is_hint {
     my $k = shift;
-    return $k =~ /^[A-Za-z0-9._]*[Hh]int[A-Za-z0-9._]*$/ && $k !~ /Accessible|ShowHints/;
+    return $k =~ /^$pat$/ && $k !~ /Accessible|ShowHints/;
 }
 
 open(my $in, '<:raw', $lang) or die "cannot read $lang: $!\n";
@@ -58,6 +73,20 @@ sub export {
         next unless $line =~ /^([A-Za-z0-9._]+)=(.*?)\r?\n?$/;
         my ($k, $v) = ($1, $2);
         next unless is_hint($k);
+        # A LONE \n BREAKS THE ROUND TRIP, and this refuses rather than mangles.
+        # The document cannot tell a deliberate single break from ordinary
+        # wrapping, so on the way back the two lines would be joined with a space
+        # -- which is exactly what happened to the numbered service steps the day
+        # they were written. Every break must be a PAIR.
+        # Pairs out first, then look for what is left. A lookaround cannot do
+        # this: "\n\n" is FOUR characters, so the second one is preceded by "n"
+        # and followed by ordinary text, and every pair reported itself.
+        my $rest = $v;
+        $rest =~ s/\\n\\n//g;
+        if ($rest =~ /\\n/) {
+            die "$k has a LONE \\n. Every break must be \\n\\n or the document\n"
+              . "cannot be written back. Fix it in en.lang and run this again.\n";
+        }
         my $g = $where{$k} || ($k =~ /^(Settings\.|Hint\.Settings)/ ? 'Settings'
                                                                    : 'Player and dialogs');
         push @{ $bag{$g} }, [$k, $v];
@@ -68,7 +97,7 @@ sub export {
     print "NEMOVIZ BOOK READER - every help hint, in one place\n";
     print "=" x 70, "\n\n";
     print <<"HEAD";
-$n hints, grouped by the window they appear in.
+$n ${what}s, grouped by where they appear.
 
 YOU CAN EDIT THIS FILE. Change the wording under any heading and then write it
 back into the language file with:
