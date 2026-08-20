@@ -4141,8 +4141,28 @@ namespace Nemoviz_Book_Reader
         /// <summary>Switch libmpv's output device live (empty → "auto", the
         /// system default). Used for the Settings → Device live preview and to
         /// re-apply the persisted choice when the dialog closes.</summary>
+        /// <summary>What the audio chain was last pointed at, so an unchanged
+        /// device is not re-applied. Null until the first call.</summary>
+        private string appliedAudioDevice;
+
         private void SetAudioDeviceLive(string device)
         {
+            // NOTHING TO DO IF NOTHING CHANGED, and this is not a micro-optimisation
+            // (2026-08-20). Setting mpv's audio-device tears the output down and
+            // opens it again, and this method was being called on EVERY close of
+            // Settings -- Cancel included -- whether the card had changed or not.
+            // NBR-hang.log has the player wedged inside exactly that call for 641
+            // seconds at 0 % CPU, from BtnSettings_Click, and all 19 mpv stalls in
+            // the file come from here.
+            //
+            // Re-opening is also not a private act: the keep-alive holds the SAME
+            // endpoint open on a second mpv context, and both are re-pointed one
+            // after the other a few lines apart. AudioKeepAlive.SetDevice has had
+            // this guard from the start; the player's side never did.
+            string want = string.IsNullOrEmpty(device) ? "auto" : device;
+            if (string.Equals(want, appliedAudioDevice, StringComparison.Ordinal)) return;
+            appliedAudioDevice = want;
+
             // Audio books play through mpv; text books through the TTS backend
             // (SAPI AudioOutput). Route the picked card to both so the choice
             // works whichever kind of book is open.
@@ -6140,6 +6160,12 @@ namespace Nemoviz_Book_Reader
                 // Output device chosen in Settings → Device (empty = mpv "auto").
                 if (appSettings != null && !string.IsNullOrEmpty(appSettings.AudioDevice))
                     mpv_set_property_string(mpvHandle, "audio-device", appSettings.AudioDevice);
+                // Remember it, so the first close of Settings does not count as a
+                // change and tear the output down for nothing. Without this the
+                // guard in SetAudioDeviceLive still lets one needless re-open
+                // through per session -- and one is all the 641-second stall took.
+                appliedAudioDevice = appSettings == null || string.IsNullOrEmpty(appSettings.AudioDevice)
+                    ? "auto" : appSettings.AudioDevice;
             }
             catch (Exception ex)
             {
