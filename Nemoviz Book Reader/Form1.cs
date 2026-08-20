@@ -3986,6 +3986,8 @@ namespace Nemoviz_Book_Reader
                     ReadingDiagnostics.Always("READING WINDOW ShowDialog THREW " + ex.GetType().Name + ": " + ex.Message);
                 }
                 ReadingDiagnostics.Always("READING WINDOW closed");
+                UiWatchdog.Note("player: reading window closed");
+                UiWatchdog.NoteWindows("player: window state after the reading window", this);
                 // ShowDialog does not dispose the form the way Show does.
                 try { modal.Dispose(); } catch { }
             }));
@@ -5958,6 +5960,8 @@ namespace Nemoviz_Book_Reader
 
         private void OpenFile()
         {
+            UiWatchdog.Note("player: Open file requested");
+            UiWatchdog.NoteWindows("player: window state", this);
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = BuildFileFilter();

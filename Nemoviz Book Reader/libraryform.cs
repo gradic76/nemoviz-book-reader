@@ -2153,6 +2153,7 @@ namespace Nemoviz_Book_Reader
         private void MenuFileOpenFile_Click(object sender, EventArgs e)
         {
             UiWatchdog.Note("library: Open file requested");
+            UiWatchdog.NoteWindows("library: window state", this);
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = BuildFileFilter();

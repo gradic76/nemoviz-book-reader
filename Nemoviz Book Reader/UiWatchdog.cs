@@ -78,6 +78,65 @@ namespace Nemoviz_Book_Reader
         /// dialog opened and then froze" — a modal dialog pumps, so this fires
         /// from inside one. Nothing else in the log can tell those two apart, and
         /// they are looked for in completely different places.</para></summary>
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern IntPtr GetActiveWindow();
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool IsWindowEnabled(IntPtr h);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr h);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern IntPtr GetWindow(IntPtr h, uint cmd);
+
+        /// <summary>The window state a common dialog is about to inherit, written
+        /// into the crumb trail so one reproduction can settle what six theories
+        /// could not.
+        ///
+        /// <para>Gordan bisected it on 2026-08-20 and the cut is clean: with no
+        /// reading window, Open file works every time from both the player and the
+        /// Library; open the reading window on F9, close it on Escape, and the next
+        /// Ctrl+O blocks. So the reading window LEAVES SOMETHING BEHIND, and this
+        /// records the candidates rather than guessing between them — whether a
+        /// window is left disabled (which is what makes an invisible modal dialog
+        /// and the DING he has always described), whether the active window is one
+        /// that is going away, and whether the owner chain still makes sense.</para>
+        ///
+        /// <para>Every value is asked of WINDOWS, not of WinForms: a stale HWND is
+        /// exactly the thing under suspicion, and WinForms would answer about the
+        /// object it thinks it has.</para></summary>
+        public static void NoteWindows(string tag, Form self)
+        {
+            try
+            {
+                IntPtr active = GetActiveWindow();
+                IntPtr fore = GetForegroundWindow();
+                var sb = new StringBuilder();
+                sb.Append(tag).Append("  active=").Append(Describe(active))
+                  .Append("  foreground=").Append(Describe(fore));
+                if (self != null && self.IsHandleCreated)
+                {
+                    sb.Append("  self=").Append(Describe(self.Handle));
+                    IntPtr owner = GetWindow(self.Handle, 4 /* GW_OWNER */);
+                    sb.Append("  owner=").Append(Describe(owner));
+                }
+                foreach (Form f in Application.OpenForms)
+                {
+                    if (f == null || !f.IsHandleCreated) continue;
+                    sb.Append("  [").Append(f.GetType().Name).Append(' ')
+                      .Append(Describe(f.Handle)).Append(']');
+                }
+                Note(sb.ToString());
+            }
+            catch { }
+        }
+
+        /// <summary>hwnd, enabled and visible as Windows itself reports them.</summary>
+        private static string Describe(IntPtr h)
+        {
+            if (h == IntPtr.Zero) return "none";
+            string name = "?";
+            try { Control c = Control.FromHandle(h); if (c != null) name = c.GetType().Name; } catch { }
+            return name + "/0x" + h.ToInt64().ToString("X")
+                 + (IsWindowEnabled(h) ? "/enabled" : "/DISABLED")
+                 + (IsWindowVisible(h) ? "/visible" : "/hidden");
+        }
         public static void NoteWhenPumping(string what, int afterMs = 400)
         {
             try
