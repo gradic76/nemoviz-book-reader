@@ -598,14 +598,14 @@ Translate.Ask.Info={0} — about {1} characters, roughly {2}. The translation be
 Translate.Ask.HybridNote=This book has a recording as well as text. Only the text can be translated, so the translation will be a text book without the narration.
 Translate.Ask.From=Language of the book:
 Translate.Ask.To=Translate into:
-Translate.Ask.Engine=Translation service:
+Translate.Ask.Model=Model {0}:
+Translate.Ask.Model.None=— none, end the chain here —
 ; One choice, and a chain follows from it. Asking for a fallback as well was
 ; asking the reader to design a retry policy; what they have an opinion about is
 ; which translation they would rather read.
 Translate.Ask.ChainNote=If a passage is refused, NBR tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
 Translate.Ask.NoEngine=No service has a key yet
 Translate.Ask.Standing=Your standing note is applied to this book as well: {0}
-Translate.Ask.OnlyThis=Use only this service, with no fallback — for comparing one service against another
 Translate.Ask.Inherit=Continue a series, using the glossary of:
 Translate.Ask.Inherit.None=Nothing — this book stands on its own
 Translate.Ask.Notes=Anything the translator should know about THIS book (optional). The narrator and the names are worked out from the text on their own; this is for what the text does not say — a term you want rendered a particular way, or how two characters address each other:

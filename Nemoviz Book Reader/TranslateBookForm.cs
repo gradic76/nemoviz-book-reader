@@ -43,10 +43,6 @@ namespace Nemoviz_Book_Reader
         /// combo's own comment for why this is asked rather than worked out.</summary>
         public string InheritGlossaryPath { get; private set; }
 
-        /// <summary>True when the reader asked for this service ALONE — see the
-        /// check box for why that exists and why it is not the default.</summary>
-        public bool OnlyPrimary { get; private set; }
-
         /// <summary><b>One choice, and a chain follows from it.</b> The dialog used
         /// to ask for a fallback as well, which was asking a reader to design a
         /// retry policy — what they have an opinion about is which translation they
@@ -54,19 +50,34 @@ namespace Nemoviz_Book_Reader
         /// help key beside the engine.</summary>
         public List<TranslationEngine> Chain
         {
-            get { return OnlyPrimary && Primary != null
-                       ? new List<TranslationEngine> { Primary }
-                       : TranslationEngines.Chain(Primary); }
+            get
+            {
+                var chain = new List<TranslationEngine>();
+                for (int i = 0; i < chainCombos.Count; i++)
+                {
+                    TranslationEngine e = Chosen(i);
+                    // "none" ENDS the chain rather than being skipped. A gap in the
+                    // middle would be a reader saying "then nothing, then this",
+                    // which means nothing -- and reading past it would quietly add a
+                    // stop they had taken out.
+                    if (e == null) break;
+                    chain.Add(e);
+                }
+                return chain;
+            }
         }
 
         private readonly ComboBox cmbSource = new ComboBox();
         private readonly ComboBox cmbTarget = new ComboBox();
-        private readonly ComboBox cmbEngine = new ComboBox();
+        private const int ChainSlots = 4;
+        private readonly List<ComboBox> chainCombos = new List<ComboBox>();
+        private readonly Dictionary<int, List<TranslationEngine>> chainOffered =
+            new Dictionary<int, List<TranslationEngine>>();
+        private bool refilling;
         private readonly TextBox tbNotes = new TextBox();
         private readonly List<string> langCodes = new List<string>();
         private readonly List<TranslationEngine> engines;
         private ComboBox cmbInherit;
-        private CheckBox chkOnlyThis;
         private readonly List<string> inheritPaths = new List<string>();
         private readonly List<KeyValuePair<string, string>> glossaries;
 
@@ -83,7 +94,8 @@ namespace Nemoviz_Book_Reader
             MaximizeBox = false;
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(500, fromHybrid ? 380 : 356);
+            // Three more rows than the single engine box it replaced.
+            ClientSize = new Size(500, (fromHybrid ? 380 : 356) + 3 * 32);
 
             int y = 12;
 
@@ -114,7 +126,7 @@ namespace Nemoviz_Book_Reader
 
             y = Row(Localization.T("Translate.Ask.From"), cmbSource, y, 1);
             y = Row(Localization.T("Translate.Ask.To"), cmbTarget, y, 3);
-            y = Row(Localization.T("Translate.Ask.Engine"), cmbEngine, y, 5);
+            BuildChainRows(ref y);
 
             // What happens when the chosen engine will not take a passage — the
             // whole of the chain in one tabbable line, because "why does it name
@@ -128,38 +140,12 @@ namespace Nemoviz_Book_Reader
                 BackColor = SystemColors.Control,
                 Location = new Point(12, y),
                 Size = new Size(476, 32),
-                TabIndex = 7,
+                TabIndex = 9,
                 Text = Localization.T("Translate.Ask.ChainNote")
             };
             chainNote.AccessibleName = chainNote.Text;
             Controls.Add(chainNote);
             y += 40;
-
-            // NO FALLBACK, FOR WHEN THE POINT IS TO JUDGE ONE SERVICE (Gordan,
-            // 2026-08-20, setting up a blind test of GPT against Gemini).
-            //
-            // <para>The chain is the right default and stays it: a book with three
-            // English paragraphs in it is a worse book, and the fallback rescued 50
-            // pieces across three novels. But it makes a COMPARISON meaningless.
-            // With Gemini refusing about a sixth of a published novel, a book
-            // labelled "translated by X" can arrive with a sixth of it written by Y,
-            // and an ear judging the result is judging a blend.</para>
-            //
-            // <para>Off by default, and deliberately worded as what it is FOR
-            // rather than as a preference. Nobody reading a book for pleasure wants
-            // this; the only reason to reach for it is to find out what one service
-            // does on its own.</para>
-            chkOnlyThis = new CheckBox
-            {
-                Text = Localization.T("Translate.Ask.OnlyThis"),
-                Location = new Point(12, y),
-                Size = new Size(476, 22),
-                TabIndex = 7
-            };
-            chkOnlyThis.AccessibleName = chkOnlyThis.Text;
-            Controls.Add(chkOnlyThis);
-            y += 28;
-            Height += 28;
 
             // THE STANDING NOTE IS SHOWN, NOT MERELY APPLIED. A rule that acts on
             // every book while being visible nowhere is the invisible dependency
@@ -213,7 +199,7 @@ namespace Nemoviz_Book_Reader
                     DropDownStyle = ComboBoxStyle.DropDownList,
                     Location = new Point(196, y),
                     Size = new Size(292, 24),
-                    TabIndex = 8
+                    TabIndex = 10
                 };
                 cmbInherit.AccessibleName = Localization.T("Translate.Ask.Inherit");
                 cmbInherit.Items.Add(Localization.T("Translate.Ask.Inherit.None"));
@@ -244,7 +230,7 @@ namespace Nemoviz_Book_Reader
             tbNotes.ScrollBars = ScrollBars.Vertical;
             tbNotes.Location = new Point(12, y);
             tbNotes.Size = new Size(476, 56);
-            tbNotes.TabIndex = 9;
+            tbNotes.TabIndex = 11;
             tbNotes.AccessibleName = Localization.T("Translate.Ask.Notes");
             Controls.Add(tbNotes);
             y += 66;
@@ -254,7 +240,7 @@ namespace Nemoviz_Book_Reader
                 Text = Localization.T("Translate.Ask.Start"),
                 Location = new Point(278, y),
                 Size = new Size(100, 30),
-                TabIndex = 10,
+                TabIndex = 12,
                 DialogResult = DialogResult.OK
             };
             var cancel = new Button
@@ -262,7 +248,7 @@ namespace Nemoviz_Book_Reader
                 Text = Localization.T("Btn.Cancel"),
                 Location = new Point(388, y),
                 Size = new Size(100, 30),
-                TabIndex = 11,
+                TabIndex = 13,
                 DialogResult = DialogResult.Cancel
             };
             // Explicit, as everywhere else in the app. A Button falls back to its
@@ -287,16 +273,105 @@ namespace Nemoviz_Book_Reader
                 if (DialogResult != DialogResult.OK) return;
                 SourceLanguage = Code(cmbSource);
                 TargetLanguage = Code(cmbTarget);
-                Primary = cmbEngine.SelectedIndex >= 0 && cmbEngine.SelectedIndex < engines.Count
-                          ? engines[cmbEngine.SelectedIndex] : null;
+                Primary = Chosen(0);
                 Notes = tbNotes.Text.Trim();
-                OnlyPrimary = chkOnlyThis != null && chkOnlyThis.Checked;
                 if (cmbInherit != null && cmbInherit.SelectedIndex > 0
                     && cmbInherit.SelectedIndex < inheritPaths.Count)
                     InheritGlossaryPath = inheritPaths[cmbInherit.SelectedIndex];
             };
         }
 
+        /// <summary>The reader's own chain: Model 1 leads, the rest are tried in
+        /// the order they were put, and "none" ends it.
+        ///
+        /// <para><b>This reverses an earlier decision, knowingly</b> (Gordan,
+        /// 2026-08-21). The dialog used to ask for one engine and build the chain
+        /// itself, on the reasoning that a reader has an opinion about which
+        /// translation they would rather read and not about a retry policy. That
+        /// held when there were four stops and one obvious cheapest-first order.
+        /// There are seven now, their prices differ by a hundredfold, and the fixed
+        /// order cost 760 seconds in one run waiting out an account that had no
+        /// credit left.</para>
+        ///
+        /// <para><b>His argument is the one NBR cannot answer for anybody</b>: free
+        /// against paid, what each costs, whether it is the 23rd of the month and
+        /// the credit is nearly gone, whether they intend to top it up at all. None
+        /// of that is in the program, and all of it decides the order.</para>
+        ///
+        /// <para><b>"None" is a real answer in every box</b>, and the first box is
+        /// the only one that must be filled. A chain of one is how you find out what
+        /// a single service does on its own, which is why the separate no-fallback
+        /// check box that briefly existed is gone: it said the same thing twice.</para>
+        ///
+        /// <para>An engine chosen in one box disappears from the ones below it, so
+        /// the same stop cannot be asked twice, and the boxes below are refilled
+        /// whenever a box above changes.</para></summary>
+        private void BuildChainRows(ref int y)
+        {
+            for (int i = 0; i < ChainSlots; i++)
+            {
+                var combo = new ComboBox();
+                chainCombos.Add(combo);
+                y = Row(Localization.T("Translate.Ask.Model", i + 1), combo, y, 5 + i);
+                int mine = i;
+                combo.SelectedIndexChanged += (s, e) => { if (!refilling) RefillChain(mine + 1); };
+            }
+            RefillChain(0);
+        }
+
+        /// <summary>Refills every box from <paramref name="from"/> down, leaving out
+        /// whatever the boxes above have taken. Keeps a box's own choice if it is
+        /// still available, so changing box 1 does not silently rearrange box 3.</summary>
+        private void RefillChain(int from)
+        {
+            if (refilling) return;
+            refilling = true;
+            try
+            {
+                for (int i = from; i < chainCombos.Count; i++)
+                {
+                    ComboBox c = chainCombos[i];
+                    TranslationEngine keep = Chosen(i);
+                    var taken = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    for (int j = 0; j < i; j++)
+                    {
+                        TranslationEngine e = Chosen(j);
+                        if (e != null) taken.Add(e.Id);
+                    }
+
+                    c.Items.Clear();
+                    var offered = new List<TranslationEngine>();
+                    // The first box has to name a service; the rest may end the
+                    // chain. Putting "none" first in those makes the shortest chain
+                    // the default, which is also the cheapest and the most literal.
+                    if (i > 0) { c.Items.Add(Localization.T("Translate.Ask.Model.None")); offered.Add(null); }
+                    foreach (TranslationEngine e in engines)
+                    {
+                        if (taken.Contains(e.Id)) continue;
+                        c.Items.Add(e.DisplayName);
+                        offered.Add(e);
+                    }
+                    chainOffered[i] = offered;
+
+                    int at = 0;
+                    if (keep != null)
+                        for (int k = 0; k < offered.Count; k++)
+                            if (offered[k] != null && offered[k].Id == keep.Id) { at = k; break; }
+                    c.SelectedIndex = c.Items.Count > 0 ? Math.Min(at, c.Items.Count - 1) : -1;
+                    c.Enabled = c.Items.Count > (i > 0 ? 1 : 0);
+                }
+            }
+            finally { refilling = false; }
+        }
+
+        private TranslationEngine Chosen(int slot)
+        {
+            if (slot < 0 || slot >= chainCombos.Count) return null;
+            List<TranslationEngine> offered;
+            if (!chainOffered.TryGetValue(slot, out offered)) return null;
+            int at = chainCombos[slot].SelectedIndex;
+            return at >= 0 && at < offered.Count ? offered[at] : null;
+        }
         private int Row(string caption, ComboBox combo, int y, int tabIndex)
         {
             var lbl = new Label { Text = caption, Location = new Point(12, y + 3), Size = new Size(190, 20) };
@@ -350,14 +425,14 @@ namespace Nemoviz_Book_Reader
             int ti = TranslationLanguages.IndexOf(want);
             cmbTarget.SelectedIndex = ti >= 0 ? ti : Math.Max(0, TranslationLanguages.IndexOf("en"));
 
-            foreach (var e in engines) cmbEngine.Items.Add(e.DisplayName);
-            if (engines.Count > 0) cmbEngine.SelectedIndex = 0;
-
-            if (engines.Count == 0)
+            // With no key anywhere there is nothing to compose. The first box says
+            // so and the rest stay empty rather than offering "none" four times.
+            if (engines.Count == 0 && chainCombos.Count > 0)
             {
-                cmbEngine.Items.Add(Localization.T("Translate.Ask.NoEngine"));
-                cmbEngine.SelectedIndex = 0;
-                cmbEngine.Enabled = false;
+                chainCombos[0].Items.Clear();
+                chainCombos[0].Items.Add(Localization.T("Translate.Ask.NoEngine"));
+                chainCombos[0].SelectedIndex = 0;
+                foreach (ComboBox c in chainCombos) c.Enabled = false;
             }
         }
 
