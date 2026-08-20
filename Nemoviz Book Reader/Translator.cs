@@ -58,6 +58,28 @@ namespace Nemoviz_Book_Reader
         /// transport already retries that itself.</para></summary>
         public int Attempts = 3;
 
+
+        /// <summary>True for OpenAI's reasoning-era models, whose chat endpoint is
+        /// the same URL and a DIFFERENT dialect (found the moment Gordan first
+        /// pressed the key check, 2026-08-20: "Unsupported parameter: max_tokens is
+        /// not supported with this model. Use max_completion_tokens instead").
+        ///
+        /// <para><b>It switches three things, not one</b>, and the other two were
+        /// going to be the next two error messages:</para>
+        ///
+        /// <para><c>max_tokens</c> becomes <c>max_completion_tokens</c>.
+        /// <c>temperature</c> is not sent at all, because these models accept only
+        /// their default and refuse a value. And <c>reasoning_effort</c> is not sent
+        /// either: the value DeepSeek needs is "none", which is not one of OpenAI's,
+        /// so sending ours would refuse the request while sending theirs would be a
+        /// guess at a name.</para>
+        ///
+        /// <para><b>What that costs, and it is worth knowing before the bill:</b>
+        /// with no reasoning setting these models think as they see fit, and OpenAI
+        /// bills thinking as OUTPUT. The per-book estimate here assumes the
+        /// translation and nothing more, so a real run may come in above it. That
+        /// is a number to take from the first book rather than from arithmetic.</para></summary>
+        public bool ReasoningDialect;
         /// <summary>True for the stop that translates without being able to be told
         /// anything — see <see cref="EngineKind.AzureTranslator"/>. A passage
         /// rescued here is MARKED IN THE BOOK, because the two faults it makes are
@@ -189,7 +211,8 @@ namespace Nemoviz_Book_Reader
                 NameKey = "Settings.Translate.Engine.OpenAi",
                 Kind = EngineKind.OpenAiCompatible,
                 Endpoint = "https://api.openai.com/v1/chat/completions",
-                Model = "gpt-5.6-terra"
+                Model = "gpt-5.6-terra",
+                ReasoningDialect = true
             },
             new TranslationEngine
             {
@@ -198,6 +221,7 @@ namespace Nemoviz_Book_Reader
                 Kind = EngineKind.OpenAiCompatible,
                 Endpoint = "https://api.openai.com/v1/chat/completions",
                 Model = "gpt-5.6-luna",
+                ReasoningDialect = true,
                 KeyId = OpenAi
             },
             new TranslationEngine
@@ -207,6 +231,7 @@ namespace Nemoviz_Book_Reader
                 Kind = EngineKind.OpenAiCompatible,
                 Endpoint = "https://api.openai.com/v1/chat/completions",
                 Model = "gpt-5.6-sol",
+                ReasoningDialect = true,
                 KeyId = OpenAi
             },
             // Deferred once, and then a measurement brought it back: Gemini
@@ -380,7 +405,7 @@ namespace Nemoviz_Book_Reader
             {
                 url = engine.Endpoint;
                 headers["Authorization"] = "Bearer " + key;
-                body = OpenAiBody(engine.Model, system, user, maxTokens);
+                body = OpenAiBody(engine.Model, system, user, maxTokens, engine.ReasoningDialect);
             }
 
             // A RATE LIMIT AND A HICCUP ARE NORMAL STATES OVER A BOOK, NOT FAULTS.
@@ -507,14 +532,16 @@ namespace Nemoviz_Book_Reader
             return sb.ToString();
         }
 
-        private static string OpenAiBody(string model, string system, string user, int maxTokens)
+        private static string OpenAiBody(string model, string system, string user, int maxTokens, bool reasoning)
         {
             var sb = new StringBuilder();
             sb.Append("{\"model\":").Append(Json.Str(model)).Append(',');
             sb.Append("\"messages\":[");
             sb.Append("{\"role\":\"system\",\"content\":").Append(Json.Str(system)).Append("},");
             sb.Append("{\"role\":\"user\",\"content\":").Append(Json.Str(user)).Append("}],");
-            sb.Append("\"temperature\":0.3,");
+            // NOT SENT to a reasoning model: it accepts only its own default and
+            // refuses a value outright.
+            if (!reasoning) sb.Append("\"temperature\":0.3,");
             // REASONING OFF, and this one is not an optimisation — without it the
             // service returns NOTHING. DeepSeek's V4 models think in a separate
             // `reasoning_content` field and bill that thinking as output: measured,
@@ -523,8 +550,11 @@ namespace Nemoviz_Book_Reader
             // allowance before writing a word, returning an empty string and no
             // error. It is also the difference between paying once and paying
             // several times over.
-            sb.Append("\"reasoning_effort\":\"none\",");
-            sb.Append("\"max_tokens\":").Append(maxTokens.ToString(CultureInfo.InvariantCulture)).Append('}');
+            // "none" is DeepSeek's value and not one OpenAI knows, so on that
+            // dialect the setting is left out rather than guessed at.
+            if (!reasoning) sb.Append("\"reasoning_effort\":\"none\",");
+            sb.Append(reasoning ? "\"max_completion_tokens\":" : "\"max_tokens\":")
+              .Append(maxTokens.ToString(CultureInfo.InvariantCulture)).Append('}');
             return sb.ToString();
         }
 
