@@ -1194,6 +1194,40 @@ namespace Nemoviz_Book_Reader
             AccessibleName = "";
         }
 
+
+        /// <summary>Keeps itself at the BACK, whatever order the window is built in.
+        ///
+        /// <para><b>The fault this ends</b> (Gordan, visual inspection 2026-08-19):
+        /// hint boxes came up black with no text and no OK key. Measured — the
+        /// canvas sat at index 0 of the form, which in WinForms is the FRONT, with
+        /// the text field and the button behind it. Exactly the fault the Library's
+        /// buttons had, and the comment in <c>LibrarySkin</c> already names the
+        /// rule: <c>Controls.Add</c> appends, and the END of the collection is the
+        /// BACK of the z-order.</para>
+        ///
+        /// <para><b>Why <c>Shell</c>'s own SendToBack could not catch it.</b> It
+        /// runs while the canvas is the ONLY child, where front and back are the
+        /// same index, so it is a no-op — and every control added afterwards lands
+        /// behind it. That is why the six dialogs the skin RE-DRESSES were right
+        /// and the message box was not: they already hold their controls when the
+        /// canvas arrives, and it is built from an empty form.</para>
+        ///
+        /// <para>So the rule is enforced here rather than remembered at ten call
+        /// sites: whenever a sibling appears, drop behind it. A window cannot be
+        /// built in an order that hides its own contents.</para></summary>
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+            if (Parent == null) return;
+            Parent.ControlAdded -= SiblingArrived;
+            Parent.ControlAdded += SiblingArrived;
+            SendToBack();
+        }
+
+        private void SiblingArrived(object sender, ControlEventArgs e)
+        {
+            if (e.Control != this) SendToBack();
+        }
         public void Rebuild()
         {
             if (cached != null) { cached.Dispose(); cached = null; }

@@ -402,6 +402,34 @@ namespace Nemoviz_Book_Reader
         /// <summary>Persists the staged settings (currently just the library
         /// path). Called by both OK and Apply. Only writes when the path
         /// actually changed, and makes sure the target folder exists.</summary>
+
+        /// <summary>True when the reader answered "yes, restart now" to a change
+        /// of look. The restart itself belongs to <see cref="Program"/>.</summary>
+        public bool RestartRequested { get; private set; }
+
+        /// <summary>Asks for a restart instead of performing one.
+        ///
+        /// <para><b>Why not <c>Application.Restart()</c> here</b> (Gordan,
+        /// 2026-08-19: changing the look left BOTH windows on screen). That call
+        /// starts the replacement FIRST and only then tries to end this process —
+        /// and it was being made from inside this dialog, which is MODAL. A modal
+        /// dialog runs its own nested message loop, and that loop does not unwind
+        /// on <c>Application.Exit</c>, so the old player stayed up while its
+        /// replacement opened in front of it.</para>
+        ///
+        /// <para>So the answer travels out as a flag: this window closes, the
+        /// player closes, the message loop ends, mpv and the speech host are
+        /// released — and only then does <see cref="Program"/> start the new one.
+        /// Order that also fixes a file-and-sound-card race nobody had hit
+        /// yet.</para></summary>
+        private void RequestRestart()
+        {
+            RestartRequested = true;
+            // Apply leaves this window open, and the answer was "restart now"; OK
+            // would have closed it in any case.
+            DialogResult = DialogResult.OK;
+            Close();
+        }
         private void SaveSettings()
         {
             if (stagedLibraryPath != appSettings.LibraryPath)
@@ -491,7 +519,7 @@ namespace Nemoviz_Book_Reader
                 appSettings.SetUiTheme(SelectedThemeId());
                 if (MessageForm.ShowConfirm(this, Localization.T("Settings.Misc.Look.Restart"),
                                            Localization.T("Settings.Misc.Look.RestartTitle")))
-                    Application.Restart();
+                    RequestRestart();
             }
         }
 

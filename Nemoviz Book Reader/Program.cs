@@ -26,7 +26,30 @@ namespace Nemoviz_Book_Reader
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
                 Record("background", e.ExceptionObject as Exception);
 
-            Application.Run(new Form1());
+            // RESTART HAPPENS HERE, AFTER THE MESSAGE LOOP HAS ENDED — never with
+            // Application.Restart (Gordan, 2026-08-19: changing the look left BOTH
+            // windows on screen, the old one and the new).
+            //
+            // Two reasons that call could not work, and the second is the one that
+            // bit. Application.Restart STARTS THE NEW PROCESS FIRST and only then
+            // tries to end this one — so anything that stops the exit leaves two
+            // running. And it was being made from inside Settings, a MODAL dialog:
+            // its nested message loop does not unwind on Application.Exit, so the
+            // old player stayed exactly where it was while its replacement opened
+            // in front of it.
+            //
+            // Doing it here also fixes a race nobody had hit yet. OnFormClosing
+            // releases mpv, liblouis and the 32-bit speech host, and those hold
+            // files and the sound card; a replacement launched before that finishes
+            // is a second process reaching for what the first has not yet let go.
+            // By this line the loop is over and the teardown is done.
+            var player = new Form1();
+            Application.Run(player);
+            if (player.RestartOnExit)
+            {
+                try { System.Diagnostics.Process.Start(Application.ExecutablePath); }
+                catch (Exception ex) { Record("restart", ex); }
+            }
         }
 
         private static void Record(string where, Exception ex)

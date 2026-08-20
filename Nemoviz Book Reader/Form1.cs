@@ -4051,6 +4051,12 @@ namespace Nemoviz_Book_Reader
             using (SettingsForm dlg = new SettingsForm(appSettings, audioDevices, SetAudioDeviceLive))
             {
                 dlg.ShowDialog(this);
+                // Carried out of the modal dialog rather than done inside it —
+                // see SettingsForm.RequestRestart and Program.Main. Nothing below
+                // is worth doing to a player that is about to be replaced, and
+                // some of it (re-applying the audio device) would reach for the
+                // sound card on the way out.
+                if (dlg.RestartRequested) { RestartOnExit = true; Close(); return; }
             }
             // Re-apply the persisted device: on OK/Apply this is the newly-saved
             // one; on Cancel it reverts any live preview that wasn't kept.
@@ -6148,6 +6154,11 @@ namespace Nemoviz_Book_Reader
             // deliver WM_HOTKEY to.
             ApplyMediaKeySettings();
         }
+
+        /// <summary>Set when the reader asked for a restart after changing the
+        /// look. <see cref="Program"/> reads it once the message loop has ended
+        /// and every device and file this player held has been let go.</summary>
+        public bool RestartOnExit { get; private set; }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
