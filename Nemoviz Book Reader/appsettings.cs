@@ -219,11 +219,13 @@ namespace Nemoviz_Book_Reader
             MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
             ShowHints = ini.Read("App", "ShowHints", "1") == "1";
-            // "follow" for anyone who has never chosen: Windows decides, which
-            // under high contrast means the system-colours layout. An install
-            // that already carries "classic" or "new" keeps it — that WAS a
-            // choice, and it stands.
-            UiTheme = ini.Read("App", "Theme", Nemoviz_Book_Reader.UiTheme.FollowId);
+            // EMPTY for anyone who has never chosen, and UiTheme.Select turns that
+            // into the default: NBR design, or the system-colours look where the
+            // reader runs high contrast. An install that already carries "classic"
+            // or "new" keeps it — that WAS a choice, and it stands. One that
+            // carries the retired "follow" is understood too, and resolves the
+            // same way an unset value does.
+            UiTheme = ini.Read("App", "Theme", "");   // unset = let UiTheme.Select apply the default rule
 
             Visual = ini.Read("Visual", "Use", "0") == "1";
             WarnBrailleReread = ini.Read("App", "WarnBrailleReread", "1") == "1";

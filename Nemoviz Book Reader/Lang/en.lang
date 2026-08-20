@@ -873,10 +873,9 @@ Dict.Help=Regex help...
 Dict.Help.Title=Regular expressions in the pronunciation dictionary
 Dict.Help.Text=The old Zen wisdom says:\n\n    Developer had a problem.\n    Developer decided to solve the problem with regular expressions.\n    Developer had two problems.\n\nRegEx, or regular expressions, are something you would rather not deal with, but it is fancy to have that option, so here it is.\n\nIf you know what you are doing, knock yourself out. If not, just don't use it, or ask Google.
 Settings.Misc.Look=Look:
-Settings.Misc.Look.Follow=Follow Windows
 Settings.Misc.Look.Classic=System colors
 Settings.Misc.Look.New=NBR design
-Settings.Misc.Look.Hint=How NBR draws itself.\n\nFollow Windows is the usual answer: NBR uses its own design, except when you have a high contrast theme switched on in Windows, and then it steps aside and uses your colors instead.\n\nSystem colors makes it do that always — plain windows in whatever colors and fonts Windows is set to, which is also what works best with a magnifier.\n\nNBR design makes it use its own look always, high contrast or not. That is your call to make: if it turns out not to suit you, the keyboard and your screen reader are unaffected, and F2 brings you back here.
+Settings.Misc.Look.Hint=How NBR draws itself, and there are two answers.\n\nNBR design is its own look, and the one it starts with.\n\nSystem colors makes it a plain window in whatever colors and fonts Windows is set to. It paints nothing of its own, so your own scheme comes through whole — which is what you want with a high contrast theme, and what works best with a magnifier. If you already have high contrast switched on, this is the one NBR starts with.\n\nEither way the choice is yours to make and yours to undo: the keyboard and your screen reader are unaffected by it, and F2 brings you back here.
 Settings.Misc.Look.RestartTitle=Change the look
 Settings.Misc.Look.Restart=The look changes when NBR starts again. Restart it now? Your place in the book is saved either way.
 

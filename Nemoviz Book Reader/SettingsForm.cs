@@ -345,17 +345,21 @@ namespace Nemoviz_Book_Reader
             gLook.Name = "Settings.Misc.Look.Hint";
             gLook.Controls.Add(MakeLabel(Localization.T("Settings.Misc.Look"), LX, 26));
             cmbLook = MakeCombo(Localization.T("Settings.Misc.Look"), CX, 22, CW, tab++);
-            // Follow Windows first, and it is where a reader who has never
-            // chosen already stands: under high contrast it gives the
-            // system-colours layout, otherwise the new one. The other two are
-            // deliberate choices and are honoured whatever Windows is doing.
-            cmbLook.Items.Add(Localization.T("Settings.Misc.Look.Follow"));
+            // TWO CHOICES, NOT THREE (Gordan, 2026-08-20). "Follow Windows" is
+            // gone because it was not a third look — it was a RULE that resolved
+            // to one of these two, and for anybody without high contrast it
+            // resolved to NBR design. So the list offered a third option that
+            // behaved exactly like one of the other two, which is confusion for
+            // nothing. The rule itself survives untouched, as the DEFAULT: see
+            // UiTheme.Select. What is removed is asking the reader to pick it.
             cmbLook.Items.Add(Localization.T("Settings.Misc.Look.Classic"));
             cmbLook.Items.Add(Localization.T("Settings.Misc.Look.New"));
+            // AGAINST THE THEME IN FORCE, never against the stored id. Until the
+            // reader chooses, nothing is stored — and comparing a chosen "new"
+            // against an empty setting would have reported a change that is not
+            // one, and offered to restart NBR for it.
             cmbLook.SelectedIndex =
-                string.Equals(appSettings.UiTheme, UiTheme.NewId, StringComparison.OrdinalIgnoreCase) ? 2
-              : string.Equals(appSettings.UiTheme, UiTheme.ClassicId, StringComparison.OrdinalIgnoreCase) ? 1
-              : 0;
+                string.Equals(UiTheme.Current.Id, UiTheme.ClassicId, StringComparison.OrdinalIgnoreCase) ? 0 : 1;
             gLook.Controls.Add(cmbLook);
             page.Controls.Add(gLook);
 
@@ -513,7 +517,15 @@ namespace Nemoviz_Book_Reader
             // Misc — the look. A window builds itself once, so the change lands
             // when NBR starts again; offer to do that now rather than leaving the
             // user wondering why nothing happened.
-            if (cmbLook != null && !string.Equals(SelectedThemeId(), appSettings.UiTheme,
+            //
+            // AGAINST THE THEME IN FORCE, not against the stored id. Until the
+            // reader picks a look nothing is stored, and the combo is showing
+            // whichever one the default rule resolved to — so comparing against
+            // the empty setting would have called that a change and offered to
+            // restart NBR for a look it is already wearing. The setting is still
+            // WRITTEN in that case, which is right: it turns a default that could
+            // move under them into a choice that cannot.
+            if (cmbLook != null && !string.Equals(SelectedThemeId(), UiTheme.Current.Id,
                                                   StringComparison.OrdinalIgnoreCase))
             {
                 appSettings.SetUiTheme(SelectedThemeId());
@@ -1818,16 +1830,12 @@ namespace Nemoviz_Book_Reader
         // have somewhere to put one control. The look moved to General, where it
         // is a setting among settings instead of a leftover.
 
-        /// <summary>The chosen look, as an id for AppSettings.</summary>
+        /// <summary>The chosen look, as an id for AppSettings. Two items, and both
+        /// are a real theme — there is no longer an id meaning "work it out".</summary>
         private string SelectedThemeId()
         {
-            if (cmbLook == null) return UiTheme.FollowId;
-            switch (cmbLook.SelectedIndex)
-            {
-                case 1: return UiTheme.ClassicId;
-                case 2: return UiTheme.NewId;
-                default: return UiTheme.FollowId;
-            }
+            if (cmbLook == null) return UiTheme.Current.Id;
+            return cmbLook.SelectedIndex == 0 ? UiTheme.ClassicId : UiTheme.NewId;
         }
     }
 }

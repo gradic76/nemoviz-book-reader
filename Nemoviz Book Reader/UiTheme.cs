@@ -31,8 +31,18 @@ namespace Nemoviz_Book_Reader
     {
         public const string ClassicId = "classic";
         public const string NewId = "new";
-        /// <summary>Let Windows decide — the default, and the only value that
-        /// changes with the machine rather than with the reader.</summary>
+        /// <summary>LEGACY ONLY, and never written any more (Gordan, 2026-08-20).
+        ///
+        /// <para>It used to be a third item in Settings, and that was the mistake:
+        /// it is not a look, it is the RULE that picks one — and for anybody
+        /// without high contrast the rule picks NBR design, so the list offered a
+        /// third choice that behaved exactly like one of the other two. The rule
+        /// stays as the DEFAULT; only the asking is gone.</para>
+        ///
+        /// <para>The constant remains because installations already carry
+        /// <c>Theme=follow</c> in their Settings.ini, and a value that is no longer
+        /// offered still has to be UNDERSTOOD. It lands in the same branch as an
+        /// unset value, which resolves it exactly as it always did.</para></summary>
         public const string FollowId = "follow";
 
         private static UiTheme current;
@@ -65,9 +75,16 @@ namespace Nemoviz_Book_Reader
                 || string.Equals(id, FollowId, StringComparison.OrdinalIgnoreCase));
             if (!chosenByUser)
             {
-                // Nothing chosen: Windows decides. Under high contrast that means
-                // the system-colours layout, which is the classic one — it paints
-                // nothing of its own, so the user's scheme comes through whole.
+                // NOTHING CHOSEN: the default rule, and it is now the ONLY thing that
+                // reads the machine (Gordan, 2026-08-20). NBR design on installation,
+                // except where the reader already runs high contrast — there the
+                // system-colours look, which paints NOTHING of its own, so their
+                // scheme comes through whole. Measured: 0 of 9 controls carry a
+                // non-system colour under it, against 4 of 10 under NBR design.
+                //
+                // An unset value and the legacy "follow" both land here, so an
+                // installation carrying the old third choice resolves exactly as it
+                // did before and nothing has to be migrated on disk.
                 current = SystemInformation.HighContrast
                     ? (UiTheme)new ClassicTheme() : new NewTheme();
                 return;
