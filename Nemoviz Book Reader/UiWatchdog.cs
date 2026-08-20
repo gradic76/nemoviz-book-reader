@@ -122,7 +122,15 @@ namespace Nemoviz_Book_Reader
                     sb.Append("  [").Append(f.GetType().Name).Append(' ')
                       .Append(Describe(f.Handle)).Append(']');
                 }
+                // WRITTEN AT ONCE, not only into the crumb ring (2026-08-20).
+                // Note() keeps its lines in memory and the file is written ONLY
+                // when something stalls — so a HEALTHY run leaves no trace, and a
+                // healthy run is exactly the control this needs. Gordan's clean
+                // pass produced an empty log and told us nothing; now the same
+                // pass records what "working" looks like, and the broken state can
+                // be diffed against it instead of read on its own.
                 Note(sb.ToString());
+                try { ReadingDiagnostics.Always(sb.ToString()); } catch { }
             }
             catch { }
         }
