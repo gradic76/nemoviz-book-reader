@@ -5943,7 +5943,7 @@ namespace Nemoviz_Book_Reader
                 ofd.Filter = BuildFileFilter();
                 ofd.FilterIndex = 4; // default to "All supported files"
                 ofd.Title = Localization.T("Player.OpenFile.Title");
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog(this) == DialogResult.OK)
                 {
                     string ext = System.IO.Path.GetExtension(ofd.FileName).ToLower();
                     if (LibraryScanner.IsExtractableArchive(System.IO.Path.GetFileName(ofd.FileName)))

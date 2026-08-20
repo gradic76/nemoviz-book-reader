@@ -2173,7 +2173,20 @@ namespace Nemoviz_Book_Reader
                 // Fires only if the modal loop is turning, which tells "never
                 // opened" from "opened, then froze".
                 UiWatchdog.NoteWhenPumping("library: file dialog is up and pumping");
-                bool ok = ofd.ShowDialog() == DialogResult.OK;
+                // AN OWNER, EXPLICITLY. Without one a common dialog is parented to
+                // whatever GetActiveWindow() returns at that instant — and this
+                // window is opened from a Library that is itself modal on the
+                // player, while the reading window is ALSO modal on the player and
+                // is disposed the moment it closes. Handing it a window that is
+                // going away, or that is not the one on top, produces exactly the
+                // reported symptom: no dialog appears, the thread blocks inside
+                // IFileDialog.Show, and clicking anywhere DINGS — which is Windows
+                // saying a modal dialog is up that you cannot see.
+                //
+                // Every other ShowDialog in the app already passes an owner; these
+                // three were the only ones that did not. HYPOTHESIS, NOT PROOF —
+                // the watchdog note below is what will say whether it recurs.
+                bool ok = ofd.ShowDialog(this) == DialogResult.OK;
                 UiWatchdog.Note("library: file dialog closed, ok=" + ok);
                 if (ok)
                 {
@@ -2194,7 +2207,7 @@ namespace Nemoviz_Book_Reader
                 if (!string.IsNullOrEmpty(appSettings.LastImportFolder)
                     && System.IO.Directory.Exists(appSettings.LastImportFolder))
                     fbd.SelectedPath = appSettings.LastImportFolder;
-                if (fbd.ShowDialog() == DialogResult.OK)
+                if (fbd.ShowDialog(this) == DialogResult.OK)
                 {
                     appSettings.SetLastImportFolder(fbd.SelectedPath);
                     ImportFolder(fbd.SelectedPath);
