@@ -43,6 +43,10 @@ namespace Nemoviz_Book_Reader
         /// combo's own comment for why this is asked rather than worked out.</summary>
         public string InheritGlossaryPath { get; private set; }
 
+        /// <summary>True when the reader asked for this service ALONE — see the
+        /// check box for why that exists and why it is not the default.</summary>
+        public bool OnlyPrimary { get; private set; }
+
         /// <summary><b>One choice, and a chain follows from it.</b> The dialog used
         /// to ask for a fallback as well, which was asking a reader to design a
         /// retry policy — what they have an opinion about is which translation they
@@ -50,7 +54,9 @@ namespace Nemoviz_Book_Reader
         /// help key beside the engine.</summary>
         public List<TranslationEngine> Chain
         {
-            get { return TranslationEngines.Chain(Primary); }
+            get { return OnlyPrimary && Primary != null
+                       ? new List<TranslationEngine> { Primary }
+                       : TranslationEngines.Chain(Primary); }
         }
 
         private readonly ComboBox cmbSource = new ComboBox();
@@ -60,6 +66,7 @@ namespace Nemoviz_Book_Reader
         private readonly List<string> langCodes = new List<string>();
         private readonly List<TranslationEngine> engines;
         private ComboBox cmbInherit;
+        private CheckBox chkOnlyThis;
         private readonly List<string> inheritPaths = new List<string>();
         private readonly List<KeyValuePair<string, string>> glossaries;
 
@@ -127,6 +134,32 @@ namespace Nemoviz_Book_Reader
             chainNote.AccessibleName = chainNote.Text;
             Controls.Add(chainNote);
             y += 40;
+
+            // NO FALLBACK, FOR WHEN THE POINT IS TO JUDGE ONE SERVICE (Gordan,
+            // 2026-08-20, setting up a blind test of GPT against Gemini).
+            //
+            // <para>The chain is the right default and stays it: a book with three
+            // English paragraphs in it is a worse book, and the fallback rescued 50
+            // pieces across three novels. But it makes a COMPARISON meaningless.
+            // With Gemini refusing about a sixth of a published novel, a book
+            // labelled "translated by X" can arrive with a sixth of it written by Y,
+            // and an ear judging the result is judging a blend.</para>
+            //
+            // <para>Off by default, and deliberately worded as what it is FOR
+            // rather than as a preference. Nobody reading a book for pleasure wants
+            // this; the only reason to reach for it is to find out what one service
+            // does on its own.</para>
+            chkOnlyThis = new CheckBox
+            {
+                Text = Localization.T("Translate.Ask.OnlyThis"),
+                Location = new Point(12, y),
+                Size = new Size(476, 22),
+                TabIndex = 7
+            };
+            chkOnlyThis.AccessibleName = chkOnlyThis.Text;
+            Controls.Add(chkOnlyThis);
+            y += 28;
+            Height += 28;
 
             // THE STANDING NOTE IS SHOWN, NOT MERELY APPLIED. A rule that acts on
             // every book while being visible nowhere is the invisible dependency
@@ -257,6 +290,7 @@ namespace Nemoviz_Book_Reader
                 Primary = cmbEngine.SelectedIndex >= 0 && cmbEngine.SelectedIndex < engines.Count
                           ? engines[cmbEngine.SelectedIndex] : null;
                 Notes = tbNotes.Text.Trim();
+                OnlyPrimary = chkOnlyThis != null && chkOnlyThis.Checked;
                 if (cmbInherit != null && cmbInherit.SelectedIndex > 0
                     && cmbInherit.SelectedIndex < inheritPaths.Count)
                     InheritGlossaryPath = inheritPaths[cmbInherit.SelectedIndex];

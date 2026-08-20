@@ -458,9 +458,23 @@ namespace Nemoviz_Book_Reader
             sb.AppendLine("The opening of the book:");
             sb.AppendLine(opening);
 
-            TranslationResult r;
-            try { r = Translator.Send(opt.First, null, "", sb.ToString(), 2000, opt.SourceLang, opt.TargetLang); }
-            catch (Exception ex) { r = new TranslationResult { Error = ex.Message }; }
+            // THE PREPARATION WALKS THE CHAIN, exactly as the translation does —
+            // found on the first real run (2026-08-20). It asked opt.First alone,
+            // and on a book Gemini would not touch the preparation was refused with
+            // everything else: the glossary came out empty while DeepSeek went on
+            // to translate the whole passage perfectly well. A step that has no
+            // fallback in a design built around fallback is a step that fails on
+            // exactly the books the fallback exists for.
+            TranslationResult r = null;
+            foreach (TranslationEngine stop in opt.Chain)
+            {
+                // Azure cannot be asked a question -- it translates and nothing
+                // else -- so it has no answer to give here.
+                if (stop == null || stop.LastResort) continue;
+                try { r = Translator.Send(stop, null, "", sb.ToString(), 2000, opt.SourceLang, opt.TargetLang); }
+                catch (Exception ex) { r = new TranslationResult { Error = ex.Message }; }
+                if (r != null && r.Ok && !string.IsNullOrEmpty(r.Text)) break;
+            }
 
             if (r == null || !r.Ok || string.IsNullOrEmpty(r.Text))
             {
