@@ -602,7 +602,9 @@ Translate.Ask.Engine=Translation service:
 Translate.Ask.ChainNote=If a passage is refused, NBR tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
 Translate.Ask.NoEngine=No service has a key yet
 Translate.Ask.Standing=Your standing note is applied to this book as well: {0}
-Translate.Ask.Notes=Anything the translator should know about THIS book (optional) — for example that the narrator is a woman, or how two characters address each other:
+Translate.Ask.Inherit=Continue a series, using the glossary of:
+Translate.Ask.Inherit.None=Nothing — this book stands on its own
+Translate.Ask.Notes=Anything the translator should know about THIS book (optional). The narrator and the names are worked out from the text on their own; this is for what the text does not say — a term you want rendered a particular way, or how two characters address each other:
 Translate.Ask.Start=Translate
 ; The notice that goes INTO the book around a passage the last-resort service had
 ; to rescue. It is not a courtesy: that service sets the narrator's gender and the

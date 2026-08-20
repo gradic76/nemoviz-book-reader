@@ -56,7 +56,7 @@ namespace Nemoviz_Book_Reader
         /// consistency line matters most: what a cut takes away is the thread, and
         /// the model has no other way to know that this piece is the middle of
         /// something.</para></summary>
-        public static string BuildSystemPrompt(string sourceLang, string targetLang, string readerNotes)
+        public static string BuildSystemPrompt(string sourceLang, string targetLang, string readerNotes, TranslationBible bible = null)
         {
             var sb = new StringBuilder();
             sb.Append("You are a literary translator. Translate from ")
@@ -103,6 +103,23 @@ namespace Nemoviz_Book_Reader
             // literalness; it is what literalness looks like in the target.
             sb.AppendLine("- Write natural, idiomatic prose in the target language. Do not mirror the source's sentence structure where the target would put it differently, and do not reach for a loanword when the target has its own word.");
             sb.AppendLine("- Stay consistent with the rest of the book: the same character names, the same terms, the same level of address between the same people, and the same gender for the same speaker.");
+            // THE LAYERS, ORDERED MOST STABLE FIRST, and the order is not tidiness.
+            // Prompt caching pays for a stable PREFIX, so what never changes has to
+            // come before what changes per language, which comes before what changes
+            // per book. Written the other way round, one new book would break the
+            // cache for everything above it.
+            //
+            //   1. the rules above          the same for all 138 languages
+            //   2. TranslationRules.For     the same for every book in this language
+            //   3. bible.ToPrompt           this book: its narrator, its names
+            //   4. the reader notes         this book, and they outrank everything
+            string langRules = TranslationRules.For(targetLang);
+            if (langRules.Length > 0) sb.AppendLine(langRules);
+            if (bible != null)
+            {
+                string facts = bible.ToPrompt();
+                if (facts.Length > 0) sb.Append(facts);
+            }
             if (!string.IsNullOrWhiteSpace(readerNotes))
             {
                 sb.AppendLine();
@@ -145,6 +162,21 @@ namespace Nemoviz_Book_Reader
             /// <see cref="TextChunker.Split(string,int,IList{int})"/>. Null or
             /// empty simply means the cutting knows nothing about chapters.</summary>
             public IList<int> ChapterStarts;
+            /// <summary>Where to write what was decided about this book — the
+            /// narrator and the glossary. Null writes none.</summary>
+            public string BiblePath;
+            /// <summary>A glossary from an EARLIER book to start from, chosen by the
+            /// reader. Empty for a standalone book.
+            ///
+            /// <para><b>Why the reader picks it and NBR does not.</b> Book two of a
+            /// trilogy must render its names exactly as book one did, and nothing in
+            /// the text says two books belong together — the reader knows and the
+            /// program cannot. The same line the narrator gender sits on: NBR
+            /// supplies the tool, the reader supplies what exists only outside the
+            /// text. What is inherited is intersected with the names this book
+            /// really uses, so a decision carries over and an irrelevant one does
+            /// not ride along in every request.</para></summary>
+            public string InheritBiblePath;
             /// <summary>Where to write a line per piece. Null writes none.
             ///
             /// <para><b>What a summary cannot tell you afterwards</b>: which stop
@@ -216,8 +248,22 @@ namespace Nemoviz_Book_Reader
             StartLog(opt, bookText.Length, parts, chunks.Count);
             var chainState = new ChainState(opt);
 
+            // THE BOOK FACTS, BEFORE A WORD OF IT IS SENT. An inherited glossary
+            // first -- the reader saying "this is book two of that trilogy" -- then
+            // one call for whatever it does not already answer. Inheriting is
+            // narrowed to the names this book really uses, so book one's cast does
+            // not ride along in every request.
+            TranslationBible bible = TranslationBible.Load(opt.InheritBiblePath);
+            bible.KeepOnlyPresentIn(parts.Body);
+            bible.FillGapsFrom(DetectBible(parts.Body, opt, report));
+            bible.Save(opt.BiblePath);
+            if (bible.NarratorGender.Length > 0)
+                Log(opt, "narrator      " + bible.NarratorGender);
+            if (bible.Names.Count > 0)
+                Log(opt, "glossary      " + bible.Names.Count + " names and terms");
+
             var cache = TranslationCache.Open(opt.CachePath);
-            string system = BuildSystemPrompt(opt.SourceLang, opt.TargetLang, opt.ReaderNotes);
+            string system = BuildSystemPrompt(opt.SourceLang, opt.TargetLang, opt.ReaderNotes, bible);
 
             var pieces = new List<Piece>(chunks.Count);
             foreach (TextChunk c in chunks)
@@ -256,7 +302,7 @@ namespace Nemoviz_Book_Reader
             if (!report.Cancelled)
             {
                 report.Issues.AddRange(TranslationChecks.Book(bookText, report.Text));
-                report.Issues.AddRange(GenderIssues(pieces));
+                report.Issues.AddRange(GenderIssues(pieces, bible));
             }
             report.Ok = !report.Cancelled && report.Text.Length > 0;
             report.Elapsed = DateTime.UtcNow - started;
@@ -356,6 +402,83 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+
+        /// <summary>Establishes the book facts before a word of it is translated:
+        /// who the narrator is, and how the names it keeps using are to be rendered.
+        ///
+        /// <para><b>The finding half costs nothing and reads the WHOLE book.</b>
+        /// <see cref="TranslationChecks.FrequentNames"/> is a deterministic scan for
+        /// capitalised words that are not merely sentence openers, and it already
+        /// existed for the vanished-name check. Sampling would have been the obvious
+        /// shortcut and it is the wrong one: a character introduced in chapter
+        /// thirty is exactly the one that ends up with five different forms across a
+        /// book, because nothing earlier fixed a choice.</para>
+        ///
+        /// <para><b>The model is asked only to DECIDE</b>, over a shortlist, with
+        /// the opening of the book for context — which is where a narrator gives
+        /// themselves away and where the cast is introduced. One request. Measured
+        /// against the jobs we have actually run (8 min, 3 h, 5 h) it is under one
+        /// per cent of the wall clock on anything but the shortest book.</para>
+        ///
+        /// <para><b>A failure here is not a failure of the job.</b> No answer, a
+        /// refusal, no key — the book is translated exactly as it would have been
+        /// before this existed, and the report says the facts were not established.
+        /// The alternative, refusing to translate because a preparatory call did not
+        /// come back, would be worse than the fault it prevents.</para></summary>
+        private static TranslationBible DetectBible(string body, Options opt, TranslationReport report)
+        {
+            var bible = new TranslationBible();
+            if (opt == null || opt.First == null || string.IsNullOrEmpty(body)) return bible;
+
+            List<string> candidates = TranslationChecks.FrequentNameList(body, 60);
+            // The opening, and enough of it to meet the narrator and the first few
+            // people they talk to. Front matter is already gone by the time this is
+            // called, so this really is the first page of the story.
+            string opening = body.Length <= 6000 ? body : body.Substring(0, 6000);
+
+            var sb = new StringBuilder();
+            sb.AppendLine("You are preparing to translate a novel from "
+                          + (LanguageDetector.DisplayName(opt.SourceLang) ?? opt.SourceLang)
+                          + " into " + (LanguageDetector.DisplayName(opt.TargetLang) ?? opt.TargetLang) + ".");
+            sb.AppendLine("Answer in PLAIN LINES, nothing else. No JSON, no prose, no explanation.");
+            sb.AppendLine();
+            sb.AppendLine("Line 1, only if the book is narrated in the FIRST PERSON:");
+            sb.AppendLine("NARRATOR: feminine");
+            sb.AppendLine("or");
+            sb.AppendLine("NARRATOR: masculine");
+            sb.AppendLine("Give this line ONLY if you are sure from the text. If the book is in the third person, or you cannot tell, leave the line out entirely rather than guessing.");
+            sb.AppendLine();
+            sb.AppendLine("Then one line for each name below that appears in the story, in this shape:");
+            sb.AppendLine("NAME: <as written in the source> = <how it is to be written in the target language, and how it inflects if the target language inflects names>");
+            sb.AppendLine("Keep a name in its original form where that is the convention of the target language, and transliterate it where THAT is the convention. Say which case forms to use if the target language declines. Leave out anything from the list that is not a name or a term of this story - an ordinary word that happens to be capitalised is not wanted.");
+            sb.AppendLine();
+            sb.AppendLine("Candidate names, most frequent first:");
+            sb.AppendLine(string.Join(", ", candidates.ToArray()));
+            sb.AppendLine();
+            sb.AppendLine("The opening of the book:");
+            sb.AppendLine(opening);
+
+            TranslationResult r;
+            try { r = Translator.Send(opt.First, null, "", sb.ToString(), 2000, opt.SourceLang, opt.TargetLang); }
+            catch (Exception ex) { r = new TranslationResult { Error = ex.Message }; }
+
+            if (r == null || !r.Ok || string.IsNullOrEmpty(r.Text))
+            {
+                Add(report, CheckSeverity.Note, "book facts",
+                    "the narrator and the names could not be established, so the book was translated without them"
+                    + (r != null && r.Error != null ? " (" + r.Error + ")" : ""));
+                return bible;
+            }
+
+            foreach (string line in r.Text.Replace("\r\n", "\n").Split('\n')) bible.ReadLine(line);
+            return bible;
+        }
+
+        private static void Add(TranslationReport report, CheckSeverity sev, string kind, string detail)
+        {
+            if (report == null) return;
+            report.Issues.Add(new TranslationIssue { Severity = sev, Kind = kind, Detail = detail });
+        }
         private static Piece TranslateOne(TextChunk c, string user, string system,
                                           Options opt, TranslationReport report, ChainState state)
         {
@@ -534,7 +657,7 @@ namespace Nemoviz_Book_Reader
         /// form, so a piece that disagrees with the book around it is measurable —
         /// and it is the ONE check that separated the engines when paragraph counts,
         /// length ratios and figures agreed across all of them.</para></summary>
-        private static List<TranslationIssue> GenderIssues(List<Piece> pieces)
+        private static List<TranslationIssue> GenderIssues(List<Piece> pieces, TranslationBible expected)
         {
             var found = new List<TranslationIssue>();
             int bookM = 0, bookF = 0;
@@ -550,11 +673,44 @@ namespace Nemoviz_Book_Reader
             // Below a handful of forms in the whole book there is nothing to be
             // consistent with — a third-person narrative has no first person at all.
             if (total < 12) return found;
-            bool bookIsFeminine = bookF > bookM;
-            // A book that is genuinely half and half has more than one narrator, and
-            // then a piece disagreeing with the average means nothing.
-            int major = Math.Max(bookM, bookF);
-            if (major * 4 < total * 3) return found;
+
+            // THE FACT COMES FROM THE SOURCE WHERE WE HAVE IT, NOT FROM THE
+            // TRANSLATION (2026-08-20). Taking the book's own majority makes this a
+            // CONSISTENCY test, and a uniformly wrong book is perfectly consistent:
+            // that is exactly how three Richard Swan novels went out with a female
+            // first-person narrator rendered as a man, and every check passing.
+            // Given the detected narrator, the same counting becomes a CORRECTNESS
+            // test and a book that is wrong throughout is the loudest thing in the
+            // report rather than the quietest.
+            bool haveFact = expected != null && expected.NarratorGender.Length > 0;
+            bool bookIsFeminine = haveFact
+                ? expected.NarratorGender == "feminine"
+                : bookF > bookM;
+
+            if (haveFact)
+            {
+                int against = bookIsFeminine ? bookM : bookF;
+                int with = bookIsFeminine ? bookF : bookM;
+                // Not "some pieces disagree" but "the book disagrees with itself
+                // about who is telling it", which is a different and worse sentence
+                // to read in a report.
+                if (against > with)
+                    found.Add(new TranslationIssue
+                    {
+                        Severity = CheckSeverity.Suspect,
+                        Kind = "narrator",
+                        Detail = "the narrator is " + expected.NarratorGender
+                                 + ", but the translation uses the other gender in " + against
+                                 + " of " + total + " first-person past-tense forms across the whole book"
+                    });
+            }
+            else
+            {
+                // A book that is genuinely half and half has more than one narrator,
+                // and then a piece disagreeing with the average means nothing.
+                int major = Math.Max(bookM, bookF);
+                if (major * 4 < total * 3) return found;
+            }
 
             for (int i = 0; i < perPiece.Count; i++)
             {

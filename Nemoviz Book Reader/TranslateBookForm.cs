@@ -39,6 +39,10 @@ namespace Nemoviz_Book_Reader
         public TranslationEngine Primary { get; private set; }
         public string Notes { get; private set; }
 
+        /// <summary>The glossary of an earlier book to start from, or null. See the
+        /// combo's own comment for why this is asked rather than worked out.</summary>
+        public string InheritGlossaryPath { get; private set; }
+
         /// <summary><b>One choice, and a chain follows from it.</b> The dialog used
         /// to ask for a fallback as well, which was asking a reader to design a
         /// retry policy — what they have an opinion about is which translation they
@@ -55,11 +59,16 @@ namespace Nemoviz_Book_Reader
         private readonly TextBox tbNotes = new TextBox();
         private readonly List<string> langCodes = new List<string>();
         private readonly List<TranslationEngine> engines;
+        private ComboBox cmbInherit;
+        private readonly List<string> inheritPaths = new List<string>();
+        private readonly List<KeyValuePair<string, string>> glossaries;
 
         public TranslateBookForm(AppSettings settings, string bookTitle, string detectedLanguage,
-                                 int characters, bool fromHybrid)
+                                 int characters, bool fromHybrid,
+                                 List<KeyValuePair<string, string>> earlierGlossaries = null)
         {
             engines = TranslationEngines.Configured();
+            glossaries = earlierGlossaries;
 
             Text = Localization.T("Translate.Ask.Title");
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -144,6 +153,52 @@ namespace Nemoviz_Book_Reader
                 Height += 36;
             }
 
+            // THE GLOSSARY OF AN EARLIER BOOK, and only when there is one to offer.
+            //
+            // <para>Book two of a trilogy has to render Vonvalt exactly as book one
+            // did, and nothing in a text says two books belong together. The reader
+            // knows; NBR cannot. Same line as the narrator gender, opposite answer:
+            // the gender IS in the text and is detected, series membership is not
+            // and is asked. Asked ONCE, here, of somebody who already knows the
+            // answer -- not a page of names to approve, which is a decision nobody
+            // can make before reading the book.
+            //
+            // <para>The row does not appear at all when no earlier book carries a
+            // glossary, which is every reader's first translation. A control that
+            // can only be answered "no" is one more thing to tab past.
+            if (glossaries != null && glossaries.Count > 0)
+            {
+                var lblInherit = new Label
+                {
+                    Text = Localization.T("Translate.Ask.Inherit"),
+                    Location = new Point(12, y + 3),
+                    Size = new Size(180, 20)
+                };
+                Controls.Add(lblInherit);
+                cmbInherit = new ComboBox
+                {
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    Location = new Point(196, y),
+                    Size = new Size(292, 24),
+                    TabIndex = 8
+                };
+                cmbInherit.AccessibleName = Localization.T("Translate.Ask.Inherit");
+                cmbInherit.Items.Add(Localization.T("Translate.Ask.Inherit.None"));
+                inheritPaths.Add(null);
+                foreach (var g in glossaries)
+                {
+                    cmbInherit.Items.Add(g.Key);
+                    inheritPaths.Add(g.Value);
+                }
+                cmbInherit.SelectedIndex = 0;
+                // NVDA says nothing when a closed DropDownList changes on the
+                // arrow keys; the app-wide remedy, and a no-op under JAWS.
+                NvdaController.SpeakOnChange(cmbInherit);
+                Controls.Add(cmbInherit);
+                y += 34;
+                Height += 34;
+            }
+
             var lblNotes = new Label
             {
                 Text = Localization.T("Translate.Ask.Notes"),
@@ -177,6 +232,12 @@ namespace Nemoviz_Book_Reader
                 TabIndex = 11,
                 DialogResult = DialogResult.Cancel
             };
+            // Explicit, as everywhere else in the app. A Button falls back to its
+            // Text when nothing is set, so this changed nothing a reader hears --
+            // but it is what the layout checks look for, and a false positive in a
+            // check is a check people stop reading.
+            ok.AccessibleName = ok.Text;
+            cancel.AccessibleName = cancel.Text;
             ok.Enabled = engines.Count > 0;
             Controls.Add(ok);
             Controls.Add(cancel);
@@ -196,6 +257,9 @@ namespace Nemoviz_Book_Reader
                 Primary = cmbEngine.SelectedIndex >= 0 && cmbEngine.SelectedIndex < engines.Count
                           ? engines[cmbEngine.SelectedIndex] : null;
                 Notes = tbNotes.Text.Trim();
+                if (cmbInherit != null && cmbInherit.SelectedIndex > 0
+                    && cmbInherit.SelectedIndex < inheritPaths.Count)
+                    InheritGlossaryPath = inheritPaths[cmbInherit.SelectedIndex];
             };
         }
 

@@ -2199,6 +2199,29 @@ namespace Nemoviz_Book_Reader
             }
         }
 
+        /// <summary>Books on the shelf that already carry a glossary, newest first
+        /// — the candidates for "this is book two of that trilogy".
+        ///
+        /// <para>Only books that HAVE one are offered. A reader's first translation
+        /// sees no such control at all, which is right: a question whose only
+        /// possible answer is "none" is one more thing to tab past.</para></summary>
+        private List<KeyValuePair<string, string>> EarlierGlossaries(BookData exclude)
+        {
+            var found = new List<KeyValuePair<string, string>>();
+            try
+            {
+                foreach (BookData b in books)
+                {
+                    if (b == null || b == exclude || string.IsNullOrEmpty(b.FolderPath)) continue;
+                    string path = System.IO.Path.Combine(b.FolderPath, "translation-glossary.txt");
+                    if (System.IO.File.Exists(path))
+                        found.Add(new KeyValuePair<string, string>(b.Title ?? b.FolderPath, path));
+                }
+            }
+            catch { }
+            return found;
+        }
+
         private void MenuFileOpenFolder_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog fbd = new FolderBrowserDialog())
@@ -2470,7 +2493,8 @@ namespace Nemoviz_Book_Reader
             TranslationReport report;
             string target;
             using (var ask = new TranslateBookForm(appSettings, title, book.TextLanguage,
-                                                   text.Length, book.IsHybrid))
+                                                   text.Length, book.IsHybrid,
+                                                   EarlierGlossaries(book)))
             {
                 if (ask.ShowDialog(this) != DialogResult.OK || ask.Primary == null) return;
                 target = ask.TargetLanguage;
@@ -2491,6 +2515,16 @@ namespace Nemoviz_Book_Reader
                     // piece, how many asks it cost and how long it waited. The
                     // counters at the end flatten exactly that away.
                     LogPath = System.IO.Path.Combine(book.FolderPath, "translation.log"),
+                    // Beside the cache and the log: the narrator and the glossary,
+                    // as they were decided before the first piece went out. Kept
+                    // with the SOURCE book so a correction plus a re-run costs
+                    // seconds -- the cache is right there and hands back every
+                    // piece that did not change.
+                    BiblePath = System.IO.Path.Combine(book.FolderPath, "translation-glossary.txt"),
+                    // The reader saying "this is book two of that trilogy". Empty
+                    // until the dialog offers the choice; an absent file simply
+                    // means nothing is inherited.
+                    InheritBiblePath = ask.InheritGlossaryPath,
                     HasHeadings = book.TextHeadings != null && book.TextHeadings.Count > 0,
                     // So a chapter does not begin three sentences before the end
                     // of a piece — see TextChunker. These are already in cleaned

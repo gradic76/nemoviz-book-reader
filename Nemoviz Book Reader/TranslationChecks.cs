@@ -281,6 +281,24 @@ namespace Nemoviz_Book_Reader
             return null;
         }
 
+        /// <summary>The frequent capitalised words, most frequent first, as a plain
+        /// list — the candidate names the book keeps using.
+        ///
+        /// <para>Exposed because two jobs want the same scan: the vanished-name
+        /// check that has always used it, and the glossary built before a word is
+        /// translated. It reads the WHOLE text on purpose. A character introduced
+        /// late is precisely the one that ends up with several different forms,
+        /// because nothing earlier fixed a choice.</para></summary>
+        public static List<string> FrequentNameList(string s, int max)
+        {
+            var names = new List<string>();
+            foreach (var kv in FrequentNames(s))
+            {
+                if (names.Count >= max) break;
+                names.Add(kv.Key);
+            }
+            return names;
+        }
         /// <summary>Capitalised words that turn up often and are not merely
         /// sentence openers — good enough to find the people and places a book
         /// keeps naming.</summary>
