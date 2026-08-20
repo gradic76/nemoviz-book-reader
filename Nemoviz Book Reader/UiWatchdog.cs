@@ -122,15 +122,28 @@ namespace Nemoviz_Book_Reader
                     sb.Append("  [").Append(f.GetType().Name).Append(' ')
                       .Append(Describe(f.Handle)).Append(']');
                 }
-                // WRITTEN AT ONCE, not only into the crumb ring (2026-08-20).
-                // Note() keeps its lines in memory and the file is written ONLY
-                // when something stalls — so a HEALTHY run leaves no trace, and a
-                // healthy run is exactly the control this needs. Gordan's clean
-                // pass produced an empty log and told us nothing; now the same
-                // pass records what "working" looks like, and the broken state can
-                // be diffed against it instead of read on its own.
+                // THE CHEAP HALF NOW, THE DISK LATER. Note() only touches a ring
+                // in memory, so it cannot shift the timing of what happens next.
+                // The immediate write does: it is a synchronous file write, and it
+                // sat microseconds before ShowDialog on the very path we are
+                // hunting a race down. Three clean runs after adding it are not
+                // evidence of a cure when the only change WAS the measurement.
+                //
+                // So the disk copy is posted instead. If the dialog opens normally
+                // it lands a moment later and the healthy control is recorded as
+                // before; if the dialog wedges before it ever pumps, the post never
+                // runs -- and it does not need to, because the crumb is already in
+                // the ring and the stall dump carries the ring with it.
                 Note(sb.ToString());
-                try { ReadingDiagnostics.Always(sb.ToString()); } catch { }
+                string forDisk = sb.ToString();
+                try
+                {
+                    if (self != null && self.IsHandleCreated)
+                        self.BeginInvoke((MethodInvoker)(() =>
+                        { try { ReadingDiagnostics.Always(forDisk); } catch { } }));
+                    else ReadingDiagnostics.Always(forDisk);
+                }
+                catch { }
             }
             catch { }
         }
