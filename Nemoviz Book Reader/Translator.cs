@@ -104,6 +104,9 @@ namespace Nemoviz_Book_Reader
         public const string Gemini = "gemini";
         public const string DeepSeek = "deepseek";
         public const string DeepSeekPro = "deepseek-pro";
+        public const string OpenAi = "openai";
+        public const string OpenAiSol = "openai-sol";
+        public const string OpenAiLuna = "openai-luna";
         public const string Azure = "azure";
 
         /// <summary>Azure keeps a second value beside its key: the region a
@@ -153,6 +156,58 @@ namespace Nemoviz_Book_Reader
                 Endpoint = "https://api.deepseek.com/chat/completions",
                 Model = "deepseek-v4-pro",
                 KeyId = DeepSeek
+            },
+            // OPENAI, THREE TIERS ON ONE ACCOUNT AND ONE KEY (added 2026-08-20 so
+            // it can be judged by ear against Gemini, under the same conditions and
+            // through the same pipe).
+            //
+            // <para>It speaks the ordinary /chat/completions shape with a Bearer
+            // key, so it needed no transport of its own — the same reason DeepSeek
+            // did not. Model ids confirmed against OpenAI's own model pages rather
+            // than taken from the conversation Gordan brought in, whose prices for
+            // them contradicted themselves between two sections.</para>
+            //
+            // <para><b>Terra is the one offered first, not Sol.</b> Our own
+            // precedent says the dearest of a family does not automatically earn
+            // its price here: Gordan compared deepseek-pro against -flash and kept
+            // the cheap one, "3.1x the price for a few phrases". Luna is here for
+            // the same reason from the other end. Recomputed with the tokenisation
+            // we measured on Croatian (3.7 chars per input token, 3.16 per output —
+            // not the 4 the conversation assumed), a 450 000-character book costs
+            // about $2.44 on Terra, $0.98 on Luna and $4.88 on Sol, against a
+            // MEASURED $0.23 on Gemini. All three are trivial for one book and
+            // Terra is ten times Gemini for a habit.</para>
+            //
+            // <para><b>None of them is in the fallback chain</b>, and that is
+            // deliberate rather than an omission — see Chain. A third engine with
+            // filters of its own is genuinely interesting for coverage, since
+            // Gemini refuses about a sixth of a published novel; but that is a
+            // measurement to make, not an assumption to ship.</para>
+            new TranslationEngine
+            {
+                Id = OpenAi,
+                NameKey = "Settings.Translate.Engine.OpenAi",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.openai.com/v1/chat/completions",
+                Model = "gpt-5.6-terra"
+            },
+            new TranslationEngine
+            {
+                Id = OpenAiLuna,
+                NameKey = "Settings.Translate.Engine.OpenAiLuna",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.openai.com/v1/chat/completions",
+                Model = "gpt-5.6-luna",
+                KeyId = OpenAi
+            },
+            new TranslationEngine
+            {
+                Id = OpenAiSol,
+                NameKey = "Settings.Translate.Engine.OpenAiSol",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.openai.com/v1/chat/completions",
+                Model = "gpt-5.6-sol",
+                KeyId = OpenAi
             },
             // Deferred once, and then a measurement brought it back: Gemini
             // refuses roughly a sixth of an ordinary published novel — not for

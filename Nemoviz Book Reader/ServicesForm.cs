@@ -142,6 +142,9 @@ namespace Nemoviz_Book_Reader
             });
             AddEngine("Services.Item.DeepSeek", "DeepSeek", TranslationEngines.DeepSeek);
             AddEngine("Services.Item.Gemini", "Gemini", TranslationEngines.Gemini);
+            // One account and one key for all three tiers -- Luna and Sol carry
+            // KeyId = OpenAi, so they need no entry of their own here.
+            AddEngine("Services.Item.OpenAi", "OpenAi", TranslationEngines.OpenAi);
         }
 
         private void AddEngine(string nameKey, string guideKey, string engineId)
