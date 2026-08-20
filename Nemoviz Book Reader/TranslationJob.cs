@@ -471,9 +471,21 @@ namespace Nemoviz_Book_Reader
                 // Azure cannot be asked a question -- it translates and nothing
                 // else -- so it has no answer to give here.
                 if (stop == null || stop.LastResort) continue;
-                try { r = Translator.Send(stop, null, "", sb.ToString(), 2000, opt.SourceLang, opt.TargetLang); }
+                try { r = Translator.Send(stop, null, "", sb.ToString(), Math.Max(4000, opt.MaxOutputTokens / 2),
+                                          opt.SourceLang, opt.TargetLang); }
                 catch (Exception ex) { r = new TranslationResult { Error = ex.Message }; }
-                if (r != null && r.Ok && !string.IsNullOrEmpty(r.Text)) break;
+                if (r == null || !r.Ok || string.IsNullOrEmpty(r.Text)) continue;
+
+                // ANSWERING IS NOT THE SAME AS TELLING US SOMETHING, measured on the
+                // first comparison run (2026-08-21). One engine came back with text
+                // this parser found nothing in, the loop treated that as success and
+                // asked nobody else, and the book was translated with no narrator
+                // and no glossary -- while the other sample in the same comparison
+                // had both. An empty result has to fall through exactly like a
+                // refusal, or the preparation quietly does not happen.
+                var got = new TranslationBible();
+                foreach (string line in r.Text.Replace("\r\n", "\n").Split('\n')) got.ReadLine(line);
+                if (!got.IsEmpty) return got;
             }
 
             if (r == null || !r.Ok || string.IsNullOrEmpty(r.Text))
@@ -501,6 +513,7 @@ namespace Nemoviz_Book_Reader
             var clock = System.Diagnostics.Stopwatch.StartNew();
             int asks = 0;
             var refused = new List<TranslationEngine>();
+            var whyRefused = new Dictionary<TranslationEngine, string>();
 
             for (int stop = 0; stop < opt.Chain.Count; stop++)
             {
@@ -522,6 +535,17 @@ namespace Nemoviz_Book_Reader
                     {
                         // Only the LAST attempt counts as this engine refusing the
                         // piece — the earlier ones are the retries it is allowed.
+                        // WHY IT WOULD NOT TAKE IT, kept for the report. Without this
+                        // the note explaining the fallback described the SUCCESSFUL
+                        // attempt instead, so it read "DeepSeek — " with nothing
+                        // after the dash and the reason was lost. Measured
+                        // 2026-08-21: Gemini was failing every piece of two books
+                        // with "429, your prepayment credits are depleted", and the
+                        // report said only that a later engine had been used --
+                        // which reads as a content refusal and sent this session
+                        // hunting the wrong fault twice.
+                        if (!r.Ok && !whyRefused.ContainsKey(engine))
+                            whyRefused[engine] = (r.Error + " " + r.Detail).Trim();
                         if (attempt == attempts - 1 && !refused.Contains(engine)) refused.Add(engine);
                         continue;
                     }
@@ -539,8 +563,7 @@ namespace Nemoviz_Book_Reader
                         {
                             Severity = CheckSeverity.Note,
                             Kind = engine.LastResort ? "last resort" : "later engine",
-                            Detail = engine.DisplayName + " — " +
-                                     (last.Ok ? Describe(lastIssues) : (last.Error + " " + last.Detail)),
+                            Detail = engine.DisplayName + " took it. " + WhyEarlierStopsFailed(opt, stop, whyRefused, last, lastIssues),
                             ChunkIndex = c.Index
                         });
                     }
@@ -820,6 +843,40 @@ namespace Nemoviz_Book_Reader
             catch { return true; }
         }
 
+
+        /// <summary>Why the stops before this one did not take the piece.
+        ///
+        /// <para><b>The whole point of the note</b>, and it was missing. It used to
+        /// describe the attempt that SUCCEEDED, which by construction has nothing
+        /// wrong with it — so the line read "DeepSeek — " and stopped. A reader of
+        /// the report could see that a later engine had been used and never learn
+        /// why, and "a later engine was needed" reads as a content refusal when it
+        /// may be anything at all.</para>
+        ///
+        /// <para>It cost this session two wrong conclusions in a row: Gemini was
+        /// failing every piece of two different books because its account had run
+        /// out of prepaid credit, and the report's silence let that pass as the
+        /// model declining to translate a published book.</para></summary>
+        private static string WhyEarlierStopsFailed(Options opt, int reached,
+                                                    Dictionary<TranslationEngine, string> why,
+                                                    TranslationResult last,
+                                                    List<TranslationIssue> lastIssues)
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < reached && i < opt.Chain.Count; i++)
+            {
+                TranslationEngine e = opt.Chain[i];
+                if (e == null) continue;
+                string reason;
+                if (!why.TryGetValue(e, out reason) || string.IsNullOrEmpty(reason))
+                    // It answered every time and the answer failed a check, which is
+                    // a different thing from refusing and has to read differently.
+                    reason = last != null && last.Ok ? Describe(lastIssues) : "no reason given";
+                if (sb.Length > 0) sb.Append("; ");
+                sb.Append(e.DisplayName).Append(": ").Append(reason);
+            }
+            return sb.Length == 0 ? "" : sb.ToString();
+        }
         private static bool HasSuspect(List<TranslationIssue> issues)
         {
             foreach (var i in issues) if (i.Severity == CheckSeverity.Suspect) return true;
