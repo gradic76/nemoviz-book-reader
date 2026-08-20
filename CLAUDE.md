@@ -157,6 +157,16 @@ These are Gordan's standing preferences. Honor them unless he says otherwise.
   wall-clock. Full-file regeneration in chat burned tokens fast; Code's
   surgical edits should help. Group related changes.
 - **Grammar**: "rewound" is the correct past participle (not "rewinded").
+- **THE APP'S NAME IN USER-VISIBLE TEXT IS "Nemoviz Book Reader" OR "NBR", never
+  "Nemoviz" alone** (Gordan, 2026-08-17). The full name where the program
+  introduces or identifies itself — the title bar, `App.Name`, the About window,
+  the first line of a file it writes — and **NBR in running prose**, which is the
+  convention `en.lang` had already settled into on its own: the About text opens
+  with the full name and then says "the parts NBR is built from". Bare "Nemoviz"
+  names the maker rather than the product, so in a sentence about what the program
+  DOES it names the wrong thing. It applies to everything a reader can reach,
+  including the text inside a log file; a machine token such as the HTTP
+  `UserAgent` is not user-visible text and is left alone.
 - **Git is the safety net.** Before making changes in a session, the working
   state should be committed so there is a point to return to. Do not perform
   destructive git operations (hard reset, force, clean) without explicit

@@ -406,7 +406,7 @@ Analyse.Progress.Minutes=About {0} minutes left.
 ; which is why the reader is asked first rather than having a book start
 ; recognising itself.
 Ocr.Ask.Title=Read the pictures
-Ocr.Ask.Question={0} has no text in it — it is {1} pages of pictures. Nemoviz can read the text off them, which should take {2}. Read it now?
+Ocr.Ask.Question={0} has no text in it — it is {1} pages of pictures. NBR can read the text off them, which should take {2}. Read it now?
 ; Only shown when more than one recognition language is installed — with one,
 ; the import asks a plain yes/no instead.
 Ocr.Ask.ReadWith=Read with:
@@ -469,7 +469,7 @@ Settings.Cloud.NoList=The account was accepted, but the list of voices could not
 Btn.Close=Close
 Azure.Setup.Title=Set up Azure Speech
 Azure.Setup.Open=Create it for me...
-Azure.Setup.Intro=Nemoviz can make the Azure resource for you, so there is no portal to work through. You sign in to Microsoft once with a short code, choose which subscription to put it on, and Nemoviz creates it on the free tier and keeps the key. Nothing is created until you have signed in.
+Azure.Setup.Intro=NBR can make the Azure resource for you, so there is no portal to work through. You sign in to Microsoft once with a short code, choose which subscription to put it on, and NBR creates it on the free tier and keeps the key. Nothing is created until you have signed in.
 Azure.Setup.Start=Start
 Azure.Setup.SigningIn=Asking Microsoft for a sign-in code.
 Azure.Setup.CodeLabel=Sign-in code:
@@ -482,7 +482,7 @@ Azure.Setup.Subscription=Subscription:
 Azure.Setup.SignedIn=Signed in. {0} subscription(s) found — choose one and select Create.
 Azure.Setup.Create=Create the resource
 Azure.Setup.NoSubscription=That account has no Azure subscription, so there is nowhere to create the resource.
-Azure.Setup.Creating=Creating the resource. This takes up to a minute or two; Azure reports it as ready before it really is, so Nemoviz waits.
+Azure.Setup.Creating=Creating the resource. This takes up to a minute or two; Azure reports it as ready before it really is, so NBR waits.
 Azure.Setup.Done=Done. The resource is made and its key is kept — {0} voices are available.
 Azure.Setup.DoneNoList=The resource is made and its key is kept, but the list of voices could not be fetched. That is usually the network; the voices will appear once it can be reached.
 Azure.Setup.Failed=It did not work: {0}
@@ -520,14 +520,14 @@ Ocr.Blank.Jbig2={0} pages in a row came back with no text on them at all. This P
 Ocr.Read.Question=This book is {0} pages of pictures and has not been read yet. Reading it takes {1}.
 Ocr.ReRead.Question=This book was read from {0} pages of pictures. Reading it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
 Ocr.ReRead.Done=The book has been read again and replaced.
-; For a book read before Nemoviz started keeping the pictures, or one whose
+; For a book read before NBR started keeping the pictures, or one whose
 ; originals have since been moved. Asked once — they are kept afterwards.
-Ocr.ReRead.Locate=The pictures for this book are not kept with it, so Nemoviz needs to find them again. Choose the scanned file, or — if the book arrived as separate page images — any one of those pages.
+Ocr.ReRead.Locate=The pictures for this book are not kept with it, so NBR needs to find them again. Choose the scanned file, or — if the book arrived as separate page images — any one of those pages.
 Ocr.ReRead.LocateTitle=Find the pictures for this book
 Ocr.ReRead.Filter=Scanned books and images|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|All files|*.*
 Ocr.ReRead.WholeFolder=There are {0} images in that folder. Read all of them as the pages of this book?
 Settings.Ocr.Group=Books that are pictures
-Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. Nemoviz can read the words off them and then speak them like any other book. This is only the starting choice — when you have more than one language, Nemoviz asks which to use each time it reads a book.
+Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. NBR can read the words off them and then speak them like any other book. This is only the starting choice — when you have more than one language, NBR asks which to use each time it reads a book.
 Settings.Ocr.Language=Recognition language
 Settings.Ocr.Automatic=Automatic
 Settings.Ocr.AddLanguage=Add a language...
@@ -545,15 +545,15 @@ Settings.Translate.Engine.DeepSeek=DeepSeek
 Settings.Translate.Engine.DeepSeekPro=DeepSeek (larger model)
 Settings.Translate.Engine.Azure=Azure Translator
 ; PLACEHOLDER. The real text is still to be written, and it has to cover: that a
-; key is the reader's own account with the service, that Nemoviz never sees a
+; key is the reader's own account with the service, that NBR never sees a
 ; bill, roughly what a book costs, and that the key is stored in readable form.
-Settings.Translate.Hint=Nemoviz can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; Nemoviz never handles payment, that's on you on the service providers web or any other means. If you don't need AI machine translation, just leave it unchecked.
+Settings.Translate.Hint=NBR can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; NBR never handles payment, that's on you on the service providers web or any other means. If you don't need AI machine translation, just leave it unchecked.
 ; The standing note. Free text on purpose: a fixed set of questions would be
 ; OUR questions, and ours were written from Croatian.
 Settings.Translate.Notes=Notes for the translator:
 Settings.Translate.Test.NoEngine=No translation service is selected.
 Settings.Translate.Test.NoKey=There is no key to check.
-Settings.Translate.Test.NoNetwork=Nemoviz could not reach the service.
+Settings.Translate.Test.NoNetwork=NBR could not reach the service.
 Settings.Translate.Test.Refused=The service refused the request ({0}).
 Settings.Translate.Test.Empty=The service answered with nothing.
 Dialog.TranslateKey.Title=API key for {0}
@@ -569,7 +569,7 @@ Dialog.TranslateKey.Testing=Checking the key...
 Dialog.TranslateKey.Works=The key works.
 Dialog.TranslateKey.Stored=A key is stored for this service.
 Dialog.TranslateKey.NotStored=No key is stored for this service.
-; Translating a book. Longer than any other wait in Nemoviz, so the window says
+; Translating a book. Longer than any other wait in NBR, so the window says
 ; out loud that stopping is cheap - everything already translated is kept, and
 ; starting again carries on from there rather than beginning afresh.
 Translate.Progress.Title=Translating the book
@@ -588,7 +588,7 @@ Translate.Progress.AlmostDone=a moment
 Translate.Progress.Seconds={0} seconds
 Translate.Progress.Minutes={0} minutes
 ; Asking before a book is sent away. As little as possible: the language it is in
-; Nemoviz already worked out from the words, and the language you read in does
+; NBR already worked out from the words, and the language you read in does
 ; not change from book to book.
 Translate.Ask.Title=Translate the book
 Translate.Ask.Info={0} — about {1} characters, roughly {2}. The translation becomes a new book; this one is not changed.
@@ -599,7 +599,7 @@ Translate.Ask.Engine=Translation service:
 ; One choice, and a chain follows from it. Asking for a fallback as well was
 ; asking the reader to design a retry policy; what they have an opinion about is
 ; which translation they would rather read.
-Translate.Ask.ChainNote=If a passage is refused, Nemoviz tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
+Translate.Ask.ChainNote=If a passage is refused, NBR tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
 Translate.Ask.NoEngine=No service has a key yet
 Translate.Ask.Standing=Your standing note is applied to this book as well: {0}
 Translate.Ask.Notes=Anything the translator should know about THIS book (optional) — for example that the narrator is a woman, or how two characters address each other:
@@ -934,11 +934,11 @@ Services.Item.Gemini=Gemini translation
 ; Every break is a PAIR (\n\n) -- tools\hints.pl refuses a lone one, since the
 ; document it writes cannot tell a deliberate break from ordinary wrapping.
 Services.Disclaimer=THE STEPS BELOW MAY NOT MATCH WHAT YOU SEE. These services redesign their web sites without warning, so a button may have moved or been renamed since this was written. The ORDER of what has to be done rarely changes; the names of things do. If you get lost, the part above tells you what you are trying to achieve.
-Services.About.GoogleVoices=Google Cloud voices read books aloud over the internet, in Google's own voices. They are the best of the cloud voices for most languages, and the free allowance is the largest — around a million characters a month, which is about two books.\n\nThree things have to happen, in this order. You need a GOOGLE ACCOUNT, which most people already have. Inside it you make a PROJECT and switch the Text-to-Speech service on for that project — and Google will not switch it on until billing is set up, so a card is needed even though the free allowance costs nothing. Then you make a SERVICE ACCOUNT and download its key.\n\nThat last part is what makes this one unusual. Google does not hand out a key you can paste: it gives a small file ending in .json, downloaded once. Nemoviz keeps what is inside that file rather than the file itself, so you can move or delete the download afterwards.
+Services.About.GoogleVoices=Google Cloud voices read books aloud over the internet, in Google's own voices. They are the best of the cloud voices for most languages, and the free allowance is the largest — around a million characters a month, which is about two books.\n\nThree things have to happen, in this order. You need a GOOGLE ACCOUNT, which most people already have. Inside it you make a PROJECT and switch the Text-to-Speech service on for that project — and Google will not switch it on until billing is set up, so a card is needed even though the free allowance costs nothing. Then you make a SERVICE ACCOUNT and download its key.\n\nThat last part is what makes this one unusual. Google does not hand out a key you can paste: it gives a small file ending in .json, downloaded once. NBR keeps what is inside that file rather than the file itself, so you can move or delete the download afterwards.
 Services.Steps.GoogleVoices=1. Open console.cloud.google.com in your browser and sign in with a Google account.\n\n2. Accept the terms if you are asked, and create a project when it offers to. Any name will do.\n\n3. Find the search box at the top, type "Cloud Text-to-Speech API", choose it from the results and press Enable.\n\n4. Google will ask you to set up billing before it enables the API. Add a card.\n\n5. Search again for "Service accounts" and open it. Press Create service account, give it any name, and press Done. No role or permission needs choosing.\n\n6. Open the account you just made, go to the Keys tab, press Add key, then Create new key, and choose JSON. The file downloads.\n\n7. Come back here, press "Set up this service", and choose that downloaded file.
-Services.About.AzureVoices=Azure Speech voices read books aloud over the internet, in Microsoft's voices. They are very good in English and many other languages. For Croatian they are ordinary, and Azure does not support the pronunciation dictionary there, so a rule you write for a name will not be obeyed. The free allowance is about half a million characters a month, roughly one book.\n\nTwo things have to happen, and only the first is yours. You need a MICROSOFT ACCOUNT before you can have an Azure one, and then an AZURE SUBSCRIPTION — which needs identity checks, a card and an agreement. A person has to do that deliberately, so it cannot be automated and Nemoviz does not try.\n\nEverything after that is Nemoviz's job. It signs in with a short code, creates the resource on the free tier, and keeps the key. You never open the Azure portal.\n\nOne thing catches people out. When your subscription is made, Azure quietly creates a DIRECTORY for it. If your Microsoft account is a personal one — Gmail, Outlook, Hotmail — Azure refuses the sign-in unless you name that directory, because it does not recognise personal accounts for this. Its name ends in onmicrosoft.com.
-Services.Steps.AzureVoices=1. Open azure.microsoft.com/free in your browser and press Start free.\n\n2. Sign in with a Microsoft account, or make one.\n\n3. Fill in your details. Azure asks for a card to prove you are a person; the free tier is not charged.\n\n4. If your account is a personal one, find your directory name: sign in to the portal and it is shown in the address bar after the @ sign, ending in onmicrosoft.com.\n\n5. Come back here and press "Set up this service".\n\n6. Fill in that directory name if your account is a personal one, and leave it empty if it is a work or school account. Press Start.\n\n7. Open the sign-in page with the button, type the short code shown, and sign in.\n\n8. Choose your subscription and press Create. Nemoviz makes the resource and keeps its key. You type nothing else.
-Services.About.DeepSeek=DeepSeek translates a whole book into another language. Of the services Nemoviz can use it is the steadiest — it refuses least often — and it is far the cheapest.\n\nOne thing has to happen: an account with DeepSeek, and some credit on it. There is no free allowance, but translation is charged by the amount of text and a book costs very little.\n\nThis one gives a key you paste, and it is the simplest of the four. The one thing to watch is that the key is shown ONCE, when you make it. If you close that window without copying it, it cannot be shown again and you simply make another.
+Services.About.AzureVoices=Azure Speech voices read books aloud over the internet, in Microsoft's voices. They are very good in English and many other languages. For Croatian they are ordinary, and Azure does not support the pronunciation dictionary there, so a rule you write for a name will not be obeyed. The free allowance is about half a million characters a month, roughly one book.\n\nTwo things have to happen, and only the first is yours. You need a MICROSOFT ACCOUNT before you can have an Azure one, and then an AZURE SUBSCRIPTION — which needs identity checks, a card and an agreement. A person has to do that deliberately, so it cannot be automated and NBR does not try.\n\nEverything after that is NBR's job. It signs in with a short code, creates the resource on the free tier, and keeps the key. You never open the Azure portal.\n\nOne thing catches people out. When your subscription is made, Azure quietly creates a DIRECTORY for it. If your Microsoft account is a personal one — Gmail, Outlook, Hotmail — Azure refuses the sign-in unless you name that directory, because it does not recognise personal accounts for this. Its name ends in onmicrosoft.com.
+Services.Steps.AzureVoices=1. Open azure.microsoft.com/free in your browser and press Start free.\n\n2. Sign in with a Microsoft account, or make one.\n\n3. Fill in your details. Azure asks for a card to prove you are a person; the free tier is not charged.\n\n4. If your account is a personal one, find your directory name: sign in to the portal and it is shown in the address bar after the @ sign, ending in onmicrosoft.com.\n\n5. Come back here and press "Set up this service".\n\n6. Fill in that directory name if your account is a personal one, and leave it empty if it is a work or school account. Press Start.\n\n7. Open the sign-in page with the button, type the short code shown, and sign in.\n\n8. Choose your subscription and press Create. NBR makes the resource and keeps its key. You type nothing else.
+Services.About.DeepSeek=DeepSeek translates a whole book into another language. Of the services NBR can use it is the steadiest — it refuses least often — and it is far the cheapest.\n\nOne thing has to happen: an account with DeepSeek, and some credit on it. There is no free allowance, but translation is charged by the amount of text and a book costs very little.\n\nThis one gives a key you paste, and it is the simplest of the four. The one thing to watch is that the key is shown ONCE, when you make it. If you close that window without copying it, it cannot be shown again and you simply make another.
 Services.Steps.DeepSeek=1. Open platform.deepseek.com in your browser.\n\n2. Press Sign up. You can fill in an e-mail and password, or choose to sign up with Google, which is quicker.\n\n3. Confirm your e-mail if you are asked to.\n\n4. Once signed in, find Top up or Billing and add a small amount of credit.\n\n5. Find API keys in the menu on the left.\n\n6. Press Create new API key, give it any name, and press Create.\n\n7. Copy the key BEFORE you close that window.\n\n8. Come back here, press "Set up this service", and paste it in.
-Services.About.Gemini=Gemini translates a whole book into another language, using Google's own model. Judged the best of them by ear — and the one with a catch.\n\nIt refuses roughly every sixth passage of an ordinary novel. Nothing that can be set prevents it; the model simply declines. Nemoviz handles that by falling back to another service for the passages Gemini will not take, so a book still finishes — but it does mean Gemini alone is not enough, and a second service is worth having.\n\nOne thing has to happen: a Google account, and a key made in AI Studio. There is a free allowance, enough to try it on a book.
+Services.About.Gemini=Gemini translates a whole book into another language, using Google's own model. Judged the best of them by ear — and the one with a catch.\n\nIt refuses roughly every sixth passage of an ordinary novel. Nothing that can be set prevents it; the model simply declines. NBR handles that by falling back to another service for the passages Gemini will not take, so a book still finishes — but it does mean Gemini alone is not enough, and a second service is worth having.\n\nOne thing has to happen: a Google account, and a key made in AI Studio. There is a free allowance, enough to try it on a book.
 Services.Steps.Gemini=1. Open aistudio.google.com in your browser and sign in with a Google account.\n\n2. Accept the terms if you are asked.\n\n3. Find Get API key, at the top left or under your account.\n\n4. Press Create API key. If it asks which project, take the one it offers or make a new one — any name will do.\n\n5. Copy the key it shows you.\n\n6. Come back here, press "Set up this service", and paste it in.

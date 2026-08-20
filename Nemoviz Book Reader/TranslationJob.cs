@@ -590,7 +590,7 @@ namespace Nemoviz_Book_Reader
             if (opt == null || string.IsNullOrEmpty(opt.LogPath)) return;
             try { File.Delete(opt.LogPath); } catch { }
             var sb = new StringBuilder();
-            sb.AppendLine("Nemoviz translation log");
+            sb.AppendLine("Nemoviz Book Reader translation log");
             sb.AppendLine("started      " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
                 "book         {0:N0} characters; front {1:N0}, body {2:N0}, back {3:N0}",
