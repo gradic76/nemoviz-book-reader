@@ -369,6 +369,74 @@ namespace Nemoviz_Book_Reader
         /// sentence openers — good enough to find the people and places a book
         /// keeps naming.</summary>
 
+
+        /// <summary>How much first person there is in the NARRATION — dialogue
+        /// taken out — per 100 000 characters. -1 when the question cannot be
+        /// asked of this language.
+        ///
+        /// <para><b>Why it exists.</b> The preparation step is asked to give the
+        /// narrator's gender ONLY for a first-person book, and to leave the line
+        /// out otherwise. It does not always obey. Measured on Robin Cook's
+        /// Pandemic (2026-08-21) it answered "masculine" for a book written in the
+        /// third person -- 1 first-person word per 100 000 of narration against
+        /// Harvest Home's 791, and <see cref="TranslationBible.ToPrompt"/> then told the
+        /// model, in all 123 passages, that the narrator speaks in the first person
+        /// and is male. The model obeyed: "Jack left Toxicology and took the
+        /// elevator down" came back as "napustio SAM toksikologiju i spustio SAM
+        /// se dizalom" — the hero's name gone and the whole novel rewritten into a
+        /// voice it was not written in. That is worse than the fault the glossary
+        /// was built to cure.</para>
+        ///
+        /// <para><b>Dialogue has to come out first, and that is the whole trick.</b>
+        /// A third-person novel is full of people saying "I"; Pandemic counts 1360
+        /// of them. Outside the quotation marks it has FOUR, in 711 441 characters.
+        /// Harvest Home, genuinely first-person, has 2878.</para>
+        ///
+        /// <para><b>English only, and that is a real limit rather than a shortcut.</b>
+        /// Croatian carries the first person in the verb ending, not in a pronoun —
+        /// measured, the Croatian translation of Harvest Home scores 29 where the
+        /// English original scores 363, and it is the same book. So for any other
+        /// source language this answers -1 and nothing is vetoed.</para></summary>
+        public static int FirstPersonDensity(string s, string sourceLang)
+        {
+            if (string.IsNullOrEmpty(s) || s.Length < 2000) return -1;
+            if (sourceLang == null || !sourceLang.StartsWith("en", StringComparison.OrdinalIgnoreCase)) return -1;
+
+            var narration = new StringBuilder(s.Length);
+            bool inQuote = false;
+            char opened = '\0';
+            foreach (char c in s)
+            {
+                if (!inQuote && (c == '\u201C' || c == '"')) { inQuote = true; opened = c; continue; }
+                if (inQuote)
+                {
+                    // A curly quote closes with its own partner; a straight one
+                    // closes with another straight one.
+                    if ((opened == '\u201C' && c == '\u201D') || (opened == '"' && c == '"')) inQuote = false;
+                    continue;
+                }
+                narration.Append(c);
+            }
+
+            string n = narration.ToString();
+            if (n.Length < 1000) return -1;          // nearly all of it was dialogue
+
+            int hits = 0;
+            for (int i = 0; i < n.Length; i++)
+            {
+                if (n[i] != 'I' && n[i] != 'm' && n[i] != 'M') continue;
+                if (i > 0 && (char.IsLetter(n[i - 1]) || n[i - 1] == '\'')) continue;
+                int j = i;
+                while (j < n.Length && (char.IsLetter(n[j]) || n[j] == '\'')) j++;
+                string w = n.Substring(i, j - i);
+                if (w == "I" || w == "I'm" || w == "I'd" || w == "I've" || w == "I'll"
+                    || w == "my" || w == "My" || w == "me" || w == "Me"
+                    || w == "myself" || w == "Myself" || w == "mine" || w == "Mine") hits++;
+                i = j - 1;
+            }
+            return (int)((long)hits * 100000 / n.Length);
+        }
+
         /// <summary>Recurring HYPHENATED lower-case compounds — the terms a book
         /// invents for itself, which <see cref="FrequentNames"/> structurally cannot
         /// see because it takes only capitalised words.

@@ -428,6 +428,40 @@ namespace Nemoviz_Book_Reader
         /// before this existed, and the report says the facts were not established.
         /// The alternative, refusing to translate because a preparatory call did not
         /// come back, would be worse than the fault it prevents.</para></summary>
+        /// <summary>Below this many first-person words per 100 000 characters of
+        /// narration, a book is not written in the first person and any narrator
+        /// gender offered for it is refused.
+        ///
+        /// <para><b>Measured through this very method</b> (not through a script
+        /// beside it — an earlier draft of this comment quoted numbers from a probe
+        /// that counted differently, which is a comment that lies). English books
+        /// in the library, dialogue stripped:</para>
+        ///
+        /// <para>first person — The Speed of Souls 1639, The Tenant 1622,
+        /// Harvest Home 791, Lady 697, The Origin of Species 107.
+        /// Third person — a novel written as an in-universe history 68,
+        /// Robin Cook's Pandemic 1.</para>
+        ///
+        /// <para><b>Set low on purpose, because the two ways to be wrong are not
+        /// equal.</b> Refusing a real narrator gender costs the fault the glossary
+        /// was built to cure — a woman narrating in a man's voice, bad but
+        /// survivable. Accepting one the book does not have costs the whole novel
+        /// rewritten into the first person, which is what Pandemic did. So the
+        /// floor sits well above the dangerous case (100 against 1, a hundredfold)
+        /// and only just above the tightest honest one.</para>
+        ///
+        /// <para><b>Known and accepted:</b> The Origin of Species clears this by
+        /// seven per cent. It is first-person and its author is male, so the line
+        /// it keeps is true; but a first-person book that reads more like a report
+        /// than a story sits near this line and a future sample could fall the
+        /// wrong side of it. Move the floor DOWN if that happens, never up.</para>
+        ///
+        /// <para>The language gate earns its place in the same table: the Croatian
+        /// translation of Harvest Home scores 70 against the English original's
+        /// 791, and it is the same book. Forced through the English rule it would
+        /// be refused every time.</para></summary>
+        private const int FirstPersonFloor = 100;
+
         private static TranslationBible DetectBible(string body, Options opt, TranslationReport report)
         {
             var bible = new TranslationBible();
@@ -439,6 +473,10 @@ namespace Nemoviz_Book_Reader
             // the blind test's glossary gap was: "human" and "she-human", the central
             // term of a novel narrated by a cat, never once offered to the model.
             List<string> terms = TranslationChecks.FrequentTermList(body, 20);
+
+            // Measured ONCE, and before anything is asked: it is a property of
+            // the book, not of whichever engine happens to answer.
+            int firstPerson = TranslationChecks.FirstPersonDensity(body, opt.SourceLang);
             // The opening, and enough of it to meet the narrator and the first few
             // people they talk to. Front matter is already gone by the time this is
             // called, so this really is the first page of the story.
@@ -516,8 +554,25 @@ namespace Nemoviz_Book_Reader
                 // FillGapsFrom only fills what is still missing.
                 var got = new TranslationBible();
                 foreach (string line in r.Text.Replace("\r\n", "\n").Split('\n')) got.ReadLine(line);
+
+                // A NARRATOR THE BOOK DOES NOT HAVE IS WORSE THAN NO NARRATOR AT
+                // ALL. The prompt asks for this line only for a first-person book
+                // and says in as many words to leave it out otherwise; Gemini gave
+                // "masculine" for Robin Cook's Pandemic, which is third person, and
+                // the model then rewrote the novel into a voice it was not written
+                // in -- see TranslationChecks.FirstPersonDensity for the passage.
+                // So the answer is checked against the text rather than trusted.
+                // The veto only ever REMOVES the line: it cannot invent one, and
+                // where the language cannot be measured it does nothing.
+                if (firstPerson >= 0 && firstPerson < FirstPersonFloor && got.NarratorGender.Length > 0)
+                {
+                    Log(opt, "narrator      \"" + got.NarratorGender + "\" refused -- only "
+                             + firstPerson + " first-person words per 100,000 of narration, so this "
+                             + "book is not written in the first person");
+                    got.NarratorGender = "";
+                }
+
                 bible.FillGapsFrom(got);
-                if (bible.NarratorGender.Length > 0 && bible.Names.Count > 0) return bible;
             }
 
             // Whatever was gathered, even if one half is missing -- a narrator with
