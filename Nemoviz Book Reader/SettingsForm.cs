@@ -62,6 +62,8 @@ namespace Nemoviz_Book_Reader
         // Voice → engine-group catalog (from the merged backends), for the
         // engine/voice two-combo picker.
         private List<(string Name, string Engine, string Language)> voiceCatalog;
+        private ComboBox cmbUiLanguage;
+        private readonly List<string> uiLanguageCodes = new List<string>();
         private ComboBox cmbLanguage;
         private readonly List<string> languageCodes = new List<string>();
         private NumericUpDown numRate;
@@ -265,13 +267,28 @@ namespace Nemoviz_Book_Reader
             // NOT cmbLanguage — that field is the BOOK's language over on Speech
             // and Braille, and reusing it here would have quietly taken that page
             // apart. This one is the language NBR speaks to the user in.
-            ComboBox cmbUiLanguage = MakeCombo(Localization.T("Settings.General.Language"), CX, 22, CW, tab++);
-            // Only English exists until the app is feature-complete (hr.lang is a
-            // final translation pass), so the combo lists the one language and is
-            // not yet wired to AppSettings.SetLanguage — there is nothing to
-            // switch to.
-            cmbUiLanguage.Items.Add(Localization.T("LanguageName"));
-            cmbUiLanguage.SelectedIndex = 0;
+            cmbUiLanguage = MakeCombo(Localization.T("Settings.General.Language"), CX, 22, CW, tab++);
+            // EVERY .lang FILE THAT IS REALLY THERE, never a list written by hand.
+            // Localization already scans the folder and reads each file's own
+            // LanguageName, so a translation dropped in beside the others appears
+            // here without anybody editing this method -- the rule the braille
+            // table catalogue follows for the same reason (a hand-written list
+            // drops the one entry somebody needs, and it surfaces on their
+            // machine rather than ours).
+            uiLanguageCodes.Clear();
+            foreach (var l in Localization.AvailableLanguages)
+            {
+                uiLanguageCodes.Add(l.Code);
+                cmbUiLanguage.Items.Add(l.Name);
+            }
+            if (cmbUiLanguage.Items.Count == 0)
+            {
+                uiLanguageCodes.Add("en");
+                cmbUiLanguage.Items.Add(Localization.T("LanguageName"));
+            }
+            int cur = uiLanguageCodes.FindIndex(c =>
+                string.Equals(c, Localization.CurrentLanguageCode, StringComparison.OrdinalIgnoreCase));
+            cmbUiLanguage.SelectedIndex = cur >= 0 ? cur : 0;
             gLang.Controls.Add(cmbUiLanguage);
             page.Controls.Add(gLang);
             y += gLang.Height + 8;
@@ -525,6 +542,24 @@ namespace Nemoviz_Book_Reader
             // restart NBR for a look it is already wearing. The setting is still
             // WRITTEN in that case, which is right: it turns a default that could
             // move under them into a choice that cannot.
+            // THE LANGUAGE NEEDS A RESTART FOR THE SAME REASON THE LOOK DOES: a
+            // window builds itself once, and every caption, accessible name and
+            // hint in it was read at that moment. Offering to reload them in
+            // place would mean rebuilding six dialogs and the player from
+            // scratch, and a screen reader would be standing in one of them.
+            if (cmbUiLanguage != null && cmbUiLanguage.SelectedIndex >= 0
+                && cmbUiLanguage.SelectedIndex < uiLanguageCodes.Count)
+            {
+                string picked = uiLanguageCodes[cmbUiLanguage.SelectedIndex];
+                if (!string.Equals(picked, Localization.CurrentLanguageCode, StringComparison.OrdinalIgnoreCase))
+                {
+                    appSettings.SetLanguage(picked);
+                    if (MessageForm.ShowConfirm(this, Localization.T("Settings.General.Language.Restart"),
+                                               Localization.T("Settings.General.Language.RestartTitle")))
+                        RequestRestart();
+                }
+            }
+
             if (cmbLook != null && !string.Equals(SelectedThemeId(), UiTheme.Current.Id,
                                                   StringComparison.OrdinalIgnoreCase))
             {

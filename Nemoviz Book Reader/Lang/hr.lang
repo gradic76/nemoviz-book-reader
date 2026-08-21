@@ -1,0 +1,256 @@
+; Nemoviz Book Reader — hrvatski
+;
+; Prijevod se radi po skupinama. Sve što ovdje nije prevedeno program uzima iz
+; en.lang, koji je i dalje jedini izvor istine (CLAUDE.md, odjeljak 3) — pa je
+; nepotpuna datoteka ispravna datoteka, ne pola posla.
+;
+; NAZIVLJE JE ZAKLJUČANO PRIJE PRIJEVODA, a ne usput. Čitatelj koji ne vidi
+; ekran nema kako povezati "oznaku" u jednom dijalogu s "obilježivačem" u
+; drugom, pa svaki pojam kroz cijeli program ima točno jedno ime:
+;
+;   Library          Knjižnica          Bookmark        knjižna oznaka
+;   Settings         Postavke           Seek step       korak premotavanja
+;   Properties       Svojstva           Standard page   kartica
+;   Sleep timer      Tajmer             Volume          glasnoća
+;   Shelf            Polica             Publisher       nakladnik
+;   Voice            glas               Folder          mapa
+;
+; CRTANE OZNAKE NA PANELU MORAJU BITI KRATKE, izgovorene ne moraju. Ključ
+; Btn.X.Legend crta se u bočnom stupcu od 91 jedinice, Btn.X.Accessible se samo
+; izgovara i nosi prečac. Zato "Označi" na tipki i "Postavi knjižnu oznaku, F5"
+; u uhu — to je ista odluka koju je Gordan donio za engleski.
+
+LanguageName=Hrvatski
+
+Player.Info.TitleLabel=Naslov:
+Player.Info.AuthorLabel=Autor:
+Player.Info.ProducerLabel=Producent:
+Player.Info.PublisherLabel=Nakladnik:
+Player.Info.ChapterLabel=Poglavlje:
+Player.Info.PartLabel=Dio:
+Player.Info.PageLabel=Stranica:
+Player.Info.BookmarksLabel=Oznake:
+Player.ReadingSurface.Accessible=Površina za čitanje
+Player.Info.VoiceLabel=Glas:
+Player.Info.NoVoiceLabel=Nijedan instalirani glas ne govori
+Player.Info.PartNumElapsed=Dio {0}, proteklo:
+Player.Info.PartNumRemaining=Dio {0}, preostalo:
+Player.Info.ElapsedLabel=Proteklo:
+Player.Info.RemainingLabel=Preostalo:
+Player.Info.VolumeLabel=Glasnoća:
+Player.Info.SpeedLabel=Brzina:
+Player.Info.AccessibleName=Podaci o reprodukciji, F8
+Player.TitleBar.Playing= — svira
+Player.TitleBar.Paused= — pauzirano
+
+Btn.Library=Knjižnica
+Btn.Library.Accessible=Knjižnica, F3
+Btn.Settings=Postavke
+Btn.Settings.Accessible=Postavke, F2
+Btn.Timer=Tajmer
+Btn.Help=Pomoć
+Btn.Help.Accessible=Pomoć, F1
+Btn.Back.Accessible=Natrag, Shift+Lijevo
+Btn.Forward.Accessible=Naprijed, Shift+Desno
+Btn.Play.Accessible=Reproduciraj, Razmaknica
+Btn.Pause.Accessible=Pauziraj, Razmaknica
+Btn.Power.Accessible=Izlaz, Alt+F4
+Btn.VolumeUp.Accessible=Glasnije, F12
+Btn.VolumeDown.Accessible=Tiše, F11
+
+Btn.Library.Legend=Knjižnica
+Btn.Settings.Legend=Postavke
+Btn.Timer.Legend=Tajmer
+Btn.Help.Legend=Pomoć
+Btn.Properties.Legend=Svojstva
+Btn.GoTo.Legend=Idi na...
+Btn.SetBookmark.Legend=Označi
+Btn.ManageBookmarks.Legend=Oznake
+
+Btn.Properties=Svojstva
+Btn.Properties.Accessible=Svojstva, Alt+Enter
+Btn.GoTo=Idi na...
+Btn.GoTo.Accessible=Idi na, F4
+Btn.SetBookmark=Postavi oznaku
+Btn.SetBookmark.Accessible=Postavi knjižnu oznaku, F5
+Btn.ManageBookmarks=Knjižne oznake
+Btn.ManageBookmarks.Accessible=Knjižne oznake, F6
+Btn.Timer.Accessible=Tajmer, F7
+Btn.Timer.Countdown=Tajmer {0}
+Btn.Timer.Accessible.Active=Tajmer, još {0}, aktivirajte da zaustavite reprodukciju i otkažete tajmer
+Btn.Timer.Accessible.LessThanMinute=Tajmer, manje od minute
+
+Player.Seek.Label=Korak premotavanja:
+Player.Seek.Accessible=Korak premotavanja, Shift+Gore ili Shift+Dolje
+Player.Seek.Announce=Korak premotavanja: {0}
+
+Seek.Item.15s=15 sekundi
+Seek.Item.30s=30 sekundi
+Seek.Item.1min=1 minuta
+Seek.Item.5min=5 minuta
+Seek.Item.10min=10 minuta
+Seek.Item.15min=15 minuta
+Seek.Item.30min=30 minuta
+Seek.Item.Chapter=Poglavlje
+Seek.Item.Part=Dio
+Seek.Item.Track=Zapis
+Seek.Item.HeadingLevel=Naslov {0}
+Seek.Item.Page=Stranica
+Seek.Item.Bookmark=Oznaka
+Seek.Item.StandardPage=Kartica
+
+GoTo.List.Accessible=Dijelovi knjige
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=U redu
+GoTo.Cancel.Accessible=Odustani
+GoTo.AutoPlay=Kreni svirati nakon skoka
+GoTo.AutoPlay.Hint=Kad je uključeno, reprodukcija kreće odmah nakon skoka. Kad nije, stanje ostaje kakvo je bilo: pauzirano ostaje pauzirano, a što svira nastavlja svirati.
+GoTo.Hint.Accessible=Savjet
+
+Tip.Back=Natrag (Shift+Lijevo)
+Tip.PlayPause=Reproduciraj/Pauziraj (Razmaknica)
+Tip.Forward=Naprijed (Shift+Desno)
+Tip.Seek=Mijenjajte sa Shift+Gore i Shift+Dolje; skačite sa Shift+Lijevo i Shift+Desno (također Natrag/Naprijed)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enter
+Tip.Timer=F7
+Tip.Volume=F12 i F11
+Tip.Speed=Ctrl+Lijevo i Ctrl+Desno
+Tip.Progress=Ctrl+1–9: skok na 10–90%
+
+Player.Volume.Text=Glasnoća: {0}%
+Player.Volume.Accessible=Glasnoća {0} posto
+Player.Speed.Text=Brzina: {0}x
+Player.Speed.Legend=Brzina
+Player.Progress.Legend=Napredak
+Player.Speed.Accessible=Brzina {0} puta
+Player.Speed.Wpm=Brzina: {0} rpm
+Player.Speed.WpmAccessible=Brzina {0} riječi u minuti
+Player.Position.Label=Pozicija
+Player.Position.Text=Pozicija: {0} / {1}
+Player.Position.Accessible=Pozicija {0} posto
+Player.OpenFile.Title=Odaberite knjigu
+
+Filter.Audiobooks=Zvučne knjige
+Filter.TextBooks=Tekstualne knjige
+Filter.BrailleBooks=Brajične knjige
+Filter.Archives=Arhive
+Filter.AllSupported=Sve podržane datoteke
+Filter.AllFiles=Sve datoteke
+
+Library.Title=Knjižnica
+Library.Btn.Load=Učitaj
+Library.Btn.Load.Accessible=Učitaj
+Library.Btn.Close=Zatvori
+Library.Btn.Close.Accessible=Zatvori
+
+Menu.File=Datoteka
+Menu.File.OpenFile=Otvori datoteku...
+Menu.File.OpenFolder=Otvori mapu...
+Menu.File.OpenAudioCd=Otvori zvučni CD
+Menu.File.ClearLibrary=Isprazni knjižnicu...
+Menu.File.Exit=Izlaz
+Menu.Sort=Poredaj
+Menu.Sort.Alphabetically=Abecedno
+Menu.Sort.DateAdded=Datum dodavanja
+Menu.Sort.Format=Format
+Menu.Sort.Status=Status
+Menu.Sort.Ascending=Uzlazno
+Menu.Sort.Descending=Silazno
+Menu.Sort.ActiveMark=(aktivno)
+Menu.Help=Pomoć
+Menu.Help.Help=Pomoć
+Menu.Help.About=O programu NBR
+
+Library.List.Accessible=Polica s knjigama
+Library.NowReading.Accessible=Trenutno čitam
+Library.NowReading.Empty=Nijedna knjiga nije učitana
+Library.Search.Accessible=Traži
+Library.Filter.Accessible=Filtriraj po statusu
+
+Shelf.Filter.All=Sve knjige
+Shelf.Filter.Reading=U čitanju
+Shelf.Filter.Unread=Nepročitano
+Shelf.Filter.Read=Pročitano
+Shelf.Filter.Favorites=Favoriti
+Shelf.Status.NowReading=Trenutno čitam
+Shelf.Status.Reading=U čitanju
+Shelf.Status.Unread=Nepročitano
+Shelf.Status.Read=Pročitano
+
+Context.Open=Otvori
+Context.MarkRead=Označi kao pročitano
+Context.MarkUnread=Označi kao nepročitano
+Context.AddFavorite=Dodaj u favorite
+Context.RemoveFavorite=Ukloni iz favorita
+Context.Rename=Preimenuj
+Context.Delete=Izbriši
+Context.Properties=Svojstva
+
+Library.Details.Accessible=Podaci o knjizi
+Details.Field.Title=Naslov
+Details.Field.Author=Autor
+Details.Field.Format=Format
+Details.Field.Speed=Brzina
+Details.Field.Volume=Glasnoća
+Details.Field.Added=Dodano
+Details.Field.Producer=Producent
+Details.Field.Publisher=Nakladnik
+Details.Field.Year=Godina
+Details.Field.Time=Trajanje
+Details.Field.Elapsed=Proteklo
+Details.Field.Remaining=Preostalo
+Details.Field.Read=Pročitano
+Details.Field.Pages=Stranica
+Details.Field.Headings=Naslova
+Details.Field.Characters=Znakova
+Details.Field.Language=Prepoznati jezik
+Details.Field.Description=Opis
+Details.Description.Open=Pritisnite Enter za čitanje
+Details.Field.SoundProcessing=Obrada zvuka
+Details.Sound.On=Uključena
+Details.Sound.Off=Isključena
+Details.Speed.Wpm={0} rpm
+
+Btn.Refresh=Osvježi
+Btn.Refresh.Accessible=Osvježi
+Btn.OK=U redu
+Btn.Cancel=Odustani
+Btn.Yes=Da
+Btn.No=Ne
+Btn.Close=Zatvori
+Btn.Continue=Nastavi
+
+Library.ImportFile.Title=Dodaj knjigu u knjižnicu
+Library.ImportFolder.Description=Odaberite mapu s knjigama
+
+Player.NoVoiceForLanguage=Nijedan instalirani glas ne govori {0}. Otvorite Svojstva s Alt+Enter i odaberite glas.
+Player.Info.Prepared=Sačuvani govor: {0} odlomaka, {1} MB
+Player.Info.Preparing=Pripremam ostatak knjige: {0} od {1} odlomaka
+
+Menu.File.ExportAudio=Izvezi kao zvučnu knjigu...
+Menu.File.Translate=Prevedi knjigu...
+Menu.Help.Services=Servisi i računi...
+Context.ReadOcr=Pročitaj slike
+Context.ReReadOcr=Pročitaj ponovo na drugom jeziku
+Context.Translate=Prevedi knjigu...
+
+Common.Dash=-
+Common.Error=Greška
+Common.DateFormatLong=d. MMMM yyyy.
+
+Reading.Title=Čitanje
+Reading.Back=Natrag
+Reading.Back.Accessible=Natrag jedan korak
+Reading.PlayPause=Reproduciraj/Pauziraj
+Reading.PlayPause.Accessible=Reproduciraj ili pauziraj, Razmaknica
+Reading.Forward=Naprijed
+Reading.Forward.Accessible=Naprijed jedan korak
+Reading.Smaller=Manje
+Reading.Smaller.Accessible=Manji tekst, tipka minus
+Reading.Bigger=Veće
+Reading.Bigger.Accessible=Veći tekst, tipka plus
+Reading.Font.Accessible=Font za čitanje
+Reading.Size.Announce=Veličina teksta {0}
+Settings.General.Language.Restart=NBR se mora ponovo pokrenuti da bi novi jezik zaživio, jer svaki prozor svoje natpise čita jednom, dok se gradi. Pokrenuti sada?
+Settings.General.Language.RestartTitle=Jezik

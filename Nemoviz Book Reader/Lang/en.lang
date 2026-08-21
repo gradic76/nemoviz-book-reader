@@ -955,3 +955,5 @@ Services.Steps.OpenAi=1. Open platform.openai.com in your browser. This is the d
 ; One flag in Beta.cs governs these. Delete this block when it goes back in.
 Beta.Suffix= — not in this beta
 Beta.NoReadingWindow=The reading window is off in this beta. Reading on screen, and the braille that follows it, are still being tested and come back in a later release.
+Settings.General.Language.Restart=NBR has to start again for the new language, because every window reads its wording once, when it is built. Restart now?
+Settings.General.Language.RestartTitle=Language
