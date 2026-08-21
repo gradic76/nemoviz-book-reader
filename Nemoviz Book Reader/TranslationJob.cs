@@ -201,6 +201,9 @@ namespace Nemoviz_Book_Reader
             public string Engine;
             public int Asks;
             public long Ms;
+            /// <summary>Why nothing took it — set only when the piece was left
+            /// in the original, and it says WHICH kind of failure it was.</summary>
+            public string Why;
         }
 
         public static TranslationReport Run(string bookText, Options opt)
@@ -288,7 +291,7 @@ namespace Nemoviz_Book_Reader
                     c.Index + 1, chunks.Count, c.Text.Length,
                     piece.Engine ?? "-", piece.Asks, piece.Asks == 1 ? " " : "s",
                     piece.Ms / 1000.0,
-                    piece.Engine == null ? "LEFT IN THE ORIGINAL"
+                    piece.Engine == null ? "LEFT IN THE ORIGINAL — " + (piece.Why ?? "no reason recorded")
                                          : (piece.LastResort ? "last resort" : "ok")));
 
                 if (!Report(opt, c.Index + 1, chunks.Count,
@@ -431,6 +434,11 @@ namespace Nemoviz_Book_Reader
             if (opt == null || opt.First == null || string.IsNullOrEmpty(body)) return bible;
 
             List<string> candidates = TranslationChecks.FrequentNameList(body, 60);
+            // The scan above takes capitalised words only, so a term the book writes
+            // in lower case is invisible to it -- and that is where the OTHER half of
+            // the blind test's glossary gap was: "human" and "she-human", the central
+            // term of a novel narrated by a cat, never once offered to the model.
+            List<string> terms = TranslationChecks.FrequentTermList(body, 20);
             // The opening, and enough of it to meet the narrator and the first few
             // people they talk to. Front matter is already gone by the time this is
             // called, so this really is the first page of the story.
@@ -450,10 +458,25 @@ namespace Nemoviz_Book_Reader
             sb.AppendLine();
             sb.AppendLine("Then one line for each name below that appears in the story, in this shape:");
             sb.AppendLine("NAME: <as written in the source> = <how it is to be written in the target language, and how it inflects if the target language inflects names>");
-            sb.AppendLine("Keep a name in its original form where that is the convention of the target language, and transliterate it where THAT is the convention. Say which case forms to use if the target language declines. Leave out anything from the list that is not a name or a term of this story - an ordinary word that happens to be capitalised is not wanted.");
+            sb.AppendLine("Keep a name in its original form where that is the convention of the target language, and transliterate it where THAT is the convention. Say which case forms to use if the target language declines.");
+            // JUDGE BY HOW THE BOOK USES THE WORD, NOT BY WHETHER THE WORD IS
+            // ORDINARY. This line used to end "an ordinary word that happens to be
+            // capitalised is not wanted", and it did exactly what it said: Gordan's
+            // blind test came back with "Outside" dropped, which in that book is a
+            // PLACE -- an ordinary word the story has made its own, which is what a
+            // good half of the proper nouns in fiction are. The intent was to keep
+            // "The" and "When" out on the days the scan lets them through, and that
+            // intent is kept; only the test moves off the word and onto its use.
+            sb.AppendLine("Leave out a candidate only if the book does not use it as a name or as a term of its own - a word the scan picked up in passing. A perfectly ordinary word IS wanted when the story uses it as one: a place, a nickname, a thing this book has named.");
             sb.AppendLine();
             sb.AppendLine("Candidate names, most frequent first:");
             sb.AppendLine(string.Join(", ", candidates.ToArray()));
+            if (terms.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("Recurring compounds this book writes for itself. Give a NAME: line for any that is a term of the story, and ignore the rest:");
+                sb.AppendLine(string.Join(", ", terms.ToArray()));
+            }
             sb.AppendLine();
             sb.AppendLine("The opening of the book:");
             sb.AppendLine(opening);
@@ -619,15 +642,26 @@ namespace Nemoviz_Book_Reader
                         "  stood down   {0} — {1} pieces in a row it would not take",
                         miss.DisplayName, ChainState.StandDownAfter));
             report.LeftInOriginal++;
+            // WHICH OF THE TWO IT WAS, and they are not the same thing at all
+            // (Gordan, 2026-08-21: "u logovima ne pise nista o razlogu"). An engine
+            // REFUSING a passage and OUR OWN CHECK rejecting a good translation both
+            // end here, and the log said only LEFT IN THE ORIGINAL for either. That
+            // matters beyond tidiness: he is about to measure which engine refuses
+            // more over a whole novel, and a count that mixes the two measures us as
+            // well as them. The very piece that prompted this was not refused by
+            // anybody -- the repetition check threw away a faithful translation six
+            // times.
+            string why = last == null ? "no engine answered"
+                       : last.Ok ? "our check: " + Describe(lastIssues)
+                       : "the service: " + (last.Error + " " + last.Detail).Trim();
             report.Issues.Add(new TranslationIssue
             {
                 Severity = CheckSeverity.Suspect,
                 Kind = "left in the original",
-                Detail = last != null && last.Ok ? Describe(lastIssues)
-                       : last != null ? (last.Error + " " + last.Detail) : "no engine answered",
+                Detail = why,
                 ChunkIndex = c.Index
             });
-            return new Piece { Text = null, Asks = asks, Ms = clock.ElapsedMilliseconds };
+            return new Piece { Text = null, Asks = asks, Ms = clock.ElapsedMilliseconds, Why = why };
         }
 
         /// <summary>

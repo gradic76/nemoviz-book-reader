@@ -112,7 +112,7 @@ namespace Nemoviz_Book_Reader
 
             // 5. A model that has fallen into a loop repeats one sentence over and
             //    over. Rare, and unmistakable when it happens.
-            string looped = RepeatedSentence(translated);
+            string looped = RepeatedSentence(chunk.Text, translated);
             if (looped != null)
                 Add(found, CheckSeverity.Suspect, "repetition",
                     "\"" + Trim(looped, 60) + "\" repeats", chunk.Index);
@@ -266,9 +266,76 @@ namespace Nemoviz_Book_Reader
             return list;
         }
 
-        private static string RepeatedSentence(string s)
+        /// <summary>A sentence the translation repeats MORE OFTEN THAN THE SOURCE
+        /// DOES — which is a model stuck in a loop. A sentence the source itself
+        /// repeats is not.
+        ///
+        /// <para><b>It used to count only the translation, and that cost a whole
+        /// passage</b> (measured 2026-08-21 on Nick Pirog's The Speed of Souls).
+        /// The book has a kitten repeating his own name three times over as a
+        /// refrain — "I'm a baby cat named Cheese." three times in a row — and the
+        /// threshold here is three. Both engines translated it faithfully, this
+        /// check rejected the result six times between them, and the piece went
+        /// out in English. Nothing was wrong with the translation and nothing was
+        /// wrong with either engine.</para>
+        ///
+        /// <para><b>The fix is the one the checks on either side of it already
+        /// use.</b> The figures check deliberately does not report a number that
+        /// merely CHANGED, because a good translation converts; the name check
+        /// fires on a name that VANISHED, not one that merely got quieter. Same
+        /// principle: compare against the source, and report only what the source
+        /// does not account for. The source is already in hand — nothing new is
+        /// needed to ask it.</para>
+        ///
+        /// <para><b>The general lesson, and this is the second time it has been
+        /// paid for:</b> a check that assumes prose never does an odd thing is
+        /// wrong about literature. The first time it was a length ratio calling a
+        /// column of page numbers a truncation.</para></summary>
+        /// <summary>Did the model get stuck repeating a line the book does not repeat?
+        ///
+        /// <para><b>It is answered by comparing HOW OFTEN, never by comparing the
+        /// sentences themselves.</b> The first attempt at this fix looked each
+        /// translated sentence up in the source and asked whether the source had it
+        /// too — which cannot work across a translation and was measured failing the
+        /// same afternoon it was written: the source says "I'm a baby cat named
+        /// Cheese" and the translation says "Ja sam mala macka po imenu Sir", so the
+        /// lookup misses every time and every book with a refrain is condemned. The
+        /// text does not survive translation. The COUNT does.</para>
+        ///
+        /// <para>So: the most-repeated sentence in the translation against the
+        /// most-repeated sentence in the source. Three against one is the model
+        /// looping. Three against three is the book, and this book really does say
+        /// it three times — a deliberate refrain in The Speed of Souls, which both
+        /// engines rendered faithfully and this check threw away six times over,
+        /// sending the whole 5 925-character passage out in English in BOTH samples
+        /// of Gordan's blind test. The fault we were measuring was our own.</para>
+        ///
+        /// <para><b>The one case it lets through, knowingly:</b> a source that
+        /// repeats sentence A three times while the model loops on a different
+        /// sentence B three times. Both maxima are three, so it passes. That is the
+        /// right way to be wrong here — a missed loop costs one odd-reading passage,
+        /// while a false alarm costs the reader the passage in a language they do not
+        /// read, which is the thing that actually happened.</para></summary>
+        private static string RepeatedSentence(string source, string translated)
+        {
+            string worst = null;
+            int most = 0;
+            foreach (var kv in Sentences(translated))
+                if (kv.Value > most) { most = kv.Value; worst = kv.Key; }
+            if (most < 3) return null;
+
+            int allowed = 0;
+            foreach (var kv in Sentences(source)) if (kv.Value > allowed) allowed = kv.Value;
+            return most > allowed ? worst : null;
+        }
+
+        /// <summary>Every sentence of 25 characters or more, and how often it
+        /// occurs. Split the same way on both sides so the two counts mean the
+        /// same thing.</summary>
+        private static Dictionary<string, int> Sentences(string s)
         {
             var seen = new Dictionary<string, int>(StringComparer.Ordinal);
+            if (string.IsNullOrEmpty(s)) return seen;
             foreach (string raw in s.Split(new[] { '.', '!', '?', '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 string t = raw.Trim();
@@ -276,9 +343,8 @@ namespace Nemoviz_Book_Reader
                 int n;
                 seen.TryGetValue(t, out n);
                 seen[t] = n + 1;
-                if (n + 1 >= 3) return t;
             }
-            return null;
+            return seen;
         }
 
         /// <summary>The frequent capitalised words, most frequent first, as a plain
@@ -302,6 +368,64 @@ namespace Nemoviz_Book_Reader
         /// <summary>Capitalised words that turn up often and are not merely
         /// sentence openers — good enough to find the people and places a book
         /// keeps naming.</summary>
+
+        /// <summary>Recurring HYPHENATED lower-case compounds — the terms a book
+        /// invents for itself, which <see cref="FrequentNames"/> structurally cannot
+        /// see because it takes only capitalised words.
+        ///
+        /// <para><b>Why the hyphen and nothing else.</b> Measured on the book that
+        /// exposed the gap (Gordan's blind test, 2026-08-21): its central term is
+        /// "she-human", and plain frequency can never find it. "she-human" occurs 32
+        /// times and "human" 27, against "back" 311 and "head" 220 — the terms of
+        /// the story sit far BELOW ordinary words, so any threshold that caught them
+        /// would catch half the language first. A hyphenated compound is different:
+        /// it is not an ordinary word of the language, it is one the author built.
+        ///
+        /// <para>Measured across ten real novels the list is 0 to 24 entries, median
+        /// about five — cheap enough to hand over whole. Most of it is ordinary
+        /// (twenty-three, father-in-law, walkie-talkie) and the term of the story is
+        /// in there with it (she-human, time-line, no-space, tri-vi). That is the
+        /// right shape for a HINT: the scan finds candidates, the model decides
+        /// which belong to the story. It does not, and should not, try to judge.
+        /// </para></summary>
+        public static List<string> FrequentTermList(string s, int max)
+        {
+            var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+            if (!string.IsNullOrEmpty(s))
+            {
+                var sb = new StringBuilder();
+                bool hyphen = false;
+                for (int i = 0; i <= s.Length; i++)
+                {
+                    char c = i < s.Length ? s[i] : ' ';
+                    if (char.IsLetter(c)) { sb.Append(c); continue; }
+                    // A hyphen between two letters continues the word; anywhere else
+                    // it ends it, so a dash used as punctuation cannot weld two words
+                    // into a compound that was never written.
+                    if (c == '-' && sb.Length > 0 && i + 1 < s.Length && char.IsLetter(s[i + 1]))
+                    { sb.Append('-'); hyphen = true; continue; }
+
+                    if (hyphen && sb.Length > 4 && char.IsLower(sb[0]))
+                    {
+                        string w = sb.ToString();
+                        int n; counts.TryGetValue(w, out n); counts[w] = n + 1;
+                    }
+                    sb.Clear();
+                    hyphen = false;
+                }
+            }
+
+            var list = new List<KeyValuePair<string, int>>();
+            // Five, the same floor the name scan uses: a compound written once is
+            // the author reaching for a phrase, not a term the book runs on.
+            foreach (var kv in counts) if (kv.Value >= 5) list.Add(kv);
+            list.Sort((x, y) => y.Value.CompareTo(x.Value));
+
+            var terms = new List<string>();
+            foreach (var kv in list) { if (terms.Count >= max) break; terms.Add(kv.Key); }
+            return terms;
+        }
+
         private static List<KeyValuePair<string, int>> FrequentNames(string s)
         {
             var counts = new Dictionary<string, int>(StringComparer.Ordinal);
