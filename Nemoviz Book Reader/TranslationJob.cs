@@ -650,11 +650,24 @@ namespace Nemoviz_Book_Reader
                         // without knowing whether that was refusals or failed
                         // checks there is no telling a filtering problem from a
                         // quality one.
+                        // AND IT GOES IN THE LOG, not only in the report.
+                        //
+                        // Gordan, 2026-08-21, of a piece that had just fallen
+                        // through: "do we know why?" We did not. The reason was
+                        // computed right here and put in the report, which lives
+                        // as long as the dialog does; the LOG, which is what
+                        // survives the run and what anybody reads afterwards,
+                        // recorded only the tally "later engine 1". That is the
+                        // same gap he found this morning for a piece left in the
+                        // original, one layer up -- and the same answer.
+                        string handedWhy = engine.DisplayName + " took it. "
+                                   + WhyEarlierStopsFailed(opt, stop, whyRefused, last, lastIssues);
+                        Log(opt, "  handed on   piece " + (c.Index + 1) + " -- " + handedWhy);
                         report.Issues.Add(new TranslationIssue
                         {
                             Severity = CheckSeverity.Note,
                             Kind = engine.LastResort ? "last resort" : "later engine",
-                            Detail = engine.DisplayName + " took it. " + WhyEarlierStopsFailed(opt, stop, whyRefused, last, lastIssues),
+                            Detail = handedWhy,
                             ChunkIndex = c.Index
                         });
                     }
