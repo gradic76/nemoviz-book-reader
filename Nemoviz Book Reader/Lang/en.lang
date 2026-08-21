@@ -110,9 +110,9 @@ SleepTimer.Announce.Cancelled=Sleep timer canceled
 SleepTimer.Announce.Finished=Sleep timer finished, playback stopped
 
 ; Player - seek dropdown
-Player.Seek.Label=Seek step:
-Player.Seek.Accessible=Seek step, Shift+Up or Shift+Down
-Player.Seek.Announce=Seek step: {0}
+Player.Seek.Label=Navigation step:
+Player.Seek.Accessible=Navigation step, Shift+Up or Shift+Down
+Player.Seek.Announce=Navigation: {0}
 Seek.Item.15s=15 seconds
 Seek.Item.30s=30 seconds
 Seek.Item.1min=1 minute
@@ -365,7 +365,7 @@ Prop.Info.Accessible=Book information
 ; the short one sits between the controls it explains and has one line to do it
 ; in, the long one on the info panel where there is room to say why.
 Prop.Text.NoVoiceShort=No installed voice speaks {0} — choose below.
-Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Install a voice for {0}, or pick a language and a voice above to read this book with it — that choice belongs to this book alone and to no other.
+Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Install a voice for {0}, or pick a language and a voice above to read this book with it. The choice applies to this book only.
 ; {0} is the book's language. Spoken when a book that cannot be read is opened.
 Player.NoVoiceForLanguage=No installed voice speaks {0}. Open Properties with Alt+Enter to choose one.
 NoVoice.Title=No voice for this book
@@ -407,25 +407,25 @@ Analyse.Progress.Minutes=About {0} minutes left.
 ; costs nothing to ship; what it costs is TIME, about half a second a page,
 ; which is why the reader is asked first rather than having a book start
 ; recognising itself.
-Ocr.Ask.Title=Read the pictures
-Ocr.Ask.Question={0} has no text in it — it is {1} pages of pictures. NBR can read the text off them, which should take {2}. Read it now?
+Ocr.Ask.Title=Recognize the text
+Ocr.Ask.Question={0} has no text in it — it is {1} pages of pictures. NBR can recognize the text on them, which should take {2}. Recognize it now?
 ; Only shown when more than one recognition language is installed — with one,
 ; the import asks a plain yes/no instead.
-Ocr.Ask.ReadWith=Read with:
-Ocr.Ask.Read=Read
+Ocr.Ask.ReadWith=Recognize as:
+Ocr.Ask.Read=Recognize
 Ocr.Ask.Skip=Skip
 Ocr.Ask.UnderAMinute=under a minute
 Ocr.Ask.Minutes=about {0} minutes
 ; NOT "OCR failed". A page that rendered and held nothing usually means the
 ; document really is pictures — of anything at all.
-Ocr.Result.NoText=No text was found in the pictures. The book has been added, but there is nothing to read from it.
+Ocr.Result.NoText=No text was recognized in the pictures. The book has been added, but there is nothing to read from it.
 ; The one Windows genuinely cannot draw: the text is stored as a JBIG2 mask,
 ; which its PDF renderer omits, so every page arrives as blank paper. The file
 ; is not damaged, and the reader must not be sent looking for a better copy.
 Ocr.Refusal.NoEngine=Windows has no text recognition installed. It comes with a Windows language: add one under Settings, Time and language, Language and region, and it arrives with it.
 Ocr.Refusal.NoPages=There are no pages in this to read.
-Ocr.Progress.Title=Reading the pictures
-Ocr.Progress.Starting=Starting to read...
+Ocr.Progress.Title=Recognizing the text
+Ocr.Progress.Starting=Starting to recognize...
 Ocr.Progress.Working=Page {0} of {1}. {2}
 Ocr.Progress.Quarter={0} percent done. {1}
 Ocr.Progress.Cancel=Cancel
@@ -510,26 +510,26 @@ Google.Cred.NotServiceAccount=That JSON is readable but it is not a service acco
 ; A book that IS pictures and has never been read — imported in bulk, where
 ; nothing could be asked. "Re-read" would be a lie to someone who has never
 ; heard a word of it.
-Context.ReadOcr=Read the pictures
-Context.ReReadOcr=Re-read in a different language
+Context.ReadOcr=Recognize the text
+Context.ReReadOcr=Recognize again in another language
 ; Enter on a book that is still pictures. It must never reach the player: a
 ; reading with nothing in it plays silence, and silence is indistinguishable
 ; from a book that has simply gone quiet.
-Ocr.Unread.Message=This book has not been read yet — it is still pictures of its pages, so there is nothing to speak. Read it now?
-Ocr.Sparse.Message=Only {0} of this book's {1} pages carry any text. It is most likely a scan whose text layer is broken, so the words are still pictures. Read the pictures now?
-Ocr.Blank.Question={0} pages in a row came back with no text on them at all. The rest of the {1} may be the same, and reading them would take a while. Keep going?
+Ocr.Unread.Message=This book has not been recognized yet — it is still pictures of its pages, so there is nothing to speak. Recognize it now?
+Ocr.Sparse.Message=Only {0} of this book's {1} pages carry any text. It is most likely a scan whose text layer is broken, so the words are still pictures. Recognize them now?
+Ocr.Blank.Question={0} pages in a row came back with no text on them at all. The rest of the {1} may be the same, and recognizing them would take a while. Keep going?
 Ocr.Blank.Jbig2={0} pages in a row came back with no text on them at all. This PDF stores its words in a form Windows cannot draw, so those pages arrive as blank paper with nothing to recognize — reading the remaining {1} would most likely find nothing. Keep going?
-Ocr.Read.Question=This book is {0} pages of pictures and has not been read yet. Reading it takes {1}.
-Ocr.ReRead.Question=This book was read from {0} pages of pictures. Reading it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
-Ocr.ReRead.Done=The book has been read again and replaced.
+Ocr.Read.Question=This book is {0} pages of pictures and has not been recognized yet. Recognizing it takes {1}.
+Ocr.ReRead.Question=This book was recognized from {0} pages of pictures. Recognizing it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
+Ocr.ReRead.Done=The book has been recognized again and replaced.
 ; For a book read before NBR started keeping the pictures, or one whose
 ; originals have since been moved. Asked once — they are kept afterwards.
 Ocr.ReRead.Locate=The pictures for this book are not kept with it, so NBR needs to find them again. Choose the scanned file, or — if the book arrived as separate page images — any one of those pages.
 Ocr.ReRead.LocateTitle=Find the pictures for this book
 Ocr.ReRead.Filter=Scanned books and images|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|All files|*.*
-Ocr.ReRead.WholeFolder=There are {0} images in that folder. Read all of them as the pages of this book?
-Settings.Ocr.Group=Books that are pictures
-Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. NBR can read the words off them and then speak them like any other book. This is only the starting choice — when you have more than one language, NBR asks which to use each time it reads a book.
+Ocr.ReRead.WholeFolder=There are {0} images in that folder. Recognize all of them as the pages of this book?
+Settings.Ocr.Group=Books with text in pictures
+Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. NBR can recognize the words on them and then speak them like any other book. This is only the starting choice — when you have more than one language, NBR asks which to use each time it reads a book.
 Settings.Ocr.Language=Recognition language
 Settings.Ocr.Automatic=Automatic
 Settings.Ocr.AddLanguage=Add a language...
@@ -625,7 +625,7 @@ Menu.File.Translate=Translate the book...
 Context.Translate=Translate the book...
 Translate.NotText=Only a text book can be translated. This one is a recording.
 Translate.Empty=There is no text in this book to translate.
-Translate.NoService=No translation service has a key yet. Add one in Settings, under OCR and translation.
+Translate.NoService=No translation service has a key yet. Add one in Settings, under Advanced.
 Translate.Done={0} passages translated. The translation is on the shelf as a new book.
 Translate.DoneLeft={0} passages translated, {1} left in the original language.
 Translate.Took=It took {0}. A line-by-line record is in translation.log beside the original book.
@@ -635,7 +635,7 @@ Translate.Suffix={0} ({1})
 ; overkill this avoids: the pack is the model alone, about a quarter of a
 ; megabyte. Windows asks for its own permission, because installing a system
 ; component needs it and a running program cannot grant itself that.
-Ocr.Add.Title=Languages for reading pictures
+Ocr.Add.Title=OCR languages
 Ocr.Add.List=Languages
 Ocr.Add.Row={0}
 Ocr.Add.RowInstalled={0} — already installed
@@ -776,7 +776,7 @@ Settings.TextBooks.AddVoices=Add new languages...
 ; the list because the library holds a book in it.
 Settings.TextBooks.LanguageNoVoice={0} — no voice installed
 Settings.TextBooks.Voice=Voice:
-Settings.TextBooks.Speed=Reading speed:
+Settings.TextBooks.Speed=Speed:
 Settings.TextBooks.Test=Test voice
 Settings.TextBooks.TestSample=This is a sample of the selected voice.
 Settings.TextBooks.Volume=Volume:
@@ -797,7 +797,7 @@ Settings.TextBooks.UseVisual=Use visual output
 Settings.TextBooks.NoSpeech=No speech
 Settings.TextBooks.VisualMode=Display mode:
 Settings.TextBooks.VisualMode.TwoRows=Two text rows (subtitle style)
-Settings.TextBooks.VisualMode.FullInstant=Full screen text (instant switch)
+Settings.TextBooks.VisualMode.FullInstant=Full screen text (page by page)
 Settings.TextBooks.VisualMode.FullScrolling=Full screen text (scrolling)
 Settings.TextBooks.Highlight=Highlight:
 Settings.TextBooks.Highlight.None=No highlight
@@ -831,7 +831,7 @@ Settings.OK.Accessible=OK
 Settings.Cancel.Accessible=Cancel
 Settings.Apply=Apply
 Settings.Apply.Accessible=Apply
-Settings.General.UseMultimediaKeys.Hint=You can use your keyboard multimedia keys or headset keys to play, pause and navigate the book using the seek step you have chosen.\n\nThe second switch takes them system-wide, so they reach NBR from anywhere — at the price of taking them from every other player while NBR is running.
+Settings.General.UseMultimediaKeys.Hint=You can use your keyboard multimedia keys or headset keys to play, pause and navigate the book using the navigation step you have chosen.\n\nThe second switch takes them system-wide, so they reach NBR from anywhere — at the price of taking them from every other player while NBR is running.
 Settings.General.LibraryLocation.Hint=This is the place where NBR copies imported books. You can leave it as default on your system partition, but if you plan to have a large library, another partition or disk would be a much better solution. NBR also keeps the information for each book in there, so if you want to save your reading positions, bookmarks, speed and other reading settings, note that you need to copy the content from the old library folder manually to the new location. And within the same price range: by changing the library location to somewhere other than the system partition, you are preserving your books from accidental system crashes and the usual data loss accompanying them.
 Settings.TextBooks.Speech.Hint=Here is the list of the languages and the voices installed on your system. You can choose the default voice for every language shown here, so every new title in that language opens with the selected voice. Choosing a voice for a language is what makes it the default — there is nothing else to press. If your new book is written in a language that is not on the list, it is best not to set a default voice for it here. You can always set a voice in the Properties of the book itself, on its Text page, or choose No speech and go on reading in braille or on screen. You will also see a notice when a language has no voice installed.
 Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears. Switched on here, the window opens by itself every time you press Play. It can also be opened and closed by hand at any time with F9, whether this is switched on or not — so you can try it on a book without changing its Properties.
@@ -865,7 +865,7 @@ Dict.Field.Replacement=Say this instead:
 Dict.Field.Match=Match:
 Dict.Field.CaseSensitive=Case sensitive
 Dict.Field.Skip=Skip
-Dict.Field.Comment=Note to self:
+Dict.Field.Comment=Note:
 Dict.Field.Enabled=Rule is on
 Dict.Match.WholeWord=The whole word
 Dict.Match.Anywhere=Anywhere, even inside a word
@@ -883,7 +883,7 @@ Settings.Misc.Look.Classic=System colors
 Settings.Misc.Look.New=NBR design
 Settings.Misc.Look.Hint=How NBR draws itself, and there are two answers.\n\nNBR design is its own look, and the one it starts with.\n\nSystem colors makes it a plain window in whatever colors and fonts Windows is set to. It paints nothing of its own, so your own scheme comes through whole — which is what you want with a high contrast theme, and what works best with a magnifier. If you already have high contrast switched on, this is the one NBR starts with.\n\nEither way the choice is yours to make and yours to undo: the keyboard and your screen reader are unaffected by it, and F2 brings you back here.
 Settings.Misc.Look.RestartTitle=Change the look
-Settings.Misc.Look.Restart=The look changes when NBR starts again. Restart it now? Your place in the book is saved either way.
+Settings.Misc.Look.Restart=Changing the look needs NBR to start again. Your place in the book is kept. Restart now?
 
 ; Per-control help: a ? on each group opens one short explanation. F1 on the
 ; focused control opens the same text without travelling to the button.
@@ -913,7 +913,7 @@ Reading.Smaller=Smaller
 Reading.Smaller.Accessible=Smaller text, minus key
 Reading.Bigger=Bigger
 Reading.Bigger.Accessible=Bigger text, plus key
-Reading.Font.Accessible=Reading font
+Reading.Font.Accessible=Font
 Reading.Size.Announce=Text size {0}
 
 ; ── Services and accounts (Help menu) ────────────────────────────────────────
@@ -955,5 +955,5 @@ Services.Steps.OpenAi=1. Open platform.openai.com in your browser. This is the d
 ; One flag in Beta.cs governs these. Delete this block when it goes back in.
 Beta.Suffix= — not in this beta
 Beta.NoReadingWindow=The reading window is off in this beta. Reading on screen, and the braille that follows it, are still being tested and come back in a later release.
-Settings.General.Language.Restart=NBR has to start again for the new language, because every window reads its wording once, when it is built. Restart now?
+Settings.General.Language.Restart=Changing the language needs NBR to start again. Restart now?
 Settings.General.Language.RestartTitle=Language

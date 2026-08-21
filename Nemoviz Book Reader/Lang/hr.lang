@@ -284,7 +284,7 @@ Settings.Misc.Look=Izgled:
 Settings.Misc.Look.Classic=Boje sustava
 Settings.Misc.Look.New=NBR dizajn
 Settings.Misc.Look.RestartTitle=Promjena izgleda
-Settings.Misc.Look.Restart=Promjena izgleda zahtijeva ponovno pokretanje aplikacije. Položaj čitanja će se zapamtiti. Pokrenuti sada?.
+Settings.Misc.Look.Restart=Promjena izgleda zahtijeva ponovno pokretanje aplikacije. Položaj čitanja će se zapamtiti. Pokrenuti sada?
 
 Settings.TextBooks.SpeechGroup=Govor
 Settings.TextBooks.Language=Jezik:
@@ -373,7 +373,7 @@ Prop.On=uključeno
 Prop.Off=isključeno
 Prop.Text.ReadingIn=Čita se na:
 Prop.Text.NoVoiceShort=Nijedan instalirani glas ne govori {0} — odaberite ispod.
-Prop.Text.NoVoiceForLanguage=Nijedan instalirani glas ne govori {0}. Instalirajte glas za {0} ili gore odaberite jezik i glas kojim će se ova knjiga čitati. Izbor vrijedi samo za ovu knjigu
+Prop.Text.NoVoiceForLanguage=Nijedan instalirani glas ne govori {0}. Instalirajte glas za {0} ili gore odaberite jezik i glas kojim će se ova knjiga čitati. Izbor vrijedi samo za ovu knjigu.
 Prop.Text.InputBrailleGroup=Brajični izvornik
 Prop.Text.InputBrailleTable=Ulazna brajična tablica:
 
@@ -611,7 +611,7 @@ Ocr.Unread.Message=Ova knjiga još nije prepoznata — i dalje su to slike njezi
 Ocr.Sparse.Message=Samo {0} od {1} stranica ove knjige nosi ikakav tekst. Najvjerojatnije je to skenirana knjiga s pokvarenim tekstualnim slojem, pa su riječi i dalje slike. Prepoznati tekst sada?
 Ocr.Blank.Question={0} stranica zaredom vratilo se bez ijednog slova. Ostatak od {1} može biti isti, a prepoznavanje bi potrajalo. Nastaviti?
 Ocr.Blank.Jbig2={0} stranica zaredom vratilo se bez ijednog slova. Ovaj PDF sprema tekst u obliku koji Microsoft OCR ne zna prepoznati — čitanje preostalih {1} najvjerojatnije ne bi našlo ništa. Nastaviti?
-Ocr.Read.Question=Ova je knjiga {0} stranica slika i još nije Prepoznata. Prepoznavanje traje {1}.
+Ocr.Read.Question=Ova je knjiga {0} stranica slika i još nije prepoznata. Prepoznavanje traje {1}.
 Ocr.ReRead.Question=Ova je knjiga prepoznata s {0} stranica slika. Ponovno prepoznavanje na drugom jeziku traje {1}. Slike se čuvaju uz knjigu, pa se ovo može ponoviti koliko god puta želite.
 Ocr.ReRead.Done=Knjiga je ponovo prepoznata i zamijenjena.
 Ocr.ReRead.Locate=Slike ove knjige ne čuvaju se uz nju, pa ih NBR mora ponovo pronaći. Odaberite skeniranu datoteku ili — ako je knjiga stigla kao zasebne slike stranica — bilo koju od tih stranica.
