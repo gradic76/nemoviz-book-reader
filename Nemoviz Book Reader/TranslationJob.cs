@@ -476,17 +476,30 @@ namespace Nemoviz_Book_Reader
                 catch (Exception ex) { r = new TranslationResult { Error = ex.Message }; }
                 if (r == null || !r.Ok || string.IsNullOrEmpty(r.Text)) continue;
 
-                // ANSWERING IS NOT THE SAME AS TELLING US SOMETHING, measured on the
-                // first comparison run (2026-08-21). One engine came back with text
-                // this parser found nothing in, the loop treated that as success and
-                // asked nobody else, and the book was translated with no narrator
-                // and no glossary -- while the other sample in the same comparison
-                // had both. An empty result has to fall through exactly like a
-                // refusal, or the preparation quietly does not happen.
+                // A PARTIAL ANSWER IS NOT A FINISHED ONE, and this is the THIRD
+                // time the preparation has failed in the same family (2026-08-21).
+                // First it asked only one engine; then it accepted text it could
+                // parse nothing out of; now: Gemini answered the narrator question
+                // and gave no names at all, the loop saw a non-empty result and
+                // stopped, and that sample was translated with no glossary while
+                // the other had seven names with full declensions. Same shape every
+                // time -- one sample prepared, the other not, and a comparison that
+                // measures our own bug.
+                //
+                // So the answers are MERGED across the chain rather than taken from
+                // whoever speaks first, and the walk stops only when both halves are
+                // in hand or the chain runs out. Merging costs at most one extra
+                // request per book and cannot lose an answer already given:
+                // FillGapsFrom only fills what is still missing.
                 var got = new TranslationBible();
                 foreach (string line in r.Text.Replace("\r\n", "\n").Split('\n')) got.ReadLine(line);
-                if (!got.IsEmpty) return got;
+                bible.FillGapsFrom(got);
+                if (bible.NarratorGender.Length > 0 && bible.Names.Count > 0) return bible;
             }
+
+            // Whatever was gathered, even if one half is missing -- a narrator with
+            // no names still fixes the fault that started all of this.
+            if (!bible.IsEmpty) return bible;
 
             if (r == null || !r.Ok || string.IsNullOrEmpty(r.Text))
             {
