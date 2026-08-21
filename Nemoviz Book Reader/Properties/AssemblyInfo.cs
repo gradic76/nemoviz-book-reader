@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Nemoviz Book Reader")]
-[assembly: AssemblyDescription("A multiformat, multioutput reader for digital books, designed for blind and partially sighted readers.")]
+[assembly: AssemblyDescription("A multiformat, multioutput reader for digital books and publications, designed for blind and partially sighted readers.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Nemoguća vizija — nemoviz.org")]
 [assembly: AssemblyProduct("Nemoviz Book Reader")]
