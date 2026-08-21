@@ -172,8 +172,28 @@ namespace Nemoviz_Book_Reader
         /// screen reader can walk line by line.</para></summary>
         public static void ShowAbout(IWin32Window owner)
         {
-            using (var f = new TextHelpForm(Localization.T("Dialog.About.Title"),
-                                            Localization.T("Dialog.About.Text"), true))
+            // THE RELEASE LABEL IS A STRING, THE BUILD DATE IS NOT (Gordan,
+            // 2026-08-21). His convention: "Alpha" while it is internal, then
+            // "Beta 1", "Beta 2", and from the first public release the DATE --
+            // "Nemoviz Book Reader 26.08.21" -- because "applications with fifteen
+            // decimals after the name" tell nobody anything. So the label is one
+            // editable string and nothing computes it.
+            //
+            // The build date beneath it is computed, and it is not the same thing:
+            // it is what a tester needs when they report a fault, and it is exactly
+            // the field nobody remembers to bump by hand.
+            string release = Localization.T("Dialog.About.Release");
+            string built = "?";
+            try
+            {
+                built = System.IO.File.GetLastWriteTime(
+                            System.Reflection.Assembly.GetExecutingAssembly().Location)
+                        .ToString("yyyy-MM-dd HH:mm");
+            }
+            catch { }
+            string body = Localization.T("Dialog.About.Text", release, built,
+                                         Localization.T("Dialog.About.Licence"));
+            using (var f = new TextHelpForm(Localization.T("Dialog.About.Title"), body, true))
                 f.ShowDialog(owner);
         }
 

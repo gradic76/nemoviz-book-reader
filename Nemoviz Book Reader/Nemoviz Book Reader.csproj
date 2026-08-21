@@ -295,6 +295,15 @@
          nvaccess ships, the MIT from inside System.ComponentModel.Annotations'
          own package — because a licence retyped from memory is not the licence.
          Naming a licence is not providing it, and the LGPL asks for a copy. -->
+    <!-- GPL v3 — NBR's OWN licence, from 2026-08-21. It is back for a different
+         reason than the one that removed it: last time it was here to cover
+         FFmpeg and did not (that build is LGPL v2.1). This time it is the
+         licence of the program itself, and the GPL requires the text to
+         accompany the program. Fetched from gnu.org, 35 149 bytes, not retyped.
+         The same file is COPYING at the root of the repository. -->
+    <Content Include="Licences\GPL-3.0.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Licences\LGPL-2.1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
