@@ -8,7 +8,14 @@ using System.Windows.Forms;
 // whichever look is named. Each container is checked among ITS OWN children -
 // two controls in different panels cannot collide however their rectangles read.
 //
-//   fits.exe <exe path> <theme>
+//   fits.exe <exe path> <theme> [book folder] [language]
+//
+// THE LANGUAGE MATTERS TO THE LAYOUT, which is why it is an argument and not a
+// constant. Every value column in these dialogs is measured from the real
+// captions, so a translation with longer words moves it -- and a button row
+// built for English can overflow in another language without a line of code
+// changing. Defaults to English.
+
 class Fits
 {
     static Assembly nbr;
@@ -32,7 +39,8 @@ class Fits
         // makes every overlap number quietly wrong.
         Type L = nbr.GetType("Nemoviz_Book_Reader.Localization");
         L.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static).Invoke(null,
-            new object[] { A.GetProperty("LangPath").GetValue(app), "en" });
+            new object[] { A.GetProperty("LangPath").GetValue(app), a.Length > 3 ? a[3] : "en" });
+        Console.WriteLine("jezik: " + L.GetProperty("CurrentLanguageName", BindingFlags.Public | BindingFlags.Static).GetValue(null));
 
         Check("Settings", (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.SettingsForm"),
             new object[] { app, null, null }));
