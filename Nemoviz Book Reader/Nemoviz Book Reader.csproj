@@ -130,6 +130,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Beta.cs" />
     <Compile Include="AppIcon.cs" />
     <Compile Include="appsettings.cs" />
     <Compile Include="ClassicLayout.cs" />

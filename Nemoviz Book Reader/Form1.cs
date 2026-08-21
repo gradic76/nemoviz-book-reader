@@ -3431,7 +3431,7 @@ namespace Nemoviz_Book_Reader
                     // pressed Play to get it back, and got nothing. Play is what
                     // brings the book's properties up, and this is one of them;
                     // a reader who does not want it turns it off in Properties.
-                    if (currentBook != null && currentBook.OpensReadingWindow)
+                    if (Beta.ReadingWindow && currentBook != null && currentBook.OpensReadingWindow)
                         OpenReadingWindowWhenReady();
                 }
                 else
@@ -3830,6 +3830,20 @@ namespace Nemoviz_Book_Reader
         /// both places. Nothing here duplicates it.</para></summary>
         private void ToggleReadingWindow()
         {
+            // HELD BACK FROM THE FIRST BETA -- see Beta.ReadingWindow.
+            //
+            // It answers rather than doing nothing. F9 is the one place a reader
+            // who cannot see the greyed-out boxes in Properties will come looking
+            // for this, so it is the one place the reason has to be reachable: the
+            // refusal beep every other unavailable key uses, and a spoken line.
+            // Silence here would read as a broken key.
+            if (!Beta.ReadingWindow)
+            {
+                tones.Play(300, 150);
+                AnnounceToScreenReader(lblAnnounceInfo, Localization.T("Beta.NoReadingWindow"));
+                return;
+            }
+
             // A window that exists but has not been SHOWN yet is not open. It is
             // made here and shown one message cycle later (ShowDialog blocks, so
             // it cannot be called from inside the play path), and in that gap

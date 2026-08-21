@@ -1366,7 +1366,11 @@ namespace Nemoviz_Book_Reader
             // Named for the same reason the braille group is: it sits at a
             // different index depending on whether that group is there at all.
             box.Tag = "Hint.TextVisual";
-            box.Text = Localization.T("Settings.TextBooks.VisualGroup");
+            // The caption carries the reason while the group is held back: a
+            // disabled control is skipped in the tab order, so the controls
+            // themselves can say nothing. See Beta.ReadingWindow.
+            box.Text = Localization.T("Settings.TextBooks.VisualGroup")
+                     + (Beta.ReadingWindow ? "" : Localization.T("Beta.Suffix"));
             box.Location = new Point(x, y);
             box.Size = new Size(452, 204);
 
@@ -1480,10 +1484,14 @@ namespace Nemoviz_Book_Reader
             // below it — a rule that existed only because there were two switches
             // for one output. With the braille box gone there is one, and it means
             // what it says.
-            SettingsForm.SetEnabled(chkTVisual != null && chkTVisual.Checked,
+            // HELD BACK FROM THE FIRST BETA -- Beta.ReadingWindow. The switch goes
+            // grey WITH the rest of the group rather than staying live over dead
+            // controls, and the caption says why, since a disabled control is
+            // skipped in the tab order and can explain nothing to a screen reader.
+            SettingsForm.SetEnabled(Beta.ReadingWindow && chkTVisual != null && chkTVisual.Checked,
                                     cmbTVisualMode, cmbTHighlight, cmbTHighlightColour,
                                     cmbTTextColour, cmbTBackColour);
-            if (chkTVisual != null) chkTVisual.Enabled = true;
+            if (chkTVisual != null) chkTVisual.Enabled = Beta.ReadingWindow;
             RefreshTextInfo();
         }
 

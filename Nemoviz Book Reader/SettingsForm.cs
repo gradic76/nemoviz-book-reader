@@ -1394,7 +1394,8 @@ namespace Nemoviz_Book_Reader
         private GroupBox BuildVisualGroup(int x, int y)
         {
             GroupBox box = new GroupBox();
-            box.Text = Localization.T("Settings.TextBooks.VisualGroup");
+            box.Text = Localization.T("Settings.TextBooks.VisualGroup")
+                     + (Beta.ReadingWindow ? "" : Localization.T("Beta.Suffix"));
             box.Name = "Settings.TextBooks.Visual.Hint";
             box.Location = new Point(x, y);
             // 232, not 224: the last row (Background colour) ended one pixel below
@@ -1468,8 +1469,13 @@ namespace Nemoviz_Book_Reader
 
         private void UpdateVisualEnabled()
         {
-            bool on = chkVisual != null && chkVisual.Checked;
+            // HELD BACK FROM THE FIRST BETA -- Beta.ReadingWindow. Same treatment
+            // as the per-book copy in Properties: the switch greys out with the
+            // group it governs, so nothing here can be set for a window that will
+            // not open.
+            bool on = Beta.ReadingWindow && chkVisual != null && chkVisual.Checked;
             SetEnabled(on, cmbVisualMode, cmbHighlight, cmbHighlightColour, cmbTextColour, cmbBackColour);
+            if (chkVisual != null) chkVisual.Enabled = Beta.ReadingWindow;
         }
 
         internal static void SetEnabled(bool on, params Control[] controls)

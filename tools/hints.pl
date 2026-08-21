@@ -34,7 +34,7 @@ my %order = ('Player and dialogs' => 1, 'Properties - sound' => 2,
              'Properties - reading' => 3, 'Settings' => 4);
 
 my $lang = shift @ARGV
-    or die "usage: hints.pl <en.lang> [--keys <regex>] [--import <doc>]\n";
+    or die "usage: hints.pl <en.lang> [--keys <regex>] [--import <doc>] [--check]\n";
 
 # WHICH KEYS THIS DOCUMENT IS FOR. Hints by default; --keys makes the same round
 # trip serve any family of long strings. The service guides needed it the day
@@ -61,6 +61,7 @@ open(my $in, '<:raw', $lang) or die "cannot read $lang: $!\n";
 my @lines = <$in>;
 close $in;
 
+if ($mode eq '--check') { check_file(); exit 0; }
 if ($mode ne '--import') { export(); exit 0; }
 import_doc();
 exit 0;
@@ -185,4 +186,36 @@ sub import_doc {
     }
     printf("\n%d changed, %d unchanged, %d not in en.lang.%s\n",
            $changed, $same, $unknown, $changed ? "" : " Nothing written.");
+}
+
+# ---------------------------------------------------------------- check
+#
+# A VALUE BROKEN ACROSS LINES IS SILENTLY THROWN AWAY, and that is why this
+# exists. Localization skips blanks and comments and then wants an '='; a line
+# without one is dropped without a word. Writing the two-character escape into
+# en.lang by hand and letting a real newline through is how it happens, and it
+# happened three times during the About and guide work -- Gordan caught one by
+# ear ("nothing reads below Written by Gordan Radic") and TWO SURVIVED UNNOTICED
+# until a sweep on 2026-08-21 found them: half of the multimedia-keys hint had
+# never been shown to anybody, and a stray paragraph sat above
+# Settings.Translate.Hint.
+#
+# The round-trip check above could not see either, because it only ever looked
+# at Hint.* keys. This looks at every line of the file.
+
+sub check_file {
+    my $bad = 0;
+    my $last = '(before any key)';
+    for my $i (0 .. $#lines) {
+        my $l = $lines[$i];
+        $l =~ s/\r?\n$//;
+        next if $l =~ /^\s*$/;
+        next if $l =~ /^[;#]/;
+        if ($l =~ /^([A-Za-z][A-Za-z0-9._]*)=/) { $last = $1; next; }
+        printf "line %d continues the value of '%s' and is LOST at load:\n  %s\n",
+               $i + 1, $last, substr($l, 0, 90);
+        $bad++;
+    }
+    print $bad ? "\n$bad broken value(s)\n" : "en.lang: no broken values\n";
+    exit($bad ? 1 : 0);
 }
