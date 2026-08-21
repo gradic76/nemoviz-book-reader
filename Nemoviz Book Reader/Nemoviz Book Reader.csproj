@@ -17,6 +17,7 @@
          TagLibSharp.xml alone being 2.2 MB — into a portable app that nobody
          writes code against. The assemblies themselves are unaffected. -->
     <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
+    <ApplicationIcon>NBR.ico</ApplicationIcon>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -129,6 +130,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppIcon.cs" />
     <Compile Include="appsettings.cs" />
     <Compile Include="ClassicLayout.cs" />
     <Compile Include="ArchivePasswordPrompt.cs" />

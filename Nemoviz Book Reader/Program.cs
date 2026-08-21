@@ -12,6 +12,9 @@ namespace Nemoviz_Book_Reader
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            // The program icon on every window, not just on the file. See AppIcon.
+            AppIcon.Install();
+
             // Write down what went wrong, before the dialog asks the reader to
             // decide about it.
             //
