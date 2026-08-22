@@ -2731,6 +2731,32 @@ needs verifying by ear before it is relied on.
   legend on the panel is now **`Knjižnica`, 71 units at 12 pt / 88 at 14 pt**, so
   a side column of **91 units** carries the whole set. The full wording stays in
   `AccessibleName` — the screen reader still says "Postavi knjižnu oznaku, F5".
+
+  > **CORRECTION, 2026-08-22: the built column is 108, not 91, and legends are
+  > drawn at 12 pt only.** The 91 above is the figure this section settled
+  > BEFORE the skin existed; what the skin actually does is
+  > `NewPlayerSkin.CellW = 108` — the same width as the key itself — handed to
+  > `DrawString` by `PaintLegends` with no inset, at `FLegend`, which is
+  > `new Font("Segoe UI", 12f)`. So the 14 pt column never applied to a legend,
+  > and 17 units of headroom were being left on the table.
+  >
+  > **It cost two unnecessary shortenings, both since undone.** Serbian
+  > Cyrillic's `Библиотека` measures 93 and had been replaced by `Књиге` on the
+  > strength of the 91; Russian was about to be given the same treatment. Both
+  > now carry the real word, and `tools/sr-cyrillic.pl`'s override is gone.
+  > Measured across all six shipping languages, the **widest legend is 93** and
+  > English's own is 85.
+  >
+  > **What the shortening rule really is**, now that the number is right: use
+  > the full word when it measures **100 or less** — eight units of margin, so a
+  > rendering difference cannot trip the ellipsis — and a short form above that.
+  > Croatian's `Oznake` still earns its place (`Knjižne oznake` is 113, over
+  > even at 108), and German keeps `Optionen`/`Details`/`Marke`/`Marken`
+  > because `Einstellungen` is 102, `Eigenschaften` and `Einschlaftimer` 106,
+  > and `Lesezeichen` would give the two bookmark keys the same legend.
+  >
+  > **Read the constant, not the brief.** A design number written down before
+  > the code was built outlived the code that superseded it by four weeks.
 - **Type.** 12 pt base, 14 pt for the display, 11 pt floor. Legends are printed
   under clean buttons; only the transport ring is iconographic.
 - **A groove around every control.** Each button and the ring sits in a recess

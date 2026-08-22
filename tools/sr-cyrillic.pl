@@ -82,14 +82,15 @@ my @names = qw(Nemoviz Book Reader Claude Anthropic Google Cloud Azure Speech
 # its own script instead.
 my %override = (
     'LanguageName'      => "\x{421}\x{440}\x{43F}\x{441}\x{43A}\x{438} (\x{45B}\x{438}\x{440}\x{438}\x{43B}\x{438}\x{446}\x{430})",
-    # CYRILLIC IS WIDER THAN LATIN, and the drawn legends have a hard column.
-    # Measured at 12 pt Segoe: the Latin "Biblioteka" is 76 units, its exact
-    # transliteration is 93, and the column is 91 -- so a faithful conversion
-    # would have been clipped on the key. "Knjige" is 52 and says what is behind
-    # the key; the spoken name stays "Biblioteka, F3", which is the same split
-    # English already makes between "Bookmark" on the key and "Set Bookmark, F5"
-    # in the ear. Only the LEGEND is overridden.
-    'Btn.Library.Legend' => "\x{41A}\x{45A}\x{438}\x{433}\x{435}",
+    # THE LEGEND OVERRIDE IS GONE, and it was mine rather than the panel's.
+    # Cyrillic really is wider than Latin -- "Biblioteka" is 76 units at 12 pt
+    # Segoe and its transliteration 93 -- and the note here said the column is
+    # 91, so "Knjige" was put on the key instead. But 91 is CLAUDE.md 8k's
+    # DESIGN figure, written before the skin was built. The skin lays every
+    # command key out at NewPlayerSkin.CellW, which is 108, and PaintLegends
+    # hands DrawString that same rectangle with no inset. So 93 was never
+    # anywhere near the edge, and the faithful transliteration fits with 15
+    # units to spare. Read the constant, not the brief.
 );
 
 my ($in, $out) = @ARGV;

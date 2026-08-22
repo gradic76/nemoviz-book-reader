@@ -97,7 +97,7 @@ Seek.Item.StandardPage=Картица текста
 ; ---- PLAYER - the eight command keys
 Btn.Library=Библиотека
 Btn.Library.Accessible=Библиотека, F3
-Btn.Library.Legend=Књиге
+Btn.Library.Legend=Библиотека
 Btn.Settings=Подешавања
 Btn.Settings.Accessible=Подешавања, F2
 Btn.Settings.Legend=Поставке
