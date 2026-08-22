@@ -1,0 +1,776 @@
+; Nemoviz Book Reader
+;
+; Translated by:            Claude (Anthropic), 2026 - Latin, then transliterated by tools/sr-cyrillic.pl
+; Verified and modified by: 
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Српски (ћирилица)
+Btn.OK=У реду
+Btn.Yes=Да
+Btn.No=Не
+Btn.Cancel=Откажи
+Btn.Close=Затвори
+Btn.Continue=Настави
+Btn.Refresh=Освежи
+Btn.Refresh.Accessible=Освежи
+Common.Dash=-
+Common.Error=Грешка
+Common.DateFormatLong=д. MMMM yyyy.
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Наслов:
+Player.Info.AuthorLabel=Аутор:
+Player.Info.ProducerLabel=Продуцент:
+Player.Info.PublisherLabel=Издавач:
+Player.Info.ChapterLabel=Поглавље:
+Player.Info.PartLabel=Део:
+Player.Info.PageLabel=Страна:
+Player.Info.BookmarksLabel=Ознаке:
+Player.Info.VoiceLabel=Глас:
+Player.Info.NoVoiceLabel=Нема инсталираног гласа
+Player.Info.PartNumElapsed=Део {0}, протекло:
+Player.Info.PartNumRemaining=Део {0}, преостало:
+Player.Info.ElapsedLabel=Протекло:
+Player.Info.RemainingLabel=Преостало:
+Player.Info.VolumeLabel=Јачина:
+Player.Info.SpeedLabel=Брзина:
+Player.Info.AccessibleName=Подаци о репродукцији, F8
+Player.Info.Prepared=Сачуван говор: {0} одломака, {1} MB
+Player.Info.Preparing=Припремам остатак књиге: {0} од {1} одломака
+Player.TitleBar.Paused=паузирано
+Player.ReadingSurface.Accessible=Површина за читање
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Репродукуј, Размакница
+Btn.Pause.Accessible=Паузирај, Размакница
+Btn.Back.Accessible=Назад, Shift+Лево
+Btn.Forward.Accessible=Напред, Shift+Десно
+Btn.VolumeUp.Accessible=Гласније, F12
+Btn.VolumeDown.Accessible=Тише, F11
+Btn.Power.Accessible=Излаз, Alt+F4
+Player.Volume.Text=Јачина: {0}%
+Player.Volume.Accessible=Јачина {0} посто
+Player.Speed.Text=Брзина: {0}x
+Player.Speed.Legend=Брзина
+Player.Speed.Accessible=Брзина {0} пута
+Player.Speed.Wpm=Брзина: {0} рпм
+Player.Speed.WpmAccessible=Брзина {0} речи у минуту
+Player.Position.Label=Положај
+Player.Position.Text=Положај: {0} / {1}
+Player.Position.Accessible=Положај {0} посто
+Player.Progress.Legend=Напредак
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Корак навигације:
+Player.Seek.Accessible=Корак навигације, Shift+Горе или Shift+Доле
+Player.Seek.Announce=Навигација: {0}
+Seek.Item.15s=15 секунди
+Seek.Item.30s=30 секунди
+Seek.Item.1min=1 минут
+Seek.Item.5min=5 минута
+Seek.Item.10min=10 минута
+Seek.Item.15min=15 минута
+Seek.Item.30min=30 минута
+Seek.Item.Chapter=Поглавље
+Seek.Item.Part=Део
+Seek.Item.Track=Трацк
+Seek.Item.HeadingLevel=Наслов {0}
+Seek.Item.Page=Страна
+Seek.Item.Bookmark=Ознака у књизи
+Seek.Item.StandardPage=Картица текста
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Библиотека
+Btn.Library.Accessible=Библиотека, F3
+Btn.Library.Legend=Књиге
+Btn.Settings=Подешавања
+Btn.Settings.Accessible=Подешавања, F2
+Btn.Settings.Legend=Поставке
+Btn.Properties.Legend=Својства
+Btn.Properties=Својства
+Btn.Properties.Accessible=Својства, Alt+Enter
+Btn.Help=Помоћ
+Btn.Help.Accessible=Помоћ, F1
+Btn.Help.Legend=Помоћ
+Btn.GoTo.Legend=Иди на...
+Btn.GoTo=Иди на...
+Btn.GoTo.Accessible=Иди на, F4
+Btn.SetBookmark.Legend=Означи
+Btn.SetBookmark=Означи
+Btn.SetBookmark.Accessible=Постави ознаку, F5
+Btn.ManageBookmarks.Legend=Ознаке
+Btn.ManageBookmarks=Ознаке
+Btn.ManageBookmarks.Accessible=Ознаке у књизи, F6
+Btn.Timer=Бројач
+Btn.Timer.Legend=Бројач
+Btn.Timer.Accessible=Бројач, F7
+Btn.Timer.Countdown=Бројач {0}
+Btn.Timer.Accessible.Active=Бројач, још {0}, активирајте да зауставите репродукцију и откажете бројач
+Btn.Timer.Accessible.LessThanMinute=Бројач, мање од минута
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Назад (Shift+Лево)
+Tip.PlayPause=Репродукуј/Паузирај (Размакница)
+Tip.Forward=Напред (Shift+Десно)
+Tip.Seek=Мењајте са Shift+Горе и Shift+Доле; скачите са Shift+Лево и Shift+Десно (такође Назад/Напред)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enter
+Tip.Timer=F7
+Tip.Volume=F11 и F12
+Tip.Speed=Ctrl+Лево и Ctrl+Десно
+Tip.Progress=Ctrl+1–9: скок на 10–90%
+Player.OpenFile.Title=Изаберите књигу
+Player.NoVoiceForLanguage=Ниједан инсталирани глас не говори {0}. Отворите Својства са Alt+Enter и изаберите глас.
+Filter.Audiobooks=Звучне књиге
+Filter.TextBooks=Текстуалне књиге
+Filter.BrailleBooks=Брајеве књиге
+Filter.Archives=Архиве
+Filter.AllSupported=Све подржане датотеке
+Filter.AllFiles=Све датотеке
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Библиотека
+Library.List.Accessible=Полица са књигама
+Library.NowReading.Accessible=Тренутно читам
+Library.NowReading.Empty=Ништа није учитано
+Library.Search.Accessible=Претрага
+Library.Filter.Accessible=Филтериши по статусу
+Library.Details.Accessible=Подаци о књизи
+Library.Btn.Load=Учитај
+Library.Btn.Load.Accessible=Учитај
+Library.Btn.Close=Затвори
+Library.Btn.Close.Accessible=Затвори
+Menu.File=Датотека
+Menu.File.OpenFile=Отвори датотеку...
+Menu.File.OpenFolder=Отвори фасциклу...
+Menu.File.OpenAudioCd=Отвори Audio CD
+Menu.File.ClearLibrary=Испразни библиотеку...
+Menu.File.Exit=Излаз
+Menu.File.ExportAudio=Извези као звучну књигу...
+Menu.File.Translate=Преведи књигу...
+Menu.Sort=Поређај
+Menu.Sort.Alphabetically=Абецедно
+Menu.Sort.DateAdded=Датум додавања
+Menu.Sort.Format=Формат
+Menu.Sort.Status=Статус
+Menu.Sort.Ascending=Растуће
+Menu.Sort.Descending=Опадајуће
+Menu.Sort.ActiveMark=(активно)
+Menu.Help=Помоћ
+Menu.Help.Help=Помоћ
+Menu.Help.About=О програму NBR
+Menu.Help.Services=Сервиси и налози...
+Shelf.Filter.All=Све књиге
+Shelf.Filter.Reading=У читању
+Shelf.Filter.Unread=Непрочитано
+Shelf.Filter.Read=Прочитано
+Shelf.Filter.Favorites=Омиљено
+Shelf.Status.NowReading=Тренутно читам
+Shelf.Status.Reading=У читању
+Shelf.Status.Unread=Непрочитано
+Shelf.Status.Read=Прочитано
+Context.Open=Отвори
+Context.MarkRead=Означи као прочитано
+Context.MarkUnread=Означи као непрочитано
+Context.Rename=Преименуј
+Context.Delete=Избриши
+Context.Properties=Својства
+Context.ReadOcr=Препознај текст
+Context.ReReadOcr=Понови препознавање на другом језику
+Context.Translate=Преведи књигу...
+Context.Favorite=Означи као омиљено
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Наслов
+Details.Field.Author=Аутор
+Details.Field.Format=Формат
+Details.Field.Speed=Брзина
+Details.Field.Volume=Јачина
+Details.Field.Added=Додато
+Details.Field.Producer=Продуцент
+Details.Field.Publisher=Издавач
+Details.Field.Year=Година
+Details.Field.Time=Трајање
+Details.Field.Elapsed=Протекло
+Details.Field.Remaining=Преостало
+Details.Field.Read=Прочитано
+Details.Field.Pages=Страна
+Details.Field.Headings=Наслова
+Details.Field.Characters=Знакова
+Details.Field.Language=Препознати језик
+Details.Field.Description=Опис
+Details.Description.Open=Притисните Enter за читање
+Details.Field.SoundProcessing=Обрада звука
+Details.Sound.On=Укључена
+Details.Sound.Off=Искључена
+Details.Speed.Wpm={0} рпм
+Dialog.Description.Title=Опис - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Додај књигу у библиотеку
+Library.ImportFolder.Description=Изаберите фасциклу са књигама
+Dialog.ConfirmImport.Message=На изабраном месту пронађено је {0} књига: {1} звучних, {2} текстуалних, {3} у специјалним форматима и {4} архива.\n\nАко је то тачно, после потврде књиге се копирају у вашу библиотеку, а архиве се тамо распакују. Ваша библиотека је на {5}.\n\nНа изворном месту ништа се не мења — све остаје нетакнуто, без бриге.\n\nАко бројке не одговарају очекиваном, пресложите податке које желите да увезете. Групни увоз има ограничења у разликовању наслова и NBR не може да гарантује да ће сваки погодити.\n\nОво може да потраје, па настојте да га не прекидате.
+Dialog.ConfirmImport.One=Пронађена је једна књига. Увести је?
+Dialog.ConfirmImport.Title=Додавање фасцикле
+Dialog.NoBooksFound.Message=У изабраној фасцикли није пронађена ниједна подржана књига.
+Dialog.NoBooksFound.Title=Додавање фасцикле
+Dialog.ImportSuccess.Message=Књига је додата у библиотеку.
+Dialog.ImportSuccess.Title=Додавање књиге
+Dialog.ImportError.Message=Грешка при додавању књиге: {0}
+Dialog.ImportFolderSuccess.Message=Увезено {0} књига.
+Dialog.ImportFolderSuccess.Skipped={0} је изостављено.
+Dialog.ImportFolderSuccess.SkippedList=Ово није ушло:
+Dialog.ImportFolderSuccess.Title=Додавање фасцикле
+Dialog.ImportFolderError.Message=Грешка при увозу фасцикле: {0}
+Dialog.ReimportExisting.Title=Већ је у библиотеци
+Dialog.ReimportExisting.Message={0} већ стоји на полици. Поновним увозом освежава се оно што је у фасцикли књиге. Ваше место у књизи и ваше ознаке остају — али ако се датотека у међувремену променила, речи су се помериле и место више неће бити тамо где сте стали. Увести поново?
+Dialog.Skipped.Drm=заштићено
+Dialog.Skipped.Cancelled=отказано
+Dialog.Skipped.MissingFirstVolume=недостаје први део овог скупа
+Dialog.Skipped.Empty=датотека је празна
+Dialog.Rename.Title=Преименуј књигу
+Dialog.Rename.Prompt=Нови назив:
+Dialog.Rename.AuthorLabel=Аутор:
+Dialog.Rename.TitleLabel=Наслов:
+Dialog.ConfirmDelete.Message=Да ли сте сигурни да желите трајно да избришете "{0}" са диска? Ово не може да се поништи.
+Dialog.ConfirmDelete.Title=Брисање књиге
+Dialog.DeleteError.Message=Грешка при брисању књиге са диска: {0}
+Dialog.ActiveBook.Message="{0}" је тренутно учитана у плејеру и не може да се избрише. Затворите библиотеку, отворите другу књигу или зауставите репродукцију, па покушајте поново.
+Dialog.ActiveBook.Title=Књига је у употреби
+Dialog.ClearLibrary.Title=Пражњење библиотеке
+Dialog.ClearLibrary.Message=Избрисати свих {0} књига из библиотеке? Тиме се њихове датотеке трајно уклањају са диска и то не може да се поништи.
+Dialog.ClearLibrary.Empty=Библиотека је већ празна.
+Dialog.ClearLibrary.Done=Уклоњено {0} књига.
+Dialog.ClearLibrary.Skipped={0} није могло да се уклони (у употреби или тренутно отворено).
+Dialog.DrmProtected.Title=Заштићена књига
+Dialog.DrmProtected.Message=Ова књига је заштићена DRM-ом (садржај јој је шифрован), па не може да се отвори. Набавите примерак без DRM-а.
+Dialog.ArchivePassword.Title=Потребна је лозинка
+Dialog.ArchivePassword.Prompt=Архива "{0}" заштићена је лозинком. Упишите лозинку да би се отворила:
+Dialog.ArchivePassword.Retry=Та лозинка није прошла. Покушајте поново за "{0}":
+Dialog.ArchivePassword.Field=Лозинка архиве
+Extract.Progress.Title=Распакујем
+Extract.Progress.Preparing=Припремам…
+Extract.Progress.Determinate=Распакујем… {0} / {1} датотека
+Extract.Progress.Indeterminate=Распакујем… {0} датотека
+
+; ---- GO TO
+Dialog.GoTo.Title=Иди на
+GoTo.List.Accessible=Делови књиге
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=У реду
+GoTo.Cancel.Accessible=Откажи
+GoTo.AutoPlay=Репродукуј после скока
+GoTo.AutoPlay.Hint=Када је укључено, репродукција креће одмах после скока. Када није, стање остаје какво је било: паузирано остаје паузирано, а што свира наставља да свира.
+GoTo.Hint.Accessible=Савет
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Бројач
+SleepTimer.Duration.Group=Трајање
+SleepTimer.Duration.15=15 минута
+SleepTimer.Duration.30=30 минута
+SleepTimer.Duration.45=45 минута
+SleepTimer.Duration.60=60 минута
+SleepTimer.Duration.Custom=Произвољно:
+SleepTimer.Custom.Accessible=Произвољно трајање у минутима
+SleepTimer.Bookmark=Постави ознаку при покретању
+SleepTimer.Action.Group=Када време истекне
+SleepTimer.Action.Stop=Заустави репродукцију
+SleepTimer.Action.StopClose=Заустави и затвори програм
+SleepTimer.Action.StopShutdown=Заустави, затвори и угаси рачунар
+SleepTimer.Start=Покрени
+SleepTimer.Start.Accessible=Покрени бројач
+SleepTimer.CancelBtn=Откажи
+SleepTimer.CancelBtn.Accessible=Откажи
+SleepTimer.Announce.Set=Бројач постављен: {0} минута
+SleepTimer.Announce.Cancelled=Бројач отказан
+SleepTimer.Announce.Finished=Бројач је завршио, репродукција заустављена
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Ознаке у књизи
+Bookmark.Announce.Set=Ознака постављена
+Bookmark.Item.Format=Ознака {0} ({1})
+ManageBookmarks.List.Accessible=Ознаке у књизи
+ManageBookmarks.Delete=Избриши
+ManageBookmarks.Delete.Accessible=Избриши
+ManageBookmarks.OK.Accessible=У реду
+ManageBookmarks.Cancel.Accessible=Откажи
+ManageBookmarks.Selected=Изабрано
+ManageBookmarks.NotSelected=Није изабрано
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Обрада звука
+Dialog.SoundProcessing.Message=Обрада звука чини лош снимак подношљивијим за слушање. Не поправља га.\n\nНе може да врати оно што никада није ни снимљено, а претерана чини више штете него користи. Оставите је једноставно укљученом, послушајте неколико минута и тек онда посегните за појединачним степенима.\n\nУ Помоћи пише шта који од њих ради.
+Prop.Info.Accessible=Подаци о књизи
+Prop.Info.ProcessingOff=Обрада звука: искључена
+Prop.Info.ProcessingOn=Обрада звука: укључена
+Prop.Info.Bypassed=(обрада обиђена)
+Prop.Info.Off=искључено
+Prop.Info.Protection=Заштита од изобличења
+Prop.Tab.Audio=Звук
+Prop.Tab.Text=Текст
+Prop.On=укључено
+Prop.Off=искључено
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Користи обраду звука
+Prop.SoundProcessing=Обрада звука
+Prop.Stage.Level=Степен
+Prop.Highpass.Title=Уклони тутњаву
+Prop.Denoise.Title=Смањење шума
+Prop.Deesser.Title=Ублажи сиктање
+Prop.Compressor.Title=Уједначи говор
+Prop.Eq.Title=Тон
+Prop.Eq.Shelf={0} и више
+Prop.Loudness.Title=Јачина и паузе
+Prop.Normalize.Title=Аутоматска јачина
+Prop.Gate.Title=Шум у паузама
+Prop.Level.Minimal=Најмање
+Prop.Level.Light=Благо
+Prop.Level.Medium=Средње
+Prop.Level.Strong=Јако
+Prop.Level.Maximum=Најјаче
+Prop.ResetAll=Поништи све
+Prop.Bypass=Обиђи обраду
+Prop.Bypass.Shortcut=Control Б ово укључује и искључује са било ког места на овој страници
+Prop.Analysing=Анализирам снимак
+Prop.Analysing.Done=Снимак је анализиран, постављено {0} степени. Промените било који ако желите другачије.
+Prop.Analysing.Failed=Снимак није могао да се анализира. Подешавања остају непромењена.
+Analyse.Progress.Title=Анализирам снимак
+Analyse.Progress.Starting=Покрећем анализу...
+Analyse.Progress.Working=Одсечак {0} од {1}. {2}
+Analyse.Progress.Quarter={0} посто готово. {1}
+Analyse.Progress.Cancel=Откажи
+Analyse.Progress.Cancelling=Прекидам после овог одсечка. Подешавања остају непромењена.
+Analyse.Progress.Estimating=Рачунам колико ће ово да траје.
+Analyse.Progress.AlmostDone=Још мало.
+Analyse.Progress.Seconds=Још отприлике {0} секунди.
+Analyse.Progress.Minutes=Још отприлике {0} минута.
+Hint.SoundProcessing=Обрадом звука можете да дотерате звук снимка. Можете да уклоните разне шумове, појачате јачину и обојите укупан звук еквилајзером. Постоји шест група контрола и сваку од њих можете засебно да укључите и искључите. Сваку контролу можете и засебно да подесите. Цео ланац обраде можете привремено да прескочите тастерима Ctrl+Б, да чујете разлику између оригиналног снимка и својих подешавања.
+Hint.RemoveRumble=Сече најниже фреквенције — саобраћај, климу, шум од руковања опремом. Мутан снимак не може да спасе, али рашчисти дно па говор добије простор.
+Hint.NoiseRemoval=Смањује уједначен шум у позадини, онакав какав оставља трака или јефтин микрофон. Прејако подешавање почиње да једе и глас, па дижите само док шум не нестане.
+Hint.SoftenSibilance=Скида оштрину са сикаваца С и Ш. Корисно код спикера снимљених изблиза и код снимака којима је превише дигнут високи део.
+Hint.EvenOutSpeech=Сужава размак између тихих и гласних делова, па шапат и вика заврше ближе једно другом. Ово је оно за чим посегнете када стално вртите дугме за јачину.
+Hint.Tone=Пет појасева, у децибелима, именованих по својој фреквенцији. Најнижи стоји на 200 Хз, тамо где мутан или бубњав снимак обично и јесте; највиши је полица, па диже или спушта све изнад себе уместо једног подручја. Појасеви се намерно преклапају, што омогућава глатку криву али и значи да се сабирају — три суседна на +4 заједно дају осетно више од +4. Мале промене иду далеко, а све преко који децибел обично значи да је прави поправак неки други степен.
+Hint.AutomaticLoudness=Две ствари које вуку једна против друге, и зато деле исти оквир. Аутоматска јачина држи укупан ниво уједначеним кроз целу књигу, па и између датотека снимљених различитих дана; прати глас а не цео сигнал, што је оно што говорни снимак и тражи. Шум у паузама ради обрнуто: све тише од изабраног нивоа потисне се надоле, па шум или брујање које лежи испод читања престаје да се чује у размацима међу реченицама. Сам глас никада не дира, и стишава уместо да ућутка (шум који се пали и гаси око сваке фразе заморнији је од онога који једноставно стоји). Појачате ли јачину, са њом се диже и шум испод, па ако се то деси, ово је контрола за то.
+
+; ---- PROPERTIES - the text page
+Prop.Text.ReadingIn=Чита се на:
+Prop.Text.NoVoiceShort=Ниједан инсталирани глас не говори {0} — изаберите испод.
+Prop.Text.NoVoiceForLanguage=Ниједан инсталирани глас не говори {0}. Инсталирајте глас за {0} или горе изаберите језик и глас којим ће се ова књига читати. Избор важи само за ову књигу.
+Prop.Text.InputBrailleGroup=Брајев изворник
+Prop.Text.InputBrailleTable=Улазна брајева табела:
+Hint.Text0=Овде бирате језик и глас за читање ове књиге. За сваку књигу у Библиотеци можете да имате засебна подешавања. Сваки глас памти своја — брзину, јачину и висину — па не морате поново да их постављате када се вратите са другог гласа.\n\nЗапамтите да можете да изаберете "Bez govora" ако желите да читате визуелно или на брајевом реду, без звука.
+Hint.TextVisual=Овде подешавате распоред текста на екрану за читање. Можете да бирате између приказа налик титловима, текста који клизи као одјавна шпица, или листајуће измене страна. Можете да изаберете и боје позадине, текста и истицања, као и да ли ће се означавати ред који се чита или цела реченица.\n\nИмајте на уму да ово не мења ништа у вези са говором.
+Hint.TextBrailleSource=Ова књига је дошла из брајеве датотеке, а ово је табела којом је прочитана — она која је брајеве ћелије претворила натраг у речи.\n\nБрајева датотека не говори ништа о свом језику, степену ни о томе ког се националног стандарда држи, па NBR табелу мора да разазна из самог текста. Обично погоди, али не увек, а погрешна табела даје речи које су скоро тачне: "Have" тамо где у књизи пише "How".\n\nАко је то оно што видите, изаберите овде другу табелу и притисните У реду. Књига се поново чита из брајеве датотеке коју сте увезли, а која се чува уз њу, па можете да испробате колико год табела желите и у сваком тренутку се вратите на прву.\n\nНуде се табеле за језик наведен изнад. Ако је тај језик погрешан, промените га и табеле ће га следити.\n\nОво нема везе са оним што приказује ваш брајев ред. То преводи ваш читач екрана, табелом из својих сопствених подешавања.
+NoVoice.Title=Нема гласа за ову књигу
+NoVoice.Message=Ова књига је на језику {0}, а ниједан инсталирани глас га не говори. Изаберите глас којим ће се прочитати, само овај пут, или је оставите непрочитаном док се не инсталира глас за {0}.
+NoVoice.Read=Прочитај овим гласом
+NoVoice.Leave=Остави непрочитано
+Dialog.BrailleReread.Title=Прочитати брајеву датотеку поново?
+Dialog.BrailleReread.Message=Ова књига ће поново да се прочита из изворне брајеве датотеке, табелом {0}.\n\nТекст настаје изнова, па се губи све што је показивало у стари: докле сте стигли, ваше ознаке и проценат прочитаног. Сама књига се не дира и можете да је читате другом табелом колико год пута желите.
+Dialog.BrailleReread.Failed=Брајева датотека није могла да се прочита том табелом. Књига је остала каква је била.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Подешавања
+Settings.Tab.General=Опште
+Settings.Tab.TextBooks=Говор и брајево писмо
+Settings.Tab.Device=Уређаји
+Settings.Tab.Advanced=Напредно
+Settings.OK.Accessible=У реду
+Settings.Cancel.Accessible=Откажи
+Settings.Apply=Примени
+Settings.Apply.Accessible=Примени
+
+; ---- SETTINGS - General
+Settings.General.Language.Restart=Промена језика захтева поновно покретање апликације. Покренути сада?
+Settings.General.Language.RestartTitle=Језик
+Settings.General.LanguageGroup=Језик
+Settings.General.Language=Језик:
+Settings.General.LibraryGroup=Место библиотеке
+Settings.General.LibraryLocation=Место библиотеке:
+Settings.General.LibraryLocation.Browse=Изаберите фасциклу у којој се чува ваша библиотека
+Settings.General.Browse=Потражи...
+Settings.General.Browse.Accessible=Потражи фасциклу библиотеке
+Settings.General.MediaKeysGroup=Мултимедијални тастери
+Settings.General.UseMultimediaKeys=Користи мултимедијалне тастере
+Settings.General.UseMultimediaKeysGlobally=Користи их и изван NBR-а
+Settings.General.MetadataGroup=Подаци о књизи
+Settings.General.UseMetadata=Користи уграђене податке
+Settings.General.LookGroup=Изглед
+Settings.General.LibraryLocation.Hint=Овде NBR копира увезене књиге. Можете да је оставите по подразумеваном, на системској партицији, али ако планирате велику библиотеку, друга партиција или други диск биће знатно боље решење. NBR тамо чува и податке о свакој књизи, па ако желите да сачувате своја места у књигама, ознаке, брзину и остала подешавања читања, имајте на уму да садржај старе фасцикле библиотеке морате ручно да прекопирате на ново место. И у истој цени: премештањем библиотеке изван системске партиције чувате своје књиге од изненадних падова система и уобичајеног губитка података који иде уз њих.
+Settings.General.UseMultimediaKeys.Hint=Мултимедијалним тастерима на тастатури или на слушалицама можете да покрећете и паузирате репродукцију и да се крећете кроз књигу кораком навигације који сте изабрали.\n\nДруги прекидач их преузима на нивоу целог система, па допиру до NBR-а одакле год — по цену тога да их док NBR ради одузима свим осталим плејерима.
+Settings.General.UseMetadata.Hint=Неки формати датотека носе метаподатке са додатним информацијама о аутору, наслову, издавачу, продуценту и тако даље. NBR те податке може да прочита и прикаже где постоје. Ако су пак нетачни или их нема, NBR основне податке може да узме из назива фасцикли и датотека. У крајњем случају књиге увек можете да преименујете у Библиотеци.
+Settings.Misc.Look=Изглед:
+Settings.Misc.Look.Classic=Боје система
+Settings.Misc.Look.New=NBR дизајн
+Settings.Misc.Look.RestartTitle=Промена изгледа
+Settings.Misc.Look.Restart=Промена изгледа захтева поновно покретање апликације. Позиција читања ће се запамтити. Покренути сада?
+Settings.Misc.Look.Hint=Како ће NBR да се прикаже?\n\nNBR дизајн је његов сопствени изглед.\n\nБоје система чине га обичним прозором у оним бојама и фонтовима на које је Windows подешен што може више да вам одговара. Ако вам је високи контраст већ укључен, NBR креће са овим изгледом.\n\nУ сваком случају избор је ваш и увек га можете променити у Подешавањима.
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.SpeechGroup=Говор
+Settings.TextBooks.Language=Језик:
+Settings.TextBooks.BookLanguage=Књиге на овом језику:
+Settings.TextBooks.AllOtherLanguages=Сви остали језици
+Settings.TextBooks.VoiceNotSet=(глас није изабран)
+Settings.TextBooks.AddVoices=Додај нове језике...
+Settings.TextBooks.LanguageNoVoice={0} — нема инсталираног гласа
+Settings.TextBooks.LanguageUnknown=(језик није наведен)
+Settings.TextBooks.Voice=Глас:
+Settings.TextBooks.Speed=Брзина:
+Settings.TextBooks.Test=Испробај глас
+Settings.TextBooks.TestSample=Ово је пример изабраног гласа.
+Settings.TextBooks.Volume=Јачина:
+Settings.TextBooks.Pitch=Висина:
+Settings.TextBooks.NoSpeech=Без говора
+Settings.TextBooks.VisualGroup=Приказ на екрану
+Settings.TextBooks.UseVisual=Прикажи на екрану
+Settings.TextBooks.VisualMode=Начин приказа:
+Settings.TextBooks.VisualMode.TwoRows=Два реда текста (као титлови)
+Settings.TextBooks.VisualMode.FullInstant=Цео екран (странично)
+Settings.TextBooks.VisualMode.FullScrolling=Цео екран (клизно)
+Settings.TextBooks.Highlight=Истицање:
+Settings.TextBooks.Highlight.None=Без истицања
+Settings.TextBooks.Highlight.Line=Тренутни ред
+Settings.TextBooks.Highlight.Sentence=Тренутна реченица
+Settings.TextBooks.HighlightColour=Боја истицања:
+Settings.TextBooks.TextColour=Боја текста:
+Settings.TextBooks.BackColour=Боја позадине:
+Settings.TextBooks.Speech.Hint=Овде је списак језика и гласова инсталираних на вашем систему. За сваки приказани језик можете да изаберете подразумевани глас, па се сваки нови наслов на том језику отвара изабраним гласом. Избор гласа за језик јесте оно што га чини подразумеваним — нема више шта да се притисне. Ако је ваша нова књига на језику којег нема на списку, боље је да му овде не постављате подразумевани глас. Глас увек можете да поставите у Својствима саме књиге, на њеној страници Текст, или да изаберете Без говора и наставите да читате на брајевом писму или на екрану. Видећете и напомену када неки језик нема инсталиран глас.
+Settings.TextBooks.Dictionary.Hint=Овде мењате оно што говорни синтесајзери погрешно изговарају. Можете да исправите изговор имена и места, поправите погрешан акцент и још штошта — пустите машти на вољу. Најбоље је што то можете да радите одвојено по језику и по гласу, јер различити синтесајзери на истом језику греше различито.
+Settings.TextBooks.Visual.Hint=За приказ текста на екрану док се чита наглас, свакоме ко прати и очима и ушима. Укључено овде, прозор се отвара сам сваки пут када притиснете Репродукуј. Може да се отвори и затвори и ручно, у сваком тренутку, тастером F9, било да је ово укључено или није — па можете да испробате на једној књизи без дирања њених Својстава.
+Settings.Colour.White=Бела
+Settings.Colour.Black=Црна
+Settings.Colour.Yellow=Жута
+Settings.Colour.Blue=Плава
+Settings.Colour.Green=Зелена
+Settings.Colour.Red=Црвена
+Voices.Add.Title=Језици за читање текста
+Voices.Add.Hint=Изаберите језике које желите и притисните Инсталирај. У зависности од ваших подешавања Windows може да затражи дозволу, па да преузме гласове за тај језик. Глас је везан за свој нагласак, па су британски и амерички енглески засебне ставке.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Излаз звука
+Settings.Device.SoundCard=Звучна картица:
+Settings.Device.KeepAlive=Држи звучну картицу будном
+Settings.Device.Default=Подразумевано у систему (аутоматски)
+Settings.Device.OpticalGroup=Оптички уређај
+Settings.Device.UseOptical=Користи оптички уређај
+Settings.Device.OpticalWhich=Уређај:
+Settings.Device.OpticalAuto=Онај у којем је диск
+Settings.Device.KeepAlive.Hint=Неки звучни излази — нарочито HDMI — гасе се чим звук стане, па им онда треба тренутак да се пробуде. Оно што чујете јесте прва реч реченице која нестаје, изнова и изнова, а да ништа очигледно није у квару. Док је ово укључено, NBR на картици коју користи свира тон далеко испод свега што можете да чујете, па картица никада не добије прилику да заспи између реченица. Искључите ако ваша картица то не ради: док књига свира, излаз остаје отворен.
+Settings.Device.UseOptical.Hint=Књиге су се некада издавале на обичним звучним CD-овима и NBR уме да их свира. Диск чита одједном уместо да га оставља да се врти: цела страна се прочита у једном пролазу, право и без враћања, па уређај ради неколико минута и онда је тих до краја књиге. Споро читање било би тише на секунд, а бучније на сат. Укључите само ако то желите — на почетку је искључено, и на рачунару који има уређај, а док је искључено NBR уређај уопште не дира.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Књиге са текстом у сликама
+Settings.Ocr.Language=Језик препознавања
+Settings.Ocr.Automatic=Аутоматски
+Settings.Ocr.AddLanguage=Додај језик...
+Settings.Ocr.None=Windows нема инсталирано препознавање текста.
+Settings.Ocr.Hint=Неке књиге су фотографије својих страна уместо текста — скенирани PDF или фасцикла нумерисаних слика. NBR са њих може да препозна текст и онда да га изговара као и сваку другу књигу. Ово је само почетни избор — када имате више од једног језика, NBR сваки пут пита којим да чита.
+Settings.Translate.Group=Превођење
+Settings.Translate.Service=Сервис за превођење
+Settings.Translate.Key=API кључ...
+Settings.Translate.State.Have={0}, кључ сачуван
+Settings.Translate.State.None={0}, нема кључа
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (већи модел)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, јефтинији)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, најскупљи)
+Settings.Translate.Engine.Azure=Azure Транслатор
+Settings.Translate.Notes=Напомене за преводиоца:
+Settings.Translate.Test.NoEngine=Није изабран ниједан сервис за превођење.
+Settings.Translate.Test.NoKey=Нема кључа за проверу.
+Settings.Translate.Test.NoNetwork=NBR није успео да дође до сервиса.
+Settings.Translate.Test.Refused=Сервис је одбио захтев ({0}).
+Settings.Translate.Test.Empty=Сервис није одговорио ништа.
+Settings.Translate.Hint=NBR књигу може да преведе мрежним сервисом. Сваки сервис тражи кључ са вашег сопственог налога код њих, који овде налепите; NBR никада не барата плаћањем, то је на вама, на сајту пружаоца услуге или како већ. Ако вам машинско превођење не треба, једноставно оставите неозначено.\n\nПревод шаље CELU књигу сервису који изаберете, а сваки од њих са њом поступа другачије — неки садржај са бесплатног нивоа користе за побољшавање сопствених производа, неки не. Опис сваког сервиса под Помоћ, Сервиси и налози каже како је са којим.
+Settings.Cloud.Group=Google Cloud гласови
+Settings.Cloud.VoicesGroup=Cloud гласови
+Settings.Cloud.Where=Google и Azure се подешавају у Помоћ, Сервиси и налози, где пише шта је који од њих и како се корак по корак отвара налог.
+Settings.Cloud.State.None=Google: није сачуван ниједан сервисни налог, па ти гласови нису доступни.
+Settings.Cloud.State.Have=Google: доступно је {0} гласова, који заједно читају {1} језика.
+Settings.Cloud.State.HaveNoList=Google: сервисни налог је сачуван, али списак гласова још није преузет. Подесите га поново док сте на мрежи.
+Settings.Cloud.Load=Датотека сервисног налога...
+Settings.Cloud.Filter=Сервисни налог (*.json)|*.json|Све датотеке (*.*)|*.*
+Settings.Cloud.Forget=Заборави сервисни налог
+Settings.Cloud.ForgetAsk=Заборавити сачувани сервисни налог? Ти гласови се престају нудити, а књига која се већ чита једним од њих занеми док јој не доделите други глас.
+Settings.Cloud.UseGroup=Коришћење гласова у облаку
+Settings.Cloud.Use=Нуди гласове у облаку
+Settings.Cloud.Why=Засад нема шта да се укључи: подесите Google или Azure изнад и ово постаје доступно.
+Settings.Cloud.NoList=Налог је прихваћен, али списак гласова није могао да се преузме. То је обично мрежа; гласови ће се појавити чим буде доступна.
+Settings.Azure.Group=Azure Speech гласови
+Settings.Azure.Resource=Назив ресурса:
+Settings.Azure.Key=Кључ:
+Settings.Azure.Save=Провери и сачувај
+Settings.Azure.NoResource=Упишите назив ресурса — то је први део адресе која стоји на истој страници као и кључ.
+Settings.Azure.NoKey=Упишите кључ.
+Settings.Azure.Refused=Azure није прихватио тај пар. Проверите назив ресурса и кључ, и да ли је ресурс заиста Speech.
+Settings.Azure.State.None=Azure: није сачуван кључ, па ти гласови нису доступни.
+Settings.Azure.State.Have=Azure: доступно је {0} гласова, који заједно читају {1} језика.
+Settings.Azure.Forget=Заборави кључ
+Settings.Azure.ForgetAsk=Заборавити сачувани Azure кључ? Ти гласови се престају нудити, а књига која се већ чита једним од њих занеми док јој не доделите други глас.
+Hint.Settings.Cloud=
+Hint.Settings.CloudUse=Овим укључујете и искључујете своје коришћење гласова у облаку, дакле свих гласова са интернета, а не ваших инсталираних SAPI или Оне Цоре гласова.\n\nОн одлучује да ли ће ти гласови бити ПОНУЂЕНИ када бирате глас за поједину књигу. Никада се не додељују сами и никада не постају подразумевани глас неког језика — то остаје гласовима инсталираним на овом рачунару, који не коштају ништа и не траже везу.\n\nКњига која се већ чита гласом из облака задржава га било да је ово укључено или није; прекидач управља бирачем, а не оним што може да се свира.
+Hint.Settings.Azure=За коришћење Google и Azure гласова требају неки Google, Microsoft и Azure акредитиви и нешто рада на њиховом сајту. Више о томе пише у Помоћи.
+Google.Cred.NotJson=Та датотека не може да се прочита као JSON, па није она коју вам је Google дао. Датотека коју тражите преузета је када сте направили сервисни налог, а назив јој се завршава на .јсон.
+Google.Cred.NotServiceAccount=Тај JSON може да се прочита, али није сервисни налог — у њему нема ни адресе налога ни приватног кључа. Google нуди више врста акредитива; за ове гласове треба кључ сервисног налога.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Речник изговора
+Dict.Open=Речник изговора...
+Dict.Open.Accessible=Речник изговора
+Dict.Scope=Ова правила важе за:
+Dict.Scope.Global=Све што читам
+Dict.Scope.Language=Све што читам на језику {0}
+Dict.Scope.Voice=Све што читам гласом {0}
+Dict.List.Accessible=Правила
+Dict.Column.Pattern=Пише
+Dict.Column.Says=Изговара се
+Dict.Column.Match=Подударање
+Dict.Column.Case=Велика слова
+Dict.Column.State=Правило
+Dict.Column.Comment=Белешка
+Dict.Add=Додај...
+Dict.Edit=Уреди...
+Dict.Remove=Уклони
+Dict.State.On=Укључено
+Dict.State.Off=Искључено
+Dict.Try=Испробајте реченицу:
+Dict.TryButton=Испробај
+Dict.Rule.TitleNew=Ново правило
+Dict.Rule.TitleEdit=Уреди правило
+Dict.Field.Pattern=Шта пише:
+Dict.Field.Replacement=Изговори уместо тога:
+Dict.Field.Match=Подударање:
+Dict.Field.CaseSensitive=Разликуј велика и мала слова
+Dict.Field.Skip=Прескочи
+Dict.Field.Comment=Белешка:
+Dict.Field.Enabled=Правило је укључено
+Dict.Match.WholeWord=Цела реч
+Dict.Match.Anywhere=Било где, и унутар речи
+Dict.Match.Regex=Регуларни израз
+Dict.Error.Title=Ово правило не може да се користи
+Dict.Error.NoPattern=Упишите шта пише у књизи.
+Dict.Error.TooSlow=Овај образац предуго тражи подударање. Поједноставите га.
+Dict.Help=Помоћ за регуларне изразе...
+Dict.Help.Title=Регуларни изрази у речнику изговора
+Dict.Help.Text=Стара зен мудрост каже:\n\n    Програмер је имао проблем.\n    Програмер је одлучио да проблем реши регуларним изразима.\n    Програмер је имао два проблема.\n\nРегЕx, односно регуларни изрази, нешто су са чиме радије не бисте имали посла, али лепо је имати ту могућност, па ево је.\n\nАко знате шта радите, само напред. Ако не знате, једноставно их немојте користити, или питајте Google.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=API кључ за {0}
+Dialog.TranslateKey.Field=API кључ
+Dialog.TranslateKey.Prompt=Налепите кључ који сте добили од {0}. Чува се на овом рачунару у сопственој датотеци, у читљивом облику, па са њим поступајте као са лозинком. Можете да га замените или уклоните кад год, а можете да га поништите и код самог сервиса.
+Dialog.TranslateKey.Region=Регион (празно ако је Глобал):
+Dialog.TranslateKey.Remove=Уклони
+Dialog.TranslateKey.Status=Резултат
+Dialog.TranslateKey.Stored=За овај сервис је кључ сачуван.
+Dialog.TranslateKey.NotStored=За овај сервис није сачуван кључ.
+Dialog.TranslateKey.Test=Провери кључ
+Dialog.TranslateKey.Testing=Проверавам кључ...
+Dialog.TranslateKey.Works=Кључ ради.
+Azure.Setup.Title=Подешавање Azure Спеецха
+Azure.Setup.Open=Направи уместо мене...
+Azure.Setup.Intro=NBR може сам да направи Azure ресурс, па не морате да се пробијате кроз портал. Једном се пријавите Мицрософту кратким кодом, изаберете на коју претплату иде, а NBR га направи на бесплатном нивоу и задржи кључ. Док се не пријавите, ништа се не ствара.
+Azure.Setup.Start=Крени
+Azure.Setup.SigningIn=Тражим од Мицрософта код за пријаву.
+Azure.Setup.CodeLabel=Код за пријаву:
+Azure.Setup.EnterCode=Ваш код за пријаву стоји у пољу испод, спреман за копирање. Изаберите "Otvori stranicu za prijavu" да се у прегледачу отвори {0}, пријавите се тамо, а овај прозор наставља сам.
+Azure.Setup.OpenPage=Отвори страницу за пријаву
+Azure.Setup.OpenFailed=Прегледач није могао да се отвори. Адреса стоји у реду изнад; отворите је ручно.
+Azure.Setup.Directory=Директоријум:
+Azure.Setup.Subscription=Претплата:
+Azure.Setup.SignedIn=Пријављени сте. Пронађено претплата: {0} — изаберите једну и изаберите Направи.
+Azure.Setup.Create=Направи ресурс
+Azure.Setup.NoSubscription=Тај налог нема Azure претплату, па нема где да се направи ресурс.
+Azure.Setup.Creating=Правим ресурс. То траје до минут или два; Azure га јави као готов пре него што заиста јесте, па NBR сачека.
+Azure.Setup.Done=Готово. Ресурс је направљен и кључ је сачуван — доступно је {0} гласова.
+Azure.Setup.DoneNoList=Ресурс је направљен и кључ је сачуван, али списак гласова није могао да се преузме. То је обично мрежа; гласови ће се појавити чим буде доступна.
+Azure.Setup.Failed=Није успело: {0}
+Azure.Setup.HaveOne=Или, ако већ имате Speech ресурс, упишите овде његова два податка:
+Azure.Setup.Kept=Azure је прихватио тај пар и он је сачуван. Ти гласови су сада доступни.
+Azure.Setup.DirectoryHint=Оставите празно ако се пријављујете пословним или школским налогом. Ако вам је Azure на ЛИЧНОМ Microsoft налогу, Microsoft ће одбити пријаву на уобичајеној адреси и морате да наведете директоријум који је Azure направио при отварању претплате — или његов назив, који се завршава на onmicrosoft.com, или његов Дирецторy (тенант) ID. Пита се једном и памти се.
+
+; ---- THE READING WINDOW
+Reading.Title=Читање
+Reading.Back=Назад
+Reading.Back.Accessible=Назад један корак
+Reading.PlayPause=Репродукуј/Паузирај
+Reading.PlayPause.Accessible=Репродукуј или паузирај, Размакница
+Reading.Forward=Напред
+Reading.Forward.Accessible=Напред један корак
+Reading.Smaller=Мање
+Reading.Smaller.Accessible=Мањи текст, тастер минус
+Reading.Bigger=Веће
+Reading.Bigger.Accessible=Већи текст, тастер плус
+Reading.Font.Accessible=Font
+Reading.Size.Announce=Величина текста {0}
+Beta.Suffix= — није у овој бети
+Beta.NoReadingWindow=Прозор за читање искључен је у овој бети. Читање на екрану и брајево писмо које га прати још се испитују и враћају се у неком од следећих издања.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Препознај текст са слика
+Ocr.Ask.Question={0} нема текста у себи — то је {1} страна слика. NBR са њих може да препозна текст, што би требало да потраје {2}. Препознати сада?
+Ocr.Ask.ReadWith=Препознај као:
+Ocr.Ask.Read=Препознај
+Ocr.Ask.Skip=Прескочи
+Ocr.Ask.UnderAMinute=мање од минута
+Ocr.Ask.Minutes=око {0} минута
+Ocr.Result.NoText=На сликама није пронађен текст. Књига је додата, али из ње нема шта да се чита.
+Ocr.Refusal.NoEngine=Препознавање текста није инсталирано. Употребите „Додај језик..." у Подешавањима, под Напредно, и NBR ће га инсталирати уместо вас.
+Ocr.Refusal.NoPages=У овоме нема страна за читање.
+Ocr.Progress.Title=Препознајем текст
+Ocr.Progress.Starting=Почињем препознавање
+Ocr.Progress.Working=Страна {0} од {1}. {2}
+Ocr.Progress.Quarter={0} посто готово. {1}
+Ocr.Progress.Cancel=Откажи
+Ocr.Progress.Cancelling=Прекидам после ове стране. Ништа се не чува.
+Ocr.Progress.Estimating=Рачунам колико ће ово трајати.
+Ocr.Progress.AlmostDone=Још мало.
+Ocr.Progress.Seconds=Још отприлике {0} секунди.
+Ocr.Progress.Minutes=Још отприлике {0} минута.
+Ocr.Unread.Message=Ова књига још није препозната — и даље су то слике њених страна, па нема шта да се изговори. Препознати сада?
+Ocr.Sparse.Message=Само {0} од {1} страна ове књиге носи икакав текст. Највероватније је то скенирана књига са поквареним текстуалним слојем, па су речи и даље слике. Препознати текст сада?
+Ocr.Blank.Question={0} страна заредом вратило се без иједног слова. Остатак од {1} може да буде исти, а препознавање би потрајало. Наставити?
+Ocr.Blank.Jbig2={0} страна заредом вратило се без иједног слова. Овај PDF чува текст у облику који Microsoft OCR не уме да препозна — читање преосталих {1} највероватније не би нашло ништа. Наставити?
+Ocr.Read.Question=Ова књига је {0} страна слика и још није препозната. Препознавање траје {1}.
+Ocr.ReRead.Question=Ова књига је препозната са {0} страна слика. Поновно препознавање на другом језику траје {1}. Слике се чувају уз књигу, па ово може да се понови колико год пута желите.
+Ocr.ReRead.Done=Књига је поново препозната и замењена.
+Ocr.ReRead.Locate=Слике ове књиге не чувају се уз њу, па NBR мора поново да их пронађе. Изаберите скенирану датотеку или — ако је књига стигла као засебне слике страна — било коју од тих страна.
+Ocr.ReRead.LocateTitle=Пронађи слике ове књиге
+Ocr.ReRead.Filter=Скениране књиге и слике|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Све датотеке|*.*
+Ocr.ReRead.WholeFolder=У тој фасцикли се налази {0} слика. Препознати их све као стране ове књиге?
+Ocr.Add.Title=OCR језици
+Ocr.Add.List=Језици
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — већ инсталирано
+Ocr.Add.Install=Инсталирај
+Ocr.Add.WindowsSettings=Подешавања Wиндоwса...
+Ocr.Add.Close=Затвори
+Ocr.Add.Installing=Инсталирам {0}. То преузима Windows Упдате, па трајање зависи од тога колико је заузет — неколико минута је уобичајено, а ни десет није невиђено. Можете да затворите овај прозор и наставите своје; посао иде даље сам.
+Ocr.Add.Done={0} је инсталиран и спреман за употребу.
+Ocr.Add.DonePartly={0} је инсталиран и спреман за употребу. {1} није стигло — Windows можда још ради, или није доступно за ову верзију.
+Ocr.Add.NotStarted=Ништа није инсталирано. Windows није дао дозволу.
+Ocr.Add.Failed={0} није инсталиран. Windows можда још ради на томе, или језик није доступан за ову верзију Wиндоwса.
+Ocr.Add.LeftRunning=Windows га још инсталира. Завршиће сам.
+Ocr.Add.Hint=Изаберите језике које желите и притисните Инсталирај. У зависности од ваших подешавања Windows може да затражи дозволу, па да преузме препознавање за тај језик — малу датотеку, а не цео језик система.
+
+; ---- TRANSLATION
+Translate.Progress.Title=Преводим књигу
+Translate.Progress.Starting=Припремам. Можете прекинути кад год; што је преведено остаје сачувано, а следећи пут се наставља одатле.
+Translate.Progress.Working=Одломак {0} од {1}. Још отприлике {2}. Можете прекинути кад год — што је готово остаје сачувано.
+Translate.Progress.Quarter={0} посто преведено, још отприлике {1}.
+Translate.Progress.Cancel=Заустави
+Translate.Progress.Cancelling=Заустављам после овог одломка. Што је преведено остаје сачувано.
+Translate.Progress.StillOn=Још сам на овоме, досад {0} секунди.
+Translate.Progress.StillWorking=Још преводим одломак {0} од {1}. Сервис одговара споро.
+Translate.Progress.Estimating=рачунам колико ће ово да траје
+Translate.Progress.AlmostDone=тренутак
+Translate.Progress.Seconds={0} секунди
+Translate.Progress.Minutes={0} минута
+Translate.Ask.Title=Преведи књигу
+Translate.Ask.Info={0} — отприлике {1} знакова, отприлике {2}. Превод постаје нова књига; ова се не мења.
+Translate.Ask.HybridNote=Ова књига уз текст има и снимак. Превести може само текст, па ће превод да буде текстуална књига без звучног дела.
+Translate.Ask.From=Језик књиге:
+Translate.Ask.To=Преведи на:
+Translate.Ask.Model=Модел {0}:
+Translate.Ask.Model.None=— ниједан, овде се ланац завршава —
+Translate.Ask.ChainNote=Ако неки одломак буде одбијен, NBR га покуша поново па онда редом испроба ваше остале сервисе. Што ниједан не прихвати остаје на језику на којем је књига и дошла.
+Translate.Ask.NoEngine=Ниједан сервис још нема кључ
+Translate.Ask.Standing=Ваша стална напомена примењује се и на ову књигу: {0}
+Translate.Ask.Inherit=Настави серијал, користећи глосар књиге:
+Translate.Ask.Inherit.None=Ништа — ова књига стоји сама за себе
+Translate.Ask.Notes=Све што би преводилац требало да зна о OVOJ књизи (није обавезно). Приповедач и имена се разазнају из текста сами; ово је за оно што текст не каже — појам који желите да се преведе на одређени начин, или како се два лика међусобно ословљавају:
+Translate.Ask.Start=Преведи
+Translate.LastResort.Begin=Следећи део превео је Microsoft Azure — очекујте неочекивано.
+Translate.LastResort.End=Крај дела који је превео Microsoft Azure.
+Translate.NotText=Превести може само текстуална књига. Ова је снимак.
+Translate.Empty=У овој књизи нема текста за превођење.
+Translate.NoService=Ниједан сервис за превођење још нема кључ. Додајте га у Подешавањима, под Напредно.
+Translate.Done=Преведено {0} одломака. Превод стоји на полици као нова књига.
+Translate.DoneLeft=Преведено {0} одломака, {1} је остало на изворном језику.
+Translate.Took=Трајало је {0}. Запис ред по ред стоји у translation.log уз оригиналну књигу.
+Translate.Failed=Књига није могла да се преведе: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Само од текстуалне књиге може да се направи звучна. Ова је већ звучна.
+Export.NoVoice=Ова књига нема глас који би је прочитао, па нема шта да се сними. Доделите јој га најпре у Својствима.
+Export.Empty=У овој књизи нема текста за читање.
+Export.Filter=Звучна датотека (*.mp3)|*.mp3
+Export.Ask.Ready=Свих {0} одломака ове књиге већ је изговорено, па је ово само спајање и потрајаће који тренутак. Направити датотеку?
+Export.Ask.Missing=Још {0} од укупно {1} одломака ове књиге треба да се похрани. То би требало да потраје око {2} минута — толико траје израда, а не слушање књиге. Прозор напретка показује бројку измерену успут. Можете прекинути кад год: што је изговорено остаје сачувано, а следећи пут се наставља одатле. Направити датотеку?
+Export.Progress.Title=Израда звучне књиге
+Export.Progress.Starting=Припремам. Можете прекинути кад год; што је изговорено остаје сачувано, а следећи пут се наставља одатле.
+Export.Progress.Making=Одломак {0} од {1}. Још отприлике {2}.
+Export.Progress.Joining=Спајам све у једну датотеку.
+Export.Done=Готово — {0} одломака, сачувано као {1}
+Export.DoneShort=Сачувано као {2}, али {1} од {0} одломака није могло да се изговори и недостају у датотеци.
+Export.Failed=Звучна књига није могла да се направи.
+
+; ---- AUDIO CD
+Cd.Progress.Title=Audio CD
+Cd.Progress.Preparing=Читам диск...
+Cd.Progress.Track=Читам трацк {0} од {1}
+Cd.Progress.Stopping=Прекидам...
+Cd.BookTitle=Audio CD ({0} нумера)
+Cd.Format=Audio CD - Compact Disc Digital Audio
+Cd.NoDisc=У уређају нема диска, или га уређај још чита. Убаците аудио CD и покушајте поново.
+Cd.DataDisc=Ово је диск са подацима, а не аудио CD. Ако се на њему налази књига у MP3 датотекама, отворите га преко Датотека, Отвори фасциклу — то NBR већ свира.
+Cd.ReadFailed=Диск није могао да се прочита: {0}
+Cue.Track=Трацк {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Сервиси и налози
+Services.List.Accessible=Сервиси
+Services.State.Ready=OVAJ је ПОДЕШЕН. Кораке можете да прођете поново да замените оно што је сачувано.
+Services.State.NotSet=Овај још није подешен.
+Services.SetUp=Подеси овај сервис...
+Services.Forget=Заборави овај налог
+Services.ForgetAsk=Заборавити сачувани кључ за {0}? Престаје да се нуди док га поново не подесите.
+Services.Disclaimer=KORACI ISPOD МОЖДА НЕЋЕ ODGOVARATI ONOME ШТО VIDITE. Ови сервиси преуређују своје сајтове без најаве, па је неко дугме можда премештено или преименовано откад је ово написано. REDOSLED онога што треба урадити ретко се мења; називи се мењају. Ако се изгубите, део изнад вам говори шта заправо желите да постигнете.
+Services.Item.Gemini=Превођење Геминијем
+Services.Item.DeepSeek=Превођење ДеепСееком
+Services.Item.OpenAi=Превођење GPT-ом (OpenAI)
+Services.Item.GoogleVoices=Google Cloud гласови
+Services.Item.AzureVoices=Azure Speech гласови
+Services.About.Gemini=Gemini преводи целу књигу на други језик, Google-овим сопственим моделом. По уху је оцењен као најбољи од бесплатних варијанти — и једини има кваку.\n\nОдбија отприлике сваки шести одломак објављеног романа. Не због садржаја: образац изгледа као да модел препознаје књигу коју познаје, и ниједно подешавање то не мења. Зато NBR оно што први сервис неће да прихвати нуди другом, и зато се ланац исплати подесити уместо да се све препусти једном строју.\n\nПостоји бесплатан ниво и довољно је издашан да буде уобичајен начин коришћења: измерено на стварном пројекту, Gemini 3.1 Фласх Лите дозвољава 500 захтева дневно, што је око шест књига. Плаћено коришћење кошта отприлике двадесет пет центи за роман од 450.000 знакова.\n\nJEDNO TREBA ODVAGATI PRE NEGO ШТО IZABERETE BESPLATNO. Google-ова сопствена страница са ценама каже да се на бесплатном нивоу ваш садржај користи за побољшавање њихових производа, а на плаћеном не. Превод шаље целу књигу, па је то стварна разлика. Избор је ваш у сваком случају — али нека буде избор, а не изненађење.\n\nДолажење до кључа најдуже је од четири, а кораци испод писани су према стварном пролазу јер очигледан пут не ради.
+Services.About.DeepSeek=DeepSeek преводи целу књигу на други језик. Од сервиса које NBR може да користи најмирнији је — најређе одбија — и далеко најјефтинији.\n\nЈедно мора да се деси: налог код ДеепСеека и нешто кредита на њему. Бесплатног нивоа нема, али превођење се наплаћује по количини текста и књига кошта врло мало.\n\nОвај даје кључ који налепите и најједноставнији је од четири. Једино треба пазити да се кључ приказује JEDNOM, када га направите. Затворите ли тај прозор без копирања, више не може да се прикаже и једноставно направите други.
+Services.About.OpenAi=OpenAI преводи целу књигу на други језик, GPT моделима. Нуди се у три нивоа на једном налогу и једном кључу: Terra, са којом се креће, Luna, која је јефтинија, и Sol, која је најскупља.\n\nБесплатног нивоа нема никаквог, и на томе се људи хватају: претплата на ЦхатГПТ ово NE плаћа. API се наплаћује засебно, а нов налог је ПРЕТПЛАЋЕН — ставите мало кредита и позиви троше са тог стања. Пет или десет долара сасвим је довољно да видите колико књига стварно кошта пре него што било шта одлучите.\n\nКолико књига кошта, израчунато за роман од 450.000 знакова и према томе како се хрватски и српски стварно ломе на токене а не по правилу палца: отприлике два и по долара на Терри, долар на Луни, пет на Солу. За поређење, иста књига је на Геминију измерена на око двадесет три цента. Било који од њих је мало за књигу до које вам је стало; Terra је око десет пута Gemini ако то постане навика.\n\nКључ је обичан, налепите га овде, што овај сервис чини најједноставнијим за подешавање.
+Services.About.GoogleVoices=Google Cloud гласови читају књиге наглас преко интернета, Google-овим сопственим гласовима. За већину језика су најбољи од гласова у облаку, а бесплатан ниво је највећи — око милион знакова месечно, што је отприлике две књиге.\n\nТри ствари морају да се десе, овим редом. Треба вам GOOGLE NALOG, који већина људи већ има. У њему направите PROJEKAT и за тај пројекат укључите сервис Теxт-то-Speech — а Google га неће укључити док се не подеси наплата, па је картица потребна иако бесплатан ниво не кошта ништа. Затим направите SERVISNI NALOG и преузмете његов кључ.\n\nТај последњи део чини овај сервис необичним. Google не даје кључ који можете да налепите: даје малу датотеку која се завршава на .јсон, преузету једном. NBR чува оно што је у тој датотеци, а не саму датотеку, па преузето можете касније да преместите или избришете.
+Services.About.AzureVoices=Azure Speech гласови читају књиге наглас преко интернета, Microsoft-овим гласовима. Врло су добри на енглеском и многим другим језицима. За српски су осредњи, а Azure тамо не подржава речник изговора, па се правило које напишете за неко име неће поштовати. Бесплатан ниво је око пола милиона знакова месечно, отприлике једна књига.\n\nДве ствари морају да се десе, а само је прва ваша. Треба вам MICROSOFT NALOG пре него што можете да имате Azure налог, а затим AZURE PRETPLATA — за коју требају провере идентитета, картица и пристанак на уговор. То човек мора да уради свесно, па не може да се аутоматизује и NBR то и не покушава.\n\nСве после тога је посао NBR-а. Пријави се кратким кодом, направи ресурс на бесплатном нивоу и задржи кључ. Azure портал никада не отварате.\n\nЈедно људе збуњује. Када се ваша претплата направи, Azure јој потихо направи DIREKTORIJUM. Ако вам је Microsoft налог лични — Гмаил, Оутлоок, Хотмаил — Azure одбија пријаву док не наведете тај директоријум, јер личне налоге за ово не препознаје. Назив му се завршава на onmicrosoft.com.
+Services.Steps.DeepSeek=1. Отворите platform.deepseek.com у прегледачу.\n\n2. Притисните Sign up. Можете да упишете е-пошту и лозинку или да изаберете пријаву преко Google-а, што је брже.\n\n3. Потврдите е-пошту ако се то од вас затражи.\n\n4. Када сте пријављени, пронађите Top up или Billing и додајте мали износ кредита.\n\n5. У менију са леве стране пронађите API кеyс.\n\n6. Притисните Create new API key, дајте му било који назив и притисните Create.\n\n7. Копирајте кључ PRE него што затворите тај прозор.\n\n8. Вратите се овде, притисните "Podesi ovaj servis" и налепите га.
+Services.Steps.GoogleVoices=1. Отворите console.cloud.google.com у прегледачу и пријавите се Google налогом.\n\n2. Прихватите услове ако се то затражи и направите пројекат када вам понуди. Било који назив је у реду.\n\n3. Пронађите поље за претрагу на врху, упишите "Cloud Text-to-Speech API", изаберите га из резултата и притисните Енабле.\n\n4. Google ће пре укључивања API-ја тражити да подесите наплату. Додајте картицу.\n\n5. Потражите поново "Service accounts" и отворите то. Притисните Create сервице аццоунт, дајте било који назив и притисните Done. Не треба да бирате никакву улогу ни дозволу.\n\n6. Отворите налог који сте управо направили, идите на картицу Keys, притисните Add key, па Create new key, и изаберите JSON. Датотека се преузима.\n\n7. Вратите се овде, притисните "Podesi ovaj servis" и изаберите ту преузету датотеку.
+Services.Steps.AzureVoices=1. Отворите azure.microsoft.com/free у прегледачу и притисните Start free.\n\n2. Пријавите се Microsoft налогом или направите нов.\n\n3. Попуните своје податке. Azure тражи картицу као доказ да сте особа; бесплатан ниво се не наплаћује.\n\n4. Ако вам је налог лични, пронађите назив свог директоријума: пријавите се на портал и он стоји у адресној траци иза знака @, а завршава се на onmicrosoft.com.\n\n5. Вратите се овде и притисните "Podesi ovaj servis".\n\n6. Упишите тај назив директоријума ако вам је налог лични, а оставите празно ако је пословни или школски. Притисните Крени.\n\n7. Дугметом отворите страницу за пријаву, упишите кратак код који је приказан и пријавите се.\n\n8. Изаберите своју претплату и притисните Направи. NBR прави ресурс и чува његов кључ. Ништа више не уписујете.
+Services.Steps.Gemini=ZA OVO NE KORISTITE AI STUDIO. Његово дугме "Create API key" пада са поруком "The request is suspicious. Please try again." — измерено на сасвим новом налогу који никада није имао начин плаћања, са већ направљеним и увезеним пројектом. Права грешка испод тога је 403 са Google-ове сопствене услуге. Све што следи ради се у CLOUD KONZOLI, и тај пут ради.\n\nРедослед је битан: пројекат, па API, па сервисни налог, и тек онда кључ. Урађено тим редом, кључ настаје из прве.\n\n1. Отворите console.cloud.google.com/projectcreate у прегледачу и пријавите се.\n\n2. Дајте пројекту назив који ћете препознати, на пример NBR. Organization оставите на "No organization" — то је уобичајен одговор за лични налог, а организација доноси правила над којима немате контролу. Изаберите CREATE и сачекајте да се пројекат појави.\n\n3. AKO VAM GOOGLE PONUDI BESPLATNU PROBU SA 300 DOLARA KREDITA, ODBIJTE. Тај кредит уопште не плаћа Gemini API — то је други новчаник за други производ. Горе од тога, прихватањем се прави налог за наплату, а Google онда наплату аутоматски везује за сваки нов пројекат, чиме пројекат излази IZ бесплатног нивоа. Тражи и картицу. Реците не.\n\n4. Отворите console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Проверите да је назив пројекта у траци на врху онај који сте управо направили. Страница се зове "Gemini API". Изаберите ENABLE и сачекајте да дугме нестане.\n\n5. Отворите console.cloud.google.com/iam-admin/serviceaccounts/create. Овај корак вам штеди да следећи радите двапут: кључ не може да дође до Геминија ако није везан за сервисни налог, а направите ли га сада, чека спреман када затреба.\n\n6. На страници "Create service account" попуните само прво поље, "Service account name" — нбр-транслате је добар назив, а ID испод се попуњава сам. Изаберите "CREATE AND CONTINUE". Корак 2, "Permissions", није обавезан: оставите га празан, никаква улога не треба. Изаберите DONE на дну.\n\n7. Отворите console.cloud.google.com/apis/credentials. Поново проверите назив пројекта у горњој траци. У реду радњи поред наслова "Credentials" изаберите "+ CREATE CREDENTIALS", а из менија који се спусти изаберите PRVU ставку, "API key" — не "OAuth client ID" и не "Service account".\n\n8. Са десне стране се отвара плоча насловљена "Create API key". У поље "Name" на самом врху упишите назив, на пример NBR.\n\n9. Померите се DOLE унутар те плоче, испод одељка "APIs that can be accessed using this key", до кућице "Authenticate API calls through a service account". ОЗНАЧИТЕ JE. То је корак који нико не погоди: док није означена, Gemini уопште не може да се изабере — ставка му остаје сива и само облачић каже зашто.\n\n10. Одмах испод се појављује одељак "Service account". Изаберите "+ Select a service account", изаберите налог који сте направили у кораку 6 кликом на кружић са леве стране у његовом реду, и изаберите SELECT на дну тог прозора.\n\n11. Сада се вратите GORE у плочи, на "APIs that can be accessed using this key", и отворите списак под "Select API restrictions". "Gemini API" сада може да се означи. Означите га и изаберите OK.\n\n12. Померите се DOLE на дно плоче и изаберите CREATE. "Application restrictions" оставите на "None".\n\n13. Појављује се прозор "API key created" са кључем у њему. Почиње са AQ. уместо са АИза, што је исправно за кључ везан за сервисни налог. Копирајте га иконом за копирање са десне стране у пољу.\n\n14. Вратите се овде, изаберите "Podesi ovaj servis" и налепите кључ. NBR га проверава код Google-а пре него што га задржи.\n\nAKO KONZOLA КАЖЕ DA VAM TREBA DODATNI PRISTUP и именује неку дозволу која недостаје, готово сигурно сте пријављени на погрешан Google налог, а не да вам недостају права. Додајте аутхусер=1 на крај адресе — или аутхусер=2, и тако даље — док се пројекат не појави.
+Services.Steps.OpenAi=1. Отворите platform.openai.com у прегледачу. То је развојна платформа, а не сајт ЦхатГПТ-а, и то је засебна ствар чак и ако већ плаћате ЦхатГПТ.\n\n2. Пријавите се својим налогом или направите нов.\n\n3. NAJPRE проверите у којој сте организацији. Назив стоји горе лево на страници и то је мени: отворите га и изаберите своју, која се обично зове Personal. Ако сте икада били позвани у туђу организацију, или преко посла имате ЦхатГПТ Теам или Бусинесс место, платформа може да вас стави у TU — где сте само члан, наплата вас одбија са "required permission: api.billing.read", а сваки кључ који бисте направили припадао би погрешном налогу. Све што следи мора да се деси у вашој сопственој организацији.\n\n4. Идите на platform.openai.com/settings/organization/billing/overview. Наплата стоји под ORGANIZATION, а не на обичној страници подешавања, где је лако тражити је и не наћи. Изаберите Add то balance, додајте платну картицу и купите нешто кредита. Десет долара је најмањи износ и више него довољно за почетак. Ништа не ради док на налогу нема кредита.\n\n5. Док сте тамо, поставите месечно ограничење потрошње. Не кошта ништа, а значи да грешка не може да вам подигне рачун.\n\n6. Отворите API кеyс у истим подешавањима и изаберите Create new сецрет key. Дајте му назив који ћете препознати, на пример NBR. Проверите да сте и даље у истој организацији у којој је кредит.\n\n7. Копирајте кључ чим се појави. Приказује се JEDNOM. Затворите ли тај прозор без копирања, више не може да се прикаже — једноставно га избришете и направите други.\n\n8. Вратите се овде, изаберите "Podesi ovaj servis" и налепите кључ.\n\n9. NBR кључ проверава код OpenAI-ја пре него што га задржи, па одмах сазнате да ли ради.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Помоћ – ускоро.
+Dialog.Help.Title=Помоћ
+Dialog.About.Title=О програму NBR
+Dialog.About.Release=Алфа
+Dialog.About.Licence=🄯 Цопyлефт — NBR је слободан софтвер под GNU Општом јавном лиценцом, верзија 3. Смете да га користите, проучавате, делите и мењате; ако проследите измењену верзију, она иде даље под истим условима, заједно са својим изворним кодом.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nГрадња од {1}\n\nОво је вишеформатни читач дигиталних књига и публикација са више излаза, направљен пре свега за слепе, слабовиде и особе са тешкоћама у читању. За основну употребу је бесплатан, али ако желите да испробате и користите напредне могућности попут превођења и гласова у облаку, мораћете да се региструјете код одговарајућих спољних сервиса и евентуално да их платите.\n\nНаправила Немогућа vizija — nemoviz.org\n\nНаписао Gordan Радић\n\nНаправљено уз Claude (Anthropic). Велики део кода написао је он, према ауторовом нацрту, одлукама и мерењима; ауторско право и лиценца су његови.\n\n{2}\n\nNA ЧЕМУ NBR ПОЧИВА\n\nNBR свира звук кроз libmpv, чита брајево писмо кроз liblouis, говори кроз NVDA цонтроллер цлиент, чита ознаке са TagLib#, вади текст из PDF-ова са PdfPig и отвара архиве са SharpCompress. Свака од њих је засебна библиотека, коришћена неизмењена, и свака може да се замени сопственом компатибилном градњом.\n\nlibmpv, и FFmpeg у њему — LGPL 2.1 или новија\n\nliblouis и његове брајеве табеле — LGPL 2.1 или новија\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress и Microsoft пакети — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend и OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nПотпуно обавештење — верзије, носиоци ауторских права и одакле је која лиценца прочитана — стоји у THIRD-PARTY-NOTICES.txt уз програм, а текстови самих лиценци у фасцикли Лиценцес.
+Hint.Button.Accessible=Помоћ за {0}
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Грешка
+Dialog.Error.General=Грешка: {0}
+Dialog.DontShowAgain=Не приказуј више

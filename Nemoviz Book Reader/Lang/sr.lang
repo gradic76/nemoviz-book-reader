@@ -19,7 +19,7 @@
 ; itself before the dialogs it opens.
 
 ; ---- The program name, and the buttons that recur everywhere
-LanguageName=Srpski
+LanguageName=Srpski (latinica)
 Btn.OK=U redu
 Btn.Yes=Da
 Btn.No=Ne
