@@ -152,6 +152,15 @@ These are Gordan's standing preferences. Honor them unless he says otherwise.
   A Croatian `hr.lang` will be produced as a *translation pass at the end*,
   not maintained in parallel now. When you add a user-visible string, add its
   key to `en.lang`; do not hardcode strings in the C#.
+- **A NEW USER-VISIBLE STRING GOES INTO TWO FILES, in the same commit as the
+  feature** (Gordan, 2026-08-22, assigning it to me by name): its key and
+  English text in **`Lang/en.lang`**, and its key PREFIX in
+  **`tools/lang-order.txt`** under the section it belongs to. The second is not
+  optional: `lang-reorder.pl` places a key by matching those prefixes, so a key
+  nobody claims lands in "everything else" at the foot of every language file
+  and stays there after it is translated. The whole translator flow rests on
+  these two — en.lang says WHAT is new, the order file says WHERE it goes, and
+  the pending block at the foot of each language file falls out of them.
 - **Token/usage awareness** — Gordan batches multiple requests into one
   message to save usage, and the 5-hour limit is a rolling token budget, not
   wall-clock. Full-file regeneration in chat burned tokens fast; Code's

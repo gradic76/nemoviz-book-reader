@@ -17,7 +17,7 @@
 # stop matching, which is the one thing this file exists to prevent.
 
 = The program name, and the buttons that recur everywhere
-App.Name
+!App.Name
 LanguageName
 Btn.OK
 Btn.Yes
