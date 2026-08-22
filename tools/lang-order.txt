@@ -16,7 +16,7 @@
 # tools/lang-reorder.pl applies it. Run it on all three files together or they
 # stop matching, which is the one thing this file exists to prevent.
 
-= Ime programa i tipke koje se ponavljaju svuda
+= The program name, and the buttons that recur everywhere
 App.Name
 LanguageName
 Btn.OK
@@ -28,12 +28,12 @@ Btn.Continue
 Btn.Refresh
 Common.
 
-= PLAYER — staklo s podacima o knjizi
+= PLAYER - the glass, where the book describes itself
 Player.Info.
 Player.TitleBar.
 Player.ReadingSurface.
 
-= PLAYER — transport i prsten
+= PLAYER - transport and the ring
 Btn.Play
 Btn.Pause
 Btn.Back
@@ -46,11 +46,11 @@ Player.Speed.
 Player.Position.
 Player.Progress.
 
-= PLAYER — korak navigacije
+= PLAYER - the navigation step
 Player.Seek.
 Seek.Item.
 
-= PLAYER — osam naredbenih tipki
+= PLAYER - the eight command keys
 Btn.Library
 Btn.Settings
 Btn.Properties
@@ -60,13 +60,13 @@ Btn.SetBookmark
 Btn.ManageBookmarks
 Btn.Timer
 
-= PLAYER — opisi za miša i ostalo
+= PLAYER - mouse tips and the rest
 Tip.
 Player.OpenFile
 Player.NoVoiceForLanguage
 Filter.
 
-= KNJIŽNICA — prozor, polica i izbornici
+= LIBRARY - the window, the shelf and the menus
 Library.Title
 Library.List
 Library.NowReading
@@ -80,11 +80,11 @@ Menu.Help
 Shelf.
 Context.
 
-= KNJIŽNICA — podaci o knjizi
+= LIBRARY - what a book says about itself
 Details.
 Dialog.Description
 
-= KNJIŽNICA — uvoz i brisanje
+= LIBRARY - importing and deleting
 Library.ImportFile
 Library.ImportFolder
 Dialog.ConfirmImport
@@ -104,27 +104,27 @@ Dialog.DrmProtected
 Dialog.ArchivePassword
 Extract.
 
-= IDI NA
+= GO TO
 Dialog.GoTo
 GoTo.
 
-= BROJAČ
+= SLEEP TIMER
 Dialog.Timer
 SleepTimer.
 
-= KNJIŽNE OZNAKE
+= BOOKMARKS
 Dialog.ManageBookmarks
 Bookmark.
 ManageBookmarks.
 
-= SVOJSTVA — zajedničko
+= PROPERTIES - shared by both pages
 Dialog.SoundProcessing
 Prop.Info
 Prop.Tab.
 Prop.On
 Prop.Off
 
-= SVOJSTVA — obrada zvuka
+= PROPERTIES - sound processing
 Prop.UseSoundProcessing
 Prop.SoundProcessing
 Prop.Stage.
@@ -149,7 +149,7 @@ Hint.EvenOutSpeech
 Hint.Tone
 Hint.AutomaticLoudness
 
-= SVOJSTVA — stranica teksta
+= PROPERTIES - the text page
 Prop.Text.
 Hint.Text0
 Hint.TextVisual
@@ -157,26 +157,26 @@ Hint.TextBrailleSource
 NoVoice.
 Dialog.BrailleReread
 
-= POSTAVKE — okvir i kartice
+= SETTINGS - the frame and its tabs
 Dialog.Settings
 Settings.Tab.
 Settings.OK
 Settings.Cancel
 Settings.Apply
 
-= POSTAVKE — Općenito
+= SETTINGS - General
 Settings.General.
 Settings.Misc.
 
-= POSTAVKE — Govor i brajica
+= SETTINGS - Speech and Braille
 Settings.TextBooks.
 Settings.Colour.
 Voices.
 
-= POSTAVKE — Uređaji
+= SETTINGS - Devices
 Settings.Device.
 
-= POSTAVKE — Napredno
+= SETTINGS - Advanced
 Settings.Ocr.
 Settings.Translate.
 Settings.Cloud.
@@ -184,31 +184,31 @@ Settings.Azure.
 Hint.Settings.
 Google.Cred.
 
-= POSTAVKE — rječnik izgovora
+= SETTINGS - the pronunciation dictionary
 Dict.
 
-= POSTAVKE — ključ servisa i Azure čarobnjak
+= SETTINGS - a service key, and the Azure wizard
 Dialog.TranslateKey
 Azure.Setup.
 
-= PROZOR ZA ČITANJE
+= THE READING WINDOW
 Reading.
 Beta.
 
-= PREPOZNAVANJE TEKSTA (OCR)
+= RECOGNIZING TEXT (OCR)
 Ocr.
 
-= PREVOĐENJE
+= TRANSLATION
 Translate.
 
-= IZVOZ U ZVUČNU KNJIGU
+= EXPORT AS AN AUDIOBOOK
 Export.
 
-= ZVUČNI CD
+= AUDIO CD
 Cd.
 Cue.
 
-= SERVISI I RAČUNI
+= SERVICES AND ACCOUNTS
 Services.Title
 Services.List
 Services.State.
@@ -219,11 +219,11 @@ Services.Item.
 Services.About.
 Services.Steps.
 
-= POMOĆ I O PROGRAMU
+= HELP AND ABOUT
 Dialog.Help
 Dialog.About
 Hint.Button
 
-= PORUKE I GREŠKE
+= MESSAGES AND ERRORS
 Dialog.Error
 Dialog.DontShowAgain

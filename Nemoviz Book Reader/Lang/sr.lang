@@ -1,16 +1,24 @@
 ; Nemoviz Book Reader
-; 
-; Redoslijed je isti u svim jezicima i propisan je u
-; tools/lang-order.txt. Ide onako kako se program koristi:
-; player i njegov panel, pa prozor po prozor, a unutar prozora
-; ono glavno prije dijaloga koje otvara.
-; 
-; Prevodi se ono desno od znaka jednakosti. Sve u vitičastim
-; zagradama - {0}, {1} - program popunjava sam i mora ostati.
-; Dva znaka \n znače prazan redak; nikad ne prelamajte redak
-; stvarnim Enterom, jer sve iza njega program ne vidi.
+;
+; Translated by:            Claude (Anthropic), 2026
+; Verified and modified by: 
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
 
-; ---- Ime programa i tipke koje se ponavljaju svuda
+; ---- The program name, and the buttons that recur everywhere
 LanguageName=Srpski
 Btn.OK=U redu
 Btn.Yes=Da
@@ -24,7 +32,7 @@ Common.Dash=-
 Common.Error=Greška
 Common.DateFormatLong=d. MMMM yyyy.
 
-; ---- PLAYER — staklo s podacima o knjizi
+; ---- PLAYER - the glass, where the book describes itself
 Player.Info.TitleLabel=Naslov:
 Player.Info.AuthorLabel=Autor:
 Player.Info.ProducerLabel=Producent:
@@ -47,7 +55,7 @@ Player.Info.Preparing=Pripremam ostatak knjige: {0} od {1} odlomaka
 Player.TitleBar.Paused=pauzirano
 Player.ReadingSurface.Accessible=Površina za čitanje
 
-; ---- PLAYER — transport i prsten
+; ---- PLAYER - transport and the ring
 Btn.Play.Accessible=Reprodukuj, Razmaknica
 Btn.Pause.Accessible=Pauziraj, Razmaknica
 Btn.Back.Accessible=Nazad, Shift+Levo
@@ -67,7 +75,7 @@ Player.Position.Text=Položaj: {0} / {1}
 Player.Position.Accessible=Položaj {0} posto
 Player.Progress.Legend=Napredak
 
-; ---- PLAYER — korak navigacije
+; ---- PLAYER - the navigation step
 Player.Seek.Label=Korak navigacije:
 Player.Seek.Accessible=Korak navigacije, Shift+Gore ili Shift+Dole
 Player.Seek.Announce=Navigacija: {0}
@@ -86,7 +94,7 @@ Seek.Item.Page=Strana
 Seek.Item.Bookmark=Oznaka u knjizi
 Seek.Item.StandardPage=Kartica teksta
 
-; ---- PLAYER — osam naredbenih tipki
+; ---- PLAYER - the eight command keys
 Btn.Library=Biblioteka
 Btn.Library.Accessible=Biblioteka, F3
 Btn.Library.Legend=Biblioteka
@@ -115,7 +123,7 @@ Btn.Timer.Countdown=Brojač {0}
 Btn.Timer.Accessible.Active=Brojač, još {0}, aktivirajte da zaustavite reprodukciju i otkažete brojač
 Btn.Timer.Accessible.LessThanMinute=Brojač, manje od minuta
 
-; ---- PLAYER — opisi za miša i ostalo
+; ---- PLAYER - mouse tips and the rest
 Tip.Back=Nazad (Shift+Levo)
 Tip.PlayPause=Reprodukuj/Pauziraj (Razmaknica)
 Tip.Forward=Napred (Shift+Desno)
@@ -135,7 +143,7 @@ Filter.Archives=Arhive
 Filter.AllSupported=Sve podržane datoteke
 Filter.AllFiles=Sve datoteke
 
-; ---- KNJIŽNICA — prozor, polica i izbornici
+; ---- LIBRARY - the window, the shelf and the menus
 Library.Title=Biblioteka
 Library.List.Accessible=Polica sa knjigama
 Library.NowReading.Accessible=Trenutno čitam
@@ -187,7 +195,7 @@ Context.ReReadOcr=Ponovi prepoznavanje na drugom jeziku
 Context.Translate=Prevedi knjigu...
 Context.Favorite=Označi kao omiljeno
 
-; ---- KNJIŽNICA — podaci o knjizi
+; ---- LIBRARY - what a book says about itself
 Details.Field.Title=Naslov
 Details.Field.Author=Autor
 Details.Field.Format=Format
@@ -213,7 +221,7 @@ Details.Sound.Off=Isključena
 Details.Speed.Wpm={0} rpm
 Dialog.Description.Title=Opis - {0}
 
-; ---- KNJIŽNICA — uvoz i brisanje
+; ---- LIBRARY - importing and deleting
 Library.ImportFile.Title=Dodaj knjigu u biblioteku
 Library.ImportFolder.Description=Izaberite fasciklu sa knjigama
 Dialog.ConfirmImport.Message=Na izabranom mestu pronađeno je {0} knjiga: {1} zvučnih, {2} tekstualnih, {3} u specijalnim formatima i {4} arhiva.\n\nAko je to tačno, posle potvrde knjige se kopiraju u vašu biblioteku, a arhive se tamo raspakuju. Vaša biblioteka je na {5}.\n\nNa izvornom mestu ništa se ne menja — sve ostaje netaknuto, bez brige.\n\nAko brojke ne odgovaraju očekivanom, presložite podatke koje želite da uvezete. Grupni uvoz ima ograničenja u razlikovanju naslova i NBR ne može da garantuje da će svaki pogoditi.\n\nOvo može da potraje, pa nastojte da ga ne prekidate.
@@ -260,7 +268,7 @@ Extract.Progress.Preparing=Pripremam…
 Extract.Progress.Determinate=Raspakujem… {0} / {1} datoteka
 Extract.Progress.Indeterminate=Raspakujem… {0} datoteka
 
-; ---- IDI NA
+; ---- GO TO
 Dialog.GoTo.Title=Idi na
 GoTo.List.Accessible=Delovi knjige
 GoTo.Item.Format={0}/{1} — {2}
@@ -270,7 +278,7 @@ GoTo.AutoPlay=Reprodukuj posle skoka
 GoTo.AutoPlay.Hint=Kada je uključeno, reprodukcija kreće odmah posle skoka. Kada nije, stanje ostaje kakvo je bilo: pauzirano ostaje pauzirano, a što svira nastavlja da svira.
 GoTo.Hint.Accessible=Savet
 
-; ---- BROJAČ
+; ---- SLEEP TIMER
 Dialog.Timer.Title=Brojač
 SleepTimer.Duration.Group=Trajanje
 SleepTimer.Duration.15=15 minuta
@@ -292,7 +300,7 @@ SleepTimer.Announce.Set=Brojač postavljen: {0} minuta
 SleepTimer.Announce.Cancelled=Brojač otkazan
 SleepTimer.Announce.Finished=Brojač je završio, reprodukcija zaustavljena
 
-; ---- KNJIŽNE OZNAKE
+; ---- BOOKMARKS
 Dialog.ManageBookmarks.Title=Oznake u knjizi
 Bookmark.Announce.Set=Oznaka postavljena
 Bookmark.Item.Format=Oznaka {0} ({1})
@@ -304,7 +312,7 @@ ManageBookmarks.Cancel.Accessible=Otkaži
 ManageBookmarks.Selected=Izabrano
 ManageBookmarks.NotSelected=Nije izabrano
 
-; ---- SVOJSTVA — zajedničko
+; ---- PROPERTIES - shared by both pages
 Dialog.SoundProcessing.Title=Obrada zvuka
 Dialog.SoundProcessing.Message=Obrada zvuka čini loš snimak podnošljivijim za slušanje. Ne popravlja ga.\n\nNe može da vrati ono što nikada nije ni snimljeno, a preterana čini više štete nego koristi. Ostavite je jednostavno uključenom, poslušajte nekoliko minuta i tek onda posegnite za pojedinačnim stepenima.\n\nU Pomoći piše šta koji od njih radi.
 Prop.Info.Accessible=Podaci o knjizi
@@ -318,7 +326,7 @@ Prop.Tab.Text=Tekst
 Prop.On=uključeno
 Prop.Off=isključeno
 
-; ---- SVOJSTVA — obrada zvuka
+; ---- PROPERTIES - sound processing
 Prop.UseSoundProcessing=Koristi obradu zvuka
 Prop.SoundProcessing=Obrada zvuka
 Prop.Stage.Level=Stepen
@@ -360,7 +368,7 @@ Hint.EvenOutSpeech=Sužava razmak između tihih i glasnih delova, pa šapat i vi
 Hint.Tone=Pet pojaseva, u decibelima, imenovanih po svojoj frekvenciji. Najniži stoji na 200 Hz, tamo gde mutan ili bubnjav snimak obično i jeste; najviši je polica, pa diže ili spušta sve iznad sebe umesto jednog područja. Pojasevi se namerno preklapaju, što omogućava glatku krivu ali i znači da se sabiraju — tri susedna na +4 zajedno daju osetno više od +4. Male promene idu daleko, a sve preko koji decibel obično znači da je pravi popravak neki drugi stepen.
 Hint.AutomaticLoudness=Dve stvari koje vuku jedna protiv druge, i zato dele isti okvir. Automatska jačina drži ukupan nivo ujednačenim kroz celu knjigu, pa i između datoteka snimljenih različitih dana; prati glas a ne ceo signal, što je ono što govorni snimak i traži. Šum u pauzama radi obrnuto: sve tiše od izabranog nivoa potisne se nadole, pa šum ili brujanje koje leži ispod čitanja prestaje da se čuje u razmacima među rečenicama. Sam glas nikada ne dira, i stišava umesto da ućutka (šum koji se pali i gasi oko svake fraze zamorniji je od onoga koji jednostavno stoji). Pojačate li jačinu, sa njom se diže i šum ispod, pa ako se to desi, ovo je kontrola za to.
 
-; ---- SVOJSTVA — stranica teksta
+; ---- PROPERTIES - the text page
 Prop.Text.ReadingIn=Čita se na:
 Prop.Text.NoVoiceShort=Nijedan instalirani glas ne govori {0} — izaberite ispod.
 Prop.Text.NoVoiceForLanguage=Nijedan instalirani glas ne govori {0}. Instalirajte glas za {0} ili gore izaberite jezik i glas kojim će se ova knjiga čitati. Izbor važi samo za ovu knjigu.
@@ -377,7 +385,7 @@ Dialog.BrailleReread.Title=Pročitati brajevu datoteku ponovo?
 Dialog.BrailleReread.Message=Ova knjiga će ponovo da se pročita iz izvorne brajeve datoteke, tabelom {0}.\n\nTekst nastaje iznova, pa se gubi sve što je pokazivalo u stari: dokle ste stigli, vaše oznake i procenat pročitanog. Sama knjiga se ne dira i možete da je čitate drugom tabelom koliko god puta želite.
 Dialog.BrailleReread.Failed=Brajeva datoteka nije mogla da se pročita tom tabelom. Knjiga je ostala kakva je bila.
 
-; ---- POSTAVKE — okvir i kartice
+; ---- SETTINGS - the frame and its tabs
 Dialog.Settings.Title=Podešavanja
 Settings.Tab.General=Opšte
 Settings.Tab.TextBooks=Govor i brajevo pismo
@@ -388,7 +396,7 @@ Settings.Cancel.Accessible=Otkaži
 Settings.Apply=Primeni
 Settings.Apply.Accessible=Primeni
 
-; ---- POSTAVKE — Općenito
+; ---- SETTINGS - General
 Settings.General.Language.Restart=Promena jezika zahteva ponovno pokretanje aplikacije. Pokrenuti sada?
 Settings.General.Language.RestartTitle=Jezik
 Settings.General.LanguageGroup=Jezik
@@ -414,7 +422,7 @@ Settings.Misc.Look.RestartTitle=Promena izgleda
 Settings.Misc.Look.Restart=Promena izgleda zahteva ponovno pokretanje aplikacije. Pozicija čitanja će se zapamtiti. Pokrenuti sada?
 Settings.Misc.Look.Hint=Kako će NBR da se prikaže?\n\nNBR dizajn je njegov sopstveni izgled.\n\nBoje sistema čine ga običnim prozorom u onim bojama i fontovima na koje je Windows podešen što može više da vam odgovara. Ako vam je visoki kontrast već uključen, NBR kreće sa ovim izgledom.\n\nU svakom slučaju izbor je vaš i uvek ga možete promeniti u Podešavanjima.
 
-; ---- POSTAVKE — Govor i brajica
+; ---- SETTINGS - Speech and Braille
 Settings.TextBooks.SpeechGroup=Govor
 Settings.TextBooks.Language=Jezik:
 Settings.TextBooks.BookLanguage=Knjige na ovom jeziku:
@@ -455,7 +463,7 @@ Settings.Colour.Red=Crvena
 Voices.Add.Title=Jezici za čitanje teksta
 Voices.Add.Hint=Izaberite jezike koje želite i pritisnite Instaliraj. U zavisnosti od vaših podešavanja Windows može da zatraži dozvolu, pa da preuzme glasove za taj jezik. Glas je vezan za svoj naglasak, pa su britanski i američki engleski zasebne stavke.
 
-; ---- POSTAVKE — Uređaji
+; ---- SETTINGS - Devices
 Settings.Device.OutputGroup=Izlaz zvuka
 Settings.Device.SoundCard=Zvučna kartica:
 Settings.Device.KeepAlive=Drži zvučnu karticu budnom
@@ -467,7 +475,7 @@ Settings.Device.OpticalAuto=Onaj u kojem je disk
 Settings.Device.KeepAlive.Hint=Neki zvučni izlazi — naročito HDMI — gase se čim zvuk stane, pa im onda treba trenutak da se probude. Ono što čujete jeste prva reč rečenice koja nestaje, iznova i iznova, a da ništa očigledno nije u kvaru. Dok je ovo uključeno, NBR na kartici koju koristi svira ton daleko ispod svega što možete da čujete, pa kartica nikada ne dobije priliku da zaspi između rečenica. Isključite ako vaša kartica to ne radi: dok knjiga svira, izlaz ostaje otvoren.
 Settings.Device.UseOptical.Hint=Knjige su se nekada izdavale na običnim zvučnim CD-ovima i NBR ume da ih svira. Disk čita odjednom umesto da ga ostavlja da se vrti: cela strana se pročita u jednom prolazu, pravo i bez vraćanja, pa uređaj radi nekoliko minuta i onda je tih do kraja knjige. Sporo čitanje bilo bi tiše na sekund, a bučnije na sat. Uključite samo ako to želite — na početku je isključeno, i na računaru koji ima uređaj, a dok je isključeno NBR uređaj uopšte ne dira.
 
-; ---- POSTAVKE — Napredno
+; ---- SETTINGS - Advanced
 Settings.Ocr.Group=Knjige sa tekstom u slikama
 Settings.Ocr.Language=Jezik prepoznavanja
 Settings.Ocr.Automatic=Automatski
@@ -524,7 +532,7 @@ Hint.Settings.Azure=Za korišćenje Google i Azure glasova trebaju neki Google, 
 Google.Cred.NotJson=Ta datoteka ne može da se pročita kao JSON, pa nije ona koju vam je Google dao. Datoteka koju tražite preuzeta je kada ste napravili servisni nalog, a naziv joj se završava na .json.
 Google.Cred.NotServiceAccount=Taj JSON može da se pročita, ali nije servisni nalog — u njemu nema ni adrese naloga ni privatnog ključa. Google nudi više vrsta akreditiva; za ove glasove treba ključ servisnog naloga.
 
-; ---- POSTAVKE — rječnik izgovora
+; ---- SETTINGS - the pronunciation dictionary
 Dict.Title=Rečnik izgovora
 Dict.Open=Rečnik izgovora...
 Dict.Open.Accessible=Rečnik izgovora
@@ -565,7 +573,7 @@ Dict.Help=Pomoć za regularne izraze...
 Dict.Help.Title=Regularni izrazi u rečniku izgovora
 Dict.Help.Text=Stara zen mudrost kaže:\n\n    Programer je imao problem.\n    Programer je odlučio da problem reši regularnim izrazima.\n    Programer je imao dva problema.\n\nRegEx, odnosno regularni izrazi, nešto su sa čime radije ne biste imali posla, ali lepo je imati tu mogućnost, pa evo je.\n\nAko znate šta radite, samo napred. Ako ne znate, jednostavno ih nemojte koristiti, ili pitajte Google.
 
-; ---- POSTAVKE — ključ servisa i Azure čarobnjak
+; ---- SETTINGS - a service key, and the Azure wizard
 Dialog.TranslateKey.Title=API ključ za {0}
 Dialog.TranslateKey.Field=API ključ
 Dialog.TranslateKey.Prompt=Nalepite ključ koji ste dobili od {0}. Čuva se na ovom računaru u sopstvenoj datoteci, u čitljivom obliku, pa sa njim postupajte kao sa lozinkom. Možete da ga zamenite ili uklonite kad god, a možete da ga poništite i kod samog servisa.
@@ -599,7 +607,7 @@ Azure.Setup.HaveOne=Ili, ako već imate Speech resurs, upišite ovde njegova dva
 Azure.Setup.Kept=Azure je prihvatio taj par i on je sačuvan. Ti glasovi su sada dostupni.
 Azure.Setup.DirectoryHint=Ostavite prazno ako se prijavljujete poslovnim ili školskim nalogom. Ako vam je Azure na LIČNOM Microsoft nalogu, Microsoft će odbiti prijavu na uobičajenoj adresi i morate da navedete direktorijum koji je Azure napravio pri otvaranju pretplate — ili njegov naziv, koji se završava na onmicrosoft.com, ili njegov Directory (tenant) ID. Pita se jednom i pamti se.
 
-; ---- PROZOR ZA ČITANJE
+; ---- THE READING WINDOW
 Reading.Title=Čitanje
 Reading.Back=Nazad
 Reading.Back.Accessible=Nazad jedan korak
@@ -616,7 +624,7 @@ Reading.Size.Announce=Veličina teksta {0}
 Beta.Suffix= — nije u ovoj beti
 Beta.NoReadingWindow=Prozor za čitanje isključen je u ovoj beti. Čitanje na ekranu i brajevo pismo koje ga prati još se ispituju i vraćaju se u nekom od sledećih izdanja.
 
-; ---- PREPOZNAVANJE TEKSTA (OCR)
+; ---- RECOGNIZING TEXT (OCR)
 Ocr.Ask.Title=Prepoznaj tekst sa slika
 Ocr.Ask.Question={0} nema teksta u sebi — to je {1} strana slika. NBR sa njih može da prepozna tekst, što bi trebalo da potraje {2}. Prepoznati sada?
 Ocr.Ask.ReadWith=Prepoznaj kao:
@@ -663,7 +671,7 @@ Ocr.Add.Failed={0} nije instaliran. Windows možda još radi na tome, ili jezik 
 Ocr.Add.LeftRunning=Windows ga još instalira. Završiće sam.
 Ocr.Add.Hint=Izaberite jezike koje želite i pritisnite Instaliraj. U zavisnosti od vaših podešavanja Windows može da zatraži dozvolu, pa da preuzme prepoznavanje za taj jezik — malu datoteku, a ne ceo jezik sistema.
 
-; ---- PREVOĐENJE
+; ---- TRANSLATION
 Translate.Progress.Title=Prevodim knjigu
 Translate.Progress.Starting=Pripremam. Možete prekinuti kad god; što je prevedeno ostaje sačuvano, a sledeći put se nastavlja odatle.
 Translate.Progress.Working=Odlomak {0} od {1}. Još otprilike {2}. Možete prekinuti kad god — što je gotovo ostaje sačuvano.
@@ -701,7 +709,7 @@ Translate.Took=Trajalo je {0}. Zapis red po red stoji u translation.log uz origi
 Translate.Failed=Knjiga nije mogla da se prevede: {0}
 Translate.Suffix={0} ({1})
 
-; ---- IZVOZ U ZVUČNU KNJIGU
+; ---- EXPORT AS AN AUDIOBOOK
 Export.NotText=Samo od tekstualne knjige može da se napravi zvučna. Ova je već zvučna.
 Export.NoVoice=Ova knjiga nema glas koji bi je pročitao, pa nema šta da se snimi. Dodelite joj ga najpre u Svojstvima.
 Export.Empty=U ovoj knjizi nema teksta za čitanje.
@@ -716,7 +724,7 @@ Export.Done=Gotovo — {0} odlomaka, sačuvano kao {1}
 Export.DoneShort=Sačuvano kao {2}, ali {1} od {0} odlomaka nije moglo da se izgovori i nedostaju u datoteci.
 Export.Failed=Zvučna knjiga nije mogla da se napravi.
 
-; ---- ZVUČNI CD
+; ---- AUDIO CD
 Cd.Progress.Title=Audio CD
 Cd.Progress.Preparing=Čitam disk...
 Cd.Progress.Track=Čitam track {0} od {1}
@@ -728,7 +736,7 @@ Cd.DataDisc=Ovo je disk sa podacima, a ne audio CD. Ako se na njemu nalazi knjig
 Cd.ReadFailed=Disk nije mogao da se pročita: {0}
 Cue.Track=Track {0}
 
-; ---- SERVISI I RAČUNI
+; ---- SERVICES AND ACCOUNTS
 Services.Title=Servisi i nalozi
 Services.List.Accessible=Servisi
 Services.State.Ready=OVAJ je PODEŠEN. Korake možete da prođete ponovo da zamenite ono što je sačuvano.
@@ -753,7 +761,7 @@ Services.Steps.AzureVoices=1. Otvorite azure.microsoft.com/free u pregledaču i 
 Services.Steps.Gemini=ZA OVO NE KORISTITE AI STUDIO. Njegovo dugme "Create API key" pada sa porukom "The request is suspicious. Please try again." — izmereno na sasvim novom nalogu koji nikada nije imao način plaćanja, sa već napravljenim i uvezenim projektom. Prava greška ispod toga je 403 sa Google-ove sopstvene usluge. Sve što sledi radi se u CLOUD KONZOLI, i taj put radi.\n\nRedosled je bitan: projekat, pa API, pa servisni nalog, i tek onda ključ. Urađeno tim redom, ključ nastaje iz prve.\n\n1. Otvorite console.cloud.google.com/projectcreate u pregledaču i prijavite se.\n\n2. Dajte projektu naziv koji ćete prepoznati, na primer NBR. Organization ostavite na "No organization" — to je uobičajen odgovor za lični nalog, a organizacija donosi pravila nad kojima nemate kontrolu. Izaberite CREATE i sačekajte da se projekat pojavi.\n\n3. AKO VAM GOOGLE PONUDI BESPLATNU PROBU SA 300 DOLARA KREDITA, ODBIJTE. Taj kredit uopšte ne plaća Gemini API — to je drugi novčanik za drugi proizvod. Gore od toga, prihvatanjem se pravi nalog za naplatu, a Google onda naplatu automatski vezuje za svaki nov projekat, čime projekat izlazi IZ besplatnog nivoa. Traži i karticu. Recite ne.\n\n4. Otvorite console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Proverite da je naziv projekta u traci na vrhu onaj koji ste upravo napravili. Stranica se zove "Gemini API". Izaberite ENABLE i sačekajte da dugme nestane.\n\n5. Otvorite console.cloud.google.com/iam-admin/serviceaccounts/create. Ovaj korak vam štedi da sledeći radite dvaput: ključ ne može da dođe do Geminija ako nije vezan za servisni nalog, a napravite li ga sada, čeka spreman kada zatreba.\n\n6. Na stranici "Create service account" popunite samo prvo polje, "Service account name" — nbr-translate je dobar naziv, a ID ispod se popunjava sam. Izaberite "CREATE AND CONTINUE". Korak 2, "Permissions", nije obavezan: ostavite ga prazan, nikakva uloga ne treba. Izaberite DONE na dnu.\n\n7. Otvorite console.cloud.google.com/apis/credentials. Ponovo proverite naziv projekta u gornjoj traci. U redu radnji pored naslova "Credentials" izaberite "+ CREATE CREDENTIALS", a iz menija koji se spusti izaberite PRVU stavku, "API key" — ne "OAuth client ID" i ne "Service account".\n\n8. Sa desne strane se otvara ploča naslovljena "Create API key". U polje "Name" na samom vrhu upišite naziv, na primer NBR.\n\n9. Pomerite se DOLE unutar te ploče, ispod odeljka "APIs that can be accessed using this key", do kućice "Authenticate API calls through a service account". OZNAČITE JE. To je korak koji niko ne pogodi: dok nije označena, Gemini uopšte ne može da se izabere — stavka mu ostaje siva i samo oblačić kaže zašto.\n\n10. Odmah ispod se pojavljuje odeljak "Service account". Izaberite "+ Select a service account", izaberite nalog koji ste napravili u koraku 6 klikom na kružić sa leve strane u njegovom redu, i izaberite SELECT na dnu tog prozora.\n\n11. Sada se vratite GORE u ploči, na "APIs that can be accessed using this key", i otvorite spisak pod "Select API restrictions". "Gemini API" sada može da se označi. Označite ga i izaberite OK.\n\n12. Pomerite se DOLE na dno ploče i izaberite CREATE. "Application restrictions" ostavite na "None".\n\n13. Pojavljuje se prozor "API key created" sa ključem u njemu. Počinje sa AQ. umesto sa AIza, što je ispravno za ključ vezan za servisni nalog. Kopirajte ga ikonom za kopiranje sa desne strane u polju.\n\n14. Vratite se ovde, izaberite "Podesi ovaj servis" i nalepite ključ. NBR ga proverava kod Google-a pre nego što ga zadrži.\n\nAKO KONZOLA KAŽE DA VAM TREBA DODATNI PRISTUP i imenuje neku dozvolu koja nedostaje, gotovo sigurno ste prijavljeni na pogrešan Google nalog, a ne da vam nedostaju prava. Dodajte authuser=1 na kraj adrese — ili authuser=2, i tako dalje — dok se projekat ne pojavi.
 Services.Steps.OpenAi=1. Otvorite platform.openai.com u pregledaču. To je razvojna platforma, a ne sajt ChatGPT-a, i to je zasebna stvar čak i ako već plaćate ChatGPT.\n\n2. Prijavite se svojim nalogom ili napravite nov.\n\n3. NAJPRE proverite u kojoj ste organizaciji. Naziv stoji gore levo na stranici i to je meni: otvorite ga i izaberite svoju, koja se obično zove Personal. Ako ste ikada bili pozvani u tuđu organizaciju, ili preko posla imate ChatGPT Team ili Business mesto, platforma može da vas stavi u TU — gde ste samo član, naplata vas odbija sa "required permission: api.billing.read", a svaki ključ koji biste napravili pripadao bi pogrešnom nalogu. Sve što sledi mora da se desi u vašoj sopstvenoj organizaciji.\n\n4. Idite na platform.openai.com/settings/organization/billing/overview. Naplata stoji pod ORGANIZATION, a ne na običnoj stranici podešavanja, gde je lako tražiti je i ne naći. Izaberite Add to balance, dodajte platnu karticu i kupite nešto kredita. Deset dolara je najmanji iznos i više nego dovoljno za početak. Ništa ne radi dok na nalogu nema kredita.\n\n5. Dok ste tamo, postavite mesečno ograničenje potrošnje. Ne košta ništa, a znači da greška ne može da vam podigne račun.\n\n6. Otvorite API keys u istim podešavanjima i izaberite Create new secret key. Dajte mu naziv koji ćete prepoznati, na primer NBR. Proverite da ste i dalje u istoj organizaciji u kojoj je kredit.\n\n7. Kopirajte ključ čim se pojavi. Prikazuje se JEDNOM. Zatvorite li taj prozor bez kopiranja, više ne može da se prikaže — jednostavno ga izbrišete i napravite drugi.\n\n8. Vratite se ovde, izaberite "Podesi ovaj servis" i nalepite ključ.\n\n9. NBR ključ proverava kod OpenAI-ja pre nego što ga zadrži, pa odmah saznate da li radi.
 
-; ---- POMOĆ I O PROGRAMU
+; ---- HELP AND ABOUT
 Dialog.Help.ComingSoon=Pomoć – uskoro.
 Dialog.Help.Title=Pomoć
 Dialog.About.Title=O programu NBR
@@ -762,7 +770,7 @@ Dialog.About.Licence=🄯 Copyleft — NBR je slobodan softver pod GNU Opštom j
 Dialog.About.Text=Nemoviz Book Reader {0}\n\nGradnja od {1}\n\nOvo je višeformatni čitač digitalnih knjiga i publikacija sa više izlaza, napravljen pre svega za slepe, slabovide i osobe sa teškoćama u čitanju. Za osnovnu upotrebu je besplatan, ali ako želite da isprobate i koristite napredne mogućnosti poput prevođenja i glasova u oblaku, moraćete da se registrujete kod odgovarajućih spoljnih servisa i eventualno da ih platite.\n\nNapravila Nemoguća vizija — nemoviz.org\n\nNapisao Gordan Radić\n\nNapravljeno uz Claude (Anthropic). Veliki deo koda napisao je on, prema autorovom nacrtu, odlukama i merenjima; autorsko pravo i licenca su njegovi.\n\n{2}\n\nNA ČEMU NBR POČIVA\n\nNBR svira zvuk kroz libmpv, čita brajevo pismo kroz liblouis, govori kroz NVDA controller client, čita oznake sa TagLib#, vadi tekst iz PDF-ova sa PdfPig i otvara arhive sa SharpCompress. Svaka od njih je zasebna biblioteka, korišćena neizmenjena, i svaka može da se zameni sopstvenom kompatibilnom gradnjom.\n\nlibmpv, i FFmpeg u njemu — LGPL 2.1 ili novija\n\nliblouis i njegove brajeve tabele — LGPL 2.1 ili novija\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress i Microsoft paketi — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend i OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nPotpuno obaveštenje — verzije, nosioci autorskih prava i odakle je koja licenca pročitana — stoji u THIRD-PARTY-NOTICES.txt uz program, a tekstovi samih licenci u fascikli Licences.
 Hint.Button.Accessible=Pomoć za {0}
 
-; ---- PORUKE I GREŠKE
+; ---- MESSAGES AND ERRORS
 Dialog.Error.Title=Greška
 Dialog.Error.General=Greška: {0}
 Dialog.DontShowAgain=Ne prikazuj više

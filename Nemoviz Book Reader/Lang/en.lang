@@ -1,16 +1,19 @@
 ; Nemoviz Book Reader
-; 
-; Redoslijed je isti u svim jezicima i propisan je u
-; tools/lang-order.txt. Ide onako kako se program koristi:
-; player i njegov panel, pa prozor po prozor, a unutar prozora
-; ono glavno prije dijaloga koje otvara.
-; 
-; Prevodi se ono desno od znaka jednakosti. Sve u vitičastim
-; zagradama - {0}, {1} - program popunjava sam i mora ostati.
-; Dva znaka \n znače prazan redak; nikad ne prelamajte redak
-; stvarnim Enterom, jer sve iza njega program ne vidi.
+;
+; Written by:               Gordan Radić
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
 
-; ---- Ime programa i tipke koje se ponavljaju svuda
+; ---- The program name, and the buttons that recur everywhere
 App.Name=Nemoviz Book Reader
 LanguageName=English
 Btn.OK=OK
@@ -25,7 +28,7 @@ Common.Dash=-
 Common.Error=Error
 Common.DateFormatLong=dd. MMMM yyyy
 
-; ---- PLAYER — staklo s podacima o knjizi
+; ---- PLAYER - the glass, where the book describes itself
 Player.Info.TitleLabel=Title:
 Player.Info.AuthorLabel=Author:
 Player.Info.ProducerLabel=Producer:
@@ -48,7 +51,7 @@ Player.Info.Preparing=Preparing the rest of this book: {0} of {1} passages
 Player.TitleBar.Paused=paused
 Player.ReadingSurface.Accessible=Reading surface
 
-; ---- PLAYER — transport i prsten
+; ---- PLAYER - transport and the ring
 Btn.Play.Accessible=Play, Space
 Btn.Pause.Accessible=Pause, Space
 Btn.Back.Accessible=Back, Shift+Left
@@ -68,7 +71,7 @@ Player.Position.Text=Position: {0} / {1}
 Player.Position.Accessible=Position {0} percent
 Player.Progress.Legend=Progress
 
-; ---- PLAYER — korak navigacije
+; ---- PLAYER - the navigation step
 Player.Seek.Label=Navigation step:
 Player.Seek.Accessible=Navigation step, Shift+Up or Shift+Down
 Player.Seek.Announce=Navigation: {0}
@@ -87,7 +90,7 @@ Seek.Item.Page=Page
 Seek.Item.Bookmark=Bookmark
 Seek.Item.StandardPage=Standard page
 
-; ---- PLAYER — osam naredbenih tipki
+; ---- PLAYER - the eight command keys
 Btn.Library=Library
 Btn.Library.Accessible=Library, F3
 Btn.Library.Legend=Library
@@ -116,7 +119,7 @@ Btn.Timer.Countdown=Sleep Timer {0}
 Btn.Timer.Accessible.Active=Sleep Timer, {0} remaining, activate to stop playback and cancel the timer
 Btn.Timer.Accessible.LessThanMinute=Sleep Timer, less than a minute remaining
 
-; ---- PLAYER — opisi za miša i ostalo
+; ---- PLAYER - mouse tips and the rest
 Tip.Back=Back (Shift+Left)
 Tip.PlayPause=Play/Pause (Space)
 Tip.Forward=Forward (Shift+Right)
@@ -136,7 +139,7 @@ Filter.Archives=Archives
 Filter.AllSupported=All supported files
 Filter.AllFiles=All files
 
-; ---- KNJIŽNICA — prozor, polica i izbornici
+; ---- LIBRARY - the window, the shelf and the menus
 Library.Title=Library
 Library.List.Accessible=Book shelf
 Library.NowReading.Accessible=Now reading
@@ -188,7 +191,7 @@ Context.ReReadOcr=Recognize again in another language
 Context.Translate=Translate the book...
 Context.Favorite=Mark as favorite
 
-; ---- KNJIŽNICA — podaci o knjizi
+; ---- LIBRARY - what a book says about itself
 Details.Field.Title=Title
 Details.Field.Author=Author
 Details.Field.Format=Format
@@ -214,7 +217,7 @@ Details.Sound.Off=Off
 Details.Speed.Wpm={0} WPM
 Dialog.Description.Title=Description - {0}
 
-; ---- KNJIŽNICA — uvoz i brisanje
+; ---- LIBRARY - importing and deleting
 Library.ImportFile.Title=Add book to library
 Library.ImportFolder.Description=Select a folder with books
 Dialog.ConfirmImport.Message={0} books detected on the selected location: {1} audio books, {2} text books, {3} special formats and {4} archives.\n\nIf this is correct, after you confirm the books will be copied to your library and the archives will be extracted there. Your library is at {5}.\n\nNothing changes on the source location — everything stays intact, so no worries.\n\nIf the numbers do not match what you expected, try rearranging the data you want to import. Bulk importing has some limits on telling titles apart, and NBR cannot guarantee it gets every one right.\n\nThis could take a while, so try not to interrupt it.
@@ -261,7 +264,7 @@ Extract.Progress.Preparing=Preparing…
 Extract.Progress.Determinate=Extracting… {0} / {1} files
 Extract.Progress.Indeterminate=Extracting… {0} files
 
-; ---- IDI NA
+; ---- GO TO
 Dialog.GoTo.Title=Go To
 GoTo.List.Accessible=Book parts
 GoTo.Item.Format={0}/{1} — {2}
@@ -271,7 +274,7 @@ GoTo.AutoPlay=Start playing after jump
 GoTo.AutoPlay.Hint=When checked, playback starts right after the jump. When unchecked, the current state is kept: paused stays paused, playing keeps playing.
 GoTo.Hint.Accessible=Hint
 
-; ---- BROJAČ
+; ---- SLEEP TIMER
 Dialog.Timer.Title=Sleep Timer
 SleepTimer.Duration.Group=Duration
 SleepTimer.Duration.15=15 minutes
@@ -293,7 +296,7 @@ SleepTimer.Announce.Set=Sleep timer set: {0} minutes
 SleepTimer.Announce.Cancelled=Sleep timer canceled
 SleepTimer.Announce.Finished=Sleep timer finished, playback stopped
 
-; ---- KNJIŽNE OZNAKE
+; ---- BOOKMARKS
 Dialog.ManageBookmarks.Title=Manage Bookmarks
 Bookmark.Announce.Set=Bookmark set
 Bookmark.Item.Format=Bookmark {0} ({1})
@@ -305,7 +308,7 @@ ManageBookmarks.Cancel.Accessible=Cancel
 ManageBookmarks.Selected=Selected
 ManageBookmarks.NotSelected=Not selected
 
-; ---- SVOJSTVA — zajedničko
+; ---- PROPERTIES - shared by both pages
 Dialog.SoundProcessing.Title=Sound processing
 Dialog.SoundProcessing.Message=Sound processing makes a poor recording easier to listen to. It does not repair one.\n\nIt cannot put back what was never recorded, and pushed hard it does more harm than good. Leave it simply on, listen for a few minutes, and only then reach for the separate stages.\n\nThe Help explains what each one does.
 Prop.Info.Accessible=Book information
@@ -319,7 +322,7 @@ Prop.Tab.Text=Text
 Prop.On=on
 Prop.Off=off
 
-; ---- SVOJSTVA — obrada zvuka
+; ---- PROPERTIES - sound processing
 Prop.UseSoundProcessing=Use sound processing
 Prop.SoundProcessing=Sound processing
 Prop.Stage.Level=Level
@@ -361,7 +364,7 @@ Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a wh
 Hint.Tone=Five bands, in decibels, named by their frequency. The lowest sits at 200 Hz, which is where a boomy or muddy recording usually is; the top one is a shelf, so it lifts or lowers everything above it rather than one region. The bands overlap on purpose, which makes a smooth curve possible but also means they add up -- three neighboring bands at +4 give rather more than +4 between them. Small moves go a long way, and anything past a few dB usually means another stage is the real fix.
 Hint.AutomaticLoudness=Two things that pull against each other, which is why they share a box. Automatic loudness holds the overall level steady across a whole book, including between files recorded on different days; it follows the voice rather than the whole signal, which is what a spoken recording asks for. Noise in pauses works the other way: anything quieter than the chosen level gets pushed down, so a hiss or a hum that sits under the reading stops being audible in the gaps between sentences. It never touches the voice itself, and it quietens rather than silences (a noise that switches off and on around every phrase is more tiring than one that simply stays). Turn loudness up and the noise underneath comes up with it, so if that happens, this is the control for it.
 
-; ---- SVOJSTVA — stranica teksta
+; ---- PROPERTIES - the text page
 Prop.Text.NoVoiceShort=No installed voice speaks {0} — choose below.
 Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Install a voice for {0}, or pick a language and a voice above to read this book with it. The choice applies to this book only.
 Prop.Text.ReadingIn=Reading in:
@@ -378,7 +381,7 @@ Dialog.BrailleReread.Title=Read the braille file again?
 Dialog.BrailleReread.Message=This book will be read again from its original braille file, using {0}.\n\nThe text is produced fresh, so everything that pointed into the old text is lost: where you had got to, your bookmarks, and the percentage read. The book itself is not touched, and you can read it again with another table as often as you like.
 Dialog.BrailleReread.Failed=The braille file could not be read with that table. The book has been left as it was.
 
-; ---- POSTAVKE — okvir i kartice
+; ---- SETTINGS - the frame and its tabs
 Dialog.Settings.Title=Settings
 Settings.Tab.Advanced=Advanced
 Settings.Tab.General=General
@@ -389,7 +392,7 @@ Settings.Cancel.Accessible=Cancel
 Settings.Apply=Apply
 Settings.Apply.Accessible=Apply
 
-; ---- POSTAVKE — Općenito
+; ---- SETTINGS - General
 Settings.General.LanguageGroup=Language
 Settings.General.LibraryGroup=Library location
 Settings.General.MediaKeysGroup=Media keys
@@ -415,7 +418,7 @@ Settings.Misc.Look.Hint=How NBR draws itself, and there are two answers.\n\nNBR 
 Settings.Misc.Look.RestartTitle=Change the look
 Settings.Misc.Look.Restart=Changing the look needs NBR to start again. Your place in the book is kept. Restart now?
 
-; ---- POSTAVKE — Govor i brajica
+; ---- SETTINGS - Speech and Braille
 Settings.TextBooks.Language=Language:
 Settings.TextBooks.BookLanguage=Books in this language:
 Settings.TextBooks.AllOtherLanguages=All other languages
@@ -456,7 +459,7 @@ Settings.Colour.Red=Red
 Voices.Add.Title=Languages for speaking text
 Voices.Add.Hint=Choose the languages you want and press Install. Depending on your settings Windows could ask your permission, then download the voices for that language. A voice is tied to its accent, so British and American English are separate entries.
 
-; ---- POSTAVKE — Uređaji
+; ---- SETTINGS - Devices
 Settings.Device.OutputGroup=Audio output
 Settings.Device.SoundCard=Sound card:
 Settings.Device.KeepAlive=Keep the sound card awake
@@ -468,7 +471,7 @@ Settings.Device.OpticalWhich=Drive:
 Settings.Device.OpticalAuto=Whichever has a disc in it
 Settings.Device.UseOptical.Hint=Books were once published on ordinary audio CDs, and NBR can play them. It reads the disc itself rather than leaving it spinning: the whole side is read in one pass, straight through and without going back, so the drive works for a few minutes and is then silent for the rest of the book. Reading slowly would be quieter for a second and noisier for an hour. Turn this on only if you want it - it is off to begin with, even on a machine that has a drive, and while it is off NBR never touches the drive at all.
 
-; ---- POSTAVKE — Napredno
+; ---- SETTINGS - Advanced
 Settings.Ocr.Group=Books with text in pictures
 Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. NBR can recognize the words on them and then speak them like any other book. This is only the starting choice — when you have more than one language, NBR asks which to use each time it reads a book.
 Settings.Ocr.Language=Recognition language
@@ -525,7 +528,7 @@ Hint.Settings.Cloud=
 Google.Cred.NotJson=That file is not readable as JSON, so it is not the one Google gave you. The file you want was downloaded when you created the service account, and its name ends in .json.
 Google.Cred.NotServiceAccount=That JSON is readable but it is not a service account — it has no account address and no private key in it. Google offers several kinds of credential; the one for these voices is the service account key.
 
-; ---- POSTAVKE — rječnik izgovora
+; ---- SETTINGS - the pronunciation dictionary
 Dict.Title=Pronunciation dictionary
 Dict.Open=Pronunciation dictionary...
 Dict.Open.Accessible=Pronunciation dictionary
@@ -566,7 +569,7 @@ Dict.Help=Regex help...
 Dict.Help.Title=Regular expressions in the pronunciation dictionary
 Dict.Help.Text=The old Zen wisdom says:\n\n    Developer had a problem.\n    Developer decided to solve the problem with regular expressions.\n    Developer had two problems.\n\nRegEx, or regular expressions, are something you would rather not deal with, but it is fancy to have that option, so here it is.\n\nIf you know what you are doing, knock yourself out. If not, just don't use it, or ask Google.
 
-; ---- POSTAVKE — ključ servisa i Azure čarobnjak
+; ---- SETTINGS - a service key, and the Azure wizard
 Dialog.TranslateKey.Title=API key for {0}
 Dialog.TranslateKey.Prompt=Paste the key you got from {0}. It is kept on this computer in a file of its own, in readable form, so treat it as you would a password. You can replace or remove it at any time, and you can cancel the key at the service itself.
 Dialog.TranslateKey.Field=API key
@@ -600,7 +603,7 @@ Azure.Setup.Failed=It did not work: {0}
 Azure.Setup.HaveOne=Or, if you already have a Speech resource, type its two details here instead:
 Azure.Setup.Kept=Azure accepted that pair and it is kept. These voices are available now.
 
-; ---- PROZOR ZA ČITANJE
+; ---- THE READING WINDOW
 Reading.Title=Reading
 Reading.Back=Back
 Reading.Back.Accessible=Back one step
@@ -617,7 +620,7 @@ Reading.Size.Announce=Text size {0}
 Beta.Suffix= — not in this beta
 Beta.NoReadingWindow=The reading window is off in this beta. Reading on screen, and the braille that follows it, are still being tested and come back in a later release.
 
-; ---- PREPOZNAVANJE TEKSTA (OCR)
+; ---- RECOGNIZING TEXT (OCR)
 Ocr.Ask.Title=Recognize the text
 Ocr.Ask.Question={0} has no text in it — it is {1} pages of pictures. NBR can recognize the text on them, which should take {2}. Recognize it now?
 Ocr.Ask.ReadWith=Recognize as:
@@ -664,7 +667,7 @@ Ocr.Add.NotStarted=Nothing was installed. Windows did not give permission.
 Ocr.Add.Failed={0} was not installed. Windows may still be working on it, or the language may not be available for this version of Windows.
 Ocr.Add.LeftRunning=Windows is still installing it. It will finish on its own.
 
-; ---- PREVOĐENJE
+; ---- TRANSLATION
 Translate.Progress.Title=Translating the book
 Translate.Progress.Starting=Getting ready. You can stop at any time; whatever has been translated is kept, and starting again carries on from there.
 Translate.Progress.Working=Passage {0} of {1}. About {2} left. You can stop at any time — what is done is kept.
@@ -702,7 +705,7 @@ Translate.Took=It took {0}. A line-by-line record is in translation.log beside t
 Translate.Failed=The book could not be translated: {0}
 Translate.Suffix={0} ({1})
 
-; ---- IZVOZ U ZVUČNU KNJIGU
+; ---- EXPORT AS AN AUDIOBOOK
 Export.NotText=Only a text book can be made into an audiobook. This one is already audio.
 Export.NoVoice=This book has no voice to read it with, so there is nothing to record. Give it one in its Properties first.
 Export.Empty=There is no text in this book to read.
@@ -717,7 +720,7 @@ Export.Done=Done — {0} passages, saved as {1}
 Export.DoneShort=Saved as {2}, but {1} of the {0} passages could not be spoken and are missing from it.
 Export.Failed=The audiobook could not be made.
 
-; ---- ZVUČNI CD
+; ---- AUDIO CD
 Cd.Progress.Title=Audio CD
 Cd.Progress.Preparing=Reading the disc...
 Cd.Progress.Track=Reading track {0} of {1}
@@ -729,7 +732,7 @@ Cd.DataDisc=This is a data disc, not an audio CD. If it holds a book as MP3 file
 Cd.ReadFailed=The disc could not be read: {0}
 Cue.Track=Track {0}
 
-; ---- SERVISI I RAČUNI
+; ---- SERVICES AND ACCOUNTS
 Services.Title=Services and accounts
 Services.List.Accessible=Services
 Services.State.Ready=THIS ONE IS SET UP. You can go through the steps again to replace what is stored.
@@ -754,7 +757,7 @@ Services.Steps.AzureVoices=1. Open azure.microsoft.com/free in your browser and 
 Services.Steps.DeepSeek=1. Open platform.deepseek.com in your browser.\n\n2. Press Sign up. You can fill in an e-mail and password, or choose to sign up with Google, which is quicker.\n\n3. Confirm your e-mail if you are asked to.\n\n4. Once signed in, find Top up or Billing and add a small amount of credit.\n\n5. Find API keys in the menu on the left.\n\n6. Press Create new API key, give it any name, and press Create.\n\n7. Copy the key BEFORE you close that window.\n\n8. Come back here, press "Set up this service", and paste it in.
 Services.Steps.OpenAi=1. Open platform.openai.com in your browser. This is the developer platform, not the ChatGPT site, and it is a separate thing even if you already pay for ChatGPT.\n\n2. Sign in with your account, or make one.\n\n3. FIRST check which organization you are in. The name sits at the top left of the page and it is a menu: open it and choose your own, which is usually called Personal. If you were ever invited into somebody else's organization, or you have a ChatGPT Team or Business seat through work, the platform can put you in THAT one — where you are only a member, billing refuses you with "required permission: api.billing.read", and any key you made would belong to the wrong account. Everything below has to happen in your own organization.\n\n4. Go to platform.openai.com/settings/organization/billing/overview. Billing sits under ORGANIZATION, not under the plain settings page, which is where it is easy to look for it and not find it. Select Add to balance, add a payment card, and buy some credit. Ten dollars is the minimum and more than enough to begin. Nothing works until there is credit on the account.\n\n5. While you are there, set a monthly spending limit. It costs nothing and it means a mistake cannot run up a bill.\n\n6. Open API keys in the same settings, and select Create new secret key. Give it a name you will recognise, such as NBR. Make sure you are still in the same organization as the credit.\n\n7. Copy the key the moment it appears. It is shown ONCE. If you close that window without copying it, it cannot be shown again — you simply delete it and make another.\n\n8. Come back here, select Set up this service, and paste the key.\n\n9. NBR checks the key with OpenAI before keeping it, so you find out straight away whether it works.
 
-; ---- POMOĆ I O PROGRAMU
+; ---- HELP AND ABOUT
 Dialog.Help.ComingSoon=Help – coming soon.
 Dialog.Help.Title=Help
 Dialog.About.Title=About NBR
@@ -763,7 +766,7 @@ Dialog.About.Licence=🄯 Copyleft — NBR is free software under the GNU Genera
 Dialog.About.Text=Nemoviz Book Reader {0}\n\nBuild of {1}\n\nThis is a multiformat and multioutput reader for digital books and publications, specially designed for the blind, visually impaired and people with reading disabilities. It is free for basic usage, but if you want to explore and use its advanced features such as translation and cloud voices you will need to register and possibly pay for the respective external services.\n\nMade by Nemoguća vizija — nemoviz.org\n\nWritten by Gordan Radić\n\nBuilt with Claude (Anthropic). Much of the code was written by it, to the author's design, decisions and measurements; the copyright and the licence are his.\n\n{2}\n\nWHAT NBR IS BUILT ON\n\nNBR plays sound through libmpv, reads braille through liblouis, speaks through the NVDA controller client, reads tags with TagLib#, takes text out of PDFs with PdfPig, and opens archives with SharpCompress. Each is a separate library, used unmodified, and each can be replaced by a compatible build of its own.\n\nlibmpv, and the FFmpeg inside it — LGPL 2.1 or later\n\nliblouis and its braille tables — LGPL 2.1 or later\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress and the Microsoft packages — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend and OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nThe full notice — versions, copyright holders, and where each licence was read from — is in THIRD-PARTY-NOTICES.txt beside the program, and the licence texts themselves are in the Licences folder.
 Hint.Button.Accessible=Help for {0}
 
-; ---- PORUKE I GREŠKE
+; ---- MESSAGES AND ERRORS
 Dialog.Error.Title=Error
 Dialog.Error.General=Error: {0}
 Dialog.DontShowAgain=Don't show this again
