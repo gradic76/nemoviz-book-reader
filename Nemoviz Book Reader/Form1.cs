@@ -3118,6 +3118,31 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         // Title bar
         // ──────────────────────────────────────────────
+        /// <summary>The title bar marks PAUSED and says nothing when playing.
+        ///
+        /// <para>Gordan, 2026-08-22: "svira se ne vidi nego čuje, pauzirano se
+        /// vidi i ne čuje." Only the state with no other signal is worth writing
+        /// down — a book that is playing announces itself out of the speakers,
+        /// and the play key's own accessible name already says which action it
+        /// will perform. It also removes a word that had no short form in
+        /// Croatian or Serbian: "reproducira" and "reprodukuje" are far longer
+        /// than "playing" and there is no better one.</para>
+        ///
+        /// <para><b>The separator lives HERE, not in the translation.</b> It used
+        /// to be written into the value as " — paused", and Localization.LoadLangFile
+        /// trims every value — so the leading space was eaten and the title has
+        /// read "Harvest Home— paused" since the beginning, in English too.
+        /// Nobody saw it because the NBR look has no title bar at all. A space a
+        /// translator cannot lose is a space that stays.</para></summary>
+
+        /// <summary>" — paused", or nothing at all while it is playing.</summary>
+        private string PausedSuffix()
+        {
+            if (isPlaying) return "";
+            string word = Localization.T("Player.TitleBar.Paused");
+            return word.Length == 0 ? "" : " — " + word;
+        }
+
         private void UpdateTitleBar()
         {
             string appName = Localization.T("App.Name");
@@ -3126,14 +3151,14 @@ namespace Nemoviz_Book_Reader
             {
                 if (currentFile != null)
                 {
-                    string st = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
+                    string st = PausedSuffix();
                     this.Text = appName + " — " + System.IO.Path.GetFileNameWithoutExtension(currentFile) + st;
                 }
                 else this.Text = appName;
                 return;
             }
 
-            string stateText = isPlaying ? Localization.T("Player.TitleBar.Playing") : Localization.T("Player.TitleBar.Paused");
+            string stateText = PausedSuffix();
             const string sep = " — ";
             PlayerType type = GetPlayerType();
             string title = currentBook.Title;

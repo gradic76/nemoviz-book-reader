@@ -45,8 +45,7 @@ Player.Info.SpeedLabel=Speed:
 Player.Info.AccessibleName=Playback information, F8
 Player.Info.Prepared=Speech kept: {0} passages, {1} MB
 Player.Info.Preparing=Preparing the rest of this book: {0} of {1} passages
-Player.TitleBar.Playing= — playing
-Player.TitleBar.Paused= — paused
+Player.TitleBar.Paused=paused
 Player.ReadingSurface.Accessible=Reading surface
 
 ; ---- PLAYER — transport i prsten

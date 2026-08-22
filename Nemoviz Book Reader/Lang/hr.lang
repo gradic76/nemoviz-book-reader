@@ -44,8 +44,7 @@ Player.Info.SpeedLabel=Brzina:
 Player.Info.AccessibleName=Podaci o reprodukciji, F8
 Player.Info.Prepared=Sačuvani govor: {0} odlomaka, {1} MB
 Player.Info.Preparing=Pripremam ostatak knjige: {0} od {1} odlomaka
-Player.TitleBar.Playing= — svira
-Player.TitleBar.Paused= — pauzirano
+Player.TitleBar.Paused=pauzirano
 Player.ReadingSurface.Accessible=Površina za čitanje
 
 ; ---- PLAYER — transport i prsten
@@ -413,7 +412,7 @@ Settings.Misc.Look.Classic=Boje sustava
 Settings.Misc.Look.New=NBR dizajn
 Settings.Misc.Look.RestartTitle=Promjena izgleda
 Settings.Misc.Look.Restart=Promjena izgleda zahtijeva ponovno pokretanje aplikacije. Položaj čitanja će se zapamtiti. Pokrenuti sada?
-Settings.Misc.Look.Hint=Kako se NBR crta, a odgovora su dva.\n\nNBR dizajn je njegov vlastiti izgled i onaj s kojim kreće.\n\nBoje sustava čine ga običnim prozorom u onim bojama i fontovima na koje su Windowsi postavljeni. Ništa ne crta sam, pa vaša shema prolazi cijela — što je upravo ono što želite uz temu visokog kontrasta i što najbolje radi s povećalom. Ako vam je visoki kontrast već uključen, NBR kreće s ovim izgledom.\n\nU svakom slučaju izbor je vaš i vaše je da ga poništite: tipkovnica i vaš čitač ekrana time se ne diraju, a F2 vas vraća ovamo.
+Settings.Misc.Look.Hint=Kako se NBR prikazuje?\n\nNBR dizajn je zadani grafički izgled.\n\nBoje sustava čine ga običnim prozorom u bojama i fontovima na koje je Windows postavljen. Ako vam je visoki kontrast već uključen, NBR kreće sa ovim izgledom.\n\nU svakom slučaju izbor je vaš i uvijek ga možete promijeniti u Postavkama.
 
 ; ---- POSTAVKE — Govor i brajica
 Settings.TextBooks.SpeechGroup=Govor
