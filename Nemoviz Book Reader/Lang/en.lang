@@ -1,10 +1,31 @@
-; Nemoviz Book Reader - English
-LanguageName=English
+; Nemoviz Book Reader
+; 
+; Redoslijed je isti u svim jezicima i propisan je u
+; tools/lang-order.txt. Ide onako kako se program koristi:
+; player i njegov panel, pa prozor po prozor, a unutar prozora
+; ono glavno prije dijaloga koje otvara.
+; 
+; Prevodi se ono desno od znaka jednakosti. Sve u vitičastim
+; zagradama - {0}, {1} - program popunjava sam i mora ostati.
+; Dva znaka \n znače prazan redak; nikad ne prelamajte redak
+; stvarnim Enterom, jer sve iza njega program ne vidi.
 
-; App
+; ---- Ime programa i tipke koje se ponavljaju svuda
 App.Name=Nemoviz Book Reader
+LanguageName=English
+Btn.OK=OK
+Btn.Yes=Yes
+Btn.No=No
+Btn.Cancel=Cancel
+Btn.Close=Close
+Btn.Continue=Continue
+Btn.Refresh=Refresh
+Btn.Refresh.Accessible=Refresh
+Common.Dash=-
+Common.Error=Error
+Common.DateFormatLong=dd. MMMM yyyy
 
-; Player - info box
+; ---- PLAYER — staklo s podacima o knjizi
 Player.Info.TitleLabel=Title:
 Player.Info.AuthorLabel=Author:
 Player.Info.ProducerLabel=Producer:
@@ -13,103 +34,42 @@ Player.Info.ChapterLabel=Chapter:
 Player.Info.PartLabel=Part:
 Player.Info.PageLabel=Page:
 Player.Info.BookmarksLabel=Bookmarks:
-; The experimental reading surface — see CLAUDE.md 8l.
-Player.ReadingSurface.Accessible=Reading surface
 Player.Info.VoiceLabel=Voice:
-; {0} is the book's language. Stands in the voice line while the book has none.
-Player.Info.NoVoiceLabel=No installed voice speaks
+Player.Info.NoVoiceLabel=No installed voice
 Player.Info.PartNumElapsed=Part {0} elapsed:
 Player.Info.PartNumRemaining=Part {0} remaining:
 Player.Info.ElapsedLabel=Time elapsed:
 Player.Info.RemainingLabel=Time remaining:
-; Volume and speed, once for every kind of audio book. Until 2026-08-09 neither
-; appeared in ANY info box — they could be changed from the player and heard,
-; but not read — and Properties has since given up its controls for them.
 Player.Info.VolumeLabel=Volume:
 Player.Info.SpeedLabel=Speed:
 Player.Info.AccessibleName=Playback information, F8
-
-; Player - title bar
+Player.Info.Prepared=Speech kept: {0} passages, {1} MB
+Player.Info.Preparing=Preparing the rest of this book: {0} of {1} passages
 Player.TitleBar.Playing= — playing
 Player.TitleBar.Paused= — paused
+Player.ReadingSurface.Accessible=Reading surface
 
-; Player - buttons
-Btn.Library=Library
-Btn.Library.Accessible=Library, F3
-Btn.Settings=Settings
-Btn.Settings.Accessible=Settings, F2
-Btn.Timer=Sleep Timer
-Btn.Help=Help
-Btn.Help.Accessible=Help, F1
-Btn.Back.Accessible=Back, Shift+Left
-Btn.Forward.Accessible=Forward, Shift+Right
+; ---- PLAYER — transport i prsten
 Btn.Play.Accessible=Play, Space
 Btn.Pause.Accessible=Pause, Space
-Btn.Power.Accessible=Exit, Alt+F4
+Btn.Back.Accessible=Back, Shift+Left
+Btn.Forward.Accessible=Forward, Shift+Right
 Btn.VolumeUp.Accessible=Volume up, F12
 Btn.VolumeDown.Accessible=Volume down, F11
-; Printed under the keys on the new panel. The cell is 100 units wide, so the
-; two bookmark keys use short forms; AccessibleName keeps the full wording.
-Btn.Library.Legend=Library
-Btn.Settings.Legend=Settings
-Btn.Timer.Legend=Timer
-Btn.Help.Legend=Help
-Btn.Properties.Legend=Properties
-Btn.GoTo.Legend=Go To...
-Btn.SetBookmark.Legend=Bookmark
-Btn.ManageBookmarks.Legend=Bookmarks
-Btn.Properties=Properties
-Btn.Properties.Accessible=Properties, Alt+Enter
-Btn.GoTo=Go To...
-Btn.GoTo.Accessible=Go To, F4
-Btn.SetBookmark=Set Bookmark
-Btn.SetBookmark.Accessible=Set Bookmark, F5
-Btn.ManageBookmarks=Manage Bookmarks
-Btn.ManageBookmarks.Accessible=Manage Bookmarks, F6
+Btn.Power.Accessible=Exit, Alt+F4
+Player.Volume.Text=Volume: {0}%
+Player.Volume.Accessible=Volume {0} percent
+Player.Speed.Text=Speed: {0}x
+Player.Speed.Legend=Speed
+Player.Speed.Accessible=Speed {0} times
+Player.Speed.Wpm=Speed: {0} WPM
+Player.Speed.WpmAccessible=Speed {0} words per minute
+Player.Position.Label=Position
+Player.Position.Text=Position: {0} / {1}
+Player.Position.Accessible=Position {0} percent
+Player.Progress.Legend=Progress
 
-; Player - sleep timer button
-; Btn.Timer.Accessible is the idle-state screen reader announcement
-; (with the shortcut, per convention). Btn.Timer.Countdown is the visible
-; button text while a timer runs ({0} = mm:ss, or h:mm:ss above 60 min).
-; The Accessible.Active variant is announced on focus during a countdown;
-; activating the button then stops playback and cancels the timer.
-Btn.Timer.Accessible=Sleep Timer, F7
-Btn.Timer.Countdown=Sleep Timer {0}
-Btn.Timer.Accessible.Active=Sleep Timer, {0} remaining, activate to stop playback and cancel the timer
-Btn.Timer.Accessible.LessThanMinute=Sleep Timer, less than a minute remaining
-
-; Sleep Timer dialog
-SleepTimer.Duration.Group=Duration
-SleepTimer.Duration.15=15 minutes
-SleepTimer.Duration.30=30 minutes
-SleepTimer.Duration.45=45 minutes
-SleepTimer.Duration.60=60 minutes
-SleepTimer.Duration.Custom=Custom:
-SleepTimer.Custom.Accessible=Custom duration in minutes
-; Neither a duration nor an expiry action - a third question, about the BOOK.
-; A reader who falls asleep wakes up somewhere they were not listening; this
-; marks where they were still awake.
-SleepTimer.Bookmark=Bookmark the start point
-SleepTimer.Action.Group=When the time expires
-SleepTimer.Action.Stop=Stop playback
-SleepTimer.Action.StopClose=Stop and close the program
-SleepTimer.Action.StopShutdown=Stop, close and shut down the computer
-SleepTimer.Start=Start
-SleepTimer.Start.Accessible=Start sleep timer
-SleepTimer.CancelBtn=Cancel
-; JUST "Cancel" (Gordan, screen-reader pass 2026-08-11). The accessible name was
-; a whole sentence explaining what Cancel does, and a reader hears it every time
-; they land on the button. Cancel explains itself; the sentence only made it
-; longer to get past. An accessible name that restates the caption in more words
-; is worse than none.
-SleepTimer.CancelBtn.Accessible=Cancel
-
-; Sleep Timer announcements (via the off-screen label)
-SleepTimer.Announce.Set=Sleep timer set: {0} minutes
-SleepTimer.Announce.Cancelled=Sleep timer canceled
-SleepTimer.Announce.Finished=Sleep timer finished, playback stopped
-
-; Player - seek dropdown
+; ---- PLAYER — korak navigacije
 Player.Seek.Label=Navigation step:
 Player.Seek.Accessible=Navigation step, Shift+Up or Shift+Down
 Player.Seek.Announce=Navigation: {0}
@@ -122,39 +82,42 @@ Seek.Item.15min=15 minutes
 Seek.Item.30min=30 minutes
 Seek.Item.Chapter=Chapter
 Seek.Item.Part=Part
-; A CD's unit is a track. Same step as Part, only the word follows the medium.
 Seek.Item.Track=Track
 Seek.Item.HeadingLevel=Heading {0}
 Seek.Item.Page=Page
 Seek.Item.Bookmark=Bookmark
 Seek.Item.StandardPage=Standard page
 
-; Player - Go To dialog
-GoTo.List.Accessible=Book parts
-GoTo.Item.Format={0}/{1} — {2}
-GoTo.OK.Accessible=OK
-GoTo.Cancel.Accessible=Cancel
-GoTo.AutoPlay=Start playing after jump
-GoTo.AutoPlay.Hint=When checked, playback starts right after the jump. When unchecked, the current state is kept: paused stays paused, playing keeps playing.
-GoTo.Hint.Accessible=Hint
+; ---- PLAYER — osam naredbenih tipki
+Btn.Library=Library
+Btn.Library.Accessible=Library, F3
+Btn.Library.Legend=Library
+Btn.Settings=Settings
+Btn.Settings.Accessible=Settings, F2
+Btn.Settings.Legend=Settings
+Btn.Properties.Legend=Properties
+Btn.Properties=Properties
+Btn.Properties.Accessible=Properties, Alt+Enter
+Btn.Help=Help
+Btn.Help.Accessible=Help, F1
+Btn.Help.Legend=Help
+Btn.GoTo.Legend=Go To...
+Btn.GoTo=Go To...
+Btn.GoTo.Accessible=Go To, F4
+Btn.SetBookmark.Legend=Bookmark
+Btn.SetBookmark=Set Bookmark
+Btn.SetBookmark.Accessible=Set Bookmark, F5
+Btn.ManageBookmarks.Legend=Bookmarks
+Btn.ManageBookmarks=Manage Bookmarks
+Btn.ManageBookmarks.Accessible=Manage Bookmarks, F6
+Btn.Timer=Sleep Timer
+Btn.Timer.Legend=Timer
+Btn.Timer.Accessible=Sleep Timer, F7
+Btn.Timer.Countdown=Sleep Timer {0}
+Btn.Timer.Accessible.Active=Sleep Timer, {0} remaining, activate to stop playback and cancel the timer
+Btn.Timer.Accessible.LessThanMinute=Sleep Timer, less than a minute remaining
 
-; Player - bookmarks
-; Bookmark.Item.Format is used both by the Manage Bookmarks list and nowhere
-; else — numbering/time are always computed live, never stored as text.
-Bookmark.Announce.Set=Bookmark set
-Bookmark.Item.Format=Bookmark {0} ({1})
-ManageBookmarks.List.Accessible=Bookmarks
-ManageBookmarks.Delete=Delete
-ManageBookmarks.Delete.Accessible=Delete
-ManageBookmarks.OK.Accessible=OK
-ManageBookmarks.Cancel.Accessible=Cancel
-ManageBookmarks.Selected=Selected
-ManageBookmarks.NotSelected=Not selected
-
-; Player - tooltips (mouse hover hints)
-; Convention: buttons with graphic labels get "Name (shortcut)", buttons
-; with text labels get the shortcut only. Tip.Seek is a functional hint.
-; Keys must stay present even if emptied.
+; ---- PLAYER — opisi za miša i ostalo
 Tip.Back=Back (Shift+Left)
 Tip.PlayPause=Play/Pause (Space)
 Tip.Forward=Forward (Shift+Right)
@@ -162,63 +125,26 @@ Tip.Seek=Change with Shift+Up and Shift+Down; jump with Shift+Left and Shift+Rig
 Tip.GoTo=F4
 Tip.Properties=Alt+Enter
 Tip.Timer=F7
-Tip.Volume=F12 and F11
+Tip.Volume=F11 and F12
 Tip.Speed=Ctrl+Left and Ctrl+Right
 Tip.Progress=Ctrl+1–9: jump to 10–90%
-
-; Player - volume / speed / position
-Player.Volume.Text=Volume: {0}%
-Player.Volume.Accessible=Volume {0} percent
-Player.Speed.Text=Speed: {0}x
-Player.Speed.Legend=Speed
-Player.Progress.Legend=Progress
-Player.Speed.Accessible=Speed {0} times
-Player.Speed.Wpm=Speed: {0} WPM
-Player.Speed.WpmAccessible=Speed {0} words per minute
-Player.Position.Label=Position
-Player.Position.Text=Position: {0} / {1}
-Player.Position.Accessible=Position {0} percent
-
-; Player - dialogs
-Dialog.Settings.Title=Settings
-Dialog.Help.ComingSoon=Help – coming soon.
-Dialog.Help.Title=Help
-; The About box, standing empty until its words are written. It says that
-; plainly rather than showing a blank window: what is missing is the text.
-Dialog.Description.Title=Description - {0}
-Dialog.About.Title=About NBR
-Dialog.About.Release=Alpha
-Dialog.About.Licence=🄯 Copyleft — NBR is free software under the GNU General Public License, version 3. You may use it, study it, share it and change it; if you pass on a changed version, it goes on under the same terms, with its source.
-Dialog.About.Text=Nemoviz Book Reader {0}\n\nBuild of {1}\n\nThis is a multiformat and multioutput reader for digital books and publications, specially designed for the blind, visually impaired and people with reading disabilities. It is free for basic usage, but if you want to explore and use its advanced features such as translation and cloud voices you will need to register and possibly pay for the respective external services.\n\nMade by Nemoguća vizija — nemoviz.org\n\nWritten by Gordan Radić\n\nBuilt with Claude (Anthropic). Much of the code was written by it, to the author's design, decisions and measurements; the copyright and the licence are his.\n\n{2}\n\nWHAT NBR IS BUILT ON\n\nNBR plays sound through libmpv, reads braille through liblouis, speaks through the NVDA controller client, reads tags with TagLib#, takes text out of PDFs with PdfPig, and opens archives with SharpCompress. Each is a separate library, used unmodified, and each can be replaced by a compatible build of its own.\n\nlibmpv, and the FFmpeg inside it — LGPL 2.1 or later\n\nliblouis and its braille tables — LGPL 2.1 or later\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress and the Microsoft packages — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend and OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nThe full notice — versions, copyright holders, and where each licence was read from — is in THIRD-PARTY-NOTICES.txt beside the program, and the licence texts themselves are in the Licences folder.
-Dialog.Timer.Title=Sleep Timer
-Dialog.GoTo.Title=Go To
-Dialog.ManageBookmarks.Title=Manage Bookmarks
-; Shown the first few times sound processing is switched on. The same thing the
-; Help says, met head-on: the name promises more than the thing delivers.
-Dialog.SoundProcessing.Title=Sound processing
-Dialog.SoundProcessing.Message=Sound processing makes a poor recording easier to listen to. It does not repair one.\n\nIt cannot put back what was never recorded, and pushed hard it does more harm than good. Leave it simply on, listen for a few minutes, and only then reach for the separate stages.\n\nThe Help explains what each one does.
-Dialog.Error.Title=Error
-Dialog.Error.General=Error: {0}
 Player.OpenFile.Title=Select a book
-
-; Shared file filters
+Player.NoVoiceForLanguage=No installed voice speaks {0}. Open Properties with Alt+Enter to choose one.
 Filter.Audiobooks=Audiobooks
 Filter.TextBooks=Text books
-; Braille stands on its own rather than among the documents: in NBR it is its
-; own way of reading, with its own tables and its own per-book setting, and the
-; reader who wants it should not have to know which five of eighteen extensions
-; are theirs.
 Filter.BrailleBooks=Braille books
 Filter.Archives=Archives
 Filter.AllSupported=All supported files
 Filter.AllFiles=All files
 
-; Library window
+; ---- KNJIŽNICA — prozor, polica i izbornici
 Library.Title=Library
-; The Library's own buttons. "OK" and "Cancel" said nothing about a shelf.
-; The accessible names are the captions, not a sentence about them: a reader
-; hears these on every pass through the button row, and "Load the selected book"
-; says nothing "Load" does not (Gordan, 2026-08-03).
+Library.List.Accessible=Book shelf
+Library.NowReading.Accessible=Now reading
+Library.NowReading.Empty=No book loaded
+Library.Search.Accessible=Search
+Library.Filter.Accessible=Filter by status
+Library.Details.Accessible=Book details
 Library.Btn.Load=Load
 Library.Btn.Load.Accessible=Load
 Library.Btn.Close=Close
@@ -226,26 +152,12 @@ Library.Btn.Close.Accessible=Close
 Menu.File=File
 Menu.File.OpenFile=Open file...
 Menu.File.OpenFolder=Open folder...
-; Present and live, present and dimmed, or absent - three states meaning three
-; different things. See BuildMenuStrip.
 Menu.File.OpenAudioCd=Open audio CD
 Menu.File.ClearLibrary=Clear library...
 Menu.File.Exit=Exit
-; Audio CD
-Cd.Progress.Title=Audio CD
-Cd.Progress.Preparing=Reading the disc...
-Cd.Progress.Track=Reading track {0} of {1}
-Cd.Progress.Stopping=Stopping...
-; The disc has no title of its own, so the name says what is in front of you
-; rather than inventing something to be corrected. {0} is the track count.
-Cd.BookTitle=Audio CD ({0} tracks)
-Cd.Format=Audio CD - Compact Disc Digital Audio
-Cd.NoDisc=There is no disc in the drive, or the drive is still reading it. Put an audio CD in and try again.
-Cd.DataDisc=This is a data disc, not an audio CD. If it holds a book as MP3 files, open it with File, Open folder instead - NBR plays that already.
-Cd.ReadFailed=The disc could not be read: {0}
+Menu.File.ExportAudio=Export as an audiobook...
+Menu.File.Translate=Translate the book...
 Menu.Sort=Sort
-; What to sort by, and which way — two questions, so two groups and two ticks
-; showing at once. Six combined entries meant every new key added two lines.
 Menu.Sort.Alphabetically=Alphabetically
 Menu.Sort.DateAdded=Date added
 Menu.Sort.Format=Format
@@ -256,11 +168,7 @@ Menu.Sort.ActiveMark=(active)
 Menu.Help=Help
 Menu.Help.Help=Help
 Menu.Help.About=About NBR
-Library.List.Accessible=Book shelf
-Library.NowReading.Accessible=Now reading
-Library.NowReading.Empty=No book loaded
-Library.Search.Accessible=Search
-Library.Filter.Accessible=Filter by status
+Menu.Help.Services=Services and accounts...
 Shelf.Filter.All=All books
 Shelf.Filter.Reading=Reading
 Shelf.Filter.Unread=Unread
@@ -273,19 +181,16 @@ Shelf.Status.Read=Read
 Context.Open=Open
 Context.MarkRead=Mark as Read
 Context.MarkUnread=Mark as Unread
-Context.AddFavorite=Add to Favorites
-Context.RemoveFavorite=Remove from Favorites
 Context.Rename=Rename
 Context.Delete=Delete
 Context.Properties=Properties
-Library.Details.Accessible=Book details
+Context.ReadOcr=Recognize the text
+Context.ReReadOcr=Recognize again in another language
+Context.Translate=Translate the book...
+Context.Favorite=Mark as favorite
+
+; ---- KNJIŽNICA — podaci o knjizi
 Details.Field.Title=Title
-; One caption per field, and ONE field per fact. These are the names
-; BookInfoField uses, and they are shared by the Library's columns and by the
-; info glass in Properties, so none of them carries a colon of its own — the
-; glass adds ": " itself, and splits on it to tell label from value.
-; Duration and Listened were removed: they said "Time" and "Elapsed" under a
-; second name, which is how the three info boxes came to disagree.
 Details.Field.Author=Author
 Details.Field.Format=Format
 Details.Field.Speed=Speed
@@ -303,94 +208,142 @@ Details.Field.Headings=Headings
 Details.Field.Characters=Characters
 Details.Field.Language=Detected language
 Details.Field.Description=Description
-; The VALUE of the Description row. The row is a doorway, not the text: the
-; pane is a 120/280 px grid and a blurb runs to about 935 characters.
 Details.Description.Open=Press Enter to read it
 Details.Field.SoundProcessing=Sound processing
 Details.Sound.On=On
 Details.Sound.Off=Off
 Details.Speed.Wpm={0} WPM
-Btn.Refresh=Refresh
-Btn.Refresh.Accessible=Refresh
-Btn.OK=OK
-Btn.Cancel=Cancel
-; The message shell's own Yes/No — plain, the way the system's own MessageBox
-; buttons announce themselves (no per-dialog override; the message text itself,
-; read first, is what supplies the context).
-Btn.Yes=Yes
-Btn.No=No
+Dialog.Description.Title=Description - {0}
 
-; Library - dialogs
+; ---- KNJIŽNICA — uvoz i brisanje
+Library.ImportFile.Title=Add book to library
+Library.ImportFolder.Description=Select a folder with books
+Dialog.ConfirmImport.Message={0} books detected on the selected location: {1} audio books, {2} text books, {3} special formats and {4} archives.\n\nIf this is correct, after you confirm the books will be copied to your library and the archives will be extracted there. Your library is at {5}.\n\nNothing changes on the source location — everything stays intact, so no worries.\n\nIf the numbers do not match what you expected, try rearranging the data you want to import. Bulk importing has some limits on telling titles apart, and NBR cannot guarantee it gets every one right.\n\nThis could take a while, so try not to interrupt it.
+Dialog.ConfirmImport.One=Found one book. Import it?
+Dialog.ConfirmImport.Title=Add folder
+Dialog.NoBooksFound.Message=No supported books were found in the selected folder.
+Dialog.NoBooksFound.Title=Add folder
+Dialog.ImportSuccess.Message=Book added to library.
+Dialog.ImportSuccess.Title=Add book
+Dialog.ImportError.Message=Error adding book: {0}
+Dialog.ImportFolderSuccess.Message=Imported {0} books.
+Dialog.ImportFolderSuccess.Skipped={0} were left out.
+Dialog.ImportFolderSuccess.SkippedList=These did not go in:
+Dialog.ImportFolderSuccess.Title=Add folder
+Dialog.ImportFolderError.Message=Error importing folder: {0}
+Dialog.ReimportExisting.Title=Already in the library
+Dialog.ReimportExisting.Message={0} is already on the shelf. Importing it again refreshes what is in the book folder. Your place in the book and your bookmarks are kept — but if the file has changed since last time, the words will have moved and your place will no longer be where you left it. Import it again?
+Dialog.Skipped.Drm=protected
+Dialog.Skipped.Cancelled=canceled
+Dialog.Skipped.MissingFirstVolume=the first part of this set is missing
+Dialog.Skipped.Empty=the file is empty
 Dialog.Rename.Title=Rename book
 Dialog.Rename.Prompt=New name:
 Dialog.Rename.AuthorLabel=Author:
 Dialog.Rename.TitleLabel=Title:
-Dialog.ActiveBook.Message="{0}" is currently loaded in the player and cannot be deleted. Close the library, open another book, or stop playback, then try again.
-Dialog.ActiveBook.Title=Book is active
 Dialog.ConfirmDelete.Message=Are you sure you want to permanently delete "{0}" from disk? This action cannot be undone.
 Dialog.ConfirmDelete.Title=Delete book
+Dialog.DeleteError.Message=Error deleting book from disk: {0}
+Dialog.ActiveBook.Message="{0}" is currently loaded in the player and cannot be deleted. Close the library, open another book, or stop playback, then try again.
+Dialog.ActiveBook.Title=Book is active
 Dialog.ClearLibrary.Title=Clear library
 Dialog.ClearLibrary.Message=Delete all {0} books from the library? This permanently removes their files from disk and cannot be undone.
 Dialog.ClearLibrary.Empty=The library is already empty.
 Dialog.ClearLibrary.Done=Removed {0} books.
 Dialog.ClearLibrary.Skipped={0} could not be removed (in use or currently open).
-Dialog.DeleteError.Message=Error deleting book from disk: {0}
-Library.ImportFile.Title=Add book to library
-Library.ImportFolder.Description=Select a folder with books
-Dialog.ImportSuccess.Message=Book added to library.
-Dialog.ImportSuccess.Title=Add book
-Extract.Progress.Title=Extracting
-Extract.Progress.Preparing=Preparing…
-Extract.Progress.Determinate=Extracting… {0} / {1} files
-Extract.Progress.Indeterminate=Extracting… {0} files
-Dialog.ImportError.Message=Error adding book: {0}
 Dialog.DrmProtected.Title=Protected book
 Dialog.DrmProtected.Message=This book is DRM-protected (its content is encrypted), so it can't be opened. Please use a DRM-free copy.
-
-; Archive password prompt (encrypted .zip/.rar/.7z on import)
 Dialog.ArchivePassword.Title=Password required
 Dialog.ArchivePassword.Prompt=The archive "{0}" is password-protected. Enter the password to open it:
 Dialog.ArchivePassword.Retry=That password didn't work. Try again for "{0}":
 Dialog.ArchivePassword.Field=Archive password
+Extract.Progress.Title=Extracting
+Extract.Progress.Preparing=Preparing…
+Extract.Progress.Determinate=Extracting… {0} / {1} files
+Extract.Progress.Indeterminate=Extracting… {0} files
 
-; Steer folder-import away from archives (use Open file instead)
+; ---- IDI NA
+Dialog.GoTo.Title=Go To
+GoTo.List.Accessible=Book parts
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=OK
+GoTo.Cancel.Accessible=Cancel
+GoTo.AutoPlay=Start playing after jump
+GoTo.AutoPlay.Hint=When checked, playback starts right after the jump. When unchecked, the current state is kept: paused stays paused, playing keeps playing.
+GoTo.Hint.Accessible=Hint
 
-; Properties dialog — per-book sound processing
-; NOTE (for later English review): the stage titles below are the plain,
-; friendly names. Some technical terms may read fine to native speakers
-; (e.g. "Normalization", "Equalizer", "Compressor", "De-esser") — revisit
-; before the final English pass.
+; ---- BROJAČ
+Dialog.Timer.Title=Sleep Timer
+SleepTimer.Duration.Group=Duration
+SleepTimer.Duration.15=15 minutes
+SleepTimer.Duration.30=30 minutes
+SleepTimer.Duration.45=45 minutes
+SleepTimer.Duration.60=60 minutes
+SleepTimer.Duration.Custom=Custom:
+SleepTimer.Custom.Accessible=Custom duration in minutes
+SleepTimer.Bookmark=Bookmark the start point
+SleepTimer.Action.Group=When the time expires
+SleepTimer.Action.Stop=Stop playback
+SleepTimer.Action.StopClose=Stop and close the program
+SleepTimer.Action.StopShutdown=Stop, close and shut down the computer
+SleepTimer.Start=Start
+SleepTimer.Start.Accessible=Start sleep timer
+SleepTimer.CancelBtn=Cancel
+SleepTimer.CancelBtn.Accessible=Cancel
+SleepTimer.Announce.Set=Sleep timer set: {0} minutes
+SleepTimer.Announce.Cancelled=Sleep timer canceled
+SleepTimer.Announce.Finished=Sleep timer finished, playback stopped
+
+; ---- KNJIŽNE OZNAKE
+Dialog.ManageBookmarks.Title=Manage Bookmarks
+Bookmark.Announce.Set=Bookmark set
+Bookmark.Item.Format=Bookmark {0} ({1})
+ManageBookmarks.List.Accessible=Bookmarks
+ManageBookmarks.Delete=Delete
+ManageBookmarks.Delete.Accessible=Delete
+ManageBookmarks.OK.Accessible=OK
+ManageBookmarks.Cancel.Accessible=Cancel
+ManageBookmarks.Selected=Selected
+ManageBookmarks.NotSelected=Not selected
+
+; ---- SVOJSTVA — zajedničko
+Dialog.SoundProcessing.Title=Sound processing
+Dialog.SoundProcessing.Message=Sound processing makes a poor recording easier to listen to. It does not repair one.\n\nIt cannot put back what was never recorded, and pushed hard it does more harm than good. Leave it simply on, listen for a few minutes, and only then reach for the separate stages.\n\nThe Help explains what each one does.
 Prop.Info.Accessible=Book information
-; {0} is the book's language. Both shown only when nothing installed speaks it:
-; the short one sits between the controls it explains and has one line to do it
-; in, the long one on the info panel where there is room to say why.
-Prop.Text.NoVoiceShort=No installed voice speaks {0} — choose below.
-Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Install a voice for {0}, or pick a language and a voice above to read this book with it. The choice applies to this book only.
-; {0} is the book's language. Spoken when a book that cannot be read is opened.
-Player.NoVoiceForLanguage=No installed voice speaks {0}. Open Properties with Alt+Enter to choose one.
-NoVoice.Title=No voice for this book
-; {0} is the book's language.
-NoVoice.Message=This book is in {0}, and no installed voice speaks it. Choose a voice to read it with, just this once, or leave it unread until a voice for {0} is installed.
-NoVoice.Read=Read with this voice
-NoVoice.Leave=Leave it unread
-Prop.Text.ReadingIn=Reading in:
-Prop.On=on
-Prop.Off=off
+Prop.Info.ProcessingOff=Sound processing: off
+Prop.Info.ProcessingOn=Sound processing: on
+Prop.Info.Bypassed=(bypass active)
+Prop.Info.Off=off
+Prop.Info.Protection=Distortion protection
 Prop.Tab.Audio=Audio
 Prop.Tab.Text=Text
+Prop.On=on
+Prop.Off=off
+
+; ---- SVOJSTVA — obrada zvuka
 Prop.UseSoundProcessing=Use sound processing
-; The subject itself, for the help key and its pop-up title — the caption above
-; is an instruction, and "Help for Use sound processing" reads badly.
 Prop.SoundProcessing=Sound processing
-; Spoken, not shown: switching sound processing on measures the recording and
-; sets the six stages from it, which takes about a second and a half. Nothing is
-; disabled meanwhile, so these three lines are the only sign it is happening.
+Prop.Stage.Level=Level
+Prop.Highpass.Title=Remove rumble
+Prop.Denoise.Title=Noise reduction
+Prop.Deesser.Title=Soften sibilance
+Prop.Compressor.Title=Even out speech
+Prop.Eq.Title=Tone
+Prop.Eq.Shelf={0} and above
+Prop.Loudness.Title=Loudness and pauses
+Prop.Normalize.Title=Automatic loudness
+Prop.Gate.Title=Noise in pauses
+Prop.Level.Minimal=Minimal
+Prop.Level.Light=Light
+Prop.Level.Medium=Medium
+Prop.Level.Strong=Strong
+Prop.Level.Maximum=Maximum
+Prop.ResetAll=Reset all
+Prop.Bypass=Bypass
+Prop.Bypass.Shortcut=Control B switches this on and off from anywhere on this page
 Prop.Analysing=Analyzing the recording
-; The wait while a recording is measured. It was 1.6 s with three segments and
-; is 22 s with twenty on a fast machine, four to seven minutes on the minimum
-; one -- hence a dialog with a bar, a spoken quarter, and a way out. {1} is a
-; phrase like "about a minute", measured from how long this machine has taken
-; so far rather than guessed.
+Prop.Analysing.Done=Recording analyzed, {0} stages set. Change any of them if you prefer.
+Prop.Analysing.Failed=The recording could not be analyzed. The settings are unchanged.
 Analyse.Progress.Title=Analyzing the recording
 Analyse.Progress.Starting=Starting the analysis...
 Analyse.Progress.Working=Segment {0} of {1}. {2}
@@ -401,58 +354,147 @@ Analyse.Progress.Estimating=Working out how long this will take.
 Analyse.Progress.AlmostDone=Almost done.
 Analyse.Progress.Seconds=About {0} seconds left.
 Analyse.Progress.Minutes=About {0} minutes left.
+Hint.SoundProcessing=Using sound processing you can fine-tune the sound of the recording. You can remove different noises, boost the volume and color the overall sound with the equalizer. There are six groups of controls, each of which you can turn on and off separately. You can also tune each control separately. You can temporarily bypass the whole sound processing chain by pressing Ctrl+B, to hear the difference between the original recording and your sound settings.
+Hint.RemoveRumble=Cuts the very lowest frequencies — traffic, air conditioning, handling noise. It cannot recover a muddy recording, but it clears the bottom end so speech has room.
+Hint.NoiseRemoval=Reduces steady background hiss, the kind a tape or a cheap microphone leaves behind. Too strong a setting starts to eat the voice with it, so raise it only until the hiss goes.
+Hint.SoftenSibilance=Takes the edge off sharp S and Š sounds. Useful on close-miked readers and on recordings that were brightened too much.
+Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a whisper and a shout end up closer together. This is the one to reach for when you keep turning the volume knob.
+Hint.Tone=Five bands, in decibels, named by their frequency. The lowest sits at 200 Hz, which is where a boomy or muddy recording usually is; the top one is a shelf, so it lifts or lowers everything above it rather than one region. The bands overlap on purpose, which makes a smooth curve possible but also means they add up -- three neighboring bands at +4 give rather more than +4 between them. Small moves go a long way, and anything past a few dB usually means another stage is the real fix.
+Hint.AutomaticLoudness=Two things that pull against each other, which is why they share a box. Automatic loudness holds the overall level steady across a whole book, including between files recorded on different days; it follows the voice rather than the whole signal, which is what a spoken recording asks for. Noise in pauses works the other way: anything quieter than the chosen level gets pushed down, so a hiss or a hum that sits under the reading stops being audible in the gaps between sentences. It never touches the voice itself, and it quietens rather than silences (a noise that switches off and on around every phrase is more tiring than one that simply stays). Turn loudness up and the noise underneath comes up with it, so if that happens, this is the control for it.
 
-; --- Reading an image document (OCR) -----------------------------------
-; A scanned book is pictures of text. Windows itself can read them, so this
-; costs nothing to ship; what it costs is TIME, about half a second a page,
-; which is why the reader is asked first rather than having a book start
-; recognising itself.
-Ocr.Ask.Title=Recognize the text
-Ocr.Ask.Question={0} has no text in it — it is {1} pages of pictures. NBR can recognize the text on them, which should take {2}. Recognize it now?
-; Only shown when more than one recognition language is installed — with one,
-; the import asks a plain yes/no instead.
-Ocr.Ask.ReadWith=Recognize as:
-Ocr.Ask.Read=Recognize
-Ocr.Ask.Skip=Skip
-Ocr.Ask.UnderAMinute=under a minute
-Ocr.Ask.Minutes=about {0} minutes
-; NOT "OCR failed". A page that rendered and held nothing usually means the
-; document really is pictures — of anything at all.
-Ocr.Result.NoText=No text was recognized in the pictures. The book has been added, but there is nothing to read from it.
-; The one Windows genuinely cannot draw: the text is stored as a JBIG2 mask,
-; which its PDF renderer omits, so every page arrives as blank paper. The file
-; is not damaged, and the reader must not be sent looking for a better copy.
-Ocr.Refusal.NoEngine=Windows has no text recognition installed. It comes with a Windows language: add one under Settings, Time and language, Language and region, and it arrives with it.
-Ocr.Refusal.NoPages=There are no pages in this to read.
-Ocr.Progress.Title=Recognizing the text
-Ocr.Progress.Starting=Starting to recognize...
-Ocr.Progress.Working=Page {0} of {1}. {2}
-Ocr.Progress.Quarter={0} percent done. {1}
-Ocr.Progress.Cancel=Cancel
-Ocr.Progress.Cancelling=Stopping after this page. Nothing is kept.
-Ocr.Progress.Estimating=Working out how long this will take.
-Ocr.Progress.AlmostDone=Almost done.
-Ocr.Progress.Seconds=About {0} seconds left.
-Ocr.Progress.Minutes=About {0} minutes left.
-; Settings. "Automatic" is the right answer nearly always: recognition goes by
-; SCRIPT, not by language, so one Latin recognizer reads every Latin language.
+; ---- SVOJSTVA — stranica teksta
+Prop.Text.NoVoiceShort=No installed voice speaks {0} — choose below.
+Prop.Text.NoVoiceForLanguage=No installed voice speaks {0}. Install a voice for {0}, or pick a language and a voice above to read this book with it. The choice applies to this book only.
+Prop.Text.ReadingIn=Reading in:
+Prop.Text.InputBrailleGroup=Braille source
+Prop.Text.InputBrailleTable=Input Braille Table:
+Hint.Text0=Here you can choose the language and voice for reading this book. You can have different settings for each individual book in the Library. Every voice remembers its own settings — speed, volume and pitch — so there is no need to set them again after switching back from another voice.\n\nRemember that you can select "No speech" if you want to read visually or on the braille display without hearing audio.
+Hint.TextVisual=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like movie end credits, or instant page changes. You can also choose the background, text and highlight colors, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
+Hint.TextBrailleSource=This book came from a braille file, and this is the table it was read with — the one that turned the braille cells back into words.\n\nA braille file says nothing about its language, its grade, or which national standard it follows, so NBR has to work the table out from the text itself. It is usually right, but not always, and a wrong table gives words that are almost right: "Have" where the book says "How".\n\nIf that is what you are seeing, pick another table here and press OK. The book is read again from the braille file you imported, which is kept beside it, so you can try as many tables as you like and go back to the first one at any time.\n\nThe tables offered are the ones for the language above. If that language is wrong, change it and the tables will follow.\n\nThis has nothing to do with what your braille display shows. Your screen reader translates that, using the table in its own settings.
+NoVoice.Title=No voice for this book
+NoVoice.Message=This book is in {0}, and no installed voice speaks it. Choose a voice to read it with, just this once, or leave it unread until a voice for {0} is installed.
+NoVoice.Read=Read with this voice
+NoVoice.Leave=Leave it unread
+Dialog.BrailleReread.Title=Read the braille file again?
+Dialog.BrailleReread.Message=This book will be read again from its original braille file, using {0}.\n\nThe text is produced fresh, so everything that pointed into the old text is lost: where you had got to, your bookmarks, and the percentage read. The book itself is not touched, and you can read it again with another table as often as you like.
+Dialog.BrailleReread.Failed=The braille file could not be read with that table. The book has been left as it was.
+
+; ---- POSTAVKE — okvir i kartice
+Dialog.Settings.Title=Settings
 Settings.Tab.Advanced=Advanced
-Player.Info.Prepared=Speech kept: {0} passages, {1} MB
-Player.Info.Preparing=Preparing the rest of this book: {0} of {1} passages
-Menu.File.ExportAudio=Export as an audiobook...
-Export.NotText=Only a text book can be made into an audiobook. This one is already audio.
-Export.NoVoice=This book has no voice to read it with, so there is nothing to record. Give it one in its Properties first.
-Export.Empty=There is no text in this book to read.
-Export.Filter=Audio file (*.mp3)|*.mp3
-Export.Ask.Ready=All {0} passages of this book have already been spoken, so this is only the joining and will take moments. Make the file?
-Export.Ask.Missing={0} of this book's {1} passages still have to be recorded. Recording them should take about {2} minutes — that is how long the making takes, not how long the book is to listen to. The progress window shows a figure measured as it goes. You can stop at any time: whatever is spoken is kept, and starting again carries on from there. Make the file?
-Export.Progress.Title=Making the audiobook
-Export.Progress.Starting=Getting ready. You can stop at any time; whatever has been spoken is kept, and starting again carries on from there.
-Export.Progress.Making=Passage {0} of {1}. About {2} left.
-Export.Progress.Joining=Joining it all into one file.
-Export.Done=Done — {0} passages, saved as {1}
-Export.DoneShort=Saved as {2}, but {1} of the {0} passages could not be spoken and are missing from it.
-Export.Failed=The audiobook could not be made.
+Settings.Tab.General=General
+Settings.Tab.TextBooks=Speech and Braille
+Settings.Tab.Device=Devices
+Settings.OK.Accessible=OK
+Settings.Cancel.Accessible=Cancel
+Settings.Apply=Apply
+Settings.Apply.Accessible=Apply
+
+; ---- POSTAVKE — Općenito
+Settings.General.LanguageGroup=Language
+Settings.General.LibraryGroup=Library location
+Settings.General.MediaKeysGroup=Media keys
+Settings.General.MetadataGroup=Book details
+Settings.General.LookGroup=Look
+Settings.General.UseMultimediaKeys=Use multimedia keys
+Settings.General.UseMultimediaKeysGlobally=Use multimedia keys globally
+Settings.General.LibraryLocation=Library location:
+Settings.General.LibraryLocation.Browse=Choose the folder where your book library is stored
+Settings.General.Browse=Browse...
+Settings.General.Browse.Accessible=Browse for library folder
+Settings.General.Language=Language:
+Settings.General.UseMetadata=Use embedded metadata
+Settings.General.UseMetadata.Hint=Some file formats have metadata with additional information about the author, title, publisher, producer and so on. NBR can read and display that information where it exists. However, if that information is wrong or missing, NBR can take the basic details from folder and file names instead. As a last resort, you can always rename books in the Library.
+Settings.General.UseMultimediaKeys.Hint=You can use your keyboard multimedia keys or headset keys to play, pause and navigate the book using the navigation step you have chosen.\n\nThe second switch takes them system-wide, so they reach NBR from anywhere — at the price of taking them from every other player while NBR is running.
+Settings.General.LibraryLocation.Hint=This is the place where NBR copies imported books. You can leave it as default on your system partition, but if you plan to have a large library, another partition or disk would be a much better solution. NBR also keeps the information for each book in there, so if you want to save your reading positions, bookmarks, speed and other reading settings, note that you need to copy the content from the old library folder manually to the new location. And within the same price range: by changing the library location to somewhere other than the system partition, you are preserving your books from accidental system crashes and the usual data loss accompanying them.
+Settings.General.Language.Restart=Changing the language needs NBR to start again. Restart now?
+Settings.General.Language.RestartTitle=Language
+Settings.Misc.Look=Look:
+Settings.Misc.Look.Classic=System colors
+Settings.Misc.Look.New=NBR design
+Settings.Misc.Look.Hint=How NBR draws itself, and there are two answers.\n\nNBR design is its own look, and the one it starts with.\n\nSystem colors makes it a plain window in whatever colors and fonts Windows is set to. It paints nothing of its own, so your own scheme comes through whole — which is what you want with a high contrast theme, and what works best with a magnifier. If you already have high contrast switched on, this is the one NBR starts with.\n\nEither way the choice is yours to make and yours to undo: the keyboard and your screen reader are unaffected by it, and F2 brings you back here.
+Settings.Misc.Look.RestartTitle=Change the look
+Settings.Misc.Look.Restart=Changing the look needs NBR to start again. Your place in the book is kept. Restart now?
+
+; ---- POSTAVKE — Govor i brajica
+Settings.TextBooks.Language=Language:
+Settings.TextBooks.BookLanguage=Books in this language:
+Settings.TextBooks.AllOtherLanguages=All other languages
+Settings.TextBooks.VoiceNotSet=(no voice chosen)
+Settings.TextBooks.AddVoices=Add new languages...
+Settings.TextBooks.LanguageNoVoice={0} — no voice installed
+Settings.TextBooks.Voice=Voice:
+Settings.TextBooks.Speed=Speed:
+Settings.TextBooks.Test=Test voice
+Settings.TextBooks.TestSample=This is a sample of the selected voice.
+Settings.TextBooks.Volume=Volume:
+Settings.TextBooks.Pitch=Pitch:
+Settings.TextBooks.SpeechGroup=Speech
+Settings.TextBooks.LanguageUnknown=(language not reported)
+Settings.TextBooks.VisualGroup=Visual output
+Settings.TextBooks.UseVisual=Use visual output
+Settings.TextBooks.NoSpeech=No speech
+Settings.TextBooks.VisualMode=Display mode:
+Settings.TextBooks.VisualMode.TwoRows=Two text rows (subtitle style)
+Settings.TextBooks.VisualMode.FullInstant=Full screen text (page by page)
+Settings.TextBooks.VisualMode.FullScrolling=Full screen text (scrolling)
+Settings.TextBooks.Highlight=Highlight:
+Settings.TextBooks.Highlight.None=No highlight
+Settings.TextBooks.Highlight.Line=Current line
+Settings.TextBooks.Highlight.Sentence=Current sentence
+Settings.TextBooks.HighlightColour=Highlight color:
+Settings.TextBooks.TextColour=Text color:
+Settings.TextBooks.BackColour=Background color:
+Settings.TextBooks.Speech.Hint=Here is the list of the languages and the voices installed on your system. You can choose the default voice for every language shown here, so every new title in that language opens with the selected voice. Choosing a voice for a language is what makes it the default — there is nothing else to press. If your new book is written in a language that is not on the list, it is best not to set a default voice for it here. You can always set a voice in the Properties of the book itself, on its Text page, or choose No speech and go on reading in braille or on screen. You will also see a notice when a language has no voice installed.
+Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears. Switched on here, the window opens by itself every time you press Play. It can also be opened and closed by hand at any time with F9, whether this is switched on or not — so you can try it on a book without changing its Properties.
+Settings.TextBooks.Dictionary.Hint=This is where you can change what speech synthesizers get wrong. You can correct the pronunciation of names and places, fix wrong stress, and much more — just use your imagination. The best part is that you can do this separately by language and by voice, because different synthesizers make different mistakes in the same language.
+Settings.Colour.White=White
+Settings.Colour.Black=Black
+Settings.Colour.Yellow=Yellow
+Settings.Colour.Blue=Blue
+Settings.Colour.Green=Green
+Settings.Colour.Red=Red
+Voices.Add.Title=Languages for speaking text
+Voices.Add.Hint=Choose the languages you want and press Install. Depending on your settings Windows could ask your permission, then download the voices for that language. A voice is tied to its accent, so British and American English are separate entries.
+
+; ---- POSTAVKE — Uređaji
+Settings.Device.OutputGroup=Audio output
+Settings.Device.SoundCard=Sound card:
+Settings.Device.KeepAlive=Keep the sound card awake
+Settings.Device.KeepAlive.Hint=Some sound outputs — HDMI especially — power down the moment the sound stops, and then take a moment to wake up again. What you hear is the first word of a sentence going missing, over and over, with nothing obviously wrong. While this is on, NBR plays a tone far below anything you can hear on the card it is using, so the card never gets the chance to fall asleep between sentences. Turn it off if your card does not do this: it holds the output open for as long as a book is playing.
+Settings.Device.Default=System default (auto)
+Settings.Device.OpticalGroup=Optical drive
+Settings.Device.UseOptical=Use the optical drive
+Settings.Device.OpticalWhich=Drive:
+Settings.Device.OpticalAuto=Whichever has a disc in it
+Settings.Device.UseOptical.Hint=Books were once published on ordinary audio CDs, and NBR can play them. It reads the disc itself rather than leaving it spinning: the whole side is read in one pass, straight through and without going back, so the drive works for a few minutes and is then silent for the rest of the book. Reading slowly would be quieter for a second and noisier for an hour. Turn this on only if you want it - it is off to begin with, even on a machine that has a drive, and while it is off NBR never touches the drive at all.
+
+; ---- POSTAVKE — Napredno
+Settings.Ocr.Group=Books with text in pictures
+Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. NBR can recognize the words on them and then speak them like any other book. This is only the starting choice — when you have more than one language, NBR asks which to use each time it reads a book.
+Settings.Ocr.Language=Recognition language
+Settings.Ocr.Automatic=Automatic
+Settings.Ocr.AddLanguage=Add a language...
+Settings.Ocr.None=Windows has no text recognition installed.
+Settings.Translate.Group=Translation
+Settings.Translate.Service=Translation service
+Settings.Translate.Key=API key...
+Settings.Translate.State.Have={0}, key stored
+Settings.Translate.State.None={0}, no key
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (larger model)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, cheaper)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, dearest)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Hint=NBR can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; NBR never handles payment, that's on you on the service providers web or any other means. If you don't need AI machine translation, just leave it unchecked.\n\nA translation sends the WHOLE book to whichever service you choose, and what each of them does with it differs — some use free-tier content to improve their own products, some do not. Each service's own description under Help, Services and accounts says which.
+Settings.Translate.Notes=Notes for the translator:
+Settings.Translate.Test.NoEngine=No translation service is selected.
+Settings.Translate.Test.NoKey=There is no key to check.
+Settings.Translate.Test.NoNetwork=NBR could not reach the service.
+Settings.Translate.Test.Refused=The service refused the request ({0}).
+Settings.Translate.Test.Empty=The service answered with nothing.
 Settings.Cloud.Group=Google Cloud voices
 Settings.Cloud.VoicesGroup=Cloud voices
 Settings.Cloud.Where=Google and Azure are set up under Help, Services and accounts, which explains what each one is and takes you through opening an account step by step.
@@ -466,30 +508,7 @@ Settings.Cloud.ForgetAsk=Forget the stored service account? These voices stop be
 Settings.Cloud.UseGroup=Using cloud voices
 Settings.Cloud.Use=Offer cloud voices
 Settings.Cloud.Why=There is nothing to switch on yet: set up Google or Azure above, and this becomes available.
-Hint.Settings.CloudUse=This one turns on and off your use of cloud voices, meaning all the voices from the Internet, not your installed SAPI or One Core voices.\n\nIt decides whether those voices are OFFERED when you choose a voice for a particular book. They are never assigned automatically and never become a language's default voice — that stays with the voices installed on this computer, which cost nothing and need no connection.\n\nA book already reading with a cloud voice keeps it whether this is on or off; the switch governs the picker, not what can be played.
 Settings.Cloud.NoList=The account was accepted, but the list of voices could not be fetched. That is usually the network; the voices will appear once it can be reached.
-Btn.Close=Close
-Azure.Setup.Title=Set up Azure Speech
-Azure.Setup.Open=Create it for me...
-Azure.Setup.Intro=NBR can make the Azure resource for you, so there is no portal to work through. You sign in to Microsoft once with a short code, choose which subscription to put it on, and NBR creates it on the free tier and keeps the key. Nothing is created until you have signed in.
-Azure.Setup.Start=Start
-Azure.Setup.SigningIn=Asking Microsoft for a sign-in code.
-Azure.Setup.CodeLabel=Sign-in code:
-Azure.Setup.EnterCode=Your sign-in code is in the field below, ready to copy. Select "Open the sign-in page" to open {0} in your browser, sign in there, and this window will carry on by itself.
-Azure.Setup.OpenPage=Open the sign-in page
-Azure.Setup.OpenFailed=The browser could not be opened. The address is in the line above; open it by hand.
-Azure.Setup.Directory=Directory:
-Azure.Setup.DirectoryHint=Leave this empty if you sign in with a work or school account. If your Azure is on a PERSONAL Microsoft account, Microsoft will refuse the sign-in at the ordinary address and you must name the directory Azure made when the subscription was created — either its name, ending in onmicrosoft.com, or its Directory (tenant) ID. It is asked once and remembered.
-Azure.Setup.Subscription=Subscription:
-Azure.Setup.SignedIn=Signed in. {0} subscription(s) found — choose one and select Create.
-Azure.Setup.Create=Create the resource
-Azure.Setup.NoSubscription=That account has no Azure subscription, so there is nowhere to create the resource.
-Azure.Setup.Creating=Creating the resource. This takes up to a minute or two; Azure reports it as ready before it really is, so NBR waits.
-Azure.Setup.Done=Done. The resource is made and its key is kept — {0} voices are available.
-Azure.Setup.DoneNoList=The resource is made and its key is kept, but the list of voices could not be fetched. That is usually the network; the voices will appear once it can be reached.
-Azure.Setup.Failed=It did not work: {0}
-Azure.Setup.HaveOne=Or, if you already have a Speech resource, type its two details here instead:
-Azure.Setup.Kept=Azure accepted that pair and it is kept. These voices are available now.
 Settings.Azure.Group=Azure Speech voices
 Settings.Azure.Resource=Resource name:
 Settings.Azure.Key=Key:
@@ -501,342 +520,13 @@ Settings.Azure.State.None=Azure: no key is stored, so none of these voices are a
 Settings.Azure.State.Have=Azure: {0} voices are available, reading {1} languages between them.
 Settings.Azure.Forget=Forget the key
 Settings.Azure.ForgetAsk=Forget the stored Azure key? These voices stop being offered, and a book already reading with one falls silent until you give it another voice.
+Hint.Settings.CloudUse=This one turns on and off your use of cloud voices, meaning all the voices from the Internet, not your installed SAPI or One Core voices.\n\nIt decides whether those voices are OFFERED when you choose a voice for a particular book. They are never assigned automatically and never become a language's default voice — that stays with the voices installed on this computer, which cost nothing and need no connection.\n\nA book already reading with a cloud voice keeps it whether this is on or off; the switch governs the picker, not what can be played.
 Hint.Settings.Azure=The use of Google and Azure voices requires some Google, Microsoft and Azure credentials and a bit of work on their web. Read more in Help.
 Hint.Settings.Cloud=
 Google.Cred.NotJson=That file is not readable as JSON, so it is not the one Google gave you. The file you want was downloaded when you created the service account, and its name ends in .json.
 Google.Cred.NotServiceAccount=That JSON is readable but it is not a service account — it has no account address and no private key in it. Google offers several kinds of credential; the one for these voices is the service account key.
-; An ACTION on the shelf, not a setting in Properties: a reading happens once,
-; from the first page to the last, and either it was right or it is done again.
-; A book that IS pictures and has never been read — imported in bulk, where
-; nothing could be asked. "Re-read" would be a lie to someone who has never
-; heard a word of it.
-Context.ReadOcr=Recognize the text
-Context.ReReadOcr=Recognize again in another language
-; Enter on a book that is still pictures. It must never reach the player: a
-; reading with nothing in it plays silence, and silence is indistinguishable
-; from a book that has simply gone quiet.
-Ocr.Unread.Message=This book has not been recognized yet — it is still pictures of its pages, so there is nothing to speak. Recognize it now?
-Ocr.Sparse.Message=Only {0} of this book's {1} pages carry any text. It is most likely a scan whose text layer is broken, so the words are still pictures. Recognize them now?
-Ocr.Blank.Question={0} pages in a row came back with no text on them at all. The rest of the {1} may be the same, and recognizing them would take a while. Keep going?
-Ocr.Blank.Jbig2={0} pages in a row came back with no text on them at all. This PDF stores its words in a form Windows cannot draw, so those pages arrive as blank paper with nothing to recognize — reading the remaining {1} would most likely find nothing. Keep going?
-Ocr.Read.Question=This book is {0} pages of pictures and has not been recognized yet. Recognizing it takes {1}.
-Ocr.ReRead.Question=This book was recognized from {0} pages of pictures. Recognizing it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
-Ocr.ReRead.Done=The book has been recognized again and replaced.
-; For a book read before NBR started keeping the pictures, or one whose
-; originals have since been moved. Asked once — they are kept afterwards.
-Ocr.ReRead.Locate=The pictures for this book are not kept with it, so NBR needs to find them again. Choose the scanned file, or — if the book arrived as separate page images — any one of those pages.
-Ocr.ReRead.LocateTitle=Find the pictures for this book
-Ocr.ReRead.Filter=Scanned books and images|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|All files|*.*
-Ocr.ReRead.WholeFolder=There are {0} images in that folder. Recognize all of them as the pages of this book?
-Settings.Ocr.Group=Books with text in pictures
-Settings.Ocr.Hint=Some books are photographs of their pages rather than text — a scanned PDF, or a folder of numbered images. NBR can recognize the words on them and then speak them like any other book. This is only the starting choice — when you have more than one language, NBR asks which to use each time it reads a book.
-Settings.Ocr.Language=Recognition language
-Settings.Ocr.Automatic=Automatic
-Settings.Ocr.AddLanguage=Add a language...
-; Translation. The service list carries its own state in the text, because a
-; reader who cannot see the dialog would otherwise have to open the key window to
-; learn whether they have already set this up.
-Settings.Translate.Group=Translation
-Settings.Translate.Service=Translation service
-Settings.Translate.Key=API key...
-Settings.Translate.State.Have={0}, key stored
-Settings.Translate.State.None={0}, no key
-Settings.Translate.Engine.Gemini=Gemini (Google)
-Settings.Translate.Engine.DeepSeek=DeepSeek
-; The dearer model of the same account, so it needs no key of its own.
-Settings.Translate.Engine.DeepSeekPro=DeepSeek (larger model)
-Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
-Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, cheaper)
-Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, dearest)
-Settings.Translate.Engine.Azure=Azure Translator
-; PLACEHOLDER. The real text is still to be written, and it has to cover: that a
-; key is the reader's own account with the service, that NBR never sees a
-; bill, roughly what a book costs, and that the key is stored in readable form.
-; The standing note. Free text on purpose: a fixed set of questions would be
-; OUR questions, and ours were written from Croatian.
-Settings.Translate.Hint=NBR can translate a book using an online service. Each service needs a key from your own account with them, which you paste in here; NBR never handles payment, that's on you on the service providers web or any other means. If you don't need AI machine translation, just leave it unchecked.\n\nA translation sends the WHOLE book to whichever service you choose, and what each of them does with it differs — some use free-tier content to improve their own products, some do not. Each service's own description under Help, Services and accounts says which.
-Settings.Translate.Notes=Notes for the translator:
-Settings.Translate.Test.NoEngine=No translation service is selected.
-Settings.Translate.Test.NoKey=There is no key to check.
-Settings.Translate.Test.NoNetwork=NBR could not reach the service.
-Settings.Translate.Test.Refused=The service refused the request ({0}).
-Settings.Translate.Test.Empty=The service answered with nothing.
-Dialog.TranslateKey.Title=API key for {0}
-Dialog.TranslateKey.Prompt=Paste the key you got from {0}. It is kept on this computer in a file of its own, in readable form, so treat it as you would a password. You can replace or remove it at any time, and you can cancel the key at the service itself.
-Dialog.TranslateKey.Field=API key
-; Azure only. Empty is correct for a single-service Global resource, which is
-; what the setup guidance tells people to make.
-Dialog.TranslateKey.Region=Region (empty if Global):
-Dialog.TranslateKey.Status=Result
-Dialog.TranslateKey.Test=Check the key
-Dialog.TranslateKey.Remove=Remove
-Dialog.TranslateKey.Testing=Checking the key...
-Dialog.TranslateKey.Works=The key works.
-Dialog.TranslateKey.Stored=A key is stored for this service.
-Dialog.TranslateKey.NotStored=No key is stored for this service.
-; Translating a book. Longer than any other wait in NBR, so the window says
-; out loud that stopping is cheap - everything already translated is kept, and
-; starting again carries on from there rather than beginning afresh.
-Translate.Progress.Title=Translating the book
-Translate.Progress.Starting=Getting ready. You can stop at any time; whatever has been translated is kept, and starting again carries on from there.
-Translate.Progress.Working=Passage {0} of {1}. About {2} left. You can stop at any time — what is done is kept.
-Translate.Progress.Quarter={0} percent translated, about {1} left.
-Translate.Progress.Cancel=Stop
-Translate.Progress.Cancelling=Stopping after this passage. What is already translated is kept.
-; The heartbeat. A passage can take minutes when the service is throttling, and
-; the job only reports when one lands - so between those moments the window said
-; nothing at all and read as frozen.
-Translate.Progress.StillOn=Still on this one, {0} seconds so far.
-Translate.Progress.StillWorking=Still translating passage {0} of {1}. The service is answering slowly.
-Translate.Progress.Estimating=working out how long this will take
-Translate.Progress.AlmostDone=a moment
-Translate.Progress.Seconds={0} seconds
-Translate.Progress.Minutes={0} minutes
-; Asking before a book is sent away. As little as possible: the language it is in
-; NBR already worked out from the words, and the language you read in does
-; not change from book to book.
-Translate.Ask.Title=Translate the book
-Translate.Ask.Info={0} — about {1} characters, roughly {2}. The translation becomes a new book; this one is not changed.
-Translate.Ask.HybridNote=This book has a recording as well as text. Only the text can be translated, so the translation will be a text book without the narration.
-Translate.Ask.From=Language of the book:
-Translate.Ask.To=Translate into:
-Translate.Ask.Model=Model {0}:
-Translate.Ask.Model.None=— none, end the chain here —
-; One choice, and a chain follows from it. Asking for a fallback as well was
-; asking the reader to design a retry policy; what they have an opinion about is
-; which translation they would rather read.
-Translate.Ask.ChainNote=If a passage is refused, NBR tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
-Translate.Ask.NoEngine=No service has a key yet
-Translate.Ask.Standing=Your standing note is applied to this book as well: {0}
-Translate.Ask.Inherit=Continue a series, using the glossary of:
-Translate.Ask.Inherit.None=Nothing — this book stands on its own
-Translate.Ask.Notes=Anything the translator should know about THIS book (optional). The narrator and the names are worked out from the text on their own; this is for what the text does not say — a term you want rendered a particular way, or how two characters address each other:
-Translate.Ask.Start=Translate
-; The notice that goes INTO the book around a passage the last-resort service had
-; to rescue. It is not a courtesy: that service sets the narrator's gender and the
-; level of address wrongly for a whole passage, and no check can catch the second,
-; so this is the only thing that reports the fault at all. Translated into the
-; book's own language by the engine already doing the work.
-Translate.LastResort.Begin=The next part was translated by Microsoft Azure — expect the impossible.
-Translate.LastResort.End=End of the part translated by Microsoft Azure.
-; The Library commands. Translating makes a NEW book, which is why this lives on
-; the shelf and not in Properties: Properties changes the book you are looking at.
-Menu.File.Translate=Translate the book...
-Context.Translate=Translate the book...
-Translate.NotText=Only a text book can be translated. This one is a recording.
-Translate.Empty=There is no text in this book to translate.
-Translate.NoService=No translation service has a key yet. Add one in Settings, under Advanced.
-Translate.Done={0} passages translated. The translation is on the shelf as a new book.
-Translate.DoneLeft={0} passages translated, {1} left in the original language.
-Translate.Took=It took {0}. A line-by-line record is in translation.log beside the original book.
-Translate.Failed=The book could not be translated: {0}
-Translate.Suffix={0} ({1})
-; Adding a recognition pack. NOT a whole Windows display language — that is the
-; overkill this avoids: the pack is the model alone, about a quarter of a
-; megabyte. Windows asks for its own permission, because installing a system
-; component needs it and a running program cannot grant itself that.
-Ocr.Add.Title=OCR languages
-Ocr.Add.List=Languages
-Ocr.Add.Row={0}
-Ocr.Add.RowInstalled={0} — already installed
-Ocr.Add.Hint=Choose the languages you want and press Install. Depending on your settings Windows could ask your permission, then download the recognition for that language — a small file, not a whole Windows language.
-Ocr.Add.Install=Install
-Ocr.Add.WindowsSettings=Windows settings...
-Ocr.Add.Close=Close
-; Measured on the first real install: TEN MINUTES, nearly all of it waiting for
-; Windows Update to hand the file over. The pack itself is tiny — a quarter of a
-; megabyte — so the wait is not the size of it, it is how busy Windows Update
-; happens to be, which is nothing we can predict or hurry. Say exactly that,
-; rather than a number that would be wrong as often as right.
-Ocr.Add.Installing=Installing {0}. Windows Update fetches this, so how long it takes depends on how busy it is — a few minutes is usual, and ten is not unheard of. You can close this window and carry on; it will keep going on its own.
-Ocr.Add.Done={0} is installed and ready to use.
-; A batch can arrive in part. Saying only the good half would leave someone
-; believing they had all of them.
-Ocr.Add.DonePartly={0} is installed and ready to use. {1} did not arrive — Windows may still be working, or it may not be available for this version.
-; Dismissing the permission prompt is a decision, not a fault.
-Ocr.Add.NotStarted=Nothing was installed. Windows did not give permission.
-Ocr.Add.Failed={0} was not installed. Windows may still be working on it, or the language may not be available for this version of Windows.
-Ocr.Add.LeftRunning=Windows is still installing it. It will finish on its own.
 
-; The same dialog, other family: VOICES. Separate windows by Gordan's call —
-; one list with two ticks a row would be compact but as likely to confuse, and a
-; two-state row is an odd thing for a screen reader to announce.
-Voices.Add.Title=Languages for speaking text
-Voices.Add.Hint=Choose the languages you want and press Install. Depending on your settings Windows could ask your permission, then download the voices for that language. A voice is tied to its accent, so British and American English are separate entries.
-Settings.Ocr.None=Windows has no text recognition installed.
-
-Prop.Analysing.Done=Recording analyzed, {0} stages set. Change any of them if you prefer.
-Prop.Analysing.Failed=The recording could not be analyzed. The settings are unchanged.
-Prop.Stage.Level=Level
-Prop.Highpass.Title=Remove rumble
-Prop.Denoise.Title=Noise reduction
-Prop.Deesser.Title=Soften sibilance
-Prop.Compressor.Title=Even out speech
-Prop.Eq.Title=Tone
-; The five bands are named by their frequency, because with five of them there
-; is no honest word for 1800 Hz and the number is what is being chosen. Only the
-; top one gets a word, because a shelf behaves differently from a bell: it lifts
-; or lowers EVERYTHING above it, and that is audible as such. {0} is "5 kHz".
-Prop.Eq.Shelf={0} and above
-; The last cell holds TWO subjects, so the group name has to cover both and
-; each switch carries its own. They belong together because they FIGHT: one
-; lifts the quiet passages, the other pushes them down, and the quiet passage is
-; the pause. The cells also read the signal chain in order, and the gate acts
-; last -- so the last cell is where it goes.
-Prop.Loudness.Title=Loudness and pauses
-Prop.Normalize.Title=Automatic loudness
-; Not "noise gate": the reader is being asked about a symptom they can hear, not
-; about the name of a filter. It only ever acts where the voice is not.
-Prop.Gate.Title=Noise in pauses
-; Preset level names — every stage uses Minimal/Light/Medium/Strong/Maximum.
-Prop.Level.Minimal=Minimal
-Prop.Level.Light=Light
-Prop.Level.Medium=Medium
-Prop.Level.Strong=Strong
-Prop.Level.Maximum=Maximum
-Prop.ResetAll=Reset all
-Prop.Bypass=Bypass
-Prop.Bypass.Shortcut=Control B switches this on and off from anywhere on this page
-; Info column read-out
-Prop.Info.ProcessingOff=Sound processing: off
-Prop.Info.ProcessingOn=Sound processing: on
-Prop.Info.Bypassed=(bypass active)
-Prop.Info.Off=off
-Prop.Info.Protection=Distortion protection
-Dialog.NoBooksFound.Message=No supported books were found in the selected folder.
-Dialog.NoBooksFound.Title=Add folder
-; Asked on every folder import, not only a big one — so it needs the singular
-; as well, or a folder holding one book says "Found 1 books".
-; {0} total, {1} audio, {2} text, {3} special formats (DAISY, narrated EPUB,
-; braille), {4} archives, {5} the library path. A kind with none of its own
-; still shows its zero — the breakdown is what the reader checks against what
-; they expected, and a missing line is harder to notice than a nought.
-Dialog.ConfirmImport.Message={0} books detected on the selected location: {1} audio books, {2} text books, {3} special formats and {4} archives.\n\nIf this is correct, after you confirm the books will be copied to your library and the archives will be extracted there. Your library is at {5}.\n\nNothing changes on the source location — everything stays intact, so no worries.\n\nIf the numbers do not match what you expected, try rearranging the data you want to import. Bulk importing has some limits on telling titles apart, and NBR cannot guarantee it gets every one right.\n\nThis could take a while, so try not to interrupt it.
-Dialog.ConfirmImport.One=Found one book. Import it?
-Dialog.ConfirmImport.Title=Add folder
-Btn.Continue=Continue
-Dialog.ImportFolderSuccess.Message=Imported {0} books.
-Dialog.ImportFolderSuccess.Skipped={0} were left out.
-Dialog.ImportFolderSuccess.SkippedList=These did not go in:
-; Reasons, kept short: they stand after a file name in that list.
-Dialog.Skipped.Drm=protected
-Dialog.Skipped.Cancelled=canceled
-Dialog.Skipped.MissingFirstVolume=the first part of this set is missing
-; A zero-byte file. Said plainly, because the archive reader's own words for it
-; ("cannot determine compressed stream type, supported formats are...") send a
-; reader off to check the format of a file that has nothing in it.
-Dialog.Skipped.Empty=the file is empty
-Dialog.ReimportExisting.Title=Already in the library
-Dialog.ReimportExisting.Message={0} is already on the shelf. Importing it again refreshes what is in the book folder. Your place in the book and your bookmarks are kept — but if the file has changed since last time, the words will have moved and your place will no longer be where you left it. Import it again?
-Dialog.ImportFolderSuccess.Title=Add folder
-Dialog.ImportFolderError.Message=Error importing folder: {0}
-
-; Common
-Common.Dash=-
-Common.Error=Error
-Common.DateFormatLong=dd. MMMM yyyy
-
-; Settings dialog (Session 9 — UI shell only, nothing wired up yet)
-Settings.ShowHints=Show help hints
-Settings.Tab.General=General
-; General is five groups now, in this order: what NBR speaks to you in, where it
-; keeps your books, the keys it answers, where a book's details come from, and
-; how it looks.
-Settings.General.LanguageGroup=Language
-Settings.General.LibraryGroup=Library location
-Settings.General.MediaKeysGroup=Media keys
-Settings.General.MetadataGroup=Book details
-Settings.General.LookGroup=Look
-; "Text Books" stopped being true when the Audio Books tab went: the page never
-; set anything about books, it sets how they are SPOKEN and SHOWN. Speech,
-; braille and the screen (Gordan, 2026-08-03).
-Settings.Tab.TextBooks=Speech and Braille
-Settings.Tab.Device=Devices
-Settings.General.UseMultimediaKeys=Use multimedia keys
-Settings.General.UseMultimediaKeysGlobally=Use multimedia keys globally
-Settings.General.LibraryLocation=Library location:
-Settings.General.LibraryLocation.Browse=Choose the folder where your book library is stored
-Settings.General.Browse=Browse...
-Settings.General.Browse.Accessible=Browse for library folder
-Settings.General.Language=Language:
-; The two hints below are WRITTEN BUT NOT YET SHOWN — the Language and Media
-; keys groups have no help key attached, unlike Book details below. Kept
-; because the text is written; delete only if those groups are dropped.
-Settings.General.UseMetadata=Use embedded metadata
-Settings.General.UseMetadata.Hint=Some file formats have metadata with additional information about the author, title, publisher, producer and so on. NBR can read and display that information where it exists. However, if that information is wrong or missing, NBR can take the basic details from folder and file names instead. As a last resort, you can always rename books in the Library.
-Settings.TextBooks.Language=Language:
-Settings.TextBooks.BookLanguage=Books in this language:
-Settings.TextBooks.AllOtherLanguages=All other languages
-Settings.TextBooks.VoiceNotSet=(no voice chosen)
-; The last row of the voice list is a door, not a voice: it opens the language
-; installer. It lives in the list because that is where a reader finds out their
-; language has no voice, and because the Speech page should not grow a button.
-Settings.TextBooks.AddVoices=Add new languages...
-; {0} is the language row. Marks a language nothing installed speaks — it is on
-; the list because the library holds a book in it.
-Settings.TextBooks.LanguageNoVoice={0} — no voice installed
-Settings.TextBooks.Voice=Voice:
-Settings.TextBooks.Speed=Speed:
-Settings.TextBooks.Test=Test voice
-Settings.TextBooks.TestSample=This is a sample of the selected voice.
-Settings.TextBooks.Volume=Volume:
-Settings.TextBooks.Pitch=Pitch:
-Settings.TextBooks.SpeechGroup=Speech
-Settings.TextBooks.LanguageUnknown=(language not reported)
-; The braille table a book was READ WITH — an import fact, not an output
-; setting. There is no output table: the screen reader translates what it puts
-; on the display, with the table set in its own braille settings.
-Prop.Text.InputBrailleGroup=Braille source
-Prop.Text.InputBrailleTable=Input Braille Table:
-Dialog.DontShowAgain=Don't show this again
-Dialog.BrailleReread.Title=Read the braille file again?
-Dialog.BrailleReread.Message=This book will be read again from its original braille file, using {0}.\n\nThe text is produced fresh, so everything that pointed into the old text is lost: where you had got to, your bookmarks, and the percentage read. The book itself is not touched, and you can read it again with another table as often as you like.
-Dialog.BrailleReread.Failed=The braille file could not be read with that table. The book has been left as it was.
-Settings.TextBooks.VisualGroup=Visual output
-Settings.TextBooks.UseVisual=Use visual output
-Settings.TextBooks.NoSpeech=No speech
-Settings.TextBooks.VisualMode=Display mode:
-Settings.TextBooks.VisualMode.TwoRows=Two text rows (subtitle style)
-Settings.TextBooks.VisualMode.FullInstant=Full screen text (page by page)
-Settings.TextBooks.VisualMode.FullScrolling=Full screen text (scrolling)
-Settings.TextBooks.Highlight=Highlight:
-Settings.TextBooks.Highlight.None=No highlight
-; "Current word" was offered and could never be kept: marking a word needs the
-; speech engine to say which word it is on, and no backend NBR uses reports that.
-; The line is what a reader is looking for anyway — it is the display's own unit.
-Settings.TextBooks.Highlight.Line=Current line
-Settings.TextBooks.Highlight.Sentence=Current sentence
-Settings.TextBooks.HighlightColour=Highlight color:
-Settings.TextBooks.TextColour=Text color:
-Settings.TextBooks.BackColour=Background color:
-Settings.Colour.White=White
-Settings.Colour.Black=Black
-Settings.Colour.Yellow=Yellow
-Settings.Colour.Blue=Blue
-Settings.Colour.Green=Green
-Settings.Colour.Red=Red
-Settings.Device.OutputGroup=Audio output
-Settings.Device.SoundCard=Sound card:
-Settings.Device.KeepAlive=Keep the sound card awake
-Settings.Device.KeepAlive.Hint=Some sound outputs — HDMI especially — power down the moment the sound stops, and then take a moment to wake up again. What you hear is the first word of a sentence going missing, over and over, with nothing obviously wrong. While this is on, NBR plays a tone far below anything you can hear on the card it is using, so the card never gets the chance to fall asleep between sentences. Turn it off if your card does not do this: it holds the output open for as long as a book is playing.
-Settings.Device.Default=System default (auto)
-; The optical-drive group. The tab is "Devices" because a sound card and a CD
-; drive are two different pieces of hardware; it was named for having only one.
-Settings.Device.OpticalGroup=Optical drive
-Settings.Device.UseOptical=Use the optical drive
-Settings.Device.OpticalWhich=Drive:
-Settings.Device.OpticalAuto=Whichever has a disc in it
-Settings.Device.UseOptical.Hint=Books were once published on ordinary audio CDs, and NBR can play them. It reads the disc itself rather than leaving it spinning: the whole side is read in one pass, straight through and without going back, so the drive works for a few minutes and is then silent for the rest of the book. Reading slowly would be quieter for a second and noisier for an hour. Turn this on only if you want it - it is off to begin with, even on a machine that has a drive, and while it is off NBR never touches the drive at all.
-Settings.OK.Accessible=OK
-Settings.Cancel.Accessible=Cancel
-Settings.Apply=Apply
-Settings.Apply.Accessible=Apply
-Settings.General.UseMultimediaKeys.Hint=You can use your keyboard multimedia keys or headset keys to play, pause and navigate the book using the navigation step you have chosen.\n\nThe second switch takes them system-wide, so they reach NBR from anywhere — at the price of taking them from every other player while NBR is running.
-Settings.General.LibraryLocation.Hint=This is the place where NBR copies imported books. You can leave it as default on your system partition, but if you plan to have a large library, another partition or disk would be a much better solution. NBR also keeps the information for each book in there, so if you want to save your reading positions, bookmarks, speed and other reading settings, note that you need to copy the content from the old library folder manually to the new location. And within the same price range: by changing the library location to somewhere other than the system partition, you are preserving your books from accidental system crashes and the usual data loss accompanying them.
-Settings.TextBooks.Speech.Hint=Here is the list of the languages and the voices installed on your system. You can choose the default voice for every language shown here, so every new title in that language opens with the selected voice. Choosing a voice for a language is what makes it the default — there is nothing else to press. If your new book is written in a language that is not on the list, it is best not to set a default voice for it here. You can always set a voice in the Properties of the book itself, on its Text page, or choose No speech and go on reading in braille or on screen. You will also see a notice when a language has no voice installed.
-Settings.TextBooks.Visual.Hint=For showing the text on screen while it is read aloud, for anyone reading along with their eyes as well as their ears. Switched on here, the window opens by itself every time you press Play. It can also be opened and closed by hand at any time with F9, whether this is switched on or not — so you can try it on a book without changing its Properties.
-Cue.Track=Track {0}
-; ── User speech dictionary (ships empty; only what the user writes runs) ──
+; ---- POSTAVKE — rječnik izgovora
 Dict.Title=Pronunciation dictionary
 Dict.Open=Pronunciation dictionary...
 Dict.Open.Accessible=Pronunciation dictionary
@@ -873,35 +563,45 @@ Dict.Match.Regex=Regular expression
 Dict.Error.Title=This rule cannot be used
 Dict.Error.NoPattern=Fill in what is written in the book.
 Dict.Error.TooSlow=This pattern takes too long to match. Simplify it.
-Settings.TextBooks.Dictionary.Hint=This is where you can change what speech synthesizers get wrong. You can correct the pronunciation of names and places, fix wrong stress, and much more — just use your imagination. The best part is that you can do this separately by language and by voice, because different synthesizers make different mistakes in the same language.
-Btn.Close=Close
 Dict.Help=Regex help...
 Dict.Help.Title=Regular expressions in the pronunciation dictionary
 Dict.Help.Text=The old Zen wisdom says:\n\n    Developer had a problem.\n    Developer decided to solve the problem with regular expressions.\n    Developer had two problems.\n\nRegEx, or regular expressions, are something you would rather not deal with, but it is fancy to have that option, so here it is.\n\nIf you know what you are doing, knock yourself out. If not, just don't use it, or ask Google.
-Settings.Misc.Look=Look:
-Settings.Misc.Look.Classic=System colors
-Settings.Misc.Look.New=NBR design
-Settings.Misc.Look.Hint=How NBR draws itself, and there are two answers.\n\nNBR design is its own look, and the one it starts with.\n\nSystem colors makes it a plain window in whatever colors and fonts Windows is set to. It paints nothing of its own, so your own scheme comes through whole — which is what you want with a high contrast theme, and what works best with a magnifier. If you already have high contrast switched on, this is the one NBR starts with.\n\nEither way the choice is yours to make and yours to undo: the keyboard and your screen reader are unaffected by it, and F2 brings you back here.
-Settings.Misc.Look.RestartTitle=Change the look
-Settings.Misc.Look.Restart=Changing the look needs NBR to start again. Your place in the book is kept. Restart now?
 
-; Per-control help: a ? on each group opens one short explanation. F1 on the
-; focused control opens the same text without travelling to the button.
-Hint.Button.Accessible=Help for {0}
-Hint.SoundProcessing=Using sound processing you can fine-tune the sound of the recording. You can remove different noises, boost the volume and color the overall sound with the equalizer. There are six groups of controls, each of which you can turn on and off separately. You can also tune each control separately. You can temporarily bypass the whole sound processing chain by pressing Ctrl+B, to hear the difference between the original recording and your sound settings.
-Hint.RemoveRumble=Cuts the very lowest frequencies — traffic, air conditioning, handling noise. It cannot recover a muddy recording, but it clears the bottom end so speech has room.
-Hint.NoiseRemoval=Reduces steady background hiss, the kind a tape or a cheap microphone leaves behind. Too strong a setting starts to eat the voice with it, so raise it only until the hiss goes.
-Hint.SoftenSibilance=Takes the edge off sharp S and Š sounds. Useful on close-miked readers and on recordings that were brightened too much.
-Hint.EvenOutSpeech=Narrows the gap between the quiet and the loud parts, so a whisper and a shout end up closer together. This is the one to reach for when you keep turning the volume knob.
-Hint.Tone=Five bands, in decibels, named by their frequency. The lowest sits at 200 Hz, which is where a boomy or muddy recording usually is; the top one is a shelf, so it lifts or lowers everything above it rather than one region. The bands overlap on purpose, which makes a smooth curve possible but also means they add up -- three neighboring bands at +4 give rather more than +4 between them. Small moves go a long way, and anything past a few dB usually means another stage is the real fix.
-Hint.AutomaticLoudness=Two things that pull against each other, which is why they share a box. Automatic loudness holds the overall level steady across a whole book, including between files recorded on different days; it follows the voice rather than the whole signal, which is what a spoken recording asks for. Noise in pauses works the other way: anything quieter than the chosen level gets pushed down, so a hiss or a hum that sits under the reading stops being audible in the gaps between sentences. It never touches the voice itself, and it quietens rather than silences (a noise that switches off and on around every phrase is more tiring than one that simply stays). Turn loudness up and the noise underneath comes up with it, so if that happens, this is the control for it.
-Hint.Text0=Here you can choose the language and voice for reading this book. You can have different settings for each individual book in the Library. Every voice remembers its own settings — speed, volume and pitch — so there is no need to set them again after switching back from another voice.\n\nRemember that you can select "No speech" if you want to read visually or on the braille display without hearing audio.
-Hint.TextBrailleSource=This book came from a braille file, and this is the table it was read with — the one that turned the braille cells back into words.\n\nA braille file says nothing about its language, its grade, or which national standard it follows, so NBR has to work the table out from the text itself. It is usually right, but not always, and a wrong table gives words that are almost right: "Have" where the book says "How".\n\nIf that is what you are seeing, pick another table here and press OK. The book is read again from the braille file you imported, which is kept beside it, so you can try as many tables as you like and go back to the first one at any time.\n\nThe tables offered are the ones for the language above. If that language is wrong, change it and the tables will follow.\n\nThis has nothing to do with what your braille display shows. Your screen reader translates that, using the table in its own settings.
-Hint.TextVisual=Here you can adjust the screen layout for reading. You can choose between a subtitle-like layout, scrolling text like movie end credits, or instant page changes. You can also choose the background, text and highlight colors, and whether the line being read or the whole sentence is marked.\n\nNote that this changes nothing about the speech.
+; ---- POSTAVKE — ključ servisa i Azure čarobnjak
+Dialog.TranslateKey.Title=API key for {0}
+Dialog.TranslateKey.Prompt=Paste the key you got from {0}. It is kept on this computer in a file of its own, in readable form, so treat it as you would a password. You can replace or remove it at any time, and you can cancel the key at the service itself.
+Dialog.TranslateKey.Field=API key
+Dialog.TranslateKey.Region=Region (empty if Global):
+Dialog.TranslateKey.Status=Result
+Dialog.TranslateKey.Test=Check the key
+Dialog.TranslateKey.Remove=Remove
+Dialog.TranslateKey.Testing=Checking the key...
+Dialog.TranslateKey.Works=The key works.
+Dialog.TranslateKey.Stored=A key is stored for this service.
+Dialog.TranslateKey.NotStored=No key is stored for this service.
+Azure.Setup.Title=Set up Azure Speech
+Azure.Setup.Open=Create it for me...
+Azure.Setup.Intro=NBR can make the Azure resource for you, so there is no portal to work through. You sign in to Microsoft once with a short code, choose which subscription to put it on, and NBR creates it on the free tier and keeps the key. Nothing is created until you have signed in.
+Azure.Setup.Start=Start
+Azure.Setup.SigningIn=Asking Microsoft for a sign-in code.
+Azure.Setup.CodeLabel=Sign-in code:
+Azure.Setup.EnterCode=Your sign-in code is in the field below, ready to copy. Select "Open the sign-in page" to open {0} in your browser, sign in there, and this window will carry on by itself.
+Azure.Setup.OpenPage=Open the sign-in page
+Azure.Setup.OpenFailed=The browser could not be opened. The address is in the line above; open it by hand.
+Azure.Setup.Directory=Directory:
+Azure.Setup.DirectoryHint=Leave this empty if you sign in with a work or school account. If your Azure is on a PERSONAL Microsoft account, Microsoft will refuse the sign-in at the ordinary address and you must name the directory Azure made when the subscription was created — either its name, ending in onmicrosoft.com, or its Directory (tenant) ID. It is asked once and remembered.
+Azure.Setup.Subscription=Subscription:
+Azure.Setup.SignedIn=Signed in. {0} subscription(s) found — choose one and select Create.
+Azure.Setup.Create=Create the resource
+Azure.Setup.NoSubscription=That account has no Azure subscription, so there is nowhere to create the resource.
+Azure.Setup.Creating=Creating the resource. This takes up to a minute or two; Azure reports it as ready before it really is, so NBR waits.
+Azure.Setup.Done=Done. The resource is made and its key is kept — {0} voices are available.
+Azure.Setup.DoneNoList=The resource is made and its key is kept, but the list of voices could not be fetched. That is usually the network; the voices will appear once it can be reached.
+Azure.Setup.Failed=It did not work: {0}
+Azure.Setup.HaveOne=Or, if you already have a Speech resource, type its two details here instead:
+Azure.Setup.Kept=Azure accepted that pair and it is kept. These voices are available now.
 
-; Reading window - the on-screen visual output (CLAUDE.md 8l).
-; Captions stay short; the explanation belongs in the hint, per the 30-character
-; rule. The three buttons repeat the player's transport, which still owns it.
+; ---- PROZOR ZA ČITANJE
 Reading.Title=Reading
 Reading.Back=Back
 Reading.Back.Accessible=Back one step
@@ -915,45 +615,156 @@ Reading.Bigger=Bigger
 Reading.Bigger.Accessible=Bigger text, plus key
 Reading.Font.Accessible=Font
 Reading.Size.Announce=Text size {0}
+Beta.Suffix= — not in this beta
+Beta.NoReadingWindow=The reading window is off in this beta. Reading on screen, and the braille that follows it, are still being tested and come back in a later release.
 
-; ── Services and accounts (Help menu) ────────────────────────────────────────
-; The four services that need an account with somebody else. Windows OCR
-; languages and OneCore voices are deliberately NOT here: they need no web site
-; and no registration, only a tick and a Windows update (Gordan, 2026-08-17).
-Menu.Help.Services=Services and accounts...
+; ---- PREPOZNAVANJE TEKSTA (OCR)
+Ocr.Ask.Title=Recognize the text
+Ocr.Ask.Question={0} has no text in it — it is {1} pages of pictures. NBR can recognize the text on them, which should take {2}. Recognize it now?
+Ocr.Ask.ReadWith=Recognize as:
+Ocr.Ask.Read=Recognize
+Ocr.Ask.Skip=Skip
+Ocr.Ask.UnderAMinute=under a minute
+Ocr.Ask.Minutes=about {0} minutes
+Ocr.Result.NoText=No text was recognized in the pictures. The book has been added, but there is nothing to read from it.
+Ocr.Refusal.NoEngine=No text recognition is installed. Use "Add a language..." in Settings, under Advanced, and NBR installs one for you.
+Ocr.Refusal.NoPages=There are no pages in this to read.
+Ocr.Progress.Title=Recognizing the text
+Ocr.Progress.Starting=Starting to recognize...
+Ocr.Progress.Working=Page {0} of {1}. {2}
+Ocr.Progress.Quarter={0} percent done. {1}
+Ocr.Progress.Cancel=Cancel
+Ocr.Progress.Cancelling=Stopping after this page. Nothing is kept.
+Ocr.Progress.Estimating=Working out how long this will take.
+Ocr.Progress.AlmostDone=Almost done.
+Ocr.Progress.Seconds=About {0} seconds left.
+Ocr.Progress.Minutes=About {0} minutes left.
+Ocr.Unread.Message=This book has not been recognized yet — it is still pictures of its pages, so there is nothing to speak. Recognize it now?
+Ocr.Sparse.Message=Only {0} of this book's {1} pages carry any text. It is most likely a scan whose text layer is broken, so the words are still pictures. Recognize them now?
+Ocr.Blank.Question={0} pages in a row came back with no text on them at all. The rest of the {1} may be the same, and recognizing them would take a while. Keep going?
+Ocr.Blank.Jbig2={0} pages in a row came back with no text on them at all. This PDF stores its words in a form Windows cannot draw, so those pages arrive as blank paper with nothing to recognize — reading the remaining {1} would most likely find nothing. Keep going?
+Ocr.Read.Question=This book is {0} pages of pictures and has not been recognized yet. Recognizing it takes {1}.
+Ocr.ReRead.Question=This book was recognized from {0} pages of pictures. Recognizing it again in another language takes {1}. The pictures are kept with the book, so this can be done as often as you like.
+Ocr.ReRead.Done=The book has been recognized again and replaced.
+Ocr.ReRead.Locate=The pictures for this book are not kept with it, so NBR needs to find them again. Choose the scanned file, or — if the book arrived as separate page images — any one of those pages.
+Ocr.ReRead.LocateTitle=Find the pictures for this book
+Ocr.ReRead.Filter=Scanned books and images|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|All files|*.*
+Ocr.ReRead.WholeFolder=There are {0} images in that folder. Recognize all of them as the pages of this book?
+Ocr.Add.Title=OCR languages
+Ocr.Add.List=Languages
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — already installed
+Ocr.Add.Hint=Choose the languages you want and press Install. Depending on your settings Windows could ask your permission, then download the recognition for that language — a small file, not a whole Windows language.
+Ocr.Add.Install=Install
+Ocr.Add.WindowsSettings=Windows settings...
+Ocr.Add.Close=Close
+Ocr.Add.Installing=Installing {0}. Windows Update fetches this, so how long it takes depends on how busy it is — a few minutes is usual, and ten is not unheard of. You can close this window and carry on; it will keep going on its own.
+Ocr.Add.Done={0} is installed and ready to use.
+Ocr.Add.DonePartly={0} is installed and ready to use. {1} did not arrive — Windows may still be working, or it may not be available for this version.
+Ocr.Add.NotStarted=Nothing was installed. Windows did not give permission.
+Ocr.Add.Failed={0} was not installed. Windows may still be working on it, or the language may not be available for this version of Windows.
+Ocr.Add.LeftRunning=Windows is still installing it. It will finish on its own.
+
+; ---- PREVOĐENJE
+Translate.Progress.Title=Translating the book
+Translate.Progress.Starting=Getting ready. You can stop at any time; whatever has been translated is kept, and starting again carries on from there.
+Translate.Progress.Working=Passage {0} of {1}. About {2} left. You can stop at any time — what is done is kept.
+Translate.Progress.Quarter={0} percent translated, about {1} left.
+Translate.Progress.Cancel=Stop
+Translate.Progress.Cancelling=Stopping after this passage. What is already translated is kept.
+Translate.Progress.StillOn=Still on this one, {0} seconds so far.
+Translate.Progress.StillWorking=Still translating passage {0} of {1}. The service is answering slowly.
+Translate.Progress.Estimating=working out how long this will take
+Translate.Progress.AlmostDone=a moment
+Translate.Progress.Seconds={0} seconds
+Translate.Progress.Minutes={0} minutes
+Translate.Ask.Title=Translate the book
+Translate.Ask.Info={0} — about {1} characters, roughly {2}. The translation becomes a new book; this one is not changed.
+Translate.Ask.HybridNote=This book has a recording as well as text. Only the text can be translated, so the translation will be a text book without the narration.
+Translate.Ask.From=Language of the book:
+Translate.Ask.To=Translate into:
+Translate.Ask.Model=Model {0}:
+Translate.Ask.Model.None=— none, end the chain here —
+Translate.Ask.ChainNote=If a passage is refused, NBR tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
+Translate.Ask.NoEngine=No service has a key yet
+Translate.Ask.Standing=Your standing note is applied to this book as well: {0}
+Translate.Ask.Inherit=Continue a series, using the glossary of:
+Translate.Ask.Inherit.None=Nothing — this book stands on its own
+Translate.Ask.Notes=Anything the translator should know about THIS book (optional). The narrator and the names are worked out from the text on their own; this is for what the text does not say — a term you want rendered a particular way, or how two characters address each other:
+Translate.Ask.Start=Translate
+Translate.LastResort.Begin=The next part was translated by Microsoft Azure — expect the unexpected.
+Translate.LastResort.End=End of the part translated by Microsoft Azure.
+Translate.NotText=Only a text book can be translated. This one is a recording.
+Translate.Empty=There is no text in this book to translate.
+Translate.NoService=No translation service has a key yet. Add one in Settings, under Advanced.
+Translate.Done={0} passages translated. The translation is on the shelf as a new book.
+Translate.DoneLeft={0} passages translated, {1} left in the original language.
+Translate.Took=It took {0}. A line-by-line record is in translation.log beside the original book.
+Translate.Failed=The book could not be translated: {0}
+Translate.Suffix={0} ({1})
+
+; ---- IZVOZ U ZVUČNU KNJIGU
+Export.NotText=Only a text book can be made into an audiobook. This one is already audio.
+Export.NoVoice=This book has no voice to read it with, so there is nothing to record. Give it one in its Properties first.
+Export.Empty=There is no text in this book to read.
+Export.Filter=Audio file (*.mp3)|*.mp3
+Export.Ask.Ready=All {0} passages of this book have already been spoken, so this is only the joining and will take moments. Make the file?
+Export.Ask.Missing={0} of this book's {1} passages still have to be recorded. Recording them should take about {2} minutes — that is how long the making takes, not how long the book is to listen to. The progress window shows a figure measured as it goes. You can stop at any time: whatever is spoken is kept, and starting again carries on from there. Make the file?
+Export.Progress.Title=Making the audiobook
+Export.Progress.Starting=Getting ready. You can stop at any time; whatever has been spoken is kept, and starting again carries on from there.
+Export.Progress.Making=Passage {0} of {1}. About {2} left.
+Export.Progress.Joining=Joining it all into one file.
+Export.Done=Done — {0} passages, saved as {1}
+Export.DoneShort=Saved as {2}, but {1} of the {0} passages could not be spoken and are missing from it.
+Export.Failed=The audiobook could not be made.
+
+; ---- ZVUČNI CD
+Cd.Progress.Title=Audio CD
+Cd.Progress.Preparing=Reading the disc...
+Cd.Progress.Track=Reading track {0} of {1}
+Cd.Progress.Stopping=Stopping...
+Cd.BookTitle=Audio CD ({0} tracks)
+Cd.Format=Audio CD - Compact Disc Digital Audio
+Cd.NoDisc=There is no disc in the drive, or the drive is still reading it. Put an audio CD in and try again.
+Cd.DataDisc=This is a data disc, not an audio CD. If it holds a book as MP3 files, open it with File, Open folder instead - NBR plays that already.
+Cd.ReadFailed=The disc could not be read: {0}
+Cue.Track=Track {0}
+
+; ---- SERVISI I RAČUNI
 Services.Title=Services and accounts
-Services.Forget=Forget this account
-Services.ForgetAsk=Forget the stored key for {0}? It stops being offered until you set it up again.
 Services.List.Accessible=Services
-Services.SetUp=Set up this service...
 Services.State.Ready=THIS ONE IS SET UP. You can go through the steps again to replace what is stored.
 Services.State.NotSet=This one is not set up yet.
+Services.SetUp=Set up this service...
+Services.Forget=Forget this account
+Services.ForgetAsk=Forget the stored key for {0}? It stops being offered until you set it up again.
+Services.Disclaimer=THE STEPS BELOW MAY NOT MATCH WHAT YOU SEE. These services redesign their web sites without warning, so a button may have moved or been renamed since this was written. The ORDER of what has to be done rarely changes; the names of things do. If you get lost, the part above tells you what you are trying to achieve.
 Services.Item.GoogleVoices=Google Cloud voices
 Services.Item.AzureVoices=Azure Speech voices
 Services.Item.DeepSeek=DeepSeek translation
 Services.Item.Gemini=Gemini translation
-Services.About.Gemini=Gemini translates a whole book into another language, using Google's own model. Judged the best of them by ear — and the one with a catch.\n\nIt refuses roughly every sixth passage of a published novel. Not for the content: the pattern looks like the model recognising a book it knows, and no setting changes it. That is why NBR asks a second service for whatever the first will not take, and why the chain is worth setting up rather than leaving to one engine.\n\nThere is a free tier and it is generous enough to be the normal way to use this: measured on a real project, Gemini 3.1 Flash Lite allows 500 requests a day, which is about six books. Paid use costs roughly twenty-five cents for a 450,000-character novel.\n\nONE THING TO WEIGH BEFORE CHOOSING FREE. Google's own pricing page says that on the free tier your content is used to improve their products, and that on the paid tier it is not. A translation sends the whole book, so that is a real difference. It is your choice either way — but it should be a choice and not a surprise.\n\nGetting the key is the longest of the four, and the steps below are written from a real run because the obvious route does not work.
-Services.Steps.Gemini=DO NOT USE AI STUDIO FOR THIS. Its "Create API key" button fails with "The request is suspicious. Please try again." — measured on a fresh account that had never had a payment method, with the project already created and imported. The real error underneath is a 403 from Google's own service. Everything below is in the CLOUD CONSOLE instead, and that route works.\n\nThe order matters: the project, then the API, then a service account, and only then the key. Done in that order the key is made in a single pass.\n\n1. Open console.cloud.google.com/projectcreate in your browser and sign in.\n\n2. Give the project a name you will recognise, such as NBR. Leave Organization set to "No organization" — that is the normal answer for a personal account, and an organization brings policies you do not control. Select CREATE and wait for the project to appear.\n\n3. IF GOOGLE OFFERS A FREE TRIAL WITH 300 DOLLARS OF CREDIT, DECLINE IT. That credit does not pay for the Gemini API at all — it is a different wallet for a different product. Worse, accepting it creates a billing account, and Google then links billing to every new project automatically, which takes the project OFF the free tier. It also asks for a payment card. Say no.\n\n4. Open console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Check that the project name shown in the bar across the top is the one you just made. The page is headed "Gemini API". Select ENABLE and wait until the button disappears.\n\n5. Open console.cloud.google.com/iam-admin/serviceaccounts/create. This is the step that saves you doing the next one twice: the key cannot reach Gemini unless it is bound to a service account, and making it now means it is waiting when you need it.\n\n6. On the page headed "Create service account", fill only the first field, "Service account name" — nbr-translate is a good name, and the ID underneath fills itself. Select "CREATE AND CONTINUE". Step 2, "Permissions", is optional: leave it empty, no role is needed. Select DONE at the bottom.\n\n7. Open console.cloud.google.com/apis/credentials. Check the project name in the top bar again. In the row of actions beside the heading "Credentials", select "+ CREATE CREDENTIALS", and from the menu that drops down choose the FIRST item, "API key" — not "OAuth client ID" and not "Service account".\n\n8. A panel opens on the right, headed "Create API key". In the "Name" field at the very top, type a name such as NBR.\n\n9. Scroll DOWN inside that panel, past the section "APIs that can be accessed using this key", to a check box labelled "Authenticate API calls through a service account". TICK IT. This is the step nobody guesses: until it is ticked, Gemini cannot be chosen at all — its entry stays greyed out and only a tooltip says why.\n\n10. A section headed "Service account" appears just below. Select "+ Select a service account", choose the account you made in step 6 by selecting the circle at the left of its row, and select SELECT at the bottom of that window.\n\n11. Now scroll UP in the panel to "APIs that can be accessed using this key" and open the list under "Select API restrictions". "Gemini API" can be ticked now. Tick it and select OK.\n\n12. Scroll DOWN to the bottom of the panel and select CREATE. Leave "Application restrictions" set to "None".\n\n13. A window headed "API key created" appears with the key in it. It begins with AQ. rather than AIza, which is correct for a key bound to a service account. Copy it with the copy icon at the right of the field.\n\n14. Come back here, select Set up this service, and paste the key. NBR checks it with Google before keeping it.\n\nIF THE CONSOLE SAYS YOU NEED ADDITIONAL ACCESS and names a missing permission, you are almost certainly signed in to the wrong Google account rather than short of rights. Add authuser=1 to the end of the address — or authuser=2, and so on — until the project appears.
-; Each guide is in TWO parts (Gordan, 2026-08-17): About says what the thing is
-; and what has to happen in what order, in prose; Steps is the numbered walk
-; through it. The disclaimer stands BETWEEN them, because the prose stays true
-; when a web site is redesigned and the steps are the half that goes stale.
-; Every break is a PAIR (\n\n) -- tools\hints.pl refuses a lone one, since the
-; document it writes cannot tell a deliberate break from ordinary wrapping.
-Services.Disclaimer=THE STEPS BELOW MAY NOT MATCH WHAT YOU SEE. These services redesign their web sites without warning, so a button may have moved or been renamed since this was written. The ORDER of what has to be done rarely changes; the names of things do. If you get lost, the part above tells you what you are trying to achieve.
-Services.About.GoogleVoices=Google Cloud voices read books aloud over the internet, in Google's own voices. They are the best of the cloud voices for most languages, and the free allowance is the largest — around a million characters a month, which is about two books.\n\nThree things have to happen, in this order. You need a GOOGLE ACCOUNT, which most people already have. Inside it you make a PROJECT and switch the Text-to-Speech service on for that project — and Google will not switch it on until billing is set up, so a card is needed even though the free allowance costs nothing. Then you make a SERVICE ACCOUNT and download its key.\n\nThat last part is what makes this one unusual. Google does not hand out a key you can paste: it gives a small file ending in .json, downloaded once. NBR keeps what is inside that file rather than the file itself, so you can move or delete the download afterwards.
-Services.Steps.GoogleVoices=1. Open console.cloud.google.com in your browser and sign in with a Google account.\n\n2. Accept the terms if you are asked, and create a project when it offers to. Any name will do.\n\n3. Find the search box at the top, type "Cloud Text-to-Speech API", choose it from the results and press Enable.\n\n4. Google will ask you to set up billing before it enables the API. Add a card.\n\n5. Search again for "Service accounts" and open it. Press Create service account, give it any name, and press Done. No role or permission needs choosing.\n\n6. Open the account you just made, go to the Keys tab, press Add key, then Create new key, and choose JSON. The file downloads.\n\n7. Come back here, press "Set up this service", and choose that downloaded file.
-Services.About.AzureVoices=Azure Speech voices read books aloud over the internet, in Microsoft's voices. They are very good in English and many other languages. For Croatian they are ordinary, and Azure does not support the pronunciation dictionary there, so a rule you write for a name will not be obeyed. The free allowance is about half a million characters a month, roughly one book.\n\nTwo things have to happen, and only the first is yours. You need a MICROSOFT ACCOUNT before you can have an Azure one, and then an AZURE SUBSCRIPTION — which needs identity checks, a card and an agreement. A person has to do that deliberately, so it cannot be automated and NBR does not try.\n\nEverything after that is NBR's job. It signs in with a short code, creates the resource on the free tier, and keeps the key. You never open the Azure portal.\n\nOne thing catches people out. When your subscription is made, Azure quietly creates a DIRECTORY for it. If your Microsoft account is a personal one — Gmail, Outlook, Hotmail — Azure refuses the sign-in unless you name that directory, because it does not recognise personal accounts for this. Its name ends in onmicrosoft.com.
-Services.Steps.AzureVoices=1. Open azure.microsoft.com/free in your browser and press Start free.\n\n2. Sign in with a Microsoft account, or make one.\n\n3. Fill in your details. Azure asks for a card to prove you are a person; the free tier is not charged.\n\n4. If your account is a personal one, find your directory name: sign in to the portal and it is shown in the address bar after the @ sign, ending in onmicrosoft.com.\n\n5. Come back here and press "Set up this service".\n\n6. Fill in that directory name if your account is a personal one, and leave it empty if it is a work or school account. Press Start.\n\n7. Open the sign-in page with the button, type the short code shown, and sign in.\n\n8. Choose your subscription and press Create. NBR makes the resource and keeps its key. You type nothing else.
-Services.About.DeepSeek=DeepSeek translates a whole book into another language. Of the services NBR can use it is the steadiest — it refuses least often — and it is far the cheapest.\n\nOne thing has to happen: an account with DeepSeek, and some credit on it. There is no free allowance, but translation is charged by the amount of text and a book costs very little.\n\nThis one gives a key you paste, and it is the simplest of the four. The one thing to watch is that the key is shown ONCE, when you make it. If you close that window without copying it, it cannot be shown again and you simply make another.
-Services.Steps.DeepSeek=1. Open platform.deepseek.com in your browser.\n\n2. Press Sign up. You can fill in an e-mail and password, or choose to sign up with Google, which is quicker.\n\n3. Confirm your e-mail if you are asked to.\n\n4. Once signed in, find Top up or Billing and add a small amount of credit.\n\n5. Find API keys in the menu on the left.\n\n6. Press Create new API key, give it any name, and press Create.\n\n7. Copy the key BEFORE you close that window.\n\n8. Come back here, press "Set up this service", and paste it in.
 Services.Item.OpenAi=GPT translation (OpenAI)
+Services.About.Gemini=Gemini translates a whole book into another language, using Google's own model. Judged the best of them by ear — and the one with a catch.\n\nIt refuses roughly every sixth passage of a published novel. Not for the content: the pattern looks like the model recognising a book it knows, and no setting changes it. That is why NBR asks a second service for whatever the first will not take, and why the chain is worth setting up rather than leaving to one engine.\n\nThere is a free tier and it is generous enough to be the normal way to use this: measured on a real project, Gemini 3.1 Flash Lite allows 500 requests a day, which is about six books. Paid use costs roughly twenty-five cents for a 450,000-character novel.\n\nONE THING TO WEIGH BEFORE CHOOSING FREE. Google's own pricing page says that on the free tier your content is used to improve their products, and that on the paid tier it is not. A translation sends the whole book, so that is a real difference. It is your choice either way — but it should be a choice and not a surprise.\n\nGetting the key is the longest of the four, and the steps below are written from a real run because the obvious route does not work.
+Services.About.GoogleVoices=Google Cloud voices read books aloud over the internet, in Google's own voices. They are the best of the cloud voices for most languages, and the free allowance is the largest — around a million characters a month, which is about two books.\n\nThree things have to happen, in this order. You need a GOOGLE ACCOUNT, which most people already have. Inside it you make a PROJECT and switch the Text-to-Speech service on for that project — and Google will not switch it on until billing is set up, so a card is needed even though the free allowance costs nothing. Then you make a SERVICE ACCOUNT and download its key.\n\nThat last part is what makes this one unusual. Google does not hand out a key you can paste: it gives a small file ending in .json, downloaded once. NBR keeps what is inside that file rather than the file itself, so you can move or delete the download afterwards.
+Services.About.AzureVoices=Azure Speech voices read books aloud over the internet, in Microsoft's voices. They are very good in English and many other languages. For Croatian they are ordinary, and Azure does not support the pronunciation dictionary there, so a rule you write for a name will not be obeyed. The free allowance is about half a million characters a month, roughly one book.\n\nTwo things have to happen, and only the first is yours. You need a MICROSOFT ACCOUNT before you can have an Azure one, and then an AZURE SUBSCRIPTION — which needs identity checks, a card and an agreement. A person has to do that deliberately, so it cannot be automated and NBR does not try.\n\nEverything after that is NBR's job. It signs in with a short code, creates the resource on the free tier, and keeps the key. You never open the Azure portal.\n\nOne thing catches people out. When your subscription is made, Azure quietly creates a DIRECTORY for it. If your Microsoft account is a personal one — Gmail, Outlook, Hotmail — Azure refuses the sign-in unless you name that directory, because it does not recognise personal accounts for this. Its name ends in onmicrosoft.com.
+Services.About.DeepSeek=DeepSeek translates a whole book into another language. Of the services NBR can use it is the steadiest — it refuses least often — and it is far the cheapest.\n\nOne thing has to happen: an account with DeepSeek, and some credit on it. There is no free allowance, but translation is charged by the amount of text and a book costs very little.\n\nThis one gives a key you paste, and it is the simplest of the four. The one thing to watch is that the key is shown ONCE, when you make it. If you close that window without copying it, it cannot be shown again and you simply make another.
 Services.About.OpenAi=OpenAI translates a whole book into another language, using the GPT models. It is offered in three tiers on one account and one key: Terra, which is the one to start with, Luna, which is cheaper, and Sol, which is the dearest.\n\nThere is no free allowance of any kind, and this is the part people are caught by: a ChatGPT subscription does NOT pay for this. The API is billed separately, and a new account is PREPAID — you put a small amount of credit on it, and calls spend from that balance. Five or ten dollars is plenty to see what a book really costs before deciding anything.\n\nWhat a book costs, worked out for a 450 000-character novel and using the way Croatian actually breaks into tokens rather than a rule of thumb: roughly two and a half dollars on Terra, one dollar on Luna, five on Sol. For comparison, the same book measured at about twenty-three cents on Gemini. Any of them is small for a book you care about; Terra is around ten times Gemini for a habit.\n\nThe key is a plain one you paste in here, which makes this the simplest of the services to set up.
+Services.Steps.Gemini=DO NOT USE AI STUDIO FOR THIS. Its "Create API key" button fails with "The request is suspicious. Please try again." — measured on a fresh account that had never had a payment method, with the project already created and imported. The real error underneath is a 403 from Google's own service. Everything below is in the CLOUD CONSOLE instead, and that route works.\n\nThe order matters: the project, then the API, then a service account, and only then the key. Done in that order the key is made in a single pass.\n\n1. Open console.cloud.google.com/projectcreate in your browser and sign in.\n\n2. Give the project a name you will recognise, such as NBR. Leave Organization set to "No organization" — that is the normal answer for a personal account, and an organization brings policies you do not control. Select CREATE and wait for the project to appear.\n\n3. IF GOOGLE OFFERS A FREE TRIAL WITH 300 DOLLARS OF CREDIT, DECLINE IT. That credit does not pay for the Gemini API at all — it is a different wallet for a different product. Worse, accepting it creates a billing account, and Google then links billing to every new project automatically, which takes the project OFF the free tier. It also asks for a payment card. Say no.\n\n4. Open console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Check that the project name shown in the bar across the top is the one you just made. The page is headed "Gemini API". Select ENABLE and wait until the button disappears.\n\n5. Open console.cloud.google.com/iam-admin/serviceaccounts/create. This is the step that saves you doing the next one twice: the key cannot reach Gemini unless it is bound to a service account, and making it now means it is waiting when you need it.\n\n6. On the page headed "Create service account", fill only the first field, "Service account name" — nbr-translate is a good name, and the ID underneath fills itself. Select "CREATE AND CONTINUE". Step 2, "Permissions", is optional: leave it empty, no role is needed. Select DONE at the bottom.\n\n7. Open console.cloud.google.com/apis/credentials. Check the project name in the top bar again. In the row of actions beside the heading "Credentials", select "+ CREATE CREDENTIALS", and from the menu that drops down choose the FIRST item, "API key" — not "OAuth client ID" and not "Service account".\n\n8. A panel opens on the right, headed "Create API key". In the "Name" field at the very top, type a name such as NBR.\n\n9. Scroll DOWN inside that panel, past the section "APIs that can be accessed using this key", to a check box labelled "Authenticate API calls through a service account". TICK IT. This is the step nobody guesses: until it is ticked, Gemini cannot be chosen at all — its entry stays greyed out and only a tooltip says why.\n\n10. A section headed "Service account" appears just below. Select "+ Select a service account", choose the account you made in step 6 by selecting the circle at the left of its row, and select SELECT at the bottom of that window.\n\n11. Now scroll UP in the panel to "APIs that can be accessed using this key" and open the list under "Select API restrictions". "Gemini API" can be ticked now. Tick it and select OK.\n\n12. Scroll DOWN to the bottom of the panel and select CREATE. Leave "Application restrictions" set to "None".\n\n13. A window headed "API key created" appears with the key in it. It begins with AQ. rather than AIza, which is correct for a key bound to a service account. Copy it with the copy icon at the right of the field.\n\n14. Come back here, select Set up this service, and paste the key. NBR checks it with Google before keeping it.\n\nIF THE CONSOLE SAYS YOU NEED ADDITIONAL ACCESS and names a missing permission, you are almost certainly signed in to the wrong Google account rather than short of rights. Add authuser=1 to the end of the address — or authuser=2, and so on — until the project appears.
+Services.Steps.GoogleVoices=1. Open console.cloud.google.com in your browser and sign in with a Google account.\n\n2. Accept the terms if you are asked, and create a project when it offers to. Any name will do.\n\n3. Find the search box at the top, type "Cloud Text-to-Speech API", choose it from the results and press Enable.\n\n4. Google will ask you to set up billing before it enables the API. Add a card.\n\n5. Search again for "Service accounts" and open it. Press Create service account, give it any name, and press Done. No role or permission needs choosing.\n\n6. Open the account you just made, go to the Keys tab, press Add key, then Create new key, and choose JSON. The file downloads.\n\n7. Come back here, press "Set up this service", and choose that downloaded file.
+Services.Steps.AzureVoices=1. Open azure.microsoft.com/free in your browser and press Start free.\n\n2. Sign in with a Microsoft account, or make one.\n\n3. Fill in your details. Azure asks for a card to prove you are a person; the free tier is not charged.\n\n4. If your account is a personal one, find your directory name: sign in to the portal and it is shown in the address bar after the @ sign, ending in onmicrosoft.com.\n\n5. Come back here and press "Set up this service".\n\n6. Fill in that directory name if your account is a personal one, and leave it empty if it is a work or school account. Press Start.\n\n7. Open the sign-in page with the button, type the short code shown, and sign in.\n\n8. Choose your subscription and press Create. NBR makes the resource and keeps its key. You type nothing else.
+Services.Steps.DeepSeek=1. Open platform.deepseek.com in your browser.\n\n2. Press Sign up. You can fill in an e-mail and password, or choose to sign up with Google, which is quicker.\n\n3. Confirm your e-mail if you are asked to.\n\n4. Once signed in, find Top up or Billing and add a small amount of credit.\n\n5. Find API keys in the menu on the left.\n\n6. Press Create new API key, give it any name, and press Create.\n\n7. Copy the key BEFORE you close that window.\n\n8. Come back here, press "Set up this service", and paste it in.
 Services.Steps.OpenAi=1. Open platform.openai.com in your browser. This is the developer platform, not the ChatGPT site, and it is a separate thing even if you already pay for ChatGPT.\n\n2. Sign in with your account, or make one.\n\n3. FIRST check which organization you are in. The name sits at the top left of the page and it is a menu: open it and choose your own, which is usually called Personal. If you were ever invited into somebody else's organization, or you have a ChatGPT Team or Business seat through work, the platform can put you in THAT one — where you are only a member, billing refuses you with "required permission: api.billing.read", and any key you made would belong to the wrong account. Everything below has to happen in your own organization.\n\n4. Go to platform.openai.com/settings/organization/billing/overview. Billing sits under ORGANIZATION, not under the plain settings page, which is where it is easy to look for it and not find it. Select Add to balance, add a payment card, and buy some credit. Ten dollars is the minimum and more than enough to begin. Nothing works until there is credit on the account.\n\n5. While you are there, set a monthly spending limit. It costs nothing and it means a mistake cannot run up a bill.\n\n6. Open API keys in the same settings, and select Create new secret key. Give it a name you will recognise, such as NBR. Make sure you are still in the same organization as the credit.\n\n7. Copy the key the moment it appears. It is shown ONCE. If you close that window without copying it, it cannot be shown again — you simply delete it and make another.\n\n8. Come back here, select Set up this service, and paste the key.\n\n9. NBR checks the key with OpenAI before keeping it, so you find out straight away whether it works.
 
-; ── What the first beta ships without ─────────────────────────────────────
-; One flag in Beta.cs governs these. Delete this block when it goes back in.
-Beta.Suffix= — not in this beta
-Beta.NoReadingWindow=The reading window is off in this beta. Reading on screen, and the braille that follows it, are still being tested and come back in a later release.
-Settings.General.Language.Restart=Changing the language needs NBR to start again. Restart now?
-Settings.General.Language.RestartTitle=Language
+; ---- POMOĆ I O PROGRAMU
+Dialog.Help.ComingSoon=Help – coming soon.
+Dialog.Help.Title=Help
+Dialog.About.Title=About NBR
+Dialog.About.Release=Alpha
+Dialog.About.Licence=🄯 Copyleft — NBR is free software under the GNU General Public License, version 3. You may use it, study it, share it and change it; if you pass on a changed version, it goes on under the same terms, with its source.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nBuild of {1}\n\nThis is a multiformat and multioutput reader for digital books and publications, specially designed for the blind, visually impaired and people with reading disabilities. It is free for basic usage, but if you want to explore and use its advanced features such as translation and cloud voices you will need to register and possibly pay for the respective external services.\n\nMade by Nemoguća vizija — nemoviz.org\n\nWritten by Gordan Radić\n\nBuilt with Claude (Anthropic). Much of the code was written by it, to the author's design, decisions and measurements; the copyright and the licence are his.\n\n{2}\n\nWHAT NBR IS BUILT ON\n\nNBR plays sound through libmpv, reads braille through liblouis, speaks through the NVDA controller client, reads tags with TagLib#, takes text out of PDFs with PdfPig, and opens archives with SharpCompress. Each is a separate library, used unmodified, and each can be replaced by a compatible build of its own.\n\nlibmpv, and the FFmpeg inside it — LGPL 2.1 or later\n\nliblouis and its braille tables — LGPL 2.1 or later\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress and the Microsoft packages — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend and OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nThe full notice — versions, copyright holders, and where each licence was read from — is in THIRD-PARTY-NOTICES.txt beside the program, and the licence texts themselves are in the Licences folder.
+Hint.Button.Accessible=Help for {0}
+
+; ---- PORUKE I GREŠKE
+Dialog.Error.Title=Error
+Dialog.Error.General=Error: {0}
+Dialog.DontShowAgain=Don't show this again

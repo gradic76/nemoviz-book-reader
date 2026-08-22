@@ -10,8 +10,6 @@ namespace Nemoviz_Book_Reader
     internal sealed class SettingsParts
     {
         public TabControl Tabs;
-        public CheckBox ShowHints;
-        public List<TextBox> Hints;
         public Button OK, Cancel, Apply;
     }
 
@@ -48,21 +46,11 @@ namespace Nemoviz_Book_Reader
             f.SuspendLayout();
             DialogCanvas canvas = DialogSkin.Shell(f, DialogSkin.H);
 
-            // The switch and everything it switched. Removed rather than hidden:
-            // a hidden control that still exists is one a later change can bring
-            // back by accident, and these have no home in the new design.
-            if (p.ShowHints != null)
-            {
-                p.ShowHints.Visible = false;
-                p.ShowHints.TabStop = false;
-                if (p.ShowHints.Parent != null) p.ShowHints.Parent.Controls.Remove(p.ShowHints);
-            }
-            if (p.Hints != null)
-            {
-                foreach (TextBox h in p.Hints)
-                    if (h != null && h.Parent != null) h.Parent.Controls.Remove(h);
-                p.Hints.Clear();
-            }
+            // The always-visible hint boxes this used to strip are gone from
+            // SettingsForm itself now, along with the switch that governed them
+            // (2026-08-22). Taking them out in one look and leaving them in the
+            // other is the drift §8k forbids -- so they are removed where they
+            // were built rather than removed here.
 
             // The tabs take the whole client area above the buttons.
             TabControl tabs = p.Tabs;

@@ -1,0 +1,229 @@
+# The order every .lang file is written in — one definition, three files.
+#
+# WHY THIS EXISTS. Gordan, 2026-08-22: "neke stvari se pojavljuju par stotina
+# linija ispod kad već pomisliš da si završio s njima." The files had grown by
+# accretion, so a translator met the same window three times in three places and
+# never knew when a window was finished. Here the file walks the PROGRAM: the
+# player and its panel, then each window in turn, and inside a window the thing
+# itself before the dialogs it opens.
+#
+# HOW IT IS READ. A line starting with = opens a section and becomes a comment
+# header in the output. Every other line is a key PREFIX; each takes all keys
+# that begin with it and are not already placed, in the order they are listed
+# here first and alphabetically after that. A key nobody claims lands under
+# "everything else" at the foot, which is the signal to add it here.
+#
+# tools/lang-reorder.pl applies it. Run it on all three files together or they
+# stop matching, which is the one thing this file exists to prevent.
+
+= Ime programa i tipke koje se ponavljaju svuda
+App.Name
+LanguageName
+Btn.OK
+Btn.Yes
+Btn.No
+Btn.Cancel
+Btn.Close
+Btn.Continue
+Btn.Refresh
+Common.
+
+= PLAYER — staklo s podacima o knjizi
+Player.Info.
+Player.TitleBar.
+Player.ReadingSurface.
+
+= PLAYER — transport i prsten
+Btn.Play
+Btn.Pause
+Btn.Back
+Btn.Forward
+Btn.VolumeUp
+Btn.VolumeDown
+Btn.Power
+Player.Volume.
+Player.Speed.
+Player.Position.
+Player.Progress.
+
+= PLAYER — korak navigacije
+Player.Seek.
+Seek.Item.
+
+= PLAYER — osam naredbenih tipki
+Btn.Library
+Btn.Settings
+Btn.Properties
+Btn.Help
+Btn.GoTo
+Btn.SetBookmark
+Btn.ManageBookmarks
+Btn.Timer
+
+= PLAYER — opisi za miša i ostalo
+Tip.
+Player.OpenFile
+Player.NoVoiceForLanguage
+Filter.
+
+= KNJIŽNICA — prozor, polica i izbornici
+Library.Title
+Library.List
+Library.NowReading
+Library.Search
+Library.Filter
+Library.Details
+Library.Btn.
+Menu.File
+Menu.Sort
+Menu.Help
+Shelf.
+Context.
+
+= KNJIŽNICA — podaci o knjizi
+Details.
+Dialog.Description
+
+= KNJIŽNICA — uvoz i brisanje
+Library.ImportFile
+Library.ImportFolder
+Dialog.ConfirmImport
+Dialog.NoBooksFound
+Dialog.ImportSuccess
+Dialog.ImportError
+Dialog.ImportFolderSuccess
+Dialog.ImportFolderError
+Dialog.ReimportExisting
+Dialog.Skipped.
+Dialog.Rename
+Dialog.ConfirmDelete
+Dialog.DeleteError
+Dialog.ActiveBook
+Dialog.ClearLibrary
+Dialog.DrmProtected
+Dialog.ArchivePassword
+Extract.
+
+= IDI NA
+Dialog.GoTo
+GoTo.
+
+= BROJAČ
+Dialog.Timer
+SleepTimer.
+
+= KNJIŽNE OZNAKE
+Dialog.ManageBookmarks
+Bookmark.
+ManageBookmarks.
+
+= SVOJSTVA — zajedničko
+Dialog.SoundProcessing
+Prop.Info
+Prop.Tab.
+Prop.On
+Prop.Off
+
+= SVOJSTVA — obrada zvuka
+Prop.UseSoundProcessing
+Prop.SoundProcessing
+Prop.Stage.
+Prop.Highpass.
+Prop.Denoise.
+Prop.Deesser.
+Prop.Compressor.
+Prop.Eq.
+Prop.Loudness.
+Prop.Normalize.
+Prop.Gate.
+Prop.Level.
+Prop.ResetAll
+Prop.Bypass
+Prop.Analysing
+Analyse.
+Hint.SoundProcessing
+Hint.RemoveRumble
+Hint.NoiseRemoval
+Hint.SoftenSibilance
+Hint.EvenOutSpeech
+Hint.Tone
+Hint.AutomaticLoudness
+
+= SVOJSTVA — stranica teksta
+Prop.Text.
+Hint.Text0
+Hint.TextVisual
+Hint.TextBrailleSource
+NoVoice.
+Dialog.BrailleReread
+
+= POSTAVKE — okvir i kartice
+Dialog.Settings
+Settings.Tab.
+Settings.OK
+Settings.Cancel
+Settings.Apply
+
+= POSTAVKE — Općenito
+Settings.General.
+Settings.Misc.
+
+= POSTAVKE — Govor i brajica
+Settings.TextBooks.
+Settings.Colour.
+Voices.
+
+= POSTAVKE — Uređaji
+Settings.Device.
+
+= POSTAVKE — Napredno
+Settings.Ocr.
+Settings.Translate.
+Settings.Cloud.
+Settings.Azure.
+Hint.Settings.
+Google.Cred.
+
+= POSTAVKE — rječnik izgovora
+Dict.
+
+= POSTAVKE — ključ servisa i Azure čarobnjak
+Dialog.TranslateKey
+Azure.Setup.
+
+= PROZOR ZA ČITANJE
+Reading.
+Beta.
+
+= PREPOZNAVANJE TEKSTA (OCR)
+Ocr.
+
+= PREVOĐENJE
+Translate.
+
+= IZVOZ U ZVUČNU KNJIGU
+Export.
+
+= ZVUČNI CD
+Cd.
+Cue.
+
+= SERVISI I RAČUNI
+Services.Title
+Services.List
+Services.State.
+Services.SetUp
+Services.Forget
+Services.Disclaimer
+Services.Item.
+Services.About.
+Services.Steps.
+
+= POMOĆ I O PROGRAMU
+Dialog.Help
+Dialog.About
+Hint.Button
+
+= PORUKE I GREŠKE
+Dialog.Error
+Dialog.DontShowAgain

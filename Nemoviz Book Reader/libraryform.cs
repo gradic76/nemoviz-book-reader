@@ -14,8 +14,8 @@ namespace Nemoviz_Book_Reader
         // The shelf's right-click menu, a real Windows menu. Held as fields
         // because Popup adjusts which items apply to the book under the cursor.
         private ContextMenu bookMenu;
-        private MenuItem ctxOpen, ctxMarkRead, ctxMarkUnread, ctxAddFav,
-                         ctxRemoveFav, ctxRename, ctxDelete, ctxReRead, ctxTranslate, ctxProperties;
+        private MenuItem ctxOpen, ctxMarkRead, ctxMarkUnread, ctxFavorite,
+                         ctxRename, ctxDelete, ctxReRead, ctxTranslate, ctxProperties;
         private ToolStripMenuItem menuFile;
         private ToolStripMenuItem menuFileOpenFile;
         private ToolStripMenuItem menuFileOpenFolder;
@@ -794,11 +794,15 @@ namespace Nemoviz_Book_Reader
             ctxMarkUnread = new MenuItem(Localization.T("Context.MarkUnread"));
             ctxMarkUnread.Click += (s, e) => MarkSelected(false);
 
-            ctxAddFav = new MenuItem(Localization.T("Context.AddFavorite"));
-            ctxAddFav.Click += (s, e) => SetSelectedFavorite(true);
-
-            ctxRemoveFav = new MenuItem(Localization.T("Context.RemoveFavorite"));
-            ctxRemoveFav.Click += (s, e) => SetSelectedFavorite(false);
+            // ONE ITEM WITH A TICK, not two that take turns (Gordan, 2026-08-22).
+            // "Add to Favorites" and "Remove from Favorites" said the same thing
+            // twice and only one was ever visible, so the menu never showed the
+            // book's STATE -- you learned it from which command you were offered.
+            // A checked item shows it outright, and it costs one entry instead of
+            // two: fewer strings, and no translator has to find two verbs where
+            // the difference is only direction.
+            ctxFavorite = new MenuItem(Localization.T("Context.Favorite"));
+            ctxFavorite.Click += (s, e) => SetSelectedFavorite(!ctxFavorite.Checked);
 
             ctxRename = new MenuItem(Localization.T("Context.Rename"));
             ctxRename.Click += (s, e) => RenameSelectedBook();
@@ -825,8 +829,7 @@ namespace Nemoviz_Book_Reader
             bookMenu.MenuItems.Add(new MenuItem("-"));
             bookMenu.MenuItems.Add(ctxMarkRead);
             bookMenu.MenuItems.Add(ctxMarkUnread);
-            bookMenu.MenuItems.Add(ctxAddFav);
-            bookMenu.MenuItems.Add(ctxRemoveFav);
+            bookMenu.MenuItems.Add(ctxFavorite);
             bookMenu.MenuItems.Add(new MenuItem("-"));
             bookMenu.MenuItems.Add(ctxRename);
             bookMenu.MenuItems.Add(ctxDelete);
@@ -848,8 +851,7 @@ namespace Nemoviz_Book_Reader
                 ctxMarkRead.Visible = cat != CatRead;
                 // "Mark as unread" — not on the active book, not on Unread books.
                 ctxMarkUnread.Visible = !active && cat != CatUnread;
-                ctxAddFav.Visible = !b.Favorite;
-                ctxRemoveFav.Visible = b.Favorite;
+                ctxFavorite.Checked = b.Favorite;
                 // Only for a book that WAS read from pictures, whose pictures are
                 // still reachable, and only when there is another language to
                 // read them in.

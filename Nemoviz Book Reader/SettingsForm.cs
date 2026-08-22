@@ -19,7 +19,6 @@ namespace Nemoviz_Book_Reader
     {
         private readonly AppSettings appSettings;
 
-        private CheckBox chkShowHints;
         private TabControl tabSettings;
         private Button btnOK;
         private Button btnCancel;
@@ -35,7 +34,6 @@ namespace Nemoviz_Book_Reader
         // dialog (they are shown/hidden together by the switch at the top).
         private CheckBox chkUseMultimediaKeys;
         private CheckBox chkUseMultimediaKeysGlobally;
-        private readonly List<TextBox> hints = new List<TextBox>();
 
         // The loose-hint machinery that used to live here is gone with the loose
         // controls (2026-08-03). General is five GROUPS now and Misc no longer
@@ -138,18 +136,14 @@ namespace Nemoviz_Book_Reader
             this.ShowInTaskbar = false;
             this.StartPosition = FormStartPosition.CenterParent;
 
-            chkShowHints = new CheckBox();
-            chkShowHints.Text = Localization.T("Settings.ShowHints");
-            chkShowHints.AccessibleName = Localization.T("Settings.ShowHints");
-            chkShowHints.Location = new Point(10, 10);
-            chkShowHints.Size = new Size(440, 24);
-            chkShowHints.TabIndex = 0;
-            chkShowHints.Checked = appSettings.ShowHints;
-            // Live, without closing the window: the hints simply appear or go.
-            chkShowHints.CheckedChanged += (s, e) =>
-            {
-                foreach (TextBox h in hints) { h.Visible = chkShowHints.Checked; h.TabStop = chkShowHints.Checked; }
-            };
+            // "SHOW HELP HINTS" IS GONE, and it had been dead for some time
+            // (found 2026-08-22 when Gordan noticed its string in the language
+            // file). It governed `hints`, a list nothing ever added to, so it
+            // switched nothing on or off; and SettingsSkin took it off the form
+            // in the NBR look while leaving it standing in classic, which is
+            // exactly the drift §8k forbids. The hints it was written for were
+            // always-visible boxes under every control; they became a `?` per
+            // group, which costs a corner and needs no switch.
 
             tabSettings = new TabControl();
             tabSettings.Location = new Point(10, 40);
@@ -198,7 +192,6 @@ namespace Nemoviz_Book_Reader
             btnApply.TabIndex = 4;
             btnApply.Click += (s, e) => SaveSettings();
 
-            this.Controls.Add(chkShowHints);
             this.Controls.Add(tabSettings);
             this.Controls.Add(btnOK);
             this.Controls.Add(btnCancel);
@@ -223,8 +216,6 @@ namespace Nemoviz_Book_Reader
                 return new SettingsParts
                 {
                     Tabs = tabSettings,
-                    ShowHints = chkShowHints,
-                    Hints = hints,
                     OK = btnOK,
                     Cancel = btnCancel,
                     Apply = btnApply,
@@ -465,7 +456,6 @@ namespace Nemoviz_Book_Reader
 
             // General — hints and the media keys (the player re-applies the global
             // claim when the dialog closes).
-            if (chkShowHints != null) appSettings.SetShowHints(chkShowHints.Checked);
             if (chkUseMultimediaKeys != null && chkUseMultimediaKeysGlobally != null)
                 appSettings.SetMediaKeys(chkUseMultimediaKeys.Checked,
                                          chkUseMultimediaKeysGlobally.Checked);
