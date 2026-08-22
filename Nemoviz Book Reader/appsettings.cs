@@ -78,7 +78,6 @@ namespace Nemoviz_Book_Reader
         /// <summary>Whether the explanatory hint lines are shown beside controls.
         /// On by default — they cost a first-time user nothing and can be switched
         /// off from any dialog that has the toggle.</summary>
-        public bool ShowHints { get; private set; }
 
         /// <summary>How a book is shown on screen when nothing has been decided
         /// FOR that book: the same six choices Properties offers, standing as the
@@ -218,7 +217,6 @@ namespace Nemoviz_Book_Reader
             OpticalDriveLetter = ini.Read("Audio", "OpticalDrive", "");
             MediaKeys = ini.Read("Player", "MediaKeys", "1") == "1";
             MediaKeysGlobal = ini.Read("Player", "MediaKeysGlobal", "0") == "1";
-            ShowHints = ini.Read("App", "ShowHints", "1") == "1";
             // EMPTY for anyone who has never chosen, and UiTheme.Select turns that
             // into the default: NBR design, or the system-colours look where the
             // reader runs high contrast. An install that already carries "classic"
@@ -269,12 +267,6 @@ namespace Nemoviz_Book_Reader
             MediaKeysGlobal = global;
             ini.Write("Player", "MediaKeys", enabled ? "1" : "0");
             ini.Write("Player", "MediaKeysGlobal", global ? "1" : "0");
-        }
-
-        public void SetShowHints(bool value)
-        {
-            ShowHints = value;
-            ini.Write("App", "ShowHints", value ? "1" : "0");
         }
 
         /// <summary>Whether to warn before re-reading a braille book with another
