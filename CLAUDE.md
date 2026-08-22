@@ -2747,16 +2747,35 @@ needs verifying by ear before it is relied on.
   > Measured across all six shipping languages, the **widest legend is 93** and
   > English's own is 85.
   >
-  > **What the shortening rule really is**, now that the number is right: use
-  > the full word when it measures **100 or less** — eight units of margin, so a
-  > rendering difference cannot trip the ellipsis — and a short form above that.
-  > Croatian's `Oznake` still earns its place (`Knjižne oznake` is 113, over
-  > even at 108), and German keeps `Optionen`/`Details`/`Marke`/`Marken`
-  > because `Einstellungen` is 102, `Eigenschaften` and `Einschlaftimer` 106,
-  > and `Lesezeichen` would give the two bookmark keys the same legend.
+  > **AND THE INSTRUMENT WAS WRONG TOO, which is the deeper half.** With 108 in
+  > hand I set a rule of "full word if `MeasureString` says 100 or less" and
+  > wrote off `Einstellungen` (102), `Eigenschaften` (106) and `Einschlaftimer`
+  > (106). All three fit. `MeasureString` **pads**, so it reads high — while
+  > `DrawString`'s own layout box carries side bearings, so a word whose ink is
+  > **101 can still ellipsise inside 108** (`Knjižne oznake` does exactly that).
+  > The two disagree in both directions, so no threshold on `MeasureString` can
+  > be right.
   >
-  > **Read the constant, not the brief.** A design number written down before
-  > the code was built outlived the code that superseded it by four weeks.
+  > **`tools/check-legends.cs` asks the only question that cannot be wrong**: it
+  > draws each legend the way `PaintLegends` does — same font, same rectangle,
+  > same `EllipsisCharacter` trimming — once into the real 108-wide cell and
+  > once into one far too wide to trim, and compares the ink. Narrower in the
+  > real cell means the ellipsis bit. Run it on any new language file.
+  >
+  > Measured that way, **every legend in all six shipping languages fits**, the
+  > tightest being `Einschlaftimer` and Spanish `Temporizador` with 12 units
+  > free. Only genuinely long phrases clip — `Knjižne oznake`, `Lesezeichen
+  > setzen`, `Postavi knjižnu oznaku` — which is why Croatian's `Označi`/`Oznake`
+  > split was right all along. German now carries its real words
+  > (`Einstellungen`, `Eigenschaften`, `Lesezeichen`, `Einschlaftimer`), with
+  > `Markieren` on the Set Bookmark key because German spells the singular and
+  > the plural of `Lesezeichen` the same way and two keys cannot share a legend.
+  >
+  > **Read the constant, not the brief; and measure the thing that reaches the
+  > screen, not a proxy for it.** A design number written down before the code
+  > was built outlived the code that superseded it by four weeks, and the first
+  > two attempts to correct it were made with an instrument that could not see
+  > the answer.
 - **Type.** 12 pt base, 14 pt for the display, 11 pt floor. Legends are printed
   under clean buttons; only the transport ring is iconographic.
 - **A groove around every control.** Each button and the ring sits in a recess
