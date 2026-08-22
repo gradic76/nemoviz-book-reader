@@ -1,0 +1,775 @@
+; Nemoviz Book Reader
+;
+; Written by:               Gordan Radić
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Italiano
+Btn.OK=OK
+Btn.Yes=Sì
+Btn.No=No
+Btn.Cancel=Annulla
+Btn.Close=Chiudi
+Btn.Continue=Continua
+Btn.Refresh=Aggiorna
+Btn.Refresh.Accessible=Aggiorna
+Common.Dash=-
+Common.Error=Errore
+Common.DateFormatLong=d MMMM yyyy
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Titolo:
+Player.Info.AuthorLabel=Autore:
+Player.Info.ProducerLabel=Produttore:
+Player.Info.PublisherLabel=Editore:
+Player.Info.ChapterLabel=Capitolo:
+Player.Info.PartLabel=Parte:
+Player.Info.PageLabel=Pagina:
+Player.Info.BookmarksLabel=Segnalibri:
+Player.Info.VoiceLabel=Voce:
+Player.Info.NoVoiceLabel=Nessuna voce installata
+Player.Info.PartNumElapsed=Parte {0}, trascorso:
+Player.Info.PartNumRemaining=Parte {0}, rimanente:
+Player.Info.ElapsedLabel=Trascorso:
+Player.Info.RemainingLabel=Rimanente:
+Player.Info.VolumeLabel=Volume:
+Player.Info.SpeedLabel=Velocità:
+Player.Info.AccessibleName=Informazioni di riproduzione, F8
+Player.Info.Prepared=Parlato salvato: {0} brani, {1} MB
+Player.Info.Preparing=Preparazione del resto del libro: {0} di {1} brani
+Player.TitleBar.Paused=in pausa
+Player.ReadingSurface.Accessible=Superficie di lettura
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Riproduci, spazio
+Btn.Pause.Accessible=Pausa, spazio
+Btn.Back.Accessible=Indietro, Maiusc+Sinistra
+Btn.Forward.Accessible=Avanti, Maiusc+Destra
+Btn.VolumeUp.Accessible=Alza il volume, F12
+Btn.VolumeDown.Accessible=Abbassa il volume, F11
+Btn.Power.Accessible=Esci, Alt+F4
+Player.Volume.Text=Volume: {0}%
+Player.Volume.Accessible=Volume {0} per cento
+Player.Speed.Text=Velocità: {0}x
+Player.Speed.Legend=Velocità
+Player.Speed.Accessible=Velocità {0} volte
+Player.Speed.Wpm=Velocità: {0} ppm
+Player.Speed.WpmAccessible=Velocità {0} parole al minuto
+Player.Position.Label=Posizione
+Player.Position.Text=Posizione: {0} / {1}
+Player.Position.Accessible=Posizione {0} per cento
+Player.Progress.Legend=Avanzamento
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Passo di spostamento:
+Player.Seek.Accessible=Passo di spostamento, Maiusc+Su o Maiusc+Giù
+Player.Seek.Announce=Spostamento: {0}
+Seek.Item.15s=15 secondi
+Seek.Item.30s=30 secondi
+Seek.Item.1min=1 minuto
+Seek.Item.5min=5 minuti
+Seek.Item.10min=10 minuti
+Seek.Item.15min=15 minuti
+Seek.Item.30min=30 minuti
+Seek.Item.Chapter=Capitolo
+Seek.Item.Part=Parte
+Seek.Item.Track=Traccia
+Seek.Item.HeadingLevel=Titolo {0}
+Seek.Item.Page=Pagina
+Seek.Item.Bookmark=Segnalibro
+Seek.Item.StandardPage=Cartella editoriale
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Biblioteca
+Btn.Library.Accessible=Biblioteca, F3
+Btn.Library.Legend=Biblioteca
+Btn.Settings=Impostazioni
+Btn.Settings.Accessible=Impostazioni, F2
+Btn.Settings.Legend=Impostazioni
+Btn.Properties.Legend=Proprietà
+Btn.Properties=Proprietà
+Btn.Properties.Accessible=Proprietà, Alt+Invio
+Btn.Help=Guida
+Btn.Help.Accessible=Guida, F1
+Btn.Help.Legend=Guida
+Btn.GoTo.Legend=Vai a...
+Btn.GoTo=Vai a...
+Btn.GoTo.Accessible=Vai a, F4
+Btn.SetBookmark.Legend=Segnalibro
+Btn.SetBookmark=Metti un segnalibro
+Btn.SetBookmark.Accessible=Metti un segnalibro, F5
+Btn.ManageBookmarks.Legend=Segnalibri
+Btn.ManageBookmarks=Segnalibri
+Btn.ManageBookmarks.Accessible=Gestisci i segnalibri, F6
+Btn.Timer=Timer
+Btn.Timer.Legend=Spegnimento
+Btn.Timer.Accessible=Timer di spegnimento, F7
+Btn.Timer.Countdown=Timer {0}
+Btn.Timer.Accessible.Active=Timer di spegnimento, mancano {0}, attivalo per fermare la riproduzione e annullare il timer
+Btn.Timer.Accessible.LessThanMinute=Timer di spegnimento, meno di un minuto
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Indietro (Maiusc+Sinistra)
+Tip.PlayPause=Riproduci/pausa (spazio)
+Tip.Forward=Avanti (Maiusc+Destra)
+Tip.Seek=Si cambia con Maiusc+Su e Maiusc+Giù; si salta con Maiusc+Sinistra e Maiusc+Destra (anche con Indietro e Avanti)
+Tip.GoTo=F4
+Tip.Properties=Alt+Invio
+Tip.Timer=F7
+Tip.Volume=F11 e F12
+Tip.Speed=Ctrl+Sinistra e Ctrl+Destra
+Tip.Progress=Ctrl+1–9: salta al 10–90%
+Player.OpenFile.Title=Scegli un libro
+Player.NoVoiceForLanguage=Nessuna voce installata parla {0}. Apri le proprietà con Alt+Invio e scegline una.
+Filter.Audiobooks=Audiolibri
+Filter.TextBooks=Libri di testo
+Filter.BrailleBooks=Libri in braille
+Filter.Archives=Archivi
+Filter.AllSupported=Tutti i file supportati
+Filter.AllFiles=Tutti i file
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Biblioteca
+Library.List.Accessible=Scaffale
+Library.NowReading.Accessible=In lettura ora
+Library.NowReading.Empty=Nessun libro caricato
+Library.Search.Accessible=Cerca
+Library.Filter.Accessible=Filtra per stato
+Library.Details.Accessible=Dati del libro
+Library.Btn.Load=Carica
+Library.Btn.Load.Accessible=Carica
+Library.Btn.Close=Chiudi
+Library.Btn.Close.Accessible=Chiudi
+Menu.File=File
+Menu.File.OpenFile=Apri file...
+Menu.File.OpenFolder=Apri cartella...
+Menu.File.OpenAudioCd=Apri CD audio
+Menu.File.ClearLibrary=Svuota la biblioteca...
+Menu.File.Exit=Esci
+Menu.File.ExportAudio=Salva come audiolibro...
+Menu.File.Translate=Traduci il libro...
+Menu.Sort=Ordina
+Menu.Sort.Alphabetically=In ordine alfabetico
+Menu.Sort.DateAdded=Per data di aggiunta
+Menu.Sort.Format=Per formato
+Menu.Sort.Status=Per stato
+Menu.Sort.Ascending=Crescente
+Menu.Sort.Descending=Decrescente
+Menu.Sort.ActiveMark=(attivo)
+Menu.Help=Guida
+Menu.Help.Help=Guida
+Menu.Help.About=Informazioni su NBR
+Menu.Help.Services=Servizi e account...
+Shelf.Filter.All=Tutti i libri
+Shelf.Filter.Reading=In lettura
+Shelf.Filter.Unread=Non letto
+Shelf.Filter.Read=Letto
+Shelf.Filter.Favorites=Preferiti
+Shelf.Status.NowReading=In lettura ora
+Shelf.Status.Reading=In lettura
+Shelf.Status.Unread=Non letto
+Shelf.Status.Read=Letto
+Context.Open=Apri
+Context.MarkRead=Segna come letto
+Context.MarkUnread=Segna come non letto
+Context.Rename=Rinomina
+Context.Delete=Elimina
+Context.Properties=Proprietà
+Context.ReadOcr=Riconosci il testo
+Context.ReReadOcr=Riconosci di nuovo in un'altra lingua
+Context.Translate=Traduci il libro...
+Context.Favorite=Segna come preferito
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Titolo
+Details.Field.Author=Autore
+Details.Field.Format=Formato
+Details.Field.Speed=Velocità
+Details.Field.Volume=Volume
+Details.Field.Added=Aggiunto
+Details.Field.Producer=Produttore
+Details.Field.Publisher=Editore
+Details.Field.Year=Anno
+Details.Field.Time=Durata
+Details.Field.Elapsed=Trascorso
+Details.Field.Remaining=Rimanente
+Details.Field.Read=Letto
+Details.Field.Pages=Pagine
+Details.Field.Headings=Titoli
+Details.Field.Characters=Caratteri
+Details.Field.Language=Lingua rilevata
+Details.Field.Description=Descrizione
+Details.Description.Open=Premi Invio per leggerla
+Details.Field.SoundProcessing=Trattamento del suono
+Details.Sound.On=Sì
+Details.Sound.Off=No
+Details.Speed.Wpm={0} ppm
+Dialog.Description.Title=Descrizione - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Aggiungi un libro alla biblioteca
+Library.ImportFolder.Description=Scegli la cartella con i libri
+Dialog.ConfirmImport.Message=Nel luogo scelto sono stati trovati {0} libri: {1} audiolibri, {2} libri di testo, {3} in formati particolari e {4} archivi.\n\nSe è giusto, dopo la tua conferma i libri verranno copiati nella tua biblioteca e gli archivi vi verranno estratti. La tua biblioteca si trova in {5}.\n\nNel luogo di partenza non cambia nulla — resta tutto intatto, non preoccuparti.\n\nSe i numeri non corrispondono a quanto ti aspettavi, disponi diversamente i dati da importare. L'importazione in blocco ha i suoi limiti nel distinguere i titoli, e NBR non può garantire per ognuno di essi.\n\nPuò volerci un po'; per quanto possibile, non interrompere.
+Dialog.ConfirmImport.One=È stato trovato un libro. Importarlo?
+Dialog.ConfirmImport.Title=Aggiungi una cartella
+Dialog.NoBooksFound.Message=Nella cartella scelta non è stato trovato nessun libro supportato.
+Dialog.NoBooksFound.Title=Aggiungi una cartella
+Dialog.ImportSuccess.Message=Il libro è stato aggiunto alla biblioteca.
+Dialog.ImportSuccess.Title=Aggiungi un libro
+Dialog.ImportError.Message=Non è stato possibile aggiungere il libro: {0}
+Dialog.ImportFolderSuccess.Message=Importati {0} libri.
+Dialog.ImportFolderSuccess.Skipped=Saltati {0}.
+Dialog.ImportFolderSuccess.SkippedList=Questi non sono entrati:
+Dialog.ImportFolderSuccess.Title=Aggiungi una cartella
+Dialog.ImportFolderError.Message=Non è stato possibile importare la cartella: {0}
+Dialog.ReimportExisting.Title=Già in biblioteca
+Dialog.ReimportExisting.Message={0} è già sullo scaffale. Reimportarlo aggiorna ciò che si trova nella cartella del libro. Il tuo punto nel libro e i tuoi segnalibri restano — ma se da allora il file è cambiato, le parole si sono spostate e il punto non è più dove ti eri fermato. Reimportarlo?
+Dialog.Skipped.Drm=protetto
+Dialog.Skipped.Cancelled=annullato
+Dialog.Skipped.MissingFirstVolume=manca la prima parte di questa serie
+Dialog.Skipped.Empty=il file è vuoto
+Dialog.Rename.Title=Rinomina il libro
+Dialog.Rename.Prompt=Nuovo nome:
+Dialog.Rename.AuthorLabel=Autore:
+Dialog.Rename.TitleLabel=Titolo:
+Dialog.ConfirmDelete.Message=Vuoi davvero eliminare "{0}" dal disco per sempre? Non si può annullare.
+Dialog.ConfirmDelete.Title=Elimina il libro
+Dialog.DeleteError.Message=Non è stato possibile eliminare il libro dal disco: {0}
+Dialog.ActiveBook.Message="{0}" è caricato in questo momento nel lettore e non può essere eliminato. Chiudi la biblioteca, apri un altro libro oppure ferma la riproduzione, e riprova.
+Dialog.ActiveBook.Title=Il libro è in uso
+Dialog.ClearLibrary.Title=Svuota la biblioteca
+Dialog.ClearLibrary.Message=Eliminare tutti i {0} libri dalla biblioteca? I loro file verranno cancellati dal disco per sempre, e non si potrà annullare.
+Dialog.ClearLibrary.Empty=La biblioteca è già vuota.
+Dialog.ClearLibrary.Done=Rimossi {0} libri.
+Dialog.ClearLibrary.Skipped=Non è stato possibile rimuoverne {0} (in uso o aperti in questo momento).
+Dialog.DrmProtected.Title=Libro protetto
+Dialog.DrmProtected.Message=Questo libro è protetto da DRM (il suo contenuto è cifrato) e perciò non può essere aperto. Usa una copia senza DRM.
+Dialog.ArchivePassword.Title=Serve una password
+Dialog.ArchivePassword.Prompt=L'archivio "{0}" è protetto da password. Inseriscila per aprirlo:
+Dialog.ArchivePassword.Retry=Quella password non ha funzionato. Riprova per "{0}":
+Dialog.ArchivePassword.Field=Password dell'archivio
+Extract.Progress.Title=Estrazione
+Extract.Progress.Preparing=Preparazione…
+Extract.Progress.Determinate=Estrazione… {0} / {1} file
+Extract.Progress.Indeterminate=Estrazione… {0} file
+
+; ---- GO TO
+Dialog.GoTo.Title=Vai a
+GoTo.List.Accessible=Parti del libro
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=OK
+GoTo.Cancel.Accessible=Annulla
+GoTo.AutoPlay=Riproduci dopo il salto
+GoTo.AutoPlay.Hint=Se è attivo, la riproduzione comincia subito dopo il salto. Se non lo è, lo stato resta com'era: ciò che era in pausa resta in pausa, e ciò che suonava continua a suonare.
+GoTo.Hint.Accessible=Spiegazione
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Timer di spegnimento
+SleepTimer.Duration.Group=Durata
+SleepTimer.Duration.15=15 minuti
+SleepTimer.Duration.30=30 minuti
+SleepTimer.Duration.45=45 minuti
+SleepTimer.Duration.60=60 minuti
+SleepTimer.Duration.Custom=Altra:
+SleepTimer.Custom.Accessible=Altra durata in minuti
+SleepTimer.Bookmark=Metti un segnalibro all'avvio
+SleepTimer.Action.Group=Quando il tempo è scaduto
+SleepTimer.Action.Stop=Ferma la riproduzione
+SleepTimer.Action.StopClose=Ferma e chiudi il programma
+SleepTimer.Action.StopShutdown=Ferma, chiudi e spegni il computer
+SleepTimer.Start=Avvia
+SleepTimer.Start.Accessible=Avvia il timer di spegnimento
+SleepTimer.CancelBtn=Annulla
+SleepTimer.CancelBtn.Accessible=Annulla
+SleepTimer.Announce.Set=Timer impostato: {0} minuti
+SleepTimer.Announce.Cancelled=Timer annullato
+SleepTimer.Announce.Finished=Tempo scaduto, riproduzione fermata
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Gestisci i segnalibri
+Bookmark.Announce.Set=Segnalibro messo
+Bookmark.Item.Format=Segnalibro {0} ({1})
+ManageBookmarks.List.Accessible=Segnalibri
+ManageBookmarks.Delete=Elimina
+ManageBookmarks.Delete.Accessible=Elimina
+ManageBookmarks.OK.Accessible=OK
+ManageBookmarks.Cancel.Accessible=Annulla
+ManageBookmarks.Selected=Selezionato
+ManageBookmarks.NotSelected=Non selezionato
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Trattamento del suono
+Dialog.SoundProcessing.Message=Il trattamento del suono rende più sopportabile una registrazione scadente. Non la ripara.\n\nNon può restituire ciò che non è mai stato registrato, e usato troppo forte danneggia più di quanto aiuti. Lascialo semplicemente acceso, ascolta qualche minuto e solo allora metti mano alle singole fasi.\n\nNella guida è scritto che cosa fa ciascuna.
+Prop.Info.Accessible=Dati del libro
+Prop.Info.ProcessingOff=Trattamento del suono: no
+Prop.Info.ProcessingOn=Trattamento del suono: sì
+Prop.Info.Bypassed=(trattamento escluso)
+Prop.Info.Off=no
+Prop.Info.Protection=Protezione dalla distorsione
+Prop.Tab.Audio=Suono
+Prop.Tab.Text=Testo
+Prop.On=sì
+Prop.Off=no
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Usa il trattamento del suono
+Prop.SoundProcessing=Trattamento del suono
+Prop.Stage.Level=Grado
+Prop.Highpass.Title=Togli il rimbombo
+Prop.Denoise.Title=Riduzione del rumore
+Prop.Deesser.Title=Addolcisci le sibilanti
+Prop.Compressor.Title=Uniforma la voce
+Prop.Eq.Title=Timbro
+Prop.Eq.Shelf={0} e oltre
+Prop.Loudness.Title=Volume e pause
+Prop.Normalize.Title=Volume automatico
+Prop.Gate.Title=Rumore nelle pause
+Prop.Level.Minimal=Minimo
+Prop.Level.Light=Leggero
+Prop.Level.Medium=Medio
+Prop.Level.Strong=Forte
+Prop.Level.Maximum=Massimo
+Prop.ResetAll=Reimposta tutto
+Prop.Bypass=Escludi il trattamento
+Prop.Bypass.Shortcut=Ctrl+B lo attiva e lo disattiva da qualsiasi punto di questa pagina
+Prop.Analysing=Analisi della registrazione
+Prop.Analysing.Done=Registrazione analizzata, impostate {0} fasi. Cambiane quante vuoi se lo preferisci diverso.
+Prop.Analysing.Failed=Non è stato possibile analizzare la registrazione. Le impostazioni restano com'erano.
+Analyse.Progress.Title=Analisi della registrazione
+Analyse.Progress.Starting=L'analisi comincia...
+Analyse.Progress.Working=Brano {0} di {1}. {2}
+Analyse.Progress.Quarter={0} per cento fatto. {1}
+Analyse.Progress.Cancel=Annulla
+Analyse.Progress.Cancelling=Si fermerà dopo questo brano. Le impostazioni restano com'erano.
+Analyse.Progress.Estimating=Calcolo di quanto ci vorrà.
+Analyse.Progress.AlmostDone=Quasi fatto.
+Analyse.Progress.Seconds=Mancano circa {0} secondi.
+Analyse.Progress.Minutes=Mancano circa {0} minuti.
+Hint.SoundProcessing=Con il trattamento del suono puoi rifinire come suona la registrazione. Puoi togliere diversi rumori, alzare il volume e colorare il suono d'insieme con l'equalizzatore. Ci sono sei gruppi di comandi, e ciascuno si può attivare e disattivare per conto suo. Anche ogni comando si regola separatamente. Puoi escludere temporaneamente tutta la catena premendo Ctrl+B, per sentire la differenza tra la registrazione originale e le tue impostazioni.
+Hint.RemoveRumble=Taglia le frequenze più basse: traffico, aria condizionata, rumori di manipolazione. Non può recuperare una registrazione impastata, ma libera i bassi perché la voce abbia spazio.
+Hint.NoiseRemoval=Riduce il sibilo di fondo costante, quello che lascia un nastro o un microfono scadente. Un'impostazione troppo forte comincia a mangiarsi anche la voce, perciò alzala solo finché il sibilo non se ne va.
+Hint.SoftenSibilance=Toglie il taglio alle S e alle SC marcate. Utile con lettori molto vicini al microfono e con registrazioni schiarite oltre misura.
+Hint.EvenOutSpeech=Avvicina le parti piano e quelle forti, così un sussurro e un grido finiscono più vicini. È il comando a cui ricorrere quando non si fa che toccare il volume.
+Hint.Tone=Cinque bande, in decibel, chiamate con la loro frequenza. La più bassa sta a 200 Hz, dove di solito si trova una registrazione rimbombante o impastata; quella in cima è a scaffale, quindi alza o abbassa tutto ciò che sta sopra invece di una sola zona. Le bande si sovrappongono di proposito, il che permette una curva morbida ma vuol dire anche che si sommano: tre bande vicine a +4 danno insieme parecchio più di +4. I movimenti piccoli rendono molto, e tutto ciò che va oltre qualche dB di solito vuol dire che il rimedio vero è un'altra fase.
+Hint.AutomaticLoudness=Due cose che tirano in versi opposti, ed è per questo che dividono una scatola. Il volume automatico tiene il livello d'insieme costante per tutto un libro, anche tra file registrati in giorni diversi; segue la voce e non l'intero segnale, che è ciò che chiede una registrazione parlata. Il rumore nelle pause lavora al contrario: tutto ciò che sta sotto il livello scelto viene spinto giù, così un sibilo o un ronzio che sta sotto la lettura smette di sentirsi negli spazi tra una frase e l'altra. Non tocca mai la voce in sé, e attenua invece di zittire (un rumore che si spegne e si riaccende attorno a ogni frase stanca più di uno che semplicemente resta). Alza il volume e il rumore che sta sotto sale con lui: se succede, questo è il comando che fa per te.
+
+; ---- PROPERTIES - the text page
+Prop.Text.NoVoiceShort=Nessuna voce installata parla {0} — scegline una qui sotto.
+Prop.Text.NoVoiceForLanguage=Nessuna voce installata parla {0}. Installa una voce per {0}, oppure scegli qui sopra una lingua e una voce con cui leggere questo libro. La scelta vale solo per lui.
+Prop.Text.ReadingIn=Si legge in:
+Prop.Text.InputBrailleGroup=Origine in braille
+Prop.Text.InputBrailleTable=Tabella braille di ingresso:
+Hint.Text0=Qui puoi scegliere la lingua e la voce con cui viene letto questo libro. Puoi avere impostazioni diverse per ogni singolo libro della biblioteca. Ogni voce ricorda le proprie — velocità, volume e tono — così non serve rimetterle dopo essere tornati da un'altra voce.\n\nRicorda che puoi scegliere "Nessuna voce" se vuoi leggere con gli occhi o sulla barra braille senza sentire audio.
+Hint.TextVisual=Qui puoi regolare la presentazione sullo schermo per la lettura. Puoi scegliere tra una disposizione in stile sottotitoli, testo che scorre come i titoli di coda di un film, oppure il cambio di pagina istantaneo. Puoi anche scegliere i colori dello sfondo, del testo e dell'evidenziazione, e se venga marcata la riga che si sta leggendo o l'intera frase.\n\nTieni presente che questo non cambia nulla della voce.
+Hint.TextBrailleSource=Questo libro è venuto da un file braille, e questa è la tabella con cui è stato letto — quella che ha riconvertito le celle braille in parole.\n\nUn file braille non dice nulla della propria lingua, del proprio grado né di quale norma nazionale segua, perciò NBR deve ricavare la tabella dal testo stesso. Di solito ci prende, ma non sempre, e una tabella sbagliata dà parole quasi giuste: "Have" dove il libro dice "How".\n\nSe è questo che vedi, scegli qui un'altra tabella e premi OK. Il libro viene riletto dal file braille che hai importato, conservato accanto a lui, così puoi provare quante tabelle vuoi e tornare alla prima quando ti pare.\n\nLe tabelle offerte sono quelle della lingua qui sopra. Se quella lingua è sbagliata, cambiala e le tabelle la seguiranno.\n\nQuesto non ha nulla a che vedere con ciò che mostra la tua barra braille. Quello lo traduce il tuo lettore di schermo, con la tabella che ha nelle proprie impostazioni.
+NoVoice.Title=Nessuna voce per questo libro
+NoVoice.Message=Questo libro è in {0}, e nessuna voce installata parla quella lingua. Scegli una voce con cui leggerlo per questa volta, oppure lascialo non letto finché non ci sarà una voce per {0}.
+NoVoice.Read=Leggi con questa voce
+NoVoice.Leave=Lascialo non letto
+Dialog.BrailleReread.Title=Rileggere il file braille?
+Dialog.BrailleReread.Message=Questo libro verrà riletto dal suo file braille originale, con {0}.\n\nIl testo viene rifatto, perciò si perde tutto ciò che puntava a quello vecchio: fin dove eri arrivato, i tuoi segnalibri e la parte letta. Il libro in sé non viene toccato, e puoi leggerlo con un'altra tabella tutte le volte che vuoi.
+Dialog.BrailleReread.Failed=Non è stato possibile leggere il file braille con quella tabella. Il libro è rimasto com'era.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Impostazioni
+Settings.Tab.Advanced=Avanzate
+Settings.Tab.General=Generale
+Settings.Tab.TextBooks=Voce e braille
+Settings.Tab.Device=Dispositivi
+Settings.OK.Accessible=OK
+Settings.Cancel.Accessible=Annulla
+Settings.Apply=Applica
+Settings.Apply.Accessible=Applica
+
+; ---- SETTINGS - General
+Settings.General.LanguageGroup=Lingua
+Settings.General.LibraryGroup=Posizione della biblioteca
+Settings.General.MediaKeysGroup=Tasti multimediali
+Settings.General.MetadataGroup=Dati del libro
+Settings.General.LookGroup=Aspetto
+Settings.General.UseMultimediaKeys=Usa i tasti multimediali
+Settings.General.UseMultimediaKeysGlobally=Usa i tasti multimediali in tutto il sistema
+Settings.General.LibraryLocation=Posizione della biblioteca:
+Settings.General.LibraryLocation.Browse=Scegli la cartella in cui è conservata la tua biblioteca
+Settings.General.Browse=Sfoglia...
+Settings.General.Browse.Accessible=Cerca la cartella della biblioteca
+Settings.General.Language=Lingua:
+Settings.General.UseMetadata=Usa i metadati incorporati
+Settings.General.UseMetadata.Hint=Alcuni formati di file portano metadati con dati aggiuntivi su autore, titolo, editore, produttore e così via. NBR può leggerli e mostrarli dove ci sono. Se però sono sbagliati o mancano, NBR può ricavare i dati essenziali dai nomi di cartelle e file. Al limite, puoi sempre rinominare i libri nella biblioteca.
+Settings.General.UseMultimediaKeys.Hint=Puoi usare i tasti multimediali della tastiera o degli auricolari per riprodurre, mettere in pausa e spostarti nel libro con il passo di spostamento che hai scelto.\n\nIl secondo interruttore li porta a livello di sistema, così raggiungono NBR da qualsiasi punto — al prezzo di sottrarli a ogni altro lettore finché NBR è in funzione.
+Settings.General.LibraryLocation.Hint=Qui NBR copia i libri importati. Puoi lasciarla dov'è, sulla partizione di sistema, ma se pensi di avere una biblioteca grande, un'altra partizione o un altro disco sono una soluzione molto migliore. Qui NBR conserva anche i dati di ogni libro, quindi se vuoi mantenere i punti di lettura, i segnalibri, la velocità e le altre impostazioni, tieni presente che il contenuto della vecchia cartella va copiato a mano nella nuova posizione. E allo stesso prezzo: portando la biblioteca fuori dalla partizione di sistema, metti i tuoi libri al riparo dai guasti di sistema e dalla perdita di dati che di solito li accompagna.
+Settings.General.Language.Restart=Per cambiare lingua NBR deve riavviarsi. Riavviare adesso?
+Settings.General.Language.RestartTitle=Lingua
+Settings.Misc.Look=Aspetto:
+Settings.Misc.Look.Classic=Colori di sistema
+Settings.Misc.Look.New=Disegno di NBR
+Settings.Misc.Look.Hint=Come NBR si disegna, e qui le risposte sono due.\n\nIl disegno di NBR è il suo aspetto proprio, quello con cui parte.\n\nI colori di sistema lo trasformano in una finestra qualunque, con i colori e i caratteri impostati in Windows. Non disegna nulla di suo, così la tua combinazione passa intera — che è quello che si vuole con un tema a contrasto elevato, e quello che funziona meglio con un ingranditore. Se il contrasto elevato è già attivo, NBR parte con questa scelta.\n\nIn un modo o nell'altro la scelta è tua, e anche disfarla: la tastiera e il tuo lettore di schermo non ne risentono, e F2 ti riporta qui.
+Settings.Misc.Look.RestartTitle=Cambia l'aspetto
+Settings.Misc.Look.Restart=Per cambiare aspetto NBR deve riavviarsi. Il tuo punto nel libro viene mantenuto. Riavviare adesso?
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.Language=Lingua:
+Settings.TextBooks.BookLanguage=Libri in questa lingua:
+Settings.TextBooks.AllOtherLanguages=Tutte le altre lingue
+Settings.TextBooks.VoiceNotSet=(nessuna voce scelta)
+Settings.TextBooks.AddVoices=Aggiungi nuove lingue...
+Settings.TextBooks.LanguageNoVoice={0} — nessuna voce installata
+Settings.TextBooks.Voice=Voce:
+Settings.TextBooks.Speed=Velocità:
+Settings.TextBooks.Test=Prova la voce
+Settings.TextBooks.TestSample=Questo è un saggio della voce scelta.
+Settings.TextBooks.Volume=Volume:
+Settings.TextBooks.Pitch=Tono:
+Settings.TextBooks.SpeechGroup=Voce
+Settings.TextBooks.LanguageUnknown=(lingua non indicata)
+Settings.TextBooks.VisualGroup=Uscita a schermo
+Settings.TextBooks.UseVisual=Usa l'uscita a schermo
+Settings.TextBooks.NoSpeech=Nessuna voce
+Settings.TextBooks.VisualMode=Modo di presentazione:
+Settings.TextBooks.VisualMode.TwoRows=Due righe di testo (come i sottotitoli)
+Settings.TextBooks.VisualMode.FullInstant=A tutto schermo (pagina per pagina)
+Settings.TextBooks.VisualMode.FullScrolling=A tutto schermo (a scorrimento)
+Settings.TextBooks.Highlight=Evidenziazione:
+Settings.TextBooks.Highlight.None=Nessuna evidenziazione
+Settings.TextBooks.Highlight.Line=Riga corrente
+Settings.TextBooks.Highlight.Sentence=Frase corrente
+Settings.TextBooks.HighlightColour=Colore dell'evidenziazione:
+Settings.TextBooks.TextColour=Colore del testo:
+Settings.TextBooks.BackColour=Colore dello sfondo:
+Settings.TextBooks.Speech.Hint=Qui c'è l'elenco delle lingue e delle voci installate sul tuo sistema. Per ogni lingua elencata puoi scegliere la voce predefinita, così ogni nuovo titolo in quella lingua si apre con la voce scelta. Scegliere una voce per una lingua è ciò che la rende predefinita — non c'è altro da premere. Se il tuo nuovo libro è scritto in una lingua che non compare nell'elenco, è meglio non impostarle qui una voce predefinita. Puoi sempre scegliere una voce nelle proprietà del libro stesso, nella sua pagina Testo, oppure scegliere Nessuna voce e continuare a leggere in braille o sullo schermo. Vedrai anche un avviso quando una lingua non ha nessuna voce installata.
+Settings.TextBooks.Visual.Hint=Per mostrare il testo sullo schermo mentre viene letto ad alta voce, per chi legge con gli occhi oltre che con le orecchie. Attivata qui, la finestra si apre da sola a ogni pressione di riproduci. Si può anche aprire e chiudere a mano in qualsiasi momento con F9, che questa sia attiva o no — così puoi provarla su un libro senza cambiarne le proprietà.
+Settings.TextBooks.Dictionary.Hint=Qui puoi correggere ciò che i sintetizzatori vocali pronunciano male. Puoi sistemare la pronuncia di nomi e luoghi, correggere accenti sbagliati e molto altro — basta un po' di fantasia. Il bello è che puoi farlo separatamente per lingua e per voce, perché sintetizzatori diversi sbagliano in modo diverso nella stessa lingua.
+Settings.Colour.White=Bianco
+Settings.Colour.Black=Nero
+Settings.Colour.Yellow=Giallo
+Settings.Colour.Blue=Blu
+Settings.Colour.Green=Verde
+Settings.Colour.Red=Rosso
+Voices.Add.Title=Lingue per leggere il testo ad alta voce
+Voices.Add.Hint=Scegli le lingue che vuoi e premi Installa. A seconda delle tue impostazioni Windows potrebbe chiederti il permesso, e poi scaricherà le voci di quella lingua. Una voce è legata al suo accento, perciò l'inglese britannico e quello americano sono voci separate.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Uscita audio
+Settings.Device.SoundCard=Scheda audio:
+Settings.Device.KeepAlive=Tieni sveglia la scheda audio
+Settings.Device.KeepAlive.Hint=Alcune uscite audio — l'HDMI in particolare — si spengono appena il suono cessa, e poi ci mettono un attimo a risvegliarsi. Quello che si sente è la prima parola di una frase che sparisce, e poi di nuovo, senza che nulla sembri non funzionare. Finché questa è attiva, NBR riproduce sulla scheda che sta usando un tono molto al di sotto di quanto tu possa udire, così la scheda non fa in tempo ad addormentarsi tra una frase e l'altra. Disattivala se la tua scheda non si comporta così: tiene l'uscita aperta per tutto il tempo in cui un libro va avanti.
+Settings.Device.Default=Quella predefinita del sistema (automatica)
+Settings.Device.OpticalGroup=Unità ottica
+Settings.Device.UseOptical=Usa l'unità ottica
+Settings.Device.OpticalWhich=Unità:
+Settings.Device.OpticalAuto=Quella che ha un disco dentro
+Settings.Device.UseOptical.Hint=Un tempo i libri uscivano su normali CD audio, e NBR sa riprodurli. Legge il disco invece di lasciarlo girare: l'intera facciata viene letta in una sola passata, di seguito e senza tornare indietro, così l'unità lavora per qualche minuto e poi tace per tutto il resto del libro. Leggere piano sarebbe più silenzioso per un secondo e più rumoroso per un'ora. Attiva questa opzione solo se la vuoi - all'inizio è disattivata, anche su una macchina che ha un'unità, e finché lo è NBR non tocca affatto l'unità.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Libri con il testo dentro le immagini
+Settings.Ocr.Hint=Alcuni libri sono fotografie delle loro pagine e non testo: un PDF scansionato, oppure una cartella di immagini numerate. NBR può riconoscere le parole che vi compaiono e poi leggerle come qualsiasi altro libro. Questa è solo la scelta di partenza — quando hai più di una lingua, NBR chiede quale usare ogni volta che legge un libro.
+Settings.Ocr.Language=Lingua di riconoscimento
+Settings.Ocr.Automatic=Automatica
+Settings.Ocr.AddLanguage=Aggiungi una lingua...
+Settings.Ocr.None=Windows non ha installato il riconoscimento del testo.
+Settings.Translate.Group=Traduzione
+Settings.Translate.Service=Servizio di traduzione
+Settings.Translate.Key=Chiave API...
+Settings.Translate.State.Have={0}, chiave salvata
+Settings.Translate.State.None={0}, nessuna chiave
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (modello più grande)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, più economico)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, il più caro)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Hint=NBR può tradurre un libro tramite un servizio online. Ogni servizio richiede una chiave del tuo account presso di loro, che incolli qui; NBR non gestisce nessun pagamento, quello sta a te sul sito del fornitore o per altra via. Se la traduzione automatica non ti serve, lascia semplicemente la casella deselezionata.\n\nUna traduzione manda l'INTERO libro al servizio che scegli, e ciò che ognuno di loro ne fa è diverso — alcuni usano i contenuti del piano gratuito per migliorare i propri prodotti, altri no. La descrizione di ciascun servizio in Guida, Servizi e account dice quali.
+Settings.Translate.Notes=Note per il traduttore:
+Settings.Translate.Test.NoEngine=Non è stato scelto nessun servizio di traduzione.
+Settings.Translate.Test.NoKey=Non c'è nessuna chiave da controllare.
+Settings.Translate.Test.NoNetwork=NBR non è riuscito a raggiungere il servizio.
+Settings.Translate.Test.Refused=Il servizio ha rifiutato la richiesta ({0}).
+Settings.Translate.Test.Empty=Il servizio non ha risposto nulla.
+Settings.Cloud.Group=Voci di Google Cloud
+Settings.Cloud.VoicesGroup=Voci dal cloud
+Settings.Cloud.Where=Google e Azure si configurano in Guida, Servizi e account, dove è spiegato che cosa sia ciascuno e sei guidato passo passo ad aprire un account.
+Settings.Cloud.State.None=Google: non è salvato nessun account di servizio, perciò nessuna di queste voci è disponibile.
+Settings.Cloud.State.Have=Google: sono disponibili {0} voci, che leggono complessivamente {1} lingue.
+Settings.Cloud.State.HaveNoList=Google: è salvato un account di servizio, ma l'elenco delle voci non è ancora stato scaricato. Riconfiguralo mentre sei connesso.
+Settings.Cloud.Load=File dell'account di servizio...
+Settings.Cloud.Filter=Account di servizio (*.json)|*.json|Tutti i file (*.*)|*.*
+Settings.Cloud.Forget=Dimentica l'account di servizio
+Settings.Cloud.ForgetAsk=Dimenticare l'account di servizio salvato? Queste voci non verranno più offerte, e un libro che sta già leggendo con una di esse ammutolisce finché non gli dai un'altra voce.
+Settings.Cloud.UseGroup=Uso delle voci dal cloud
+Settings.Cloud.Use=Offri le voci dal cloud
+Settings.Cloud.Why=Non c'è ancora nulla da attivare: configura qui sopra Google o Azure, e questa diventerà disponibile.
+Settings.Cloud.NoList=L'account è stato accettato, ma non è stato possibile scaricare l'elenco delle voci. Di solito è la rete; le voci compariranno appena sarà raggiungibile.
+Settings.Azure.Group=Voci di Azure Speech
+Settings.Azure.Resource=Nome della risorsa:
+Settings.Azure.Key=Chiave:
+Settings.Azure.Save=Controlla e conserva
+Settings.Azure.NoResource=Inserisci il nome della risorsa — è la prima parte dell'endpoint che compare nella stessa pagina della chiave.
+Settings.Azure.NoKey=Inserisci la chiave.
+Settings.Azure.Refused=Azure non ha accettato questa coppia. Controlla il nome della risorsa e la chiave, e che la risorsa sia di tipo Speech.
+Settings.Azure.State.None=Azure: non è salvata nessuna chiave, perciò nessuna di queste voci è disponibile.
+Settings.Azure.State.Have=Azure: sono disponibili {0} voci, che leggono complessivamente {1} lingue.
+Settings.Azure.Forget=Dimentica la chiave
+Settings.Azure.ForgetAsk=Dimenticare la chiave Azure salvata? Queste voci non verranno più offerte, e un libro che sta già leggendo con una di esse ammutolisce finché non gli dai un'altra voce.
+Hint.Settings.CloudUse=Questo attiva e disattiva il tuo uso delle voci dal cloud, cioè di tutte le voci da internet, non delle tue voci SAPI o OneCore installate.\n\nDecide se quelle voci vengano OFFERTE quando scegli la voce per un libro preciso. Non vengono mai assegnate da sole né diventano la voce predefinita di una lingua — quello resta alle voci installate su questo computer, che non costano nulla e non hanno bisogno di connessione.\n\nUn libro che sta già leggendo con una voce dal cloud la mantiene, che questa sia attiva o no; l'interruttore governa la scelta, non ciò che si può riprodurre.
+Hint.Settings.Azure=L'uso delle voci di Google e di Azure richiede alcune credenziali Google, Microsoft e Azure e un po' di lavoro sui loro siti. Maggiori dettagli nella guida.
+Hint.Settings.Cloud=
+Google.Cred.NotJson=Quel file non è leggibile come JSON, quindi non è quello che ti ha dato Google. Il file che cerchi è stato scaricato quando hai creato l'account di servizio, e il suo nome finisce con .json.
+Google.Cred.NotServiceAccount=Quel JSON è leggibile, ma non è un account di servizio — non contiene né un indirizzo di account né una chiave privata. Google offre diversi tipi di credenziali; quella che serve per queste voci è la chiave dell'account di servizio.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Dizionario di pronuncia
+Dict.Open=Dizionario di pronuncia...
+Dict.Open.Accessible=Dizionario di pronuncia
+Dict.Scope=Queste regole valgono per:
+Dict.Scope.Global=Tutto ciò che leggo
+Dict.Scope.Language=Tutto ciò che leggo in {0}
+Dict.Scope.Voice=Tutto ciò che leggo con {0}
+Dict.List.Accessible=Regole
+Dict.Column.Pattern=Scritto
+Dict.Column.Says=Si dice
+Dict.Column.Match=Corrispondenza
+Dict.Column.Case=Maiuscole
+Dict.Column.State=Regola
+Dict.Column.Comment=Nota
+Dict.Add=Aggiungi...
+Dict.Edit=Modifica...
+Dict.Remove=Rimuovi
+Dict.State.On=Sì
+Dict.State.Off=No
+Dict.Try=Prova una frase:
+Dict.TryButton=Prova
+Dict.Rule.TitleNew=Nuova regola
+Dict.Rule.TitleEdit=Modifica la regola
+Dict.Field.Pattern=Ciò che è scritto:
+Dict.Field.Replacement=Di' questo invece:
+Dict.Field.Match=Corrispondenza:
+Dict.Field.CaseSensitive=Distingui maiuscole
+Dict.Field.Skip=Salta
+Dict.Field.Comment=Nota:
+Dict.Field.Enabled=Regola attiva
+Dict.Match.WholeWord=La parola intera
+Dict.Match.Anywhere=Ovunque, anche dentro una parola
+Dict.Match.Regex=Espressione regolare
+Dict.Error.Title=Questa regola non si può usare
+Dict.Error.NoPattern=Inserisci ciò che è scritto nel libro.
+Dict.Error.TooSlow=Questo schema impiega troppo tempo. Semplificalo.
+Dict.Help=Guida alle regex...
+Dict.Help.Title=Espressioni regolari nel dizionario di pronuncia
+Dict.Help.Text=L'antica saggezza zen dice:\n\n    Lo sviluppatore aveva un problema.\n    Lo sviluppatore decise di risolverlo con le espressioni regolari.\n    Lo sviluppatore aveva due problemi.\n\nLe RegEx, ovvero le espressioni regolari, sono una cosa con cui è meglio non avere a che fare, ma fa fine avere l'opzione, ed eccola qui.\n\nSe sai quello che fai, accomodati. Se no, semplicemente non usarle, oppure chiedi a Google.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=Chiave API per {0}
+Dialog.TranslateKey.Prompt=Incolla la chiave che hai ricevuto da {0}. Viene conservata su questo computer in un file a parte, in chiaro, perciò trattala come tratteresti una password. Puoi sostituirla o rimuoverla quando vuoi, e puoi revocarla presso il servizio stesso.
+Dialog.TranslateKey.Field=Chiave API
+Dialog.TranslateKey.Region=Regione (vuoto se è Global):
+Dialog.TranslateKey.Status=Risultato
+Dialog.TranslateKey.Test=Controlla la chiave
+Dialog.TranslateKey.Remove=Rimuovi
+Dialog.TranslateKey.Testing=Controllo della chiave...
+Dialog.TranslateKey.Works=La chiave funziona.
+Dialog.TranslateKey.Stored=Per questo servizio è conservata una chiave.
+Dialog.TranslateKey.NotStored=Per questo servizio non è conservata nessuna chiave.
+Azure.Setup.Title=Configura Azure Speech
+Azure.Setup.Open=Creala per me...
+Azure.Setup.Intro=NBR può creare la risorsa Azure al posto tuo, così non c'è nessun portale da attraversare. Accedi a Microsoft una volta con un codice breve, scegli su quale abbonamento metterla, e NBR la crea nel piano gratuito e ne conserva la chiave. Finché non hai effettuato l'accesso non viene creato nulla.
+Azure.Setup.Start=Avvia
+Azure.Setup.SigningIn=Richiesta a Microsoft di un codice di accesso.
+Azure.Setup.CodeLabel=Codice di accesso:
+Azure.Setup.EnterCode=Il tuo codice di accesso è nel campo qui sotto, pronto da copiare. Scegli "Apri la pagina di accesso" per aprire {0} nel browser, accedi lì, e questa finestra proseguirà da sola.
+Azure.Setup.OpenPage=Apri la pagina di accesso
+Azure.Setup.OpenFailed=Non è stato possibile aprire il browser. L'indirizzo è nella riga qui sopra; aprilo a mano.
+Azure.Setup.Directory=Directory:
+Azure.Setup.DirectoryHint=Lascia vuoto se accedi con un account aziendale o scolastico. Se il tuo Azure è su un account Microsoft PERSONALE, Microsoft rifiuterà l'accesso all'indirizzo consueto e dovrai indicare la directory che Azure ha creato quando è stato attivato l'abbonamento — o il suo nome, che finisce con onmicrosoft.com, o il suo ID directory (tenant). Viene chiesto una volta e poi ricordato.
+Azure.Setup.Subscription=Abbonamento:
+Azure.Setup.SignedIn=Accesso effettuato. Trovati {0} abbonamenti — scegline uno e premi Crea.
+Azure.Setup.Create=Crea la risorsa
+Azure.Setup.NoSubscription=Quell'account non ha nessun abbonamento Azure, quindi non c'è dove creare la risorsa.
+Azure.Setup.Creating=Creazione della risorsa. Ci vuole fino a un minuto o due; Azure la dà per pronta prima che lo sia davvero, perciò NBR aspetta.
+Azure.Setup.Done=Fatto. La risorsa è creata e la sua chiave conservata — sono disponibili {0} voci.
+Azure.Setup.DoneNoList=La risorsa è creata e la sua chiave conservata, ma non è stato possibile scaricare l'elenco delle voci. Di solito è la rete; le voci compariranno appena sarà raggiungibile.
+Azure.Setup.Failed=Non ha funzionato: {0}
+Azure.Setup.HaveOne=Oppure, se hai già una risorsa Speech, inserisci qui i suoi due dati:
+Azure.Setup.Kept=Azure ha accettato questa coppia ed è conservata. Queste voci sono ora disponibili.
+
+; ---- THE READING WINDOW
+Reading.Title=Lettura
+Reading.Back=Indietro
+Reading.Back.Accessible=Un passo indietro
+Reading.PlayPause=Riproduci/pausa
+Reading.PlayPause.Accessible=Riproduci o metti in pausa, spazio
+Reading.Forward=Avanti
+Reading.Forward.Accessible=Un passo avanti
+Reading.Smaller=Più piccolo
+Reading.Smaller.Accessible=Testo più piccolo, tasto meno
+Reading.Bigger=Più grande
+Reading.Bigger.Accessible=Testo più grande, tasto più
+Reading.Font.Accessible=Carattere
+Reading.Size.Announce=Dimensione del testo {0}
+Beta.Suffix= — non in questa beta
+Beta.NoReadingWindow=La finestra di lettura è disattivata in questa beta. La lettura sullo schermo, e il braille che la segue, sono ancora in prova e torneranno in una versione successiva.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Riconosci il testo
+Ocr.Ask.Question={0} non contiene testo — sono {1} pagine di immagini. NBR può riconoscere il testo che vi compare, e dovrebbe volerci {2}. Riconoscerlo adesso?
+Ocr.Ask.ReadWith=Riconosci come:
+Ocr.Ask.Read=Riconosci
+Ocr.Ask.Skip=Salta
+Ocr.Ask.UnderAMinute=meno di un minuto
+Ocr.Ask.Minutes=circa {0} minuti
+Ocr.Result.NoText=Nelle immagini non è stato riconosciuto alcun testo. Il libro è stato aggiunto, ma non c'è nulla da leggervi.
+Ocr.Refusal.NoEngine=Non è installato alcun riconoscimento del testo. Usa "Aggiungi una lingua..." nelle impostazioni, in Avanzate, e NBR ne installerà uno per te.
+Ocr.Refusal.NoPages=Qui dentro non ci sono pagine da leggere.
+Ocr.Progress.Title=Riconoscimento del testo
+Ocr.Progress.Starting=Il riconoscimento comincia...
+Ocr.Progress.Working=Pagina {0} di {1}. {2}
+Ocr.Progress.Quarter={0} per cento fatto. {1}
+Ocr.Progress.Cancel=Annulla
+Ocr.Progress.Cancelling=Si fermerà dopo questa pagina. Non viene conservato nulla.
+Ocr.Progress.Estimating=Calcolo di quanto ci vorrà.
+Ocr.Progress.AlmostDone=Quasi fatto.
+Ocr.Progress.Seconds=Mancano circa {0} secondi.
+Ocr.Progress.Minutes=Mancano circa {0} minuti.
+Ocr.Unread.Message=Questo libro non è ancora stato riconosciuto — sono ancora immagini delle sue pagine, quindi non c'è nulla da pronunciare. Riconoscerlo adesso?
+Ocr.Sparse.Message=Solo {0} delle {1} pagine di questo libro contengono del testo. Con ogni probabilità è una scansione con lo strato di testo rovinato, quindi le parole restano immagini. Riconoscerle adesso?
+Ocr.Blank.Question={0} pagine di seguito sono tornate senza alcun testo. Le altre {1} potrebbero essere uguali, e riconoscerle richiederebbe un po' di tempo. Continuare?
+Ocr.Blank.Jbig2={0} pagine di seguito sono tornate senza alcun testo. Questo PDF conserva le sue parole in una forma che Windows non sa disegnare, perciò quelle pagine arrivano come carta bianca su cui non c'è nulla da riconoscere — leggere le restanti {1} con ogni probabilità non troverebbe nulla. Continuare?
+Ocr.Read.Question=Questo libro è fatto di {0} pagine di immagini e non è ancora stato riconosciuto. Riconoscerlo richiede {1}.
+Ocr.ReRead.Question=Questo libro è stato riconosciuto da {0} pagine di immagini. Riconoscerlo di nuovo in un'altra lingua richiede {1}. Le immagini sono conservate insieme al libro, quindi lo si può fare tutte le volte che vuoi.
+Ocr.ReRead.Done=Il libro è stato riconosciuto di nuovo e sostituito.
+Ocr.ReRead.Locate=Le immagini di questo libro non sono conservate insieme a lui, perciò NBR deve ritrovarle. Scegli il file scansionato oppure — se il libro è arrivato come immagini di pagina separate — una qualsiasi di quelle pagine.
+Ocr.ReRead.LocateTitle=Trova le immagini di questo libro
+Ocr.ReRead.Filter=Libri scansionati e immagini|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Tutti i file|*.*
+Ocr.ReRead.WholeFolder=In quella cartella ci sono {0} immagini. Riconoscerle tutte come le pagine di questo libro?
+Ocr.Add.Title=Lingue di riconoscimento
+Ocr.Add.List=Lingue
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — già installata
+Ocr.Add.Hint=Scegli le lingue che vuoi e premi Installa. A seconda delle tue impostazioni Windows potrebbe chiederti il permesso, e poi scaricherà il riconoscimento di quella lingua — un file piccolo, non un intero pacchetto lingua di Windows.
+Ocr.Add.Install=Installa
+Ocr.Add.WindowsSettings=Impostazioni di Windows...
+Ocr.Add.Close=Chiudi
+Ocr.Add.Installing=Installazione di {0}. Se ne occupa Windows Update, perciò quanto ci vuole dipende da quanto è occupato — qualche minuto è normale, e dieci non è cosa mai vista. Puoi chiudere questa finestra e continuare per la tua strada; andrà avanti da solo.
+Ocr.Add.Done={0} è installata e pronta all'uso.
+Ocr.Add.DonePartly={0} è installata e pronta all'uso. {1} non è arrivata — forse Windows ci sta ancora lavorando, oppure non è disponibile per questa versione.
+Ocr.Add.NotStarted=Non è stato installato nulla. Windows non ha dato il permesso.
+Ocr.Add.Failed={0} non è stata installata. Forse Windows ci sta ancora lavorando, oppure la lingua non è disponibile per questa versione di Windows.
+Ocr.Add.LeftRunning=Windows la sta ancora installando. Finirà da solo.
+
+; ---- TRANSLATION
+Translate.Progress.Title=Traduzione del libro
+Translate.Progress.Starting=Preparazione in corso. Puoi fermarti quando vuoi; ciò che è tradotto resta, e ripartendo si continua da lì.
+Translate.Progress.Working=Brano {0} di {1}. Mancano circa {2}. Puoi fermarti quando vuoi — ciò che è fatto resta.
+Translate.Progress.Quarter=Tradotto il {0} per cento, mancano circa {1}.
+Translate.Progress.Cancel=Ferma
+Translate.Progress.Cancelling=Si fermerà dopo questo brano. Ciò che è già tradotto resta.
+Translate.Progress.StillOn=Ancora su questo, {0} secondi finora.
+Translate.Progress.StillWorking=Ancora sul brano {0} di {1}. Il servizio risponde lentamente.
+Translate.Progress.Estimating=calcolo di quanto ci vorrà
+Translate.Progress.AlmostDone=un attimo
+Translate.Progress.Seconds={0} secondi
+Translate.Progress.Minutes={0} minuti
+Translate.Ask.Title=Traduci il libro
+Translate.Ask.Info={0} — circa {1} caratteri, all'incirca {2}. La traduzione diventa un libro nuovo; questo non viene toccato.
+Translate.Ask.HybridNote=Questo libro ha una registrazione oltre al testo. Si può tradurre solo il testo, perciò la traduzione sarà un libro di testo senza la narrazione.
+Translate.Ask.From=Lingua del libro:
+Translate.Ask.To=Traduci in:
+Translate.Ask.Model=Modello {0}:
+Translate.Ask.Model.None=— nessuno, la catena finisce qui —
+Translate.Ask.ChainNote=Se un brano viene rifiutato, NBR ci riprova e poi passa in rassegna gli altri tuoi servizi. Ciò che nessuno di loro accetta resta nella lingua in cui è arrivato il libro.
+Translate.Ask.NoEngine=Nessun servizio ha ancora una chiave
+Translate.Ask.Standing=La tua nota permanente vale anche per questo libro: {0}
+Translate.Ask.Inherit=Continua una serie, usando il glossario di:
+Translate.Ask.Inherit.None=Niente — questo libro sta per conto suo
+Translate.Ask.Notes=Ciò che il traduttore dovrebbe sapere di QUESTO libro (facoltativo). Il narratore e i nomi si ricavano da soli dal testo; questo serve per ciò che il testo non dice — un termine che vuoi reso in un certo modo, o come si rivolgono l'uno all'altro due personaggi:
+Translate.Ask.Start=Traduci
+Translate.LastResort.Begin=La parte che segue è stata tradotta da Microsoft Azure — aspettati l'inaspettato.
+Translate.LastResort.End=Fine della parte tradotta da Microsoft Azure.
+Translate.NotText=Si può tradurre solo un libro di testo. Questo è una registrazione.
+Translate.Empty=In questo libro non c'è testo da tradurre.
+Translate.NoService=Nessun servizio di traduzione ha ancora una chiave. Aggiungine una nelle impostazioni, in Avanzate.
+Translate.Done=Tradotti {0} brani. La traduzione è sullo scaffale come libro nuovo.
+Translate.DoneLeft=Tradotti {0} brani, {1} lasciati nella lingua originale.
+Translate.Took=Ci è voluto {0}. C'è un registro riga per riga in translation.log, accanto al libro originale.
+Translate.Failed=Non è stato possibile tradurre il libro: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Si può ricavare un audiolibro solo da un libro di testo. Questo è già suono.
+Export.NoVoice=Questo libro non ha nessuna voce con cui leggerlo, perciò non c'è nulla da registrare. Dagliene prima una nelle sue proprietà.
+Export.Empty=In questo libro non c'è testo da leggere.
+Export.Filter=File audio (*.mp3)|*.mp3
+Export.Ask.Ready=Tutti i {0} brani di questo libro sono già stati pronunciati, resta quindi solo da unirli e ci vorrà un attimo. Creare il file?
+Export.Ask.Missing=Restano da registrare {0} dei {1} brani di questo libro. Registrarli dovrebbe richiedere circa {2} minuti — è il tempo della lavorazione, non la durata del libro all'ascolto. La finestra di avanzamento mostra un valore misurato strada facendo. Puoi fermarti quando vuoi: ciò che è stato pronunciato resta, e ripartendo si continua da lì. Creare il file?
+Export.Progress.Title=Creazione dell'audiolibro
+Export.Progress.Starting=Preparazione in corso. Puoi fermarti quando vuoi; ciò che è stato pronunciato resta, e ripartendo si continua da lì.
+Export.Progress.Making=Brano {0} di {1}. Mancano circa {2}.
+Export.Progress.Joining=Unione di tutto in un solo file.
+Export.Done=Fatto — {0} brani, salvato come {1}
+Export.DoneShort=Salvato come {2}, ma {1} dei {0} brani non è stato possibile pronunciarli e vi mancano.
+Export.Failed=Non è stato possibile creare l'audiolibro.
+
+; ---- AUDIO CD
+Cd.Progress.Title=CD audio
+Cd.Progress.Preparing=Lettura del disco...
+Cd.Progress.Track=Lettura della traccia {0} di {1}
+Cd.Progress.Stopping=Arresto...
+Cd.BookTitle=CD audio ({0} tracce)
+Cd.Format=Audio CD - Compact Disc Digital Audio
+Cd.NoDisc=Non c'è nessun disco nell'unità, oppure l'unità lo sta ancora leggendo. Inserisci un CD audio e riprova.
+Cd.DataDisc=Questo è un disco dati, non un CD audio. Se contiene un libro in file MP3, aprilo con File, Apri cartella - quello NBR lo riproduce già.
+Cd.ReadFailed=Non è stato possibile leggere il disco: {0}
+Cue.Track=Traccia {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Servizi e account
+Services.List.Accessible=Servizi
+Services.State.Ready=QUESTO È CONFIGURATO. Puoi ripercorrere i passaggi per sostituire ciò che è conservato.
+Services.State.NotSet=Questo non è ancora configurato.
+Services.SetUp=Configura questo servizio...
+Services.Forget=Dimentica questo account
+Services.ForgetAsk=Dimenticare la chiave conservata per {0}? Non verrà più offerta finché non la configuri di nuovo.
+Services.Disclaimer=I PASSAGGI QUI SOTTO POTREBBERO NON CORRISPONDERE A CIÒ CHE VEDI. Questi servizi rifanno i loro siti senza preavviso, perciò un pulsante può essersi spostato o aver cambiato nome da quando questo è stato scritto. L'ORDINE di ciò che va fatto cambia di rado; i nomi delle cose, spesso. Se ti perdi, la parte qui sopra ti dice che cosa stai cercando di ottenere.
+Services.Item.GoogleVoices=Voci di Google Cloud
+Services.Item.AzureVoices=Voci di Azure Speech
+Services.Item.DeepSeek=Traduzione con DeepSeek
+Services.Item.Gemini=Traduzione con Gemini
+Services.Item.OpenAi=Traduzione con GPT (OpenAI)
+Services.About.Gemini=Gemini traduce un libro intero in un'altra lingua, con il modello di Google. A orecchio è stato giudicato il migliore di tutti — ed è quello con la fregatura.\n\nRifiuta circa un brano su sei di un romanzo pubblicato. Non per il contenuto: lo schema sembra quello di un modello che riconosce un libro che già conosce, e nessuna impostazione lo cambia. Per questo NBR chiede a un secondo servizio ciò che il primo non accetta, e per questo vale la pena mettere su la catena invece di affidarsi a un solo motore.\n\nC'è un piano gratuito, ed è abbastanza generoso da essere il modo normale di usarlo: misurato su un progetto reale, Gemini 3.1 Flash Lite consente 500 richieste al giorno, cioè circa sei libri. L'uso a pagamento costa all'incirca venticinque centesimi per un romanzo da 450.000 caratteri.\n\nUNA COSA DA SOPPESARE PRIMA DI SCEGLIERE IL PIANO GRATUITO. La pagina dei prezzi di Google dice che nel piano gratuito i tuoi contenuti vengono usati per migliorare i loro prodotti, e che in quello a pagamento no. Una traduzione manda il libro intero, quindi la differenza è reale. La scelta è comunque tua — ma dev'essere una scelta e non una sorpresa.\n\nOttenere la chiave è il percorso più lungo dei quattro, e i passaggi qui sotto sono scritti da una prova reale, perché la strada ovvia non funziona.
+Services.About.GoogleVoices=Le voci di Google Cloud leggono i libri ad alta voce attraverso internet, con le voci di Google. Per la maggior parte delle lingue sono le migliori del cloud, e il piano gratuito è il più ampio: circa un milione di caratteri al mese, cioè all'incirca due libri.\n\nDevono succedere tre cose, in quest'ordine. Ti serve un ACCOUNT GOOGLE, che quasi tutti hanno già. Dentro ci crei un PROGETTO e attivi il servizio Text-to-Speech per quel progetto — e Google non lo attiva finché non è configurata la fatturazione, quindi serve una carta anche se il piano gratuito non costa nulla. Poi crei un ACCOUNT DI SERVIZIO e ne scarichi la chiave.\n\nQuest'ultima parte è ciò che rende questo servizio particolare. Google non consegna una chiave da incollare: dà un piccolo file che finisce con .json, scaricato una volta sola. NBR conserva ciò che c'è dentro quel file e non il file stesso, così dopo puoi spostarlo o cancellarlo.
+Services.About.AzureVoices=Le voci di Azure Speech leggono i libri ad alta voce attraverso internet, con le voci di Microsoft. In inglese e in molte altre lingue sono molto buone. In croato sono nella media, e lì Azure non supporta il dizionario di pronuncia, perciò una regola che scrivi per un nome non verrà rispettata. Il piano gratuito è di circa mezzo milione di caratteri al mese, all'incirca un libro.\n\nDevono succedere due cose, e solo la prima dipende da te. Ti serve un ACCOUNT MICROSOFT prima di poterne avere uno Azure, e poi un ABBONAMENTO AZURE — che richiede verifiche d'identità, una carta e un contratto. Deve farlo una persona di proposito, quindi non si può automatizzare e NBR non ci prova nemmeno.\n\nTutto il resto è compito di NBR. Accede con un codice breve, crea la risorsa nel piano gratuito e ne conserva la chiave. Il portale di Azure non lo apri mai.\n\nC'è una cosa che coglie molti di sorpresa. Quando viene attivato il tuo abbonamento, Azure crea in silenzio una DIRECTORY per esso. Se il tuo account Microsoft è personale — Gmail, Outlook, Hotmail —, Azure rifiuta l'accesso finché non indichi quella directory, perché per questo scopo non riconosce gli account personali. Il suo nome finisce con onmicrosoft.com.
+Services.About.DeepSeek=DeepSeek traduce un libro intero in un'altra lingua. Dei servizi che NBR può usare è il più costante — è quello che rifiuta meno — e di gran lunga il più economico.\n\nServe una cosa: un account presso DeepSeek e un po' di credito sopra. Non c'è un piano gratuito, ma la traduzione si paga a quantità di testo e un libro costa pochissimo.\n\nQuesto dà una chiave che incolli, ed è il più semplice dei quattro. L'unica cosa a cui stare attenti è che la chiave viene mostrata UNA volta, quando la crei. Se chiudi quella finestra senza copiarla, non si può più mostrare e semplicemente ne fai un'altra.
+Services.About.OpenAi=OpenAI traduce un libro intero in un'altra lingua, con i modelli GPT. È offerto in tre livelli su un solo account e con una sola chiave: Terra, quello da cui conviene cominciare, Luna, più economico, e Sol, il più caro.\n\nNon c'è alcun piano gratuito, ed è qui che la gente resta spiazzata: un abbonamento a ChatGPT NON paga questo. L'API si fattura a parte, e un account nuovo è PREPAGATO — versi una piccola somma di credito, e le chiamate attingono da quel saldo. Cinque o dieci dollari bastano e avanzano per vedere quanto costa davvero un libro prima di decidere qualsiasi cosa.\n\nQuanto costa un libro, calcolato per un romanzo da 450 000 caratteri e in base a come il croato si spezza davvero in token, non a occhio: circa due dollari e mezzo su Terra, uno su Luna, cinque su Sol. Per confronto, lo stesso libro è stato misurato in circa ventitré centesimi su Gemini. Ognuna di queste cifre è poca cosa per un libro a cui tieni; per farne un'abitudine, Terra viene circa dieci volte Gemini.\n\nLa chiave è di quelle normali, la incolli qui, il che rende questo il servizio più facile da configurare.
+Services.Steps.Gemini=NON USARE AI STUDIO PER QUESTO. Il suo pulsante "Create API key" fallisce con "The request is suspicious. Please try again." — misurato su un account nuovo che non aveva mai avuto un metodo di pagamento, con il progetto già creato e importato. L'errore vero, sotto, è un 403 del servizio di Google stesso. Tutto quanto segue si fa invece nella CLOUD CONSOLE, e quella strada funziona.\n\nL'ordine conta: il progetto, poi l'API, poi un account di servizio, e solo allora la chiave. Fatto in quest'ordine, la chiave riesce al primo colpo.\n\n1. Apri console.cloud.google.com/projectcreate nel browser e accedi.\n\n2. Dai al progetto un nome che riconoscerai, per esempio NBR. Lascia Organization su "No organization" — è la risposta normale per un account personale, e un'organizzazione porta con sé politiche che non controlli. Scegli CREATE e aspetta che il progetto compaia.\n\n3. SE GOOGLE TI OFFRE UNA PROVA GRATUITA CON 300 DOLLARI DI CREDITO, RIFIUTALA. Quel credito non paga affatto l'API di Gemini — è un altro portafoglio per un altro prodotto. Peggio: accettarla crea un account di fatturazione, e Google da quel momento collega la fatturazione a ogni nuovo progetto in automatico, il che toglie il progetto dal piano gratuito. Chiede anche una carta di pagamento. Di' di no.\n\n4. Apri console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Controlla che il nome del progetto nella barra in alto sia quello che hai appena creato. La pagina si intitola "Gemini API". Scegli ENABLE e aspetta che il pulsante sparisca.\n\n5. Apri console.cloud.google.com/iam-admin/serviceaccounts/create. Questo passaggio ti risparmia di fare il successivo due volte: la chiave non può raggiungere Gemini se non è legata a un account di servizio, e crearlo adesso vuol dire trovarlo pronto quando serve.\n\n6. Nella pagina intitolata "Create service account" riempi solo il primo campo, "Service account name" — nbr-translate è un buon nome, e l'ID sotto si riempie da solo. Scegli "CREATE AND CONTINUE". Il passaggio 2, "Permissions", è facoltativo: lascialo vuoto, non serve alcun ruolo. Scegli DONE in fondo.\n\n7. Apri console.cloud.google.com/apis/credentials. Controlla di nuovo il nome del progetto nella barra in alto. Nella riga di azioni accanto al titolo "Credentials", scegli "+ CREATE CREDENTIALS", e dal menu che si apre scegli la PRIMA voce, "API key" — non "OAuth client ID" e non "Service account".\n\n8. Si apre un pannello a destra, intitolato "Create API key". Nel campo "Name", in cima, scrivi un nome come NBR.\n\n9. Scorri GIÙ dentro quel pannello, oltre la sezione "APIs that can be accessed using this key", fino a una casella con la scritta "Authenticate API calls through a service account". SPUNTALA. È il passaggio che nessuno indovina: finché non è spuntata, Gemini non si può scegliere affatto — la sua voce resta in grigio e solo un suggerimento dice perché.\n\n10. Subito sotto compare una sezione intitolata "Service account". Scegli "+ Select a service account", scegli l'account creato al passaggio 6 selezionando il cerchietto a sinistra della sua riga, e scegli SELECT in fondo a quella finestra.\n\n11. Ora risali nel pannello fino a "APIs that can be accessed using this key" e apri l'elenco sotto "Select API restrictions". "Gemini API" ora si può spuntare. Spuntala e scegli OK.\n\n12. Scorri GIÙ fino in fondo al pannello e scegli CREATE. Lascia "Application restrictions" su "None".\n\n13. Compare una finestra intitolata "API key created" con dentro la chiave. Comincia con AQ. e non con AIza, il che è giusto per una chiave legata a un account di servizio. Copiala con l'icona di copia a destra del campo.\n\n14. Torna qui, scegli Configura questo servizio e incolla la chiave. NBR la controlla presso Google prima di conservarla.\n\nSE LA CONSOLE DICE CHE TI SERVE UN ACCESSO AGGIUNTIVO e nomina un permesso mancante, quasi certamente hai fatto l'accesso con l'account Google sbagliato, non ti mancano i diritti. Aggiungi authuser=1 in fondo all'indirizzo — oppure authuser=2, e così via — finché il progetto non compare.
+Services.Steps.GoogleVoices=1. Apri console.cloud.google.com nel browser e accedi con un account Google.\n\n2. Accetta le condizioni se te lo chiedono, e crea un progetto quando te lo propone. Va bene qualsiasi nome.\n\n3. Trova la casella di ricerca in alto, scrivi "Cloud Text-to-Speech API", scegliela tra i risultati e premi Enable.\n\n4. Google ti chiederà di configurare la fatturazione prima di attivare l'API. Aggiungi una carta.\n\n5. Cerca di nuovo "Service accounts" e aprilo. Premi Create service account, dai un nome qualsiasi e premi Done. Non serve scegliere nessun ruolo né permesso.\n\n6. Apri l'account che hai appena creato, vai alla scheda Keys, premi Add key, poi Create new key, e scegli JSON. Il file viene scaricato.\n\n7. Torna qui, premi "Configura questo servizio" e scegli quel file scaricato.
+Services.Steps.AzureVoices=1. Apri azure.microsoft.com/free nel browser e premi Start free.\n\n2. Accedi con un account Microsoft, oppure creane uno.\n\n3. Inserisci i tuoi dati. Azure chiede una carta per verificare che tu sia una persona; il piano gratuito non viene addebitato.\n\n4. Se il tuo account è personale, trova il nome della tua directory: accedi al portale e compare nella barra degli indirizzi dopo la chiocciola, con la fine in onmicrosoft.com.\n\n5. Torna qui e premi "Configura questo servizio".\n\n6. Inserisci quel nome di directory se il tuo account è personale, e lascialo vuoto se è aziendale o scolastico. Premi Avvia.\n\n7. Apri la pagina di accesso con il pulsante, digita il codice breve mostrato e accedi.\n\n8. Scegli il tuo abbonamento e premi Crea. NBR crea la risorsa e ne conserva la chiave. Tu non digiti altro.
+Services.Steps.DeepSeek=1. Apri platform.deepseek.com nel browser.\n\n2. Premi Sign up. Puoi inserire un'email e una password, oppure registrarti con Google, che è più rapido.\n\n3. Conferma la tua email se te lo chiedono.\n\n4. Una volta dentro, cerca Top up o Billing e aggiungi un po' di credito.\n\n5. Cerca API keys nel menu di sinistra.\n\n6. Premi Create new API key, dai un nome qualsiasi e premi Create.\n\n7. Copia la chiave PRIMA di chiudere quella finestra.\n\n8. Torna qui, premi "Configura questo servizio" e incollala.
+Services.Steps.OpenAi=1. Apri platform.openai.com nel browser. Questa è la piattaforma per sviluppatori, non il sito di ChatGPT, ed è una cosa a parte anche se ChatGPT lo paghi già.\n\n2. Accedi con il tuo account, oppure creane uno.\n\n3. Controlla PRIMA in quale organizzazione ti trovi. Il nome sta in alto a sinistra ed è un menu: aprilo e scegli la tua, di solito chiamata Personal. Se qualcuno ti ha mai invitato nella propria organizzazione, o hai una postazione ChatGPT Team o Business per lavoro, la piattaforma può metterti in QUELLA — dove sei solo un membro, la fatturazione ti respinge con "required permission: api.billing.read", e qualsiasi chiave creassi apparterrebbe all'account sbagliato. Tutto quanto segue deve avvenire nella tua organizzazione.\n\n4. Vai su platform.openai.com/settings/organization/billing/overview. La fatturazione sta sotto ORGANIZATION, non nella pagina delle impostazioni normale, che è dove è facile cercarla e non trovarla. Scegli Add to balance, aggiungi una carta di pagamento e compra credito. Dieci dollari è il minimo e più che sufficiente per cominciare. Nulla funziona finché non c'è credito sull'account.\n\n5. Già che ci sei, imposta un limite di spesa mensile. Non costa nulla e fa sì che un errore non possa farti lievitare il conto.\n\n6. Apri API keys nelle stesse impostazioni e scegli Create new secret key. Dagli un nome che riconoscerai, per esempio NBR. Assicurati di essere ancora nella stessa organizzazione del credito.\n\n7. Copia la chiave appena compare. Viene mostrata UNA volta. Se chiudi quella finestra senza copiarla, non si può più mostrare — semplicemente la cancelli e ne fai un'altra.\n\n8. Torna qui, scegli Configura questo servizio e incolla la chiave.\n\n9. NBR controlla la chiave presso OpenAI prima di conservarla, così scopri subito se funziona.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Guida – in arrivo.
+Dialog.Help.Title=Guida
+Dialog.About.Title=Informazioni su NBR
+Dialog.About.Release=Alfa
+Dialog.About.Licence=🄯 Copyleft — NBR è software libero sotto la GNU General Public License, versione 3. Puoi usarlo, studiarlo, condividerlo e modificarlo; se distribuisci una versione modificata, questa prosegue alle stesse condizioni, insieme al suo codice sorgente.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nBuild del {1}\n\nQuesto è un lettore multiformato e multiuscita di libri e pubblicazioni digitali, pensato specialmente per persone cieche, ipovedenti e con difficoltà di lettura. È gratuito per l'uso di base, ma se vuoi esplorare e usare le sue funzioni avanzate come la traduzione e le voci dal cloud dovrai registrarti e forse pagare i rispettivi servizi esterni.\n\nRealizzato da Nemoguća vizija — nemoviz.org\n\nScritto da Gordan Radić\n\nCostruito con Claude (Anthropic). Buona parte del codice è stata scritta da lui, secondo il progetto, le decisioni e le misure dell'autore; il diritto d'autore e la licenza sono suoi.\n\n{2}\n\nSU CHE COSA È COSTRUITO NBR\n\nNBR riproduce il suono con libmpv, legge il braille con liblouis, parla attraverso il client controller di NVDA, legge i tag con TagLib#, ricava il testo dai PDF con PdfPig e apre gli archivi con SharpCompress. Ognuna è una libreria a sé, usata senza modifiche, e ognuna può essere sostituita da una build compatibile della stessa.\n\nlibmpv, e l'FFmpeg che contiene — LGPL 2.1 o successiva\n\nliblouis e le sue tabelle braille — LGPL 2.1 o successiva\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress e i pacchetti Microsoft — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend e OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nL'avviso completo — versioni, titolari dei diritti e da dove è stata letta ciascuna licenza — si trova in THIRD-PARTY-NOTICES.txt accanto al programma, e i testi delle licenze nella cartella Licences.
+Hint.Button.Accessible=Guida su {0}
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Errore
+Dialog.Error.General=Errore: {0}
+Dialog.DontShowAgain=Non mostrare più questo messaggio
