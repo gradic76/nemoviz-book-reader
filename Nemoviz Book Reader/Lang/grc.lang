@@ -1,0 +1,785 @@
+; Nemoviz Book Reader
+;
+; Translated by:            Claude (Anthropic), 2026
+; Verified and modified by: 
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; NOTE: MUCH OF THIS VOCABULARY IS COINED, and you should know that before
+; you trust it. Ancient Greek has no attested word for a sound card, a cloud
+; voice, an API key or an MP3, so where the language ran out the terms here
+; were made rather than found: pinakion tou echou, phonai tou nephous, kleis
+; API, chronometron. Where a real word existed it was used - bibliotheke,
+; kephalaion, selis, phone - and product names are left alone.
+; The orthography is polytonic throughout. So this file is usable Greek and
+; it is not attested usage. Correct it freely; nothing here rests on a source.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Ἀρχαία Ἑλληνική
+Btn.OK=Καλῶς
+Btn.Yes=Ναί
+Btn.No=Οὔ
+Btn.Cancel=Ἄφες
+Btn.Close=Κλεῖσον
+Btn.Continue=Πρόσθες
+Btn.Refresh=Ἀνανέωσον
+Btn.Refresh.Accessible=Ἀνανέωσον
+Common.Dash=-
+Common.Error=Σφάλμα
+Common.DateFormatLong=d MMMM yyyy
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Ἐπιγραφή:
+Player.Info.AuthorLabel=Συγγραφεύς:
+Player.Info.ProducerLabel=Κατασκευαστής:
+Player.Info.PublisherLabel=Ἐκδότης:
+Player.Info.ChapterLabel=Κεφάλαιον:
+Player.Info.PartLabel=Μέρος:
+Player.Info.PageLabel=Σελίς:
+Player.Info.BookmarksLabel=Σημεῖα:
+Player.Info.VoiceLabel=Φωνή:
+Player.Info.NoVoiceLabel=Οὐδεμία φωνὴ ἐγκατέστηκεν
+Player.Info.PartNumElapsed=Μέρος {0}, παρῆλθεν:
+Player.Info.PartNumRemaining=Μέρος {0}, λείπεται:
+Player.Info.ElapsedLabel=Παρῆλθεν:
+Player.Info.RemainingLabel=Λείπεται:
+Player.Info.VolumeLabel=Μέγεθος ἤχου:
+Player.Info.SpeedLabel=Τάχος:
+Player.Info.AccessibleName=Ἀγγελίαι περὶ τῆς ἀναγνώσεως, F8
+Player.Info.Prepared=Φωνὴ σεσωσμένη: μέρη {0}, {1} MB
+Player.Info.Preparing=Τὸ λοιπὸν τοῦ βιβλίου παρασκευάζεται: {0} ἐκ τῶν {1} μερῶν
+Player.TitleBar.Paused=διαλέλειπται
+Player.ReadingSurface.Accessible=Χώρα ἀναγνώσεως
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Ἀναγίγνωσκε, κενόν
+Btn.Pause.Accessible=Διάλειπε, κενόν
+Btn.Back.Accessible=Ὀπίσω, Maiusc+Ἀριστερά
+Btn.Forward.Accessible=Πρόσω, Maiusc+Δεξιά
+Btn.VolumeUp.Accessible=Μεῖζον, F12
+Btn.VolumeDown.Accessible=Ἔλαττον, F11
+Btn.Power.Accessible=Ἔξιθι, Alt+F4
+Player.Volume.Text=Μέγεθος ἤχου: {0}%
+Player.Volume.Accessible=Μέγεθος ἤχου {0} ἑκατοστά
+Player.Speed.Text=Τάχος: {0}x
+Player.Speed.Legend=Τάχος
+Player.Speed.Accessible=Τάχος {0}πλάσιον
+Player.Speed.Wpm=Τάχος: {0} λ.κ.λ.
+Player.Speed.WpmAccessible=Τάχος {0} λέξεις κατὰ λεπτόν
+Player.Position.Label=Θέσις
+Player.Position.Text=Θέσις: {0} / {1}
+Player.Position.Accessible=Θέσις {0} ἑκατοστά
+Player.Progress.Legend=Προκοπή
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Βῆμα μεταβάσεως:
+Player.Seek.Accessible=Βῆμα μεταβάσεως, Maiusc+Ἄνω ἢ Maiusc+Κάτω
+Player.Seek.Announce=Μετάβασις: {0}
+Seek.Item.15s=15 δεύτερα
+Seek.Item.30s=30 δεύτερα
+Seek.Item.1min=1 λεπτόν
+Seek.Item.5min=5 λεπτά
+Seek.Item.10min=10 λεπτά
+Seek.Item.15min=15 λεπτά
+Seek.Item.30min=30 λεπτά
+Seek.Item.Chapter=Κεφάλαιον
+Seek.Item.Part=Μέρος
+Seek.Item.Track=Λωρίς
+Seek.Item.HeadingLevel=Ἐπιγραφὴ {0}
+Seek.Item.Page=Σελίς
+Seek.Item.Bookmark=Σημεῖον
+Seek.Item.StandardPage=Σελὶς κανονική
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Βιβλιοθήκη
+Btn.Library.Accessible=Βιβλιοθήκη, F3
+Btn.Library.Legend=Βιβλιοθήκη
+Btn.Settings=Ῥυθμίσεις
+Btn.Settings.Accessible=Ῥυθμίσεις, F2
+Btn.Settings.Legend=Ῥυθμίσεις
+Btn.Properties.Legend=Ἰδιότητες
+Btn.Properties=Ἰδιότητες
+Btn.Properties.Accessible=Ἰδιότητες, Alt+Enter
+Btn.Help=Βοήθεια
+Btn.Help.Accessible=Βοήθεια, F1
+Btn.Help.Legend=Βοήθεια
+Btn.GoTo.Legend=Μετάβασις...
+Btn.GoTo=Μετάβασις...
+Btn.GoTo.Accessible=Μετάβασις, F4
+Btn.SetBookmark.Legend=Σημεῖον
+Btn.SetBookmark=Σημεῖον θεῖναι
+Btn.SetBookmark.Accessible=Σημεῖον θεῖναι, F5
+Btn.ManageBookmarks.Legend=Σημεῖα
+Btn.ManageBookmarks=Σημεῖα
+Btn.ManageBookmarks.Accessible=Τὰ σημεῖα διοικεῖν, F6
+Btn.Timer=Χρονόμετρον
+Btn.Timer.Legend=Χρονόμετρον
+Btn.Timer.Accessible=Χρονόμετρον ὕπνου, F7
+Btn.Timer.Countdown=Χρονόμετρον {0}
+Btn.Timer.Accessible.Active=Χρονόμετρον ὕπνου, λείπονται {0}, πίεσον ἵνα ἡ ἀνάγνωσις παύσηται καὶ τὸ χρονόμετρον ἀφεθῇ
+Btn.Timer.Accessible.LessThanMinute=Χρονόμετρον ὕπνου, ἔλαττον λεπτοῦ
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Ὀπίσω (Maiusc+Ἀριστερά)
+Tip.PlayPause=Ἀναγίγνωσκε/διάλειπε (κενόν)
+Tip.Forward=Πρόσω (Maiusc+Δεξιά)
+Tip.Seek=Μεταβάλλεται διὰ Maiusc+Ἄνω καὶ Maiusc+Κάτω· μεταβαίνεις διὰ Maiusc+Ἀριστερά καὶ Maiusc+Δεξιά (καὶ διὰ Ὀπίσω καὶ Πρόσω)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enter
+Tip.Timer=F7
+Tip.Volume=F11 καὶ F12
+Tip.Speed=Ctrl+Ἀριστερά καὶ Ctrl+Δεξιά
+Tip.Progress=Ctrl+1–9: μετάβασις εἰς 10–90%
+Player.OpenFile.Title=Ἕλοῦ βιβλίον
+Player.NoVoiceForLanguage=Οὐδεμία φωνὴ ἐγκατεστημένη τὴν γλῶτταν {0} λαλεῖ. Ἄνοιξον τὰς ἰδιότητας διὰ Alt+Enter καὶ ἑλοῦ μίαν.
+Filter.Audiobooks=Βιβλία φωνητικά
+Filter.TextBooks=Βιβλία γεγραμμένα
+Filter.BrailleBooks=Βιβλία Braille
+Filter.Archives=Κιβώτια
+Filter.AllSupported=Πᾶσαι αἱ δέλτοι αἱ ὑποστηριζόμεναι
+Filter.AllFiles=Πᾶσαι αἱ δέλτοι
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Βιβλιοθήκη
+Library.List.Accessible=Βιβλιοστάσιον
+Library.NowReading.Accessible=Νῦν ἀναγιγνώσκεται
+Library.NowReading.Empty=Οὐδὲν βιβλίον ἐπιτέθειται
+Library.Search.Accessible=Ζήτησις
+Library.Filter.Accessible=Διακρίνειν κατὰ κατάστασιν
+Library.Details.Accessible=Ἀγγελίαι τοῦ βιβλίου
+Library.Btn.Load=Ἐπίθες
+Library.Btn.Load.Accessible=Ἐπίθες
+Library.Btn.Close=Κλεῖσον
+Library.Btn.Close.Accessible=Κλεῖσον
+Menu.File=Δέλτος
+Menu.File.OpenFile=Δέλτον ἀνοῖξαι...
+Menu.File.OpenFolder=Θήκην ἀνοῖξαι...
+Menu.File.OpenAudioCd=Δίσκον φωνητικὸν ἀνοῖξαι
+Menu.File.ClearLibrary=Τὴν βιβλιοθήκην κενῶσαι...
+Menu.File.Exit=Ἔξοδος
+Menu.File.ExportAudio=Ὡς βιβλίον φωνητικὸν σῶσαι...
+Menu.File.Translate=Τὸ βιβλίον μεταφράσαι...
+Menu.Sort=Τάξις
+Menu.Sort.Alphabetically=Κατὰ στοιχεῖα
+Menu.Sort.DateAdded=Κατὰ ἡμέραν προσθήκης
+Menu.Sort.Format=Κατὰ εἶδος
+Menu.Sort.Status=Κατὰ κατάστασιν
+Menu.Sort.Ascending=Ἀναβαίνουσα
+Menu.Sort.Descending=Καταβαίνουσα
+Menu.Sort.ActiveMark=(ᾑρημένον)
+Menu.Help=Βοήθεια
+Menu.Help.Help=Βοήθεια
+Menu.Help.About=Περὶ τοῦ NBR
+Menu.Help.Services=Ὑπηρεσίαι καὶ λόγοι...
+Shelf.Filter.All=Πάντα τὰ βιβλία
+Shelf.Filter.Reading=Ἀναγιγνωσκόμενα
+Shelf.Filter.Unread=Ἀνάγνωστα
+Shelf.Filter.Read=Ἀνεγνωσμένα
+Shelf.Filter.Favorites=Ἀγαπώμενα
+Shelf.Status.NowReading=Νῦν ἀναγιγνώσκεται
+Shelf.Status.Reading=Ἀναγιγνώσκεται
+Shelf.Status.Unread=Ἀνάγνωστον
+Shelf.Status.Read=Ἀνεγνωσμένον
+Context.Open=Ἄνοιξον
+Context.MarkRead=Σημείωσον ὡς ἀνεγνωσμένον
+Context.MarkUnread=Σημείωσον ὡς ἀνάγνωστον
+Context.Rename=Μετονόμασον
+Context.Delete=Ἐξάλειψον
+Context.Properties=Ἰδιότητες
+Context.ReadOcr=Τὰ γράμματα γνώρισον
+Context.ReReadOcr=Πάλιν ἄλλῃ γλώττῃ γνώρισον
+Context.Translate=Τὸ βιβλίον μεταφράσαι...
+Context.Favorite=Σημείωσον ὡς ἀγαπώμενον
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Ἐπιγραφή
+Details.Field.Author=Συγγραφεύς
+Details.Field.Format=Εἶδος
+Details.Field.Speed=Τάχος
+Details.Field.Volume=Μέγεθος ἤχου
+Details.Field.Added=Προσετέθη
+Details.Field.Producer=Κατασκευαστής
+Details.Field.Publisher=Ἐκδότης
+Details.Field.Year=Ἔτος
+Details.Field.Time=Χρόνος
+Details.Field.Elapsed=Παρῆλθεν
+Details.Field.Remaining=Λείπεται
+Details.Field.Read=Ἀνεγνωσμένον
+Details.Field.Pages=Σελίδες
+Details.Field.Headings=Ἐπιγραφαί
+Details.Field.Characters=Γράμματα
+Details.Field.Language=Γλῶττα γνωρισθεῖσα
+Details.Field.Description=Περιγραφή
+Details.Description.Open=Πίεσον Enter ἵνα ἀναγνῷς
+Details.Field.SoundProcessing=Θεραπεία τοῦ ἤχου
+Details.Sound.On=Ναί
+Details.Sound.Off=Οὔ
+Details.Speed.Wpm={0} λ.κ.λ.
+Dialog.Description.Title=Περιγραφή - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Βιβλίον τῇ βιβλιοθήκῃ προσθεῖναι
+Library.ImportFolder.Description=Ἑλοῦ τὴν θήκην ἐν ᾗ τὰ βιβλία ἐστίν
+Dialog.ConfirmImport.Message=Ἐν τῷ τόπῳ τῷ ᾑρημένῳ ηὑρέθη βιβλία {0}: {1} φωνητικά, {2} γεγραμμένα, {3} ἐν εἴδεσιν ἰδίοις, καὶ {4} κιβώτια.\n\nΕἰ ὀρθῶς ἔχει, μετὰ τὴν βεβαίωσίν σου τὰ βιβλία εἰς τὴν βιβλιοθήκην σου μεταγραφήσεται καὶ τὰ κιβώτια ἐκεῖ ἀνοιχθήσεται. Ἡ βιβλιοθήκη σου ἐν {5} ἐστίν.\n\nἘν τῷ τόπῳ ὅθεν ἔρχεται οὐδὲν μεταβάλλεται — πάντα ἄθικτα μένει, μὴ μερίμνα.\n\nΕἰ οἱ ἀριθμοὶ τῇ προσδοκίᾳ σου οὐκ ἀποκρίνονται, ἄλλως διάταξον τὰ εἰσακτέα. Ἡ εἰσαγωγὴ ἡ πολλὴ ἐν τῷ τὰς ἐπιγραφὰς διακρίνειν ὅρους ἔχει, οὐδὲ ὁ NBR ὑπὲρ ἑκάστου ἐγγυᾶσθαι δύναται.\n\nΤοῦτο χρόνον τινὰ διαρκεῖν δύναται· μὴ διακόπτε, εἰ δυνατόν.
+Dialog.ConfirmImport.One=Ἓν βιβλίον ηὑρέθη. Ἆρα εἰσαγάγῃς;
+Dialog.ConfirmImport.Title=Θήκην προσθεῖναι
+Dialog.NoBooksFound.Message=Ἐν τῇ θήκῃ τῇ ᾑρημένῃ οὐδὲν βιβλίον ηὑρέθη ὃ ὑποστηρίζεται.
+Dialog.NoBooksFound.Title=Θήκην προσθεῖναι
+Dialog.ImportSuccess.Message=Τὸ βιβλίον τῇ βιβλιοθήκῃ προσετέθη.
+Dialog.ImportSuccess.Title=Βιβλίον προσθεῖναι
+Dialog.ImportError.Message=Τὸ βιβλίον προστεθῆναι οὐκ ἠδυνήθη: {0}
+Dialog.ImportFolderSuccess.Message=Εἰσήχθη βιβλία {0}.
+Dialog.ImportFolderSuccess.Skipped=Παρελείφθη {0}.
+Dialog.ImportFolderSuccess.SkippedList=Ταῦτα οὐκ εἰσῆλθεν:
+Dialog.ImportFolderSuccess.Title=Θήκην προσθεῖναι
+Dialog.ImportFolderError.Message=Ἡ θήκη εἰσαχθῆναι οὐκ ἠδυνήθη: {0}
+Dialog.ReimportExisting.Title=Ἤδη ἐν τῇ βιβλιοθήκῃ
+Dialog.ReimportExisting.Message=Τὸ {0} ἤδη ἐν τῷ βιβλιοστασίῳ ἕστηκεν. Τὸ πάλιν εἰσαγαγεῖν ἀνανεοῖ ὃ ἐν τῇ θήκῃ τοῦ βιβλίου κεῖται. Ἡ θέσις σου ἐν τῷ βιβλίῳ καὶ τὰ σημεῖά σου μένει — ἀλλ᾽ εἰ ἡ δέλτος ἐν τῷ μεταξὺ μετεβλήθη, αἱ λέξεις μετεκινήθησαν καὶ ἡ θέσις οὐκέτι ἐκεῖ ἐστὶν ὅπου ἐπαύσω. Ἆρα πάλιν εἰσαγάγῃς;
+Dialog.Skipped.Drm=πεφυλαγμένον
+Dialog.Skipped.Cancelled=ἀφειμένον
+Dialog.Skipped.MissingFirstVolume=τὸ πρῶτον μέρος τῆσδε τῆς σειρᾶς ἀπολείπεται
+Dialog.Skipped.Empty=ἡ δέλτος κενή ἐστιν
+Dialog.Rename.Title=Τὸ βιβλίον μετονομάσαι
+Dialog.Rename.Prompt=Ὄνομα νέον:
+Dialog.Rename.AuthorLabel=Συγγραφεύς:
+Dialog.Rename.TitleLabel=Ἐπιγραφή:
+Dialog.ConfirmDelete.Message=Ἆρα ἀληθῶς βούλει τὸ "{0}" εἰς ἀεὶ ἐκ τοῦ δίσκου ἐξαλεῖψαι; Τοῦτο ἀνακληθῆναι οὐ δύναται.
+Dialog.ConfirmDelete.Title=Τὸ βιβλίον ἐξαλεῖψαι
+Dialog.DeleteError.Message=Τὸ βιβλίον ἐκ τοῦ δίσκου ἐξαλειφθῆναι οὐκ ἠδυνήθη: {0}
+Dialog.ActiveBook.Message=Τὸ "{0}" νῦν ἐν τῷ ἀναγνώστῃ ἐπιτέθειται οὐδὲ ἐξαλειφθῆναι δύναται. Κλεῖσον τὴν βιβλιοθήκην, ἄνοιξον ἄλλο βιβλίον ἢ παῦσον τὴν ἀνάγνωσιν, καὶ πάλιν πείρασον.
+Dialog.ActiveBook.Title=Τὸ βιβλίον ἐν χρήσει ἐστίν
+Dialog.ClearLibrary.Title=Τὴν βιβλιοθήκην κενῶσαι
+Dialog.ClearLibrary.Message=Ἆρα πάντα τὰ βιβλία {0} ἐκ τῆς βιβλιοθήκης ἐξαλείψῃς; Οὕτως αἱ δέλτοι αὐτῶν εἰς ἀεὶ ἐκ τοῦ δίσκου ἐξαλειφθήσονται, οὐδὲ ἀνακληθῆναι δυνήσονται.
+Dialog.ClearLibrary.Empty=Ἡ βιβλιοθήκη ἤδη κενή ἐστιν.
+Dialog.ClearLibrary.Done=Ἀφῃρέθη βιβλία {0}.
+Dialog.ClearLibrary.Skipped={0} ἀφαιρεθῆναι οὐκ ἠδυνήθη (ἐν χρήσει ἢ νῦν ἀνεῳγμένα).
+Dialog.DrmProtected.Title=Βιβλίον πεφυλαγμένον
+Dialog.DrmProtected.Message=Τοῦτο τὸ βιβλίον DRM πεφύλακται (τὰ ἐντὸς αὐτοῦ κέκρυπται) διὸ ἀνοιχθῆναι οὐ δύναται. Χρῶ ἀντιγράφῳ ἄνευ DRM.
+Dialog.ArchivePassword.Title=Συνθήματος δεῖ
+Dialog.ArchivePassword.Prompt=Τὸ κιβώτιον "{0}" συνθήματι πεφύλακται. Γράψον αὐτὸ ἵνα ἀνοιχθῇ:
+Dialog.ArchivePassword.Retry=Ἐκεῖνο τὸ σύνθημα οὐκ ἴσχυσεν. Πάλιν πείρασον ὑπὲρ τοῦ "{0}":
+Dialog.ArchivePassword.Field=Σύνθημα τοῦ κιβωτίου
+Extract.Progress.Title=Ἄνοιξις
+Extract.Progress.Preparing=Παρασκευάζεται…
+Extract.Progress.Determinate=Ἀνοίγεται… {0} / {1} δέλτοι
+Extract.Progress.Indeterminate=Ἀνοίγεται… {0} δέλτοι
+
+; ---- GO TO
+Dialog.GoTo.Title=Μετάβασις
+GoTo.List.Accessible=Μέρη τοῦ βιβλίου
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=Καλῶς
+GoTo.Cancel.Accessible=Ἄφες
+GoTo.AutoPlay=Μετὰ τὴν μετάβασιν ἀναγιγνώσκειν
+GoTo.AutoPlay.Hint=Ἐὰν τοῦτο ἐνεργὸν ᾖ, ἡ ἀνάγνωσις εὐθὺς μετὰ τὴν μετάβασιν ἄρχεται. Ἐὰν δὲ μή, ἡ κατάστασις μένει οἵα ἦν· τὸ διαλελειμμένον διαλελειμμένον μένει, καὶ τὸ ἀναγιγνωσκόμενον ἀναγιγνωσκόμενον.
+GoTo.Hint.Accessible=Ἐξήγησις
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Χρονόμετρον ὕπνου
+SleepTimer.Duration.Group=Χρόνος
+SleepTimer.Duration.15=15 λεπτά
+SleepTimer.Duration.30=30 λεπτά
+SleepTimer.Duration.45=45 λεπτά
+SleepTimer.Duration.60=60 λεπτά
+SleepTimer.Duration.Custom=Ἄλλος:
+SleepTimer.Custom.Accessible=Ἄλλος χρόνος ἐν λεπτοῖς
+SleepTimer.Bookmark=Σημεῖον θεῖναι ὅτε ἄρχεται
+SleepTimer.Action.Group=Ὅταν ὁ χρόνος ἐξέλθῃ
+SleepTimer.Action.Stop=Τὴν ἀνάγνωσιν παῦσαι
+SleepTimer.Action.StopClose=Παῦσαι καὶ τὸ πρόγραμμα κλεῖσαι
+SleepTimer.Action.StopShutdown=Παῦσαι, κλεῖσαι καὶ τὸν ὑπολογιστὴν σβέσαι
+SleepTimer.Start=Ἄρξαι
+SleepTimer.Start.Accessible=Τὸ χρονόμετρον ὕπνου ἄρξαι
+SleepTimer.CancelBtn=Ἄφες
+SleepTimer.CancelBtn.Accessible=Ἄφες
+SleepTimer.Announce.Set=Χρονόμετρον ὕπνου τέθειται: λεπτὰ {0}
+SleepTimer.Announce.Cancelled=Χρονόμετρον ὕπνου ἀφεῖται
+SleepTimer.Announce.Finished=Ὁ χρόνος ἐξῆλθεν, ἡ ἀνάγνωσις πέπαυται
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Τὰ σημεῖα διοικεῖν
+Bookmark.Announce.Set=Σημεῖον τέθειται
+Bookmark.Item.Format=Σημεῖον {0} ({1})
+ManageBookmarks.List.Accessible=Σημεῖα
+ManageBookmarks.Delete=Ἐξάλειψον
+ManageBookmarks.Delete.Accessible=Ἐξάλειψον
+ManageBookmarks.OK.Accessible=Καλῶς
+ManageBookmarks.Cancel.Accessible=Ἄφες
+ManageBookmarks.Selected=ᾑρημένον
+ManageBookmarks.NotSelected=Οὐχ ᾑρημένον
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Θεραπεία τοῦ ἤχου
+Dialog.SoundProcessing.Message=Ἡ θεραπεία τοῦ ἤχου ποιεῖ τὴν φαύλην φωνὴν ἀνεκτοτέραν. Οὐκ ἰᾶται αὐτήν.\n\nὋ οὐδέποτε ἐλήφθη ἀποδοῦναι οὐ δύναται, καὶ λίαν χρωμένη βλάπτει μᾶλλον ἢ ὠφελεῖ. Ἔα αὐτὴν ἁπλῶς ἐνεργόν, ἄκουσον ὀλίγα λεπτά, καὶ τότε δὴ τῶν καθ᾽ ἕκαστα βαθμῶν ἅπτου.\n\nἘν τῇ βοηθείᾳ γέγραπται τί ἕκαστος αὐτῶν ποιεῖ.
+Prop.Info.Accessible=Ἀγγελίαι τοῦ βιβλίου
+Prop.Info.ProcessingOff=Θεραπεία τοῦ ἤχου: οὔ
+Prop.Info.ProcessingOn=Θεραπεία τοῦ ἤχου: ναί
+Prop.Info.Bypassed=(ἡ θεραπεία παρῆλθεν)
+Prop.Info.Off=οὔ
+Prop.Info.Protection=Φυλακὴ κατὰ διαστροφῆς
+Prop.Tab.Audio=Ἦχος
+Prop.Tab.Text=Κείμενον
+Prop.On=ναί
+Prop.Off=οὔ
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Τῇ θεραπείᾳ τοῦ ἤχου χρῆσθαι
+Prop.SoundProcessing=Θεραπεία τοῦ ἤχου
+Prop.Stage.Level=Βαθμός
+Prop.Highpass.Title=Τὸν βόμβον ἀφελεῖν
+Prop.Denoise.Title=Τὸν θόρυβον μειῶσαι
+Prop.Deesser.Title=Τοὺς συριγμοὺς μαλάξαι
+Prop.Compressor.Title=Τὴν φωνὴν ὁμαλῦναι
+Prop.Eq.Title=Χρῶμα τοῦ ἤχου
+Prop.Eq.Shelf={0} καὶ ἄνω
+Prop.Loudness.Title=Μέγεθος καὶ διαλείμματα
+Prop.Normalize.Title=Μέγεθος αὐτόματον
+Prop.Gate.Title=Θόρυβος ἐν τοῖς διαλείμμασιν
+Prop.Level.Minimal=Ἐλάχιστος
+Prop.Level.Light=Κοῦφος
+Prop.Level.Medium=Μέσος
+Prop.Level.Strong=Ἰσχυρός
+Prop.Level.Maximum=Μέγιστος
+Prop.ResetAll=Πάντα ἀποκαταστῆσαι
+Prop.Bypass=Τὴν θεραπείαν παρελθεῖν
+Prop.Bypass.Shortcut=Ctrl+B τοῦτο ἐνεργὸν καὶ ἀργὸν ποιεῖ ἐκ παντὸς τόπου τῆσδε τῆς σελίδος
+Prop.Analysing=Ἡ φωνὴ ἐξετάζεται
+Prop.Analysing.Done=Ἡ φωνὴ ἐξητάσθη, βαθμοὶ {0} ἐτέθησαν. Μετάβαλε ὅντινα βούλει, εἰ ἄλλως μᾶλλον θέλεις.
+Prop.Analysing.Failed=Ἡ φωνὴ ἐξετασθῆναι οὐκ ἠδυνήθη. Αἱ ῥυθμίσεις μένουσιν οἷαι ἦσαν.
+Analyse.Progress.Title=Ἡ φωνὴ ἐξετάζεται
+Analyse.Progress.Starting=Ἡ ἐξέτασις ἄρχεται...
+Analyse.Progress.Working=Μέρος {0} ἐκ {1}. {2}
+Analyse.Progress.Quarter={0} ἑκατοστὰ πεποίηται. {1}
+Analyse.Progress.Cancel=Ἄφες
+Analyse.Progress.Cancelling=Μετὰ τοῦτο τὸ μέρος παύσεται. Αἱ ῥυθμίσεις μένουσιν οἷαι ἦσαν.
+Analyse.Progress.Estimating=Λογίζεται πόσον τοῦτο διαρκέσει.
+Analyse.Progress.AlmostDone=Σχεδὸν πεποίηται.
+Analyse.Progress.Seconds=Λείπονται περὶ {0} δεύτερα.
+Analyse.Progress.Minutes=Λείπονται περὶ {0} λεπτά.
+Hint.SoundProcessing=Τῇ θεραπείᾳ τοῦ ἤχου λεπτῶς ἁρμόζειν δύνασαι πῶς ἡ φωνὴ ἠχῇ. Διαφόρους θορύβους ἀφελεῖν, τὸ μέγεθος αὐξῆσαι καὶ τὸ ὅλον χρῶμα τῷ ἰσωτῇ βάψαι δύνασαι. Ἓξ ὅμιλοι κανόνων εἰσίν, καὶ ἕκαστος χωρὶς ἐνεργὸς καὶ ἀργὸς γίγνεσθαι δύναται. Καὶ ἕκαστος κανὼν χωρὶς ἁρμόζεται. Ὅλην τὴν σειρὰν τῆς θεραπείας διὰ τοῦ Ctrl+B πρὸς ὀλίγον παρελθεῖν δύνασαι, ἵνα τὴν διαφορὰν μεταξὺ τῆς ἀρχικῆς φωνῆς καὶ τῶν σῶν ῥυθμίσεων ἀκούσῃς.
+Hint.RemoveRumble=Τὰς κατωτάτας συχνότητας ἀποτέμνει: τὰ ὀχήματα, τὴν μηχανὴν τοῦ ἀέρος, τὸν θόρυβον τῶν χειρῶν. Φωνὴν θολερὰν ἀνακτήσασθαι οὐ δύναται, ἀλλὰ τὰ βαρέα ἐλευθεροῖ ἵνα τῷ λόγῳ τόπος ᾖ.
+Hint.NoiseRemoval=Τὸν ὁμαλὸν συριγμὸν τὸν ὑποκείμενον μειοῖ, οἷον ταινία ἢ φαῦλον μικρόφωνον καταλείπει. Λίαν ἰσχυρὰ ἁρμογὴ καὶ τὴν φωνὴν ἐσθίειν ἄρχεται, διὸ τοσοῦτον μόνον αὖξε ἕως ἂν ὁ συριγμὸς ἀπέλθῃ.
+Hint.SoftenSibilance=Τὴν ὀξύτητα τῶν Σ τῶν ὀξέων ἀφαιρεῖ. Χρήσιμον παρὰ τοῖς ἀναγνώσταις τοῖς τῷ μικροφώνῳ ἐγγυτάτοις καὶ παρὰ ταῖς φωναῖς ταῖς λίαν λαμπρυνθείσαις.
+Hint.EvenOutSpeech=Τὸ διάστημα μεταξὺ τῶν ἡσύχων καὶ τῶν λαμπρῶν μερῶν συστέλλει, ὥστε ψιθυρισμὸν καὶ κραυγὴν ἐγγύτερον συνιέναι. Οὗτός ἐστιν ὁ κανὼν πρὸς ὃν καταφεύγεις ὅταν τοῦ μεγέθους συνεχῶς ἅπτῃ.
+Hint.Tone=Πέντε ζῶναι, ἐν δεκαβήλοις, ἀπὸ τῆς συχνότητος αὑτῶν ὠνομασμέναι. Ἡ κατωτάτη ἐπὶ 200 Hz ἕστηκεν, ὅπου φωνὴ βομβοῦσα ἢ θολερὰ ὡς τὰ πολλὰ κάθηται· ἡ ἀνωτάτη βαθμὸν ποιεῖ, διὸ πάντα τὰ ὑπὲρ ἑαυτὴν αἴρει ἢ πιέζει μᾶλλον ἢ μίαν χώραν. Αἱ ζῶναι ἐπίτηδες ἀλλήλας ἐπικαλύπτουσιν, ὃ καμπύλην λείαν ἐπιτρέπει ἀλλὰ καὶ σημαίνει αὐτὰς συντίθεσθαι· τρεῖς ζῶναι γείτονες ἐπὶ +4 ὁμοῦ πολλῷ πλέον ἢ +4 διδόασιν. Αἱ μικραὶ κινήσεις πολλοῦ ἀξιαί εἰσιν, καὶ πᾶν ὃ ὑπὲρ ὀλίγους δεκαβήλους ἐστὶν ὡς τὰ πολλὰ σημαίνει τὸ ἀληθὲς φάρμακον ἄλλον βαθμὸν εἶναι.
+Hint.AutomaticLoudness=Δύο πράγματα εἰς τἀναντία ἕλκοντα, διὸ καὶ μίαν κιβωτὸν κοινωνοῦσιν. Τὸ μέγεθος τὸ αὐτόματον τὸν ὅλον βαθμὸν δι᾽ ὅλου τοῦ βιβλίου ὁμαλὸν κατέχει, καὶ μεταξὺ δέλτων ἐν διαφόροις ἡμέραις ληφθεισῶν· τῇ φωνῇ ἕπεται, οὐχ ὅλῳ τῷ σημείῳ, ὃ ἡ ἀπαγγελλομένη φωνὴ αἰτεῖ. Ὁ θόρυβος ἐν τοῖς διαλείμμασιν ἐναντίως ἐργάζεται: πᾶν ὃ ἡσυχώτερόν ἐστι τοῦ ᾑρημένου βαθμοῦ πιέζεται, ὥστε συριγμὸν ἢ βόμβον ὃς ὑπὸ τῇ ἀναγνώσει κάθηται ἐν τοῖς διαστήμασι μεταξὺ τῶν περιόδων ἀκούεσθαι παύεσθαι. Αὐτῆς τῆς φωνῆς οὐδέποτε ἅπτεται, καὶ ἀμαυροῖ μᾶλλον ἢ σιγὴν ποιεῖ (θόρυβος ὃς περὶ ἑκάστην περίοδον σβέννυται καὶ ἀνάπτεται μᾶλλον κοπιᾷ ἢ ὃς ἁπλῶς μένει). Τὸ μέγεθος αὖξε καὶ ὁ θόρυβος ὁ ὑποκείμενος σὺν αὐτῷ ἀναβαίνει· εἰ τοῦτο γίγνεται, ἰδοὺ ὁ κανὼν ὃς αὐτῷ ἰᾶται.
+
+; ---- PROPERTIES - the text page
+Prop.Text.NoVoiceShort=Οὐδεμία φωνὴ ἐγκατεστημένη τὴν γλῶτταν {0} λαλεῖ — ἑλοῦ μίαν κάτω.
+Prop.Text.NoVoiceForLanguage=Οὐδεμία φωνὴ ἐγκατεστημένη τὴν γλῶτταν {0} λαλεῖ. Ἐγκατάστησον φωνὴν ὑπὲρ τῆς γλώττης {0}, ἢ ἑλοῦ ἄνω γλῶτταν καὶ φωνὴν αἷς τοῦτο τὸ βιβλίον ἀναγνωσθήσεται. Ἡ αἵρεσις πρὸς τοῦτο μόνον τὸ βιβλίον ἀνήκει.
+Prop.Text.ReadingIn=Ἀναγιγνώσκεται γλώττῃ:
+Prop.Text.InputBrailleGroup=Ἀρχὴ Braille
+Prop.Text.InputBrailleTable=Πίναξ Braille εἰσερχόμενος:
+Hint.Text0=Ἐνταῦθα τὴν γλῶτταν καὶ τὴν φωνὴν αἱρεῖσθαι δύνασαι αἷς τοῦτο τὸ βιβλίον ἀναγιγνώσκηται. Ἑκάστῳ βιβλίῳ ἐν τῇ βιβλιοθήκῃ ἰδίας ῥυθμίσεις ἔχειν δύνασαι. Ἑκάστη φωνὴ τὰς ἑαυτῆς μνήμῃ κατέχει — τὸ τάχος, τὸ μέγεθος καὶ τὸ ὕψος τοῦ τόνου — διὸ αὐτὰς πάλιν τιθέναι οὐ δεῖ ἀφ᾽ οὗ ἂν ἀπ᾽ ἄλλης φωνῆς ἐπανέλθῃς.\n\nΜέμνησο σοὶ ἐξεῖναι "Ἄνευ φωνῆς" αἱρεῖσθαι, εἰ ὀφθαλμοῖς ἢ ἐν τῷ στίχῳ Braille ἀναγιγνώσκειν βούλει ἄνευ τοῦ ἤχου ἀκούειν.
+Hint.TextVisual=Ἐνταῦθα τὴν ἐν τῇ ὀθόνῃ ὄψιν πρὸς τὸ ἀναγιγνώσκειν ἁρμόζειν δύνασαι. Αἱρεῖσθαι δύνασαι μεταξὺ τάξεως κατὰ τοὺς ὑποτίτλους, κειμένου ῥέοντος ὥσπερ οἱ τίτλοι ἐν τῷ τέλει πελλίκλης, ἢ σελίδων ἐξαίφνης μεταβαλλομένων. Καὶ τὰ χρώματα τοῦ βάθους, τοῦ κειμένου καὶ τῆς ἐπισημάνσεως αἱρεῖσθαι δύνασαι, καὶ πότερον ὁ στίχος ὁ ἀναγιγνωσκόμενος ἢ ὅλη ἡ περίοδος σημαίνηται.\n\nΣημείωσαι τοῦτο οὐδὲν περὶ τῆς φωνῆς μεταβάλλειν.
+Hint.TextBrailleSource=Τοῦτο τὸ βιβλίον ἐκ δέλτου Braille ἦλθεν, καὶ οὗτός ἐστιν ὁ πίναξ ᾧ ἀνεγνώσθη — ἐκεῖνος ὃς τὰ κελλία Braille εἰς λέξεις ἀνήγαγεν.\n\nἩ δέλτος Braille οὐδὲν περὶ τῆς γλώττης αὑτῆς, οὐδὲ περὶ τοῦ βαθμοῦ αὑτῆς οὐδὲ ποίῳ ἐθνικῷ κανόνι ἕπεται λέγει, διὸ τὸν NBR τὸν πίνακα ἐξ αὐτοῦ τοῦ κειμένου συλλέγειν δεῖ. Ὡς τὰ πολλὰ ὀρθῶς, ἀλλ᾽ οὐκ ἀεί, καὶ ὁ πίναξ ὁ ψευδὴς λέξεις σχεδὸν ὀρθὰς δίδωσιν: "Have" ὅπου τὸ βιβλίον "How" λέγει.\n\nΕἰ τοῦτο αὐτὸ ὁρᾷς, ἑλοῦ ἐνταῦθα ἄλλον πίνακα καὶ πίεσον Καλῶς. Τὸ βιβλίον ἐκ τῆς δέλτου Braille ἣν εἰσήγαγες πάλιν ἀναγιγνώσκεται, ἣ παρ᾽ αὐτὸ σῴζεται, διὸ τοσούτους πίνακας ὅσους βούλει πειρᾶσθαι καὶ πρὸς τὸν πρῶτον ὁποτεοῦν ἐπανιέναι δύνασαι.\n\nΟἱ πίνακες οἱ παρεχόμενοι εἰσὶν οἱ τῆς γλώττης τῆς ἄνω κειμένης. Εἰ ἐκείνη ἡ γλῶττα ψευδής ἐστιν, μετάβαλε αὐτὴν καὶ οἱ πίνακες ἕψονται.\n\nΤοῦτο οὐδὲν κοινὸν ἔχει πρὸς ὃ ὁ στίχος σου Braille δείκνυσιν. Ἐκεῖνο ὁ ἀναγνώστης σου τῶν γραμμάτων μεταφράζει, πίνακι ἐκ τῶν ἰδίων ῥυθμίσεων.
+NoVoice.Title=Οὐδεμία φωνὴ τῷδε τῷ βιβλίῳ
+NoVoice.Message=Τοῦτο τὸ βιβλίον γλώττῃ {0} γέγραπται, οὐδεμία δὲ φωνὴ ἐγκατεστημένη αὐτὴν λαλεῖ. Ἑλοῦ φωνὴν ᾗ τοῦτο ἅπαξ ἀναγνωσθῇ, ἢ ἔα αὐτὸ ἀνάγνωστον ἕως ἂν φωνὴ ὑπὲρ τῆς γλώττης {0} ἐγκατασταθῇ.
+NoVoice.Read=Ταύτῃ τῇ φωνῇ ἀναγιγνώσκειν
+NoVoice.Leave=Ἀνάγνωστον ἐᾶν
+Dialog.BrailleReread.Title=Ἆρα τὴν δέλτον Braille πάλιν ἀναγνῷς;
+Dialog.BrailleReread.Message=Τοῦτο τὸ βιβλίον πάλιν ἐκ τῆς δέλτου Braille τῆς ἀρχικῆς ἀναγνωσθήσεται, πίνακι {0}.\n\nΤὸ κείμενον ἐξ ἀρχῆς γίγνεται, διὸ ἀπόλλυται πᾶν ὃ πρὸς τὸ παλαιὸν ἔβλεπεν: μέχρι ποῦ ἦλθες, τὰ σημεῖά σου καὶ τὸ ἀνεγνωσμένον μέρος. Αὐτὸ τὸ βιβλίον ἄθικτον μένει, καὶ αὐτὸ ἄλλῳ πίνακι τοσαυτάκις ἀναγιγνώσκειν δύνασαι ὁσάκις βούλει.
+Dialog.BrailleReread.Failed=Ἡ δέλτος Braille ἐκείνῳ τῷ πίνακι ἀναγνωσθῆναι οὐκ ἠδυνήθη. Τὸ βιβλίον ἔμεινεν οἷον ἦν.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Ῥυθμίσεις
+Settings.Tab.Advanced=Περαιτέρω
+Settings.Tab.General=Γενικά
+Settings.Tab.TextBooks=Φωνὴ καὶ Braille
+Settings.Tab.Device=Ὄργανα
+Settings.OK.Accessible=Καλῶς
+Settings.Cancel.Accessible=Ἄφες
+Settings.Apply=Χρῆσαι
+Settings.Apply.Accessible=Χρῆσαι
+
+; ---- SETTINGS - General
+Settings.General.LanguageGroup=Γλῶττα
+Settings.General.LibraryGroup=Τόπος τῆς βιβλιοθήκης
+Settings.General.MediaKeysGroup=Πλῆκτρα τῶν μέσων
+Settings.General.MetadataGroup=Ἀγγελίαι τοῦ βιβλίου
+Settings.General.LookGroup=Ὄψις
+Settings.General.UseMultimediaKeys=Τοῖς πλήκτροις τῶν μέσων χρῆσθαι
+Settings.General.UseMultimediaKeysGlobally=Τοῖς πλήκτροις τῶν μέσων ἀνὰ πᾶν τὸ σύστημα χρῆσθαι
+Settings.General.LibraryLocation=Τόπος τῆς βιβλιοθήκης:
+Settings.General.LibraryLocation.Browse=Ἑλοῦ τὴν θήκην ἐν ᾗ ἡ βιβλιοθήκη σου σῴζεται
+Settings.General.Browse=Ζήτησον...
+Settings.General.Browse.Accessible=Τὴν θήκην τῆς βιβλιοθήκης ζητῆσαι
+Settings.General.Language=Γλῶττα:
+Settings.General.UseMetadata=Τοῖς ἐντεθειμένοις μεταδεδομένοις χρῆσθαι
+Settings.General.UseMetadata.Hint=Ἔνια εἴδη δέλτων μεταδεδομένα φέρει μετ᾽ ἀγγελιῶν περαιτέρω περὶ τοῦ συγγραφέως, τῆς ἐπιγραφῆς, τοῦ ἐκδότου, τοῦ κατασκευαστοῦ καὶ τῶν ἄλλων. Ὁ NBR αὐτὰ ἀναγιγνώσκειν καὶ δεικνύναι δύναται ὅπου ἐστίν. Ἀλλ᾽ εἰ ψευδῆ ἐστιν ἢ ἀπολείπεται, ὁ NBR τὰς πρώτας ἀγγελίας ἐκ τῶν ὀνομάτων τῶν θηκῶν καὶ τῶν δέλτων λαμβάνειν δύναται. Εἰ μηδὲν ἄλλο ὠφελεῖ, ἀεὶ τοῖς βιβλίοις ἐν τῇ βιβλιοθήκῃ νέα ὀνόματα διδόναι δύνασαι.
+Settings.General.UseMultimediaKeys.Hint=Τοῖς πλήκτροις τῶν μέσων τοῦ πληκτρολογίου σου ἢ τῶν ὠτοακουστίκων χρῆσθαι δύνασαι ἵνα ἀναγιγνώσκῃς, διαλείπῃς καὶ διὰ τοῦ βιβλίου κινῇ τῷ βήματι τῆς μεταβάσεως ὃ ᾑροῦ.\n\nΤὸ δεύτερον πλῆκτρον αὐτὰ ἀνὰ πᾶν τὸ σύστημα ἰσχύειν ποιεῖ, ὥστε τὸν NBR πανταχόθεν ἀφικνεῖσθαι — ἐπὶ τούτῳ ὥστε πᾶσι τοῖς ἄλλοις ἀναγνώσταις ἀφαιρεῖσθαι ἕως ἂν ὁ NBR τρέχῃ.
+Settings.General.LibraryLocation.Hint=Ἐνταῦθα ὁ NBR τὰ εἰσαχθέντα βιβλία μεταγράφει. Δύνασαι αὐτὸν ἐᾶν ὅπου ἐστίν, ἐν τῷ μέρει τοῦ συστήματος, ἀλλ᾽ εἰ μεγάλην βιβλιοθήκην ἕξειν διανοῇ, ἄλλο μέρος ἢ ἄλλος δίσκος πολλῷ βέλτιον βούλευμά ἐστιν. Ὁ NBR ἐνταῦθα καὶ τὰς ἀγγελίας ἑκάστου βιβλίου σῴζει, διὸ εἰ τὰς θέσεις τῆς ἀναγνώσεως, τὰ σημεῖα, τὸ τάχος καὶ τὰς ἄλλας ῥυθμίσεις σῴζειν βούλει, μέμνησο τὰ ἐν τῇ παλαιᾷ θήκῃ χειρὶ εἰς τὸν νέον τόπον μεταγραπτέα εἶναι. Καὶ τῇ αὐτῇ τιμῇ: τῆς βιβλιοθήκης ἔξω τοῦ μέρους τοῦ συστήματος κειμένης, τὰ βιβλία σου ἀπὸ τῶν πτωμάτων τοῦ συστήματος καὶ τῆς συνήθους ἀπωλείας τῶν δεδομένων φυλάττεις.
+Settings.General.Language.Restart=Ἵνα ἡ γλῶττα μεταβληθῇ, τὸν NBR πάλιν ἄρχεσθαι δεῖ. Ἆρα νῦν πάλιν ἄρξῃ;
+Settings.General.Language.RestartTitle=Γλῶττα
+Settings.Misc.Look=Ὄψις:
+Settings.Misc.Look.Classic=Χρώματα τοῦ συστήματος
+Settings.Misc.Look.New=Ὄψις τοῦ NBR
+Settings.Misc.Look.Hint=Πῶς ὁ NBR ἑαυτὸν γράφῃ, καὶ αἱ ἀποκρίσεις δύο εἰσίν.\n\nἩ ὄψις τοῦ NBR ἡ ἰδία αὐτοῦ ἐστιν, ἐκείνη ᾗ ἄρχεται.\n\nΤὰ χρώματα τοῦ συστήματος αὐτὸν ποιεῖ θυρίδα κοινήν, ἐν τοῖς χρώμασι καὶ τοῖς τύποις τῶν γραμμάτων ἃ τὸ Windows ἔχει. Οὐδὲν ἴδιον γράφει, διὸ τὸ σχῆμά σου ὅλον διέρχεται — ὃ βούλει ἐπὶ σχήματος μεγάλης ἀντιθέσεως, καὶ ὃ ἄριστα μετὰ μεγεθυντοῦ ἐργάζεται. Εἰ ἡ μεγάλη ἀντίθεσις ἤδη παρὰ σοὶ ἐνεργός ἐστιν, ὁ NBR ταύτῃ αὐτῇ τῇ ὄψει ἄρχεται.\n\nἈμφοτέρως ἡ αἵρεσις σή ἐστιν, καὶ τὸ αὐτὴν ἀνακαλέσαι ὡσαύτως· τὸ πληκτρολόγιον καὶ ὁ ἀναγνώστης τῶν γραμμάτων ὑπὸ τούτων οὐχ ἅπτονται, καὶ τὸ F2 σε ἐνταῦθα ἐπανάγει.
+Settings.Misc.Look.RestartTitle=Τὴν ὄψιν μεταβαλεῖν
+Settings.Misc.Look.Restart=Ἵνα ἡ ὄψις μεταβληθῇ, τὸν NBR πάλιν ἄρχεσθαι δεῖ. Ἡ θέσις σου ἐν τῷ βιβλίῳ σῴζεται. Ἆρα νῦν πάλιν ἄρξῃ;
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.Language=Γλῶττα:
+Settings.TextBooks.BookLanguage=Βιβλία ταύτῃ τῇ γλώττῃ:
+Settings.TextBooks.AllOtherLanguages=Πᾶσαι αἱ ἄλλαι γλῶτται
+Settings.TextBooks.VoiceNotSet=(οὐδεμία φωνὴ ᾑρημένη)
+Settings.TextBooks.AddVoices=Νέας γλώττας προσθεῖναι...
+Settings.TextBooks.LanguageNoVoice={0} — οὐδεμία φωνὴ ἐγκατεστημένη
+Settings.TextBooks.Voice=Φωνή:
+Settings.TextBooks.Speed=Τάχος:
+Settings.TextBooks.Test=Τὴν φωνὴν πειρᾶσαι
+Settings.TextBooks.TestSample=Τοῦτό ἐστι δεῖγμα τῆς ᾑρημένης φωνῆς.
+Settings.TextBooks.Volume=Μέγεθος ἤχου:
+Settings.TextBooks.Pitch=Ὕψος τοῦ τόνου:
+Settings.TextBooks.SpeechGroup=Φωνή
+Settings.TextBooks.LanguageUnknown=(ἡ γλῶττα οὐ δεδήλωται)
+Settings.TextBooks.VisualGroup=Ἔξοδος ἐν τῇ ὀθόνῃ
+Settings.TextBooks.UseVisual=Τῇ ἐξόδῳ ἐν τῇ ὀθόνῃ χρῆσθαι
+Settings.TextBooks.NoSpeech=Ἄνευ φωνῆς
+Settings.TextBooks.VisualMode=Τρόπος δείξεως:
+Settings.TextBooks.VisualMode.TwoRows=Δύο στίχοι (κατὰ τοὺς ὑποτίτλους)
+Settings.TextBooks.VisualMode.FullInstant=Ὅλη ἡ ὀθόνη (σελὶς μετὰ σελίδα)
+Settings.TextBooks.VisualMode.FullScrolling=Ὅλη ἡ ὀθόνη (ῥέουσα)
+Settings.TextBooks.Highlight=Ἐπισήμανσις:
+Settings.TextBooks.Highlight.None=Οὐδεμία ἐπισήμανσις
+Settings.TextBooks.Highlight.Line=Ὁ παρὼν στίχος
+Settings.TextBooks.Highlight.Sentence=Ἡ παροῦσα περίοδος
+Settings.TextBooks.HighlightColour=Χρῶμα τῆς ἐπισημάνσεως:
+Settings.TextBooks.TextColour=Χρῶμα τοῦ κειμένου:
+Settings.TextBooks.BackColour=Χρῶμα τοῦ βάθους:
+Settings.TextBooks.Speech.Hint=Ἐνταῦθά ἐστιν ὁ κατάλογος τῶν γλωττῶν καὶ τῶν φωνῶν τῶν ἐν τῷ συστήματί σου ἐγκατεστημένων. Ἑκάστῃ γλώττῃ ἐνταῦθα κειμένῃ φωνὴν κυρίαν αἱρεῖσθαι δύνασαι, ὥστε πᾶν νέον βιβλίον ἐκείνῃ τῇ γλώττῃ ἐκείνῃ τῇ φωνῇ ἀνοίγεσθαι. Τὸ φωνὴν γλώττῃ αἱρεῖσθαι αὐτὸ τοῦτό ἐστιν ὃ αὐτὴν κυρίαν ποιεῖ — οὐδὲν ἄλλο πιεστέον. Εἰ τὸ νέον σου βιβλίον γλώττῃ γέγραπται ἣ ἐν τῷ καταλόγῳ οὐκ ἔστιν, ἄμεινον αὐτῇ ἐνταῦθα φωνὴν κυρίαν μὴ τιθέναι. Ἀεὶ φωνὴν ἐν ταῖς ἰδιότησιν αὐτοῦ τοῦ βιβλίου, ἐν τῇ σελίδι Κείμενον, αἱρεῖσθαι δύνασαι, ἢ Ἄνευ φωνῆς αἱρεῖσθαι καὶ Braille ἢ ἐν τῇ ὀθόνῃ ἀναγιγνώσκειν. Ὄψει καὶ μήνυμα ὅταν γλῶττα οὐδεμίαν φωνὴν ἐγκατεστημένην ἔχῃ.
+Settings.TextBooks.Visual.Hint=Πρὸς τὸ κείμενον ἐν τῇ ὀθόνῃ δεικνύναι ἕως ἂν φωνῇ ἀναγιγνώσκηται, ὑπὲρ τῶν ὀφθαλμοῖς ὁμοίως καὶ ὠσὶν ἀναγιγνωσκόντων. Ἐνταῦθα ἐνεργὸν ὄν, ἡ θυρὶς αὐτομάτως ἀνοίγεται ὁσάκις ἂν τὸ ἀναγιγνώσκειν πιέσῃς. Καὶ χειρὶ ἀνοίγεσθαι καὶ κλείεσθαι δύναται ὁποτεοῦν διὰ τοῦ F9, εἴτε τοῦτο ἐνεργόν ἐστιν εἴτε μή — οὕτως ἐν βιβλίῳ αὐτὸ πειρᾶσθαι δύνασαι ἄνευ τοῦ τὰς ἰδιότητας αὐτοῦ μεταβαλεῖν.
+Settings.TextBooks.Dictionary.Hint=Ἐνταῦθα διορθοῦν δύνασαι ἃ αἱ μηχαναὶ τῆς φωνῆς κακῶς προφέρουσιν. Τὴν προφορὰν ὀνομάτων καὶ τόπων ἐπανορθοῦν δύνασαι, τὸν τόνον τὸν ψευδῆ διορθοῦν καὶ πολλὰ ἄλλα — χρῶ μόνον τῇ φαντασίᾳ σου. Ἄριστον δέ ἐστιν ὅτι τοῦτο χωρὶς κατὰ γλῶτταν καὶ κατὰ φωνὴν ποιεῖν δύνασαι, ἐπεὶ διάφοροι μηχαναὶ ἐν τῇ αὐτῇ γλώττῃ διαφόρως ἁμαρτάνουσιν.
+Settings.Colour.White=Λευκόν
+Settings.Colour.Black=Μέλαν
+Settings.Colour.Yellow=Ξανθόν
+Settings.Colour.Blue=Κυάνεον
+Settings.Colour.Green=Χλωρόν
+Settings.Colour.Red=Ἐρυθρόν
+Voices.Add.Title=Γλῶτται πρὸς τὸ κείμενον φωνῇ ἀναγιγνώσκειν
+Voices.Add.Hint=Ἑλοῦ τὰς γλώττας ἃς βούλει καὶ πίεσον Ἐγκατάστησον. Κατὰ τὰς ῥυθμίσεις σου τὸ Windows ἄδειαν αἰτεῖν δύναται, καὶ ἔπειτα τὰς φωνὰς ἐκείνης τῆς γλώττης κατάξει. Ἡ φωνὴ τῇ ἑαυτῆς προφορᾷ πρόσκειται, διὸ ἡ Ἀγγλικὴ ἡ Βρεττανικὴ καὶ ἡ Ἀμερικανικὴ χωρισταί εἰσιν.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Ἔξοδος τοῦ ἤχου
+Settings.Device.SoundCard=Πινάκιον τοῦ ἤχου:
+Settings.Device.KeepAlive=Τὸ πινάκιον τοῦ ἤχου ἐγρηγορὸς φυλάττειν
+Settings.Device.KeepAlive.Hint=Ἔνιαι ἔξοδοι τοῦ ἤχου — μάλιστα ἡ HDMI — σβέννυνται ἅμα τῷ τὸν ἦχον παύσασθαι, καὶ ἔπειτα στιγμῆς δέονται ἵνα ἐγερθῶσιν. Ἀκούεται τοῦτο ὡς ἡ πρώτη λέξις περιόδου ἣ ἀπόλλυται, καὶ πάλιν, οὐδενὸς φανερῶς κακῶς ἔχοντος. Ἕως ἂν τοῦτο ἐνεργὸν ᾖ, ὁ NBR ἐν τῷ πινακίῳ ᾧ χρῆται τόνον ἐκπέμπει πολὺ κάτω παντὸς οὗ ἀκούειν δύνασαι, ἵνα τὸ πινάκιον μεταξὺ τῶν περιόδων μὴ ἔχῃ καιρὸν καθεύδειν. Σβέσον εἰ τὸ πινάκιόν σου οὕτως οὐκ ἔχει: τὴν ἔξοδον ἀνεῳγμένην κατέχει ὅσον ἂν βιβλίον διαρκῇ.
+Settings.Device.Default=Τὸ κύριον τοῦ συστήματος (αὐτομάτως)
+Settings.Device.OpticalGroup=Ὄργανον ὀπτικόν
+Settings.Device.UseOptical=Τῷ ὀργάνῳ τῷ ὀπτικῷ χρῆσθαι
+Settings.Device.OpticalWhich=Ὄργανον:
+Settings.Device.OpticalAuto=Ἐκεῖνο ὃ δίσκον ἐντὸς ἔχει
+Settings.Device.UseOptical.Hint=Πάλαι τὰ βιβλία ἐν δίσκοις φωνητικοῖς κοινοῖς ἐξεδίδοτο, καὶ ὁ NBR αὐτοὺς ἀναγιγνώσκειν δύναται. Αὐτὸν τὸν δίσκον ἀναγιγνώσκει μᾶλλον ἢ αὐτὸν στρέφεσθαι ἐᾷ: ὅλη ἡ πλευρὰ μιᾷ διαδρομῇ ἀναγιγνώσκεται, εὐθὺ καὶ ἄνευ ἐπανόδου, ὥστε τὸ ὄργανον ὀλίγα λεπτὰ ἐργάζεσθαι καὶ ἔπειτα διὰ τὸ λοιπὸν τοῦ βιβλίου σιγᾶν. Τὸ βραδέως ἀναγιγνώσκειν ἡσυχώτερον ἂν ἦν ἐπὶ δεύτερον καὶ θορυβωδέστερον ἐφ᾽ ὥραν. Τοῦτο ἐνεργὸν ποίει μόνον εἰ αὐτὸ βούλει - ἐν ἀρχῇ ἀργόν ἐστιν, καὶ ἐν μηχανῇ ἣ ὄργανον ἔχει, καὶ ἕως ἂν ἀργὸν ᾖ ὁ NBR τοῦ ὀργάνου ὅλως οὐχ ἅπτεται.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Βιβλία ὧν τὸ κείμενον ἐν εἰκόσιν ἐστίν
+Settings.Ocr.Hint=Ἔνια βιβλία εἰκόνες τῶν σελίδων αὑτῶν ἐστιν, οὐ κείμενον: PDF ἐσαρωμένον, ἢ θήκη εἰκόνων ἠριθμημένων. Ὁ NBR τὰς λέξεις ἐν αὐταῖς γνωρίζειν δύναται καὶ ἔπειτα αὐτὰς ἀναγιγνώσκειν ὥσπερ πᾶν ἄλλο βιβλίον. Αὕτη ἡ αἵρεσις πρώτη μόνον ἐστίν — ὅταν πλείονας γλώττας ἔχῃς, ὁ NBR ἐρωτᾷ ποίᾳ χρήσηται ὁσάκις ἂν βιβλίον ἀναγιγνώσκῃ.
+Settings.Ocr.Language=Γλῶττα τῆς γνωρίσεως
+Settings.Ocr.Automatic=Αὐτομάτως
+Settings.Ocr.AddLanguage=Γλῶτταν προσθεῖναι...
+Settings.Ocr.None=Τὸ Windows οὐδεμίαν γνώρισιν γραμμάτων ἐγκατεστημένην ἔχει.
+Settings.Translate.Group=Μετάφρασις
+Settings.Translate.Service=Ὑπηρεσία τῆς μεταφράσεως
+Settings.Translate.Key=Κλεὶς API...
+Settings.Translate.State.Have={0}, ἡ κλεὶς σέσωσται
+Settings.Translate.State.None={0}, οὐδεμία κλείς
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (πρότυπον μεῖζον)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, εὐωνότερον)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, τιμιώτατον)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Hint=Ὁ NBR βιβλίον διὰ ὑπηρεσίας ἐν τῷ δικτύῳ μεταφράζειν δύναται. Ἑκάστῃ ὑπηρεσίᾳ κλειδὸς ἐκ τοῦ ἰδίου σου λόγου παρ᾽ αὐτῇ δεῖ, ἣν ἐνταῦθα κολλᾷς· ὁ NBR οὐδεμίαν τιμὴν διοικεῖ, τοῦτο σόν ἐστιν ἐν τῷ τόπῳ τοῦ παρέχοντος ἢ ἄλλῃ ὁδῷ. Εἰ μεταφράσεως μηχανικῆς οὐ δέῃ, ἁπλῶς τὸ τετράγωνον ἀσήμαντον ἔα.\n\nἩ μετάφρασις ΟΛΟΝ τὸ βιβλίον πρὸς τὴν ᾑρημένην ὑπηρεσίαν πέμπει, καὶ ὃ ἕκαστος αὐτῶν αὐτῷ ποιεῖ διάφορόν ἐστιν — ἔνιοι τοῖς ἐν τῷ βαθμῷ τῷ δωρεὰν χρῶνται πρὸς τὸ τὰ ἴδια ἔργα βελτιοῦν, ἄλλοι οὔ. Ἡ περιγραφὴ ἑκάστης ὑπηρεσίας ὑπὸ Βοήθεια, Ὑπηρεσίαι καὶ λόγοι λέγει τίνες.
+Settings.Translate.Notes=Μηνύματα τῷ μεταφραστῇ:
+Settings.Translate.Test.NoEngine=Οὐδεμία ὑπηρεσία μεταφράσεως ᾕρηται.
+Settings.Translate.Test.NoKey=Οὐδεμία κλείς ἐστιν ἣ πειραθῇ.
+Settings.Translate.Test.NoNetwork=Ὁ NBR τῆς ὑπηρεσίας τυχεῖν οὐκ ἠδυνήθη.
+Settings.Translate.Test.Refused=Ἡ ὑπηρεσία τὴν αἴτησιν ἀπηρνήσατο ({0}).
+Settings.Translate.Test.Empty=Ἡ ὑπηρεσία οὐδὲν ἀπεκρίνατο.
+Settings.Cloud.Group=Φωναὶ Google Cloud
+Settings.Cloud.VoicesGroup=Φωναὶ τοῦ νέφους
+Settings.Cloud.Where=Τὸ Google καὶ τὸ Azure ὑπὸ Βοήθεια, Ὑπηρεσίαι καὶ λόγοι καθίσταται, ὅπου ἐξηγεῖται τί ἑκάτερόν ἐστι καὶ κατὰ βῆμα πρὸς τὸ λόγον ἀνοῖξαι ἄγῃ.
+Settings.Cloud.State.None=Google: οὐδεὶς λόγος ὑπηρεσίας σέσωσται, διὸ οὐδεμία τούτων τῶν φωνῶν πάρεστιν.
+Settings.Cloud.State.Have=Google: πάρεισι φωναὶ {0}, αἳ ὁμοῦ γλώττας {1} ἀναγιγνώσκουσιν.
+Settings.Cloud.State.HaveNoList=Google: λόγος ὑπηρεσίας σέσωσται, ἀλλ᾽ ὁ κατάλογος τῶν φωνῶν οὔπω ἐκομίσθη. Κατάστησον αὐτὸν πάλιν ἕως ἂν συνημμένος ᾖς.
+Settings.Cloud.Load=Δέλτος τοῦ λόγου τῆς ὑπηρεσίας...
+Settings.Cloud.Filter=Λόγος ὑπηρεσίας (*.json)|*.json|Πᾶσαι αἱ δέλτοι (*.*)|*.*
+Settings.Cloud.Forget=Τοῦ λόγου τῆς ὑπηρεσίας ἐπιλαθέσθαι
+Settings.Cloud.ForgetAsk=Ἆρα τοῦ σεσωσμένου λόγου τῆς ὑπηρεσίας ἐπιλάθῃ; Αὗται αἱ φωναὶ παρέχεσθαι παύσονται, καὶ βιβλίον ὃ ἤδη μιᾷ αὐτῶν ἀναγιγνώσκεται σιγήσει ἕως ἂν αὐτῷ ἄλλην φωνὴν δῷς.
+Settings.Cloud.UseGroup=Χρῆσις τῶν φωνῶν τοῦ νέφους
+Settings.Cloud.Use=Τὰς φωνὰς τοῦ νέφους παρέχειν
+Settings.Cloud.Why=Οὐδὲν ἔτι ἐστὶν ὃ ἐνεργὸν γένηται: κατάστησον ἄνω τὸ Google ἢ τὸ Azure, καὶ τοῦτο παρέσται.
+Settings.Cloud.NoList=Ὁ λόγος ἐδέχθη, ἀλλ᾽ ὁ κατάλογος τῶν φωνῶν κομισθῆναι οὐκ ἠδυνήθη. Ὡς τὰ πολλὰ τὸ δίκτυον αἴτιόν ἐστιν· αἱ φωναὶ φανήσονται ἅμα τῷ αὐτοῦ τυχεῖν δυνατὸν εἶναι.
+Settings.Azure.Group=Φωναὶ Azure Speech
+Settings.Azure.Resource=Ὄνομα τῆς πηγῆς:
+Settings.Azure.Key=Κλείς:
+Settings.Azure.Save=Πειρᾶσαι καὶ σῶσαι
+Settings.Azure.NoResource=Γράψον τὸ ὄνομα τῆς πηγῆς — ἐστὶ τὸ πρῶτον μέρος τοῦ πέρατος ἐν τῇ αὐτῇ σελίδι ἐν ᾗ ἡ κλείς.
+Settings.Azure.NoKey=Γράψον τὴν κλεῖδα.
+Settings.Azure.Refused=Τὸ Azure ἐκεῖνο τὸ ζεῦγος οὐκ ἐδέξατο. Ἐπίσκεψαι τὸ ὄνομα τῆς πηγῆς καὶ τὴν κλεῖδα, καὶ τὴν πηγὴν Speech εἶναι.
+Settings.Azure.State.None=Azure: οὐδεμία κλεὶς σέσωσται, διὸ οὐδεμία τούτων τῶν φωνῶν πάρεστιν.
+Settings.Azure.State.Have=Azure: πάρεισι φωναὶ {0}, αἳ ὁμοῦ γλώττας {1} ἀναγιγνώσκουσιν.
+Settings.Azure.Forget=Τῆς κλειδὸς ἐπιλαθέσθαι
+Settings.Azure.ForgetAsk=Ἆρα τῆς σεσωσμένης κλειδὸς Azure ἐπιλάθῃ; Αὗται αἱ φωναὶ παρέχεσθαι παύσονται, καὶ βιβλίον ὃ ἤδη μιᾷ αὐτῶν ἀναγιγνώσκεται σιγήσει ἕως ἂν αὐτῷ ἄλλην φωνὴν δῷς.
+Hint.Settings.CloudUse=Τοῦτο τὴν σὴν χρῆσιν τῶν φωνῶν τοῦ νέφους ἐνεργὸν καὶ ἀργὸν ποιεῖ, τουτέστι πασῶν τῶν φωνῶν ἐκ τοῦ δικτύου, οὐ τῶν φωνῶν SAPI ἢ OneCore τῶν παρὰ σοὶ ἐγκατεστημένων.\n\nΚρίνει πότερον ἐκεῖναι αἱ φωναὶ ΠΑΡΕΧΩΝΤΑΙ ὅταν φωνὴν ὡρισμένῳ βιβλίῳ αἱρῇ. Οὐδέποτε αὐτομάτως ἀποδίδονται οὐδέ ποτε φωνὴ κυρία γλώττης γίγνονται — τοῦτο ταῖς ἐν τῷδε τῷ ὑπολογιστῇ ἐγκατεστημέναις μένει, αἳ οὐδὲν κοστίζουσιν οὐδὲ συνάψεως δέονται.\n\nΒιβλίον ὃ ἤδη φωνῇ τοῦ νέφους ἀναγιγνώσκεται αὐτὴν κατέχει, εἴτε τοῦτο ἐνεργόν ἐστιν εἴτε μή· τὸ πλῆκτρον τῆς αἱρέσεως ἄρχει, οὐ τοῦ ὃ ἀναγνωσθῆναι δύναται.
+Hint.Settings.Azure=Ἡ χρῆσις τῶν φωνῶν Google καὶ Azure τινῶν πίστεων Google, Microsoft καὶ Azure καὶ τινὸς ἔργου ἐν τοῖς τόποις αὐτῶν δεῖται. Πλείονα ἐν τῇ βοηθείᾳ.
+Hint.Settings.Cloud=
+Google.Cred.NotJson=Ἐκείνη ἡ δέλτος ὡς JSON ἀναγνωσθῆναι οὐ δύναται, διὸ οὐκ ἔστιν ἣν σοὶ τὸ Google ἔδωκεν. Ἡ δέλτος ἣν ζητεῖς κατήχθη ὅτε τὸν λόγον τῆς ὑπηρεσίας ἔκτιζες, καὶ τὸ ὄνομα αὐτῆς εἰς .json τελευτᾷ.
+Google.Cred.NotServiceAccount=Ἐκεῖνο τὸ JSON ἀναγνωσθῆναι δύναται, ἀλλὰ λόγος ὑπηρεσίας οὐκ ἔστιν — οὔτε διεύθυνσιν λόγου οὔτε κλεῖδα ἰδίαν ἔχει. Τὸ Google πλείονα γένη πίστεως παρέχει· ὃ ταύταις ταῖς φωναῖς δεῖ ἐστιν ἡ κλεὶς τοῦ λόγου τῆς ὑπηρεσίας.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Λεξικὸν τῆς προφορᾶς
+Dict.Open=Λεξικὸν τῆς προφορᾶς...
+Dict.Open.Accessible=Λεξικὸν τῆς προφορᾶς
+Dict.Scope=Οὗτοι οἱ κανόνες ἀνήκουσι πρός:
+Dict.Scope.Global=Πάντα ἃ ἀναγιγνώσκω
+Dict.Scope.Language=Πάντα ἃ γλώττῃ {0} ἀναγιγνώσκω
+Dict.Scope.Voice=Πάντα ἃ φωνῇ {0} ἀναγιγνώσκω
+Dict.List.Accessible=Κανόνες
+Dict.Column.Pattern=Γεγραμμένον
+Dict.Column.Says=Λέγεται ὡς
+Dict.Column.Match=Συμφωνία
+Dict.Column.Case=Μεγάλα γράμματα
+Dict.Column.State=Κανών
+Dict.Column.Comment=Σημείωσις
+Dict.Add=Πρόσθες...
+Dict.Edit=Διόρθωσον...
+Dict.Remove=Ἀφαίρεσον
+Dict.State.On=Ναί
+Dict.State.Off=Οὔ
+Dict.Try=Περίοδον πειρᾶσαι:
+Dict.TryButton=Πείρασον
+Dict.Rule.TitleNew=Κανὼν νέος
+Dict.Rule.TitleEdit=Τὸν κανόνα διορθῶσαι
+Dict.Field.Pattern=Ὃ γέγραπται:
+Dict.Field.Replacement=Λέγε τοῦτο ἀντ᾽ αὐτοῦ:
+Dict.Field.Match=Συμφωνία:
+Dict.Field.CaseSensitive=Τὰ μεγάλα γράμματα διακρίνειν
+Dict.Field.Skip=Παράλειπε
+Dict.Field.Comment=Σημείωσις:
+Dict.Field.Enabled=Ὁ κανὼν ἐνεργός ἐστιν
+Dict.Match.WholeWord=Ὅλη ἡ λέξις
+Dict.Match.Anywhere=Πανταχοῦ, καὶ ἐντὸς λέξεως
+Dict.Match.Regex=Κανονικὴ ἔκφρασις
+Dict.Error.Title=Τούτῳ τῷ κανόνι χρῆσθαι οὐκ ἔξεστιν
+Dict.Error.NoPattern=Γράψον ὃ ἐν τῷ βιβλίῳ γέγραπται.
+Dict.Error.TooSlow=Τοῦτο τὸ παράδειγμα λίαν πολὺν χρόνον ζητεῖ. Ἁπλούστερον ποίησον.
+Dict.Help=Βοήθεια περὶ τῶν κανονικῶν ἐκφράσεων...
+Dict.Help.Title=Κανονικαὶ ἐκφράσεις ἐν τῷ λεξικῷ τῆς προφορᾶς
+Dict.Help.Text=Ἡ παλαιὰ σοφία Ζεν λέγει:\n\n    Ὁ τεχνίτης πρόβλημα εἶχεν.\n    Ὁ τεχνίτης ἔγνω αὐτὸ κανονικαῖς ἐκφράσεσι λῦσαι.\n    Ὁ τεχνίτης δύο προβλήματα εἶχεν.\n\nΑἱ RegEx, τουτέστιν αἱ κανονικαὶ ἐκφράσεις, τοιαῦταί εἰσιν αἷς ἄμεινον μὴ ἐμπλέκεσθαι, ἀλλὰ κομψόν ἐστι τὴν ἐξουσίαν ἔχειν, ἰδοὺ οὖν αὐτήν.\n\nΕἰ οἶσθα τί ποιεῖς, πρόσιθι. Εἰ δὲ μή, ἁπλῶς αὐταῖς μὴ χρῶ, ἢ τὸ Google ἐρώτησον.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=Κλεὶς API ὑπὲρ τοῦ {0}
+Dialog.TranslateKey.Prompt=Κόλλησον τὴν κλεῖδα ἣν παρὰ τοῦ {0} ἔλαβες. Ἐν τῷδε τῷ ὑπολογιστῇ ἐν ἰδίᾳ δέλτῳ, εἴδει ἀναγνωστῷ, σῴζεται, διὸ αὐτῇ χρῶ ὥσπερ ἂν συνθήματι χρῷο. Αὐτὴν ὁποτεοῦν ἀντικαταστῆσαι ἢ ἀφελεῖν δύνασαι, καὶ παρ᾽ αὐτῇ τῇ ὑπηρεσίᾳ αὐτὴν ἀκυρῶσαι.
+Dialog.TranslateKey.Field=Κλεὶς API
+Dialog.TranslateKey.Region=Χώρα (κενὸν εἰ Global):
+Dialog.TranslateKey.Status=Ἀποτέλεσμα
+Dialog.TranslateKey.Test=Τὴν κλεῖδα πειρᾶσαι
+Dialog.TranslateKey.Remove=Ἀφαίρεσον
+Dialog.TranslateKey.Testing=Ἡ κλεὶς πειρᾶται...
+Dialog.TranslateKey.Works=Ἡ κλεὶς ἰσχύει.
+Dialog.TranslateKey.Stored=Ταύτῃ τῇ ὑπηρεσίᾳ κλεὶς σέσωσται.
+Dialog.TranslateKey.NotStored=Ταύτῃ τῇ ὑπηρεσίᾳ οὐδεμία κλεὶς σέσωσται.
+Azure.Setup.Title=Τὸ Azure Speech καταστῆσαι
+Azure.Setup.Open=Κτίσον αὐτὴν ὑπὲρ ἐμοῦ...
+Azure.Setup.Intro=Ὁ NBR τὴν πηγὴν Azure ἀντὶ σοῦ κτίζειν δύναται, ὥστε οὐδεμία πύλη διαπορευτέα ἐστίν. Ἅπαξ παρὰ τῷ Microsoft βραχεῖ κώδικι σεαυτὸν δηλοῖς, αἱρῇ ἐν ποίᾳ συνδρομῇ τεθῇ, καὶ ὁ NBR αὐτὴν ἐν τῷ βαθμῷ τῷ δωρεὰν κτίζει καὶ τὴν κλεῖδα σῴζει. Οὐδὲν κτίζεται πρὶν ἂν σεαυτὸν δηλώσῃς.
+Azure.Setup.Start=Ἄρξαι
+Azure.Setup.SigningIn=Αἰτεῖται παρὰ τοῦ Microsoft κῶδιξ δηλώσεως.
+Azure.Setup.CodeLabel=Κῶδιξ δηλώσεως:
+Azure.Setup.EnterCode=Ὁ κῶδιξ σου τῆς δηλώσεως ἐν τῷ πεδίῳ κάτω ἐστίν, ἕτοιμος πρὸς ἀντιγραφήν. Ἑλοῦ "Τὴν σελίδα τῆς δηλώσεως ἀνοῖξαι" ἵνα τὸ {0} ἐν τῷ περιηγητῇ σου ἀνοιχθῇ, ἐκεῖ σεαυτὸν δήλωσον, καὶ ἥδε ἡ θυρὶς αὐτομάτως προσθήσει.
+Azure.Setup.OpenPage=Τὴν σελίδα τῆς δηλώσεως ἀνοῖξαι
+Azure.Setup.OpenFailed=Ὁ περιηγητὴς ἀνοιχθῆναι οὐκ ἠδυνήθη. Ἡ διεύθυνσις ἐν τῷ στίχῳ ἄνω ἐστίν· ἄνοιξον αὐτὴν χειρί.
+Azure.Setup.Directory=Directory:
+Azure.Setup.DirectoryHint=Τοῦτο κενὸν ἔα εἰ λόγῳ ἔργου ἢ σχολῆς σεαυτὸν δηλοῖς. Εἰ τὸ Azure σου ἐν λόγῳ Microsoft ΙΔΙΩΤΙΚΩΙ ἐστίν, τὸ Microsoft τὴν δήλωσιν ἐν τῇ συνήθει διευθύνσει ἀπαρνήσεται καὶ τὸ directory ὀνομάσαι δεήσει ὃ τὸ Azure ἔκτισεν ὅτε ἡ συνδρομὴ ἐγένετο — ἢ τὸ ὄνομα αὐτοῦ, ὃ εἰς onmicrosoft.com τελευτᾷ, ἢ τὴν ταυτότητα αὐτοῦ. Ἅπαξ ἐρωτᾶται καὶ μνήμῃ κατέχεται.
+Azure.Setup.Subscription=Συνδρομή:
+Azure.Setup.SignedIn=Ἐδηλώθης. Ηὑρέθησαν συνδρομαὶ {0} — ἑλοῦ μίαν καὶ πίεσον Κτίσον.
+Azure.Setup.Create=Τὴν πηγὴν κτίσαι
+Azure.Setup.NoSubscription=Ἐκεῖνος ὁ λόγος οὐδεμίαν συνδρομὴν Azure ἔχει, διὸ οὐδαμοῦ ἐστιν ὅπου ἡ πηγὴ κτισθῇ.
+Azure.Setup.Creating=Ἡ πηγὴ κτίζεται. Τοῦτο μέχρι λεπτοῦ ἢ δυοῖν διαρκεῖ· τὸ Azure αὐτὴν ἑτοίμην ἀγγέλλει πρὶν ἀληθῶς εἶναι, διὸ ὁ NBR περιμένει.
+Azure.Setup.Done=Πεποίηται. Ἡ πηγὴ ἔκτισται καὶ ἡ κλεὶς αὐτῆς σέσωσται — πάρεισι φωναὶ {0}.
+Azure.Setup.DoneNoList=Ἡ πηγὴ ἔκτισται καὶ ἡ κλεὶς αὐτῆς σέσωσται, ἀλλ᾽ ὁ κατάλογος τῶν φωνῶν κομισθῆναι οὐκ ἠδυνήθη. Ὡς τὰ πολλὰ τὸ δίκτυον αἴτιόν ἐστιν· αἱ φωναὶ φανήσονται ἅμα τῷ αὐτοῦ τυχεῖν δυνατὸν εἶναι.
+Azure.Setup.Failed=Οὐκ ἐπέτυχεν: {0}
+Azure.Setup.HaveOne=Ἤ, εἰ ἤδη πηγὴν Speech ἔχεις, γράψον ἐνταῦθα τὰ δύο σημεῖα αὐτῆς:
+Azure.Setup.Kept=Τὸ Azure ἐκεῖνο τὸ ζεῦγος ἐδέξατο καὶ σέσωσται. Αὗται αἱ φωναὶ νῦν πάρεισιν.
+
+; ---- THE READING WINDOW
+Reading.Title=Ἀνάγνωσις
+Reading.Back=Ὀπίσω
+Reading.Back.Accessible=Ἓν βῆμα ὀπίσω
+Reading.PlayPause=Ἀναγιγνώσκειν/διαλείπειν
+Reading.PlayPause.Accessible=Ἀναγιγνώσκειν ἢ διαλείπειν, κενόν
+Reading.Forward=Πρόσω
+Reading.Forward.Accessible=Ἓν βῆμα πρόσω
+Reading.Smaller=Ἔλαττον
+Reading.Smaller.Accessible=Κείμενον ἔλαττον, πλῆκτρον μεῖον
+Reading.Bigger=Μεῖζον
+Reading.Bigger.Accessible=Κείμενον μεῖζον, πλῆκτρον πλέον
+Reading.Font.Accessible=Τύπος τῶν γραμμάτων
+Reading.Size.Announce=Μέγεθος τοῦ κειμένου {0}
+Beta.Suffix= — οὐκ ἐν τῇδε τῇ beta
+Beta.NoReadingWindow=Ἡ θυρὶς τῆς ἀναγνώσεως ἐν τῇδε τῇ beta ἀργός ἐστιν. Ἡ ἐν τῇ ὀθόνῃ ἀνάγνωσις, καὶ τὸ Braille ὃ αὐτῇ ἕπεται, ἔτι πειρᾶται καὶ ἐν ὑστέρᾳ ἐκδόσει ἐπανήξει.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Τὰ γράμματα γνωρίσαι
+Ocr.Ask.Question=Τὸ {0} οὐδὲν κείμενον ἔχει — σελίδες εἰκόνων {1} ἐστίν. Ὁ NBR τὸ κείμενον ἐν αὐταῖς γνωρίζειν δύναται, ὃ {2} διαρκεῖν δεῖ. Ἆρα νῦν γνωρίσῃς;
+Ocr.Ask.ReadWith=Γνωρίσαι ὡς:
+Ocr.Ask.Read=Γνώρισον
+Ocr.Ask.Skip=Παράλειπε
+Ocr.Ask.UnderAMinute=ἔλαττον λεπτοῦ
+Ocr.Ask.Minutes=περὶ {0} λεπτά
+Ocr.Result.NoText=Ἐν ταῖς εἰκόσιν οὐδὲν κείμενον ἐγνωρίσθη. Τὸ βιβλίον προσετέθη, ἀλλ᾽ οὐδέν ἐστιν ὃ ἐξ αὐτοῦ ἀναγνωσθῇ.
+Ocr.Refusal.NoEngine=Οὐδεμία γνώρισις γραμμάτων ἐγκατέστηκεν. Χρῶ τῷ "Γλῶτταν προσθεῖναι..." ἐν ταῖς ῥυθμίσεσιν, ὑπὸ Περαιτέρω, καὶ ὁ NBR μίαν σοι ἐγκαταστήσει.
+Ocr.Refusal.NoPages=Ἐνταῦθα οὐδεμία σελίς ἐστιν ἣ ἀναγνωσθῇ.
+Ocr.Progress.Title=Τὰ γράμματα γνωρίζεται
+Ocr.Progress.Starting=Ἡ γνώρισις ἄρχεται...
+Ocr.Progress.Working=Σελὶς {0} ἐκ {1}. {2}
+Ocr.Progress.Quarter={0} ἑκατοστὰ πεποίηται. {1}
+Ocr.Progress.Cancel=Ἄφες
+Ocr.Progress.Cancelling=Μετὰ ταύτην τὴν σελίδα παύσεται. Οὐδὲν σῴζεται.
+Ocr.Progress.Estimating=Λογίζεται πόσον τοῦτο διαρκέσει.
+Ocr.Progress.AlmostDone=Σχεδὸν πεποίηται.
+Ocr.Progress.Seconds=Λείπονται περὶ {0} δεύτερα.
+Ocr.Progress.Minutes=Λείπονται περὶ {0} λεπτά.
+Ocr.Unread.Message=Τοῦτο τὸ βιβλίον οὐδέπω ἐγνώρισται — ἔτι εἰκόνες τῶν σελίδων αὑτοῦ ἐστιν, διὸ οὐδέν ἐστιν ὃ λεχθῇ. Ἆρα νῦν γνωρίσῃς;
+Ocr.Sparse.Message=Μόναι {0} ἐκ τῶν {1} σελίδων τοῦδε τοῦ βιβλίου τι κειμένου φέρουσιν. Κατὰ τὸ εἰκὸς σάρωσίς ἐστιν ἧς ἡ στρῶσις τοῦ κειμένου διέφθαρται, διὸ αἱ λέξεις εἰκόνες μένουσιν. Ἆρα αὐτὰς νῦν γνωρίσῃς;
+Ocr.Blank.Question={0} σελίδες ἐφεξῆς ὅλως ἄνευ κειμένου ἐπανῆλθον. Αἱ λοιπαὶ {1} αἱ αὐταὶ εἶναι δύνανται, καὶ αὐτὰς γνωρίσαι χρόνον τινὰ διαρκοίη ἄν. Ἆρα πρόσθῃς;
+Ocr.Blank.Jbig2={0} σελίδες ἐφεξῆς ὅλως ἄνευ κειμένου ἐπανῆλθον. Οὗτος ὁ PDF τὰς λέξεις αὑτοῦ ἐν εἴδει σῴζει ὃ τὸ Windows γράφειν οὐ δύναται, διὸ ἐκεῖναι αἱ σελίδες ὡς χάρτης κενὸς ἔρχονται ἐν ᾧ οὐδέν ἐστιν ὃ γνωρισθῇ — τὰς λοιπὰς {1} ἀναγνῶναι κατὰ τὸ εἰκὸς οὐδὲν ἂν εὕροι. Ἆρα πρόσθῃς;
+Ocr.Read.Question=Τοῦτο τὸ βιβλίον σελίδες εἰκόνων {0} ἐστὶν οὐδέπω ἐγνωρισμένον. Αὐτὸ γνωρίσαι διαρκεῖ {1}.
+Ocr.ReRead.Question=Τοῦτο τὸ βιβλίον ἐκ {0} σελίδων εἰκόνων ἐγνωρίσθη. Αὐτὸ πάλιν ἄλλῃ γλώττῃ γνωρίσαι διαρκεῖ {1}. Αἱ εἰκόνες μετὰ τοῦ βιβλίου σῴζονται, διὸ τοῦτο τοσαυτάκις γίγνεσθαι δύναται ὁσάκις βούλει.
+Ocr.ReRead.Done=Τὸ βιβλίον πάλιν ἐγνωρίσθη καὶ ἀντικατέστη.
+Ocr.ReRead.Locate=Αἱ εἰκόνες τοῦδε τοῦ βιβλίου μετ᾽ αὐτοῦ οὐ σῴζονται, διὸ τὸν NBR αὐτὰς πάλιν εὑρεῖν δεῖ. Ἑλοῦ τὴν δέλτον τὴν ἐσαρωμένην ἢ — εἰ τὸ βιβλίον ὡς χωρισταὶ εἰκόνες σελίδων ἦλθεν — ἡντιναοῦν ἐκείνων τῶν σελίδων.
+Ocr.ReRead.LocateTitle=Εὑρὲ τὰς εἰκόνας τοῦδε τοῦ βιβλίου
+Ocr.ReRead.Filter=Βιβλία ἐσαρωμένα καὶ εἰκόνες|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Πᾶσαι αἱ δέλτοι|*.*
+Ocr.ReRead.WholeFolder=Ἐν ἐκείνῃ τῇ θήκῃ εἰσὶν εἰκόνες {0}. Ἆρα αὐτὰς πάσας ὡς τὰς σελίδας τοῦδε τοῦ βιβλίου γνωρίσῃς;
+Ocr.Add.Title=Γλῶτται τῆς γνωρίσεως
+Ocr.Add.List=Γλῶτται
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — ἤδη ἐγκατεστημένη
+Ocr.Add.Hint=Ἑλοῦ τὰς γλώττας ἃς βούλει καὶ πίεσον Ἐγκατάστησον. Κατὰ τὰς ῥυθμίσεις σου τὸ Windows ἄδειαν αἰτεῖν δύναται, καὶ ἔπειτα τὴν γνώρισιν ἐκείνης τῆς γλώττης κατάξει — δέλτον μικράν, οὐχ ὅλον δέσμην γλώττης τοῦ Windows.
+Ocr.Add.Install=Ἐγκατάστησον
+Ocr.Add.WindowsSettings=Ῥυθμίσεις τοῦ Windows...
+Ocr.Add.Close=Κλεῖσον
+Ocr.Add.Installing=Τὸ {0} ἐγκαθίσταται. Τοῦτο τὸ Windows Update ἐπιμελεῖται, διὸ πόσον διαρκῇ ἐκ τούτου ἤρτηται πόσον ἀσχολεῖται — ὀλίγα λεπτὰ σύνηθές ἐστι, καὶ δέκα οὐκ ἀνήκουστον. Ταύτην τὴν θυρίδα κλεῖσαι καὶ τοῖς σαυτοῦ σχολάζειν δύνασαι· αὐτομάτως προσθήσει.
+Ocr.Add.Done=Τὸ {0} ἐγκατέστη καὶ πρὸς χρῆσιν ἕτοιμόν ἐστιν.
+Ocr.Add.DonePartly=Τὸ {0} ἐγκατέστη καὶ πρὸς χρῆσιν ἕτοιμόν ἐστιν. Τὸ {1} οὐκ ἦλθεν — ἴσως τὸ Windows ἔτι ἐπ᾽ αὐτῷ ἐργάζεται, ἢ ταύτῃ τῇ ἐκδόσει οὐ πάρεστιν.
+Ocr.Add.NotStarted=Οὐδὲν ἐγκατέστη. Τὸ Windows ἄδειαν οὐκ ἔδωκεν.
+Ocr.Add.Failed=Τὸ {0} οὐκ ἐγκατέστη. Ἴσως τὸ Windows ἔτι ἐπ᾽ αὐτῷ ἐργάζεται, ἢ ἡ γλῶττα ταύτῃ τῇ ἐκδόσει τοῦ Windows οὐ πάρεστιν.
+Ocr.Add.LeftRunning=Τὸ Windows αὐτὸ ἔτι ἐγκαθίστησιν. Αὐτομάτως τελέσει.
+
+; ---- TRANSLATION
+Translate.Progress.Title=Τὸ βιβλίον μεταφράζεται
+Translate.Progress.Starting=Παρασκευάζεται. Ὁποτεοῦν παύσασθαι δύνασαι· τὸ μεταφρασθὲν σῴζεται, καὶ πάλιν ἀρχόμενος ἐκεῖθεν προστίθης.
+Translate.Progress.Working=Μέρος {0} ἐκ {1}. Λείπονται περὶ {2}. Ὁποτεοῦν παύσασθαι δύνασαι — τὸ πεποιημένον σῴζεται.
+Translate.Progress.Quarter={0} ἑκατοστὰ μετεφράσθη, λείπονται περὶ {1}.
+Translate.Progress.Cancel=Παῦσον
+Translate.Progress.Cancelling=Μετὰ τοῦτο τὸ μέρος παύσεται. Τὸ ἤδη μεταφρασθὲν σῴζεται.
+Translate.Progress.StillOn=Ἔτι ἐν τούτῳ, μέχρι νῦν {0} δεύτερα.
+Translate.Progress.StillWorking=Ἔτι ἐν τῷ μέρει {0} ἐκ {1}. Ἡ ὑπηρεσία βραδέως ἀποκρίνεται.
+Translate.Progress.Estimating=λογίζεται πόσον τοῦτο διαρκέσει
+Translate.Progress.AlmostDone=στιγμή
+Translate.Progress.Seconds={0} δεύτερα
+Translate.Progress.Minutes={0} λεπτά
+Translate.Ask.Title=Τὸ βιβλίον μεταφράσαι
+Translate.Ask.Info={0} — περὶ {1} γράμματα, σχεδὸν {2}. Ἡ μετάφρασις νέον βιβλίον γίγνεται· τοῦτο ἄθικτον μένει.
+Translate.Ask.HybridNote=Τοῦτο τὸ βιβλίον πρὸς τῷ κειμένῳ καὶ φωνὴν ἔχει. Μεταφρασθῆναι μόνον τὸ κείμενον δύναται, διὸ ἡ μετάφρασις βιβλίον γεγραμμένον ἔσται ἄνευ τῆς ἀπαγγελίας.
+Translate.Ask.From=Γλῶττα τοῦ βιβλίου:
+Translate.Ask.To=Μεταφράσαι εἰς:
+Translate.Ask.Model=Πρότυπον {0}:
+Translate.Ask.Model.None=— οὐδέν, ἡ σειρὰ ἐνταῦθα τελευτᾷ —
+Translate.Ask.ChainNote=Ἐὰν μέρος ἀπαρνηθῇ, ὁ NBR αὐτὸ πάλιν πειρᾶται καὶ ἔπειτα κατὰ τάξιν τὰς ἄλλας ὑπηρεσίας σου προσέρχεται. Ὃ οὐδεμία αὐτῶν δέχεται, ἐν τῇ γλώττῃ ᾗ τὸ βιβλίον ἦλθε μένει.
+Translate.Ask.NoEngine=Οὐδεμία ὑπηρεσία ἔτι κλεῖδα ἔχει
+Translate.Ask.Standing=Ἡ διαρκής σου σημείωσις καὶ πρὸς τοῦτο τὸ βιβλίον ἀνήκει: {0}
+Translate.Ask.Inherit=Σειρὰν συνεχίζειν, τῷ γλωσσαρίῳ τοῦδε χρώμενον:
+Translate.Ask.Inherit.None=Οὐδέν — τοῦτο τὸ βιβλίον καθ᾽ ἑαυτὸ ἕστηκεν
+Translate.Ask.Notes=Ἃ τὸν μεταφραστὴν περὶ ΤΟΥΔΕ τοῦ βιβλίου εἰδέναι δεῖ (κατὰ βούλησιν). Ὁ διηγούμενος καὶ τὰ ὀνόματα ἐξ αὐτοῦ τοῦ κειμένου αὐτομάτως συλλέγεται· τοῦτο ὑπὲρ τούτου ἐστὶν ὃ τὸ κείμενον οὐ λέγει — ὄνομα ὃ ὡρισμένῳ τρόπῳ ἀποδεδομένον βούλει, ἢ πῶς δύο πρόσωπα ἀλλήλοις προσαγορεύεται:
+Translate.Ask.Start=Μετάφρασον
+Translate.LastResort.Begin=Τὸ ἑπόμενον μέρος μετέφρασε τὸ Microsoft Azure — προσδόκα τὰ ἀπροσδόκητα.
+Translate.LastResort.End=Τέλος τοῦ ὑπὸ Microsoft Azure μεταφρασθέντος μέρους.
+Translate.NotText=Μεταφρασθῆναι μόνον βιβλίον γεγραμμένον δύναται. Τοῦτο φωνή ἐστιν.
+Translate.Empty=Ἐν τῷδε τῷ βιβλίῳ οὐδὲν κείμενόν ἐστιν ὃ μεταφρασθῇ.
+Translate.NoService=Οὐδεμία ὑπηρεσία μεταφράσεως ἔτι κλεῖδα ἔχει. Πρόσθες μίαν ἐν ταῖς ῥυθμίσεσιν, ὑπὸ Περαιτέρω.
+Translate.Done=Μετεφράσθη μέρη {0}. Ἡ μετάφρασις ἐν τῷ βιβλιοστασίῳ ὡς νέον βιβλίον ἕστηκεν.
+Translate.DoneLeft=Μετεφράσθη μέρη {0}, κατελείφθη ἐν τῇ ἀρχικῇ γλώττῃ {1}.
+Translate.Took=Διήρκεσεν {0}. Ὑπόμνημα κατὰ στίχον ἐστὶν ἐν τῷ translation.log, παρὰ τὸ ἀρχικὸν βιβλίον.
+Translate.Failed=Τὸ βιβλίον μεταφρασθῆναι οὐκ ἠδυνήθη: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Βιβλίον φωνητικὸν μόνον ἐκ βιβλίου γεγραμμένου γενέσθαι δύναται. Τοῦτο ἤδη ἦχός ἐστιν.
+Export.NoVoice=Τοῦτο τὸ βιβλίον οὐδεμίαν φωνὴν ἔχει ᾗ ἀναγνωσθῇ, διὸ οὐδέν ἐστιν ὃ ληφθῇ. Δὸς αὐτῷ πρῶτον μίαν ἐν ταῖς ἰδιότησιν αὐτοῦ.
+Export.Empty=Ἐν τῷδε τῷ βιβλίῳ οὐδὲν κείμενόν ἐστιν ὃ ἀναγνωσθῇ.
+Export.Filter=Δέλτος φωνητική (*.mp3)|*.mp3
+Export.Ask.Ready=Πάντα τὰ μέρη {0} τοῦδε τοῦ βιβλίου ἤδη εἴρηται, λείπεται οὖν αὐτὰ μόνον συνάψαι καὶ τοῦτο στιγμὴν διαρκέσει. Ἆρα τὴν δέλτον ποιήσῃς;
+Export.Ask.Missing=Λείπεται ληφθῆναι {0} ἐκ τῶν {1} μερῶν τοῦδε τοῦ βιβλίου. Αὐτὰ λαβεῖν περὶ {2} λεπτὰ διαρκεῖν δεῖ — τοῦτό ἐστιν ὁ χρόνος τῆς ποιήσεως, οὐ τὸ μῆκος τοῦ βιβλίου πρὸς ἀκρόασιν. Ἡ θυρὶς τῆς προκοπῆς ἀριθμὸν δείκνυσιν ὃς καθ᾽ ὁδὸν μετρεῖται. Ὁποτεοῦν παύσασθαι δύνασαι· τὸ εἰρημένον σῴζεται, καὶ πάλιν ἀρχόμενος ἐκεῖθεν προστίθης. Ἆρα τὴν δέλτον ποιήσῃς;
+Export.Progress.Title=Τὸ βιβλίον φωνητικὸν ποιεῖται
+Export.Progress.Starting=Παρασκευάζεται. Ὁποτεοῦν παύσασθαι δύνασαι· τὸ εἰρημένον σῴζεται, καὶ πάλιν ἀρχόμενος ἐκεῖθεν προστίθης.
+Export.Progress.Making=Μέρος {0} ἐκ {1}. Λείπονται περὶ {2}.
+Export.Progress.Joining=Πάντα εἰς μίαν δέλτον συνάπτεται.
+Export.Done=Πεποίηται — μέρη {0}, σεσωσμένον ὡς {1}
+Export.DoneShort=Σεσωσμένον ὡς {2}, ἀλλὰ {1} ἐκ τῶν {0} μερῶν ῥηθῆναι οὐκ ἠδυνήθη καὶ ἐν αὐτῷ ἀπολείπεται.
+Export.Failed=Τὸ βιβλίον φωνητικὸν ποιηθῆναι οὐκ ἠδυνήθη.
+
+; ---- AUDIO CD
+Cd.Progress.Title=Δίσκος φωνητικός
+Cd.Progress.Preparing=Ὁ δίσκος ἀναγιγνώσκεται...
+Cd.Progress.Track=Ἀναγιγνώσκεται λωρὶς {0} ἐκ {1}
+Cd.Progress.Stopping=Παύεται...
+Cd.BookTitle=Δίσκος φωνητικός (λωρίδες {0})
+Cd.Format=Audio CD - Compact Disc Digital Audio
+Cd.NoDisc=Οὐδεὶς δίσκος ἐν τῷ ὀργάνῳ ἐστίν, ἢ τὸ ὄργανον αὐτὸν ἔτι ἀναγιγνώσκει. Ἔνθες δίσκον φωνητικὸν καὶ πάλιν πείρασον.
+Cd.DataDisc=Οὗτος δίσκος δεδομένων ἐστίν, οὐ δίσκος φωνητικός. Εἰ βιβλίον ἐν δέλτοις MP3 φέρει, ἄνοιξον αὐτὸν διὰ Δέλτος, Θήκην ἀνοῖξαι - τοῦτο ὁ NBR ἤδη ἀναγιγνώσκει.
+Cd.ReadFailed=Ὁ δίσκος ἀναγνωσθῆναι οὐκ ἠδυνήθη: {0}
+Cue.Track=Λωρὶς {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Ὑπηρεσίαι καὶ λόγοι
+Services.List.Accessible=Ὑπηρεσίαι
+Services.State.Ready=ΑΥΤΗ ΚΑΘΕΣΤΗΚΕΝ. Τὰ βήματα πάλιν διελθεῖν δύνασαι ἵνα τὸ σεσωσμένον ἀντικαταστήσῃς.
+Services.State.NotSet=Αὕτη οὔπω καθέστηκεν.
+Services.SetUp=Ταύτην τὴν ὑπηρεσίαν καταστῆσαι...
+Services.Forget=Τοῦδε τοῦ λόγου ἐπιλαθέσθαι
+Services.ForgetAsk=Ἆρα τῆς σεσωσμένης κλειδὸς ὑπὲρ τοῦ {0} ἐπιλάθῃ; Παρέχεσθαι παύσεται ἕως ἂν αὐτὴν πάλιν καταστήσῃς.
+Services.Disclaimer=ΤΑ ΒΗΜΑΤΑ ΚΑΤΩ ΙΣΩΣ ΟΥΚ ΑΠΟΚΡΙΝΕΤΑΙ ΤΟΥΤΩΙ Ο ΟΡΑΙΣ. Αὗται αἱ ὑπηρεσίαι τοὺς τόπους αὑτῶν ἄνευ προρρήσεως ἀνακαινίζουσιν, διὸ πλῆκτρον μετακεκινῆσθαι ἢ νέον ὄνομα εἰληφέναι δύναται ἀφ᾽ οὗ ταῦτα ἐγράφη. Ἡ ΤΑΞΙΣ τῶν ποιητέων σπανίως μεταβάλλεται· τὰ ὀνόματα τῶν πραγμάτων πολλάκις. Ἐὰν πλανηθῇς, τὸ ἄνω μέρος σοι λέγει τίνος τυχεῖν πειρᾷ.
+Services.Item.GoogleVoices=Φωναὶ Google Cloud
+Services.Item.AzureVoices=Φωναὶ Azure Speech
+Services.Item.DeepSeek=Μετάφρασις διὰ DeepSeek
+Services.Item.Gemini=Μετάφρασις διὰ Gemini
+Services.Item.OpenAi=Μετάφρασις διὰ GPT (OpenAI)
+Services.About.Gemini=Τὸ Gemini ὅλον βιβλίον εἰς ἄλλην γλῶτταν μεταφράζει, τῷ ἰδίῳ τοῦ Google προτύπῳ. Τῇ ἀκοῇ ἄριστον πάντων κέκριται — καὶ τοῦτό ἐστιν ὃ δόλον ἔχει.\n\nΣχεδὸν ἕκτον ἕκαστον μέρος ἐκδεδομένου μυθιστορήματος ἀπαρνεῖται. Οὐ διὰ τὰ ἐντός· τὸ σχῆμα τοιοῦτόν ἐστιν οἷον προτύπου ὃ βιβλίον ἑαυτῷ γνώριμον ἀναγνωρίζει, οὐδεμία δὲ ῥύθμισις τοῦτο μεταβάλλει. Διὸ ὁ NBR ἄλλην ὑπηρεσίαν ἐρωτᾷ περὶ τούτου ὃ ἡ πρώτη οὐ δέχεται, καὶ διὰ τοῦτο ἄξιόν ἐστι τὴν σειρὰν συστῆσαι μᾶλλον ἢ μιᾷ μηχανῇ πιστεύειν.\n\nἜστι βαθμὸς δωρεάν, καὶ οὕτως ἄφθονος ὥστε τρόπον συνήθη τῆσδε τῆς χρήσεως εἶναι: ἐν ἀληθεῖ ἔργῳ μεμετρημένον, τὸ Gemini 3.1 Flash Lite πεντακοσίας αἰτήσεις τῆς ἡμέρας ἐπιτρέπει, ὃ σχεδὸν ἓξ βιβλία ἐστίν. Ἡ ἔμμισθος χρῆσις περὶ εἴκοσι πέντε ἑκατοστὰ ὑπὲρ μυθιστορήματος 450.000 γραμμάτων αἰτεῖ.\n\nἝΝ ΣΤΑΘΜΗΤΕΟΝ ΠΡΙΝ ΤΟΝ ΔΩΡΕΑΝ ΒΑΘΜΟΝ ΕΛΕΣΘΑΙ. Αὐτὴ ἡ σελὶς τῶν τιμῶν τοῦ Google λέγει ἐν τῷ βαθμῷ τῷ δωρεὰν τὰ σὰ πρὸς τὸ τὰ ἔργα αὐτῶν βελτιοῦν χρῆσθαι, ἐν δὲ τῷ ἐμμίσθῳ οὔ. Ἡ μετάφρασις ὅλον τὸ βιβλίον πέμπει, διὸ ἡ διαφορὰ ἀληθής ἐστιν. Ἡ αἵρεσις ἀμφοτέρως σή ἐστιν — ἀλλ᾽ αἵρεσις ἔστω, μὴ πρᾶγμα ἀπροσδόκητον.\n\nΤὸ τὴν κλεῖδα κτήσασθαι μακροτάτη ὁδὸς ἐκ τῶν τεττάρων ἐστίν, καὶ τὰ βήματα κάτω ἐξ ἀληθοῦς δρόμου γέγραπται, ἐπεὶ ἡ φανερὰ ὁδὸς οὐκ ἰσχύει.
+Services.About.GoogleVoices=Αἱ φωναὶ Google Cloud τὰ βιβλία διὰ τοῦ δικτύου φωνῇ ἀναγιγνώσκουσιν, ταῖς ἰδίαις τοῦ Google φωναῖς. Ταῖς πλείσταις γλώτταις ἄρισται τῶν τοῦ νέφους εἰσίν, καὶ ὁ βαθμὸς ὁ δωρεὰν μέγιστός ἐστιν: σχεδὸν μύρια δεκάκις γράμματα τοῦ μηνός, ὃ σχεδὸν δύο βιβλία ἐστίν.\n\nΤρία γενέσθαι δεῖ, ταύτῃ τῇ τάξει. Σοὶ ΛΟΓΟΥ GOOGLE δεῖ, ὃν οἱ πλεῖστοι ἤδη ἔχουσιν. Ἐν αὐτῷ ΕΡΓΟΝ κτίζεις καὶ ὑπὲρ ἐκείνου τοῦ ἔργου τὴν ὑπηρεσίαν Text-to-Speech ἐνεργὸν ποιεῖς — οὐδὲ τὸ Google αὐτὴν ἐνεργὸν ποιήσει ἕως ἂν ὁ λόγος τῆς τιμῆς καταστῇ, διὸ χάρτου δεῖ καίπερ τοῦ βαθμοῦ τοῦ δωρεὰν οὐδὲν κοστίζοντος. Ἔπειτα ΛΟΓΟΝ ΥΠΗΡΕΣΙΑΣ κτίζεις καὶ τὴν κλεῖδα αὐτοῦ κατάγεις.\n\nἘκεῖνο τὸ ὕστατον μέρος ταύτην τὴν ὑπηρεσίαν ἀσυνήθη ποιεῖ. Τὸ Google κλεῖδα ἣν κολλᾶν δύναιο οὐ δίδωσιν: δέλτον μικρὰν δίδωσιν ἣ εἰς .json τελευτᾷ, ἅπαξ καταχθεῖσαν. Ὁ NBR τὸ ἐντὸς ἐκείνης τῆς δέλτου σῴζει, οὐκ αὐτὴν τὴν δέλτον, διὸ ὕστερον τὸ καταχθὲν μετακινεῖν ἢ ἐξαλείφειν δύνασαι.
+Services.About.AzureVoices=Αἱ φωναὶ Azure Speech τὰ βιβλία διὰ τοῦ δικτύου φωνῇ ἀναγιγνώσκουσιν, ταῖς φωναῖς τοῦ Microsoft. Ἐν τῇ Ἀγγλικῇ καὶ ἐν πολλαῖς ἄλλαις ἄρισταί εἰσιν. Ἐν τῇ Κροατικῇ μέτριαί εἰσιν, καὶ ἐκεῖ τὸ Azure τὸ λεξικὸν τῆς προφορᾶς οὐχ ὑποστηρίζει, διὸ κανὼν ὃν ὑπὲρ ὀνόματος γράφεις οὐ φυλαχθήσεται. Ὁ βαθμὸς ὁ δωρεὰν σχεδὸν ἥμισυ μυρίων δεκάκις γραμμάτων τοῦ μηνός ἐστιν, σχεδὸν ἓν βιβλίον.\n\nΔύο γενέσθαι δεῖ, καὶ τὸ πρῶτον μόνον ἀπὸ σοῦ ἤρτηται. Σοὶ ΛΟΓΟΥ MICROSOFT δεῖ πρὶν Azure ἔχειν δύνασθαι, καὶ ἔπειτα ΣΥΝΔΡΟΜΗΣ AZURE — ᾗ δοκιμασιῶν ταυτότητος, χάρτου καὶ συνθήκης δεῖ. Τοῦτο ἄνθρωπον ἑκόντα ποιεῖν δεῖ, διὸ αὐτομάτως γενέσθαι οὐ δύναται καὶ ὁ NBR οὐδὲ πειρᾶται.\n\nΠάντα τὰ μετὰ τοῦτο ἔργον τοῦ NBR ἐστίν. Βραχεῖ κώδικι ἑαυτὸν δηλοῖ, τὴν πηγὴν ἐν τῷ βαθμῷ τῷ δωρεὰν κτίζει καὶ τὴν κλεῖδα σῴζει. Τὴν πύλην τοῦ Azure οὐδέποτε ἀνοίγεις.\n\nἝν πολλοὺς λανθάνει. Ὅτε ἡ συνδρομή σου γίγνεται, τὸ Azure σιγῇ DIRECTORY αὐτῇ κτίζει. Εἰ ὁ λόγος σου Microsoft ἰδιωτικός ἐστιν — Gmail, Outlook, Hotmail —, τὸ Azure τὴν δήλωσιν ἀπαρνεῖται ἕως ἂν ἐκεῖνο τὸ directory ὀνομάσῃς, ἐπεὶ πρὸς τοῦτο τοὺς ἰδιωτικοὺς λόγους οὐκ ἀναγνωρίζει. Τὸ ὄνομα αὐτοῦ εἰς onmicrosoft.com τελευτᾷ.
+Services.About.DeepSeek=Τὸ DeepSeek ὅλον βιβλίον εἰς ἄλλην γλῶτταν μεταφράζει. Ἐκ τῶν ὑπηρεσιῶν αἷς ὁ NBR χρῆσθαι δύναται βεβαιοτάτη ἐστίν — σπανιώτατα ἀπαρνεῖται — καὶ πολλῷ εὐωνοτάτη.\n\nἙνὸς δεῖ: λόγου παρὰ τῷ DeepSeek καὶ τινὸς ἀργυρίου ἐν αὐτῷ. Βαθμὸς δωρεὰν οὐκ ἔστιν, ἀλλ᾽ ἡ μετάφρασις κατὰ τὸ πλῆθος τοῦ κειμένου τιμᾶται καὶ βιβλίον ἐλάχιστον κοστίζει.\n\nΑὕτη κλεῖδα δίδωσιν ἣν κολλᾷς, καὶ ἁπλουστάτη ἐκ τῶν τεττάρων ἐστίν. Ἓν μόνον φυλακτέον: ἡ κλεὶς ΑΠΑΞ δείκνυται, ὅτε αὐτὴν κτίζεις. Ἐὰν ἐκείνην τὴν θυρίδα ἄνευ ἀντιγραφῆς κλείσῃς, πάλιν δειχθῆναι οὐ δύναται καὶ ἁπλῶς ἄλλην ποιεῖς.
+Services.About.OpenAi=Τὸ OpenAI ὅλον βιβλίον εἰς ἄλλην γλῶτταν μεταφράζει, τοῖς προτύποις GPT. Τρισὶ βαθμοῖς ἐφ᾽ ἑνὶ λόγῳ καὶ μιᾷ κλειδὶ παρέχεται: τῷ Terra, ἀφ᾽ οὗ ἀρκτέον, τῷ Luna, εὐωνοτέρῳ, καὶ τῷ Sol, τιμιωτάτῳ.\n\nΒαθμὸς δωρεὰν ὅλως οὐκ ἔστιν, καὶ ἐνταῦθα οἱ ἄνθρωποι ἀπατῶνται: ἡ συνδρομὴ πρὸς τὸ ChatGPT τοῦτο ΟΥ τελεῖ. Τὸ API χωρὶς λογίζεται, καὶ λόγος νέος ΠΡΟΤΕΛΗΣ ἐστίν — μικρὸν ἀργύριον ἐπιτίθης, καὶ αἱ κλήσεις ἐξ ἐκείνου λαμβάνουσιν. Πέντε ἢ δέκα δολλάρια ἱκανώτατά ἐστιν ἵνα ἴδῃς πόσου βιβλίον ἀληθῶς κοστίζει πρὶν ὁτιοῦν γνῶναι.\n\nΠόσου βιβλίον κοστίζει, ὑπὲρ μυθιστορήματος 450 000 γραμμάτων λελογισμένον καὶ κατὰ τὸ πῶς ἡ Κροατικὴ ἀληθῶς εἰς σημεῖα διαιρεῖται, οὐ κατὰ κανόνα παχύν: σχεδὸν δύο δολλάρια καὶ ἥμισυ ἐν τῷ Terra, ἓν ἐν τῷ Luna, πέντε ἐν τῷ Sol. Πρὸς σύγκρισιν, τὸ αὐτὸ βιβλίον παρὰ τῷ Gemini περὶ εἴκοσι τρία ἑκατοστὰ ἐμετρήθη. Ἑκάστη τούτων τῶν τιμῶν μικρά ἐστιν ὑπὲρ βιβλίου ὃ σοὶ διὰ φροντίδος ἐστίν· πρὸς συνήθειαν, τὸ Terra σχεδὸν δεκάκις τὸ Gemini ἐστίν.\n\nἩ κλεὶς συνήθης ἐστίν, ἐνταῦθα αὐτὴν κολλᾷς, ὃ ταύτην τὴν ὑπηρεσίαν ῥᾴστην πρὸς τὸ καταστῆσαι ποιεῖ.
+Services.Steps.Gemini=ΜΗ ΧΡΩ ΠΡΟΣ ΤΟΥΤΟ ΤΩΙ AI STUDIO. Τὸ πλῆκτρον αὐτοῦ "Create API key" σφάλλεται τῷ "The request is suspicious. Please try again." — ἐν λόγῳ νέῳ μεμετρημένον, ὃς οὐδέποτε τρόπον τιμῆς εἶχεν, τοῦ ἔργου ἤδη ἐκτισμένου καὶ εἰσηγμένου. Τὸ ἀληθὲς σφάλμα τὸ ὑποκείμενόν ἐστι 403 ἀπ᾽ αὐτῆς τῆς ὑπηρεσίας τοῦ Google. Πάντα τὰ ἑπόμενα ἐν τῷ CLOUD CONSOLE γίγνεται, καὶ ἐκείνη ἡ ὁδὸς ἰσχύει.\n\nἩ τάξις διαφέρει: τὸ ἔργον, ἔπειτα τὸ API, ἔπειτα λόγος ὑπηρεσίας, καὶ τότε δὴ ἡ κλείς. Ταύτῃ τῇ τάξει γενόμενον, ἡ κλεὶς μιᾷ διαδρομῇ ἐπιτυγχάνει.\n\n1. Ἄνοιξον τὸ console.cloud.google.com/projectcreate ἐν τῷ περιηγητῇ σου καὶ σεαυτὸν δήλωσον.\n\n2. Δὸς τῷ ἔργῳ ὄνομα ὃ γνωριεῖς, οἷον NBR. Ἔα τὸ Organization ἐπὶ "No organization" — αὕτη ἡ σύνηθης ἀπόκρισις ὑπὲρ λόγου ἰδιωτικοῦ ἐστιν, καὶ κοινωνία νόμους μεθ᾽ ἑαυτῆς φέρει ὧν οὐκ ἄρχεις. Ἑλοῦ CREATE καὶ περίμενε ἕως ἂν τὸ ἔργον φανῇ.\n\n3. ΕΑΝ ΤΟ GOOGLE ΠΕΙΡΑΝ ΔΩΡΕΑΝ ΜΕΤΑ 300 ΔΟΛΛΑΡΙΩΝ ΠΑΡΕΧΗΙ, ΑΠΑΡΝΗΣΑΙ. Ἐκεῖνο τὸ ἀργύριον τὸ API τοῦ Gemini ὅλως οὐ τελεῖ — ἄλλο βαλλάντιον ὑπὲρ ἄλλου ἔργου ἐστίν. Χεῖρον: τὸ αὐτὸ δέξασθαι λόγον τιμῆς κτίζει, καὶ τὸ Google ἔπειτα τὸν λόγον τῆς τιμῆς ἑκάστῳ νέῳ ἔργῳ αὐτομάτως συνάπτει, ὃ τὸ ἔργον ἐκ τοῦ βαθμοῦ τοῦ δωρεὰν ἐξαιρεῖ. Καὶ χάρτην τιμῆς αἰτεῖ. Εἰπὲ οὔ.\n\n4. Ἄνοιξον τὸ console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Ἐπίσκεψαι τὸ ὄνομα τοῦ ἔργου ἐν τῷ στίχῳ ἄνω ἐκεῖνο εἶναι ὃ ἄρτι ἔκτισας. Ἡ σελὶς "Gemini API" ἐπιγράφεται. Ἑλοῦ ENABLE καὶ περίμενε ἕως ἂν τὸ πλῆκτρον ἀφανισθῇ.\n\n5. Ἄνοιξον τὸ console.cloud.google.com/iam-admin/serviceaccounts/create. Τοῦτο τὸ βῆμά σοι φείδεται τοῦ τὸ ἑπόμενον δὶς ποιεῖν: ἡ κλεὶς τοῦ Gemini τυχεῖν οὐ δύναται εἰ μὴ λόγῳ ὑπηρεσίας προσδέδεται, καὶ τὸ αὐτὸν νῦν κτίσαι σημαίνει αὐτὸν ἕτοιμον εἶναι ὅταν δέῃ.\n\n6. Ἐν τῇ σελίδι "Create service account" ἐπιγεγραμμένῃ πλήρωσον μόνον τὸ πρῶτον πεδίον, "Service account name" — τὸ nbr-translate ἀγαθὸν ὄνομά ἐστιν, καὶ ἡ ταυτότης κάτω ἑαυτὴν πληροῖ. Ἑλοῦ "CREATE AND CONTINUE". Τὸ βῆμα 2, "Permissions", κατὰ βούλησίν ἐστιν: κενὸν ἔα, οὐδενὸς ἀξιώματος δεῖ. Ἑλοῦ DONE κάτω.\n\n7. Ἄνοιξον τὸ console.cloud.google.com/apis/credentials. Ἐπίσκεψαι πάλιν τὸ ὄνομα τοῦ ἔργου ἐν τῷ στίχῳ ἄνω. Ἐν τῇ τάξει τῶν πράξεων παρὰ τὴν ἐπιγραφὴν "Credentials" ἑλοῦ "+ CREATE CREDENTIALS", καὶ ἐκ τοῦ καταλόγου τοῦ καταπίπτοντος ἑλοῦ ΤΟ ΠΡΩΤΟΝ, "API key" — οὐ τὸ "OAuth client ID" οὐδὲ τὸ "Service account".\n\n8. Δεξιὰ πίναξ ἀνοίγεται, "Create API key" ἐπιγεγραμμένος. Ἐν τῷ πεδίῳ "Name", ἀνωτάτω, γράψον ὄνομα οἷον NBR.\n\n9. Κύλισον ΚΑΤΩ ἐν ἐκείνῳ τῷ πίνακι, ὑπὲρ τὸ μέρος "APIs that can be accessed using this key", πρὸς τετράγωνον ᾧ ἐπιγέγραπται "Authenticate API calls through a service account". ΣΗΜΑΝΟΝ ΑΥΤΟ. Τοῦτό ἐστι τὸ βῆμα ὃ οὐδεὶς μαντεύεται: ἕως ἂν ἀσήμαντον ᾖ, τὸ Gemini ὅλως αἱρεθῆναι οὐ δύναται — ἡ θέσις αὐτοῦ φαιὰ μένει καὶ μόνη ὑπόμνησις λέγει διὰ τί.\n\n10. Εὐθὺς κάτω μέρος "Service account" ἐπιγεγραμμένον φαίνεται. Ἑλοῦ "+ Select a service account", ἑλοῦ τὸν λόγον ὃν ἐν τῷ βήματι 6 ἐποίησας σημαίνων τὸν κύκλον ἀριστερὰ τῆς τάξεως αὐτοῦ, καὶ ἑλοῦ SELECT κάτω ἐν ἐκείνῃ τῇ θυρίδι.\n\n11. Νῦν κύλισον ΑΝΩ ἐν τῷ πίνακι πρὸς "APIs that can be accessed using this key" καὶ ἄνοιξον τὸν κατάλογον ὑπὸ "Select API restrictions". Τὸ "Gemini API" νῦν σημανθῆναι δύναται. Σήμανον αὐτὸ καὶ ἑλοῦ OK.\n\n12. Κύλισον ΚΑΤΩ πρὸς τὸ τέλος τοῦ πίνακος καὶ ἑλοῦ CREATE. Ἔα τὸ "Application restrictions" ἐπὶ "None".\n\n13. Θυρὶς "API key created" ἐπιγεγραμμένη φαίνεται μετὰ τῆς κλειδὸς ἐντός. Ἀπὸ AQ. ἄρχεται, οὐκ ἀπὸ AIza, ὃ ὀρθόν ἐστιν ὑπὲρ κλειδὸς λόγῳ ὑπηρεσίας προσδεδεμένης. Ἀντίγραψον αὐτὴν τῷ σημείῳ τῆς ἀντιγραφῆς δεξιὰ ἐν τῷ πεδίῳ.\n\n14. Ἐπάνελθε ἐνταῦθα, ἑλοῦ Ταύτην τὴν ὑπηρεσίαν καταστῆσαι καὶ τὴν κλεῖδα κόλλησον. Ὁ NBR αὐτὴν παρὰ τῷ Google πειρᾶται πρὶν σῶσαι.\n\nΕΑΝ ΤΟ CONSOLE ΛΕΓΗΙ ΣΟΙ ΠΡΟΣΟΔΟΥ ΠΕΡΑΙΤΕΡΩ ΔΕΙΝ καὶ ἄδειαν ἀπολείπεσθαι ὀνομάζῃ, σχεδὸν βεβαίως λόγῳ Google ψευδεῖ σεαυτὸν ἐδήλωσας, οὐδὲ δικαίων ἐνδεὴς εἶ. Πρόσθες authuser=1 πρὸς τὸ τέλος τῆς διευθύνσεως — ἢ authuser=2, καὶ οὕτως ἑξῆς — ἕως ἂν τὸ ἔργον φανῇ.
+Services.Steps.GoogleVoices=1. Ἄνοιξον τὸ console.cloud.google.com ἐν τῷ περιηγητῇ σου καὶ δήλωσον σεαυτὸν λόγῳ Google.\n\n2. Δέξαι τὰς συνθήκας ἐὰν αἰτηθῇς, καὶ κτίσον ἔργον ὅταν σοι παρέχηται. Ὁτιοῦν ὄνομα ἀρκεῖ.\n\n3. Εὑρὲ τὸ πεδίον τῆς ζητήσεως ἄνω, γράψον "Cloud Text-to-Speech API", ἑλοῦ αὐτὸ ἐκ τῶν ἀποτελεσμάτων καὶ πίεσον Enable.\n\n4. Τὸ Google σε αἰτήσει τὸν λόγον τῆς τιμῆς καταστῆσαι πρὶν τὸ API ἐνεργὸν ποιῆσαι. Πρόσθες χάρτην.\n\n5. Ζήτησον πάλιν "Service accounts" καὶ ἄνοιξον. Πίεσον Create service account, δὸς ὁτιοῦν ὄνομα καὶ πίεσον Done. Οὔτε ἀξίωμα οὔτε ἄδειαν αἱρεῖσθαι δεῖ.\n\n6. Ἄνοιξον τὸν λόγον ὃν ἄρτι ἔκτισας, ἴθι πρὸς τὴν πτυχὴν Keys, πίεσον Add key, ἔπειτα Create new key, καὶ ἑλοῦ JSON. Ἡ δέλτος κατάγεται.\n\n7. Ἐπάνελθε ἐνταῦθα, πίεσον "Ταύτην τὴν ὑπηρεσίαν καταστῆσαι" καὶ ἑλοῦ ἐκείνην τὴν καταχθεῖσαν δέλτον.
+Services.Steps.AzureVoices=1. Ἄνοιξον τὸ azure.microsoft.com/free ἐν τῷ περιηγητῇ σου καὶ πίεσον Start free.\n\n2. Δήλωσον σεαυτὸν λόγῳ Microsoft, ἢ νέον κτίσον.\n\n3. Γράψον τὰ σὰ σημεῖα. Τὸ Azure χάρτην αἰτεῖ ἵνα ἀποδείξῃ σε ἄνθρωπον εἶναι· ὁ βαθμὸς ὁ δωρεὰν οὐκ εἰσπράττεται.\n\n4. Εἰ ὁ λόγος σου ἰδιωτικός ἐστιν, εὑρὲ τὸ ὄνομα τοῦ directory σου: δήλωσον σεαυτὸν παρὰ τῇ πύλῃ καὶ ἐν τῷ στίχῳ τῆς διευθύνσεως μετὰ τὸ σημεῖον @ δείκνυται, εἰς onmicrosoft.com τελευτῶν.\n\n5. Ἐπάνελθε ἐνταῦθα καὶ πίεσον "Ταύτην τὴν ὑπηρεσίαν καταστῆσαι".\n\n6. Γράψον ἐκεῖνο τὸ ὄνομα τοῦ directory εἰ ὁ λόγος σου ἰδιωτικός ἐστιν, καὶ κενὸν ἔα εἰ ἔργου ἢ σχολῆς ἐστιν. Πίεσον Ἄρξαι.\n\n7. Ἄνοιξον τὴν σελίδα τῆς δηλώσεως τῷ πλήκτρῳ, γράψον τὸν βραχὺν κώδικα τὸν δεικνύμενον καὶ σεαυτὸν δήλωσον.\n\n8. Ἑλοῦ τὴν συνδρομήν σου καὶ πίεσον Κτίσον. Ὁ NBR τὴν πηγὴν ποιεῖ καὶ τὴν κλεῖδα αὐτῆς σῴζει. Οὐδὲν ἄλλο γράφεις.
+Services.Steps.DeepSeek=1. Ἄνοιξον τὸ platform.deepseek.com ἐν τῷ περιηγητῇ σου.\n\n2. Πίεσον Sign up. Ἐπιστολικὴν διεύθυνσιν καὶ σύνθημα γράφειν δύνασαι, ἢ διὰ τοῦ Google σεαυτὸν δηλοῦν, ὃ θᾶττόν ἐστιν.\n\n3. Βεβαίωσον τὴν ἐπιστολικήν σου διεύθυνσιν ἐὰν αἰτηθῇς.\n\n4. Ἀφ᾽ οὗ ἂν σεαυτὸν δηλώσῃς, ζήτησον Top up ἢ Billing καὶ πρόσθες μικρὸν ἀργύριον.\n\n5. Ζήτησον API keys ἐν τῷ καταλόγῳ τῷ ἀριστερῷ.\n\n6. Πίεσον Create new API key, δὸς αὐτῇ ὁτιοῦν ὄνομα καὶ πίεσον Create.\n\n7. Ἀντίγραψον τὴν κλεῖδα ΠΡΙΝ ἐκείνην τὴν θυρίδα κλεῖσαι.\n\n8. Ἐπάνελθε ἐνταῦθα, πίεσον "Ταύτην τὴν ὑπηρεσίαν καταστῆσαι" καὶ αὐτὴν κόλλησον.
+Services.Steps.OpenAi=1. Ἄνοιξον τὸ platform.openai.com ἐν τῷ περιηγητῇ σου. Αὕτη ἡ πλατεῖα τῶν τεχνιτῶν ἐστίν, οὐχ ὁ τόπος τοῦ ChatGPT, καὶ πρᾶγμα χωριστόν ἐστι καίπερ ἤδη ὑπὲρ τοῦ ChatGPT τελοῦντος.\n\n2. Δήλωσον σεαυτὸν τῷ λόγῳ σου, ἢ νέον κτίσον.\n\n3. ΠΡΩΤΟΝ ἐπίσκεψαι ἐν ποίᾳ κοινωνίᾳ εἶ. Τὸ ὄνομα ἄνω ἀριστερὰ ἐν τῇ σελίδι ἕστηκεν καὶ κατάλογός ἐστιν: ἄνοιξον αὐτὸν καὶ ἑλοῦ τὴν σήν, ἣ ὡς τὰ πολλὰ Personal καλεῖται. Εἴ ποτε εἰς ἀλλοτρίαν κοινωνίαν ἐκλήθης, ἢ διὰ τοῦ ἔργου ἕδραν ChatGPT Team ἢ Business ἔχεις, ἡ πλατεῖα σε εἰς ΕΚΕΙΝΗΝ τιθέναι δύναται — ὅπου μόνον μέλος εἶ, ὁ λόγος τῆς τιμῆς σε ἀπαρνεῖται τῷ "required permission: api.billing.read", καὶ πᾶσα κλεὶς ἣν ποιοίης τῷ ψευδεῖ λόγῳ ἂν ἀνήκοι. Πάντα τὰ ἑπόμενα ἐν τῇ σῇ ἰδίᾳ κοινωνίᾳ γενέσθαι δεῖ.\n\n4. Ἴθι πρὸς τὸ platform.openai.com/settings/organization/billing/overview. Ὁ λόγος τῆς τιμῆς ὑπὸ ORGANIZATION ἐστίν, οὐκ ἐν τῇ συνήθει σελίδι τῶν ῥυθμίσεων, ὅπου ῥᾴδιόν ἐστιν αὐτὸν ζητεῖν καὶ μὴ εὑρίσκειν. Ἑλοῦ Add to balance, πρόσθες χάρτην τιμῆς καὶ πρίω τι ἀργύριον. Δέκα δολλάρια ἐλάχιστόν ἐστι καὶ πλέον ἢ ἱκανὸν πρὸς τὸ ἄρξασθαι. Οὐδὲν ἰσχύει ἕως ἂν ἀργύριον ἐν τῷ λόγῳ ᾖ.\n\n5. Ἕως ἐκεῖ εἶ, θὲς ὅρον μηνιαῖον τῆς δαπάνης. Οὐδὲν κοστίζει, καὶ ποιεῖ ὥστε ἁμαρτίαν τὸν λογισμὸν αὔξειν μὴ δύνασθαι.\n\n6. Ἄνοιξον API keys ἐν ταῖς αὐταῖς ῥυθμίσεσι καὶ ἑλοῦ Create new secret key. Δὸς αὐτῇ ὄνομα ὃ γνωριεῖς, οἷον NBR. Ἐπιμελοῦ ἵνα ἔτι ἐν τῇ αὐτῇ κοινωνίᾳ ᾖς ἐν ᾗ τὸ ἀργύριον.\n\n7. Ἀντίγραψον τὴν κλεῖδα ἅμα τῷ φανῆναι. ΑΠΑΞ δείκνυται. Ἐὰν ἐκείνην τὴν θυρίδα ἄνευ ἀντιγραφῆς κλείσῃς, πάλιν δειχθῆναι οὐ δύναται — ἁπλῶς αὐτὴν ἐξαλείφεις καὶ ἄλλην ποιεῖς.\n\n8. Ἐπάνελθε ἐνταῦθα, ἑλοῦ Ταύτην τὴν ὑπηρεσίαν καταστῆσαι καὶ τὴν κλεῖδα κόλλησον.\n\n9. Ὁ NBR τὴν κλεῖδα παρὰ τῷ OpenAI πειρᾶται πρὶν αὐτὴν σῶσαι, διὸ εὐθὺς γιγνώσκεις εἰ ἰσχύει.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Βοήθεια – ὅσον οὔπω ἥξει.
+Dialog.Help.Title=Βοήθεια
+Dialog.About.Title=Περὶ τοῦ NBR
+Dialog.About.Release=Ἄλφα
+Dialog.About.Licence=🄯 Copyleft — ὁ NBR ἐλεύθερόν ἐστι πρόγραμμα ὑπὸ τῇ GNU General Public License, ἐκδόσει 3. Ἔξεστί σοι αὐτῷ χρῆσθαι, αὐτὸ μελετᾶν, κοινωνεῖν καὶ μεταβάλλειν· ἐὰν ἔκδοσιν μεταβεβλημένην παραδῷς, αὕτη ἐπὶ τοῖς αὐτοῖς προστίθεται, μετὰ τοῦ πηγαίου κώδικος αὑτῆς.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nΟἰκοδομὴ τῆς ἡμέρας {1}\n\nΟὗτός ἐστιν ἀναγνώστης πολυειδὴς καὶ πολύξοδος βιβλίων καὶ ἐκδόσεων ψηφιακῶν, μάλιστα ὑπὲρ τῶν τυφλῶν, τῶν ἀσθενῶν τὴν ὄψιν καὶ τῶν ἐν τῷ ἀναγιγνώσκειν δυσκολίαν ἐχόντων πεποιημένος. Πρὸς τὴν ἁπλῆν χρῆσιν δωρεάν ἐστιν, ἀλλ᾽ εἰ τὰς περαιτέρω δυνάμεις αὐτοῦ, οἷον τὴν μετάφρασιν καὶ τὰς φωνὰς τοῦ νέφους, ἐξερευνᾶν καὶ χρῆσθαι βούλει, σοὶ παρὰ ταῖς ἔξω ὑπηρεσίαις ἑκάσταις δηλωτέον καὶ ἴσως τελεστέον ἔσται.\n\nΠεποιημένον ὑπὸ Nemoguća vizija — nemoviz.org\n\nΓεγραμμένον ὑπὸ Gordan Radić\n\nὨικοδομημένον μετὰ Claude (Anthropic). Μέγα μέρος τοῦ κώδικος ἐκεῖνο ἔγραψε, κατὰ τὸ βούλευμα, τὰς κρίσεις καὶ τὰ μέτρα τοῦ συγγραφέως· τὸ δίκαιον καὶ ἡ ἄδεια αὐτοῦ ἐστιν.\n\n{2}\n\nΕΠΙ ΤΙΝΩΝ Ο NBR ΒΕΒΗΚΕΝ\n\nὉ NBR ἦχον διὰ τοῦ libmpv ἐκπέμπει, Braille διὰ τοῦ liblouis ἀναγιγνώσκει, διὰ τοῦ NVDA Controller Client λαλεῖ, τὰς ἐπιγραφὰς διὰ τοῦ TagLib# ἀναγιγνώσκει, τὸ κείμενον ἐκ τῶν PDF διὰ τοῦ PdfPig ἐξάγει καὶ τὰ κιβώτια διὰ τοῦ SharpCompress ἀνοίγει. Ἑκάστη αὐτῶν χωριστὴ βιβλιοθήκη ἐστίν, ἀμετάβλητος χρωμένη, καὶ ἑκάστη ὑπὸ οἰκοδομῆς συμφώνου ἑαυτῆς ἀντικατασταθῆναι δύναται.\n\nlibmpv, καὶ τὸ FFmpeg ἐν αὐτῷ — LGPL 2.1 ἢ ὕστερον\n\nliblouis καὶ οἱ πίνακες αὐτοῦ Braille — LGPL 2.1 ἢ ὕστερον\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress καὶ αἱ δέσμαι Microsoft — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend καὶ OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nΤὸ πλῆρες μήνυμα — αἱ ἐκδόσεις, οἱ κύριοι τοῦ δικαίου, καὶ πόθεν ἑκάστη ἄδεια ἀνεγνώσθη — ἐν τῷ THIRD-PARTY-NOTICES.txt παρὰ τὸ πρόγραμμά ἐστιν, καὶ αὐτὰ τὰ ῥήματα τῶν ἀδειῶν ἐν τῇ θήκῃ Licences.
+Hint.Button.Accessible=Βοήθεια περὶ τοῦ {0}
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Σφάλμα
+Dialog.Error.General=Σφάλμα: {0}
+Dialog.DontShowAgain=Τοῦτο μηκέτι δεικνύναι

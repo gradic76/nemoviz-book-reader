@@ -1,0 +1,785 @@
+; Nemoviz Book Reader
+;
+; Translated by:            Claude (Anthropic), 2026
+; Verified and modified by: 
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; NOTE: MUCH OF THIS VOCABULARY IS COINED, and you should know that before
+; you trust it. Latin has no attested word for a sound card, a cloud voice,
+; an API key or an MP3, so where the language ran out the terms here were
+; made rather than found: charta sonora, voces nubis, clavis API, gradus
+; saliendi. Where a real Latin word existed it was used - bibliotheca,
+; signaculum, capitulum, celeritas - and product names are left alone.
+; So this file is usable Latin and it is not attested usage. Correct it
+; freely if you know better; nothing here rests on a source.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Latina
+Btn.OK=Bene
+Btn.Yes=Ita
+Btn.No=Minime
+Btn.Cancel=Omittere
+Btn.Close=Claudere
+Btn.Continue=Pergere
+Btn.Refresh=Renovare
+Btn.Refresh.Accessible=Renovare
+Common.Dash=-
+Common.Error=Error
+Common.DateFormatLong=d MMMM yyyy
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Titulus:
+Player.Info.AuthorLabel=Auctor:
+Player.Info.ProducerLabel=Confector:
+Player.Info.PublisherLabel=Editor:
+Player.Info.ChapterLabel=Capitulum:
+Player.Info.PartLabel=Pars:
+Player.Info.PageLabel=Pagina:
+Player.Info.BookmarksLabel=Signacula:
+Player.Info.VoiceLabel=Vox:
+Player.Info.NoVoiceLabel=Nulla vox est instituta
+Player.Info.PartNumElapsed=Pars {0}, praeteriit:
+Player.Info.PartNumRemaining=Pars {0}, restat:
+Player.Info.ElapsedLabel=Praeteriit:
+Player.Info.RemainingLabel=Restat:
+Player.Info.VolumeLabel=Sonoritas:
+Player.Info.SpeedLabel=Celeritas:
+Player.Info.AccessibleName=Notitiae de lectione, F8
+Player.Info.Prepared=Vox servata: partes {0}, {1} MB
+Player.Info.Preparing=Reliquum libri paratur: {0} ex {1} partibus
+Player.TitleBar.Paused=intermissum
+Player.ReadingSurface.Accessible=Area legendi
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Legere, spatium
+Btn.Pause.Accessible=Intermittere, spatium
+Btn.Back.Accessible=Retro, Maiusc+Sinistra
+Btn.Forward.Accessible=Ante, Maiusc+Dextra
+Btn.VolumeUp.Accessible=Clarius, F12
+Btn.VolumeDown.Accessible=Summissius, F11
+Btn.Power.Accessible=Exire, Alt+F4
+Player.Volume.Text=Sonoritas: {0}%
+Player.Volume.Accessible=Sonoritas {0} centesimae
+Player.Speed.Text=Celeritas: {0}x
+Player.Speed.Legend=Celeritas
+Player.Speed.Accessible=Celeritas {0}-plex
+Player.Speed.Wpm=Celeritas: {0} vpm
+Player.Speed.WpmAccessible=Celeritas {0} verba in minuto
+Player.Position.Label=Locus
+Player.Position.Text=Locus: {0} / {1}
+Player.Position.Accessible=Locus {0} centesimae
+Player.Progress.Legend=Progressus
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Gradus saliendi:
+Player.Seek.Accessible=Gradus saliendi, Maiusc+Sursum vel Maiusc+Deorsum
+Player.Seek.Announce=Saltus: {0}
+Seek.Item.15s=15 secunda
+Seek.Item.30s=30 secunda
+Seek.Item.1min=1 minutum
+Seek.Item.5min=5 minuta
+Seek.Item.10min=10 minuta
+Seek.Item.15min=15 minuta
+Seek.Item.30min=30 minuta
+Seek.Item.Chapter=Capitulum
+Seek.Item.Part=Pars
+Seek.Item.Track=Tractus
+Seek.Item.HeadingLevel=Titulus {0}
+Seek.Item.Page=Pagina
+Seek.Item.Bookmark=Signaculum
+Seek.Item.StandardPage=Pagina normalis
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Bibliotheca
+Btn.Library.Accessible=Bibliotheca, F3
+Btn.Library.Legend=Bibliotheca
+Btn.Settings=Optiones
+Btn.Settings.Accessible=Optiones, F2
+Btn.Settings.Legend=Optiones
+Btn.Properties.Legend=Proprietates
+Btn.Properties=Proprietates
+Btn.Properties.Accessible=Proprietates, Alt+Enter
+Btn.Help=Auxilium
+Btn.Help.Accessible=Auxilium, F1
+Btn.Help.Legend=Auxilium
+Btn.GoTo.Legend=Ad...
+Btn.GoTo=Ad...
+Btn.GoTo.Accessible=Ad locum ire, F4
+Btn.SetBookmark.Legend=Signaculum
+Btn.SetBookmark=Signaculum ponere
+Btn.SetBookmark.Accessible=Signaculum ponere, F5
+Btn.ManageBookmarks.Legend=Signacula
+Btn.ManageBookmarks=Signacula
+Btn.ManageBookmarks.Accessible=Signacula administrare, F6
+Btn.Timer=Horologium
+Btn.Timer.Legend=Horologium
+Btn.Timer.Accessible=Horologium somni, F7
+Btn.Timer.Countdown=Horologium {0}
+Btn.Timer.Accessible.Active=Horologium somni, restant {0}, preme ut lectio desinat et horologium omittatur
+Btn.Timer.Accessible.LessThanMinute=Horologium somni, minus quam minutum
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Retro (Maiusc+Sinistra)
+Tip.PlayPause=Legere/intermittere (spatium)
+Tip.Forward=Ante (Maiusc+Dextra)
+Tip.Seek=Muta per Maiusc+Sursum et Maiusc+Deorsum; sali per Maiusc+Sinistra et Maiusc+Dextra (etiam per Retro et Ante)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enter
+Tip.Timer=F7
+Tip.Volume=F11 et F12
+Tip.Speed=Ctrl+Sinistra et Ctrl+Dextra
+Tip.Progress=Ctrl+1–9: salire ad 10–90%
+Player.OpenFile.Title=Elige librum
+Player.NoVoiceForLanguage=Nulla vox instituta linguam {0} loquitur. Aperi proprietates per Alt+Enter et elige unam.
+Filter.Audiobooks=Libri sonori
+Filter.TextBooks=Libri scripti
+Filter.BrailleBooks=Libri Braille
+Filter.Archives=Arcae
+Filter.AllSupported=Omnes plicae quae sustinentur
+Filter.AllFiles=Omnes plicae
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Bibliotheca
+Library.List.Accessible=Pluteus
+Library.NowReading.Accessible=Nunc legitur
+Library.NowReading.Empty=Nullus liber est impositus
+Library.Search.Accessible=Quaerere
+Library.Filter.Accessible=Secundum statum eligere
+Library.Details.Accessible=Notitiae libri
+Library.Btn.Load=Imponere
+Library.Btn.Load.Accessible=Imponere
+Library.Btn.Close=Claudere
+Library.Btn.Close.Accessible=Claudere
+Menu.File=Plica
+Menu.File.OpenFile=Plicam aperire...
+Menu.File.OpenFolder=Directorium aperire...
+Menu.File.OpenAudioCd=Discum sonorum aperire
+Menu.File.ClearLibrary=Bibliothecam vacuare...
+Menu.File.Exit=Exire
+Menu.File.ExportAudio=Ut librum sonorum servare...
+Menu.File.Translate=Librum vertere...
+Menu.Sort=Ordinare
+Menu.Sort.Alphabetically=Secundum litteras
+Menu.Sort.DateAdded=Secundum diem additionis
+Menu.Sort.Format=Secundum formam
+Menu.Sort.Status=Secundum statum
+Menu.Sort.Ascending=Ascendenter
+Menu.Sort.Descending=Descendenter
+Menu.Sort.ActiveMark=(electum)
+Menu.Help=Auxilium
+Menu.Help.Help=Auxilium
+Menu.Help.About=De NBR
+Menu.Help.Services=Officia et rationes...
+Shelf.Filter.All=Omnes libri
+Shelf.Filter.Reading=Qui leguntur
+Shelf.Filter.Unread=Nondum lecti
+Shelf.Filter.Read=Lecti
+Shelf.Filter.Favorites=Dilecti
+Shelf.Status.NowReading=Nunc legitur
+Shelf.Status.Reading=Legitur
+Shelf.Status.Unread=Nondum lectus
+Shelf.Status.Read=Lectus
+Context.Open=Aperire
+Context.MarkRead=Ut lectum notare
+Context.MarkUnread=Ut nondum lectum notare
+Context.Rename=Nomen mutare
+Context.Delete=Delere
+Context.Properties=Proprietates
+Context.ReadOcr=Litteras agnoscere
+Context.ReReadOcr=Iterum alia lingua agnoscere
+Context.Translate=Librum vertere...
+Context.Favorite=Ut dilectum notare
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Titulus
+Details.Field.Author=Auctor
+Details.Field.Format=Forma
+Details.Field.Speed=Celeritas
+Details.Field.Volume=Sonoritas
+Details.Field.Added=Additus
+Details.Field.Producer=Confector
+Details.Field.Publisher=Editor
+Details.Field.Year=Annus
+Details.Field.Time=Spatium
+Details.Field.Elapsed=Praeteriit
+Details.Field.Remaining=Restat
+Details.Field.Read=Lectum
+Details.Field.Pages=Paginae
+Details.Field.Headings=Tituli
+Details.Field.Characters=Litterae
+Details.Field.Language=Lingua agnita
+Details.Field.Description=Descriptio
+Details.Description.Open=Preme Enter ut legas
+Details.Field.SoundProcessing=Curatio soni
+Details.Sound.On=Ita
+Details.Sound.Off=Minime
+Details.Speed.Wpm={0} vpm
+Dialog.Description.Title=Descriptio - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Librum bibliothecae addere
+Library.ImportFolder.Description=Elige directorium in quo libri sunt
+Dialog.ConfirmImport.Message=In loco electo inventi sunt libri {0}: {1} sonori, {2} scripti, {3} formis propriis, et {4} arcae.\n\nSi recte se habet, post confirmationem tuam libri in bibliothecam tuam transcribentur et arcae ibi aperientur. Bibliotheca tua est in {5}.\n\nIn loco unde veniunt nihil mutatur — omnia intacta manent, noli sollicitus esse.\n\nSi numeri exspectationi tuae non respondent, aliter dispone quae importanda sunt. Importatio magna in titulis discernendis fines habet, neque NBR pro singulis spondere potest.\n\nHoc aliquamdiu durare potest; ne interrumpas, si fieri potest.
+Dialog.ConfirmImport.One=Unus liber inventus est. Visne eum importare?
+Dialog.ConfirmImport.Title=Directorium addere
+Dialog.NoBooksFound.Message=In directorio electo nullus liber inventus est qui sustineatur.
+Dialog.NoBooksFound.Title=Directorium addere
+Dialog.ImportSuccess.Message=Liber bibliothecae additus est.
+Dialog.ImportSuccess.Title=Librum addere
+Dialog.ImportError.Message=Liber addi non potuit: {0}
+Dialog.ImportFolderSuccess.Message=Importati sunt libri {0}.
+Dialog.ImportFolderSuccess.Skipped=Praetermissi sunt {0}.
+Dialog.ImportFolderSuccess.SkippedList=Haec non intraverunt:
+Dialog.ImportFolderSuccess.Title=Directorium addere
+Dialog.ImportFolderError.Message=Directorium importari non potuit: {0}
+Dialog.ReimportExisting.Title=Iam in bibliotheca
+Dialog.ReimportExisting.Message={0} iam in pluteo stat. Iterum importare renovat quod in directorio libri iacet. Locus tuus in libro et signacula tua manent — sed si plica interim mutata est, verba loco mota sunt et locus non est ubi desiisti. Visne iterum importare?
+Dialog.Skipped.Drm=munitus
+Dialog.Skipped.Cancelled=omissus
+Dialog.Skipped.MissingFirstVolume=prima pars huius seriei deest
+Dialog.Skipped.Empty=plica vacua est
+Dialog.Rename.Title=Nomen libri mutare
+Dialog.Rename.Prompt=Nomen novum:
+Dialog.Rename.AuthorLabel=Auctor:
+Dialog.Rename.TitleLabel=Titulus:
+Dialog.ConfirmDelete.Message=Visne vere "{0}" in perpetuum de disco delere? Hoc revocari non potest.
+Dialog.ConfirmDelete.Title=Librum delere
+Dialog.DeleteError.Message=Liber de disco deleri non potuit: {0}
+Dialog.ActiveBook.Message="{0}" nunc in lectore impositus est neque deleri potest. Claude bibliothecam, aperi alium librum vel siste lectionem, et iterum tempta.
+Dialog.ActiveBook.Title=Liber in usu est
+Dialog.ClearLibrary.Title=Bibliothecam vacuare
+Dialog.ClearLibrary.Message=Visne omnes libros {0} de bibliotheca delere? Ita plicae eorum in perpetuum de disco delebuntur, neque revocari poterunt.
+Dialog.ClearLibrary.Empty=Bibliotheca iam vacua est.
+Dialog.ClearLibrary.Done=Remoti sunt libri {0}.
+Dialog.ClearLibrary.Skipped={0} removeri non potuerunt (in usu vel nunc aperti).
+Dialog.DrmProtected.Title=Liber munitus
+Dialog.DrmProtected.Message=Hic liber DRM munitus est (contenta eius occulta sunt) ideoque aperiri non potest. Utere exemplari sine DRM.
+Dialog.ArchivePassword.Title=Tessera opus est
+Dialog.ArchivePassword.Prompt=Arca "{0}" tessera munita est. Scribe eam ut aperiatur:
+Dialog.ArchivePassword.Retry=Illa tessera non valuit. Iterum tempta pro "{0}":
+Dialog.ArchivePassword.Field=Tessera arcae
+Extract.Progress.Title=Aperitio
+Extract.Progress.Preparing=Paratur…
+Extract.Progress.Determinate=Aperitur… {0} / {1} plicae
+Extract.Progress.Indeterminate=Aperitur… {0} plicae
+
+; ---- GO TO
+Dialog.GoTo.Title=Ad locum ire
+GoTo.List.Accessible=Partes libri
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=Bene
+GoTo.Cancel.Accessible=Omittere
+GoTo.AutoPlay=Post saltum legere
+GoTo.AutoPlay.Hint=Si hoc accensum est, lectio statim post saltum incipit. Si non, status manet qualis erat: quod intermissum erat intermissum manet, et quod legebatur legi pergit.
+GoTo.Hint.Accessible=Explanatio
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Horologium somni
+SleepTimer.Duration.Group=Spatium
+SleepTimer.Duration.15=15 minuta
+SleepTimer.Duration.30=30 minuta
+SleepTimer.Duration.45=45 minuta
+SleepTimer.Duration.60=60 minuta
+SleepTimer.Duration.Custom=Aliud:
+SleepTimer.Custom.Accessible=Aliud spatium in minutis
+SleepTimer.Bookmark=Signaculum ponere cum incipit
+SleepTimer.Action.Group=Cum tempus exierit
+SleepTimer.Action.Stop=Lectionem sistere
+SleepTimer.Action.StopClose=Sistere et programma claudere
+SleepTimer.Action.StopShutdown=Sistere, claudere et computatrum exstinguere
+SleepTimer.Start=Incipere
+SleepTimer.Start.Accessible=Horologium somni incipere
+SleepTimer.CancelBtn=Omittere
+SleepTimer.CancelBtn.Accessible=Omittere
+SleepTimer.Announce.Set=Horologium somni positum: minuta {0}
+SleepTimer.Announce.Cancelled=Horologium somni omissum
+SleepTimer.Announce.Finished=Tempus exiit, lectio sistitur
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Signacula administrare
+Bookmark.Announce.Set=Signaculum positum
+Bookmark.Item.Format=Signaculum {0} ({1})
+ManageBookmarks.List.Accessible=Signacula
+ManageBookmarks.Delete=Delere
+ManageBookmarks.Delete.Accessible=Delere
+ManageBookmarks.OK.Accessible=Bene
+ManageBookmarks.Cancel.Accessible=Omittere
+ManageBookmarks.Selected=Electum
+ManageBookmarks.NotSelected=Non electum
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Curatio soni
+Dialog.SoundProcessing.Message=Curatio soni facit ut mala vox tolerabilior sit. Eam non sanat.\n\nQuod numquam captum est reddere non potest, et nimis adhibita plus nocet quam prodest. Sine eam simpliciter accensam, audi aliquot minuta, et tum demum singulos gradus tange.\n\nIn auxilio scriptum est quid quisque eorum faciat.
+Prop.Info.Accessible=Notitiae libri
+Prop.Info.ProcessingOff=Curatio soni: minime
+Prop.Info.ProcessingOn=Curatio soni: ita
+Prop.Info.Bypassed=(curatio praeterita)
+Prop.Info.Off=minime
+Prop.Info.Protection=Munimen contra distortionem
+Prop.Tab.Audio=Sonus
+Prop.Tab.Text=Textus
+Prop.On=ita
+Prop.Off=minime
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Curatione soni uti
+Prop.SoundProcessing=Curatio soni
+Prop.Stage.Level=Gradus
+Prop.Highpass.Title=Murmur tollere
+Prop.Denoise.Title=Strepitum minuere
+Prop.Deesser.Title=Sibilos mitigare
+Prop.Compressor.Title=Vocem aequare
+Prop.Eq.Title=Color soni
+Prop.Eq.Shelf={0} et supra
+Prop.Loudness.Title=Sonoritas et morae
+Prop.Normalize.Title=Sonoritas automata
+Prop.Gate.Title=Strepitus in moris
+Prop.Level.Minimal=Minimus
+Prop.Level.Light=Levis
+Prop.Level.Medium=Medius
+Prop.Level.Strong=Fortis
+Prop.Level.Maximum=Maximus
+Prop.ResetAll=Omnia restituere
+Prop.Bypass=Curationem praeterire
+Prop.Bypass.Shortcut=Ctrl+B hoc accendit et exstinguit ex quovis loco huius paginae
+Prop.Analysing=Vox examinatur
+Prop.Analysing.Done=Vox examinata, gradus {0} positi. Muta quemvis eorum si aliter mavis.
+Prop.Analysing.Failed=Vox examinari non potuit. Optiones manent quales erant.
+Analyse.Progress.Title=Vox examinatur
+Analyse.Progress.Starting=Examinatio incipit...
+Analyse.Progress.Working=Pars {0} ex {1}. {2}
+Analyse.Progress.Quarter={0} centesimae factae. {1}
+Analyse.Progress.Cancel=Omittere
+Analyse.Progress.Cancelling=Post hanc partem sistetur. Optiones manent quales erant.
+Analyse.Progress.Estimating=Aestimatur quantum hoc duraturum sit.
+Analyse.Progress.AlmostDone=Paene factum.
+Analyse.Progress.Seconds=Restant circiter {0} secunda.
+Analyse.Progress.Minutes=Restant circiter {0} minuta.
+Hint.SoundProcessing=Curatione soni subtiliter temperare potes quomodo vox sonet. Varios strepitus tollere, sonoritatem augere et colorem universum aequatore tingere potes. Sex greges regularum sunt, et quisque separatim accendi et exstingui potest. Etiam quaeque regula separatim temperatur. Totam catenam curationis per Ctrl+B temporarie praeterire potes, ut discrimen inter vocem originalem et optiones tuas audias.
+Hint.RemoveRumble=Frequentias infimas praecidit: vehicula, machinam aeris, strepitum manuum. Vocem lutulentam recuperare non potest, sed ima liberat ut sermoni locus sit.
+Hint.NoiseRemoval=Sibilum aequabilem qui subest minuit, qualem taenia vel microphonum vile relinquit. Nimis fortis temperatio etiam vocem edere incipit, ideo tantum tolle donec sibilus abeat.
+Hint.SoftenSibilance=Acumen litteris S et Š acutis adimit. Utile apud lectores microphono proximos et apud voces nimis illuminatas.
+Hint.EvenOutSpeech=Intervallum inter partes summissas et claras coartat, ita ut susurrus et clamor propius conveniant. Haec est regula ad quam confugias cum sonoritatem identidem tangis.
+Hint.Tone=Quinque fasciae, in decibelis, a frequentia sua nominatae. Infima ad 200 Hz stat, ubi vox murmurans vel lutulenta plerumque sedet; suprema pluteum facit, ideo omnia supra se tollit aut deprimit potius quam unam regionem. Fasciae de industria se invicem tegunt, quod curvam lenem permittit sed etiam significat eas cumulari: tres fasciae vicinae ad +4 simul multo plus quam +4 dant. Motus parvi multum valent, et quicquid ultra paucos dB est plerumque significat verum remedium alium gradum esse.
+Hint.AutomaticLoudness=Duae res in contrarias partes trahentes, ideoque unam capsam communicant. Sonoritas automata gradum universum per totum librum aequabilem tenet, etiam inter plicas diversis diebus exceptas; vocem sequitur, non totum signum, quod vox recitata poscit. Strepitus in moris contrario modo operatur: quicquid summissius est quam gradus electus deprimitur, ita ut sibilus vel murmur quod sub lectione sedet in intervallis inter sententias audiri desinat. Ipsam vocem numquam tangit, et attenuat potius quam silentium facit (strepitus qui circa quamque sententiam exstinguitur et accenditur magis fatigat quam is qui simpliciter manet). Sonoritatem tolle et strepitus qui subest cum ea ascendit; si hoc accidit, ecce regula quae ei medetur.
+
+; ---- PROPERTIES - the text page
+Prop.Text.NoVoiceShort=Nulla vox instituta linguam {0} loquitur — elige unam infra.
+Prop.Text.NoVoiceForLanguage=Nulla vox instituta linguam {0} loquitur. Institue vocem pro lingua {0}, vel elige supra linguam et vocem quibus hic liber legatur. Electio ad hunc solum librum pertinet.
+Prop.Text.ReadingIn=Legitur lingua:
+Prop.Text.InputBrailleGroup=Origo Braille
+Prop.Text.InputBrailleTable=Tabula Braille ingrediens:
+Hint.Text0=Hic linguam et vocem eligere potes quibus hic liber legatur. Cuique libro in bibliotheca optiones proprias habere potes. Quaeque vox suas memoria tenet — celeritatem, sonoritatem et altitudinem soni — ideo eas denuo ponere non opus est postquam ab alia voce redieris.\n\nMemento te "Sine voce" eligere posse si oculis vel in linea Braille legere vis sine sono audiendo.
+Hint.TextVisual=Hic speciem in quadro ad legendum temperare potes. Eligere potes inter dispositionem more subtitulorum, textum labentem ut tituli in fine pelliculae, vel paginas subito mutatas. Etiam colores fundi, textus et illuminationis eligere potes, et utrum versus qui legitur an tota sententia notetur.\n\nNota hoc nihil de voce mutare.
+Hint.TextBrailleSource=Hic liber ex plica Braille venit, et haec est tabula qua lectus est — ea quae cellas Braille in verba rettulit.\n\nPlica Braille nihil de lingua sua, de gradu suo neque de qua norma gentis sequatur dicit, ideo NBR tabulam ex ipso textu colligere debet. Plerumque recte, sed non semper, et tabula falsa verba paene recta dat: "Have" ubi liber "How" dicit.\n\nSi hoc ipsum vides, elige hic aliam tabulam et preme Bene. Liber ex plica Braille quam importasti iterum legitur, quae iuxta eum servatur, ideo tot tabulas quot vis probare et ad primam quovis tempore redire potes.\n\nTabulae quae offeruntur sunt eae linguae supra positae. Si illa lingua falsa est, muta eam et tabulae sequentur.\n\nHoc nihil commune habet cum eo quod linea Braille tua ostendit. Id lector scriptorum tuus vertit, tabula ex optionibus suis.
+NoVoice.Title=Nulla vox huic libro
+NoVoice.Message=Hic liber lingua {0} scriptus est, neque ulla vox instituta eam loquitur. Elige vocem qua hoc semel legatur, vel sine eum non lectum donec vox pro lingua {0} instituta sit.
+NoVoice.Read=Hac voce legere
+NoVoice.Leave=Non lectum relinquere
+Dialog.BrailleReread.Title=Visne plicam Braille iterum legere?
+Dialog.BrailleReread.Message=Hic liber iterum ex plica Braille originali legetur, tabula {0}.\n\nTextus denuo fit, ideo perit quicquid ad veterem spectabat: quousque perveneris, signacula tua et pars lecta. Liber ipse intactus manet, et eum alia tabula totiens legere potes quotiens vis.
+Dialog.BrailleReread.Failed=Plica Braille illa tabula legi non potuit. Liber mansit qualis erat.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Optiones
+Settings.Tab.Advanced=Ulteriora
+Settings.Tab.General=Generalia
+Settings.Tab.TextBooks=Vox et Braille
+Settings.Tab.Device=Instrumenta
+Settings.OK.Accessible=Bene
+Settings.Cancel.Accessible=Omittere
+Settings.Apply=Adhibere
+Settings.Apply.Accessible=Adhibere
+
+; ---- SETTINGS - General
+Settings.General.LanguageGroup=Lingua
+Settings.General.LibraryGroup=Locus bibliothecae
+Settings.General.MediaKeysGroup=Claves mediorum
+Settings.General.MetadataGroup=Notitiae libri
+Settings.General.LookGroup=Species
+Settings.General.UseMultimediaKeys=Clavibus mediorum uti
+Settings.General.UseMultimediaKeysGlobally=Clavibus mediorum per totum systema uti
+Settings.General.LibraryLocation=Locus bibliothecae:
+Settings.General.LibraryLocation.Browse=Elige directorium in quo bibliotheca tua servatur
+Settings.General.Browse=Quaerere...
+Settings.General.Browse.Accessible=Directorium bibliothecae quaerere
+Settings.General.Language=Lingua:
+Settings.General.UseMetadata=Metadatis insertis uti
+Settings.General.UseMetadata.Hint=Quaedam formae plicarum metadata ferunt cum notitiis ulterioribus de auctore, titulo, editore, confectore et ceteris. NBR ea legere et ostendere potest ubi sunt. Sed si falsa sunt aut desunt, NBR notitias primarias ex nominibus directoriorum et plicarum sumere potest. Si nihil aliud iuvat, semper libris in bibliotheca nova nomina dare potes.
+Settings.General.UseMultimediaKeys.Hint=Clavibus mediorum claviaturae tuae vel auricularium uti potes ut legas, intermittas et per librum eo gradu saliendi movearis quem elegisti.\n\nAltera clavis eas per totum systema valere facit, ita ut NBR undique attingant — eo pretio ut omnibus aliis lectoribus adimantur dum NBR currit.
+Settings.General.LibraryLocation.Hint=Huc NBR libros importatos transcribit. Potes eum relinquere ubi est, in parte systematis, sed si magnam bibliothecam habere cogitas, alia pars vel alius discus multo melius consilium est. NBR hic etiam notitias cuiusque libri servat, ideo si locos lectionis, signacula, celeritatem ceterasque optiones servare vis, memento contenta veteris directorii manu in novum locum transcribenda esse. Et eodem pretio: bibliotheca extra partem systematis posita, libros tuos ab ruinis systematis et ab damno datorum quod eas comitari solet tutos praestas.
+Settings.General.Language.Restart=Ut lingua mutetur, NBR denuo incipiendum est. Visne nunc denuo incipere?
+Settings.General.Language.RestartTitle=Lingua
+Settings.Misc.Look=Species:
+Settings.Misc.Look.Classic=Colores systematis
+Settings.Misc.Look.New=Species NBR
+Settings.Misc.Look.Hint=Quomodo NBR se ipsum pingat, et responsa duo sunt.\n\nSpecies NBR est species eius propria, ea qua incipit.\n\nColores systematis eum faciunt fenestram ordinariam, coloribus et litterarum formis quas Windows habet. Nihil proprium pingit, ideo schema tuum integrum transit — quod vis cum schemate magnae oppositionis, et quod optime cum lente augenti operatur. Si magna oppositio iam apud te accensa est, NBR hac ipsa specie incipit.\n\nUtroque modo electio tua est, et eam revocare item tuum: claviatura et lector tuus scriptorum his non tanguntur, et F2 te huc reducit.
+Settings.Misc.Look.RestartTitle=Speciem mutare
+Settings.Misc.Look.Restart=Ut species mutetur, NBR denuo incipiendum est. Locus tuus in libro servatur. Visne nunc denuo incipere?
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.Language=Lingua:
+Settings.TextBooks.BookLanguage=Libri hac lingua:
+Settings.TextBooks.AllOtherLanguages=Omnes ceterae linguae
+Settings.TextBooks.VoiceNotSet=(nulla vox electa)
+Settings.TextBooks.AddVoices=Novas linguas addere...
+Settings.TextBooks.LanguageNoVoice={0} — nulla vox instituta
+Settings.TextBooks.Voice=Vox:
+Settings.TextBooks.Speed=Celeritas:
+Settings.TextBooks.Test=Vocem probare
+Settings.TextBooks.TestSample=Hoc est specimen vocis electae.
+Settings.TextBooks.Volume=Sonoritas:
+Settings.TextBooks.Pitch=Altitudo soni:
+Settings.TextBooks.SpeechGroup=Vox
+Settings.TextBooks.LanguageUnknown=(lingua non indicata)
+Settings.TextBooks.VisualGroup=Exitus in quadro
+Settings.TextBooks.UseVisual=Exitu in quadro uti
+Settings.TextBooks.NoSpeech=Sine voce
+Settings.TextBooks.VisualMode=Modus ostendendi:
+Settings.TextBooks.VisualMode.TwoRows=Duo versus (more subtitulorum)
+Settings.TextBooks.VisualMode.FullInstant=Totum quadrum (pagina post paginam)
+Settings.TextBooks.VisualMode.FullScrolling=Totum quadrum (labens)
+Settings.TextBooks.Highlight=Illuminatio:
+Settings.TextBooks.Highlight.None=Nulla illuminatio
+Settings.TextBooks.Highlight.Line=Versus praesens
+Settings.TextBooks.Highlight.Sentence=Sententia praesens
+Settings.TextBooks.HighlightColour=Color illuminationis:
+Settings.TextBooks.TextColour=Color textus:
+Settings.TextBooks.BackColour=Color fundi:
+Settings.TextBooks.Speech.Hint=Hic est index linguarum et vocum in systemate tuo institutarum. Cuique linguae hic positae vocem principem eligere potes, ita ut omnis novus liber ea lingua ea voce aperiatur. Vocem linguae eligere id ipsum est quod eam principem facit — nihil aliud premendum est. Si liber tuus novus lingua scriptus est quae in indice non est, melius est ei hic vocem principem non ponere. Semper vocem in proprietatibus ipsius libri, in pagina Textus, eligere potes, vel Sine voce eligere et Braille aut in quadro legere pergere. Videbis quoque monitum cum lingua nullam vocem institutam habet.
+Settings.TextBooks.Visual.Hint=Ad textum in quadro ostendendum dum voce legitur, pro iis qui oculis aeque ac auribus legunt. Hic accensum, fenestra sua sponte aperitur quotiens legere premis. Manu quoque aperiri et claudi potest quovis tempore per F9, sive hoc accensum est sive non — ita in libro id probare potes sine proprietatibus eius mutandis.
+Settings.TextBooks.Dictionary.Hint=Hic corrigere potes quod machinae vocales prave pronuntiant. Pronuntiationem nominum et locorum emendare potes, accentum falsum reficere et multa alia — utere modo ingenio tuo. Optimum est quod hoc separatim secundum linguam et secundum vocem facere potes, quia diversae machinae in eadem lingua diverse errant.
+Settings.Colour.White=Albus
+Settings.Colour.Black=Niger
+Settings.Colour.Yellow=Flavus
+Settings.Colour.Blue=Caeruleus
+Settings.Colour.Green=Viridis
+Settings.Colour.Red=Ruber
+Voices.Add.Title=Linguae ad textum voce legendum
+Voices.Add.Hint=Elige linguas quas vis et preme Instituere. Pro optionibus tuis Windows veniam petere potest, et deinde voces illius linguae deponet. Vox pronuntiationi suae adhaeret, ideo Anglica Britannica et Americana res separatae sunt.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Exitus soni
+Settings.Device.SoundCard=Charta sonora:
+Settings.Device.KeepAlive=Chartam sonoram vigilem servare
+Settings.Device.KeepAlive.Hint=Quidam exitus soni — praesertim HDMI — exstinguuntur simul ac sonus cessat, et deinde momento opus habent ut expergiscantur. Auditur hoc ut primum verbum sententiae quod perit, et iterum, cum nihil manifeste male se habeat. Dum hoc accensum est, NBR in charta qua utitur sonum edit multo infra id quod audire potes, ne charta inter sententias obdormiscendi occasionem habeat. Exstingue si charta tua ita non se gerit: exitum apertum tenet quamdiu liber durat.
+Settings.Device.Default=Principalis systematis (sua sponte)
+Settings.Device.OpticalGroup=Instrumentum opticum
+Settings.Device.UseOptical=Instrumento optico uti
+Settings.Device.OpticalWhich=Instrumentum:
+Settings.Device.OpticalAuto=Illud quod discum intus habet
+Settings.Device.UseOptical.Hint=Olim libri in discis sonoris ordinariis edebantur, et NBR eos legere potest. Discum ipsum legit potius quam eum volvi sinit: tota facies uno cursu legitur, recte et sine reditu, ita ut instrumentum aliquot minuta laboret et deinde per reliquum librum taceat. Lente legere silentius esset per secundum et clamosius per horam. Hoc accende tantum si id vis - initio exstinctum est, etiam in machina quae instrumentum habet, et dum exstinctum est NBR instrumentum omnino non tangit.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Libri quorum textus in imaginibus est
+Settings.Ocr.Hint=Quidam libri imagines paginarum suarum sunt, non textus: PDF scansum, vel directorium imaginum numeratarum. NBR verba in eis agnoscere potest et deinde ea legere ut quemvis alium librum. Haec est electio prima tantum — cum plures linguas habes, NBR rogat qua utatur quotiens librum legit.
+Settings.Ocr.Language=Lingua agnoscendi
+Settings.Ocr.Automatic=Sua sponte
+Settings.Ocr.AddLanguage=Linguam addere...
+Settings.Ocr.None=Windows nullam agnitionem litterarum institutam habet.
+Settings.Translate.Group=Translatio
+Settings.Translate.Service=Officium translationis
+Settings.Translate.Key=Clavis API...
+Settings.Translate.State.Have={0}, clavis servata
+Settings.Translate.State.None={0}, nulla clavis
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (exemplar maius)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, vilius)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, carissimum)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Hint=NBR librum per officium in rete vertere potest. Cuique officio clavis ex ratione tua apud illud opus est, quam huc agglutinas; NBR nullam solutionem tractat, id tuum est in situ praebentis vel alia via. Si translatione machinali non eges, simpliciter quadratulum non signatum relinque.\n\nTranslatio TOTUM librum ad officium electum mittit, et quod quisque eorum cum eo facit diversum est — quidam contentis gradus gratuiti utuntur ad sua producta emendanda, alii non. Descriptio cuiusque officii sub Auxilium, Officia et rationes dicit quae.
+Settings.Translate.Notes=Monita interpreti:
+Settings.Translate.Test.NoEngine=Nullum officium translationis electum est.
+Settings.Translate.Test.NoKey=Nulla clavis est quae probetur.
+Settings.Translate.Test.NoNetwork=NBR officium attingere non potuit.
+Settings.Translate.Test.Refused=Officium petitionem recusavit ({0}).
+Settings.Translate.Test.Empty=Officium nihil respondit.
+Settings.Cloud.Group=Voces Google Cloud
+Settings.Cloud.VoicesGroup=Voces nubis
+Settings.Cloud.Where=Google et Azure sub Auxilium, Officia et rationes constituuntur, ubi explicatur quid utrumque sit et gradatim ad rationem aperiendam duceris.
+Settings.Cloud.State.None=Google: nulla ratio officii servata est, ideo nulla harum vocum praesto est.
+Settings.Cloud.State.Have=Google: praesto sunt voces {0}, quae simul linguas {1} legunt.
+Settings.Cloud.State.HaveNoList=Google: ratio officii servata est, sed index vocum nondum allatus est. Eam denuo constitue dum conexus es.
+Settings.Cloud.Load=Plica rationis officii...
+Settings.Cloud.Filter=Ratio officii (*.json)|*.json|Omnes plicae (*.*)|*.*
+Settings.Cloud.Forget=Rationem officii oblivisci
+Settings.Cloud.ForgetAsk=Visne rationem officii servatam oblivisci? Hae voces offerri desinent, et liber qui iam una earum legitur obmutescet donec ei aliam vocem dederis.
+Settings.Cloud.UseGroup=Usus vocum nubis
+Settings.Cloud.Use=Voces nubis offerre
+Settings.Cloud.Why=Nihil adhuc est quod accendatur: constitue supra Google vel Azure, et hoc praesto erit.
+Settings.Cloud.NoList=Ratio accepta est, sed index vocum afferri non potuit. Plerumque rete in causa est; voces apparebunt simul ac ad id perveniri poterit.
+Settings.Azure.Group=Voces Azure Speech
+Settings.Azure.Resource=Nomen fontis:
+Settings.Azure.Key=Clavis:
+Settings.Azure.Save=Probare et servare
+Settings.Azure.NoResource=Scribe nomen fontis — est prima pars terminationis in eadem pagina in qua clavis est.
+Settings.Azure.NoKey=Scribe clavem.
+Settings.Azure.Refused=Azure illud par non accepit. Inspice nomen fontis et clavem, et fontem esse Speech.
+Settings.Azure.State.None=Azure: nulla clavis servata est, ideo nulla harum vocum praesto est.
+Settings.Azure.State.Have=Azure: praesto sunt voces {0}, quae simul linguas {1} legunt.
+Settings.Azure.Forget=Clavem oblivisci
+Settings.Azure.ForgetAsk=Visne clavem Azure servatam oblivisci? Hae voces offerri desinent, et liber qui iam una earum legitur obmutescet donec ei aliam vocem dederis.
+Hint.Settings.CloudUse=Hoc usum tuum vocum nubis accendit et exstinguit, id est omnium vocum ex rete, non vocum SAPI vel OneCore apud te institutarum.\n\nStatuit utrum illae voces OFFERANTUR cum vocem certo libro eligis. Numquam sua sponte attribuuntur neque umquam vox princeps linguae fiunt — id vocibus in hoc computatro institutis manet, quae nihil constant neque conexu egent.\n\nLiber qui iam voce nubis legitur eam retinet, sive hoc accensum est sive non; clavis electionem regit, non id quod legi potest.
+Hint.Settings.Azure=Usus vocum Google et Azure quasdam fides Google, Microsoft et Azure et aliquantum laboris in situs eorum poscit. Plura in auxilio.
+Hint.Settings.Cloud=
+Google.Cred.NotJson=Illa plica ut JSON legi non potest, ideo non est ea quam tibi Google dedit. Plica quam quaeris deposita est cum rationem officii creabas, et nomen eius in .json desinit.
+Google.Cred.NotServiceAccount=Illud JSON legi potest, sed ratio officii non est — neque inscriptionem rationis neque clavem privatam continet. Google plura genera fidei praebet; id quod his vocibus opus est clavis rationis officii est.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Lexicon pronuntiationis
+Dict.Open=Lexicon pronuntiationis...
+Dict.Open.Accessible=Lexicon pronuntiationis
+Dict.Scope=Hae regulae pertinent ad:
+Dict.Scope.Global=Omnia quae lego
+Dict.Scope.Language=Omnia quae lingua {0} lego
+Dict.Scope.Voice=Omnia quae voce {0} lego
+Dict.List.Accessible=Regulae
+Dict.Column.Pattern=Scriptum
+Dict.Column.Says=Dicitur ut
+Dict.Column.Match=Congruentia
+Dict.Column.Case=Maiusculae
+Dict.Column.State=Regula
+Dict.Column.Comment=Nota
+Dict.Add=Addere...
+Dict.Edit=Emendare...
+Dict.Remove=Removere
+Dict.State.On=Ita
+Dict.State.Off=Minime
+Dict.Try=Sententiam probare:
+Dict.TryButton=Probare
+Dict.Rule.TitleNew=Regula nova
+Dict.Rule.TitleEdit=Regulam emendare
+Dict.Field.Pattern=Quod scriptum est:
+Dict.Field.Replacement=Dic hoc pro eo:
+Dict.Field.Match=Congruentia:
+Dict.Field.CaseSensitive=Maiusculas distinguere
+Dict.Field.Skip=Praeterire
+Dict.Field.Comment=Nota:
+Dict.Field.Enabled=Regula accensa est
+Dict.Match.WholeWord=Totum verbum
+Dict.Match.Anywhere=Ubique, etiam intra verbum
+Dict.Match.Regex=Expressio regularis
+Dict.Error.Title=Hac regula uti non licet
+Dict.Error.NoPattern=Scribe quod in libro scriptum est.
+Dict.Error.TooSlow=Hoc exemplar nimis diu quaerit. Simplicius fac.
+Dict.Help=Auxilium de expressionibus regularibus...
+Dict.Help.Title=Expressiones regulares in lexico pronuntiationis
+Dict.Help.Text=Vetus sapientia Zen dicit:\n\n    Programmator problema habebat.\n    Programmator statuit id expressionibus regularibus solvere.\n    Programmator duo problemata habebat.\n\nRegEx, id est expressiones regulares, res sunt quibus melius non implicaris, sed elegans est facultatem habere, ecce igitur eam.\n\nSi scis quid agas, perge. Si non, simpliciter eis noli uti, aut Google interroga.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=Clavis API pro {0}
+Dialog.TranslateKey.Prompt=Agglutina clavem quam ab {0} accepisti. In hoc computatro in plica propria, forma legibili, servatur, ideo eam tracta ut tesseram tractares. Eam quovis tempore supplere vel removere potes, et apud ipsum officium eam abrogare.
+Dialog.TranslateKey.Field=Clavis API
+Dialog.TranslateKey.Region=Regio (vacuum si Global):
+Dialog.TranslateKey.Status=Exitus
+Dialog.TranslateKey.Test=Clavem probare
+Dialog.TranslateKey.Remove=Removere
+Dialog.TranslateKey.Testing=Clavis probatur...
+Dialog.TranslateKey.Works=Clavis valet.
+Dialog.TranslateKey.Stored=Huic officio clavis servata est.
+Dialog.TranslateKey.NotStored=Huic officio nulla clavis servata est.
+Azure.Setup.Title=Azure Speech constituere
+Azure.Setup.Open=Crea id pro me...
+Azure.Setup.Intro=NBR fontem Azure pro te creare potest, ita ut nulla porta perambulanda sit. Semel apud Microsoft brevi codice te profiteris, eligis in qua subscriptione ponatur, et NBR eum in gradu gratuito creat clavemque servat. Nihil creatur priusquam te professus sis.
+Azure.Setup.Start=Incipere
+Azure.Setup.SigningIn=Petitur a Microsoft codex profitendi.
+Azure.Setup.CodeLabel=Codex profitendi:
+Azure.Setup.EnterCode=Codex tuus profitendi in campo infra est, ad describendum paratus. Elige "Paginam profitendi aperire" ut {0} in navigatro tuo aperiatur, ibi te profitere, et haec fenestra sua sponte perget.
+Azure.Setup.OpenPage=Paginam profitendi aperire
+Azure.Setup.OpenFailed=Navigatrum aperiri non potuit. Inscriptio in versu supra est; aperi eam manu.
+Azure.Setup.Directory=Directorium:
+Azure.Setup.DirectoryHint=Hoc vacuum relinque si ratione operis vel scholae te profiteris. Si Azure tuum in ratione Microsoft PRIVATA est, Microsoft professionem in inscriptione usitata recusabit et directorium nominare debebis quod Azure creavit cum subscriptio facta est — vel nomen eius, quod in onmicrosoft.com desinit, vel identitatem eius directorii. Semel rogatur et memoria tenetur.
+Azure.Setup.Subscription=Subscriptio:
+Azure.Setup.SignedIn=Professus es. Inventae sunt subscriptiones {0} — elige unam et preme Creare.
+Azure.Setup.Create=Fontem creare
+Azure.Setup.NoSubscription=Illa ratio nullam subscriptionem Azure habet, ideo nusquam est ubi fons creetur.
+Azure.Setup.Creating=Fons creatur. Hoc usque ad minutum vel duo durat; Azure eum paratum nuntiat priusquam vere sit, ideo NBR exspectat.
+Azure.Setup.Done=Factum. Fons creatus est et clavis eius servata — praesto sunt voces {0}.
+Azure.Setup.DoneNoList=Fons creatus est et clavis eius servata, sed index vocum afferri non potuit. Plerumque rete in causa est; voces apparebunt simul ac ad id perveniri poterit.
+Azure.Setup.Failed=Non successit: {0}
+Azure.Setup.HaveOne=Vel, si iam fontem Speech habes, scribe hic duas notas eius:
+Azure.Setup.Kept=Azure illud par accepit et servatum est. Hae voces nunc praesto sunt.
+
+; ---- THE READING WINDOW
+Reading.Title=Lectio
+Reading.Back=Retro
+Reading.Back.Accessible=Uno gradu retro
+Reading.PlayPause=Legere/intermittere
+Reading.PlayPause.Accessible=Legere vel intermittere, spatium
+Reading.Forward=Ante
+Reading.Forward.Accessible=Uno gradu ante
+Reading.Smaller=Minus
+Reading.Smaller.Accessible=Textus minor, clavis minus
+Reading.Bigger=Maius
+Reading.Bigger.Accessible=Textus maior, clavis plus
+Reading.Font.Accessible=Forma litterarum
+Reading.Size.Announce=Magnitudo textus {0}
+Beta.Suffix= — non in hac beta
+Beta.NoReadingWindow=Fenestra legendi in hac beta exstincta est. Lectio in quadro, et Braille quod eam sequitur, adhuc probantur et in editione posteriore redibunt.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Litteras agnoscere
+Ocr.Ask.Question={0} nullum textum continet — sunt paginae imaginum {1}. NBR textum in eis agnoscere potest, quod {2} durare debet. Visne nunc agnoscere?
+Ocr.Ask.ReadWith=Agnoscere ut:
+Ocr.Ask.Read=Agnoscere
+Ocr.Ask.Skip=Praeterire
+Ocr.Ask.UnderAMinute=minus quam minutum
+Ocr.Ask.Minutes=circiter {0} minuta
+Ocr.Result.NoText=In imaginibus nullus textus agnitus est. Liber additus est, sed nihil est quod ex eo legatur.
+Ocr.Refusal.NoEngine=Nulla agnitio litterarum instituta est. Utere "Linguam addere..." in optionibus, sub Ulteriora, et NBR unam tibi instituet.
+Ocr.Refusal.NoPages=Hic nullae paginae sunt quae legantur.
+Ocr.Progress.Title=Litterae agnoscuntur
+Ocr.Progress.Starting=Agnitio incipit...
+Ocr.Progress.Working=Pagina {0} ex {1}. {2}
+Ocr.Progress.Quarter={0} centesimae factae. {1}
+Ocr.Progress.Cancel=Omittere
+Ocr.Progress.Cancelling=Post hanc paginam sistetur. Nihil servatur.
+Ocr.Progress.Estimating=Aestimatur quantum hoc duraturum sit.
+Ocr.Progress.AlmostDone=Paene factum.
+Ocr.Progress.Seconds=Restant circiter {0} secunda.
+Ocr.Progress.Minutes=Restant circiter {0} minuta.
+Ocr.Unread.Message=Hic liber nondum agnitus est — adhuc imagines paginarum suarum est, ideo nihil est quod pronuntietur. Visne nunc agnoscere?
+Ocr.Sparse.Message=Tantum {0} ex {1} paginis huius libri aliquid textus ferunt. Verisimillime scansum est cuius stratum textus corruptum est, ideo verba imagines manent. Visne ea nunc agnoscere?
+Ocr.Blank.Question={0} paginae deinceps prorsus sine textu redierunt. Reliquae {1} eaedem esse possunt, et eas agnoscere aliquamdiu duraret. Visne pergere?
+Ocr.Blank.Jbig2={0} paginae deinceps prorsus sine textu redierunt. Hic PDF verba sua ea forma servat quam Windows pingere non potest, ideo illae paginae ut charta vacua veniunt in qua nihil est quod agnoscatur — reliquas {1} legere verisimillime nihil inveniret. Visne pergere?
+Ocr.Read.Question=Hic liber paginae imaginum {0} est neque adhuc agnitus est. Eum agnoscere durat {1}.
+Ocr.ReRead.Question=Hic liber ex {0} paginis imaginum agnitus est. Eum alia lingua iterum agnoscere durat {1}. Imagines cum libro servantur, ideo hoc totiens fieri potest quotiens vis.
+Ocr.ReRead.Done=Liber iterum agnitus et suppositus est.
+Ocr.ReRead.Locate=Imagines huius libri cum eo non servantur, ideo NBR eas denuo invenire debet. Elige plicam scansam vel — si liber ut singulae imagines paginarum venit — quamvis earum paginarum.
+Ocr.ReRead.LocateTitle=Inveni imagines huius libri
+Ocr.ReRead.Filter=Libri scansi et imagines|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Omnes plicae|*.*
+Ocr.ReRead.WholeFolder=In illo directorio sunt imagines {0}. Visne eas omnes ut paginas huius libri agnoscere?
+Ocr.Add.Title=Linguae agnoscendi
+Ocr.Add.List=Linguae
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — iam instituta
+Ocr.Add.Hint=Elige linguas quas vis et preme Instituere. Pro optionibus tuis Windows veniam petere potest, et deinde agnitionem illius linguae deponet — plicam parvam, non totum fascem linguae Windows.
+Ocr.Add.Install=Instituere
+Ocr.Add.WindowsSettings=Optiones Windows...
+Ocr.Add.Close=Claudere
+Ocr.Add.Installing={0} instituitur. Id Windows Update curat, ideo quantum duret pendet ex eo quam occupatum sit — aliquot minuta usitata sunt, et decem non inaudita. Hanc fenestram claudere et tuis rebus vacare potes; sua sponte perget.
+Ocr.Add.Done={0} instituta est et ad usum parata.
+Ocr.Add.DonePartly={0} instituta est et ad usum parata. {1} non venit — fortasse Windows adhuc in eo laborat, vel pro hac versione praesto non est.
+Ocr.Add.NotStarted=Nihil institutum est. Windows veniam non dedit.
+Ocr.Add.Failed={0} instituta non est. Fortasse Windows adhuc in eo laborat, vel lingua pro hac versione Windows praesto non est.
+Ocr.Add.LeftRunning=Windows id adhuc instituit. Sua sponte perficiet.
+
+; ---- TRANSLATION
+Translate.Progress.Title=Liber vertitur
+Translate.Progress.Starting=Paratur. Quovis tempore sistere potes; quod versum est servatur, et denuo incipiens inde pergitur.
+Translate.Progress.Working=Pars {0} ex {1}. Restant circiter {2}. Quovis tempore sistere potes — quod factum est servatur.
+Translate.Progress.Quarter={0} centesimae versae, restant circiter {1}.
+Translate.Progress.Cancel=Sistere
+Translate.Progress.Cancelling=Post hanc partem sistetur. Quod iam versum est servatur.
+Translate.Progress.StillOn=Adhuc in hac, adhuc {0} secunda.
+Translate.Progress.StillWorking=Adhuc in parte {0} ex {1}. Officium tarde respondet.
+Translate.Progress.Estimating=aestimatur quantum hoc duraturum sit
+Translate.Progress.AlmostDone=momentum
+Translate.Progress.Seconds={0} secunda
+Translate.Progress.Minutes={0} minuta
+Translate.Ask.Title=Librum vertere
+Translate.Ask.Info={0} — circiter {1} litterae, fere {2}. Translatio novus liber fit; hic intactus manet.
+Translate.Ask.HybridNote=Hic liber praeter textum etiam vocem habet. Verti tantum textus potest, ideo translatio liber scriptus erit sine recitatione.
+Translate.Ask.From=Lingua libri:
+Translate.Ask.To=Vertere in:
+Translate.Ask.Model=Exemplar {0}:
+Translate.Ask.Model.None=— nullum, catena hic desinit —
+Translate.Ask.ChainNote=Si pars recusatur, NBR eam iterum temptat et deinde per ordinem cetera officia tua adit. Quod nullum eorum accipit, in lingua qua liber venit manet.
+Translate.Ask.NoEngine=Nullum officium adhuc clavem habet
+Translate.Ask.Standing=Nota tua perpetua ad hunc quoque librum pertinet: {0}
+Translate.Ask.Inherit=Seriem continuare, glossario huius libri utens:
+Translate.Ask.Inherit.None=Nihil — hic liber per se stat
+Translate.Ask.Notes=Quod interpretem de HOC libro scire oportet (pro voluntate). Narrator et nomina ex ipso textu per se colliguntur; hoc est pro eo quod textus non dicit — vocabulum quod certo modo redditum vis, vel quomodo duae personae inter se loquantur:
+Translate.Ask.Start=Vertere
+Translate.LastResort.Begin=Partem sequentem vertit Microsoft Azure — exspecta inexspectata.
+Translate.LastResort.End=Finis partis a Microsoft Azure versae.
+Translate.NotText=Verti tantum liber scriptus potest. Hic vox est.
+Translate.Empty=In hoc libro nullus textus est qui vertatur.
+Translate.NoService=Nullum officium translationis adhuc clavem habet. Adde unam in optionibus, sub Ulteriora.
+Translate.Done=Versae sunt partes {0}. Translatio in pluteo ut liber novus stat.
+Translate.DoneLeft=Versae sunt partes {0}, relictae in lingua originali {1}.
+Translate.Took=Duravit {0}. Commentarius per singulos versus est in translation.log, iuxta librum originalem.
+Translate.Failed=Liber verti non potuit: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Liber sonorus tantum ex libro scripto fieri potest. Hic iam sonus est.
+Export.NoVoice=Hic liber nullam vocem habet qua legatur, ideo nihil est quod excipiatur. Da ei prius unam in proprietatibus eius.
+Export.Empty=In hoc libro nullus textus est qui legatur.
+Export.Filter=Plica sonora (*.mp3)|*.mp3
+Export.Ask.Ready=Omnes partes {0} huius libri iam pronuntiatae sunt, restat igitur eas tantum coniungere et hoc momentum durabit. Visne plicam facere?
+Export.Ask.Missing=Restant excipiendae {0} ex {1} partibus huius libri. Eas excipere circiter {2} minuta durare debet — id est tempus faciendi, non longitudo libri audiendi. Fenestra progressus numerum ostendit qui in via metitur. Quovis tempore sistere potes: quod pronuntiatum est servatur, et denuo incipiens inde pergitur. Visne plicam facere?
+Export.Progress.Title=Liber sonorus fit
+Export.Progress.Starting=Paratur. Quovis tempore sistere potes; quod pronuntiatum est servatur, et denuo incipiens inde pergitur.
+Export.Progress.Making=Pars {0} ex {1}. Restant circiter {2}.
+Export.Progress.Joining=Omnia in unam plicam coniunguntur.
+Export.Done=Factum — partes {0}, servatum ut {1}
+Export.DoneShort=Servatum ut {2}, sed {1} ex {0} partibus pronuntiari non potuerunt et in eo desunt.
+Export.Failed=Liber sonorus fieri non potuit.
+
+; ---- AUDIO CD
+Cd.Progress.Title=Discus sonorus
+Cd.Progress.Preparing=Discus legitur...
+Cd.Progress.Track=Legitur tractus {0} ex {1}
+Cd.Progress.Stopping=Sistitur...
+Cd.BookTitle=Discus sonorus (tractus {0})
+Cd.Format=Audio CD - Compact Disc Digital Audio
+Cd.NoDisc=Nullus discus in instrumento est, vel instrumentum eum adhuc legit. Impone discum sonorum et iterum tempta.
+Cd.DataDisc=Hic discus datorum est, non discus sonorus. Si librum in plicis MP3 fert, aperi eum per Plica, Directorium aperire - id NBR iam legit.
+Cd.ReadFailed=Discus legi non potuit: {0}
+Cue.Track=Tractus {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Officia et rationes
+Services.List.Accessible=Officia
+Services.State.Ready=HOC CONSTITUTUM EST. Gradus iterum percurrere potes ut id quod servatum est supplere.
+Services.State.NotSet=Hoc nondum constitutum est.
+Services.SetUp=Hoc officium constituere...
+Services.Forget=Hanc rationem oblivisci
+Services.ForgetAsk=Visne clavem pro {0} servatam oblivisci? Offerri desinet donec eam denuo constitueris.
+Services.Disclaimer=GRADUS INFRA FORTASSE NON RESPONDENT EI QUOD VIDES. Haec officia situs suos sine praemonitione reficiunt, ideo bulla moveri vel novum nomen accipere potuit ex quo haec scripta sunt. ORDO eorum quae facienda sunt raro mutatur; nomina rerum saepe. Si erras, pars supra tibi dicit quid consequi coneris.
+Services.Item.GoogleVoices=Voces Google Cloud
+Services.Item.AzureVoices=Voces Azure Speech
+Services.Item.DeepSeek=Translatio per DeepSeek
+Services.Item.Gemini=Translatio per Gemini
+Services.Item.OpenAi=Translatio per GPT (OpenAI)
+Services.About.Gemini=Gemini totum librum in aliam linguam vertit, exemplari ipsius Google. Aure iudicatum optimum omnium — et id est quod fraudem habet.\n\nFere sextam quamque partem romani editi recusat. Non propter contenta: species ea est exemplaris quod librum sibi notum agnoscit, neque ulla optio id mutat. Ideo NBR alterum officium rogat de eo quod primum non accipit, ideoque operae pretium est catenam instruere potius quam uni machinae confidere.\n\nEst gradus gratuitus, et satis largus ut modus usitatus huius rei sit: in opere vero mensum, Gemini 3.1 Flash Lite quingentas petitiones in die permittit, quod fere sex libri sunt. Usus pretio constans circiter viginti quinque centesimas pro romano 450 000 litterarum poscit.\n\nUNUM PENSANDUM PRIUSQUAM GRADUM GRATUITUM ELIGAS. Ipsa pagina pretiorum Google dicit in gradu gratuito contenta tua ad producta eorum emendanda adhiberi, in gradu pretioso non. Translatio totum librum mittit, ideo discrimen verum est. Electio utroque modo tua est — sed electio sit, non res inopinata.\n\nClavem acquirere longissima via ex quattuor est, et gradus infra ex vero cursu scripti sunt, quia via manifesta non valet.
+Services.About.GoogleVoices=Voces Google Cloud libros per rete voce legunt, vocibus ipsius Google. Pro plerisque linguis optimae vocum nubis sunt, et gradus gratuitus maximus est: circiter decies centena milia litterarum in mense, quod fere duo libri sunt.\n\nTria fieri debent, hoc ordine. Tibi RATIONE GOOGLE opus est, quam plerique iam habent. In ea PROIECTUM creas et pro eo proiecto officium Text-to-Speech accendis — neque Google id accendet donec ratio solvendi constituta sit, ideo charta opus est quamquam gradus gratuitus nihil constat. Deinde RATIONEM OFFICII creas et clavem eius deponis.\n\nIlla ultima pars hoc officium insolitum facit. Google clavem quam agglutinare possis non dat: parvam plicam dat quae in .json desinit, semel depositam. NBR id quod intra illam plicam est servat, non ipsam plicam, ideo postea depositum movere vel delere potes.
+Services.About.AzureVoices=Voces Azure Speech libros per rete voce legunt, vocibus Microsoft. In lingua Anglica et in multis aliis optimae sunt. In Croatica mediocres sunt, et ibi Azure lexicon pronuntiationis non sustinet, ideo regula quam pro nomine scribis non servabitur. Gradus gratuitus circiter dimidium decies centena milia litterarum in mense est, fere unus liber.\n\nDuo fieri debent, et primum tantum a te pendet. Tibi RATIONE MICROSOFT opus est priusquam Azure habere possis, et deinde SUBSCRIPTIONE AZURE — cui probationes identitatis, charta et pactum opus sunt. Id homo consulto facere debet, ideo automate fieri non potest et NBR ne conatur quidem.\n\nOmnia post id munus NBR est. Brevi codice se profitetur, fontem in gradu gratuito creat clavemque servat. Portam Azure numquam aperis.\n\nUnum multos fallit. Cum subscriptio tua fit, Azure tacite DIRECTORIUM ei creat. Si ratio tua Microsoft privata est — Gmail, Outlook, Hotmail —, Azure professionem recusat donec illud directorium nominaveris, quia ad hoc rationes privatas non agnoscit. Nomen eius in onmicrosoft.com desinit.
+Services.About.DeepSeek=DeepSeek totum librum in aliam linguam vertit. Ex officiis quibus NBR uti potest constantissimum est — rarissime recusat — et longe vilissimum.\n\nUnum opus est: ratio apud DeepSeek et aliquantum pecuniae in ea. Gradus gratuitus non est, sed translatio pro copia textus pretio constat et liber minimum constat.\n\nHoc clavem dat quam agglutinas, et simplicissimum ex quattuor est. Unum tantum cavendum est: clavis SEMEL ostenditur, cum eam creas. Si illam fenestram sine describendo claudis, iterum ostendi non potest et simpliciter aliam facis.
+Services.About.OpenAi=OpenAI totum librum in aliam linguam vertit, exemplaribus GPT. Tribus gradibus in una ratione et una clave offertur: Terra, a quo incipiendum est, Luna, vilius, et Sol, carissimum.\n\nGradus gratuitus omnino non est, et hic est ubi homines decipiuntur: subscriptio ad ChatGPT hoc NON solvit. API separatim ratione ducitur, et ratio nova ANTE SOLVENDA est — parvam summam pecuniae imponis, et vocationes ex illo saldo sumunt. Quinque vel decem dollaria abunde sufficiunt ut videas quanti liber vere constet priusquam quicquam statuas.\n\nQuanti liber constet, pro romano 450 000 litterarum computatum et secundum id quomodo lingua Croatica vere in signa dividatur, non secundum regulam crassam: circiter duo dollaria et dimidium in Terra, unum in Luna, quinque in Sol. Ad comparandum, idem liber apud Gemini circiter viginti tribus centesimis mensus est. Quaevis earum summarum parva est pro libro qui tibi cordi est; pro consuetudine, Terra fere decies Gemini est.\n\nClavis usitata est, hic eam agglutinas, quod hoc officium facillimum ad constituendum facit.
+Services.Steps.Gemini=NOLI AD HOC AI STUDIO ADHIBERE. Bulla eius "Create API key" cum "The request is suspicious. Please try again." deficit — in ratione nova mensum, quae numquam modum solvendi habuerat, proiecto iam creato et importato. Verus error subiacens est 403 ab ipso officio Google. Omnia quae sequuntur in CLOUD CONSOLE fiunt, et illa via valet.\n\nOrdo refert: proiectum, deinde API, deinde ratio officii, et tum demum clavis. Hoc ordine facta, clavis uno cursu succedit.\n\n1. Aperi console.cloud.google.com/projectcreate in navigatro tuo et profitere te.\n\n2. Da proiecto nomen quod agnosces, exempli gratia NBR. Relinque Organization ad "No organization" — id responsum usitatum pro ratione privata est, et societas leges secum adfert quas non regis. Elige CREATE et exspecta donec proiectum appareat.\n\n3. SI GOOGLE PROBATIONEM GRATUITAM CUM 300 DOLLARIIS OFFERT, RECUSA. Illa pecunia API Gemini omnino non solvit — alia crumena pro alio producto est. Peius: eam accipere rationem solvendi creat, et Google deinde rationem solvendi cuique novo proiecto sua sponte adnectit, quod proiectum e gradu gratuito eximit. Chartam quoque solvendi poscit. Dic non.\n\n4. Aperi console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Inspice nomen proiecti in versu supra id esse quod modo creavisti. Pagina "Gemini API" inscribitur. Elige ENABLE et exspecta donec bulla evanescat.\n\n5. Aperi console.cloud.google.com/iam-admin/serviceaccounts/create. Hic gradus tibi parcit ne sequentem bis facias: clavis Gemini attingere non potest nisi ad rationem officii adligata est, et eam nunc creare significat eam paratam esse cum opus erit.\n\n6. In pagina "Create service account" inscripta imple tantum primum campum, "Service account name" — nbr-translate bonum nomen est, et identitas infra se ipsa implet. Elige "CREATE AND CONTINUE". Gradus 2, "Permissions", pro voluntate est: relinque vacuum, nullum munus opus est. Elige DONE infra.\n\n7. Aperi console.cloud.google.com/apis/credentials. Inspice iterum nomen proiecti in versu supra. In ordine actionum iuxta titulum "Credentials" elige "+ CREATE CREDENTIALS", et ex indice qui decidit elige PRIMUM, "API key" — non "OAuth client ID" neque "Service account".\n\n8. A dextra tabula aperitur, "Create API key" inscripta. In campo "Name", summo loco, scribe nomen ut NBR.\n\n9. Volve DEORSUM in illa tabula, ultra partem "APIs that can be accessed using this key", ad quadratulum cui inscriptum est "Authenticate API calls through a service account". SIGNA ID. Hic est gradus quem nemo divinat: dum non signatum est, Gemini omnino eligi non potest — locus eius canus manet et sola monitio dicit cur.\n\n10. Statim infra pars "Service account" inscripta apparet. Elige "+ Select a service account", elige rationem quam gradu 6 fecisti signans circulum a sinistra ordinis eius, et elige SELECT infra in illa fenestra.\n\n11. Nunc volve SURSUM in tabula ad "APIs that can be accessed using this key" et aperi indicem sub "Select API restrictions". "Gemini API" nunc signari potest. Signa id et elige OK.\n\n12. Volve DEORSUM ad finem tabulae et elige CREATE. Relinque "Application restrictions" ad "None".\n\n13. Fenestra "API key created" inscripta apparet cum clave intus. AQ. incipit, non AIza, quod rectum est pro clave ad rationem officii adligata. Describe eam signo describendi a dextra in campo.\n\n14. Redi huc, elige Hoc officium constituere et clavem agglutina. NBR eam apud Google probat priusquam servet.\n\nSI CONSOLE DICIT TIBI ADITU ULTERIORE OPUS ESSE et veniam deesse nominat, paene certe ratione Google falsa te professus es, neque iuribus cares. Adde authuser=1 ad finem inscriptionis — vel authuser=2, et ita porro — donec proiectum appareat.
+Services.Steps.GoogleVoices=1. Aperi console.cloud.google.com in navigatro tuo et profitere te ratione Google.\n\n2. Accipe condiciones si rogaris, et crea proiectum cum id offertur. Quodvis nomen valet.\n\n3. Inveni campum quaerendi supra, scribe "Cloud Text-to-Speech API", elige id ex exitibus et preme Enable.\n\n4. Google te rogabit ut rationem solvendi constituas priusquam API accendat. Adde chartam.\n\n5. Quaere iterum "Service accounts" et aperi. Preme Create service account, da quodvis nomen et preme Done. Neque munus neque venia eligenda est.\n\n6. Aperi rationem quam modo creavisti, i ad tabulam Keys, preme Add key, deinde Create new key, et elige JSON. Plica deponitur.\n\n7. Redi huc, preme "Hoc officium constituere" et elige illam plicam depositam.
+Services.Steps.AzureVoices=1. Aperi azure.microsoft.com/free in navigatro tuo et preme Start free.\n\n2. Profitere te ratione Microsoft, vel novam crea.\n\n3. Scribe notas tuas. Azure chartam poscit ut probet te hominem esse; gradus gratuitus non exigitur.\n\n4. Si ratio tua privata est, inveni nomen directorii tui: profitere te apud portam et in versu inscriptionis post signum @ ostenditur, in onmicrosoft.com desinens.\n\n5. Redi huc et preme "Hoc officium constituere".\n\n6. Scribe illud nomen directorii si ratio tua privata est, et vacuum relinque si operis vel scholae est. Preme Incipere.\n\n7. Aperi paginam profitendi bulla, scribe brevem codicem ostensum et te profitere.\n\n8. Elige subscriptionem tuam et preme Creare. NBR fontem facit et clavem eius servat. Nihil aliud scribis.
+Services.Steps.DeepSeek=1. Aperi platform.deepseek.com in navigatro tuo.\n\n2. Preme Sign up. Litteras electronicas et tesseram scribere potes, vel per Google te profiteri, quod celerius est.\n\n3. Confirma litteras tuas electronicas si rogaris.\n\n4. Postquam te professus es, quaere Top up vel Billing et adde parvam summam pecuniae.\n\n5. Quaere API keys in indice a sinistra.\n\n6. Preme Create new API key, da ei quodvis nomen et preme Create.\n\n7. Describe clavem PRIUSQUAM illam fenestram claudas.\n\n8. Redi huc, preme "Hoc officium constituere" et eam agglutina.
+Services.Steps.OpenAi=1. Aperi platform.openai.com in navigatro tuo. Haec est platea artificum, non situs ChatGPT, et res separata est etiam si iam pro ChatGPT solvis.\n\n2. Profitere te ratione tua, vel novam crea.\n\n3. PRIMUM inspice in qua societate sis. Nomen supra a sinistra in pagina stat et index est: aperi eum et elige tuam, quae plerumque Personal vocatur. Si umquam in alienam societatem invitatus es, vel per opus sedem ChatGPT Team aut Business habes, platea te in ILLAM ponere potest — ubi tantum socius es, ratio solvendi te recusat cum "required permission: api.billing.read", et quaevis clavis quam faceres ad rationem falsam pertineret. Omnia quae sequuntur in societate tua propria fieri debent.\n\n4. I ad platform.openai.com/settings/organization/billing/overview. Ratio solvendi sub ORGANIZATION est, non in pagina optionum usitata, ubi facile est eam quaerere neque invenire. Elige Add to balance, adde chartam solvendi et eme aliquantum pecuniae. Decem dollaria minimum sunt et plus quam satis ad incipiendum. Nihil valet donec pecunia in ratione sit.\n\n5. Dum ibi es, pone finem mensuum sumptus. Nihil constat, et efficit ne error rationem augere possit.\n\n6. Aperi API keys in isdem optionibus et elige Create new secret key. Da ei nomen quod agnosces, exempli gratia NBR. Cura ut adhuc in eadem societate sis in qua pecunia est.\n\n7. Describe clavem simul ac apparuerit. SEMEL ostenditur. Si illam fenestram sine describendo claudis, iterum ostendi non potest — simpliciter eam deles et aliam facis.\n\n8. Redi huc, elige Hoc officium constituere et clavem agglutina.\n\n9. NBR clavem apud OpenAI probat priusquam eam servet, ideo statim cognoscis num valeat.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Auxilium – mox veniet.
+Dialog.Help.Title=Auxilium
+Dialog.About.Title=De NBR
+Dialog.About.Release=Alpha
+Dialog.About.Licence=🄯 Copyleft — NBR programma liberum est sub GNU General Public License, versione 3. Licet tibi eo uti, id studere, communicare et mutare; si versionem mutatam tradis, ea isdem condicionibus pergit, una cum codice suo fontali.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nAedificatio diei {1}\n\nHic est lector multiformis et multiexitus librorum et editionum digitalium, praesertim pro caecis, debilis visu et iis qui difficultatem in legendo habent factus. Ad usum simplicem gratuitus est, sed si facultates ulteriores eius, ut translationem et voces nubis, explorare et adhibere vis, tibi apud officia externa singula profitendum et fortasse solvendum erit.\n\nFactum a Nemoguća vizija — nemoviz.org\n\nScriptum a Gordan Radić\n\nAedificatum cum Claude (Anthropic). Magnam partem codicis id scripsit, secundum consilium, iudicia et mensuras auctoris; ius et licentia eius sunt.\n\n{2}\n\nQUIBUS REBUS NBR NITITUR\n\nNBR sonum per libmpv edit, Braille per liblouis legit, per NVDA Controller Client loquitur, titulos per TagLib# legit, textum ex PDF per PdfPig extrahit et arcas per SharpCompress aperit. Quaeque earum bibliotheca separata est, sine mutatione adhibita, et quaeque aedificatione congruenti sui ipsius suppleri potest.\n\nlibmpv, et FFmpeg in eo — LGPL 2.1 vel posterior\n\nliblouis et tabulae eius Braille — LGPL 2.1 vel posterior\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress et fasces Microsoft — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend et OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nMonitum plenum — versiones, possessores iuris, et unde quaeque licentia lecta sit — in THIRD-PARTY-NOTICES.txt iuxta programma est, et ipsa verba licentiarum in directorio Licences.
+Hint.Button.Accessible=Auxilium de {0}
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Error
+Dialog.Error.General=Error: {0}
+Dialog.DontShowAgain=Hoc ne iterum ostendas

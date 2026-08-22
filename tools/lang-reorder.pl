@@ -98,6 +98,40 @@ for my $file (@ARGV) {
         push @credit, $b if $b =~ /^;\s*(Translated by|Written by|Verified and modified by)\s*:/i;
     }
 
+    # "WRITTEN BY" BELONGS TO en.lang ALONE, and this guard exists because six
+    # files carried it wrongly for a day. Each new language was seeded by
+    # copying en.lang and rewriting LanguageName -- which also copied Gordan's
+    # authorship line into files he had not written, and dropped the "Verified
+    # and modified by:" line a human translator is meant to sign. The credit
+    # block is carried forward verbatim by design, so once wrong it stayed
+    # wrong through every reorder. Cheap to check, and invisible otherwise:
+    # nothing else in this project reads these lines.
+    if (!$isSource && grep { /^;\s*Written by\s*:/i } @credit) {
+        warn "$file: carries \"Written by\" - that line is en.lang's. A "
+           . "translation wants \"Translated by:\" and an empty \"Verified and "
+           . "modified by:\" for the human who checks it.\n";
+    }
+
+    # A NOTE ABOUT THE LANGUAGE ITSELF, carried forward like the credit block.
+    #
+    # Every other comment in this file is dropped and rewritten, which is the
+    # point (Gordan asked for the developer chatter to go). But two of these
+    # files need to say something about themselves that no section header can:
+    # Latin and Ancient Greek have no attested words for a sound card, a cloud
+    # voice or an API key, so much of their vocabulary is COINED, and a reader
+    # or a later translator is owed that plainly rather than left to infer it.
+    #
+    # Lines from "; NOTE:" to the next bare ";" are kept verbatim. Nothing else
+    # in the tool knows what they say, so any language may carry one.
+    my (@note, $inNote);
+    for my $l (@lines) {
+        (my $b = $l) =~ s/\r?\n$//;
+        $inNote = 1 if $b =~ /^;\s*NOTE:/;
+        next unless $inNote;
+        last if $b =~ /^;\s*$/;
+        push @note, $b;
+    }
+
     # Which keys stood BELOW the pending marker when this file was read. They
     # are what the translator was given to do, and they are filed on this run
     # whatever they now say -- see the note at the head about why position and
@@ -159,6 +193,10 @@ for my $file (@ARGV) {
         push @out, "; Human translators: write your name and the year after the colon above." . $nl;
         push @out, "; If somebody has signed there already, add another line like theirs" . $nl;
         push @out, "; underneath - every one of them is kept when this file is reordered." . $nl;
+    }
+    if (@note) {
+        push @out, ";" . $nl;
+        push @out, $_ . $nl for @note;
     }
     push @out, ";" . $nl;
     push @out, "; Translate what stands to the RIGHT of the equals sign, and nothing else." . $nl;
