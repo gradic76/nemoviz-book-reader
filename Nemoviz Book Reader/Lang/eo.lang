@@ -1,0 +1,775 @@
+; Nemoviz Book Reader
+;
+; Written by:               Gordan Radić
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Esperanto
+Btn.OK=Bone
+Btn.Yes=Jes
+Btn.No=Ne
+Btn.Cancel=Nuligi
+Btn.Close=Fermi
+Btn.Continue=Daŭrigi
+Btn.Refresh=Refreŝigi
+Btn.Refresh.Accessible=Refreŝigi
+Common.Dash=-
+Common.Error=Eraro
+Common.DateFormatLong=d'-a de' MMMM yyyy
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Titolo:
+Player.Info.AuthorLabel=Aŭtoro:
+Player.Info.ProducerLabel=Produktinto:
+Player.Info.PublisherLabel=Eldonejo:
+Player.Info.ChapterLabel=Ĉapitro:
+Player.Info.PartLabel=Parto:
+Player.Info.PageLabel=Paĝo:
+Player.Info.BookmarksLabel=Legosignoj:
+Player.Info.VoiceLabel=Voĉo:
+Player.Info.NoVoiceLabel=Neniu voĉo estas instalita
+Player.Info.PartNumElapsed=Parto {0}, pasis:
+Player.Info.PartNumRemaining=Parto {0}, restas:
+Player.Info.ElapsedLabel=Pasis:
+Player.Info.RemainingLabel=Restas:
+Player.Info.VolumeLabel=Laŭteco:
+Player.Info.SpeedLabel=Rapido:
+Player.Info.AccessibleName=Informoj pri la ludado, F8
+Player.Info.Prepared=Konservita parolo: {0} pecoj, {1} MB
+Player.Info.Preparing=Preparado de la resto de la libro: {0} el {1} pecoj
+Player.TitleBar.Paused=paŭzita
+Player.ReadingSurface.Accessible=Lega surfaco
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Ludi, spaco
+Btn.Pause.Accessible=Paŭzi, spaco
+Btn.Back.Accessible=Malantaŭen, Maj+Maldekstren
+Btn.Forward.Accessible=Antaŭen, Maj+Dekstren
+Btn.VolumeUp.Accessible=Pli laŭte, F12
+Btn.VolumeDown.Accessible=Pli mallaŭte, F11
+Btn.Power.Accessible=Eliri, Alt+F4
+Player.Volume.Text=Laŭteco: {0}%
+Player.Volume.Accessible=Laŭteco {0} procentoj
+Player.Speed.Text=Rapido: {0}x
+Player.Speed.Legend=Rapido
+Player.Speed.Accessible=Rapido {0} obla
+Player.Speed.Wpm=Rapido: {0} vpm
+Player.Speed.WpmAccessible=Rapido {0} vortoj po minuto
+Player.Position.Label=Pozicio
+Player.Position.Text=Pozicio: {0} / {1}
+Player.Position.Accessible=Pozicio {0} procentoj
+Player.Progress.Legend=Progreso
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Saltopaŝo:
+Player.Seek.Accessible=Saltopaŝo, Maj+Supren aŭ Maj+Malsupren
+Player.Seek.Announce=Salto: {0}
+Seek.Item.15s=15 sekundoj
+Seek.Item.30s=30 sekundoj
+Seek.Item.1min=1 minuto
+Seek.Item.5min=5 minutoj
+Seek.Item.10min=10 minutoj
+Seek.Item.15min=15 minutoj
+Seek.Item.30min=30 minutoj
+Seek.Item.Chapter=Ĉapitro
+Seek.Item.Part=Parto
+Seek.Item.Track=Trako
+Seek.Item.HeadingLevel=Titolo {0}
+Seek.Item.Page=Paĝo
+Seek.Item.Bookmark=Legosigno
+Seek.Item.StandardPage=Norma paĝo
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Biblioteko
+Btn.Library.Accessible=Biblioteko, F3
+Btn.Library.Legend=Biblioteko
+Btn.Settings=Agordoj
+Btn.Settings.Accessible=Agordoj, F2
+Btn.Settings.Legend=Agordoj
+Btn.Properties.Legend=Ecoj
+Btn.Properties=Ecoj
+Btn.Properties.Accessible=Ecoj, Alt+Enigi
+Btn.Help=Helpo
+Btn.Help.Accessible=Helpo, F1
+Btn.Help.Legend=Helpo
+Btn.GoTo.Legend=Iri al...
+Btn.GoTo=Iri al...
+Btn.GoTo.Accessible=Iri al, F4
+Btn.SetBookmark.Legend=Legosigno
+Btn.SetBookmark=Meti legosignon
+Btn.SetBookmark.Accessible=Meti legosignon, F5
+Btn.ManageBookmarks.Legend=Legosignoj
+Btn.ManageBookmarks=Legosignoj
+Btn.ManageBookmarks.Accessible=Administri la legosignojn, F6
+Btn.Timer=Tempigilo
+Btn.Timer.Legend=Tempigilo
+Btn.Timer.Accessible=Dormtempigilo, F7
+Btn.Timer.Countdown=Tempigilo {0}
+Btn.Timer.Accessible.Active=Dormtempigilo, restas {0}, aktivigu por halti la ludadon kaj nuligi la tempigilon
+Btn.Timer.Accessible.LessThanMinute=Dormtempigilo, malpli ol unu minuto
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Malantaŭen (Maj+Maldekstren)
+Tip.PlayPause=Ludi/paŭzi (spaco)
+Tip.Forward=Antaŭen (Maj+Dekstren)
+Tip.Seek=Ŝanĝu per Maj+Supren kaj Maj+Malsupren; saltu per Maj+Maldekstren kaj Maj+Dekstren (ankaŭ per Malantaŭen kaj Antaŭen)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enigi
+Tip.Timer=F7
+Tip.Volume=F11 kaj F12
+Tip.Speed=Stir+Maldekstren kaj Stir+Dekstren
+Tip.Progress=Stir+1–9: salti al 10–90%
+Player.OpenFile.Title=Elektu libron
+Player.NoVoiceForLanguage=Neniu instalita voĉo parolas {0}. Malfermu la ecojn per Alt+Enigi kaj elektu unu.
+Filter.Audiobooks=Sonlibroj
+Filter.TextBooks=Tekstolibroj
+Filter.BrailleBooks=Brajlaj libroj
+Filter.Archives=Arkivoj
+Filter.AllSupported=Ĉiuj subtenataj dosieroj
+Filter.AllFiles=Ĉiuj dosieroj
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Biblioteko
+Library.List.Accessible=Librobreto
+Library.NowReading.Accessible=Nun legata
+Library.NowReading.Empty=Neniu libro estas ŝargita
+Library.Search.Accessible=Serĉi
+Library.Filter.Accessible=Filtri laŭ stato
+Library.Details.Accessible=Datumoj de la libro
+Library.Btn.Load=Ŝargi
+Library.Btn.Load.Accessible=Ŝargi
+Library.Btn.Close=Fermi
+Library.Btn.Close.Accessible=Fermi
+Menu.File=Dosiero
+Menu.File.OpenFile=Malfermi dosieron...
+Menu.File.OpenFolder=Malfermi dosierujon...
+Menu.File.OpenAudioCd=Malfermi sonan lumdiskon
+Menu.File.ClearLibrary=Malplenigi la bibliotekon...
+Menu.File.Exit=Eliri
+Menu.File.ExportAudio=Konservi kiel sonlibron...
+Menu.File.Translate=Traduki la libron...
+Menu.Sort=Ordigi
+Menu.Sort.Alphabetically=Alfabete
+Menu.Sort.DateAdded=Laŭ dato de aldono
+Menu.Sort.Format=Laŭ formo
+Menu.Sort.Status=Laŭ stato
+Menu.Sort.Ascending=Kreskante
+Menu.Sort.Descending=Malkreskante
+Menu.Sort.ActiveMark=(aktiva)
+Menu.Help=Helpo
+Menu.Help.Help=Helpo
+Menu.Help.About=Pri NBR
+Menu.Help.Services=Servoj kaj kontoj...
+Shelf.Filter.All=Ĉiuj libroj
+Shelf.Filter.Reading=Legata
+Shelf.Filter.Unread=Nelegita
+Shelf.Filter.Read=Legita
+Shelf.Filter.Favorites=Preferataj
+Shelf.Status.NowReading=Nun legata
+Shelf.Status.Reading=Legata
+Shelf.Status.Unread=Nelegita
+Shelf.Status.Read=Legita
+Context.Open=Malfermi
+Context.MarkRead=Marki kiel legitan
+Context.MarkUnread=Marki kiel nelegitan
+Context.Rename=Alinomi
+Context.Delete=Forigi
+Context.Properties=Ecoj
+Context.ReadOcr=Rekoni la tekston
+Context.ReReadOcr=Rekoni denove en alia lingvo
+Context.Translate=Traduki la libron...
+Context.Favorite=Marki kiel preferatan
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Titolo
+Details.Field.Author=Aŭtoro
+Details.Field.Format=Formo
+Details.Field.Speed=Rapido
+Details.Field.Volume=Laŭteco
+Details.Field.Added=Aldonita
+Details.Field.Producer=Produktinto
+Details.Field.Publisher=Eldonejo
+Details.Field.Year=Jaro
+Details.Field.Time=Daŭro
+Details.Field.Elapsed=Pasis
+Details.Field.Remaining=Restas
+Details.Field.Read=Legita
+Details.Field.Pages=Paĝoj
+Details.Field.Headings=Titoloj
+Details.Field.Characters=Signoj
+Details.Field.Language=Rekonita lingvo
+Details.Field.Description=Priskribo
+Details.Description.Open=Premu Enigi por legi ĝin
+Details.Field.SoundProcessing=Sonprilaborado
+Details.Sound.On=Jes
+Details.Sound.Off=Ne
+Details.Speed.Wpm={0} vpm
+Dialog.Description.Title=Priskribo - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Aldoni libron al la biblioteko
+Library.ImportFolder.Description=Elektu la dosierujon kun la libroj
+Dialog.ConfirmImport.Message=En la elektita loko estis trovitaj {0} libroj: {1} sonlibroj, {2} tekstolibroj, {3} en apartaj formoj kaj {4} arkivoj.\n\nSe tio ĝustas, post via konfirmo la libroj estos kopiitaj en vian bibliotekon kaj la arkivoj estos malpakitaj tie. Via biblioteko troviĝas en {5}.\n\nEn la deveno nenio ŝanĝiĝas — ĉio restas netuŝita, ne maltrankviliĝu.\n\nSe la nombroj ne kongruas kun via atendo, aranĝu alie la importotajn datumojn. La amasa importado havas siajn limojn en distingado de titoloj, kaj NBR ne povas garantii pri ĉiu el ili.\n\nTio povas daŭri iom; laŭeble ne interrompu.
+Dialog.ConfirmImport.One=Unu libro estis trovita. Ĉu importi ĝin?
+Dialog.ConfirmImport.Title=Aldoni dosierujon
+Dialog.NoBooksFound.Message=En la elektita dosierujo neniu subtenata libro estis trovita.
+Dialog.NoBooksFound.Title=Aldoni dosierujon
+Dialog.ImportSuccess.Message=La libro estis aldonita al la biblioteko.
+Dialog.ImportSuccess.Title=Aldoni libron
+Dialog.ImportError.Message=Ne eblis aldoni la libron: {0}
+Dialog.ImportFolderSuccess.Message={0} libroj importitaj.
+Dialog.ImportFolderSuccess.Skipped={0} estis preterlasitaj.
+Dialog.ImportFolderSuccess.SkippedList=Jen kio ne eniris:
+Dialog.ImportFolderSuccess.Title=Aldoni dosierujon
+Dialog.ImportFolderError.Message=Ne eblis importi la dosierujon: {0}
+Dialog.ReimportExisting.Title=Jam en la biblioteko
+Dialog.ReimportExisting.Message={0} jam staras sur la breto. Reimporti ĝin refreŝigas tion, kio kuŝas en la dosierujo de la libro. Via loko en la libro kaj viaj legosignoj restas — sed se la dosiero ekde tiam ŝanĝiĝis, la vortoj moviĝis kaj la loko ne plu estas tie, kie vi haltis. Ĉu reimporti?
+Dialog.Skipped.Drm=protektita
+Dialog.Skipped.Cancelled=nuligita
+Dialog.Skipped.MissingFirstVolume=mankas la unua parto de ĉi tiu aro
+Dialog.Skipped.Empty=la dosiero estas malplena
+Dialog.Rename.Title=Alinomi la libron
+Dialog.Rename.Prompt=Nova nomo:
+Dialog.Rename.AuthorLabel=Aŭtoro:
+Dialog.Rename.TitleLabel=Titolo:
+Dialog.ConfirmDelete.Message=Ĉu vi vere volas por ĉiam forigi "{0}" de la disko? Tion ne eblas malfari.
+Dialog.ConfirmDelete.Title=Forigi la libron
+Dialog.DeleteError.Message=Ne eblis forigi la libron de la disko: {0}
+Dialog.ActiveBook.Message="{0}" estas nun ŝargita en la ludilon kaj ne povas esti forigita. Fermu la bibliotekon, malfermu alian libron aŭ haltigu la ludadon, kaj provu denove.
+Dialog.ActiveBook.Title=La libro estas uzata
+Dialog.ClearLibrary.Title=Malplenigi la bibliotekon
+Dialog.ClearLibrary.Message=Ĉu forigi ĉiujn {0} librojn el la biblioteko? Ĉe tio iliaj dosieroj estos por ĉiam forviŝitaj de la disko, kaj tion ne eblos malfari.
+Dialog.ClearLibrary.Empty=La biblioteko jam estas malplena.
+Dialog.ClearLibrary.Done={0} libroj forigitaj.
+Dialog.ClearLibrary.Skipped={0} ne eblis forigi (uzataj aŭ nun malfermitaj).
+Dialog.DrmProtected.Title=Protektita libro
+Dialog.DrmProtected.Message=Ĉi tiu libro estas protektita per DRM (ĝia enhavo estas ĉifrita) kaj tial ne malfermeblas. Uzu ekzempleron sen DRM.
+Dialog.ArchivePassword.Title=Necesas pasvorto
+Dialog.ArchivePassword.Prompt=La arkivo "{0}" estas protektita per pasvorto. Enigu ĝin por malfermi ĝin:
+Dialog.ArchivePassword.Retry=Tiu pasvorto ne funkciis. Provu denove por "{0}":
+Dialog.ArchivePassword.Field=Pasvorto de la arkivo
+Extract.Progress.Title=Malpakado
+Extract.Progress.Preparing=Preparado…
+Extract.Progress.Determinate=Malpakado… {0} / {1} dosieroj
+Extract.Progress.Indeterminate=Malpakado… {0} dosieroj
+
+; ---- GO TO
+Dialog.GoTo.Title=Iri al
+GoTo.List.Accessible=Partoj de la libro
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=Bone
+GoTo.Cancel.Accessible=Nuligi
+GoTo.AutoPlay=Ludi post la salto
+GoTo.AutoPlay.Hint=Se tio estas ŝaltita, la ludado komenciĝas tuj post la salto. Se ne, la stato restas kia ĝi estis: kio paŭzis, plu paŭzas, kaj kio ludis, plu ludas.
+GoTo.Hint.Accessible=Klarigo
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Dormtempigilo
+SleepTimer.Duration.Group=Daŭro
+SleepTimer.Duration.15=15 minutoj
+SleepTimer.Duration.30=30 minutoj
+SleepTimer.Duration.45=45 minutoj
+SleepTimer.Duration.60=60 minutoj
+SleepTimer.Duration.Custom=Alia:
+SleepTimer.Custom.Accessible=Alia daŭro en minutoj
+SleepTimer.Bookmark=Meti legosignon ĉe la starto
+SleepTimer.Action.Group=Kiam la tempo finiĝos
+SleepTimer.Action.Stop=Haltigi la ludadon
+SleepTimer.Action.StopClose=Haltigi kaj fermi la programon
+SleepTimer.Action.StopShutdown=Haltigi, fermi kaj malŝalti la komputilon
+SleepTimer.Start=Starti
+SleepTimer.Start.Accessible=Starti la dormtempigilon
+SleepTimer.CancelBtn=Nuligi
+SleepTimer.CancelBtn.Accessible=Nuligi
+SleepTimer.Announce.Set=Dormtempigilo agordita: {0} minutoj
+SleepTimer.Announce.Cancelled=Dormtempigilo nuligita
+SleepTimer.Announce.Finished=La tempo finiĝis, la ludado haltis
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Administri la legosignojn
+Bookmark.Announce.Set=Legosigno metita
+Bookmark.Item.Format=Legosigno {0} ({1})
+ManageBookmarks.List.Accessible=Legosignoj
+ManageBookmarks.Delete=Forigi
+ManageBookmarks.Delete.Accessible=Forigi
+ManageBookmarks.OK.Accessible=Bone
+ManageBookmarks.Cancel.Accessible=Nuligi
+ManageBookmarks.Selected=Elektita
+ManageBookmarks.NotSelected=Ne elektita
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Sonprilaborado
+Dialog.SoundProcessing.Message=La sonprilaborado igas malbonan registraĵon pli elportebla. Ĝi ne riparas ĝin.\n\nĜi ne povas revenigi tion, kio neniam estis registrita, kaj uzata tro forte ĝi malutilas pli ol utilas. Simple lasu ĝin ŝaltita, aŭskultu kelkajn minutojn, kaj nur tiam tuŝu la unuopajn ŝtupojn.\n\nEn la helpo estas skribite, kion faras ĉiu el ili.
+Prop.Info.Accessible=Datumoj de la libro
+Prop.Info.ProcessingOff=Sonprilaborado: ne
+Prop.Info.ProcessingOn=Sonprilaborado: jes
+Prop.Info.Bypassed=(prilaborado preterpasita)
+Prop.Info.Off=ne
+Prop.Info.Protection=Protekto kontraŭ distordo
+Prop.Tab.Audio=Sono
+Prop.Tab.Text=Teksto
+Prop.On=jes
+Prop.Off=ne
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Uzi la sonprilaboradon
+Prop.SoundProcessing=Sonprilaborado
+Prop.Stage.Level=Grado
+Prop.Highpass.Title=Forigi la muĝon
+Prop.Denoise.Title=Redukto de bruo
+Prop.Deesser.Title=Mildigi la siblojn
+Prop.Compressor.Title=Egaligi la parolon
+Prop.Eq.Title=Sonkoloro
+Prop.Eq.Shelf={0} kaj pli alte
+Prop.Loudness.Title=Laŭteco kaj paŭzoj
+Prop.Normalize.Title=Aŭtomata laŭteco
+Prop.Gate.Title=Bruo en la paŭzoj
+Prop.Level.Minimal=Minimuma
+Prop.Level.Light=Malforta
+Prop.Level.Medium=Meza
+Prop.Level.Strong=Forta
+Prop.Level.Maximum=Maksimuma
+Prop.ResetAll=Restarigi ĉion
+Prop.Bypass=Preterpasi la prilaboradon
+Prop.Bypass.Shortcut=Stir+B ŝaltas kaj malŝaltas tion el iu ajn loko de ĉi tiu paĝo
+Prop.Analysing=La registraĵo estas analizata
+Prop.Analysing.Done=Registraĵo analizita, {0} ŝtupoj agorditaj. Ŝanĝu iun ajn el ili, se vi preferas alie.
+Prop.Analysing.Failed=Ne eblis analizi la registraĵon. La agordoj restas kiaj ili estis.
+Analyse.Progress.Title=La registraĵo estas analizata
+Analyse.Progress.Starting=La analizo komenciĝas...
+Analyse.Progress.Working=Peco {0} el {1}. {2}
+Analyse.Progress.Quarter={0} procentoj faritaj. {1}
+Analyse.Progress.Cancel=Nuligi
+Analyse.Progress.Cancelling=Haltos post ĉi tiu peco. La agordoj restas kiaj ili estis.
+Analyse.Progress.Estimating=Kalkulado, kiom tio daŭros.
+Analyse.Progress.AlmostDone=Preskaŭ preta.
+Analyse.Progress.Seconds=Restas ĉirkaŭ {0} sekundoj.
+Analyse.Progress.Minutes=Restas ĉirkaŭ {0} minutoj.
+Hint.SoundProcessing=Per la sonprilaborado vi povas fajne agordi, kiel sonas la registraĵo. Vi povas forigi diversajn bruojn, plilaŭtigi kaj kolorigi la ĝeneralan sonon per la egaligilo. Estas ses grupoj de regiloj, kaj ĉiun eblas ŝalti kaj malŝalti aparte. Ankaŭ ĉiun regilon eblas agordi aparte. Vi povas provizore preterpasi la tutan ĉenon per Stir+B, por aŭdi la diferencon inter la originala registraĵo kaj viaj agordoj.
+Hint.RemoveRumble=Fortranĉas la plej malaltajn frekvencojn: trafikon, klimatizilon, manipuladan bruon. Ĝi ne povas savi kotan registraĵon, sed liberigas la basojn, por ke la parolo havu lokon.
+Hint.NoiseRemoval=Malpliigas la konstantan fonan siblon, tian, kian lasas bendo aŭ malmultekosta mikrofono. Tro forta agordo komencas manĝi ankaŭ la voĉon, do plialtigu nur ĝis la siblo malaperas.
+Hint.SoftenSibilance=Deprenas la akrecon de la fortaj S kaj Ŝ. Utila ĉe legantoj tre proksimaj al la mikrofono kaj ĉe registraĵoj tro heligitaj.
+Hint.EvenOutSpeech=Malvastigas la interspacon inter la mallaŭtaj kaj la laŭtaj partoj, tiel ke flustro kaj krio finiĝas pli proksimaj. Jen la regilo, al kiu iri, kiam oni senĉese tuŝas la laŭtecon.
+Hint.Tone=Kvin bendoj, en decibeloj, nomitaj laŭ sia frekvenco. La plej malalta staras ĉe 200 Hz, kie kutime sidas muĝanta aŭ kota registraĵo; la supra estas breta, do ĝi levas aŭ malaltigas ĉion super si anstataŭ unu solan zonon. La bendoj interkovriĝas intence, kio ebligas glatan kurbon sed ankaŭ signifas, ke ili sumiĝas: tri najbaraj bendoj je +4 donas kune sufiĉe pli ol +4. Malgrandaj movoj multe valoras, kaj ĉio preter kelkaj dB kutime signifas, ke la vera kuracilo estas alia ŝtupo.
+Hint.AutomaticLoudness=Du aferoj, kiuj tiras en kontraŭajn direktojn, kaj ĝuste tial ili kunhavas skatolon. La aŭtomata laŭteco tenas la ĝeneralan nivelon egala tra tuta libro, ankaŭ inter dosieroj registritaj en malsamaj tagoj; ĝi sekvas la voĉon kaj ne la tutan signalon, kion parola registraĵo postulas. La bruo en la paŭzoj laboras inverse: ĉio, kio estas pli mallaŭta ol la elektita nivelo, estas puŝata malsupren, tiel ke siblo aŭ zumo, kiu sidas sub la legado, ĉesas esti aŭdebla en la interspacoj inter la frazoj. La voĉon mem ĝi neniam tuŝas, kaj ĝi mallaŭtigas anstataŭ silentigi (bruo, kiu malŝaltiĝas kaj reŝaltiĝas ĉirkaŭ ĉiu frazo, lacigas pli ol tia, kiu simple restas). Plialtigu la laŭtecon kaj la bruo sub ĝi leviĝas kun ĝi; se tio okazas, jen la regilo por tio.
+
+; ---- PROPERTIES - the text page
+Prop.Text.NoVoiceShort=Neniu instalita voĉo parolas {0} — elektu unu sube.
+Prop.Text.NoVoiceForLanguage=Neniu instalita voĉo parolas {0}. Instalu voĉon por {0}, aŭ elektu supre lingvon kaj voĉon, per kiuj ĉi tiu libro estos legata. La elekto validas nur por ĝi.
+Prop.Text.ReadingIn=Legata en:
+Prop.Text.InputBrailleGroup=Brajla deveno
+Prop.Text.InputBrailleTable=Enira brajla tabelo:
+Hint.Text0=Ĉi tie vi povas elekti la lingvon kaj la voĉon, per kiuj ĉi tiu libro estas legata. Vi povas havi malsamajn agordojn por ĉiu unuopa libro en la biblioteko. Ĉiu voĉo memoras siajn proprajn — rapidon, laŭtecon kaj tonalton — do ne necesas remeti ilin post reveno de alia voĉo.\n\nMemoru, ke vi povas elekti "Sen parolo", se vi volas legi per la okuloj aŭ sur la brajla linio sen aŭdi sonon.
+Hint.TextVisual=Ĉi tie vi povas agordi la ekranan prezenton por legado. Vi povas elekti inter aranĝo laŭ la maniero de subtekstoj, teksto, kiu rulumas kiel la finaj titoloj de filmo, aŭ tuja ŝanĝo de paĝoj. Vi povas ankaŭ elekti la kolorojn de la fono, de la teksto kaj de la emfazo, kaj ĉu estu markata la legata linio aŭ la tuta frazo.\n\nNotu, ke tio nenion ŝanĝas pri la parolo.
+Hint.TextBrailleSource=Ĉi tiu libro venis el brajla dosiero, kaj jen la tabelo, per kiu ĝi estis legita — tiu, kiu igis la brajlajn ĉelojn denove vortoj.\n\nBrajla dosiero diras nenion pri sia lingvo, pri sia grado nek pri tio, kiun nacian normon ĝi sekvas, tial NBR devas eltrovi la tabelon el la teksto mem. Kutime ĝi trafas, sed ne ĉiam, kaj malĝusta tabelo donas vortojn preskaŭ ĝustajn: "Have" tie, kie la libro diras "How".\n\nSe ĝuste tion vi vidas, elektu ĉi tie alian tabelon kaj premu Bone. La libro estas relegata el la brajla dosiero, kiun vi importis kaj kiu estas konservita apud ĝi, do vi povas provi tiom da tabeloj, kiom vi volas, kaj reveni al la unua iam ajn.\n\nLa proponataj tabeloj estas tiuj de la lingvo supre. Se tiu lingvo estas malĝusta, ŝanĝu ĝin kaj la tabeloj sekvos.\n\nTio havas nenion komunan kun tio, kion montras via brajla linio. Tion tradukas via ekranlegilo, per la tabelo el siaj propraj agordoj.
+NoVoice.Title=Neniu voĉo por ĉi tiu libro
+NoVoice.Message=Ĉi tiu libro estas en {0}, kaj neniu instalita voĉo parolas tiun lingvon. Elektu voĉon, per kiu legi ĝin ĉi-foje, aŭ lasu ĝin nelegita ĝis kiam voĉo por {0} estos instalita.
+NoVoice.Read=Legi per ĉi tiu voĉo
+NoVoice.Leave=Lasi ĝin nelegita
+Dialog.BrailleReread.Title=Ĉu relegi la brajlan dosieron?
+Dialog.BrailleReread.Message=Ĉi tiu libro estos relegata el sia originala brajla dosiero, per {0}.\n\nLa teksto estas refarata, tial perdiĝas ĉio, kio montris al la malnova: kiom malproksimen vi venis, viaj legosignoj kaj la legita parto. La libro mem restas netuŝita, kaj vi povas legi ĝin per alia tabelo tiom da fojoj, kiom vi volas.
+Dialog.BrailleReread.Failed=Ne eblis legi la brajlan dosieron per tiu tabelo. La libro restis kia ĝi estis.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Agordoj
+Settings.Tab.Advanced=Speciala
+Settings.Tab.General=Ĝenerala
+Settings.Tab.TextBooks=Voĉo kaj brajlo
+Settings.Tab.Device=Aparatoj
+Settings.OK.Accessible=Bone
+Settings.Cancel.Accessible=Nuligi
+Settings.Apply=Apliki
+Settings.Apply.Accessible=Apliki
+
+; ---- SETTINGS - General
+Settings.General.LanguageGroup=Lingvo
+Settings.General.LibraryGroup=Loko de la biblioteko
+Settings.General.MediaKeysGroup=Aŭdvidaj klavoj
+Settings.General.MetadataGroup=Datumoj de la libro
+Settings.General.LookGroup=Aspekto
+Settings.General.UseMultimediaKeys=Uzi la aŭdvidajn klavojn
+Settings.General.UseMultimediaKeysGlobally=Uzi la aŭdvidajn klavojn tutsisteme
+Settings.General.LibraryLocation=Loko de la biblioteko:
+Settings.General.LibraryLocation.Browse=Elektu la dosierujon, en kiu kuŝas via biblioteko
+Settings.General.Browse=Foliumi...
+Settings.General.Browse.Accessible=Serĉi la dosierujon de la biblioteko
+Settings.General.Language=Lingvo:
+Settings.General.UseMetadata=Uzi la enmetitajn metadatumojn
+Settings.General.UseMetadata.Hint=Kelkaj dosierformoj portas metadatumojn kun pliaj informoj pri aŭtoro, titolo, eldonejo, produktinto kaj tiel plu. NBR povas legi kaj montri ilin tie, kie ili ekzistas. Sed se ili estas malĝustaj aŭ mankas, NBR povas preni la bazajn datumojn el la nomoj de dosierujoj kaj dosieroj. Se nenio alia helpas, vi ĉiam povas alinomi la librojn en la biblioteko.
+Settings.General.UseMultimediaKeys.Hint=Vi povas uzi la aŭdvidajn klavojn de via klavaro aŭ de viaj kapaŭdiloj por ludi, paŭzi kaj moviĝi tra la libro per la saltopaŝo, kiun vi elektis.\n\nLa dua ŝaltilo faras ilin tutsistemaj, tiel ke ili atingas NBR el ĉie — je la prezo, ke ili estas forprenitaj de ĉiu alia ludilo dum NBR funkcias.
+Settings.General.LibraryLocation.Hint=Ĉi tien NBR kopias la importitajn librojn. Vi povas lasi ĝin kie ĝi estas, sur la sistema subdisko, sed se vi planas grandan bibliotekon, alia subdisko aŭ alia disko estas multe pli bona solvo. NBR konservas ĉi tie ankaŭ la datumojn de ĉiu libro, do se vi volas konservi viajn legolokojn, legosignojn, rapidon kaj aliajn agordojn, notu, ke la enhavon de la malnova dosierujo necesas kopii mane al la nova loko. Kaj sampreze: metante la bibliotekon ekster la sisteman subdiskon, vi ŝirmas viajn librojn kontraŭ sistemaj paneoj kaj la kutima perdo de datumoj, kiu ilin akompanas.
+Settings.General.Language.Restart=Por ŝanĝi la lingvon NBR devas restarti. Ĉu restarti nun?
+Settings.General.Language.RestartTitle=Lingvo
+Settings.Misc.Look=Aspekto:
+Settings.Misc.Look.Classic=Sistemaj koloroj
+Settings.Misc.Look.New=Dezajno de NBR
+Settings.Misc.Look.Hint=Kiel NBR desegnas sin mem, kaj respondoj estas du.\n\nLa dezajno de NBR estas ĝia propra aspekto, tiu, kun kiu ĝi startas.\n\nLa sistemaj koloroj igas ĝin ordinara fenestro, en la koloroj kaj tiparoj, kiujn havas Vindozo. Ĝi desegnas nenion propran, tial via skemo trapasas tuta — kaj tion vi volas ĉe altkontrasta etoso, kaj tio plej bone funkcias kun ekranlupeo. Se la alta kontrasto jam estas ŝaltita ĉe vi, NBR startas ĝuste per ĉi tiu.\n\nĈiuokaze la elekto estas via, kaj malfari ĝin same: la klavaro kaj via ekranlegilo ne estas tuŝitaj de tio, kaj F2 revenigas vin ĉi tien.
+Settings.Misc.Look.RestartTitle=Ŝanĝi la aspekton
+Settings.Misc.Look.Restart=Por ŝanĝi la aspekton NBR devas restarti. Via loko en la libro konserviĝas. Ĉu restarti nun?
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.Language=Lingvo:
+Settings.TextBooks.BookLanguage=Libroj en ĉi tiu lingvo:
+Settings.TextBooks.AllOtherLanguages=Ĉiuj aliaj lingvoj
+Settings.TextBooks.VoiceNotSet=(neniu voĉo elektita)
+Settings.TextBooks.AddVoices=Aldoni novajn lingvojn...
+Settings.TextBooks.LanguageNoVoice={0} — neniu voĉo instalita
+Settings.TextBooks.Voice=Voĉo:
+Settings.TextBooks.Speed=Rapido:
+Settings.TextBooks.Test=Provi la voĉon
+Settings.TextBooks.TestSample=Jen provaĵo de la elektita voĉo.
+Settings.TextBooks.Volume=Laŭteco:
+Settings.TextBooks.Pitch=Tonalto:
+Settings.TextBooks.SpeechGroup=Parolo
+Settings.TextBooks.LanguageUnknown=(lingvo ne indikita)
+Settings.TextBooks.VisualGroup=Ekrana eligo
+Settings.TextBooks.UseVisual=Uzi la ekranan eligon
+Settings.TextBooks.NoSpeech=Sen parolo
+Settings.TextBooks.VisualMode=Montromaniero:
+Settings.TextBooks.VisualMode.TwoRows=Du tekstlinioj (kiel subtekstoj)
+Settings.TextBooks.VisualMode.FullInstant=Tutekrane (paĝon post paĝo)
+Settings.TextBooks.VisualMode.FullScrolling=Tutekrane (rulumante)
+Settings.TextBooks.Highlight=Emfazo:
+Settings.TextBooks.Highlight.None=Neniu emfazo
+Settings.TextBooks.Highlight.Line=Nuna linio
+Settings.TextBooks.Highlight.Sentence=Nuna frazo
+Settings.TextBooks.HighlightColour=Koloro de la emfazo:
+Settings.TextBooks.TextColour=Koloro de la teksto:
+Settings.TextBooks.BackColour=Koloro de la fono:
+Settings.TextBooks.Speech.Hint=Jen la listo de la lingvoj kaj de la voĉoj instalitaj en via sistemo. Por ĉiu listigita lingvo vi povas elekti la defaŭltan voĉon, tiel ke ĉiu nova titolo en tiu lingvo malfermiĝas per la elektita voĉo. Elekti voĉon por lingvo estas ĝuste tio, kio faras ĝin defaŭlta — nenio alia estas premenda. Se via nova libro estas verkita en lingvo, kiu ne estas en la listo, plej bone ne agordu defaŭltan voĉon por ĝi ĉi tie. Vi ĉiam povas elekti voĉon en la ecoj de la libro mem, sur ĝia paĝo Teksto, aŭ elekti Sen parolo kaj plu legi brajle aŭ sur la ekrano. Vi ankaŭ vidos avizon, kiam lingvo havas neniun instalitan voĉon.
+Settings.TextBooks.Visual.Hint=Por montri la tekston sur la ekrano dum ĝi estas laŭtlegata, por tiuj, kiuj legas per la okuloj same kiel per la oreloj. Ŝaltita ĉi tie, la fenestro malfermiĝas mem ĉe ĉiu premo de ludi. Ĝi ankaŭ malfermeblas kaj fermeblas mane iam ajn per F9, ĉu ĉi tio estas ŝaltita aŭ ne — tiel vi povas provi ĝin sur libro sen ŝanĝi ĝiajn ecojn.
+Settings.TextBooks.Dictionary.Hint=Ĉi tie vi povas korekti tion, kion la parolsinteziloj prononcas malĝuste. Vi povas ĝustigi la prononcon de nomoj kaj lokoj, ripari misan akcenton kaj multon pli — nur uzu vian imagon. La plej bona estas, ke vi povas fari tion aparte laŭ lingvo kaj laŭ voĉo, ĉar diversaj sinteziloj eraras diverse en la sama lingvo.
+Settings.Colour.White=Blanka
+Settings.Colour.Black=Nigra
+Settings.Colour.Yellow=Flava
+Settings.Colour.Blue=Blua
+Settings.Colour.Green=Verda
+Settings.Colour.Red=Ruĝa
+Voices.Add.Title=Lingvoj por laŭtlegi tekston
+Voices.Add.Hint=Elektu la lingvojn, kiujn vi volas, kaj premu Instali. Depende de viaj agordoj Vindozo povus peti vian permeson, kaj poste elŝutos la voĉojn por tiu lingvo. Voĉo estas ligita al sia prononcmaniero, tial la brita kaj la usona angla estas apartaj eroj.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Soneligo
+Settings.Device.SoundCard=Sonkarto:
+Settings.Device.KeepAlive=Teni la sonkarton maldorma
+Settings.Device.KeepAlive.Hint=Kelkaj soneligoj — precipe HDMI — malŝaltiĝas tuj kiam la sono ĉesas, kaj poste bezonas momenton por vekiĝi. Aŭdeblas tio kiel la unua vorto de frazo, kiu perdiĝas, kaj denove, dum nenio ŝajnas malfunkcii. Dum ĉi tio estas ŝaltita, NBR ludas sur la uzata karto tonon multe sub ĉio, kion vi kapablas aŭdi, por ke la karto ne havu okazon ekdormi inter la frazoj. Malŝaltu ĝin, se via karto ne kondutas tiel: ĝi tenas la eligon malfermita tiom longe, kiom daŭras libro.
+Settings.Device.Default=La defaŭlta de la sistemo (aŭtomate)
+Settings.Device.OpticalGroup=Optika legilo
+Settings.Device.UseOptical=Uzi la optikan legilon
+Settings.Device.OpticalWhich=Legilo:
+Settings.Device.OpticalAuto=Tiu, kiu havas diskon interne
+Settings.Device.UseOptical.Hint=Iam la libroj aperis sur ordinaraj sonaj lumdiskoj, kaj NBR scipovas ludi ilin. Ĝi legas la diskon anstataŭ lasi ĝin turniĝi: la tuta flanko estas legata per unu trapaso, rekte kaj sen reveni, tiel ke la legilo laboras kelkajn minutojn kaj poste silentas dum la tuta resto de la libro. Legi malrapide estus pli silente dum sekundo kaj pli brue dum horo. Ŝaltu ĉi tion nur se vi volas ĝin - komence ĝi estas malŝaltita, eĉ sur maŝino, kiu havas legilon, kaj dum ĝi estas malŝaltita NBR tute ne tuŝas la legilon.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Libroj kun teksto en bildoj
+Settings.Ocr.Hint=Kelkaj libroj estas fotoj de siaj paĝoj kaj ne teksto: skanita PDF, aŭ dosierujo da numeritaj bildoj. NBR povas rekoni la vortojn sur ili kaj poste legi ilin kiel ĉiun alian libron. Ĉi tio estas nur la komenca elekto — kiam vi havas pli ol unu lingvon, NBR demandas, kiun uzi ĉiufoje kiam ĝi legas libron.
+Settings.Ocr.Language=Lingvo de rekonado
+Settings.Ocr.Automatic=Aŭtomate
+Settings.Ocr.AddLanguage=Aldoni lingvon...
+Settings.Ocr.None=Vindozo havas neniun instalitan tekstorekonadon.
+Settings.Translate.Group=Traduko
+Settings.Translate.Service=Traduka servo
+Settings.Translate.Key=API-ŝlosilo...
+Settings.Translate.State.Have={0}, ŝlosilo konservita
+Settings.Translate.State.None={0}, neniu ŝlosilo
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (pli granda modelo)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, pli malmultekosta)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, la plej multekosta)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Hint=NBR povas traduki libron per interreta servo. Ĉiu servo bezonas ŝlosilon el via propra konto ĉe ĝi, kiun vi algluas ĉi tien; NBR ne traktas pagojn, tio estas via afero sur la retejo de la provizanto aŭ alimaniere. Se maŝintraduko ne necesas al vi, simple lasu la markobutonon nemarkita.\n\nTraduko sendas la TUTAN libron al la servo, kiun vi elektas, kaj kion ĉiu el ili faras kun ĝi, estas malsame — kelkaj uzas la enhavon el la senpaga nivelo por plibonigi siajn proprajn produktojn, aliaj ne. La priskribo de ĉiu servo sub Helpo, Servoj kaj kontoj diras, kiuj.
+Settings.Translate.Notes=Notoj por la tradukanto:
+Settings.Translate.Test.NoEngine=Neniu traduka servo estas elektita.
+Settings.Translate.Test.NoKey=Estas neniu ŝlosilo por kontroli.
+Settings.Translate.Test.NoNetwork=NBR ne sukcesis atingi la servon.
+Settings.Translate.Test.Refused=La servo rifuzis la peton ({0}).
+Settings.Translate.Test.Empty=La servo respondis nenion.
+Settings.Cloud.Group=Nubaj voĉoj de Google
+Settings.Cloud.VoicesGroup=Nubaj voĉoj
+Settings.Cloud.Where=Google kaj Azure estas agordataj sub Helpo, Servoj kaj kontoj, kie estas klarigite, kio estas ĉiu el ili, kaj kie vi estas gvidata paŝon post paŝo al malfermo de konto.
+Settings.Cloud.State.None=Google: neniu serva konto estas konservita, tial neniu el ĉi tiuj voĉoj disponeblas.
+Settings.Cloud.State.Have=Google: disponeblas {0} voĉoj, kiuj kune legas {1} lingvojn.
+Settings.Cloud.State.HaveNoList=Google: serva konto estas konservita, sed la listo de la voĉoj ankoraŭ ne estis prenita. Agordu ĝin denove dum vi estas konektita.
+Settings.Cloud.Load=Dosiero de serva konto...
+Settings.Cloud.Filter=Serva konto (*.json)|*.json|Ĉiuj dosieroj (*.*)|*.*
+Settings.Cloud.Forget=Forgesi la servan konton
+Settings.Cloud.ForgetAsk=Ĉu forgesi la konservitan servan konton? Ĉi tiuj voĉoj ĉesos esti proponataj, kaj libro, kiu jam estas legata per unu el ili, silentiĝos ĝis vi donos al ĝi alian voĉon.
+Settings.Cloud.UseGroup=Uzado de la nubaj voĉoj
+Settings.Cloud.Use=Proponi la nubajn voĉojn
+Settings.Cloud.Why=Ankoraŭ estas nenio por ŝalti: agordu supre Google aŭ Azure, kaj ĉi tio fariĝos disponebla.
+Settings.Cloud.NoList=La konto estis akceptita, sed la listo de la voĉoj ne alveturis. Kutime kulpas la reto; la voĉoj aperos tuj kiam ĝi estos atingebla.
+Settings.Azure.Group=Voĉoj de Azure Speech
+Settings.Azure.Resource=Nomo de la rimedo:
+Settings.Azure.Key=Ŝlosilo:
+Settings.Azure.Save=Kontroli kaj konservi
+Settings.Azure.NoResource=Enigu la nomon de la rimedo — ĝi estas la unua parto de la finpunkto sur la sama paĝo kiel la ŝlosilo.
+Settings.Azure.NoKey=Enigu la ŝlosilon.
+Settings.Azure.Refused=Azure ne akceptis tiun paron. Kontrolu la nomon de la rimedo kaj la ŝlosilon, kaj ke la rimedo estas Speech-a.
+Settings.Azure.State.None=Azure: neniu ŝlosilo estas konservita, tial neniu el ĉi tiuj voĉoj disponeblas.
+Settings.Azure.State.Have=Azure: disponeblas {0} voĉoj, kiuj kune legas {1} lingvojn.
+Settings.Azure.Forget=Forgesi la ŝlosilon
+Settings.Azure.ForgetAsk=Ĉu forgesi la konservitan ŝlosilon de Azure? Ĉi tiuj voĉoj ĉesos esti proponataj, kaj libro, kiu jam estas legata per unu el ili, silentiĝos ĝis vi donos al ĝi alian voĉon.
+Hint.Settings.CloudUse=Ĉi tio ŝaltas kaj malŝaltas vian uzadon de la nubaj voĉoj, do de ĉiuj voĉoj el la interreto, ne de viaj instalitaj SAPI- aŭ OneCore-voĉoj.\n\nĜi decidas, ĉu tiuj voĉoj estu PROPONATAJ, kiam vi elektas voĉon por difinita libro. Ili neniam estas atribuataj mem kaj neniam fariĝas la defaŭlta voĉo de lingvo — tio restas ĉe la voĉoj instalitaj sur ĉi tiu komputilo, kiuj nenion kostas kaj bezonas neniun konekton.\n\nLibro, kiu jam estas legata per nuba voĉo, konservas ĝin, ĉu ĉi tio estas ŝaltita aŭ ne; la ŝaltilo regas la elekton, ne tion, kion eblas ludi.
+Hint.Settings.Azure=La uzado de la voĉoj de Google kaj de Azure postulas kelkajn akreditaĵojn de Google, Microsoft kaj Azure kaj iom da laboro sur iliaj retejoj. Pli detale en la helpo.
+Hint.Settings.Cloud=
+Google.Cred.NotJson=Tiu dosiero ne legeblas kiel JSON, do ĝi ne estas tiu, kiun donis al vi Google. La serĉata dosiero estis elŝutita, kiam vi kreis la servan konton, kaj ĝia nomo finiĝas per .json.
+Google.Cred.NotServiceAccount=Tiu JSON estas legebla, sed ĝi ne estas serva konto — ĝi enhavas nek kontan adreson nek privatan ŝlosilon. Google proponas plurajn specojn de akreditaĵoj; tiu por ĉi tiuj voĉoj estas la ŝlosilo de serva konto.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Prononca vortaro
+Dict.Open=Prononca vortaro...
+Dict.Open.Accessible=Prononca vortaro
+Dict.Scope=Ĉi tiuj reguloj validas por:
+Dict.Scope.Global=Ĉio, kion mi legas
+Dict.Scope.Language=Ĉio, kion mi legas en {0}
+Dict.Scope.Voice=Ĉio, kion mi legas per {0}
+Dict.List.Accessible=Reguloj
+Dict.Column.Pattern=Skribite
+Dict.Column.Says=Dirate kiel
+Dict.Column.Match=Kongruo
+Dict.Column.Case=Majuskloj
+Dict.Column.State=Regulo
+Dict.Column.Comment=Noto
+Dict.Add=Aldoni...
+Dict.Edit=Redakti...
+Dict.Remove=Forigi
+Dict.State.On=Jes
+Dict.State.Off=Ne
+Dict.Try=Provu frazon:
+Dict.TryButton=Provi
+Dict.Rule.TitleNew=Nova regulo
+Dict.Rule.TitleEdit=Redakti la regulon
+Dict.Field.Pattern=Kio estas skribita:
+Dict.Field.Replacement=Diru ĉi tion anstataŭe:
+Dict.Field.Match=Kongruo:
+Dict.Field.CaseSensitive=Distingi majusklojn
+Dict.Field.Skip=Preterlasi
+Dict.Field.Comment=Noto:
+Dict.Field.Enabled=Regulo estas ŝaltita
+Dict.Match.WholeWord=La tuta vorto
+Dict.Match.Anywhere=Ie ajn, eĉ interne de vorto
+Dict.Match.Regex=Regula esprimo
+Dict.Error.Title=Ĉi tiun regulon ne eblas uzi
+Dict.Error.NoPattern=Enigu tion, kio estas skribita en la libro.
+Dict.Error.TooSlow=Ĉi tiu ŝablono bezonas tro da tempo. Simpligu ĝin.
+Dict.Help=Helpo pri regulesprimoj...
+Dict.Help.Title=Regulaj esprimoj en la prononca vortaro
+Dict.Help.Text=La malnova zena saĝo diras:\n\n    La programisto havis problemon.\n    La programisto decidis solvi ĝin per regulaj esprimoj.\n    La programisto havis du problemojn.\n\nRegEx, do regulaj esprimoj, estas io, kun kio prefere ne okupiĝi, sed estas eleganta havi la eblon, do jen ĝi.\n\nSe vi scias, kion vi faras, bonvolu. Se ne, simple ne uzu ilin, aŭ demandu al Google.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=API-ŝlosilo por {0}
+Dialog.TranslateKey.Prompt=Algluu la ŝlosilon, kiun vi ricevis de {0}. Ĝi estas konservata sur ĉi tiu komputilo en propra dosiero, en legebla formo, do traktu ĝin kiel vi traktus pasvorton. Vi povas anstataŭigi aŭ forigi ĝin iam ajn, kaj vi povas nuligi ĝin ĉe la servo mem.
+Dialog.TranslateKey.Field=API-ŝlosilo
+Dialog.TranslateKey.Region=Regiono (malplena, se Global):
+Dialog.TranslateKey.Status=Rezulto
+Dialog.TranslateKey.Test=Kontroli la ŝlosilon
+Dialog.TranslateKey.Remove=Forigi
+Dialog.TranslateKey.Testing=La ŝlosilo estas kontrolata...
+Dialog.TranslateKey.Works=La ŝlosilo funkcias.
+Dialog.TranslateKey.Stored=Por ĉi tiu servo ŝlosilo estas konservita.
+Dialog.TranslateKey.NotStored=Por ĉi tiu servo neniu ŝlosilo estas konservita.
+Azure.Setup.Title=Agordi Azure Speech
+Azure.Setup.Open=Kreu ĝin por mi...
+Azure.Setup.Intro=NBR povas krei la Azure-rimedon anstataŭ vi, tiel ke estas neniu portalo por trairi. Vi salutas ĉe Microsoft unufoje per mallonga kodo, elektas, sur kiun abonon meti ĝin, kaj NBR kreas ĝin en la senpaga nivelo kaj konservas la ŝlosilon. Nenio estas kreata antaŭ ol vi salutis.
+Azure.Setup.Start=Starti
+Azure.Setup.SigningIn=Peto al Microsoft pri saluta kodo.
+Azure.Setup.CodeLabel=Saluta kodo:
+Azure.Setup.EnterCode=Via saluta kodo estas en la kampo sube, preta por kopii. Elektu "Malfermi la salutan paĝon" por malfermi {0} en via retumilo, salutu tie, kaj ĉi tiu fenestro mem daŭrigos.
+Azure.Setup.OpenPage=Malfermi la salutan paĝon
+Azure.Setup.OpenFailed=Ne eblis malfermi la retumilon. La adreso estas en la linio supre; malfermu ĝin mane.
+Azure.Setup.Directory=Dosierujo:
+Azure.Setup.DirectoryHint=Lasu tion malplena, se vi salutas per labora aŭ lerneja konto. Se via Azure estas sur PERSONA Microsoft-konto, Microsoft rifuzos la saluton ĉe la kutima adreso kaj vi devos nomi la dosierujon, kiun Azure kreis kiam la abono estis farita — aŭ ĝian nomon, kiu finiĝas per onmicrosoft.com, aŭ ĝian dosieruja (luanta) identigilo. Ĝi estas demandata unufoje kaj memorata.
+Azure.Setup.Subscription=Abono:
+Azure.Setup.SignedIn=Salutite. Troviĝis {0} abonoj — elektu unu kaj premu Krei.
+Azure.Setup.Create=Krei la rimedon
+Azure.Setup.NoSubscription=Tiu konto havas neniun Azure-abonon, do estas nenie krei la rimedon.
+Azure.Setup.Creating=La rimedo estas kreata. Tio daŭras ĝis unu aŭ du minutoj; Azure raportas ĝin preta antaŭ ol ĝi vere estas, tial NBR atendas.
+Azure.Setup.Done=Preta. La rimedo estas kreita kaj ĝia ŝlosilo konservita — disponeblas {0} voĉoj.
+Azure.Setup.DoneNoList=La rimedo estas kreita kaj ĝia ŝlosilo konservita, sed la listo de la voĉoj ne alvenis. Kutime kulpas la reto; la voĉoj aperos tuj kiam ĝi estos atingebla.
+Azure.Setup.Failed=Ne sukcesis: {0}
+Azure.Setup.HaveOne=Aŭ, se vi jam havas Speech-rimedon, enigu ĉi tie ĝiajn du datumojn:
+Azure.Setup.Kept=Azure akceptis tiun paron kaj ĝi estas konservita. Ĉi tiuj voĉoj nun disponeblas.
+
+; ---- THE READING WINDOW
+Reading.Title=Legado
+Reading.Back=Malantaŭen
+Reading.Back.Accessible=Unu paŝon malantaŭen
+Reading.PlayPause=Ludi/paŭzi
+Reading.PlayPause.Accessible=Ludi aŭ paŭzi, spaco
+Reading.Forward=Antaŭen
+Reading.Forward.Accessible=Unu paŝon antaŭen
+Reading.Smaller=Pli malgranda
+Reading.Smaller.Accessible=Pli malgranda teksto, minusklavo
+Reading.Bigger=Pli granda
+Reading.Bigger.Accessible=Pli granda teksto, plusklavo
+Reading.Font.Accessible=Tiparo
+Reading.Size.Announce=Grando de la teksto {0}
+Beta.Suffix= — ne en ĉi tiu beta-versio
+Beta.NoReadingWindow=La lega fenestro estas malŝaltita en ĉi tiu beta-versio. La legado sur la ekrano, kaj la brajlo, kiu ĝin sekvas, estas ankoraŭ provataj kaj revenos en pli posta eldono.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Rekoni la tekston
+Ocr.Ask.Question={0} enhavas neniun tekston — ĝi estas {1} paĝoj da bildoj. NBR povas rekoni la tekston sur ili, kio devus daŭri {2}. Ĉu rekoni ĝin nun?
+Ocr.Ask.ReadWith=Rekoni kiel:
+Ocr.Ask.Read=Rekoni
+Ocr.Ask.Skip=Preterlasi
+Ocr.Ask.UnderAMinute=malpli ol unu minuto
+Ocr.Ask.Minutes=ĉirkaŭ {0} minutoj
+Ocr.Result.NoText=Sur la bildoj neniu teksto estis rekonita. La libro estis aldonita, sed estas nenio por legi el ĝi.
+Ocr.Refusal.NoEngine=Neniu tekstorekonado estas instalita. Uzu "Aldoni lingvon..." en la agordoj, sub Speciala, kaj NBR instalos unu por vi.
+Ocr.Refusal.NoPages=Ĉi tie estas neniu paĝo por legi.
+Ocr.Progress.Title=Rekonado de la teksto
+Ocr.Progress.Starting=La rekonado komenciĝas...
+Ocr.Progress.Working=Paĝo {0} el {1}. {2}
+Ocr.Progress.Quarter={0} procentoj faritaj. {1}
+Ocr.Progress.Cancel=Nuligi
+Ocr.Progress.Cancelling=Haltos post ĉi tiu paĝo. Nenio estas konservata.
+Ocr.Progress.Estimating=Kalkulado, kiom tio daŭros.
+Ocr.Progress.AlmostDone=Preskaŭ preta.
+Ocr.Progress.Seconds=Restas ĉirkaŭ {0} sekundoj.
+Ocr.Progress.Minutes=Restas ĉirkaŭ {0} minutoj.
+Ocr.Unread.Message=Ĉi tiu libro ankoraŭ ne estis rekonita — ĝi ankoraŭ estas bildoj de siaj paĝoj, do estas nenio por eldiri. Ĉu rekoni ĝin nun?
+Ocr.Sparse.Message=Nur {0} el la {1} paĝoj de ĉi tiu libro portas iom da teksto. Plej verŝajne ĝi estas skanaĵo kun difektita teksta tavolo, do la vortoj restas bildoj. Ĉu rekoni ilin nun?
+Ocr.Blank.Question={0} paĝoj sinsekve revenis tute sen teksto. La ceteraj {1} povus esti samaj, kaj rekoni ilin daŭrus iom. Ĉu daŭrigi?
+Ocr.Blank.Jbig2={0} paĝoj sinsekve revenis tute sen teksto. Ĉi tiu PDF konservas siajn vortojn en formo, kiun Vindozo ne kapablas desegni, tial tiuj paĝoj alvenas kiel blanka papero, sur kiu estas nenio por rekoni — legi la ceterajn {1} plej verŝajne trovus nenion. Ĉu daŭrigi?
+Ocr.Read.Question=Ĉi tiu libro estas {0} paĝoj da bildoj kaj ankoraŭ ne estis rekonita. Rekoni ĝin daŭras {1}.
+Ocr.ReRead.Question=Ĉi tiu libro estis rekonita el {0} paĝoj da bildoj. Rekoni ĝin denove en alia lingvo daŭras {1}. La bildoj estas konservitaj kun la libro, do tion eblas fari tiom da fojoj, kiom vi volas.
+Ocr.ReRead.Done=La libro estis rekonita denove kaj anstataŭigita.
+Ocr.ReRead.Locate=La bildoj de ĉi tiu libro ne estas konservitaj kun ĝi, do NBR devas retrovi ilin. Elektu la skanitan dosieron aŭ — se la libro alvenis kiel apartaj paĝbildoj — iun ajn el tiuj paĝoj.
+Ocr.ReRead.LocateTitle=Trovu la bildojn de ĉi tiu libro
+Ocr.ReRead.Filter=Skanitaj libroj kaj bildoj|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Ĉiuj dosieroj|*.*
+Ocr.ReRead.WholeFolder=En tiu dosierujo estas {0} bildoj. Ĉu rekoni ilin ĉiujn kiel la paĝojn de ĉi tiu libro?
+Ocr.Add.Title=Lingvoj de rekonado
+Ocr.Add.List=Lingvoj
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — jam instalita
+Ocr.Add.Hint=Elektu la lingvojn, kiujn vi volas, kaj premu Instali. Depende de viaj agordoj Vindozo povus peti vian permeson, kaj poste elŝutos la rekonadon por tiu lingvo — malgranda dosiero, ne tuta lingvopakaĵo de Vindozo.
+Ocr.Add.Install=Instali
+Ocr.Add.WindowsSettings=Agordoj de Vindozo...
+Ocr.Add.Close=Fermi
+Ocr.Add.Installing=Instalado de {0}. Tion prizorgas Vindoza Ĝisdatigo, do kiom longe tio daŭras dependas de tio, kiom ĝi estas okupata — kelkaj minutoj estas kutimaj, kaj dek ne estas io neaŭdita. Vi povas fermi ĉi tiun fenestron kaj daŭrigi vian aferon; ĝi mem plu iros.
+Ocr.Add.Done={0} estas instalita kaj preta por uzo.
+Ocr.Add.DonePartly={0} estas instalita kaj preta por uzo. {1} ne alvenis — eble Vindozo ankoraŭ laboras pri tio, aŭ ĝi ne disponeblas por ĉi tiu versio.
+Ocr.Add.NotStarted=Nenio estis instalita. Vindozo ne donis la permeson.
+Ocr.Add.Failed={0} ne estis instalita. Eble Vindozo ankoraŭ laboras pri tio, aŭ la lingvo ne disponeblas por ĉi tiu versio de Vindozo.
+Ocr.Add.LeftRunning=Vindozo ankoraŭ instalas ĝin. Ĝi mem finos.
+
+; ---- TRANSLATION
+Translate.Progress.Title=La libro estas tradukata
+Translate.Progress.Starting=Preparado. Vi povas halti iam ajn; kio estas tradukita, restas, kaj rekomencante oni daŭrigas de tie.
+Translate.Progress.Working=Peco {0} el {1}. Restas ĉirkaŭ {2}. Vi povas halti iam ajn — kio estas farita, restas.
+Translate.Progress.Quarter={0} procentoj tradukitaj, restas ĉirkaŭ {1}.
+Translate.Progress.Cancel=Halti
+Translate.Progress.Cancelling=Haltos post ĉi tiu peco. Kio jam estas tradukita, restas.
+Translate.Progress.StillOn=Ankoraŭ ĉe ĉi tiu, ĝis nun {0} sekundoj.
+Translate.Progress.StillWorking=Ankoraŭ ĉe la peco {0} el {1}. La servo respondas malrapide.
+Translate.Progress.Estimating=kalkulado, kiom tio daŭros
+Translate.Progress.AlmostDone=momenton
+Translate.Progress.Seconds={0} sekundoj
+Translate.Progress.Minutes={0} minutoj
+Translate.Ask.Title=Traduki la libron
+Translate.Ask.Info={0} — ĉirkaŭ {1} signoj, proksimume {2}. La traduko fariĝas nova libro; ĉi tiu restas netuŝita.
+Translate.Ask.HybridNote=Ĉi tiu libro havas registraĵon krom la teksto. Tradukebla estas nur la teksto, tial la traduko estos tekstolibro sen la voĉlegado.
+Translate.Ask.From=Lingvo de la libro:
+Translate.Ask.To=Traduki al:
+Translate.Ask.Model=Modelo {0}:
+Translate.Ask.Model.None=— neniu, la ĉeno finiĝas ĉi tie —
+Translate.Ask.ChainNote=Se peco estas rifuzita, NBR provas ĝin denove kaj poste vice provas viajn aliajn servojn. Kion neniu el ili akceptas, restas en la lingvo, en kiu la libro alvenis.
+Translate.Ask.NoEngine=Neniu servo ankoraŭ havas ŝlosilon
+Translate.Ask.Standing=Via daŭra noto validas ankaŭ por ĉi tiu libro: {0}
+Translate.Ask.Inherit=Daŭrigi serion, uzante la glosaron de:
+Translate.Ask.Inherit.None=Nenio — ĉi tiu libro staras memstare
+Translate.Ask.Notes=Kion la tradukanto sciu pri ĈI TIU libro (laŭvole). La rakontanto kaj la nomoj eltroviĝas mem el la teksto; ĉi tio estas por tio, kion la teksto ne diras — termino, kiun vi volas redonita iel aparte, aŭ kiel du personoj alparolas unu la alian:
+Translate.Ask.Start=Traduki
+Translate.LastResort.Begin=La sekvan parton tradukis Microsoft Azure — atendu la neatenditan.
+Translate.LastResort.End=Fino de la parto tradukita de Microsoft Azure.
+Translate.NotText=Tradukebla estas nur tekstolibro. Ĉi tiu estas registraĵo.
+Translate.Empty=En ĉi tiu libro estas neniu teksto por traduki.
+Translate.NoService=Neniu traduka servo ankoraŭ havas ŝlosilon. Aldonu unu en la agordoj, sub Speciala.
+Translate.Done={0} pecoj tradukitaj. La traduko staras sur la breto kiel nova libro.
+Translate.DoneLeft={0} pecoj tradukitaj, {1} lasitaj en la originala lingvo.
+Translate.Took=Tio daŭris {0}. Liniopo linia registro troviĝas en translation.log, apud la originala libro.
+Translate.Failed=Ne eblis traduki la libron: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Sonlibron eblas fari nur el tekstolibro. Ĉi tiu jam estas sono.
+Export.NoVoice=Ĉi tiu libro havas neniun voĉon por legi ĝin, do estas nenio por registri. Donu al ĝi unu unue en ĝiaj ecoj.
+Export.Empty=En ĉi tiu libro estas neniu teksto por legi.
+Export.Filter=Sondosiero (*.mp3)|*.mp3
+Export.Ask.Ready=Ĉiuj {0} pecoj de ĉi tiu libro jam estas eldiritaj, do restas nur kunigi ilin kaj tio daŭros momenton. Ĉu fari la dosieron?
+Export.Ask.Missing=Restas registri {0} el la {1} pecoj de ĉi tiu libro. Registri ilin devus daŭri ĉirkaŭ {2} minutojn — tio estas la daŭro de la faro, ne la longo de la libro por aŭskulti. La progresfenestro montras valoron mezuratan survoje. Vi povas halti iam ajn: kio estas eldirita, restas, kaj rekomencante oni daŭrigas de tie. Ĉu fari la dosieron?
+Export.Progress.Title=Farado de la sonlibro
+Export.Progress.Starting=Preparado. Vi povas halti iam ajn; kio estas eldirita, restas, kaj rekomencante oni daŭrigas de tie.
+Export.Progress.Making=Peco {0} el {1}. Restas ĉirkaŭ {2}.
+Export.Progress.Joining=Ĉio estas kunigata en unu dosieron.
+Export.Done=Preta — {0} pecoj, konservita kiel {1}
+Export.DoneShort=Konservita kiel {2}, sed {1} el la {0} pecoj ne eblis eldiri kaj ili mankas en ĝi.
+Export.Failed=Ne eblis fari la sonlibron.
+
+; ---- AUDIO CD
+Cd.Progress.Title=Sona lumdisko
+Cd.Progress.Preparing=La disko estas legata...
+Cd.Progress.Track=Legado de la trako {0} el {1}
+Cd.Progress.Stopping=Haltado...
+Cd.BookTitle=Sona lumdisko ({0} trakoj)
+Cd.Format=Audio CD - Compact Disc Digital Audio
+Cd.NoDisc=Estas neniu disko en la legilo, aŭ la legilo ankoraŭ legas ĝin. Enmetu sonan lumdiskon kaj provu denove.
+Cd.DataDisc=Ĉi tio estas datuma disko, ne sona lumdisko. Se ĝi portas libron en MP3-dosieroj, malfermu ĝin per Dosiero, Malfermi dosierujon - tion NBR jam ludas.
+Cd.ReadFailed=Ne eblis legi la diskon: {0}
+Cue.Track=Trako {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Servoj kaj kontoj
+Services.List.Accessible=Servoj
+Services.State.Ready=ĈI TIU ESTAS AGORDITA. Vi povas retrairi la paŝojn por anstataŭigi tion, kio estas konservita.
+Services.State.NotSet=Ĉi tiu ankoraŭ ne estas agordita.
+Services.SetUp=Agordi ĉi tiun servon...
+Services.Forget=Forgesi ĉi tiun konton
+Services.ForgetAsk=Ĉu forgesi la konservitan ŝlosilon por {0}? Ĝi ĉesos esti proponata, ĝis vi agordos ĝin denove.
+Services.Disclaimer=LA PAŜOJ SUBE EBLE NE KONGRUAS KUN TIO, KION VI VIDAS. Ĉi tiuj servoj refaras siajn retejojn sen averto, do butono povas esti movita aŭ alinomita ekde kiam ĉi tio estis verkita. La ORDO de tio, kio estas farenda, malofte ŝanĝiĝas; la nomoj de la aferoj ofte. Se vi perdiĝas, la parto supre diras al vi, kion vi celas atingi.
+Services.Item.GoogleVoices=Nubaj voĉoj de Google
+Services.Item.AzureVoices=Voĉoj de Azure Speech
+Services.Item.DeepSeek=Traduko per DeepSeek
+Services.Item.Gemini=Traduko per Gemini
+Services.Item.OpenAi=Traduko per GPT (OpenAI)
+Services.About.Gemini=Gemini tradukas tutan libron al alia lingvo, per la propra modelo de Google. Laŭ la orelo ĝi estis juĝita la plej bona el ĉiuj — kaj ĝi estas tiu kun kaptilo.\n\nĜi rifuzas proksimume ĉiun sesan pecon de eldonita romano. Ne pro la enhavo: la ŝablono aspektas kiel modelo, kiu rekonas libron, kiun ĝi jam konas, kaj neniu agordo tion ŝanĝas. Tial NBR petas duan servon pri tio, kion la unua ne akceptas, kaj tial indas starigi la ĉenon anstataŭ fidi al unu sola maŝino.\n\nEkzistas senpaga nivelo, kaj ĝi estas sufiĉe malavara por esti la normala maniero uzi ĉi tion: mezurite sur reala projekto, Gemini 3.1 Flash Lite permesas 500 petojn tage, kio estas ĉirkaŭ ses libroj. La paga uzado kostas proksimume dudek kvin cendojn por romano de 450 000 signoj.\n\nUNU AFERO PRIPENSENDA ANTAŬ OL ELEKTI LA SENPAGAN NIVELON. La propra prezpaĝo de Google diras, ke en la senpaga nivelo via enhavo estas uzata por plibonigi iliajn produktojn, kaj ke en la paga ne. Traduko sendas la tutan libron, do la diferenco estas reala. La elekto ĉiuokaze estas via — sed ĝi estu elekto kaj ne surprizo.\n\nAkiri la ŝlosilon estas la plej longa vojo el la kvar, kaj la paŝoj sube estas verkitaj laŭ reala trairo, ĉar la evidenta vojo ne funkcias.
+Services.About.GoogleVoices=La nubaj voĉoj de Google laŭtlegas librojn tra la interreto, per la propraj voĉoj de Google. Por la plimulto de la lingvoj ili estas la plej bonaj el la nubaj, kaj la senpaga nivelo estas la plej granda: ĉirkaŭ unu miliono da signoj monate, kio estas proksimume du libroj.\n\nTri aferoj devas okazi, kaj en ĉi tiu ordo. Vi bezonas GOOGLE-KONTON, kiun la plimulto jam havas. Interne vi kreas PROJEKTON kaj ŝaltas la servon Text-to-Speech por tiu projekto — kaj Google ne ŝaltos ĝin, ĝis la fakturado estas agordita, do karto necesas, kvankam la senpaga nivelo nenion kostas. Poste vi kreas SERVAN KONTON kaj elŝutas ĝian ŝlosilon.\n\nTiu lasta parto faras ĉi tiun servon nekutima. Google ne disdonas ŝlosilon, kiun eblas algui: ĝi donas malgrandan dosieron, kiu finiĝas per .json, elŝutatan unufoje. NBR konservas tion, kio estas interne de tiu dosiero, kaj ne la dosieron mem, do poste vi povas movi aŭ forigi la elŝutaĵon.
+Services.About.AzureVoices=La voĉoj de Azure Speech laŭtlegas librojn tra la interreto, per la voĉoj de Microsoft. En la angla kaj en multaj aliaj lingvoj ili estas tre bonaj. En la kroata ili estas ordinaraj, kaj tie Azure ne subtenas la prononcan vortaron, do regulo, kiun vi verkas por nomo, ne estos obeata. La senpaga nivelo estas ĉirkaŭ duona miliono da signoj monate, proksimume unu libro.\n\nDu aferoj devas okazi, kaj nur la unua dependas de vi. Vi bezonas MICROSOFT-KONTON antaŭ ol povi havi Azure-konton, kaj poste AZURE-ABONON — por kiu necesas identeckontroloj, karto kaj interkonsento. Tion devas fari homo intence, do ĝi ne aŭtomatigeblas kaj NBR eĉ ne provas.\n\nĈio post tio estas la tasko de NBR. Ĝi salutas per mallonga kodo, kreas la rimedon en la senpaga nivelo kaj konservas la ŝlosilon. La portalon de Azure vi neniam malfermas.\n\nUnu afero surprizas multajn. Kiam via abono estas farita, Azure kviete kreas DOSIERUJON por ĝi. Se via Microsoft-konto estas persona — Gmail, Outlook, Hotmail —, Azure rifuzas la saluton, ĝis vi nomas tiun dosierujon, ĉar por ĉi tio ĝi ne agnoskas personajn kontojn. Ĝia nomo finiĝas per onmicrosoft.com.
+Services.About.DeepSeek=DeepSeek tradukas tutan libron al alia lingvo. El la servoj, kiujn NBR povas uzi, ĝi estas la plej konstanta — ĝi malplej ofte rifuzas — kaj multe la plej malmultekosta.\n\nUnu afero necesas: konto ĉe DeepSeek kaj iom da kredito sur ĝi. Senpaga nivelo ne ekzistas, sed la traduko estas pagata laŭ kvanto de teksto kaj libro kostas tre malmulte.\n\nĈi tiu donas ŝlosilon, kiun vi algluas, kaj ĝi estas la plej simpla el la kvar. La sola atentinda afero estas, ke la ŝlosilo estas montrata UNUFOJE, ĉe la kreado. Se vi fermas tiun fenestron sen kopii ĝin, ĝi ne plu montreblas kaj vi simple faras alian.
+Services.About.OpenAi=OpenAI tradukas tutan libron al alia lingvo, per la GPT-modeloj. Ĝi estas proponata en tri niveloj sur unu konto kaj kun unu ŝlosilo: Terra, per kiu indas komenci, Luna, pli malmultekosta, kaj Sol, la plej multekosta.\n\nSenpaga nivelo tute ne ekzistas, kaj jen kie oni surpriziĝas: abono al ChatGPT NE pagas ĉi tion. La API estas fakturata aparte, kaj nova konto estas ANTAŬPAGA — vi metas malgrandan sumon da kredito, kaj la vokoj konsumas el tiu saldo. Kvin aŭ dek dolaroj plene sufiĉas por vidi, kiom libro vere kostas, antaŭ ol decidi ion ajn.\n\nKiom kostas libro, kalkulite por romano de 450 000 signoj kaj laŭ tio, kiel la kroata efektive dividiĝas en simbolojn, ne laŭ proksimuma regulo: proksimume du kaj duonon da dolaroj sur Terra, unu dolaron sur Luna, kvin sur Sol. Por komparo, la sama libro estis mezurita je ĉirkaŭ dudek tri cendoj ĉe Gemini. Ĉiu el ili estas malmulte por libro, kiu gravas al vi; kiel kutimo, Terra estas ĉirkaŭ dekoble Gemini.\n\nLa ŝlosilo estas ordinara, vi algluas ĝin ĉi tien, kio faras ĉi tiun servon la plej facile agordebla.
+Services.Steps.Gemini=NE UZU AI STUDIO POR ĈI TIO. Ĝia butono "Create API key" fiaskas kun "The request is suspicious. Please try again." — mezurite sur freŝa konto, kiu neniam havis pagmanieron, kun la projekto jam kreita kaj importita. La vera eraro sube estas 403 de la propra servo de Google. Ĉio suba okazas anstataŭe en la CLOUD CONSOLE, kaj tiu vojo funkcias.\n\nLa ordo gravas: la projekto, poste la API, poste serva konto, kaj nur tiam la ŝlosilo. Farite en tiu ordo, la ŝlosilo sukcesas per unu trapaso.\n\n1. Malfermu console.cloud.google.com/projectcreate en via retumilo kaj salutu.\n\n2. Donu al la projekto nomon, kiun vi rekonos, ekzemple NBR. Lasu Organization ĉe "No organization" — tio estas la normala respondo por persona konto, kaj organizo alportas regulojn, kiujn vi ne regas. Elektu CREATE kaj atendu, ĝis la projekto aperos.\n\n3. SE GOOGLE PROPONAS SENPAGAN PROVON KUN 300 DOLAROJ DA KREDITO, RIFUZU ĜIN. Tiu kredito tute ne pagas la API-on de Gemini — ĝi estas alia monujo por alia produkto. Pli malbone: akcepti ĝin kreas fakturadan konton, kaj Google ekde tiam ligas la fakturadon al ĉiu nova projekto aŭtomate, kio elprenas la projekton el la senpaga nivelo. Ĝi ankaŭ petas pagkarton. Diru ne.\n\n4. Malfermu console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Kontrolu, ke la nomo de la projekto en la supra strio estas tiu, kiun vi ĵus kreis. La paĝo titoliĝas "Gemini API". Elektu ENABLE kaj atendu, ĝis la butono malaperos.\n\n5. Malfermu console.cloud.google.com/iam-admin/serviceaccounts/create. Ĉi tiu paŝo ŝparas al vi fari la sekvan dufoje: la ŝlosilo ne povas atingi Gemini, se ĝi ne estas ligita al serva konto, kaj krei ĝin nun signifas trovi ĝin preta, kiam ĝi bezonatos.\n\n6. Sur la paĝo titolita "Create service account" plenigu nur la unuan kampon, "Service account name" — nbr-translate estas bona nomo, kaj la identigilo sube pleniĝas mem. Elektu "CREATE AND CONTINUE". La paŝo 2, "Permissions", estas laŭvola: lasu ĝin malplena, neniu rolo necesas. Elektu DONE sube.\n\n7. Malfermu console.cloud.google.com/apis/credentials. Kontrolu denove la nomon de la projekto en la supra strio. En la vico de agoj apud la titolo "Credentials" elektu "+ CREATE CREDENTIALS", kaj el la falanta menuo elektu la UNUAN eron, "API key" — ne "OAuth client ID" kaj ne "Service account".\n\n8. Dekstre malfermiĝas panelo, titolita "Create API key". En la kampo "Name", tute supre, tajpu nomon kiel NBR.\n\n9. Rulumu MALSUPREN en tiu panelo, preter la sekcio "APIs that can be accessed using this key", ĝis markobutono kun la surskribo "Authenticate API calls through a service account". MARKU ĜIN. Jen la paŝo, kiun neniu divenas: dum ĝi ne estas markita, Gemini tute ne elekteblas — ĝia ero restas griza kaj nur ŝpruchelpilo diras kial.\n\n10. Tuj sube aperas sekcio titolita "Service account". Elektu "+ Select a service account", elektu la konton, kiun vi faris en la paŝo 6, markante la rondeton maldekstre de ĝia vico, kaj elektu SELECT sube en tiu fenestro.\n\n11. Nun rulumu SUPREN en la panelo ĝis "APIs that can be accessed using this key" kaj malfermu la liston sub "Select API restrictions". "Gemini API" nun markeblas. Marku ĝin kaj elektu OK.\n\n12. Rulumu MALSUPREN ĝis la fino de la panelo kaj elektu CREATE. Lasu "Application restrictions" ĉe "None".\n\n13. Aperas fenestro titolita "API key created" kun la ŝlosilo interne. Ĝi komenciĝas per AQ. kaj ne per AIza, kio estas ĝusta por ŝlosilo ligita al serva konto. Kopiu ĝin per la kopia bildsimbolo dekstre en la kampo.\n\n14. Revenu ĉi tien, elektu Agordi ĉi tiun servon kaj algluu la ŝlosilon. NBR kontrolas ĝin ĉe Google antaŭ ol konservi.\n\nSE LA KONZOLO DIRAS, KE VI BEZONAS PLIAN ALIRON, kaj nomas mankantan permeson, vi preskaŭ certe salutis per la malĝusta Google-konto, kaj ne mankas al vi rajtoj. Aldonu authuser=1 al la fino de la adreso — aŭ authuser=2, kaj tiel plu — ĝis la projekto aperos.
+Services.Steps.GoogleVoices=1. Malfermu console.cloud.google.com en via retumilo kaj salutu per Google-konto.\n\n2. Akceptu la kondiĉojn, se oni petas, kaj kreu projekton, kiam tio estas proponata. Iu ajn nomo taŭgas.\n\n3. Trovu la serĉkampon supre, tajpu "Cloud Text-to-Speech API", elektu ĝin el la rezultoj kaj premu Enable.\n\n4. Google petos vin agordi la fakturadon antaŭ ol ŝalti la API-on. Aldonu karton.\n\n5. Serĉu denove "Service accounts" kaj malfermu ĝin. Premu Create service account, donu iun ajn nomon kaj premu Done. Nek rolon nek permeson necesas elekti.\n\n6. Malfermu la ĵus kreitan konton, iru al la langeto Keys, premu Add key, poste Create new key, kaj elektu JSON. La dosiero elŝutiĝas.\n\n7. Revenu ĉi tien, premu "Agordi ĉi tiun servon" kaj elektu tiun elŝutitan dosieron.
+Services.Steps.AzureVoices=1. Malfermu azure.microsoft.com/free en via retumilo kaj premu Start free.\n\n2. Salutu per Microsoft-konto, aŭ kreu unu.\n\n3. Enigu viajn datumojn. Azure petas karton por pruvi, ke vi estas homo; la senpaga nivelo ne estas ŝarĝata.\n\n4. Se via konto estas persona, trovu la nomon de via dosierujo: salutu ĉe la portalo kaj ĝi montriĝas en la adreslinio post la signo @, finiĝanta per onmicrosoft.com.\n\n5. Revenu ĉi tien kaj premu "Agordi ĉi tiun servon".\n\n6. Enigu tiun nomon de dosierujo, se via konto estas persona, kaj lasu ĝin malplena, se ĝi estas labora aŭ lerneja. Premu Starti.\n\n7. Malfermu la salutan paĝon per la butono, tajpu la montratan mallongan kodon kaj salutu.\n\n8. Elektu vian abonon kaj premu Krei. NBR faras la rimedon kaj konservas ĝian ŝlosilon. Vi tajpas nenion plu.
+Services.Steps.DeepSeek=1. Malfermu platform.deepseek.com en via retumilo.\n\n2. Premu Sign up. Vi povas enigi retpoŝton kaj pasvorton, aŭ registriĝi per Google, kio estas pli rapida.\n\n3. Konfirmu vian retpoŝton, se oni petas.\n\n4. Post la saluto trovu Top up aŭ Billing kaj aldonu iom da kredito.\n\n5. Trovu API keys en la menuo maldekstre.\n\n6. Premu Create new API key, donu iun ajn nomon kaj premu Create.\n\n7. Kopiu la ŝlosilon ANTAŬ ol fermi tiun fenestron.\n\n8. Revenu ĉi tien, premu "Agordi ĉi tiun servon" kaj algluu ĝin.
+Services.Steps.OpenAi=1. Malfermu platform.openai.com en via retumilo. Ĉi tio estas la platformo por programistoj, ne la retejo de ChatGPT, kaj ĝi estas aparta afero, eĉ se vi jam pagas por ChatGPT.\n\n2. Salutu per via konto, aŭ kreu unu.\n\n3. Kontrolu UNUE, en kiu organizo vi estas. La nomo staras supre maldekstre kaj estas menuo: malfermu ĝin kaj elektu la vian, kutime nomatan Personal. Se iu iam invitis vin en sian organizon, aŭ vi havas laborlokan sidlokon de ChatGPT Team aŭ Business, la platformo povas meti vin en TIUN — kie vi estas nur membro, la fakturado rifuzas vin per "required permission: api.billing.read", kaj ĉiu ŝlosilo, kiun vi farus, apartenus al la malĝusta konto. Ĉio suba devas okazi en via propra organizo.\n\n4. Iru al platform.openai.com/settings/organization/billing/overview. La fakturado sidas sub ORGANIZATION, ne sur la ordinara agorda paĝo, kie estas facile serĉi ĝin kaj ne trovi. Elektu Add to balance, aldonu pagkarton kaj aĉetu krediton. Dek dolaroj estas la minimumo kaj pli ol sufiĉe por komenci. Nenio funkcias, ĝis estas kredito sur la konto.\n\n5. Dum vi estas tie, agordu monatan limon de elspezo. Ĝi nenion kostas kaj signifas, ke eraro ne povas kreskigi fakturon.\n\n6. Malfermu API keys en la samaj agordoj kaj elektu Create new secret key. Donu al ĝi nomon, kiun vi rekonos, ekzemple NBR. Certiĝu, ke vi ankoraŭ estas en la sama organizo kiel la kredito.\n\n7. Kopiu la ŝlosilon tuj kiam ĝi aperas. Ĝi estas montrata UNUFOJE. Se vi fermas tiun fenestron sen kopii ĝin, ĝi ne plu montreblas — vi simple forigas ĝin kaj faras alian.\n\n8. Revenu ĉi tien, elektu Agordi ĉi tiun servon kaj algluu la ŝlosilon.\n\n9. NBR kontrolas la ŝlosilon ĉe OpenAI antaŭ ol konservi ĝin, do vi tuj ekscias, ĉu ĝi funkcias.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Helpo – baldaŭ venos.
+Dialog.Help.Title=Helpo
+Dialog.About.Title=Pri NBR
+Dialog.About.Release=Alfa
+Dialog.About.Licence=🄯 Kopimaldekstro — NBR estas libera programaro laŭ la Ĝenerala Publika Permesilo de GNU, versio 3. Vi rajtas uzi ĝin, studi ĝin, kunhavigi ĝin kaj ŝanĝi ĝin; se vi transdonas ŝanĝitan version, ĝi iras plu laŭ la samaj kondiĉoj, kune kun sia fontkodo.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nKonstruo de {1}\n\nĈi tio estas plurforma kaj plureliga legilo de ciferecaj libroj kaj eldonaĵoj, desegnita speciale por blinduloj, malbonvidantoj kaj homoj kun legaj malfacilaĵoj. Ĝi estas senpaga por la baza uzo, sed se vi volas esplori kaj uzi ĝiajn spertajn funkciojn, kiel la tradukon kaj la nubajn voĉojn, vi devos registriĝi kaj eble pagi al la respektivaj eksteraj servoj.\n\nFarita de Nemoguća vizija — nemoviz.org\n\nVerkita de Gordan Radić\n\nKonstruita per Claude (Anthropic). Grandan parton de la kodo verkis ĝi, laŭ la desegno, la decidoj kaj la mezuroj de la aŭtoro; la kopirajto kaj la permesilo estas liaj.\n\n{2}\n\nSUR KIO NBR ESTAS KONSTRUITA\n\nNBR ludas sonon per libmpv, legas brajlon per liblouis, parolas tra la NVDA-regila kliento, legas etikedojn per TagLib#, eltiras tekston el PDF per PdfPig kaj malfermas arkivojn per SharpCompress. Ĉiu el ili estas aparta biblioteko, uzata senŝanĝe, kaj ĉiun eblas anstataŭigi per kongrua propra konstruo.\n\nlibmpv, kaj la FFmpeg en ĝi — LGPL 2.1 aŭ pli posta\n\nliblouis kaj ĝiaj brajlaj tabeloj — LGPL 2.1 aŭ pli posta\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress kaj la Microsoft-pakaĵoj — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend kaj OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nLa plena avizo — versioj, rajtoposedantoj kaj de kie ĉiu permesilo estis legita — troviĝas en THIRD-PARTY-NOTICES.txt apud la programo, kaj la tekstoj de la permesiloj en la dosierujo Licences.
+Hint.Button.Accessible=Helpo pri {0}
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Eraro
+Dialog.Error.General=Eraro: {0}
+Dialog.DontShowAgain=Ne montri tion denove

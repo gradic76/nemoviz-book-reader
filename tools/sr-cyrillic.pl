@@ -61,6 +61,35 @@ my @protect = (
     qr/[A-Za-z][A-Za-z0-9-]*(?:\.[A-Za-z0-9-]+){1,}(?:\/[^\s"]*)?/,   # domains, files
     qr/\b[A-Z][A-Z0-9]{1,}\b/,                       # NBR OCR API JSON MP3 CD LGPL
     qr/\bGPL\b|\bMIT\b/,
+
+    # A WORD CONTAINING q, w, x OR y CANNOT BE TRANSLITERATED AT ALL, and this
+    # rule is worth more than every name in the list below.
+    #
+    # The Latin-Cyrillic bijection this script rests on covers the Serbian
+    # alphabet, and those four letters are not in it -- %map has no entry for
+    # any of them. So cyr() converts every letter around them and leaves them
+    # standing, and the result is a word in two alphabets: Directory came out
+    # as "Дирецторy", Windowsa as "Wиндоwса", Copyleft as "Цопyлефт", RegEx as
+    # "РегЕx", keys as "кеyс", Text as "Теxт". Six of them, found 2026-08-22 by
+    # tools/check-scripts.pl and by nothing else, because each looks like a
+    # plausible Serbian word until you read the letters one at a time.
+    #
+    # The @names list below could not have caught them and adding them to it
+    # would be treating the symptom: "Windows" IS in that list and still lost,
+    # because Serbian inflects it and \bWindows\b does not match "Windowsa".
+    # This rule needs no list and no maintenance -- whatever the right answer
+    # for such a word is (keep it Latin, or transcribe it by hand into the
+    # %override table), a HALF-converted word is never it.
+    # THE HYPHEN IS PART OF THE WORD HERE, and leaving it out broke a name this
+    # script had always got right. @protect runs before @names, so a bare
+    # [A-Za-z] version of this rule lifted "Text" out of "Text-to-Speech" on
+    # account of its x -- and \bText-to-Speech\b could then no longer match what
+    # was left, so the "to" in the middle transliterated and Google1s own
+    # service became "Text-то-Speech". Allowing hyphens takes the whole name in
+    # one piece. Serbian has no q, w, x or y of its own, so this cannot swallow
+    # a Serbian word.
+    qr/\b[A-Za-z-]*[QqWwXxYy][A-Za-z-]*\b/,
+
     qr/"[^"]*"/,                                     # anything the reader must click
     qr/\x{201E}[^\x{201C}\x{201D}]*[\x{201C}\x{201D}]/,
 );
@@ -74,6 +103,31 @@ my @names = qw(Nemoviz Book Reader Claude Anthropic Google Cloud Azure Speech
                Alt Space Sign up Top Billing Create new key Done Personal
                Organization Add balance Start free Select Name Keys Permissions
                Credentials Application restrictions None Web Xing);
+
+# A SECOND LIST, AND IT HAS TO BE MATCHED AS PHRASES RATHER THAN WORDS.
+#
+# Everything above is one word, and a word list cannot protect a BUTTON whose
+# name contains an ordinary little English word: "Add to balance" came out as
+# "Add то balance" because Add and balance were both protected and the "to"
+# between them was not -- and "to" is also the Serbian word "то", so it cannot
+# simply be added to the list above without turning real Serbian prose into
+# Latin. The phrase is the unit that carries the meaning here, so the phrase is
+# what gets lifted out.
+#
+# Found 2026-08-22 by comparing sr.lang against sr-Cyrl.lang word by word and
+# keeping only words that ALSO stand in en.lang -- i.e. English that the Serbian
+# translator deliberately left in English, and that the transliteration then
+# ate. That comparison is the check to re-run after touching this file; most of
+# what it reports is coincidence (audio, format, problem, signal and disk are
+# Serbian words too, and must be Cyrillic), so it is read rather than obeyed.
+my @phrases = (
+    'Add to balance', 'Create new secret key', 'Create new API key',
+    'Text-to-Speech', 'Windows Update', 'ChatGPT Team', 'ChatGPT Business',
+    'ChatGPT', 'Gmail', 'Outlook', 'Hotmail', 'OneCore', 'One Core',
+    'Flash Lite', 'nbr-translate', 'authuser', 'AIza', 'tenant', 'Global',
+    'Enable', 'Sign up', 'Top up', 'Service account name', 'API keys',
+    'Create service account', 'Business', 'Team',
+);
 
 # A FEW VALUES ARE NOT A TRANSLITERATION OF THE LATIN ONE, and the language's
 # own name is the first of them. Two rows reading "Srpski" and "Srpski" in
@@ -130,6 +184,15 @@ for my $line (@lines) {
     if ($line =~ /^([A-Za-z][A-Za-z0-9._]*=)(.*)$/s) {
         my ($k, $v) = ($1, $2);
         my @keep;
+        # PHRASES FIRST, and the order is forced rather than chosen. @protect's
+        # q/w/x/y rule works on single words, so run before it, it would lift
+        # "key" out of "Create new secret key" and "keys" out of "API keys" and
+        # leave the rest of each phrase to transliterate -- the same way it
+        # broke Text-to-Speech. Longest first, so "ChatGPT Team" is taken whole
+        # rather than being half-eaten by the bare "ChatGPT" behind it.
+        for my $ph (sort { length($b) <=> length($a) } @phrases) {
+            $v =~ s/\b\Q$ph\E\b/push @keep, $ph; "\x{FFFC}" . (scalar(@keep) - 1) . "\x{FFFD}"/ge;
+        }
         for my $re (@protect) {
             $v =~ s/($re)/push @keep, $1; "\x{FFFC}" . (scalar(@keep) - 1) . "\x{FFFD}"/ge;
         }
