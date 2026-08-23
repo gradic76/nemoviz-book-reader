@@ -106,11 +106,53 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ;   nbr-services.dat stored API keys and the Azure pair — must never ship
 ;   *-voices.txt     the fetched cloud voice catalogues, tied to that account
 ;   CloudUsage.ini   this month's character count, which is nobody else's
-; None of the five is written beside the exe any more — they live in %APPDATA%
+;   Dictionaries     the developer's OWN pronunciation rules — see below
+; None of them is written beside the exe any more — they live in %APPDATA%
 ; since 2026-08-23 — but a DEVELOPER's build folder still collects them from
 ; older runs, and "cannot happen" is a poor reason to risk shipping an API key.
+;
+; DICTIONARIES WAS MISSING FROM THIS LIST UNTIL 2026-08-24, and it is the reason
+; the list below is now written ONCE. Gordan asked whether his own test rules for
+; Karmela had reached the installer. They had not — beta-1 was recompiled from
+; the clean tree and came out BYTE FOR BYTE IDENTICAL, so its payload provably
+; never contained them — but only because his dictionaries sit in bin\x64\DEBUG
+; and this packages RELEASE. One Release run under the old storage layout and
+; six of his personal dictionaries would have shipped to every reader.
+;
+; The lesson is about the SHAPE, not the miss. Packaging by exclusion is right
+; for the CONTENT (a hand-written include list drops the one table somebody
+; needs), but the exclusions are themselves a hand-written list, and a denylist
+; fails the other way round: it misses the one private thing nobody thought of.
+; So it is a denylist with a tripwire, and the tripwire is what makes it safe.
+;
+; KEEP THIS IN STEP WITH UserData.MigrateFromAppFolder — that method names
+; exactly what belongs to the reader rather than to the program, and the two
+; lists disagreeing by one entry is precisely what happened here.
+; Each name is checked against the build folder AND returned into the Excludes
+; string, so the tripwire and the denylist are one list read once. Adding a name
+; here protects it both ways; there is no second place to forget.
+;
+; It is an ERROR and not a warning on purpose. A warning scrolls past — three
+; Esperanto ones already do — and the thing at stake is somebody's API keys.
+; It also cannot fire spuriously: since the move to %APPDATA% nothing writes
+; these beside the exe, so if one is there the tree is stale and wants cleaning
+; before a release is cut anyway.
+#define Guard(str N) \
+    (FileExists(SourceDir + "\" + N) || DirExists(SourceDir + "\" + N)) \
+      ? Error("This belongs to the READER, not to the program, and it is sitting in the build folder: " \
+              + N + "  —  delete it from " + SourceDir + " and compile again.") \
+      : N
+
+#define UserOwned \
+      Guard("Settings.ini") \
+      + "," + Guard("nbr-services.dat") \
+      + "," + Guard("azure-voices.txt") \
+      + "," + Guard("google-voices.txt") \
+      + "," + Guard("CloudUsage.ini") \
+      + "," + Guard("Dictionaries")
+
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
-    Excludes: "*.pdb,Settings.ini,nbr-services.dat,azure-voices.txt,google-voices.txt,CloudUsage.ini"
+    Excludes: "*.pdb,{#UserOwned}"
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\Nemoviz Book Reader.exe"
