@@ -37,7 +37,7 @@ namespace Nemoviz_Book_Reader
         /// <para><b>Bump this and the About label together when a release goes
         /// out.</b> Getting it wrong is not silent: leave it behind and every
         /// reader is told there is an update when there is not.</para></summary>
-        public const string Release = "alpha";
+        public const string Release = "beta-1";
 
         /// <summary>The repository the releases are published from.
         ///
