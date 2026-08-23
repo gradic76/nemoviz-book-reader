@@ -6185,6 +6185,65 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
 
 ---
 
+## 10i. Beta 1 is out — the repo, the installer, the release (2026-08-23)
+
+**`github.com/gradic76/nemoviz-book-reader`, PUBLIC**, at Gordan's word. That is
+what GPL v3 asks once a binary is distributed, and it is also what makes
+Releases reachable at all — a private repo's releases are not public, so the
+installer could not have gone out from one.
+
+**The version label is a PAIR and both halves must move together**:
+`Dialog.About.Release` is prose the reader hears and is translated into all
+eleven; `UpdateCheck.Release` is the git tag, compared character for character.
+Beta 1 / `beta-1`. Leave one behind and every reader is told there is an update
+that does not exist.
+
+**The installer is Inno Setup 6.7.3** — `installer\nbr.iss`, compiled with
+`"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\nbr.iss` after a
+Release build. **18.9 MB against 63 MB installed.** Chosen over NSIS because it
+does a genuinely silent install, which is what Store policy 10.2.9 demands of an
+.exe — the same script serves the Store later rather than being written twice.
+
+- **It packages `bin\x64\Release` WHOLE and EXCLUDES**, never lists. A
+  hand-written list is the shape that drops the one braille table or the one
+  `.lang` somebody needs, and it surfaces on their machine rather than ours —
+  §10e′'s rule again. The exclusions are the point: `*.pdb` and the five files
+  NBR writes beside itself (`Settings.ini`, `nbr-services.dat` with the API keys
+  and the Azure pair, the two fetched voice catalogues, `CloudUsage.ini`). None
+  can appear in a clean Release build; they are named anyway, because "cannot
+  happen" is a poor reason to risk shipping somebody's API key.
+- **x64 only**, and not as a preference: libmpv is 64-bit and a 32-bit process
+  loading it dies with 0x8007000B.
+- **Nine of the eleven languages.** Inno ships five; Croatian, both Serbians and
+  Esperanto are among its UNOFFICIAL translations and are **vendored into
+  `installer\languages`**, so the script compiles on any machine with Inno and
+  nobody has to copy files into Program Files first. Latin and Ancient Greek have
+  no Inno translation and none was invented. **An Inno language name takes no
+  hyphen** — sr-Cyrl is `srcyrl`.
+- **Verified by installing and uninstalling, not by compiling.** Everything
+  arrives (11 `.lang`, 11 manuals, 480 braille tables, the 32-bit speech host,
+  the four licence texts); none of the six excluded files does; and **the LIBRARY
+  survives the uninstall**, which is the only part of an uninstall worth testing.
+- **NOT code-signed.** SmartScreen calls the publisher unknown. The README and
+  the release notes say so plainly rather than letting a reader meet it cold. A
+  certificate is the next real cost.
+
+**THE FIRST PUSH WAS REFUSED, and by the HISTORY rather than the working tree.**
+Two old versions of `libmpv-2.dll` — 114.8 MB (the GPL build) and 93.6 MB (the
+LGPL one before audio-only) — exceed GitHub's hard 100 MB per-file limit. Only
+that file, in three commits. Fixed by rewriting the history to drop exactly those
+two blobs **by hash**, keeping today's 30 MB one and all 526 commits with their
+messages, after a full `--mirror` backup clone. 95 MB → 21.8 MB.
+**Check before creating a repo next time:**
+
+    git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '$1=="blob" && $3>45000000'
+
+`filter-branch` leaves the originals on `refs/original/`, so the old blobs stay
+reachable until those refs are deleted, the reflog expired and `gc --prune=now`
+run — measuring the size before that step says nothing.
+
+---
+
 ## 11. TODO (open items)
 
 ### WHAT IS LEFT TO TEST, as of 2026-08-16 (Gordan's own list)
