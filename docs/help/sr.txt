@@ -1,0 +1,255 @@
+; Priručnik za Nemoviz Book Reader — srpski (latinica).
+; Prevedeno iz docs/help/hr.txt. Ćirilično izdanje se izvodi iz ovog fajla
+; alatom tools/sr-cyrillic.pl --text; ovaj je izvor, ono nije za ručno menjanje.
+
+TITLE: Nemoviz Book Reader
+LANG: sr
+TOC: Sadržaj
+BETA: Ovo nije uključeno u prvoj beti. Provere i prepravke koje ostaju zahtevaju više vremena nego što ga ova verzija ima, pa se vraća u nekom od sledećih izdanja.
+
+Dobrodošli u Nemoviz Book Reader, plejer elektronskih knjiga u više od četrdeset pet formata i na tri izlaza.
+
+# Zahtevi sistema
+
+## Najmanji zahtevi
+
+- Dvojezgarni procesor od 1,5 GHz, 2 GB RAM-a, 100 MB za smeštaj + prostor za biblioteku,
+- MS Windows 7 SP1 64-bit ili viši, .NET Framework 4.8 (na Windowsu 7 treba ga instalirati zasebno). Na ovoj konfiguraciji nažalost nećete moći da koristite OCR i One Core glasove, i jedno i drugo dostupno je tek od Windows 10.
+
+## Preporučeni zahtevi
+
+- Četvorojezgarni procesor od 2,0 GHz, 8 GB RAM-a, 100 MB prostora na SSD-u + prostor za biblioteku,
+- MS Windows 10 64-bit 22H2 ili viši, gde je .NET Framework 4.8 već ugrađen.
+
+# Uopšteno
+
+Nemoviz Book Reader omogućava vam da čitate zvučne i tekstualne elektronske dokumente na način koji vam najviše odgovara. Podržani formati koje možete reprodukovati su:
+
+Zvučni formati: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au i .voc.
+
+Tekstualni formati: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw i .azw3.
+
+Posebni formati: Daisy 2.02 audio, Daisy 3 audio, Daisy 2.02 tekst, Daisy 3 tekst, Daisy 2.02 audio + tekst, Daisy 3 audio + tekst i epub 3 tekst + audio.
+
+Brajevi formati: .brf, .brl, .bra, .dxb i .i55.
+
+Sve navedene formate možete otvoriti i neposredno iz arhiva .7z, .rar i .zip. Podržavamo otvaranje višedelnih arhiva kao i arhiva zaštićenih lozinkom, naravno, ako je znate.
+
+Moguće je otvarati i knjige od slika – one u kojima su stranice slike teksta a ne pravi tekst, poput skeniranog .pdf-a ili .epub-a sastavljenog od slika stranica. Takođe, moguće je otvarati i obične slike poput .bmp, .jpg, .tif i tako dalje, pa ako slučajno imate knjigu kao niz uredno numerisanih slika, Nemoviz Book Reader prima i to. Tekst sa slika prepoznaje se sam kroz Microsoft OCR i posle kraćeg vremena dobićete razumno čitljiv naslov na svojoj polici sa knjigama.
+
+Upozorenje! Svi navedeni formati i njihove varijante mogu se učitati u Nemoviz Book Reader ako nisu zaštićeni Digital Rights Management licencom. NBR ne može da otvori DRM zaštićene naslove pa ako imate takve možete ih reprodukovati kroz za to predviđeni hardverski ili softverski plejer. Za više detalja obratite se izvoru gde ste te naslove nabavili.
+
+Sve oblike datoteka iz gornjeg spiska možete reprodukovati zvučno, prikazati na ekranu a čak i čitati na Brajevom pismu, ukoliko imate za to potrebnu opremu. Sve što vam treba je Windows kompatibilan računar, monitor i po mogućstvu, instaliran Brajev red podešen sa vašim čitačem ekrana.
+
+Uz sve iznad navedeno NBR vam omogućava i mašinsko prevođenje knjiga uz korišćenje različitih servisa jezičkih modela. Neki imaju besplatne kvote, neki se moraju platiti no to je način na koji ti servisi rade. Nemoviz Book Reader za Windows jeste u potpunosti besplatan za korišćenje no spoljni servisi nisu u našoj nadležnosti. Mi vas kroz aplikaciju spajamo sa spoljnim servisima i dajemo mogućnost da se prevođenje teksta odradi kroz plejer no registracija na servise, podešavanje načina plaćanja i sve ostalo je na vama. Kada sve to uradite potrebno je da na stranicama servisa koje koristite preuzmete API ključ, nalepite ga u podešavanja plejera na za to predviđeno mesto i mi onda preuzimamo odatle.
+
+Nemoviz Book Reader je testiran i provereno usklađen sa Jaws for Windows i NVDA čitačima ekrana no trebalo bi da radi bez ikakvih problema i sa drugima. Pristupačnost je temelj na kojem je ova aplikacija izgrađena te ne bi trebalo da bude problema ukoliko koristite neki drugi čitač.
+
+Sve tastaturne prečice ugrađene su u samu aplikaciju i mogu se koristiti i bez prisustva čitača ekrana. Čitač ekrana je tu samo da pruži povratnu informaciju o tome šta se trenutno dešava u samom plejeru i da, ukoliko koristite Brajevo pismo, prenosi tekstualni sadržaj na Brajev red. Za sve ostalo plejer možete koristiti i bez čitača ekrana.
+
+Prilikom uvoza Brajevih formata navedenih u gornjem spisku važno je znati da NBR koristi LibLouis tehnologiju sa pripadajućim tablicama. Ne možemo garantovati da će sve raditi kako treba baš za svaki jezik, ne možemo raditi ispravke tablica za svaku knjigu posebno, mnogo toga zavisi od izrade i produkcije samih knjiga. Ukoliko rezultat koji dobijete uvozom u biblioteku nije dobar, u svojstvima knjige možete promeniti Brajevu tablicu ako ih je za taj jezik dostupno više. Ako uspe odlično, ako ne uspe žao nam je. Nije sve do plejera, ima nešto odgovornosti i na proizvođačima knjiga i autorima Brajevih tablica.
+
+# Prvo pokretanje
+
+Pri prvom pokretanju Nemoviz Book Reader će proveriti da li želite da zadržite ili promenite putanju fascikle za vašu buduću biblioteku. Imajte na umu da je podrazumevana lokacija unutar Windows korisničke fascikle koja se obično nalazi na C particiji i koja se s vremenom može dosta napuniti i zauzimati prostor na sistemskom disku. Ako je preusmerite na drugu particiju ili disk ništa se bitno neće promeniti a vi ćete biti sigurniji da vam sistem neće ostati bez neophodnog prostora za rad. Takođe, držanjem biblioteke na drugom disku ili particiji osiguravate da u slučaju loma sistema vaša zbirka knjiga ostaje na sigurnom.
+
+Nakon toga otvara se jedan od dva prozora aplikacije a to je prozor biblioteke koji se otvara sad, po pokretanju posle instalacije i svaki put kada nema učitane knjige ili je biblioteka prazna. Ovaj put ga možemo zatvoriti jer bi bilo dobro da posle instalacije prvo pređemo podešavanja i tamo namestimo šta treba.
+
+# Podešavanja
+
+Ovaj prozor se sastoji od nekoliko kartica, ispod ćete naći pregled svake od njih. Ono što ga, možda, razlikuje od drugih prozora podešavanja jeste da uz većinu opcija koje tamo možete postaviti imate malo dugme za pomoć koje otvara dodatni dijalog sa opisom te funkcije. Vi dobijate pomoć na svakom koraku a dokument koji upravo čitate ne mora imati 250 stranica.
+
+## Opšte
+
+Prva stavka koju ovde postavljamo je jezik. Ako aplikacija ima jezik na kojem vam je sistem već će biti izabran i sučelje će biti na tom jeziku, ako nema NBR će se prikazati na engleskom. Ako vam se ni to ne sviđa, otvorite spisak jezika i izaberite neki drugi jezik.
+
+Druga je opcija izbor lokacije biblioteke, to smo već prošli posle prvog pokretanja. Ako se tada još niste odlučili, sad je idealna prilika.
+
+Slede dva polja za potvrdu za uključivanje ili isključivanje multimedijalnih funkcija na tastaturi ako ih imate. Važe i za tastere na slušalicama. Prva stavka je uključiti ili ne, druga stavka da li će raditi globalno ili samo kad je NBR u fokusu.
+
+Zatim polje za potvrdu kojim birate da li će se u biblioteci koristiti metapodaci iz datoteka ili će se imena autora i izdanja prikazati iz imena fascikle ili datoteke.
+
+I na kraju, izbor izgleda u kojem će vam se prikazivati Nemoviz Book Reader. Ponuđene su dve opcije. *Boje sistema* daju vam plejer u klasičnom izgledu i paleti boja koju koristite u sistemu; to je ujedno i ono što ćete dobiti ako imate uključen visoki kontrast, jer NBR tada ne crta ništa svoje nego pušta vašu šemu da prođe cela. *NBR dizajn* daje prikaz plejera u malo savremenijem izdanju. Ako niste birali, NBR odlučuje sam: visoki kontrast dobija Boje sistema, sve ostalo NBR dizajn.
+
+## Govor i Brajevo pismo
+
+Prva je opcija niz kontrola za izbor jezika i glasa za tekstualne knjige. Biramo jezik pa zatim glas za taj jezik. Postavimo jačinu, brzinu i visinu te potvrdimo na dugmetu Primeni. Izaberemo još neki jezik, glas i druge parametre i ponovo pritisnemo Primeni. Na taj način biramo podrazumevani glas za određeni jezik i svaka nova knjiga koja se otvori prilikom određivanja jezika kojim je pisana podrazumevano dobije i glas koji smo izabrali.
+
+Možda malo skrivena opcija no nismo imali bolju ideju. U kombinovanom polju za izbor glasa poslednja opcija je *Dodaj nove jezike*. Aktiviranjem ove opcije otvoriće se prozor u kojem možete izabrati jedan ili više Microsoft One Core glasova te ih posle potvrde instalirati kroz servis Windows Update. Može, kao i u slučaju dodavanja jezika za OCR trajati duže ili kraće, zavisno od zauzetosti servera za ažuriranje. Moguće je da ćete, zavisno od svojih administrativnih podešavanja, dobiti i UAC dijalog koji morate potvrditi.
+
+Naravno, svi navedeni parametri mogu se postaviti drugačije i to za svaku knjigu posebno no to se radi u svojstvima te knjige, ovde postavljamo opšte parametre.
+
+Sledeća je opcija Rečnik izgovora kakav ste sigurno već videli. Imate mogućnost ispravke izgovora globalno, po jeziku i po glasu i za sva tri izbora naći ćete uobičajene opcije za ovakav tip rečnika.
+
+Slede polja za potvrdu za uključivanje i isključivanje Brajevog i ekranskog prikaza, svako od njih kad je uključeno nudi određena dodatna podešavanja za koja ćete pomoć naći na licu mesta. U ovoj beti ta dva polja su zasivljena i nose napomenu da nisu uključena; vraćaju se u nekom od sledećih izdanja.
+
+## Uređaji
+
+Ovde birate zvučnu karticu preko koje želite da slušate knjige. Ako imate samo jednu ne morate ništa dirati jer ni nema izbora. U produžetku je i polje za potvrdu za sprečavanje odlaska zvučne kartice na spavanje. Ako u reprodukciji knjiga, a naročito kod tekstualnih formata primetite sečenje, kako vam rečenice ili pasusi zvuče odsečeno za prvu reč ili dve, obavezno uključite ovu opciju.
+
+Ako još uvek imate optički uređaj na svom računaru a možda i zbirku starijih zvučnih izdanja na klasičnom CD audio formatu slobodno možete uključiti opciju Koristi optički uređaj. Time aktivirate podršku za uređaj i možete početi da slušate svoje knjige na CD-ovima.
+
+## Napredno
+
+Na ovoj kartici birate jezik ili više njih koji će se koristiti za prepoznavanje dokumenata od slika prilikom uvoza. Nemoviz Book Reader koristi ugrađeni Microsoft OCR alat, dostupan u Windows 10 i 11 verzijama operativnog sistema. Trenutno podržava trideset pet jezika čiji spisak možete videti ako pritisnete dugme *Dodaj jezik*. Kad izaberete željene jezike i pritisnete Instaliraj, jezici se neće odmah instalirati. NBR ih ne instalira neposredno nego se instaliraju preko usluge Windows Update te im može trebati određeno vreme da dođu na red za instalaciju. Takođe, zavisno od podešavanja vašeg sistema moguće je da će vam iskočiti i dijalog Kontrole korisničkog naloga u kojem ćete morati potvrditi instalaciju jezika ili više njih.
+
+Posle instalacije a prilikom uvoza formata od slika moći ćete u kombinovanom polju izabrati jezik kojim želite prepoznati tekst u naslovu koji otvarate. Ovo takođe može potrajati neko kraće vreme, zavisno od brzine mašine i veličine knjige no sve možete pratiti na traci napretka.
+
+Osim podešavanja za optičko prepoznavanje ovde možete birati i servise jezičkih modela za prevođenje. U trenutku pisanja ovog teksta tu su Google Gemini, DeepSeek, DeepSeek sa većim modelom, tri nivoa OpenAI GPT-a i Microsoft Azure. Kao što smo napisali iznad, za ove servise potrebni su vam API ključevi ili neke druge vrste ovlašćenja a više možete pročitati u meniju Pomoć pa na stavci Servisi i nalozi.
+
+Osim mogućnosti prevođenja tu su još i dodatni glasovi u oblaku, trenutno podržavamo Google Cloud Chirp 3 i Microsoft Azure Neural glasove. Postupak za omogućavanje ovih glasova sličan je kao i za servise za prevođenje i više o tome je takođe u meniju Pomoć pa stavci Servisi i nalozi.
+
+Napominjemo da se ovi glasovi takođe plaćaju, Google besplatno daje milion znakova za čitanje što su otprilike dve prosečne knjige od 500 stranica. Microsoft daje upola manje, 500.000 znakova što je otprilike jedna prosečna knjiga. Posle potrošene besplatne kvote znakova tereti se vaša kreditna kartica a trošak čitanja je negde između 8,00 i 15,00 dolara po prosečnoj knjizi, zavisno od servisa.
+
+Da ne bi bilo nesporazuma i slučajne neželjene potrošnje ograničili smo postavljanje glasova u oblaku. U podešavanjima govora i Brajevog pisma nećete videti ove glasove i nećete ih moći postaviti kao podrazumevane, vidljivi su samo u svojstvima izabrane knjige no prethodno ih treba omogućiti u naprednim podešavanjima. U svojstvima knjige možete izabrati neki od ovih glasova kao podrazumevan za određenu knjigu i to važi samo za tu knjigu.
+
+S obzirom na to da se znakovi prilikom korišćenja glasova u oblaku troše i kad premotavate, ponavljate određeni deo knjige ili na neki drugi način trošite već pročitane znakove NBR ima omogućenu privremenu memoriju gde se čuva ono što ste pročitali tako da se premotavanje i slične radnje neće tretirati kao ponovno trošenje znakova. Ova mogućnost će vam takođe omogućiti da posle čitanja knjige možete napraviti izvoz u mp3 i time dobiti klasičnu zvučnu knjigu.
+
+# Biblioteka
+
+Ovaj prozor se ne vidi stalno, osim pri prvom pokretanju otvara se samo po potrebi i u njemu organizujete svoju zbirku elektronskih izdanja. Dodajete pojedinačno ili grupno, brišete, označavate knjige pročitanima, nepročitanima ili omiljenima. Možete razvrstavati redosled prikaza po nekoliko merila, možete filtrirati naslove po stanju (pročitano, nepročitano…) a možete i pretraživati.
+
+Uz svaki naslov u biblioteci jednostavnim pritiskom na taster Tab možete pročitati i detalje o tom naslovu. Naslov i autora, izdavača i format, gde ste stali, koliki postotak knjige ste pročitali, koliko vam je vremenski još preostalo te još poneke informacije. Ako je moguće, dobićete i kratak opis knjige.
+
+## Dodavanje naslova
+
+U padajućem meniju Datoteka možete pronaći dve stavke: Otvori datoteku (Ctrl + O) i Otvori fasciklu (Ctrl + Shift + O). Ako ste u Podešavanjima uključili podršku za optički uređaj, pronaći ćete i opciju Otvori Audio CD. Osim ovog tu su takođe i opcija za ponovno optičko prepoznavanje naslova od slika, opcija za stvaranje zvučne knjige te opcija za prevod. Tu je i stavka koju nemojte dirati ako baš ne morate, *Isprazni biblioteku*. Sama po sebi govori šta radi i posle aktiviranja dobićete još jedno upozorenje. Ako potvrdite sve do kraja, vaša je biblioteka obrisana, svi podaci o oznakama u knjizi i gde ste stali su obrisani, obrisana su i podešavanja jezika i brzine za knjige koje imate unutra. Zato radije zaobiđite ovu stavku ukoliko niste apsolutno sigurni da želite isprazniti biblioteku.
+
+Na prvoj opciji možete otvoriti pojedinačnu datoteku (MP3 knjigu u jednoj datoteci, EPUB dokument ili ncc.html datoteku za Daisy naslov) a na otvaranju fascikle možete otvoriti zvučnu knjigu u nekoliko datoteka smeštenu u jednu fasciklu. Osim toga, ako koristite otvaranje fascikle, možete uvesti i veću količinu različitih datoteka tj. zbirku od više naslova. Nemoviz Book Reader ima ugrađena određena pravila oko razvrstavanja i daće sve od sebe da vam takvu fasciklu razvrsta i posloži koliko je najbolje moguće.
+
+Otvori Audio CD pokrenuće reprodukciju knjige sa vašeg optičkog uređaja i vratiti vas u prozor plejera. Korišćenje klasičnog CD-a ne uvozi knjigu u biblioteku, samo vam omogućava reprodukciju kroz Nemoviz Book Reader.
+
+Osim klasičnih datoteka NBR može, za razliku od velike većine aplikacija ovog tipa, otvarati i komprimovane datoteke, tzv. arhive. Od formata arhiva podržani su .zip, .rar i .7z a osim jednodelnih arhiva mogu se otvoriti i višedelne arhive kao i arhive zaštićene lozinkom, pod uslovom da znate tu lozinku.
+
+Drugim rečima, odakle god i na koji god način da dobijete neku knjigu, u standardnoj datoteci ili više njih, zapakovano u arhivu ili ne, možete je bez ikakvih predradnji i sa lokacije na kojoj se nalazi uvesti u biblioteku. Nemoviz Book Reader kopira datoteke koje ste otvorili u fasciklu biblioteke na za to predviđenu lokaciju, raspakuje arhive i smešta ih u biblioteku u standardnom obliku te beleži sve bitne podatke o naslovima koje ste uvezli. Vaše izvorne datoteke ostaju netaknute na lokacijama na kojima ih držite, sve što se sa knjigama kasnije dešava dešava se na NBR kopijama u fascikli biblioteke.
+
+Opcija za ponovljeni OCR služi da ponovite optičko prepoznavanje naslova od slika sa nekim drugim jezikom ako niste zadovoljni rezultatom prepoznavanja prilikom otvaranja knjige.
+
+Opcija Prevedi knjigu otvara dijalog u kojem birate izvorni jezik, jezik na koji želite prevesti knjigu, servis ili servise koje želite koristiti te polje u koje možete upisati neka osnovna uputstva šta i kako prevoditi.
+
+Opcija Izvezi kao zvučnu knjigu radi tačno to što joj naziv i kaže. Bez obzira na to da li koristite neki od instaliranih sintetizatora govora ili glasove u oblaku, možete od tekstualne knjige napraviti zvučnu i izvesti je na željenu lokaciju. Knjiga se izvozi kao jedna .mp3 datoteka, parametri su jednaki parametrima sintetizatora koji koristite i kvalitet zapisa će biti jednak kvalitetu slušanja uživo. Pre početka NBR će vas pitati za potvrdu i reći koliko bi izrada trebalo da traje.
+
+## Polica sa knjigama
+
+Dok se po polici sa knjigama, kako se zove deo prozora biblioteke u kojem se nalazi spisak vaših naslova, krećete strelicama gore ili dole čućete naslove koje imate u biblioteci. Kako će se naslov dokumenta izgovoriti zavisi od nekoliko stvari. NBR prilikom uvoza pokušava izvući ime autora, naziv dela i još poneke podatke iz tzv. metapodataka datoteke koja sadrži knjigu. Ako ti podaci ne postoje NBR će knjigu imenovati prema nazivu fascikle ili datoteke.
+
+Ako vam se ne sviđa nijedan od ovih prikaza, u priručnom meniju naziva knjige ili jednostavnije tasterom F2 možete izabranu knjigu imenovati prema svojoj želji. Prilikom imenovanja naći ćete dva odvojena polja za ime autora i naziv dela i kada ih upišete, potvrdite unos na dugmetu za potvrdu ili jednostavno pritisnite Enter.
+
+Osim osnovnih podataka o knjizi poput imena autora i naziva dela krećući se strelicama po ovom spisku moći ćete čuti i stanje knjige: *Trenutno čitam*, *U čitanju*, *Pročitano* i *Nepročitano*. Ako ste naslov označili kao omiljen, čućete i to. U priručnom meniju gde se nalazi već pomenuta stavka za preimenovanje još možete pronaći stavke Označi kao pročitano, Označi kao nepročitano, Označi kao omiljeno, Obriši i Svojstva no o tome nešto kasnije.
+
+Pošto ste zastali na nekom naslovu tasterom Tab možete doći na deo u kojem možete strelicama gore i dole dobiti pregršt informacija o knjizi sa fokusom na to gde ste stali, koliko knjige je pročitano i preostalo u postotku, vremenski, gde je knjiga izdata i proizvedena, tehničke podatke o zvučnom zapisu i tako dalje. Ovi podaci zavise od formata u kojem je knjiga i razlikovaće se od naslova do naslova.
+
+Krećući se dalje kroz prozor biblioteke, doći ćete do polja za pretragu koje funkcioniše po jednostavnom načelu da traži niz znakova koje ste upisali u nazivima stavki na polici sa knjigama. Ako upišete „ana“ pronaći će zasigurno autorke sa imenom Ana ali će pronaći i *7000 dana u Sibiru*.
+
+Posle polja za pretragu tu je i kombinovano polje filtera u kojem možete odrediti koje će vam se knjige prikazivati. Po podrazumevanim podešavanjima tu su uvek sve knjige no možete filter prebaciti na U čitanju, Nepročitano, Pročitano i Omiljeno a prikaz na polici sa knjigama uskladiće se sa vašim izborom.
+
+## Razvrstavanje
+
+U ovom meniju samo uobičajene stvari koje ste ko zna koliko puta dosad već videli. Možete izabrati redosled kojim se naslovi u biblioteci prikazuju pa imamo azbučno, prema datumu dodavanja, prema formatu i prema stanju. Stanje znači nepročitano, pročitano i tako dalje. Svaki ovaj izbor možete dodatno prikazati rastuće ili opadajuće.
+
+Kad ste se upoznali sa sadržajem i funkcijama prozora biblioteke, vreme je da izaberete neku knjigu na polici i prošetate Tabom do dugmeta Učitaj ili jednostavno, još dok ste fokusirani na naslov pritisnete Enter. Knjiga koju ste izabrali za čitanje uvek će biti iznad police sa knjigama u izdvojenom odeljku Trenutno čitam. Treba napomenuti da knjigu koju čitate tj. aktivnu knjigu učitanu u plejer ne možete obrisati jednako kao i ostale knjige na polici. Aktivnu knjigu preko priručnog menija morate označiti kao pročitanu kako bi se iz stanja Trenutno čitam prebacila u stanje Pročitano i tek tada je možete obrisati.
+
+Uglavnom, kada pritisnete Enter na naslovu knjige ili dugme Učitaj, biblioteka se zatvara i vraćate se na glavni prozor plejera.
+
+# Plejer
+
+Ovaj prozor je uvek vidljiv na ekranu vašeg računara, ponekad ga sakrije prozor biblioteke, ponekad ga sakrije i površina za čitanje teksta ali je zapravo glavni prozor na kojem upravljate knjigom posle učitavanja. Po prozoru plejera možete se kretati Tabom kao i po svakom drugom prozoru te određene stavke aktivirati tasterom Enter no za razliku od drugih prozora u samoj aplikaciji a i u drugim aplikacijama, tasteri strelica i razmaknica rezervisani su za druge funkcije, tako da ako Tabom dođete npr. do dugmeta za oznake u knjizi, nećete ga moći aktivirati razmaknicom, isključivo se mora koristiti taster Enter.
+
+U Tab liniji, ne nužno ovim redosledom, na glavnom prozoru plejera nalaze se sledeći tasteri i funkcije:
+
+| Reprodukcija/Pauza | razmaknica |
+| Napred | Shift + desno |
+| Nazad | Shift + levo |
+| Jačina zvuka | strelice gore i dole, ili F11 i F12 |
+| Brzina | Ctrl + levo i Ctrl + desno |
+| Napredak kroz knjigu | strelice levo i desno |
+| Korak kretanja | Shift + strelice gore i dole |
+| Biblioteka | F3 |
+| Podešavanja | F2 |
+| Svojstva | Alt + Enter |
+| Označi | F5 |
+| Oznake | F6 |
+| Idi na… | F4 |
+| Pomoć | F1 |
+| Brojač | F7 |
+| Informaciono polje | F8 |
+
+U informacionom polju možete saznati osnovne podatke o reprodukciji poput autora, naslova, proteklog vremena, stranice i još ponešto, naravno, zavisno od formata knjige koju čitate. Jednim pritiskom na F8 sadržaj ekrana sa informacijama samo će se pročitati a dvostrukim pritiskom dolazi u fokus čitača ekrana pa možete strelicama detaljnije pročitati šta tamo piše.
+
+Svi tasteri imaju svoje prečice tako da lako možete do njih bez da previše šetate po prozoru a samo upravljanje knjigom koju čitate je više nego jednostavno.
+
+## Reprodukcija
+
+- Razmaknicom pokrećete ili zaustavljate reprodukciju.
+- Strelicama levo ili desno „premotavate“ po pet sekundi ili, ako se radi o tekstualnoj knjizi, po rečenicu unapred ili unazad.
+- Kombinacijom tastera Ctrl + strelice levo ili desno određujete brzinu reprodukcije.
+- Kombinacijom tastera Shift + gore ili dole birate korak kretanja (naslov, poglavlje, autorski tabak, određene minutaže), izbor se menja zavisno od formata i strukture knjige.
+- Kombinacijom tastera Shift + strelice levo ili desno krećete se izabranim korakom.
+
+Ukratko, pokrenete reprodukciju izabrane knjige razmaknicom, držeći pritisnut taster Ctrl strelicama levo i desno određujete brzinu čitanja.
+
+Ako želite nešto kratko premotati unapred ili unazad, to možete strelicama levo ili desno po pet sekundi ili po jednu rečenicu. Ako želite veće korake kretanja, pritisnite Shift, strelicama gore i dole izaberite željeni korak te i dalje držeći Shift strelicama levo i desno idite napred i nazad po knjizi izabranim korakom. Kada želite čuti kako i prema kuda napredujete sa čitanjem knjige, u bilo kojem trenutku pritisnite F8 i čitač ekrana pročitaće vam ceo sadržaj informacionog ekrana. Ukoliko detaljnije želite pročitati informaciono polje, podatak po podatak, dvaput brzo pritisnite F8. Kad ste gotovi, izađite iz informacionog polja pritiskajući ponovo dvaput F8 ili jednostavno Escape kako bi tasteri sa strelicama ponovo dobili svojstva kretanja.
+
+Ideja iza ovog pristupa kretanju bila je da korisnik ne mora učiti i pamtiti ceo niz prečica. Najveći deo kretanja složen je na tastere sa strelicama i u kombinaciji sa modifikatorima Shift i Ctrl postignuto je da ne morate šetati rukom po tastaturi. Desnu ruku postavite na strelice, levom po potrebi pritisnete neki od modifikatora i to je cela filozofija kretanja. Oni vešti i snalažljiviji verovatno će moći iskoristiti i palac desne ruke da pritisnu Ctrl ili Shift sa desne strane tastature no način upotrebe ostavljen je svakome na izbor. Sve ostale prečice, sa izuzetkom Alt + Enter za Svojstva jer je to uobičajena Windows konvencija, postavljene su na funkcijske tastere sve u cilju što jednostavnijeg upravljanja.
+
+## Idi na...
+
+Ova kontrola, kao što joj i samo ime kaže, služi da u par pritisaka ili klikova skočite na određeni deo u knjizi. Kod nestrukturiranih formata kao što su običan tekst, većina zvučnih formata u jednoj datoteci ili loše formatirane strukturirane knjige ne može se aktivirati što se potvrđuje i zvučnim signalom. Kod knjiga s iole pristojnom strukturom moći ćete preskakati na poglavlja, potpoglavlja i druge strukturne delove knjige. Naravno, sve zavisi od toga šta su i kako proizvođači postavili u samu knjigu.
+
+## Oznake u knjizi
+
+Dva dugmeta koja dolaze u paru – Označi za postavljanje oznake i Oznake gde možete upravljati postavljenim oznakama. Prilikom postavljanja oznake čućete i kratak zvučni signal tako da ste sigurni da je postavljena. U upravljanju oznakama možete se kretati strelicama po njima i pritiskom na Enter skočiti na položaj oznake. Osim toga možete brisati one koje vam ne trebaju. Za zvučne knjige tu je zasad samo prikazano vreme a kod tekstualnih knjiga i početak rečenice gde ste postavili oznaku. Ako nemate postavljenih oznaka dugme Oznake ne može se aktivirati što će vam reći i zvučni signal.
+
+## Brojač
+
+Klasični tajmer za spavanje, ništa mudro. Izaberete vreme, nudi se 15, 30, 45 i 60 min kao opcije, sledeća je opcija po želji i podrazumevano je 90 min ali to možete promeniti na koju god vrednost želite. Sledi izbor šta se dešava posle isteka odbrojavanja gde je ponuđeno: Zaustavi reprodukciju, Zaustavi i zatvori aplikaciju i Zaustavi i isključi računar.
+
+Osim toga, tu je i polje za potvrdu koje vas pita da li želite postaviti oznaku uz početak odbrojavanja. Može biti korisno da se vratite na vreme dok još niste spavali i odatle lakše pronađete mesto gde ste stali sa čitanjem.
+
+Odbrojavanje počinje pritiskom na dugme *Pokreni*, dijalog se zatvara, umesto naziva Brojač na prozoru plejera sad se vidi aktivan brojčanik. Ako ponovo aktivirate opciju Brojač odbrojavanje se poništava te u dijalogu možete izabrati novo vreme ili sve otkazati na za to predviđenom dugmetu.
+
+Treba zapamtiti i obratiti pažnju da se reprodukcija zaustavlja aktiviranjem svih opcija kao što su Podešavanja, Biblioteka i tako dalje. Kad uradite šta imate u tim dijalozima i potvrdite vraćanjem u prozor plejera reprodukcija se nastavlja. Izuzetak je dijalog Svojstva gde ipak postavljate stvari koje biste hteli čuti kako zvuče dok to radite.
+
+Nekoliko reči i o kontrolama za brzinu i jačinu zvuka. Kretanjem strelicama jačina se menja u koracima od 5% i kad dođete do kraja čujete zvučni signal. Brzina se za zvučne knjige menja u koracima od 0,1x, od 0,5x do 3x, a kad se vratite na normalnu brzinu od 1x čućete i zvučni signal. Kod tekstualnih knjiga brzina se ne meri množiteljem nego brojem reči u minutu i menja se u koracima od pet, od 80 do 400 reči u minutu.
+
+Ono što je za vas kao korisnika najbitnije jeste da Nemoviz Book Reader pamti baš sve vezano za reprodukciju knjiga koje slušate. Pamte se položaj, jačina, brzina za zvučne te vrsta, brzina, jezik i visina sintetizatora za tekstualne knjige, pamte se parametri obrade zvuka za zvučne knjige kao i parametri Brajevog i ekranskog prikaza za tekstualne. Drugim rečima, pamti se sve što ste postavili prema svojim željama i potrebama za svaku knjigu posebno.
+
+# Svojstva
+
+Već je nekoliko puta rečeno, podešavanja i parametri za svaku knjigu posebno određuju se u svojstvima knjige. Zvučne knjige imaju svoja svojstva, tekstualne svoja a posebne knjige poput Daisy audio + tekst imaju i jedna i druga, na dve zasebne kartice u prozoru svojstava. Svojstva iz prozora plejera pokrećete dugmetom Svojstva ili prečicom Alt + Enter, iz prozora biblioteke kad ste na naslovu knjige iz priručnog menija ili takođe prečicom Alt + Enter.
+
+## Svojstva zvuka
+
+Kada otvorite Svojstva zvuka prvo ćete primetiti polje za potvrdu Obrada zvuka. Ne morate ga uključivati ako vam je zvuk knjige koju slušate prihvatljiv no ako ipak nije, uključujući Obradu zvuka možda uspete dovesti zvuk na slušljiv nivo. Označavanjem polja počinje analiza zvučnog zapisa knjige i može, zavisno od brzine mašine, potrajati između trideset sekundi i nekoliko minuta. Prema traci napretka u svakom trenutku vidite kakvo je stanje i koliko je još preostalo. Kad je analiza gotova, NBR će postaviti niže navedene filtere u neko razumno stanje pa ako vam zvuk odgovara samo potvrdite sve na U redu, ako mislite da ga još možete doraditi evo i kratak opis šta se sve može uraditi.
+
+Sledi sedam filtera koji će vam pomoći ili ne da donekle poboljšate zvuk zvučnih knjiga na starim, lošim ili oboje snimcima. Svaka kontrola se može zasebno uključiti ili isključiti tako da ih ne morate koristiti sve odjednom. Kad uključite Obradu zvuka prvo ćete pronaći dugme Poništi, ono sve filtere vraća na podrazumevana podešavanja. Sledi polje za potvrdu Premosti čijim uključivanjem i isključivanjem trenutno čujete razliku između izvornika i vaših podešavanja. Prečica za premošćavanje je Ctrl + B tako da se ne morate stalno vraćati od kontrola do premošćavanja i natrag.
+
+Prvi u nizu filtera je tzv. Hi Pass odnosno uklanjanje tutnjave. Uklanja šumove u niskom delu snimka, od električnih uređaja do slučajnog treska po mikrofonu ili stolu. Sledi Uklanjanje šuma koje je predviđeno za šum trake, loših mikrofona i slične šumove u malo višem delu spektra. Omekšavanje sibilanata smanjuje praskanje glasova poput C, S, Š i sličnih koji su se izobličili na snimku zbog preblizu postavljenog mikrofona ili istaknutih visokih tonova. Poravnanje govora pokušava izjednačiti tiše i glasnije delove snimka. Zatim je tu Boja tona tj. petopojasni ekvilajzer, duboko, duboko/srednje, srednje (glas), srednje/visoko i visoko područje. Na kraju, automatska jačina i pauze, zovu se još i normalizacija i gejt: normalizacija podiže ceo snimak do najveće razine bez izobličenja a stišavanje pauza (gejt) uklanja preostale šumove u pauzama.
+
+Svaki filter ima pet nivoa delovanja, najmanje, blago, srednje, jako i najviše. Takođe, valja ponoviti, svaki se može pojedinačno uključiti ili isključiti.
+
+Obrada zvuka takođe se pamti za svaku knjigu posebno.
+
+Obavezno valja napomenuti da ova obrada zvuka neće napraviti čuda i nećete sa loše presnimke iz šezdesetih godina prošlog veka dobiti kristalno čist i jasan govor kao da je snimano u Abbey Road studijima u Londonu ali će vas, nadamo se, dovesti nekako do kraja knjige a da ne poludite zbog lošeg kvaliteta.
+
+## Svojstva teksta
+
+Slično kao i u podešavanjima za govor ovde imate izbor jezika, glasa, brzine, jačine i visine za izabranu knjigu. U Podešavanjima birate podrazumevano za sve, ovde postavljate za konkretan naslov. Ako se pitate zašto, najjednostavniji primer je ako vam je podrazumevani glas u podešavanjima muški a vi biste roman pisan iz ženske perspektive čitali ženskim glasom, to u svojstvima teksta promenite konkretno za tu knjigu. Sve ostale knjige na tom jeziku i dalje će se podrazumevano otvarati muškim glasom dok i ako to ne promenite. Takođe, neko lako štivo možete bez problema čitati na 250 reči u minutu ali nešto teže o čemu morate usput i razmišljati radije ćete možda staviti na 180.
+
+Ovde rečnika izgovora nema, slede podešavanja za Brajevo pismo i ekranska podešavanja. Ako aktivirate Brajev izlaz dobijate izbor Brajeve tablice za izabrani jezik, ako aktivirate ekranski prikaz dobijate izbor na koji će se način tekst prikazivati na vašem ekranu. Ukoliko želite samo čitati na Brajevom pismu ili sa ekrana bez govora, na spisku glasova izaberite tu opciju. U ovoj beti Brajev i ekranski izlaz su zasivljeni i nose napomenu da nisu uključeni; izbor Brajeve tablice za knjige uvezene iz Brajevih datoteka i dalje radi.
+
+## Podešavanja ekranskog prikaza {beta}
+
+Zavisno od izbora u Podešavanjima ili Svojstvima na ekranu ćete videti manji okvir preko površine plejera u kojem će se tekst menjati poput titlova kod stranih filmova ili serija. Ako izaberete jednu od druge dve opcije, okvir će biti veći a tekst će kliziti po ekranu poput odjavne špice ili će se menjati okvir po okvir. U ova dva prikaza izgovoreni red prikazuje se u drugačijoj boji.
+
+Na dnu okvira možete menjati font, veličinu i još neke parametre prikaza a imate i osnovna dugmad za upravljanje reprodukcijom. Sve tastaturne prečice rade i u ovom okviru.
+
+Ukoliko ste izabrali korišćenje Brajevog pisma pojaviće se mali okvir koji je prvi opisan jer Brajevo pismo ne može raditi bez prikaza teksta koji se prenosi u čitač ekrana. Ako izaberete samo ekranski prikaz imate izbor vrste prikaza. U oba slučaja prikaz će se pojaviti posle pokretanja reprodukcije. Ako niste izabrali nijednu od ovih opcija i želite samo slušati ako ste radoznali kako ovo izgleda uvek iz prozora plejera možete uključiti i isključiti prikaz tasterom F9.
+
+I to je otprilike to što se dokumenta pomoći tiče. Detaljnija objašnjenja pronaći ćete uz kontrole tamo gde je potrebno, malo dugme sa znakom pitanja ili F1 u fokusiranoj grupi. Hvala što ste bili strpljivi i došli do kraja teksta. Kao mali znak pažnje zbog toga sad imate priliku pročitati dve skrivene funkcije.
+
+# Za najupornije
+
+Prva je funkcija drugačije dodavanje jednog ili više naslova u biblioteku. Umesto kroz opisane dijaloge Otvori datoteku i Otvori fasciklu jednostavno kroz Windows ili File Explorer kopirajte željeni sadržaj u fasciklu biblioteke. Prilikom sledećeg pokretanja Nemoviz Book Reader će osvežiti biblioteku i prikazati nove naslove. Ako je već pokrenut samo u prozoru biblioteke pritisnite dugme Osveži.
+
+Druga skrivena funkcija je vezana za kretanje. Uz sve iznad opisano po knjizi koju čitate možete se kretati i tastaturnim prečicama od Ctrl + 1 do Ctrl + 9 i one vas postavljaju na 10, 20 pa sve do 90% knjige.

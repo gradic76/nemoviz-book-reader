@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nemoviz Book Reader</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: Georgia, "Times New Roman", serif; font-size: 1.1em;
+         line-height: 1.6; max-width: 42em; margin: 2em auto; padding: 0 1.5em; }
+  h1 { font-size: 1.5em; margin-top: 2em; }
+  h2 { font-size: 1.2em; margin-top: 1.6em; }
+  p, li { margin: 0.8em 0; }
+  nav ul { list-style: none; padding-left: 1em; }
+  nav > ul { padding-left: 0; }
+  nav li { margin: 0.3em 0; }
+  table.keys { border-collapse: collapse; margin: 1em 0; }
+  table.keys th, table.keys td { text-align: left; vertical-align: top;
+         padding: 0.3em 1.2em 0.3em 0; font-weight: normal; }
+  table.keys th { white-space: nowrap; font-family: inherit; }
+  .beta { border-left: 4px solid currentColor; padding-left: 0.8em;
+          font-style: italic; opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<h1>Nemoviz Book Reader</h1>
+
+<nav aria-label="Inhalt">
+<h2>Inhalt</h2>
+<ul>
+<li><a href="#s1">Systemanforderungen</a><ul>
+<li><a href="#s2">Mindestanforderungen</a></li>
+<li><a href="#s3">Empfohlene Ausstattung</a></li>
+</ul></li>
+<li><a href="#s4">Allgemeines</a></li>
+<li><a href="#s5">Erster Start</a></li>
+<li><a href="#s6">Einstellungen</a><ul>
+<li><a href="#s7">Allgemein</a></li>
+<li><a href="#s8">Sprache und Braille</a></li>
+<li><a href="#s9">Geräte</a></li>
+<li><a href="#s10">Erweitert</a></li>
+</ul></li>
+<li><a href="#s11">Bibliothek</a><ul>
+<li><a href="#s12">Titel hinzufügen</a></li>
+<li><a href="#s13">Das Bücherregal</a></li>
+<li><a href="#s14">Sortieren</a></li>
+</ul></li>
+<li><a href="#s15">Der Player</a><ul>
+<li><a href="#s16">Wiedergabe</a></li>
+<li><a href="#s17">Gehe zu ...</a></li>
+<li><a href="#s18">Lesezeichen</a></li>
+<li><a href="#s19">Der Einschlaftimer</a></li>
+</ul></li>
+<li><a href="#s20">Eigenschaften</a><ul>
+<li><a href="#s21">Toneigenschaften</a></li>
+<li><a href="#s22">Texteigenschaften</a></li>
+<li><a href="#s23">Die Bildschirmausgabe</a></li>
+</ul></li>
+<li><a href="#s24">Für die Hartnäckigsten</a></li>
+</ul>
+</nav>
+
+<p>Willkommen bei Nemoviz Book Reader, einem Player für elektronische Bücher in mehr als fünfundvierzig Formaten und auf drei Ausgabewegen.</p>
+<h1 id="s1">Systemanforderungen</h1>
+<h2 id="s2">Mindestanforderungen</h2>
+<ul>
+<li>Dual-Core-CPU mit 1,5 GHz, 2 GB RAM, 100 MB Speicherplatz + Platz für die Bibliothek,</li>
+<li>MS Windows 7 SP1 64-Bit oder höher, .NET Framework 4.8 (unter Windows 7 muss es getrennt installiert werden). Auf dieser Konfiguration können Sie OCR und die OneCore-Stimmen leider nicht nutzen; beides gibt es erst ab Windows 10.</li>
+</ul>
+<h2 id="s3">Empfohlene Ausstattung</h2>
+<ul>
+<li>Quad-Core-CPU mit 2,0 GHz, 8 GB RAM, 100 MB auf einer SSD + Platz für die Bibliothek,</li>
+<li>MS Windows 10 64-Bit 22H2 oder höher, wo .NET Framework 4.8 bereits enthalten ist.</li>
+</ul>
+<h1 id="s4">Allgemeines</h1>
+<p>Nemoviz Book Reader lässt Sie Ton- und Textdokumente so lesen, wie es Ihnen am besten passt. Abspielbar sind folgende Formate:</p>
+<p>Tonformate: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au und .voc.</p>
+<p>Textformate: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw und .azw3.</p>
+<p>Besondere Formate: Daisy 2.02 Audio, Daisy 3 Audio, Daisy 2.02 Text, Daisy 3 Text, Daisy 2.02 Audio + Text, Daisy 3 Audio + Text und EPUB 3 Text + Audio.</p>
+<p>Brailleformate: .brf, .brl, .bra, .dxb und .i55.</p>
+<p>Alle genannten Formate lassen sich auch unmittelbar aus einem .7z-, .rar- oder .zip-Archiv öffnen. Mehrteilige Archive werden unterstützt, ebenso passwortgeschützte — sofern Sie das Passwort natürlich kennen.</p>
+<p>Auch Bücher aus Bildern lassen sich öffnen — jene, in denen die Seiten Abbildungen von Text und kein echter Text sind, etwa ein eingescanntes PDF oder ein EPUB aus Seitenbildern. Ebenso gewöhnliche Bilder wie .bmp, .jpg, .tif und so weiter: Haben Sie also zufällig ein Buch als ordentlich nummerierte Bilderfolge, nimmt Nemoviz Book Reader auch das. Der Text auf den Bildern wird über Microsoft OCR automatisch erkannt, und nach kurzer Zeit steht ein ordentlich lesbarer Titel in Ihrem Bücherregal.</p>
+<p>Achtung! Alle genannten Formate und ihre Spielarten laden in Nemoviz Book Reader, solange sie nicht durch eine Digital-Rights-Management-Lizenz geschützt sind. NBR kann DRM-geschützte Titel nicht öffnen; haben Sie solche, spielen Sie sie mit dem dafür vorgesehenen Hardware- oder Software-Player ab. Einzelheiten erfragen Sie dort, wo Sie diese Titel bezogen haben.</p>
+<p>Jede Dateiart aus der obigen Liste können Sie als Ton wiedergeben, am Bildschirm anzeigen und sogar in Braille lesen, sofern Sie die nötige Ausrüstung haben. Nötig sind nur ein Windows-kompatibler Rechner, ein Monitor und nach Möglichkeit eine Braillezeile, die mit Ihrem Screenreader eingerichtet ist.</p>
+<p>Über all das hinaus kann NBR Bücher maschinell übersetzen, mithilfe verschiedener KI-Sprachmodell-Dienste. Manche haben ein kostenloses Kontingent, manche müssen bezahlt werden; so arbeiten diese Dienste nun einmal. Nemoviz Book Reader für Windows ist in der Nutzung vollständig kostenlos, für externe Dienste können wir jedoch nicht einstehen. Wir verbinden Sie über die Anwendung mit ihnen und ermöglichen, dass die Übersetzung im Player abläuft — die Anmeldung bei den Diensten, das Einrichten der Zahlung und alles Übrige liegt bei Ihnen. Ist das getan, holen Sie sich auf den Seiten des jeweiligen Dienstes den API-Schlüssel, fügen ihn in den Einstellungen des Players an der dafür vorgesehenen Stelle ein, und von da an übernehmen wir.</p>
+<p>Nemoviz Book Reader ist mit den Screenreadern Jaws for Windows und NVDA getestet und nachweislich verträglich, sollte aber auch mit anderen ohne Weiteres arbeiten. Barrierefreiheit ist das Fundament, auf dem diese Anwendung gebaut ist, es sollte also auch mit einem anderen Reader keine Probleme geben.</p>
+<p>Alle Tastenkürzel stecken in der Anwendung selbst und lassen sich auch ohne Screenreader nutzen. Der Screenreader ist nur dafür da, zurückzumelden, was gerade im Player geschieht, und — wenn Sie Braille lesen — den Text auf die Braillezeile zu bringen. Für alles andere kommt der Player ohne ihn aus.</p>
+<p>Beim Import der oben genannten Brailleformate ist zu wissen, dass NBR die Technik LibLouis samt ihren Tabellen verwendet. Wir können nicht dafür einstehen, dass für jede Sprache alles stimmt, und wir können die Tabellen nicht für jedes Buch einzeln nachbessern; vieles hängt davon ab, wie die Bücher selbst gemacht wurden. Ist das Ergebnis beim Import schlecht, können Sie in den Eigenschaften des Buches die Brailletabelle wechseln, sofern es für diese Sprache mehrere gibt. Klappt es, ausgezeichnet; klappt es nicht, tut es uns leid. Es liegt nicht alles am Player — ein Teil der Verantwortung liegt bei denen, die die Bücher herstellen, und bei den Autoren der Brailletabellen.</p>
+<h1 id="s5">Erster Start</h1>
+<p>Beim ersten Start fragt Nemoviz Book Reader, ob Sie den Ordner für Ihre künftige Bibliothek behalten oder ändern möchten. Bedenken Sie, dass der Standard im Windows-Benutzerordner liegt, der gewöhnlich auf der Partition C sitzt und mit der Zeit ordentlich volllaufen und Platz auf der Systemplatte belegen kann. Legen Sie ihn auf eine andere Partition oder Platte, ändert sich nichts Wesentliches, aber Sie können sicherer sein, dass dem System der nötige Arbeitsplatz nicht ausgeht. Die Bibliothek auf einer anderen Platte oder Partition zu halten sorgt außerdem dafür, dass Ihre Büchersammlung bei einem Systemausfall unversehrt bleibt.</p>
+<p>Danach öffnet sich eines der beiden Fenster der Anwendung: das Bibliotheksfenster, das jetzt erscheint, beim ersten Start nach der Installation, und jedes Mal, wenn kein Buch geladen oder die Bibliothek leer ist. Diesmal können wir es schließen, denn nach der Installation lohnt es sich, zuerst die Einstellungen durchzugehen und dort einzurichten, was nötig ist.</p>
+<h1 id="s6">Einstellungen</h1>
+<p>Dieses Fenster besteht aus mehreren Registerkarten; unten folgt ein Überblick über jede davon. Was es vielleicht von anderen Einstellungsfenstern unterscheidet: Bei den meisten Optionen steht eine kleine Hilfetaste, die einen zusätzlichen Dialog mit der Beschreibung dieser Funktion öffnet. Sie bekommen Hilfe auf jedem Schritt, und das Dokument, das Sie gerade lesen, muss keine 250 Seiten haben.</p>
+<h2 id="s7">Allgemein</h2>
+<p>Das Erste, was hier eingestellt wird, ist die Sprache. Hat die Anwendung die Sprache, in der Ihr System läuft, ist sie bereits gewählt und die Oberfläche erscheint darin; hat sie sie nicht, zeigt sich NBR auf Englisch. Gefällt Ihnen auch das nicht, öffnen Sie die Sprachliste und wählen eine andere.</p>
+<p>Die zweite Option ist der Ort der Bibliothek, den wir nach dem ersten Start schon durchgegangen sind. Hatten Sie sich damals noch nicht entschieden, ist jetzt die beste Gelegenheit.</p>
+<p>Es folgen zwei Kontrollkästchen zum Ein- und Ausschalten der Multimediatasten Ihrer Tastatur, falls Sie welche haben. Sie gelten auch für die Tasten an Headsets. Das erste sagt, ob sie überhaupt verwendet werden, das zweite, ob sie systemweit arbeiten oder nur, solange NBR im Vordergrund ist.</p>
+<p>Dann ein Kontrollkästchen, mit dem Sie wählen, ob die Bibliothek die Metadaten aus den Dateien verwendet oder Autor und Titel stattdessen aus dem Ordner- oder Dateinamen zeigt.</p>
+<p>Und zuletzt das Aussehen, in dem Nemoviz Book Reader gezeichnet wird. Es gibt zwei Möglichkeiten. <strong>Systemfarben</strong> geben Ihnen den Player in einer schlichten Anordnung und der Farbpalette Ihres Systems; das ist auch das, was Sie bekommen, wenn hoher Kontrast eingeschaltet ist, denn NBR zeichnet dann nichts Eigenes und lässt Ihr Schema unverfälscht durch. <strong>NBR-Design</strong> gibt dem Player ein etwas moderneres Aussehen. Haben Sie nicht gewählt, entscheidet NBR selbst: hoher Kontrast bekommt Systemfarben, alles andere NBR-Design.</p>
+<h2 id="s8">Sprache und Braille</h2>
+<p>Die erste Option ist eine Reihe von Bedienelementen zur Wahl von Sprache und Stimme für Textbücher. Wählen Sie eine Sprache, dann eine Stimme dafür. Stellen Sie Lautstärke, Tempo und Tonhöhe ein und bestätigen Sie mit Übernehmen. Wählen Sie eine weitere Sprache, eine weitere Stimme und weitere Werte und drücken Sie erneut Übernehmen. So legen Sie die Standardstimme für eine bestimmte Sprache fest, sodass jedes neue Buch, sobald seine Sprache ermittelt ist, mit der gewählten Stimme aufgeht.</p>
+<p>Vielleicht eine etwas versteckte Möglichkeit, aber wir hatten keine bessere Idee. Der letzte Eintrag im Stimmen-Kombinationsfeld ist <strong>Neue Sprachen hinzufügen</strong>. Rufen Sie ihn auf, öffnet sich ein Fenster, in dem Sie eine oder mehrere Microsoft-OneCore-Stimmen wählen und nach Bestätigung über Windows Update installieren können. Wie beim Hinzufügen von OCR-Sprachen kann das kürzer oder länger dauern, je nachdem, wie beschäftigt die Update-Server sind. Je nach Ihren Verwaltungseinstellungen kann außerdem ein UAC-Dialog erscheinen, den Sie bestätigen müssen.</p>
+<p>All diese Werte lassen sich selbstverständlich für jedes Buch einzeln anders setzen, das geschieht aber in den Eigenschaften dieses Buches; hier stellen wir die allgemeinen ein.</p>
+<p>Als Nächstes folgt das Aussprachewörterbuch, das Sie sicher schon einmal gesehen haben. Sie können die Aussprache global, je Sprache und je Stimme berichtigen, und für alle drei finden Sie die für ein solches Wörterbuch üblichen Möglichkeiten.</p>
+<p>Es folgen die Kontrollkästchen zum Ein- und Ausschalten der Braille- und der Bildschirmausgabe; jedes von ihnen bietet, eingeschaltet, weitere Einstellungen, deren Hilfe Sie an Ort und Stelle finden. In dieser Beta sind diese beiden Kästchen ausgegraut und tragen einen entsprechenden Hinweis; sie kommen in einer der nächsten Fassungen zurück.</p>
+<h2 id="s9">Geräte</h2>
+<p>Hier wählen Sie die Soundkarte, über die Sie Ihre Bücher hören möchten. Haben Sie nur eine, ist nichts anzurühren, weil es nichts zu wählen gibt. Daneben steht ein Kontrollkästchen, das die Soundkarte am Einschlafen hindert. Bemerken Sie beim Abspielen — und besonders bei Textformaten — ein Stocken, als wären Sätzen oder Absätzen das erste Wort oder zwei abgeschnitten, schalten Sie diese Möglichkeit unbedingt ein.</p>
+<p>Haben Sie noch ein optisches Laufwerk im Rechner und vielleicht eine Sammlung älterer Tonausgaben auf gewöhnlichen Audio-CDs, schalten Sie ruhig Optisches Laufwerk verwenden ein. Damit ist die Unterstützung für das Gerät aktiv und Sie können Ihre Bücher von CD hören.</p>
+<h2 id="s10">Erweitert</h2>
+<p>Auf dieser Registerkarte wählen Sie die Sprache oder mehrere, die beim Import zur Erkennung von Büchern aus Bildern verwendet werden. Nemoviz Book Reader nutzt das in Windows 10 und 11 eingebaute Microsoft OCR. Derzeit unterstützt es fünfunddreißig Sprachen, deren Liste Sie sehen, wenn Sie <strong>Eine Sprache hinzufügen</strong> drücken. Haben Sie die gewünschten gewählt und Installieren gedrückt, werden die Sprachen nicht sofort installiert. NBR installiert sie nicht selbst; sie kommen über Windows Update und brauchen mitunter eine Weile, bis sie an der Reihe sind. Je nach Ihren Systemeinstellungen kann außerdem ein Dialog der Benutzerkontensteuerung erscheinen, in dem Sie die Installation bestätigen müssen.</p>
+<p>Nach der Installation können Sie beim Import eines Buches aus Bildern in einem Kombinationsfeld die Sprache wählen, in der der Text erkannt werden soll. Auch das kann eine Weile dauern, je nach Geschwindigkeit des Rechners und Größe des Buches, doch alles lässt sich am Fortschrittsbalken verfolgen.</p>
+<p>Neben den Einstellungen für die Erkennung wählen Sie hier auch die Sprachmodell-Dienste für die Übersetzung. Zum Zeitpunkt dieses Textes sind das Google Gemini, DeepSeek, DeepSeek mit einem größeren Modell, drei Stufen von OpenAI GPT und Microsoft Azure. Wie oben geschrieben, brauchen diese Dienste API-Schlüssel oder eine andere Art von Berechtigung, und mehr dazu lesen Sie im Menü Hilfe unter Dienste und Konten.</p>
+<p>Neben der Übersetzung gibt es auch die zusätzlichen Cloud-Stimmen; derzeit unterstützen wir Google Cloud Chirp 3 und Microsoft Azure Neural. Das Freischalten dieser Stimmen läuft ähnlich wie bei den Übersetzungsdiensten, und auch dazu steht mehr im Menü Hilfe unter Dienste und Konten.</p>
+<p>Wir weisen darauf hin, dass auch diese Stimmen bezahlt werden. Google gibt eine Million Zeichen zum Vorlesen kostenlos, das sind ungefähr zwei durchschnittliche Bücher von 500 Seiten. Microsoft gibt halb so viel, 500.000 Zeichen, ungefähr ein durchschnittliches Buch. Ist das kostenlose Kontingent aufgebraucht, wird Ihre Kreditkarte belastet, und die Kosten liegen je nach Dienst irgendwo zwischen 8,00 und 15,00 US-Dollar je durchschnittlichem Buch.</p>
+<p>Damit es kein Missverständnis und keine versehentlichen Ausgaben gibt, haben wir das Einrichten der Cloud-Stimmen eingeschränkt. In den Einstellungen für Sprache und Braille sehen Sie diese Stimmen nicht und können sie nicht zum Standard machen; sichtbar sind sie nur in den Eigenschaften eines gewählten Buches, und auch das erst, nachdem Sie sie in den erweiterten Einstellungen freigeschaltet haben. In den Eigenschaften eines Buches können Sie eine dieser Stimmen für dieses Buch wählen, und sie gilt allein für dieses Buch.</p>
+<p>Da bei Cloud-Stimmen auch dann Zeichen verbraucht werden, wenn Sie zurückspulen, eine Stelle wiederholen oder auf andere Weise bereits gelesene Zeichen noch einmal durchlaufen, hält NBR einen Zwischenspeicher dessen bereit, was gesprochen wurde, sodass Zurückspulen und Ähnliches nicht erneut berechnet wird. Derselbe Zwischenspeicher ist es auch, der Ihnen erlaubt, das Buch nach dem Lesen als MP3 auszugeben und so ein gewöhnliches Hörbuch zu bekommen.</p>
+<h1 id="s11">Bibliothek</h1>
+<p>Dieses Fenster ist nicht ständig zu sehen; außer beim ersten Start öffnet es sich nach Bedarf, und darin ordnen Sie Ihre Sammlung elektronischer Veröffentlichungen. Sie fügen einzeln oder in Mengen hinzu, löschen, markieren Bücher als gelesen, ungelesen oder als Favorit. Sie können die Reihenfolge nach mehreren Gesichtspunkten ordnen, Titel nach Status filtern (gelesen, ungelesen …) und suchen.</p>
+<p>Bei jedem Titel in der Bibliothek können Sie mit einem einfachen Druck auf die Tabulatortaste die Einzelheiten dazu lesen: Titel und Autor, Verlag und Format, wo Sie stehen geblieben sind, wie viel Prozent des Buches Sie gelesen haben, wie viel Zeit noch bleibt und einiges mehr. Wo es möglich ist, bekommen Sie auch eine kurze Beschreibung des Buches.</p>
+<h2 id="s12">Titel hinzufügen</h2>
+<p>Im Menü Datei finden Sie zwei Einträge: Datei öffnen (Strg + O) und Ordner öffnen (Strg + Umschalt + O). Haben Sie in den Einstellungen die Unterstützung für das optische Laufwerk eingeschaltet, finden Sie auch Audio-CD öffnen. Daneben gibt es eine Möglichkeit, ein Bilderbuch erneut erkennen zu lassen, eine, um ein Hörbuch zu erzeugen, und eine zum Übersetzen. Es gibt außerdem einen Eintrag, den Sie nicht anrühren sollten, wenn es nicht wirklich sein muss: <strong>Bibliothek leeren</strong>. Er sagt von selbst, was er tut, und nach dem Aufrufen bekommen Sie noch eine Warnung. Bestätigen Sie bis zum Ende, ist Ihre Bibliothek gelöscht: alle Lesezeichen und alle Lesestellen fort, und die Sprach- und Tempoeinstellungen der Bücher darin gleich mit. Machen Sie um diesen Eintrag also lieber einen Bogen, solange Sie nicht ganz sicher sind, dass Sie die Bibliothek leeren wollen.</p>
+<p>Mit der ersten Möglichkeit öffnen Sie eine einzelne Datei (ein MP3-Buch in einer Datei, ein EPUB-Dokument oder eine ncc.html-Datei für einen Daisy-Titel), mit dem Öffnen eines Ordners ein Hörbuch, das über mehrere Dateien in einem Ordner verteilt ist. Darüber hinaus können Sie beim Öffnen eines Ordners auch eine größere Menge verschiedener Dateien einlesen, also eine Sammlung mehrerer Titel. Nemoviz Book Reader hat Regeln für das Sortieren eingebaut und wird sein Bestes tun, einen solchen Ordner so gut wie irgend möglich zu ordnen.</p>
+<p>Audio-CD öffnen startet die Wiedergabe des Buches von Ihrem optischen Laufwerk und bringt Sie zum Player-Fenster zurück. Eine gewöhnliche CD zu verwenden führt das Buch nicht in die Bibliothek ein; es macht nur das Abspielen durch Nemoviz Book Reader möglich.</p>
+<p>Neben gewöhnlichen Dateien kann NBR — anders als die große Mehrheit der Anwendungen dieser Art — auch komprimierte Dateien öffnen, also Archive. Von den Archivformaten werden .zip, .rar und .7z unterstützt, und außer einteiligen lassen sich auch mehrteilige und passwortgeschützte Archive öffnen, sofern Sie das Passwort kennen.</p>
+<p>Mit anderen Worten: Woher und auf welchem Weg auch immer Sie ein Buch bekommen, in einer Standarddatei oder mehreren, in ein Archiv gepackt oder nicht — Sie können es ohne jede Vorarbeit von dem Ort, an dem es liegt, in die Bibliothek einlesen. Nemoviz Book Reader kopiert die geöffneten Dateien an die dafür vorgesehene Stelle im Bibliotheksordner, packt Archive aus und legt sie in der Bibliothek in ihrer üblichen Form ab und hält alles Wesentliche über die eingelesenen Titel fest. Ihre ursprünglichen Dateien bleiben unberührt an ihrem Platz; alles, was mit den Büchern später geschieht, geschieht an NBRs Kopien im Bibliotheksordner.</p>
+<p>Der Eintrag für die wiederholte Erkennung ist dafür da, die Texterkennung eines Bilderbuches in einer anderen Sprache noch einmal laufen zu lassen, wenn Sie mit dem Ergebnis beim Öffnen des Buches nicht zufrieden waren.</p>
+<p>Buch übersetzen öffnet einen Dialog, in dem Sie die Ausgangssprache wählen, die Sprache, in die übersetzt werden soll, den Dienst oder die Dienste, die Sie verwenden möchten, und ein Feld, in das Sie ein paar grundlegende Hinweise schreiben können, was und wie übersetzt werden soll.</p>
+<p>Als Hörbuch exportieren tut genau das, was der Name sagt. Ob Sie einen der installierten Sprachsynthesizer oder die Cloud-Stimmen verwenden — Sie können aus einem Textbuch ein Tonbuch machen und es an einen Ort Ihrer Wahl ausgeben. Das Buch wird als eine einzige .mp3-Datei ausgegeben, die Werte entsprechen denen der von Ihnen verwendeten Sprachausgabe, und die Aufnahmequalität entspricht der beim Zuhören. Vorher fragt NBR nach einer Bestätigung und sagt, wie lange die Herstellung dauern dürfte.</p>
+<h2 id="s13">Das Bücherregal</h2>
+<p>Bewegen Sie sich im Bücherregal — so heißt der Teil des Bibliotheksfensters mit der Liste Ihrer Titel — mit den Pfeiltasten auf und ab, hören Sie die Titel, die Sie in der Bibliothek haben. Wie der Titel eines Dokuments gesprochen wird, hängt von einigem ab. Beim Import versucht NBR, den Namen des Autors, den Titel des Werks und ein paar weitere Angaben aus den Metadaten der Datei zu ziehen, die das Buch enthält. Fehlen diese Angaben, benennt NBR das Buch nach dem Ordner- oder Dateinamen.</p>
+<p>Gefällt Ihnen keine dieser Darstellungen, können Sie das gewählte Buch nach Ihrem Wunsch benennen, aus dem Kontextmenü des Buchnamens oder einfacher mit F2. Beim Benennen finden Sie zwei getrennte Felder für den Namen des Autors und den Titel des Werks; tragen Sie sie ein und bestätigen Sie auf der Schaltfläche oder drücken Sie einfach die Eingabetaste.</p>
+<p>Neben den Grundangaben wie Autor und Titel hören Sie beim Bewegen durch diese Liste mit den Pfeiltasten auch den Status des Buches: <strong>Aktuell in Arbeit</strong>, <strong>Wird gelesen</strong>, <strong>Gelesen</strong> und <strong>Ungelesen</strong>. Haben Sie den Titel als Favorit markiert, hören Sie auch das. Im Kontextmenü, in dem schon der genannte Eintrag zum Umbenennen liegt, finden Sie außerdem Als gelesen markieren, Als ungelesen markieren, Als Favorit markieren, Löschen und Eigenschaften — doch dazu später mehr.</p>
+<p>Sind Sie auf einem Titel stehen geblieben, bringt Sie die Tabulatortaste an eine Stelle, an der Ihnen die Pfeiltasten auf und ab eine Fülle von Angaben zum Buch geben, mit Blick darauf, wo Sie stehen geblieben sind, wie viel des Buches gelesen ist und wie viel bleibt, in Prozent und in Zeit, wo das Buch verlegt und hergestellt wurde, technische Angaben zur Aufnahme und so weiter. Diese Angaben hängen vom Format des Buches ab und werden sich von Titel zu Titel unterscheiden.</p>
+<p>Gehen Sie weiter durch das Bibliotheksfenster, kommen Sie zum Suchfeld, das nach dem einfachen Grundsatz arbeitet, die eingetippte Zeichenfolge in den Namen der Einträge im Bücherregal zu suchen. Tippen Sie „ana“, findet es gewiss Autorinnen namens Ana — aber es findet auch <strong>7000 dana u Sibiru</strong>.</p>
+<p>Nach dem Suchfeld steht ein Filter-Kombinationsfeld, in dem Sie bestimmen, welche Bücher gezeigt werden. Standardmäßig sind dort immer alle Bücher, doch Sie können den Filter auf Wird gelesen, Ungelesen, Gelesen und Favoriten umstellen, und das Bücherregal richtet sich nach Ihrer Wahl.</p>
+<h2 id="s14">Sortieren</h2>
+<p>In diesem Menü nur das Übliche, das Sie schon wer weiß wie oft gesehen haben. Sie können die Reihenfolge wählen, in der die Titel erscheinen: alphabetisch, nach Datum der Aufnahme, nach Format und nach Status. Status heißt ungelesen, gelesen und so weiter. Jede dieser Ordnungen lässt sich zusätzlich aufsteigend oder absteigend zeigen.</p>
+<p>Haben Sie sich mit Inhalt und Funktionen des Bibliotheksfensters vertraut gemacht, ist es Zeit, ein Buch im Regal zu wählen und mit der Tabulatortaste zur Schaltfläche Laden zu gehen — oder einfach die Eingabetaste zu drücken, solange der Titel noch den Fokus hat. Das Buch, das Sie zum Lesen gewählt haben, steht immer über dem Regal, in einem eigenen Abschnitt namens Aktuell in Arbeit. Es sei angemerkt, dass das Buch, das Sie lesen, also das aktive im Player geladene Buch, sich nicht so löschen lässt wie die übrigen Bücher im Regal. Sie müssen das aktive Buch über das Kontextmenü als gelesen markieren, damit es aus Aktuell in Arbeit nach Gelesen wechselt, und erst dann können Sie es löschen.</p>
+<p>Kurzum: Drücken Sie auf dem Buchtitel die Eingabetaste oder die Schaltfläche Laden, schließt sich die Bibliothek und Sie sind zurück im Hauptfenster des Players.</p>
+<h1 id="s15">Der Player</h1>
+<p>Dieses Fenster ist auf dem Bildschirm Ihres Rechners immer sichtbar; mal verdeckt es das Bibliotheksfenster, mal die Lesefläche, doch es ist in Wahrheit das Hauptfenster, von dem aus Sie ein geladenes Buch steuern. Sie können sich im Player-Fenster mit der Tabulatortaste bewegen wie in jedem anderen Fenster und Einträge mit der Eingabetaste auslösen — doch anders als in anderen Fenstern dieser Anwendung und in anderen Anwendungen sind die Pfeiltasten und die Leertaste für andere Aufgaben belegt. Kommen Sie also mit Tab etwa auf die Lesezeichen-Taste, lässt sie sich nicht mit der Leertaste auslösen; ausschließlich mit der Eingabetaste.</p>
+<p>Im Tabulatorlauf des Player-Hauptfensters liegen die folgenden Tasten und Funktionen, nicht unbedingt in dieser Reihenfolge:</p>
+<table class="keys">
+<tr><th>Wiedergabe/Pause</th><td>Leertaste</td></tr>
+<tr><th>Vorwärts</th><td>Umschalt + Rechts</td></tr>
+<tr><th>Zurück</th><td>Umschalt + Links</td></tr>
+<tr><th>Lautstärke</th><td>Pfeile auf und ab, oder F11 und F12</td></tr>
+<tr><th>Tempo</th><td>Strg + Links und Strg + Rechts</td></tr>
+<tr><th>Fortschritt im Buch</th><td>Pfeile links und rechts</td></tr>
+<tr><th>Navigationsschritt</th><td>Umschalt + Pfeile auf und ab</td></tr>
+<tr><th>Bibliothek</th><td>F3</td></tr>
+<tr><th>Einstellungen</th><td>F2</td></tr>
+<tr><th>Eigenschaften</th><td>Alt + Enter</td></tr>
+<tr><th>Markieren</th><td>F5</td></tr>
+<tr><th>Lesezeichen</th><td>F6</td></tr>
+<tr><th>Gehe zu …</th><td>F4</td></tr>
+<tr><th>Hilfe</th><td>F1</td></tr>
+<tr><th>Einschlaftimer</th><td>F7</td></tr>
+<tr><th>Wiedergabeinformationen</th><td>F8</td></tr>
+</table>
+<p>Im Informationsfeld erfahren Sie die Grunddaten zur Wiedergabe — Autor, Titel, vergangene Zeit, Seite und ein wenig mehr, je nach Format des Buches, das Sie lesen. Ein Druck auf F8 liest den Inhalt der Informationsanzeige nur vor; zweimal gedrückt, kommt sie in den Fokus des Screenreaders, sodass Sie mit den Pfeiltasten genauer durchgehen können, was dort steht.</p>
+<p>Alle Tasten haben ihr eigenes Kürzel, sodass Sie sie leicht erreichen, ohne allzu viel im Fenster umherzugehen, und das Steuern des Buches, das Sie lesen, ist mehr als einfach.</p>
+<h2 id="s16">Wiedergabe</h2>
+<ul>
+<li>Mit der Leertaste starten und stoppen Sie die Wiedergabe.</li>
+<li>Mit den Pfeilen links und rechts „spulen“ Sie um fünf Sekunden oder, bei einem Textbuch, um einen Satz vor oder zurück.</li>
+<li>Mit Strg + Links oder Rechts regeln Sie das Lesetempo.</li>
+<li>Mit Umschalt + Auf oder Ab wählen Sie den Navigationsschritt (Überschrift, Kapitel, Normseite, bestimmte Zeitspannen); die Auswahl ändert sich mit Format und Aufbau des Buches.</li>
+<li>Mit Umschalt + Links oder Rechts bewegen Sie sich um den gewählten Navigationsschritt.</li>
+</ul>
+<p>Kurz gesagt: Sie starten das gewählte Buch mit der Leertaste, und mit gedrückter Strg-Taste regeln die Pfeile links und rechts das Lesetempo.</p>
+<p>Wollen Sie ein wenig vor- oder zurückspringen, geht das mit den Pfeilen links und rechts um fünf Sekunden oder um einen Satz. Wollen Sie größere Schritte, drücken Sie Umschalt, wählen mit den Pfeilen auf und ab den gewünschten Schritt und gehen — weiter mit gedrückter Umschalttaste — mit den Pfeilen links und rechts um den gewählten Schritt vor und zurück durch das Buch. Wollen Sie hören, wie und wohin Ihr Lesen vorankommt, drücken Sie jederzeit F8, und der Screenreader liest Ihnen den ganzen Inhalt der Informationsanzeige vor. Wollen Sie das Informationsfeld genauer durchgehen, Angabe für Angabe, drücken Sie zweimal rasch F8. Sind Sie fertig, verlassen Sie das Informationsfeld, indem Sie erneut zweimal F8 drücken, oder einfach mit Escape, damit die Pfeiltasten ihre Navigationsaufgaben zurückbekommen.</p>
+<p>Der Gedanke hinter diesem Zugang zur Navigation war, dass die Benutzerin oder der Benutzer nicht eine ganze Reihe von Kürzeln lernen und behalten muss. Der größte Teil der Navigation liegt auf den Pfeiltasten, und zusammen mit den Umschalt- und Strg-Tasten ist erreicht, dass Sie die Hand nicht über die Tastatur wandern lassen müssen. Legen Sie die rechte Hand auf die Pfeile, drücken Sie bei Bedarf mit der linken einen Modifikator, und das ist die ganze Philosophie. Die Geschickteren werden vermutlich auch den Daumen der rechten Hand nutzen können, um Strg oder Umschalt auf der rechten Seite der Tastatur zu drücken, doch die Art der Nutzung bleibt jedem selbst überlassen. Alle übrigen Kürzel liegen, mit Ausnahme von Alt + Enter für Eigenschaften, weil das die übliche Windows-Konvention ist, auf den Funktionstasten, alles im Sinne einer möglichst einfachen Bedienung.</p>
+<h2 id="s17">Gehe zu ...</h2>
+<p>Dieses Bedienelement dient, wie sein Name sagt, dazu, mit ein paar Tastendrücken oder Klicks zu einem bestimmten Teil des Buches zu springen. Bei unstrukturierten Formaten wie reinem Text, den meisten Tonformaten in einer einzigen Datei oder schlecht formatierten strukturierten Büchern lässt es sich nicht aufrufen, was ein Signalton bestätigt. Bei Büchern mit einigermaßen ordentlichem Aufbau können Sie zu Kapiteln, Unterkapiteln und anderen strukturellen Teilen des Buches springen. Alles hängt natürlich davon ab, was die Hersteller in das Buch selbst gelegt haben und wie.</p>
+<h2 id="s18">Lesezeichen</h2>
+<p>Zwei Tasten, die als Paar kommen — Markieren zum Setzen eines Lesezeichens und Lesezeichen, wo Sie die gesetzten verwalten. Beim Setzen hören Sie einen kurzen Signalton, damit Sie sicher sind, dass es gesetzt ist. In der Verwaltung bewegen Sie sich mit den Pfeilen durch die Lesezeichen und springen mit der Eingabetaste an die Stelle eines Lesezeichens. Außerdem können Sie löschen, was Sie nicht brauchen. Für Hörbücher steht vorerst nur die Zeit, bei Textbüchern auch der Anfang des Satzes, an dem Sie das Lesezeichen gesetzt haben. Haben Sie keine Lesezeichen gesetzt, lässt sich die Taste Lesezeichen nicht aufrufen, was Ihnen ein Signalton sagt.</p>
+<h2 id="s19">Der Einschlaftimer</h2>
+<p>Ein gewöhnlicher Einschlaftimer, nichts Kluges. Sie wählen eine Dauer — angeboten sind 15, 30, 45 und 60 Minuten — und die nächste Möglichkeit ist eine eigene, voreingestellt auf 90 Minuten, die Sie aber auf jeden beliebigen Wert ändern können. Dann folgt die Wahl, was nach Ablauf geschieht: Wiedergabe stoppen, Stoppen und die Anwendung schließen, Stoppen und den Rechner ausschalten.</p>
+<p>Daneben gibt es ein Kontrollkästchen, das fragt, ob beim Start des Countdowns ein Lesezeichen gesetzt werden soll. Das kann nützlich sein, um zu der Zeit zurückzukehren, als Sie noch wach waren, und von dort leichter die Stelle zu finden, an der Sie mit dem Lesen aufgehört haben.</p>
+<p>Der Countdown beginnt mit einem Druck auf <strong>Starten</strong>; der Dialog schließt sich, und statt des Wortes Timer zeigt das Player-Fenster nun eine laufende Uhr. Rufen Sie den Timer erneut auf, wird der Countdown aufgehoben, und im Dialog können Sie eine neue Zeit wählen oder alles auf der dafür vorgesehenen Schaltfläche abbrechen.</p>
+<p>Zu merken und zu beachten ist, dass die Wiedergabe stoppt, sobald Sie eine der Möglichkeiten wie Einstellungen, Bibliothek und so weiter aufrufen. Haben Sie in diesen Dialogen getan, was zu tun war, und bestätigen sich zurück ins Player-Fenster, läuft die Wiedergabe weiter. Die Ausnahme ist der Dialog Eigenschaften, wo Sie ja Dinge einstellen, die Sie dabei hören möchten.</p>
+<p>Ein paar Worte zu den Reglern für Tempo und Lautstärke. Mit den Pfeilen bewegt sich die Lautstärke in Schritten von 5 %, und am Ende hören Sie einen Signalton. Bei Hörbüchern läuft das Tempo in Schritten von 0,1x, von 0,5x bis 3x, und kommen Sie zum normalen 1x zurück, hören Sie ebenfalls einen Ton. Bei Textbüchern wird das Tempo nicht als Vielfaches gemessen, sondern als Wörter je Minute, und läuft in Schritten von fünf, von 80 bis 400 Wörtern je Minute.</p>
+<p>Das Wichtigste für Sie als Benutzer ist, dass Nemoviz Book Reader schlicht alles behält, was mit der Wiedergabe der Bücher zu tun hat, die Sie hören. Behalten werden Position, Lautstärke und Tempo für Ton sowie Art, Tempo, Sprache und Tonhöhe der Sprachausgabe für Textbücher; behalten werden die Werte der Klangbearbeitung für Hörbücher und die Werte der Braille- und Bildschirmausgabe für Textbücher. Mit anderen Worten: Alles, was Sie nach Ihren Wünschen und Bedürfnissen eingestellt haben, wird für jedes Buch einzeln behalten.</p>
+<h1 id="s20">Eigenschaften</h1>
+<p>Es ist mehrfach gesagt worden: Die Einstellungen und Werte für jedes einzelne Buch werden in den Eigenschaften dieses Buches bestimmt. Hörbücher haben ihre Eigenschaften, Textbücher ihre, und besondere Bücher wie Daisy Audio + Text haben beide, auf zwei getrennten Registerkarten des Eigenschaftenfensters. Aus dem Player-Fenster rufen Sie die Eigenschaften mit der Taste Eigenschaften oder mit Alt + Enter auf, aus dem Bibliotheksfenster, während Sie auf einem Buchtitel stehen, aus dem Kontextmenü oder ebenfalls mit Alt + Enter.</p>
+<h2 id="s21">Toneigenschaften</h2>
+<p>Öffnen Sie die Toneigenschaften, fällt Ihnen zuerst das Kontrollkästchen Klangbearbeitung auf. Sie müssen es nicht einschalten, wenn Ihnen der Klang des Buches genügt — ist er es aber nicht, bringt die Klangbearbeitung den Ton womöglich auf ein hörbares Maß. Das Ankreuzen beginnt eine Analyse der Aufnahme, die je nach Geschwindigkeit des Rechners zwischen dreißig Sekunden und einigen Minuten dauern kann. Am Fortschrittsbalken sehen Sie jederzeit, wie es steht und wie viel noch bleibt. Ist die Analyse fertig, setzt NBR die unten genannten Filter auf einen brauchbaren Stand; sagt Ihnen der Klang zu, bestätigen Sie einfach alles mit OK, meinen Sie, es lasse sich noch verbessern, folgt hier eine kurze Beschreibung dessen, was sich machen lässt.</p>
+<p>Es folgen sieben Filter, die Ihnen helfen mögen oder auch nicht, den Klang von Hörbüchern aus alten, schlechten oder beidem Aufnahmen etwas zu verbessern. Jedes Bedienelement lässt sich einzeln ein- und ausschalten, Sie müssen sie also nicht alle zugleich verwenden. Schalten Sie die Klangbearbeitung ein, finden Sie zuerst die Schaltfläche Zurücksetzen, die alle Filter auf ihre Voreinstellungen bringt. Dann ein Kontrollkästchen Umgehen, mit dessen Ein- und Ausschalten Sie sofort den Unterschied zwischen dem Original und Ihren Einstellungen hören. Das Kürzel dafür ist Strg + B, sodass Sie nicht ständig von den Reglern zum Umgehen und zurück wandern müssen.</p>
+<p>Der erste Filter in der Reihe ist der Hochpass, also das Entfernen von Rumpeln. Er nimmt Geräusche im unteren Bereich der Aufnahme heraus, von elektrischen Geräten bis zum zufälligen Stoß gegen Mikrofon oder Tisch. Es folgt die Rauschminderung, gedacht für Bandrauschen, schlechte Mikrofone und ähnliche Geräusche etwas weiter oben im Spektrum. Das Mildern der Zischlaute verringert das Zischen von Lauten wie S und Sch, die auf der Aufnahme durch zu nahes Besprechen oder angehobene Höhen verzerrt wurden. Sprache angleichen versucht, die leisen und die lauten Teile der Aufnahme einander anzunähern. Dann folgt die Klangfarbe, also ein Fünfband-Equalizer: tief, tief/mittel, mittel (die Stimme), mittel/hoch und hoch. Zuletzt die automatische Lautheit und die Pausen, auch Normalisierung und Gate genannt: Die Normalisierung hebt die ganze Aufnahme ohne Verzerrung auf den höchsten Pegel, während das Absenken der Pausen (das Gate) entfernt, was an Geräusch in ihnen übrig ist.</p>
+<p>Jeder Filter hat fünf Stufen: minimal, leicht, mittel, stark und maximal. Und es sei wiederholt: Jeder lässt sich einzeln ein- und ausschalten.</p>
+<p>Auch die Klangbearbeitung wird für jedes Buch einzeln behalten.</p>
+<p>Unbedingt gesagt sei, dass diese Klangbearbeitung keine Wunder wirkt und aus einer schlechten Überspielung aus den sechziger Jahren keine kristallklare Sprache macht, als wäre sie in den Abbey Road Studios in London aufgenommen — aber sie bringt Sie hoffentlich irgendwie bis ans Ende des Buches, ohne dass Sie an der Qualität verzweifeln.</p>
+<h2 id="s22">Texteigenschaften</h2>
+<p>Ähnlich wie in den Einstellungen für die Sprachausgabe haben Sie hier die Wahl von Sprache, Stimme, Tempo, Lautstärke und Tonhöhe für das gewählte Buch. In den Einstellungen wählen Sie den Standard für alles, hier stellen Sie es für einen bestimmten Titel ein. Fragen Sie sich, wozu: Das einfachste Beispiel ist, dass Ihre Standardstimme in den Einstellungen männlich ist, Sie aber einen aus weiblicher Sicht geschriebenen Roman lieber mit einer weiblichen Stimme läsen — das ändern Sie in den Texteigenschaften für dieses eine Buch. Alle übrigen Bücher in dieser Sprache gehen weiterhin mit der männlichen Stimme auf, bis und falls Sie das ändern. Ebenso lässt sich leichte Lektüre ohne Weiteres mit 250 Wörtern je Minute lesen, etwas Schwereres aber, über das Sie nebenher nachdenken müssen, stellen Sie vielleicht lieber auf 180.</p>
+<p>Ein Aussprachewörterbuch gibt es hier nicht; es folgen die Einstellungen für Braille und für den Bildschirm. Schalten Sie die Brailleausgabe ein, bekommen Sie die Wahl der Brailletabelle für die gewählte Sprache; schalten Sie die Bildschirmausgabe ein, bekommen Sie die Wahl, auf welche Art der Text auf Ihrem Bildschirm gezeigt wird. Wollen Sie nur in Braille oder nur am Bildschirm ohne Sprachausgabe lesen, wählen Sie das in der Stimmenliste. In dieser Beta sind die Braille- und die Bildschirmausgabe ausgegraut und tragen einen entsprechenden Hinweis; die Wahl der Brailletabelle für Bücher aus Brailledateien arbeitet weiterhin.</p>
+<h2 id="s23">Die Bildschirmausgabe</h2>
+<p class="beta">Dies ist in der ersten Beta nicht enthalten. Die noch nötigen Prüfungen und Umbauten brauchen mehr Zeit, als diese Fassung hat, deshalb kommt es in einer der nächsten zurück.</p>
+<p>Je nach Ihrer Wahl in den Einstellungen oder den Eigenschaften sehen Sie auf dem Bildschirm einen kleineren Rahmen über der Fläche des Players, in dem der Text wechselt wie die Untertitel eines fremdsprachigen Films oder einer Serie. Wählen Sie eine der beiden anderen Möglichkeiten, ist der Rahmen größer, und der Text gleitet entweder über den Bildschirm wie ein Abspann oder wechselt Bild für Bild. In diesen beiden Darstellungen erscheint die gesprochene Zeile in einer anderen Farbe.</p>
+<p>Am unteren Rand des Rahmens können Sie Schrift, Größe und einige weitere Werte der Darstellung ändern, und es gibt Grundtasten zum Steuern der Wiedergabe. Alle Tastenkürzel arbeiten auch in diesem Rahmen.</p>
+<p>Haben Sie sich für Braille entschieden, erscheint der zuerst beschriebene kleine Rahmen, denn Braille kann ohne die Anzeige des Textes, der an den Screenreader geht, nicht arbeiten. Wählen Sie allein die Bildschirmausgabe, haben Sie die Wahl der Darstellungsart. In beiden Fällen erscheint die Anzeige, sobald die Wiedergabe beginnt. Haben Sie keine dieser Möglichkeiten gewählt und wollen nur hören, sind aber neugierig, wie das aussieht, können Sie die Anzeige aus dem Player-Fenster jederzeit mit F9 ein- und ausschalten.</p>
+<p>Und das ist ungefähr alles, was das Hilfedokument angeht. Ausführlichere Erklärungen finden Sie bei den Bedienelementen, wo sie nötig sind — die kleine Taste mit dem Fragezeichen oder F1 in der fokussierten Gruppe. Danke, dass Sie geduldig bis ans Ende des Textes gekommen sind. Als kleine Aufmerksamkeit dafür dürfen Sie nun von zwei versteckten Funktionen lesen.</p>
+<h1 id="s24">Für die Hartnäckigsten</h1>
+<p>Die erste ist ein anderer Weg, einen oder mehrere Titel in die Bibliothek zu bekommen. Statt über die beschriebenen Dialoge Datei öffnen und Ordner öffnen kopieren Sie den gewünschten Inhalt einfach über Windows oder den Datei-Explorer in den Bibliotheksordner. Beim nächsten Start frischt Nemoviz Book Reader die Bibliothek auf und zeigt die neuen Titel. Läuft er bereits, drücken Sie im Bibliotheksfenster einfach die Taste Aktualisieren.</p>
+<p>Die zweite versteckte Funktion betrifft die Navigation. Über alles oben Beschriebene hinaus können Sie sich durch das Buch, das Sie lesen, auch mit den Kürzeln Strg + 1 bis Strg + 9 bewegen; sie setzen Sie auf 10, 20 und so weiter bis 90 % des Buches.</p>
+
+</body>
+</html>

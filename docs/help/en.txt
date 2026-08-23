@@ -1,0 +1,261 @@
+; The Nemoviz Book Reader manual — English.
+;
+; Translated from docs/help/hr.txt, which is derived from Gordan's own
+; docs/NBR.docx. This is also the FALLBACK manual: HintSystem.OpenManual reaches
+; for the reader's own language first and for this file second, so it is the one
+; a reader gets when their language has no manual yet.
+;
+; Markers: # chapter, ## section, - bullet, | key | meaning,
+; {beta} after a heading prints the BETA: line, *this* is emphasis.
+
+TITLE: Nemoviz Book Reader
+LANG: en
+TOC: Contents
+BETA: This is not included in the first beta. The testing and rework still needed take more time than this release has, so it comes back in one of the next ones.
+
+Welcome to Nemoviz Book Reader, a player for electronic books in more than forty-five formats and on three outputs.
+
+# System requirements
+
+## Minimum
+
+- Dual core CPU at 1.5 GHz, 2 GB of RAM, 100 MB of storage + room for your library,
+- MS Windows 7 SP1 64-bit or later, .NET Framework 4.8 (on Windows 7 it has to be installed separately). On this configuration you will unfortunately not be able to use OCR or the One Core voices; both arrived with Windows 10.
+
+## Recommended
+
+- Quad core CPU at 2.0 GHz, 8 GB of RAM, 100 MB on an SSD + room for your library,
+- MS Windows 10 64-bit 22H2 or later, where .NET Framework 4.8 is built in.
+
+# In general
+
+Nemoviz Book Reader lets you read audio and text electronic documents in whichever way suits you best. The formats it can play are:
+
+Audio formats: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au and .voc.
+
+Text formats: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw and .azw3.
+
+Special formats: Daisy 2.02 audio, Daisy 3 audio, Daisy 2.02 text, Daisy 3 text, Daisy 2.02 audio + text, Daisy 3 audio + text and epub 3 text + audio.
+
+Braille formats: .brf, .brl, .bra, .dxb and .i55.
+
+All of the above can also be opened straight out of a .7z, .rar or .zip archive. Multi-volume archives are supported, and so are password-protected ones — provided you know the password, of course.
+
+Books stored as pictures can be opened as well — the ones where the pages are images of text rather than real text, such as a scanned .pdf or an .epub made of page images. Ordinary pictures work too — .bmp, .jpg, .tif and so on — so if you happen to have a book as a set of neatly numbered images, Nemoviz Book Reader will take that as well. The text in the pictures is recognized automatically through Microsoft OCR, and after a short while you have a reasonably readable title on your bookshelf.
+
+Warning! All of the formats above and their variations will load into Nemoviz Book Reader as long as they are not protected by a Digital Rights Management licence. NBR cannot open DRM-protected titles, so if you have any, play them through the hardware or software player intended for them. For details, ask wherever you got those titles from.
+
+Every file type in the list above can be played as sound, shown on screen, and even read in braille if you have the equipment for it. All you need is a Windows-compatible computer, a monitor and, ideally, a braille display set up with your screen reader.
+
+On top of all that, NBR can machine-translate books using various AI LLM services. Some have free allowances, some have to be paid for; that is simply how those services work. Nemoviz Book Reader for Windows is entirely free to use, but external services are not ours to answer for. We connect you to them through the application and make it possible for the translation to happen inside the player — but registering with the services, arranging payment and everything else is yours to do. Once that is done, take the API key from the service's own pages, paste it into the place set aside for it in the player's settings, and we take over from there.
+
+Nemoviz Book Reader has been tested and confirmed compatible with the Jaws for Windows and NVDA screen readers, and it ought to work without trouble with others too. Accessibility is the foundation this application is built on, so there should be no problem if you use a different reader.
+
+All keyboard shortcuts are built into the application itself and can be used with no screen reader present. The screen reader is only there to report what is happening in the player at the moment, and — if you read braille — to carry the text to the braille display. For everything else the player works without one.
+
+When importing the braille formats listed above, it matters to know that NBR uses LibLouis and its tables. We cannot guarantee that everything will be right for every language, and we cannot correct the tables for each book individually; a great deal depends on how the books themselves were made. If the result you get on import is poor, you can change the braille table in the book's properties, where more than one is available for that language. If it works, excellent; if it does not, we are sorry. Not all of it is down to the player — some responsibility lies with the people who produce the books and the people who write the braille tables.
+
+# First run
+
+The first time it starts, Nemoviz Book Reader will ask whether you want to keep or change the folder for your future library. Bear in mind that the default is inside the Windows user folder, which usually sits on the C partition and can fill up over time, taking space on the system disk. Point it at another partition or disk and nothing important changes, but you can be more confident that the system will not run out of the room it needs to work. Keeping the library on another disk or partition also means that if the system breaks, your collection of books is safe.
+
+After that, one of the application's two windows opens: the library window, which appears now, on the first run after installation, and every time there is no book loaded or the library is empty. This time we can close it, because after installing it is worth going through the settings first and putting things the way you want them.
+
+# Settings
+
+This window is made of several tabs, and there is a walk through each of them below. What perhaps sets it apart from other settings windows is that most of the options carry a small help key which opens a dialog describing that function. You get help at every step, and the document you are reading now does not have to be 250 pages long.
+
+## General
+
+The first thing set here is the language. If the application has the language your system is in, it will already be selected and the interface will be in that language; if not, NBR appears in English. If you do not like that either, open the list of languages and choose another.
+
+The second option is where the library lives, which we went through after the first run. If you had not decided then, now is the moment.
+
+Then come two check boxes for switching the multimedia keys on your keyboard on and off, if you have them. They apply to the keys on headsets as well. The first says whether to use them at all, the second whether they work system-wide or only while NBR has focus.
+
+Then a check box where you choose whether the library uses the metadata inside the files, or shows author and title from the folder or file name instead.
+
+And last, the look Nemoviz Book Reader is drawn in. There are two choices. *System colors* gives you the player in a classic layout and the palette your system uses; it is also what you get if you have high contrast switched on, because NBR then draws nothing of its own and lets your scheme through whole. *NBR design* gives the player a slightly more modern appearance. If you have not chosen, NBR decides for itself: high contrast gets System colors, everything else gets NBR design.
+
+## Speech and braille
+
+The first option is a row of controls for choosing a language and a voice for text books. Pick a language, then a voice for that language. Set the volume, the speed and the pitch, and confirm with Apply. Choose another language, another voice and other parameters, and press Apply again. That is how you set the default voice for a given language, so that every new book, once its language has been worked out, opens with the voice you chose.
+
+Perhaps a slightly hidden option, but we had no better idea. The last item in the voice combo box is *Add new languages*. Activating it opens a window where you can pick one or more Microsoft One Core voices and, after confirming, install them through Windows Update. As with adding OCR languages, this can take a shorter or a longer time depending on how busy the update servers are. Depending on your administrative settings you may also get a UAC dialog to confirm.
+
+All of these parameters can of course be set differently for each individual book, but that is done in that book's properties; here we are setting the general ones.
+
+Next is the pronunciation dictionary, which you have surely met before. You can correct pronunciation globally, per language and per voice, and for all three you will find the options usual for this sort of dictionary.
+
+Then come the check boxes for switching braille and on-screen output on and off; each of them, when on, offers further settings whose help you will find on the spot. In this beta those two boxes are greyed out and carry a note saying so; they come back in one of the next releases.
+
+## Devices
+
+Here you choose the sound card you want to listen to your books through. If you only have one there is nothing to touch, because there is nothing to choose. Beside it is a check box that stops the sound card going to sleep. If you notice chopping while a book plays — sentences or paragraphs sounding as if the first word or two had been cut off — and especially with text formats, do switch this on.
+
+If you still have an optical drive in your computer, and perhaps a collection of older audio editions on ordinary CDs, feel free to switch on Use the optical drive. That turns support for the device on and you can start listening to your books on CD.
+
+## Advanced
+
+On this tab you choose the language, or several, to be used for recognizing books made of pictures when they are imported. Nemoviz Book Reader uses the Microsoft OCR built into Windows 10 and 11. It currently supports thirty-five languages, whose list you can see by pressing *Add a language*. When you have picked the ones you want and press Install, the languages will not be installed immediately. NBR does not install them itself; they come through Windows Update and may take a while to reach the front of the queue. Depending on your system settings, a User Account Control dialog may also appear for you to confirm the installation.
+
+Once installed, when you import a book made of pictures you will be able to pick from a combo box the language you want the text recognized in. This too can take a little while, depending on the speed of the machine and the size of the book, but you can follow all of it on the progress bar.
+
+Besides the settings for recognition, this is also where you choose the LLM services for translation. At the time of writing those are Google Gemini, DeepSeek, DeepSeek with a larger model, three tiers of OpenAI GPT, and Microsoft Azure. As written above, these services need API keys or some other form of authorization, and you can read more in the Help menu under Services and accounts.
+
+Besides translation there are also the additional cloud voices; we currently support Google Cloud Chirp 3 and Microsoft Azure Neural voices. Enabling them works much like the translation services, and again there is more about it in the Help menu under Services and accounts.
+
+Please note that these voices are also paid for. Google gives a million characters of reading free, which is roughly two average 500-page books. Microsoft gives half that, 500,000 characters, roughly one average book. Once the free allowance is used up your credit card is charged, and the cost of reading is somewhere between $8.00 and $15.00 per average book, depending on the service.
+
+To avoid misunderstandings and accidental unwanted spending, we have limited how cloud voices can be set. You will not see them in the speech and braille settings and cannot make them the default; they are visible only in a chosen book's properties, and only after you have enabled them in the advanced settings. In a book's properties you can pick one of these voices as that book's own, and it applies to that book alone.
+
+Since characters are spent on cloud voices even when you rewind, repeat a passage, or otherwise go back over words already read, NBR keeps a cache of what has been spoken, so that rewinding and the like are not charged again. That same cache is what lets you export the book to mp3 once you have read it, and so end up with an ordinary audiobook.
+
+# Library
+
+This window is not on screen all the time; apart from the first run it opens when it is needed, and it is where you organize your collection of electronic publications. You add titles one at a time or in bulk, delete them, mark them read, unread or favourite. You can order the display by several criteria, filter titles by status (read, unread…), and search.
+
+For any title in the library, a simple press of Tab lets you read its details: title and author, publisher and format, where you stopped, what percentage of the book you have read, how much time is left, and a few things besides. Where it is possible, you also get a short description of the book.
+
+## Adding titles
+
+The File menu holds two items: Open file (Ctrl + O) and Open folder (Ctrl + Shift + O). If you switched on support for the optical drive in Settings, you will also find Open audio CD. Besides these there is an option to recognize a picture book again, one to make an audiobook, and one to translate. There is also an item not to touch unless you really must, *Clear the library*. It says plainly what it does, and after activating it you get one more warning. Confirm all the way through and your library is deleted: every bookmark and every reading position gone, and the language and speed settings for the books inside gone with them. So do go around this item unless you are absolutely certain you want the library emptied.
+
+The first option opens a single file (an MP3 book in one file, an EPUB document, or an ncc.html file for a Daisy title), while opening a folder lets you open an audiobook spread over several files in one folder. Beyond that, opening a folder lets you import a larger quantity of different files, that is, a collection of several titles. Nemoviz Book Reader has rules built in for sorting these out and will do its best to arrange such a folder as well as it possibly can.
+
+Open audio CD starts playing the book from your optical drive and returns you to the player window. Using an ordinary CD does not import the book into the library; it only lets you play it through Nemoviz Book Reader.
+
+Besides ordinary files, NBR can — unlike the great majority of applications of this kind — open compressed files, that is, archives. The supported archive formats are .zip, .rar and .7z, and besides single-volume archives it can open multi-volume ones and password-protected ones, provided you know the password.
+
+In other words, wherever and however you come by a book, in one standard file or several, packed into an archive or not, you can import it into the library from where it sits with no preparation at all. Nemoviz Book Reader copies the files you opened into the library folder at the place set aside for them, unpacks archives and stores them in the library in their standard form, and records everything worth knowing about the titles you imported. Your original files stay untouched where you keep them; everything that happens to the books afterwards happens to NBR's copies in the library folder.
+
+The repeat-OCR option is there so you can run the recognition of a picture book again in some other language, if you were not happy with the result when the book was opened.
+
+Translate the book opens a dialog where you choose the source language, the language to translate into, the service or services you want to use, and a field where you can type a few basic instructions about what to translate and how.
+
+Export as an audiobook does exactly what its name says. Whether you use one of the installed speech synthesizers or the cloud voices, you can turn a text book into an audio one and export it wherever you like. The book is exported as a single .mp3 file, the parameters are the same as those of the TTS you are using, and the quality of the recording will match the quality of listening live. Before it starts, NBR asks you to confirm and says how long the making should take.
+
+## The bookshelf
+
+Moving up and down with the arrow keys on the bookshelf — which is what the part of the library window holding the list of your titles is called — you hear the titles you have in the library. How a document's title is spoken depends on a few things. On import NBR tries to pull the author's name, the title of the work and a few other details out of the metadata in the file holding the book. If that information is not there, NBR names the book after the folder or the file.
+
+If you like neither of those, you can name the selected book as you please, from the context menu on the book's name or more simply with F2. When naming it you will find two separate fields for the author's name and the title of the work; type them in and confirm on the button, or simply press Enter.
+
+Besides the basic details such as the author's name and the title, moving through this list with the arrows will let you hear the book's status: *Now reading*, *Reading*, *Read* and *Unread*. If you marked the title a favourite, you hear that too. In the context menu, where the rename item already mentioned lives, you will also find Mark as read, Mark as unread, Mark as favourite, Delete and Properties — but more about those later.
+
+Once you have stopped on a title, Tab takes you to a place where the arrow keys give you a wealth of information about the book, with an eye to where you stopped, how much of the book is read and how much is left as a percentage and in time, where the book was published and produced, technical details of the recording and so on. This information depends on the format the book is in and will differ from title to title.
+
+Moving on through the library window you come to the search field, which works on the simple principle of looking for the string you typed in the names of the items on the bookshelf. Type "ana" and it will certainly find authors called Ana — but it will also find *7000 dana u Sibiru*.
+
+After the search field there is a filter combo box where you decide which books are shown. By default all books are there, but you can switch the filter to Reading, Unread, Read or Favourites, and the bookshelf will fall in with your choice.
+
+## Sorting
+
+This menu holds only the usual things you have seen who knows how many times before. You can choose the order the titles appear in: alphabetically, by date added, by format and by status. Status means unread, read and so on. Each of these can additionally be shown ascending or descending.
+
+Once you have got to know what the library window holds and does, it is time to pick a book on the shelf and walk with Tab to the Load button — or simply press Enter while the title still has focus. The book you chose to read will always be above the bookshelf, in a section of its own called Now reading. It is worth saying that the book you are reading, that is the active book loaded in the player, cannot be deleted the way the other books on the shelf can. You have to mark the active book as read from the context menu so that it moves out of Now reading and into Read, and only then can you delete it.
+
+In short, when you press Enter on a book's title or the Load button, the library closes and you are back at the player's main window.
+
+# The player
+
+This window is always visible on your computer's screen. Sometimes the library window hides it, sometimes the reading surface does, but it is in fact the main window from which you control a book once it is loaded. You can move around the player window with Tab as in any other window, and activate items with Enter — but unlike other windows in this application and in others, the arrow keys and the space bar are reserved for other functions. So if you Tab to, say, the bookmarks key, you will not be able to activate it with the space bar; Enter is the only way.
+
+The tab ring of the player's main window holds the following keys and functions, not necessarily in this order:
+
+| Play/Pause | space bar |
+| Forward | Shift + Right |
+| Back | Shift + Left |
+| Volume | Up and Down arrows, or F11 and F12 |
+| Speed | Ctrl + Left and Ctrl + Right |
+| Progress through the book | Left and Right arrows |
+| Navigation step | Shift + Up and Down arrows |
+| Library | F3 |
+| Settings | F2 |
+| Properties | Alt + Enter |
+| Bookmark | F5 |
+| Bookmarks | F6 |
+| Go to… | F4 |
+| Help | F1 |
+| Sleep timer | F7 |
+| Playback information | F8 |
+
+In the information field you can find the basic facts about playback — author, title, elapsed time, page and a little more, depending of course on the format of the book you are reading. One press of F8 simply reads out what the information panel says; press it twice and it comes into the screen reader's focus, so you can go through it in detail with the arrow keys.
+
+Every key has its own shortcut, so you can reach it easily without walking around the window too much, and controlling the book you are reading is simplicity itself.
+
+## Playback
+
+- The space bar starts and stops playback.
+- The Left and Right arrows "rewind" five seconds at a time or, in a text book, one sentence forwards or backwards.
+- Ctrl + Left or Right controls the reading speed.
+- Shift + Up or Down chooses the navigation step (heading, chapter, standard page, certain lengths of time); the choice changes with the format and structure of the book.
+- Shift + Left or Right moves you by the chosen navigation step.
+
+In short: you start the chosen book with the space bar, and with Ctrl held down the Left and Right arrows control the reading speed.
+
+If you want to skip a little forwards or backwards, the Left and Right arrows do it five seconds or one sentence at a time. For bigger navigation steps, press Shift, choose the step you want with the Up and Down arrows, and — still holding Shift — go forwards and backwards through the book with the Left and Right arrows by the step you chose. Whenever you want to hear how and where your reading is getting to, press F8 at any moment and the screen reader will read you the whole content of the information panel. If you want to go through the information field in more detail, item by item, press F8 twice quickly. When you are done, leave the information field by pressing F8 twice again, or simply Escape, so that the arrow keys get their navigation duties back.
+
+The thinking behind this approach to navigation was that the user should not have to learn and remember a whole string of shortcuts. Most of the navigation is arranged on the arrow keys and, combined with the Shift and Ctrl modifiers, means you do not have to move your hand around the keyboard. Put your right hand on the arrows, press a modifier with your left when you need one, and that is the whole philosophy of it. Those who are defter will probably manage to use the thumb of the right hand for the Ctrl or Shift on the right-hand side, but how you use it is left to each person. All the other shortcuts, with the exception of Alt + Enter for Properties because that is the usual Windows convention, are on the function keys, all in the interest of keeping the controls as simple as possible.
+
+## Go to...
+
+This control, as its name says, is for jumping to a particular part of the book in a couple of presses or clicks. With unstructured formats such as plain text, most audio formats in a single file, or badly formatted structured books, it cannot be activated — and a sound confirms that. With books of even halfway decent structure you will be able to skip to chapters, subchapters and other structural parts of the book. All of it, naturally, depends on what the producers put into the book and how.
+
+## Bookmarks
+
+Two keys that come as a pair — Bookmark for setting one, and Bookmarks where you manage the ones already set. When a bookmark is set you hear a short sound, so you can be sure it is there. In managing bookmarks you move through them with the arrows and jump to a bookmark's position with Enter. You can also delete the ones you do not need. For audio books only the time is shown for now; for text books, the start of the sentence where you put the bookmark. If you have no bookmarks set, the Bookmarks key cannot be activated, and a sound will tell you so.
+
+## The sleep timer
+
+An ordinary sleep timer, nothing clever. You choose a length — 15, 30, 45 and 60 minutes are offered — and the next option is your own, set to 90 minutes but changeable to whatever value you like. Then comes the choice of what happens when the countdown ends: Stop playback, Stop and close the application, and Stop and shut down the computer.
+
+Besides that there is a check box asking whether you want a bookmark set when the countdown begins. It can be useful for getting back to the time before you fell asleep and finding your place more easily from there.
+
+The countdown starts when you press *Start*; the dialog closes, and instead of the word Timer the player window now shows a running clock. Activate the timer again and the countdown is cancelled, and in the dialog you can choose a new time or cancel everything on the button meant for it.
+
+Do remember, and watch out for, the fact that playback stops when you activate any of the options such as Settings, Library and so on. When you have done what you came to do in those dialogs and confirm your way back to the player window, playback resumes. The exception is the Properties dialog, where you are after all setting things you would want to hear while you do it.
+
+A few words about the speed and volume controls. Moving with the arrows, volume goes in steps of 5% and you hear a sound when you reach the end. For audio books the speed goes in steps of 0.1x, from 0.5x to 3x, and when you come back to the normal 1x you hear a sound. For text books the speed is not a multiplier but a number of words per minute, and it goes in steps of five, from 80 to 400 words per minute.
+
+What matters most to you as a user is that Nemoviz Book Reader remembers absolutely everything about the playback of the books you listen to. It remembers the position, the volume and the speed for audio, and the kind, speed, language and pitch of the TTS for text books; it remembers the sound-processing parameters for audio books and the braille and on-screen parameters for text ones. In other words, everything you set to your own liking and needs is remembered for each book separately.
+
+# Properties
+
+It has been said several times: the settings and parameters for each individual book are decided in that book's properties. Audio books have their own properties, text books theirs, and special books such as Daisy audio + text have both, on two separate tabs of the properties window. You open properties from the player window with the Properties key or the Alt + Enter shortcut, and from the library window, while on a book's title, from the context menu or again with Alt + Enter.
+
+## Audio properties
+
+When you open the audio properties, the first thing you notice is the Sound processing check box. You do not have to switch it on if the sound of the book you are listening to is acceptable — but if it is not, switching Sound processing on may bring the sound up to a listenable level. Ticking the box starts an analysis of the book's recording, which can take between thirty seconds and a few minutes depending on the speed of the machine. The progress bar shows you at every moment how it stands and how much is left. When the analysis is done, NBR will set the filters listed below to some optimal state, so if the sound suits you just confirm everything with OK; if you think you can improve on it, here is a short description of what can be done.
+
+There follow seven filters which may or may not help you improve the sound of audiobooks made from old recordings, bad ones, or both. Each control can be switched on or off separately, so you do not have to use them all at once. When you switch Sound processing on, the first thing you find is the Reset key, which returns all the filters to their default settings. Then a Bypass check box, switching which on and off lets you hear immediately the difference between the original and your adjustments. The shortcut for bypassing is Ctrl + B, so you do not have to keep travelling from the controls to the bypass and back.
+
+First in the row of filters is the high pass, that is, removing rumble. It takes out noise in the low end of the recording, from electrical equipment to an accidental knock on the microphone or the table. Then Noise reduction, meant for tape hiss, poor microphones and similar noise a little higher up the spectrum. Softening sibilance reduces the spitting of sounds like S and SH which were distorted on the recording by being recorded too close or by the highs being pushed up. Evening out speech tries to bring the quiet and loud parts of the recording closer together. Then there is Tone, that is, a five-band equalizer: low, low/mid, mid (the voice), mid/high and high. Finally, automatic loudness and pauses, also known as normalization and gate: the normalization lifts the whole recording to the maximum level without distortion, while quietening the pauses (the gate) removes what noise is left in them.
+
+Every filter has five levels of action: minimal, light, medium, strong and maximum. And it is worth repeating that each can be switched on or off individually.
+
+Sound processing is also remembered for each book separately.
+
+It must be said that this sound processing will not work miracles, and a bad dub from the nineteen-sixties will not come out as crystal-clear speech recorded at Abbey Road in London — but it will, we hope, get you somewhere near the end of the book without going mad at the quality.
+
+## Text properties
+
+Much as in the speech settings, here you have the choice of language, voice, speed, volume and pitch for the selected book. In Settings you choose the default for everything; here you set it for one particular title. If you wonder why, the simplest example is that your default voice in Settings is a male one but you would rather read a novel written from a woman's perspective in a female voice — you change that in the text properties for that book alone. Every other book in that language will still open with the male voice by default until and unless you change it. Equally, some light reading you can happily take at 250 words a minute, but something heavier that you have to think about along the way you might rather put at 180.
+
+There is no pronunciation dictionary here; what follows are the braille and on-screen settings. Switch braille output on and you get a choice of braille table for the chosen language; switch the on-screen display on and you get a choice of how the text is shown on your screen. If you want to read only in braille or only on screen with no speech, choose that option in the list of voices. In this beta the braille and on-screen outputs are greyed out and carry a note saying so; choosing the braille table for books imported from braille files still works.
+
+## The on-screen display {beta}
+
+Depending on your choice in Settings or Properties, you will see on screen a smaller frame over the player's face in which the text changes like the subtitles on a foreign film or series. Choose either of the other two options and the frame will be larger, with the text either sliding across the screen like the closing credits or changing a frame at a time. In those two displays the line being spoken is shown in a different colour.
+
+At the bottom of the frame you can change the font, the size and a few other display parameters, and there are basic keys for controlling playback. All the keyboard shortcuts work in this frame too.
+
+If you chose to use braille, the small frame described first will appear, because braille cannot work without the display of the text that is carried to the screen reader. If you choose the on-screen display alone, you have the choice of the kind of display. In both cases the display appears once playback starts. If you chose neither of these options and only want to listen, but are curious how this looks, you can always switch the display on and off from the player window with F9.
+
+And that is roughly it as far as the help document goes. Fuller explanations are beside the controls wherever they are needed — the small key with a question mark, or F1 in the focused group. Thank you for being patient and reaching the end of the text. As a small token for it, you now get to read about two hidden functions.
+
+# For the most persistent
+
+The first is an alternative way of adding one or more titles to the library. Instead of the Open file and Open folder dialogs described above, simply copy the content you want into the library folder through Windows or File Explorer. The next time it starts, Nemoviz Book Reader will refresh the library and show the new titles. If it is already running, just press the Refresh key in the library window.
+
+The second hidden function is a navigational one. On top of everything described above, you can move through the book you are reading with the shortcuts Ctrl + 1 to Ctrl + 9, which put you at 10, 20 and so on up to 90% of the book.

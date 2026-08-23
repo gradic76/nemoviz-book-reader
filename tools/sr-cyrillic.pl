@@ -1,6 +1,11 @@
 use strict; use warnings;
 use Encode qw(decode encode);
 
+# The flag is read HERE, before @protect is built, because @protect itself
+# is filtered by it -- see the note beside @protectLangOnly.
+my $textMode = 0;
+@ARGV = grep { $_ eq q{--text} ? ($textMode = 1, 0)[1] : 1 } @ARGV;
+
 # sr.lang (Latin) -> sr-Cyrl.lang, by transliteration.
 #
 #   perl tools\sr-cyrillic.pl "Nemoviz Book Reader\Lang\sr.lang" "Nemoviz Book Reader\Lang\sr-Cyrl.lang"
@@ -56,11 +61,45 @@ my @seams = qw(nadziveti nadzivi nadzive injekcij konjug konjunk nadjaca
 # Latin that must survive as Latin.
 my @protect = (
     qr/\\[rn]/,                                    # the \n escape -- its own n is NOT a word
-    qr/\{[0-9]+\}/,                                  # {0} {1}
+    # {0} {1} in a .lang file, and {beta} in the manual. LETTERS ARE ALLOWED
+    # HERE, and the numeric-only version cost the Cyrillic manual its beta
+    # notice: docs/help/sr.txt marks a heading "{beta}", the rule did not match
+    # it, "beta" transliterated to Cyrillic, and tools/make-help.pl then found
+    # no marker to act on -- so the one page that had to warn a reader that the
+    # feature is switched off silently did not. Nothing in Serbian is written
+    # inside braces, so widening this cannot swallow a real word.
+    qr/\{[A-Za-z0-9]+\}/,
     qr/\*\.[A-Za-z0-9]+/,                            # *.json
     qr/[A-Za-z][A-Za-z0-9-]*(?:\.[A-Za-z0-9-]+){1,}(?:\/[^\s"]*)?/,   # domains, files
+
+    # A BARE DOTTED EXTENSION, written the way prose writes it: .rtf, .epub,
+    # .zip, and .NET while we are here. The mask rule wants a star in front and
+    # the domain rule wants a name in front, so a list of formats -- which is
+    # most of the manual's second chapter -- had nothing protecting it and came
+    # out as ".ртф", ".епуб", ".рар". Those are not extensions; a reader cannot
+    # type them and cannot recognise them on a file. Safe because it needs a
+    # letter IMMEDIATELY after the dot, and a Serbian sentence puts a space
+    # there.
+    #
+    # IT MUST STAND AFTER THE DOMAIN RULE, and putting it before cost one
+    # regression to find out: it matched the ".com" of onmicrosoft.com first,
+    # leaving "onmicrosoft" bare for the transliteration, so Azure's own
+    # directory name came out as "онмицрософт.com". The general form has to get
+    # its chance before the narrow one.
+    qr/\.[A-Za-z][A-Za-z0-9]*\b/,
     qr/\b[A-Z][A-Z0-9]{1,}\b/,                       # NBR OCR API JSON MP3 CD LGPL
     qr/\bGPL\b|\bMIT\b/,
+
+    # A TOKEN THAT MIXES LETTERS AND DIGITS IS AN IDENTIFIER, NOT A WORD.
+    # Serbian has no word with a digit inside it, so nothing native can match
+    # this -- but version strings, key names and model numbers are full of them,
+    # and the uppercase rule above cannot help because it requires the token to
+    # BEGIN with a letter. Found 2026-08-23 in the manual: Windows 10 "22H2"
+    # came out as "22X2" with a Cyrillic X, and it is exactly the kind of damage
+    # tools/check-scripts.pl cannot see -- once the H has become an X there is no
+    # Latin left in the word to mix. A reader would have typed a version that
+    # does not exist.
+    qr/\b(?=[A-Za-z0-9]*[0-9])(?=[A-Za-z0-9]*[A-Za-z])[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)*\b/,
 
     # A WORD CONTAINING q, w, x OR y CANNOT BE TRANSLITERATED AT ALL, and this
     # rule is worth more than every name in the list below.
@@ -93,6 +132,20 @@ my @protect = (
     qr/"[^"]*"/,                                     # anything the reader must click
     qr/\x{201E}[^\x{201C}\x{201D}]*[\x{201C}\x{201D}]/,
 );
+
+# THE QUOTE RULES ARE FOR .lang FILES ONLY, and prose is why. In a language
+# file a quoted run is a button in somebody else's window -- "Create new API
+# key" -- and must survive as Latin or the guide cannot be followed. In the
+# manual, quotes are ordinary punctuation: the Croatian says the arrows
+# "premotavate" five seconds at a time, using the quotes to mark a metaphor,
+# and protecting that left a Serbian verb sitting in Latin in the middle of a
+# Cyrillic sentence. The manual marks UI names with *stars* instead, which the
+# generator turns into emphasis and which no rule here touches.
+my @protectLangOnly = (
+    qr/"[^"]*"/,
+    qr/\x{201E}[^\x{201C}\x{201D}]*[\x{201C}\x{201D}]/,
+);
+@protect = grep { my $r = "$_"; !grep { "$_" eq $r } @protectLangOnly } @protect if $textMode;
 my @names = qw(Nemoviz Book Reader Claude Anthropic Google Cloud Azure Speech
                Microsoft Windows Gemini DeepSeek OpenAI GPT Terra Luna Sol
                Text-to-Speech Compact Disc Digital Audio Andika Atkinson
@@ -148,7 +201,7 @@ my %override = (
 );
 
 my ($in, $out) = @ARGV;
-die "usage: sr-cyrillic.pl <sr.lang> <sr-Cyrl.lang>\n" unless $in && $out;
+die "usage: sr-cyrillic.pl [--text] <input> <output>\n" unless $in && $out;
 
 open(my $h, '<:raw', $in) or die "$in: $!\n";
 my $text = decode('UTF-8', do { local $/; <$h> }); close $h;
@@ -180,9 +233,30 @@ sub cyr {
 my @lines = split /\n/, $text, -1;
 for my $line (@lines) {
     next if $line =~ /^\s*$/;
-    # comments and keys are untouched; only the value is converted
-    if ($line =~ /^([A-Za-z][A-Za-z0-9._]*=)(.*)$/s) {
-        my ($k, $v) = ($1, $2);
+
+    # TWO KINDS OF INPUT, ONE SET OF RULES. A .lang file is key=value and only
+    # the value converts; the manual (docs/help/sr.txt) is prose and nearly all
+    # of it converts. Sharing the code rather than writing a second
+    # transliterator is the whole point -- every lesson in the protection lists
+    # above was paid for once, and a twin would drift away from them.
+    my ($k, $v);
+    if ($textMode) {
+        next if $line =~ /^;/;                      # a comment in the source
+
+        # The manual's own directives. LANG: is a code and must not convert at
+        # all; the others carry prose that must. The markers -- #, ##, -, | and
+        # {beta} -- are structure, so they are held out of the way exactly as a
+        # key is, by splitting them off the front and putting them back after.
+        if ($line =~ /^LANG:/) { next }
+        if ($line =~ /^((?:TITLE|TOC|BETA|DIR):\s*)(.*)$/) { ($k, $v) = ($1, $2) }
+        elsif ($line =~ /^((?:#{1,2}|-|\|)\s*)(.*)$/)      { ($k, $v) = ($1, $2) }
+        else                                               { ($k, $v) = ('', $line) }
+    }
+    elsif ($line =~ /^([A-Za-z][A-Za-z0-9._]*=)(.*)$/s) {
+        ($k, $v) = ($1, $2);
+    }
+
+    if (defined $v) {
         my @keep;
         # PHRASES FIRST, and the order is forced rather than chosen. @protect's
         # q/w/x/y rule works on single words, so run before it, it would lift

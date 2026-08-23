@@ -1257,14 +1257,25 @@ namespace Nemoviz_Book_Reader
                     // echo.
                     //
                     // Pressed TWICE in quick succession it instead moves focus
-                    // into the info box, and a third press brings it back where
-                    // it came from. The box is parked off the client area and
-                    // out of the tab order (§8k), so this is the only way in —
-                    // and the way out matters just as much, or a reader who
-                    // walked in has nowhere to walk back to.
+                    // into the info box, and TWICE AGAIN brings it back where it
+                    // came from. The box is parked off the client area and out
+                    // of the tab order (§8k), so this is the only way in — and
+                    // the way out matters just as much, or a reader who walked
+                    // in has nowhere to walk back to. Escape leaves as well.
+                    //
+                    // THIS COMMENT USED TO SAY "a third press brings it back",
+                    // AND IT WAS WRONG ABOUT THE CODE BELOW IT. Clearing
+                    // lastInfoKey on the way in is exactly what makes the next
+                    // press a fresh single: it announces, and the one after it
+                    // toggles out. So the gesture is symmetrical — double in,
+                    // double out — which is also the easier thing to remember.
+                    // Gordan checked it on the running player 2026-08-23 after
+                    // the comment sent me to report a fault in the manual that
+                    // the manual did not have. Read the code, not the note
+                    // above it.
                     if (DateTime.UtcNow - lastInfoKey < TimeSpan.FromMilliseconds(600))
                     {
-                        lastInfoKey = DateTime.MinValue;   // a third press is a fresh single
+                        lastInfoKey = DateTime.MinValue;   // so the next press is a fresh single
                         ToggleInfoBoxFocus();
                         return true;
                     }

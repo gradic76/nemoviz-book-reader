@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="eo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nemoviz Book Reader</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: Georgia, "Times New Roman", serif; font-size: 1.1em;
+         line-height: 1.6; max-width: 42em; margin: 2em auto; padding: 0 1.5em; }
+  h1 { font-size: 1.5em; margin-top: 2em; }
+  h2 { font-size: 1.2em; margin-top: 1.6em; }
+  p, li { margin: 0.8em 0; }
+  nav ul { list-style: none; padding-left: 1em; }
+  nav > ul { padding-left: 0; }
+  nav li { margin: 0.3em 0; }
+  table.keys { border-collapse: collapse; margin: 1em 0; }
+  table.keys th, table.keys td { text-align: left; vertical-align: top;
+         padding: 0.3em 1.2em 0.3em 0; font-weight: normal; }
+  table.keys th { white-space: nowrap; font-family: inherit; }
+  .beta { border-left: 4px solid currentColor; padding-left: 0.8em;
+          font-style: italic; opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<h1>Nemoviz Book Reader</h1>
+
+<nav aria-label="Enhavo">
+<h2>Enhavo</h2>
+<ul>
+<li><a href="#s1">Postuloj de la sistemo</a><ul>
+<li><a href="#s2">Minimumaj</a></li>
+<li><a href="#s3">Rekomendataj</a></li>
+</ul></li>
+<li><a href="#s4">Ĝenerale</a></li>
+<li><a href="#s5">Unua lanĉo</a></li>
+<li><a href="#s6">Agordoj</a><ul>
+<li><a href="#s7">Ĝenerale</a></li>
+<li><a href="#s8">Parolo kaj brajlo</a></li>
+<li><a href="#s9">Aparatoj</a></li>
+<li><a href="#s10">Speciala</a></li>
+</ul></li>
+<li><a href="#s11">Biblioteko</a><ul>
+<li><a href="#s12">Aldono de titoloj</a></li>
+<li><a href="#s13">La librobreto</a></li>
+<li><a href="#s14">Ordigo</a></li>
+</ul></li>
+<li><a href="#s15">La ludilo</a><ul>
+<li><a href="#s16">Ludado</a></li>
+<li><a href="#s17">Iri al...</a></li>
+<li><a href="#s18">Legosignoj</a></li>
+<li><a href="#s19">La dormtempigilo</a></li>
+</ul></li>
+<li><a href="#s20">Ecoj</a><ul>
+<li><a href="#s21">Ecoj de la sono</a></li>
+<li><a href="#s22">Ecoj de la teksto</a></li>
+<li><a href="#s23">Agordoj de la ekrana eligo</a></li>
+</ul></li>
+<li><a href="#s24">Por la plej persistaj</a></li>
+</ul>
+</nav>
+
+<p>Bonvenon al Nemoviz Book Reader, ludilo de elektronikaj libroj en pli ol kvardek kvin formoj kaj sur tri eligoj.</p>
+<h1 id="s1">Postuloj de la sistemo</h1>
+<h2 id="s2">Minimumaj</h2>
+<ul>
+<li>Dukerna procesoro je 1,5 GHz, 2 GB da ĉefmemoro, 100 MB por konservo + spaco por la biblioteko,</li>
+<li>MS Windows 7 SP1 64-bita aŭ pli nova, .NET Framework 4.8 (en Windows 7 oni devas instali ĝin aparte). En ĉi tiu agordo vi bedaŭrinde ne povos uzi OCR-on nek la OneCore-voĉojn; ambaŭ aperis nur ekde Windows 10.</li>
+</ul>
+<h2 id="s3">Rekomendataj</h2>
+<ul>
+<li>Kvarkerna procesoro je 2,0 GHz, 8 GB da ĉefmemoro, 100 MB sur SSD + spaco por la biblioteko,</li>
+<li>MS Windows 10 64-bita 22H2 aŭ pli nova, kie .NET Framework 4.8 jam estas enkonstruita.</li>
+</ul>
+<h1 id="s4">Ĝenerale</h1>
+<p>Nemoviz Book Reader ebligas al vi legi sonajn kaj tekstajn elektronikajn dokumentojn tiel, kiel plej konvenas al vi. La ludeblaj formoj estas:</p>
+<p>Sonaj formoj: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au kaj .voc.</p>
+<p>Tekstaj formoj: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw kaj .azw3.</p>
+<p>Apartaj formoj: Daisy 2.02 sono, Daisy 3 sono, Daisy 2.02 teksto, Daisy 3 teksto, Daisy 2.02 sono + teksto, Daisy 3 sono + teksto kaj epub 3 teksto + sono.</p>
+<p>Brajlaj formoj: .brf, .brl, .bra, .dxb kaj .i55.</p>
+<p>Ĉiujn menciitajn formojn vi povas malfermi ankaŭ rekte el arkivo .7z, .rar aŭ .zip. Subtenataj estas plurpartaj arkivoj kaj tiuj protektitaj per pasvorto — kompreneble, se vi konas ĝin.</p>
+<p>Malfermeblaj estas ankaŭ libroj el bildoj — tiuj, en kiuj la paĝoj estas fotoj de teksto kaj ne vera teksto, kiel skanita .pdf aŭ .epub el paĝbildoj. Taŭgas ankaŭ ordinaraj bildoj — .bmp, .jpg, .tif kaj tiel plu — do se vi hazarde havas libron kiel serion da orde numeritaj bildoj, Nemoviz Book Reader akceptas ankaŭ tion. La teksto sur la bildoj estas rekonata per si mem tra Microsoft OCR, kaj post nelonge vi havos sur via librobreto sufiĉe legeblan titolon.</p>
+<p>Averto! Ĉiuj menciitaj formoj kaj iliaj variaĵoj ŝargiĝas en Nemoviz Book Reader se ili ne estas protektitaj per permesilo Digital Rights Management. NBR ne povas malfermi titolojn kun DRM, do se vi havas tiajn, ludu ilin per la aparato aŭ programo destinita por tio. Pri detaloj demandu tie, kie vi akiris tiujn titolojn.</p>
+<p>Ĉiun specon de dosiero el la supra listo vi povas ludi kiel sonon, montri sur la ekrano kaj eĉ legi per brajlo, se vi havas la necesan ekipaĵon. Necesas nur komputilo kongrua kun Windows, ekrano kaj, laŭeble, brajla linio agordita kun via ekranlegilo.</p>
+<p>Krom ĉio supre menciita, NBR ebligas ankaŭ maŝinan tradukon de libroj per diversaj servoj de lingvomodeloj. Kelkaj havas senpagan kvoton, kelkajn oni devas pagi; tiel tiuj servoj funkcias. Nemoviz Book Reader por Windows estas tute senpaga por uzo, sed la eksteraj servoj ne estas en nia respondeco. Ni tra la aplikaĵo kunligas vin kun ili kaj donas la eblon, ke la traduko okazu en la ludilo, sed la registriĝo ĉe la servoj, la aranĝo de la pago kaj ĉio cetera estas via afero. Kiam tio estas farita, prenu de la paĝoj de la servo mem la API-ŝlosilon, algluu ĝin en la agordoj de la ludilo en la lokon destinitan por tio, kaj de tie ni transprenas.</p>
+<p>Nemoviz Book Reader estas provita kaj kontrolite kongrua kun la ekranlegiloj Jaws for Windows kaj NVDA, sed devus funkcii senĝene ankaŭ kun aliaj. Alirebleco estas la fundamento sur kiu ĉi tiu aplikaĵo estas konstruita, do ne devus esti problemoj se vi uzas alian legilon.</p>
+<p>Ĉiuj klavkombinoj estas enkonstruitaj en la aplikaĵon mem kaj uzeblas ankaŭ sen ekranlegilo. La ekranlegilo estas tie nur por raporti, kio okazas en la ludilo en tiu momento, kaj — se vi legas brajle — por porti la tekston al la brajla linio. Por ĉio cetera la ludilo funkcias ankaŭ sen ĝi.</p>
+<p>Ĉe la importo de la brajlaj formoj el la supra listo gravas scii, ke NBR uzas la teknikon LibLouis kun ĝiaj tabeloj. Ni ne povas garantii, ke ĉio ĝustos por ĉiu lingvo, nek povas ni korekti la tabelojn por ĉiu libro aparte; multo dependas de tio, kiel la libroj mem estis faritaj. Se la rezulto, kiun vi ricevas ĉe la importo, ne taŭgas, en la ecoj de la libro vi povas ŝanĝi la brajlan tabelon, kie por tiu lingvo estas pli ol unu. Se sukcesas, bonege; se ne sukcesas, ni bedaŭras. Ne ĉio dependas de la ludilo — parto de la respondeco kuŝas ĉe tiuj, kiuj produktas la librojn, kaj ĉe la aŭtoroj de la brajlaj tabeloj.</p>
+<h1 id="s5">Unua lanĉo</h1>
+<p>Ĉe la unua lanĉo Nemoviz Book Reader demandos, ĉu vi volas konservi aŭ ŝanĝi la vojon al la dosierujo por via estonta biblioteko. Memoru, ke la defaŭlta loko estas ene de la Windows-uzantodosierujo, kiu kutime troviĝas sur la subdisko C kaj kiu kun la tempo povas sufiĉe pleniĝi, okupante spacon sur la sistema disko. Se vi direktas ĝin al alia subdisko aŭ disko, nenio esenca ŝanĝiĝas, sed vi estos pli trankvila, ke al la sistemo ne mankos la spaco necesa por labori. Krome, teni la bibliotekon sur alia disko aŭ subdisko certigas, ke se la sistemo rompiĝas, via kolekto de libroj restas sekura.</p>
+<p>Poste malfermiĝas unu el la du fenestroj de la aplikaĵo, nome la fenestro de la biblioteko, kiu aperas nun, ĉe la unua lanĉo post la instalo, kaj ĉiufoje kiam neniu libro estas ŝargita aŭ la biblioteko estas malplena. Ĉi-foje ni povas fermi ĝin, ĉar post la instalo indas unue trairi la agordojn kaj tie aranĝi, kio necesas.</p>
+<h1 id="s6">Agordoj</h1>
+<p>Ĉi tiu fenestro konsistas el kelkaj langetoj; sube estas trarigardo de ĉiu el ili. Kio eble distingas ĝin de aliaj agordaj fenestroj, estas ke apud la plimulto de la eblecoj staras malgranda helpa klavo, kiu malfermas dialogon kun la priskribo de tiu funkcio. Vi ricevas helpon ĉe ĉiu paŝo, kaj la dokumento, kiun vi nun legas, ne devas havi 250 paĝojn.</p>
+<h2 id="s7">Ĝenerale</h2>
+<p>La unua afero agordata ĉi tie estas la lingvo. Se la aplikaĵo havas la lingvon, en kiu estas via sistemo, ĝi jam estos elektita kaj la interfaco aperos en ĝi; se ne, NBR montriĝos en la angla. Se ankaŭ tio ne plaĉas al vi, malfermu la liston de lingvoj kaj elektu alian.</p>
+<p>La dua ebleco estas la loko de la biblioteko, kion ni jam trairis post la unua lanĉo. Se tiam vi ankoraŭ ne decidis, nun estas la ideala momento.</p>
+<p>Sekvas du markobutonoj por ŝalti aŭ malŝalti la aŭdvidajn klavojn de via klavaro, se vi havas ilin. Ili validas ankaŭ por la klavoj sur kapaŭdiloj. La unua diras, ĉu uzi ilin entute, la dua, ĉu ili funkcias tra la tuta sistemo aŭ nur dum NBR havas la fokuson.</p>
+<p>Poste markobutono, per kiu vi elektas, ĉu la biblioteko uzas la metadatenojn el la dosieroj aŭ montras la aŭtoron kaj la titolon el la nomo de la dosierujo aŭ de la dosiero.</p>
+<p>Kaj laste, la aspekto, en kiu Nemoviz Book Reader estos montrata al vi. Estas du elektoj. <strong>Sistemaj koloroj</strong> donas al vi la ludilon en klasika aranĝo kaj en la kolorpaletro, kiun uzas via sistemo; tion vi ankaŭ ricevos, se vi havas ŝaltita altan kontraston, ĉar NBR tiam nenion propran desegnas kaj lasas vian skemon trapasi tuta. <strong>Dezajno de NBR</strong> donas al la ludilo iom pli modernan aspekton. Se vi ne elektis, NBR decidas mem: alta kontrasto ricevas Sistemajn kolorojn, ĉio cetera la Dezajnon de NBR.</p>
+<h2 id="s8">Parolo kaj brajlo</h2>
+<p>La unua ebleco estas vico da regiloj por elekti lingvon kaj voĉon por tekstolibroj. Ni elektas lingvon, poste voĉon por tiu lingvo. Ni agordas laŭtecon, rapidon kaj tonalton kaj konfirmas per la klavo Apliki. Ni elektas ankoraŭ alian lingvon, alian voĉon kaj aliajn valorojn kaj denove premas Apliki. Tiel ni elektas la defaŭltan voĉon por difinita lingvo, kaj ĉiu nova libro, kiam la lingvo en kiu ĝi estas verkita estas determinita, ricevas la voĉon, kiun ni elektis.</p>
+<p>Eble iom kaŝita ebleco, sed pli bonan ideon ni ne havis. La lasta ero en la voĉa kombinilo estas <strong>Aldoni novajn lingvojn</strong>. Aktiviginte ĝin, vi malfermos fenestron, en kiu vi povas elekti unu aŭ plurajn voĉojn Microsoft OneCore kaj, post konfirmo, instali ilin tra Windows Update. Kiel ĉe la aldono de lingvoj por OCR, tio povas daŭri pli longe aŭ pli mallonge, laŭ tio, kiom okupataj estas la ĝisdatigaj serviloj. Eblas, ke depende de viaj administraj agordoj aperos ankaŭ UAC-dialogo, kiun vi devos konfirmi.</p>
+<p>Kompreneble ĉiujn menciitajn valorojn eblas agordi alie por ĉiu libro aparte, sed tio okazas en la ecoj de tiu libro; ĉi tie ni agordas la ĝeneralajn.</p>
+<p>La sekva ebleco estas la prononca vortaro, kiun vi certe jam vidis. Vi povas korekti la prononcon tutmonde, laŭ lingvo kaj laŭ voĉo, kaj por ĉiuj tri vi trovos la eblecojn kutimajn por tia vortaro.</p>
+<p>Sekvas la markobutonoj por ŝalti kaj malŝalti la brajlan kaj la ekranan eligon; ĉiu el ili, ŝaltita, proponas pliajn agordojn, kies helpon vi trovos surloke. En ĉi tiu beta-versio tiuj du butonoj estas grizigitaj kaj portas rimarkon pri tio; ili revenos en unu el la sekvaj eldonoj.</p>
+<h2 id="s9">Aparatoj</h2>
+<p>Ĉi tie vi elektas la sonkarton, per kiu vi volas aŭskulti la librojn. Se vi havas nur unu, nenio estas tuŝenda, ĉar nenio estas elektebla. Apude staras markobutono, kiu malhelpas al la sonkarto ekdormi. Se dum la ludado, kaj precipe ĉe tekstaj formoj, vi rimarkas hakadon — frazojn aŭ alineojn sonantajn kvazaŭ la unua vorto aŭ du estus fortranĉitaj —, nepre ŝaltu ĉi tiun eblecon.</p>
+<p>Se vi ankoraŭ havas optikan legilon en via komputilo kaj eble kolekton de pli malnovaj sonaj eldonoj sur ordinaraj sonaj lumdiskoj, trankvile ŝaltu Uzi la optikan legilon. Per tio vi aktivigas la subtenon por la aparato kaj povas komenci aŭskulti viajn librojn de disko.</p>
+<h2 id="s10">Speciala</h2>
+<p>En ĉi tiu langeto vi elektas la lingvon, aŭ plurajn, kiuj estos uzataj por rekoni librojn el bildoj ĉe la importo. Nemoviz Book Reader uzas la ilon Microsoft OCR enkonstruitan en Windows 10 kaj 11. Nuntempe ĝi subtenas tridek kvin lingvojn, kies liston vi povas vidi premante <strong>Aldoni lingvon</strong>. Kiam vi elektos la dezirataĵn kaj premos Instali, la lingvoj ne instaliĝos tuj. NBR ne instalas ilin mem; ili venas tra Windows Update kaj povas bezoni iom da tempo ĝis venos ilia vico. Krome, depende de la agordoj de via sistemo, eblas ke aperos dialogo de la Kontrolo de uzantokontoj, en kiu vi devos konfirmi la instalon.</p>
+<p>Post la instalo, importante libron el bildoj, vi povos elekti en kombinilo la lingvon, per kiu vi volas rekoni la tekston. Ankaŭ tio povas daŭri iom, laŭ la rapido de la maŝino kaj la grando de la libro, sed ĉion vi povas sekvi sur la progresa strio.</p>
+<p>Krom la agordoj por la rekonado vi elektas ĉi tie ankaŭ la servojn de lingvomodeloj por la traduko. En la momento de la verkado de ĉi tiu teksto tio estas Google Gemini, DeepSeek, DeepSeek kun pli granda modelo, tri niveloj de OpenAI GPT kaj Microsoft Azure. Kiel skribite supre, ĉi tiuj servoj bezonas API-ŝlosilojn aŭ alian specon de rajtigo, kaj pli vi povas legi en la menuo Helpo, ĉe la ero Servoj kaj kontoj.</p>
+<p>Krom la traduko estas ankaŭ la aldonaj nubaj voĉoj; nuntempe ni subtenas Google Cloud Chirp 3 kaj Microsoft Azure Neural. Ebligi ilin similas al tio ĉe la tradukaj servoj, kaj ankaŭ pri tio estas pli en la menuo Helpo, ĉe la ero Servoj kaj kontoj.</p>
+<p>Ni atentigas, ke ankaŭ ĉi tiuj voĉoj estas pagataj. Google donas senpage milionon da signoj por legado, kio estas proksimume du mezaj libroj de 500 paĝoj. Microsoft donas duonon de tio, 500.000 signojn, do proksimume unu meza libro. Kiam la senpaga kvoto estas elĉerpita, via kreditkarto estas ŝarĝata, kaj la kosto de la legado estas ie inter 8,00 kaj 15,00 usonaj dolaroj por meza libro, laŭ la servo.</p>
+<p>Por ke ne estu miskompreno nek hazarda nedezirata elspezo, ni limigis la agordadon de la nubaj voĉoj. En la agordoj de parolo kaj brajlo vi ne vidos ĉi tiujn voĉojn kaj ne povos fari ilin defaŭltaj; ili videblas nur en la ecoj de elektita libro, kaj ankaŭ tie nur post kiam vi ebligis ilin en la specialaj agordoj. En la ecoj de libro vi povas elekti unu el ĉi tiuj voĉoj por tiu libro, kaj ĝi validas nur por ĝi.</p>
+<p>Ĉar ĉe la nubaj voĉoj signoj konsumiĝas ankaŭ kiam vi retroiras, ripetas parton aŭ alimaniere trairas jam legitajn vortojn, NBR tenas provizoran memoron pri tio, kio estis eldirita, tiel ke retroiro kaj simila ne estas kalkulataj denove. Tiu sama memoro estas ankaŭ tio, kio permesas al vi post la legado eksporti la libron al mp3 kaj tiel ricevi ordinaran sonlibron.</p>
+<h1 id="s11">Biblioteko</h1>
+<p>Ĉi tiu fenestro ne videblas la tutan tempon: krom ĉe la unua lanĉo ĝi malfermiĝas laŭbezone, kaj en ĝi vi ordigas vian kolekton de elektronikaj eldonaĵoj. Vi aldonas unuope aŭ amase, forigas, markas librojn legitaj, nelegitaj aŭ preferataj. Vi povas ordigi la prezenton laŭ pluraj kriterioj, filtri titolojn laŭ stato (legita, nelegita…) kaj serĉi.</p>
+<p>Ĉe ĉiu titolo en la biblioteko, per simpla premo de la klavo Tab vi povas legi ankaŭ la detalojn pri ĝi: titolon kaj aŭtoron, eldoniston kaj formon, kie vi haltis, kiun procenton de la libro vi legis, kiom da tempo restas kaj ankoraŭ ion. Kie eblas, vi ricevos ankaŭ mallongan priskribon de la libro.</p>
+<h2 id="s12">Aldono de titoloj</h2>
+<p>En la menuo Dosiero vi trovas du erojn: Malfermi dosieron (Stir + O) kaj Malfermi dosierujon (Stir + Maj + O). Se en la Agordoj vi ŝaltis la subtenon por la optika legilo, vi trovos ankaŭ Malfermi sonan lumdiskon. Krom tiuj estas ebleco rekoni bildolibron denove, ebleco krei sonlibron kaj ebleco traduki. Estas ankaŭ ero, kiun ne tuŝu se ne vere necese: <strong>Malplenigi la bibliotekon</strong>. Ĝi mem diras, kion ĝi faras, kaj post la aktivigo vi ricevos ankoraŭ averton. Se vi konfirmas ĝis la fino, via biblioteko estas forigita: ĉiuj legosignoj kaj ĉiuj legopozicioj for, kaj for ankaŭ la agordoj de lingvo kaj rapido por la libroj interne. Do prefere ĉirkaŭiru ĉi tiun eron, se vi ne estas absolute certa, ke vi volas malplenigi la bibliotekon.</p>
+<p>Per la unua ebleco vi malfermas unuopan dosieron (MP3-libron en unu dosiero, EPUB-dokumenton aŭ dosieron ncc.html por Daisy-titolo), dum malfermante dosierujon vi povas malfermi sonlibron dividitan en plurajn dosierojn en unu dosierujo. Krome, malfermante dosierujon vi povas importi ankaŭ pli grandan kvanton da diversaj dosieroj, tio estas kolekton de pluraj titoloj. Nemoviz Book Reader havas enkonstruitajn certajn regulojn pri ordigo kaj faros sian plejeblon por ordigi al vi tian dosierujon kiel eble plej bone.</p>
+<p>Malfermi sonan lumdiskon ekigos la ludadon de la libro de via optika legilo kaj revenigos vin al la fenestro de la ludilo. Uzi ordinaran lumdiskon ne importas la libron en la bibliotekon; ĝi nur ebligas ludi ĝin per Nemoviz Book Reader.</p>
+<p>Krom ordinaraj dosieroj NBR povas — malsame ol la granda plimulto de aplikaĵoj de ĉi tiu speco — malfermi ankaŭ densigitajn dosierojn, tio estas arkivojn. El la arkivaj formoj estas subtenataj .zip, .rar kaj .7z, kaj krom unupartaj eblas malfermi plurpartajn kaj pasvorte protektitajn, kondiĉe ke vi konas la pasvorton.</p>
+<p>Alivorte, de kie ajn kaj kiel ajn vi ricevas libron, en unu norma dosiero aŭ en pluraj, pakita en arkivon aŭ ne, vi povas importi ĝin en la bibliotekon sen ia ajn antaŭlaboro kaj el la loko, kie ĝi kuŝas. Nemoviz Book Reader kopias la dosierojn, kiujn vi malfermis, en la dosierujon de la biblioteko en la lokon destinitan por tio, malpakas arkivojn kaj metas ilin en la bibliotekon en ilia ordinara formo, kaj notas ĉion esencan pri la titoloj, kiujn vi importis. Viaj originalaj dosieroj restas netuŝitaj tie, kie vi tenas ilin; ĉio, kio poste okazas al la libroj, okazas al la kopioj de NBR en la dosierujo de la biblioteko.</p>
+<p>La ebleco de ripetita OCR servas por refari la optikan rekonon de bildolibro per alia lingvo, se vi ne kontentis pri la rezulto kiam la libro estis malfermita.</p>
+<p>Traduki la libron malfermas dialogon, en kiu vi elektas la fontan lingvon, la lingvon al kiu vi volas traduki, la servon aŭ servojn, kiujn vi volas uzi, kaj kampon, en kiun vi povas skribi kelkajn bazajn instrukciojn pri tio, kion kaj kiel traduki.</p>
+<p>Eksporti kiel sonlibron faras precize tion, kion diras ĝia nomo. Ĉu vi uzas unu el la instalitaj parolsinteziloj aŭ la nubajn voĉojn, vi povas el tekstolibro fari sonan kaj eksporti ĝin kien vi volas. La libro estas eksportata kiel unu sola dosiero .mp3, la valoroj samas al tiuj de la sintezilo, kiun vi uzas, kaj la kvalito de la registraĵo egalos al la kvalito de la aŭskultado vive. Antaŭ la komenco NBR petas konfirmon kaj diras, kiom la farado devus daŭri.</p>
+<h2 id="s13">La librobreto</h2>
+<p>Moviĝante sur la librobreto — tiel nomiĝas la parto de la fenestro de la biblioteko kun la listo de viaj titoloj — per la sagoklavoj supren kaj malsupren, vi aŭdos la titolojn, kiujn vi havas en la biblioteko. Kiel la titolo de dokumento estos eldirita, dependas de kelkaj aferoj. Ĉe la importo NBR provas eltiri la nomon de la aŭtoro, la titolon de la verko kaj kelkajn pliajn datenojn el la metadatenoj de la dosiero, kiu enhavas la libron. Se tiuj datenoj ne ekzistas, NBR nomos la libron laŭ la nomo de la dosierujo aŭ de la dosiero.</p>
+<p>Se al vi plaĉas neniu el ĉi tiuj prezentoj, vi povas nomi la elektitan libron laŭ via deziro, el la kunteksta menuo de la nomo de la libro aŭ pli simple per F2. Ĉe la nomado vi trovos du apartajn kampojn por la nomo de la aŭtoro kaj la titolo de la verko; skribu ilin kaj konfirmu sur la butono aŭ simple premu Enigi.</p>
+<p>Krom la bazaj datenoj kiel la nomo de la aŭtoro kaj la titolo, moviĝante per la sagoj tra ĉi tiu listo vi povos aŭdi ankaŭ la staton de la libro: <strong>Nun legata</strong>, <strong>Legata</strong>, <strong>Legita</strong> kaj <strong>Nelegita</strong>. Se vi markis la titolon kiel preferatan, vi aŭdos ankaŭ tion. En la kunteksta menuo, kie kuŝas la jam menciita ero por renomi, vi trovos ankoraŭ la erojn Marki kiel legitan, Marki kiel nelegitan, Marki kiel preferatan, Forigi kaj Ecoj — sed pri tio iom poste.</p>
+<p>Haltinte ĉe iu titolo, per Tab vi venas al loko, kie per la sagoj supren kaj malsupren vi ricevas amason da informoj pri la libro, kun atento al tio, kie vi haltis, kiom de la libro estas legita kaj kiom restas procente kaj laŭtempe, kie la libro estis eldonita kaj produktita, teknikaj datenoj pri la sonregistraĵo kaj tiel plu. Ĉi tiuj informoj dependas de la formo de la libro kaj diferencos de titolo al titolo.</p>
+<p>Irante plu tra la fenestro de la biblioteko, vi venos al la serĉa kampo, kiu funkcias laŭ la simpla principo serĉi la ĉenon, kiun vi skribis, en la nomoj de la eroj sur la librobreto. Se vi skribas „ana“, ĝi certe trovos aŭtorinojn nomatajn Ana, sed ĝi trovos ankaŭ <strong>7000 dana u Sibiru</strong>.</p>
+<p>Post la serĉa kampo staras filtra kombinilo, en kiu vi decidas, kiuj libroj estos montrataj al vi. Defaŭlte tie ĉiam estas ĉiuj libroj, sed vi povas ŝanĝi la filtron al Legata, Nelegita, Legita kaj Preferataj, kaj la librobreto akordiĝos kun via elekto.</p>
+<h2 id="s14">Ordigo</h2>
+<p>En ĉi tiu menuo nur la kutimaj aferoj, kiujn vi vidis kiu scias kiom da fojoj. Vi povas elekti la ordon, en kiu la titoloj aperas: alfabete, laŭ dato de aldono, laŭ formo kaj laŭ stato. Stato signifas nelegita, legita kaj tiel plu. Ĉiun el ĉi tiuj ordojn vi povas krome montri kreskante aŭ malkreskante.</p>
+<p>Kiam vi konatiĝis kun la enhavo kaj la funkcioj de la fenestro de la biblioteko, estas tempo elekti libron sur la breto kaj iri per Tab ĝis la butono Ŝargi — aŭ simple premi Enigi dum la titolo ankoraŭ havas la fokuson. La libro, kiun vi elektis por legi, ĉiam staros super la breto, en aparta sekcio nomata Nun legata. Indas noti, ke la libron, kiun vi legas, tio estas la aktivan libron ŝargitan en la ludilon, oni ne povas forigi tiel kiel la ceterajn librojn sur la breto. La aktivan libron oni devas per la kunteksta menuo marki kiel legitan, por ke ĝi transiru el Nun legata al Legita, kaj nur tiam vi povas forigi ĝin.</p>
+<p>Resume, kiam vi premas Enigi sur la titolo de libro aŭ la butonon Ŝargi, la biblioteko fermiĝas kaj vi revenas al la ĉefa fenestro de la ludilo.</p>
+<h1 id="s15">La ludilo</h1>
+<p>Ĉi tiu fenestro ĉiam videblas sur la ekrano de via komputilo; foje kaŝas ĝin la fenestro de la biblioteko, foje la lega surfaco, sed ĝi fakte estas la ĉefa fenestro, el kiu vi regas la libron post la ŝargo. Vi povas moviĝi en la fenestro de la ludilo per Tab kiel en ĉiu alia fenestro kaj aktivigi erojn per Enigi, sed malsame ol en aliaj fenestroj de ĉi tiu aplikaĵo kaj de aliaj aplikaĵoj, la sagoklavoj kaj la spaco estas rezervitaj por aliaj funkcioj. Do se vi venas per Tab ekzemple al la klavo de legosignoj, vi ne povos aktivigi ĝin per la spaco; nur per Enigi.</p>
+<p>En la taba vico de la ĉefa fenestro de la ludilo, ne nepre en ĉi tiu ordo, troviĝas la jenaj klavoj kaj funkcioj:</p>
+<table class="keys">
+<tr><th>Ludi/Paŭzi</th><td>spaco</td></tr>
+<tr><th>Antaŭen</th><td>Maj + dekstren</td></tr>
+<tr><th>Malantaŭen</th><td>Maj + maldekstren</td></tr>
+<tr><th>Laŭteco</th><td>sagoj supren kaj malsupren, aŭ F11 kaj F12</td></tr>
+<tr><th>Rapido</th><td>Stir + maldekstren kaj Stir + dekstren</td></tr>
+<tr><th>Progreso en la libro</th><td>sagoj maldekstren kaj dekstren</td></tr>
+<tr><th>Saltopaŝo</th><td>Maj + sagoj supren kaj malsupren</td></tr>
+<tr><th>Biblioteko</th><td>F3</td></tr>
+<tr><th>Agordoj</th><td>F2</td></tr>
+<tr><th>Ecoj</th><td>Alt + Enigi</td></tr>
+<tr><th>Meti legosignon</th><td>F5</td></tr>
+<tr><th>Legosignoj</th><td>F6</td></tr>
+<tr><th>Iri al…</th><td>F4</td></tr>
+<tr><th>Helpo</th><td>F1</td></tr>
+<tr><th>Dormtempigilo</th><td>F7</td></tr>
+<tr><th>Informoj pri la ludado</th><td>F8</td></tr>
+</table>
+<p>En la informa kampo vi ekscias la bazajn datenojn pri la ludado: aŭtoron, titolon, pasintan tempon, paĝon kaj iom pli, laŭ kompreneble la formo de la libro, kiun vi legas. Unu premo de F8 nur laŭtlegas tion, kion diras la informa panelo; premita dufoje, ĝi venas en la fokuson de la ekranlegilo, kaj vi povas per la sagoj trairi pli detale, kio tie staras.</p>
+<p>Ĉiuj klavoj havas sian propran kombinon, do vi atingas ilin facile sen tro multe promeni tra la fenestro, kaj regi la libron, kiun vi legas, estas pli ol simple.</p>
+<h2 id="s16">Ludado</h2>
+<ul>
+<li>Per la spaco vi ekigas kaj haltigas la ludadon.</li>
+<li>Per la sagoj maldekstren kaj dekstren vi „retroiras“ po kvin sekundoj aŭ, se temas pri tekstolibro, po unu frazo antaŭen aŭ malantaŭen.</li>
+<li>Per Stir + sago maldekstren aŭ dekstren vi regas la rapidon de la legado.</li>
+<li>Per Maj + supren aŭ malsupren vi elektas la saltopaŝon (titolo, ĉapitro, norma paĝo, certaj daŭroj); la elekto ŝanĝiĝas laŭ la formo kaj la strukturo de la libro.</li>
+<li>Per Maj + sago maldekstren aŭ dekstren vi moviĝas laŭ la elektita saltopaŝo.</li>
+</ul>
+<p>Resume: vi ekigas la elektitan libron per la spaco, kaj tenante Stir, la sagoj maldekstren kaj dekstren regas la rapidon de la legado.</p>
+<p>Se vi volas iom salti antaŭen aŭ malantaŭen, tion faras la sagoj maldekstren kaj dekstren po kvin sekundoj aŭ po unu frazo. Se vi volas pli grandajn paŝojn, premu Maj, elektu per la sagoj supren kaj malsupren la deziratan paŝon kaj — plu tenante Maj — iru antaŭen kaj malantaŭen tra la libro per la sagoj maldekstren kaj dekstren laŭ tiu paŝo. Kiam vi volas aŭdi, kiel kaj kien progresas via legado, premu F8 en iu ajn momento kaj la ekranlegilo laŭtlegos al vi la tutan enhavon de la informa panelo. Se vi volas trairi la informan kampon pli detale, dateno post dateno, premu dufoje rapide F8. Kiam vi finis, forlasu la informan kampon premante denove dufoje F8, aŭ simple per Eskapo, por ke la sagoklavoj reprenu siajn navigajn taskojn.</p>
+<p>La ideo malantaŭ ĉi tiu maniero navigi estis, ke la uzanto ne devu lerni kaj memori tutan vicon da klavkombinoj. La plej granda parto de la navigado kuŝas sur la sagoklavoj kaj, kune kun la modifiloj Maj kaj Stir, atingiĝis, ke vi ne devas promenigi la manon tra la klavaro. Metu la dekstran manon sur la sagojn, per la maldekstra premu laŭbezone modifilon, kaj jen la tuta filozofio. La pli lertaj verŝajne sukcesos uzi ankaŭ la dikfingron de la dekstra mano por premi la Stir aŭ la Maj dekstraflanke, sed la maniero de uzo restas al ĉiu propra elekto. Ĉiuj ceteraj kombinoj, escepte de Alt + Enigi por Ecoj ĉar tio estas la kutima konvencio de Windows, kuŝas sur la funkciaj klavoj, ĉio en la intereso de kiel eble plej simpla regado.</p>
+<h2 id="s17">Iri al...</h2>
+<p>Ĉi tiu regilo, kiel diras ĝia nomo, servas por salti per kelkaj premoj aŭ klakoj al difinita parto de la libro. Ĉe senstrukturaj formoj kiel plata teksto, la plimulto de sonaj formoj en unu dosiero aŭ malbone formatitaj strukturitaj libroj, ĝi ne estas aktivigebla, kion konfirmas ankaŭ sonsignalo. Ĉe libroj kun iom deca strukturo vi povos salti al ĉapitroj, subĉapitroj kaj aliaj strukturaj partoj de la libro. Ĉio kompreneble dependas de tio, kion kaj kiel la produktintoj metis en la libron mem.</p>
+<h2 id="s18">Legosignoj</h2>
+<p>Du klavoj, kiuj venas kiel paro — Meti legosignon por meti unu, kaj Legosignoj, kie vi administras la jam metitajn. Ĉe la metado vi aŭdos mallongan sonsignalon, por ke vi estu certa, ke ĝi estas metita. En la administrado vi moviĝas inter ili per la sagoj kaj per Enigi saltas al la loko de legosigno. Krome vi povas forigi tiujn, kiujn vi ne bezonas. Por sonlibroj estas montrata provizore nur la tempo, kaj por tekstolibroj ankaŭ la komenco de la frazo, kie vi metis la legosignon. Se vi havas neniun legosignon, la klavo Legosignoj ne estas aktivigebla, kion diros al vi ankaŭ sonsignalo.</p>
+<h2 id="s19">La dormtempigilo</h2>
+<p>Ordinara dormtempigilo, nenio saĝa. Vi elektas daŭron — proponataj estas 15, 30, 45 kaj 60 minutoj — kaj la sekva ebleco estas via propra, agordita al 90 minutoj sed ŝanĝebla al kiu ajn valoro. Sekvas la elekto de tio, kio okazas post la fino de la kalkulado: Haltigi la ludadon, Haltigi kaj fermi la programon, kaj Haltigi kaj malŝalti la komputilon.</p>
+<p>Krome estas markobutono, kiu demandas, ĉu vi volas meti legosignon ĉe la komenco de la kalkulado. Tio povas utili por reveni al la tempo, kiam vi ankoraŭ ne dormis, kaj de tie pli facile trovi la lokon, kie vi ĉesis legi.</p>
+<p>La kalkulado komenciĝas per premo de <strong>Starti</strong>; la dialogo fermiĝas, kaj anstataŭ la vorto Tempigilo la fenestro de la ludilo nun montras kurantan nombrilon. Se vi denove aktivigas la tempigilon, la kalkulado nuliĝas kaj en la dialogo vi povas elekti novan tempon aŭ nuligi ĉion sur la butono destinita por tio.</p>
+<p>Memoru kaj atentu, ke la ludado haltas ĉe la aktivigo de iu ajn el la eblecoj kiel Agordoj, Biblioteko kaj tiel plu. Kiam vi faris tion, por kio vi venis en tiujn dialogojn, kaj konfirmas revenante al la fenestro de la ludilo, la ludado daŭras plu. La escepto estas la dialogo Ecoj, kie vi ja agordas aferojn, kiujn vi volus aŭdi dum vi faras tion.</p>
+<p>Kelkaj vortoj pri la regiloj de rapido kaj laŭteco. Moviĝante per la sagoj, la laŭteco iras po 5%, kaj ĉe la fino vi aŭdas sonsignalon. Por sonlibroj la rapido iras po 0,1x, de 0,5x ĝis 3x, kaj kiam vi revenas al la normala 1x vi aŭdas ankaŭ signalon. Ĉe tekstolibroj la rapido ne estas mezurata per obligilo sed per vortoj en minuto, kaj iras po kvin, de 80 ĝis 400 vortoj en minuto.</p>
+<p>Kio por vi kiel uzanto plej gravas, estas ke Nemoviz Book Reader memoras absolute ĉion pri la ludado de la libroj, kiujn vi aŭskultas. Memoriĝas la pozicio, la laŭteco kaj la rapido por la sonaj, kaj la speco, rapido, lingvo kaj tonalto de la sintezilo por la tekstaj; memoriĝas la valoroj de la sonprilaborado por sonlibroj kaj la valoroj de la brajla kaj ekrana eligo por la tekstaj. Alivorte, memoriĝas ĉio, kion vi agordis laŭ viaj deziroj kaj bezonoj, por ĉiu libro aparte.</p>
+<h1 id="s20">Ecoj</h1>
+<p>Jam plurfoje dirite: la agordoj kaj valoroj por ĉiu libro aparte estas difinataj en la ecoj de tiu libro. Sonlibroj havas siajn ecojn, tekstolibroj siajn, kaj apartaj libroj kiel Daisy sono + teksto havas ambaŭ, sur du apartaj langetoj de la fenestro de la ecoj. La ecojn vi malfermas el la fenestro de la ludilo per la klavo Ecoj aŭ per Alt + Enigi, kaj el la fenestro de la biblioteko, starante sur titolo de libro, el la kunteksta menuo aŭ same per Alt + Enigi.</p>
+<h2 id="s21">Ecoj de la sono</h2>
+<p>Malferminte la Ecojn de la sono, la unua afero, kiun vi rimarkos, estas la markobutono Sonprilaborado. Vi ne devas ŝalti ĝin, se la sono de la libro, kiun vi aŭskultas, estas al vi akceptebla — sed se ne, ŝaltante la Sonprilaboradon vi eble sukcesos konduki la sonon al aŭskultebla nivelo. Marki la butonon komencas analizon de la registraĵo de la libro, kiu, laŭ la rapido de la maŝino, povas daŭri inter tridek sekundoj kaj kelkaj minutoj. Laŭ la progresa strio vi vidas en ĉiu momento, kiel statas kaj kiom ankoraŭ restas. Kiam la analizo finiĝis, NBR agordos la sube menciitajn filtrilojn al ia racia stato, do se la sono konvenas al vi, simple konfirmu ĉion per Bone; se vi opinias, ke vi povas ankoraŭ plibonigi ĝin, jen mallonga priskribo de tio, kion eblas fari.</p>
+<p>Sekvas sep filtriloj, kiuj helpos al vi aŭ ne iom plibonigi la sonon de sonlibroj el malnovaj, malbonaj aŭ ambaŭ registraĵoj. Ĉiu regilo estas ŝaltebla kaj malŝaltebla aparte, do vi ne devas uzi ilin ĉiujn samtempe. Ŝaltinte la Sonprilaboradon, la unua afero, kiun vi trovas, estas la klavo Restarigi, kiu redonas al ĉiuj filtriloj iliajn defaŭltajn valorojn. Sekvas markobutono Preterpasi, kies ŝalto kaj malŝalto tuj aŭdigas al vi la diferencon inter la originalo kaj viaj agordoj. La kombino por preterpasi estas Stir + B, do vi ne devos senĉese iri de la regiloj al la preterpaso kaj reen.</p>
+<p>La unua en la vico de filtriloj estas la tiel nomata Hi Pass, tio estas forigo de la muĝo. Ĝi forprenas bruojn en la malalta parto de la registraĵo, de elektraj aparatoj ĝis hazarda frapo sur la mikrofonon aŭ la tablon. Sekvas la Redukto de bruo, celita al la siblo de bendo, malbonaj mikrofonoj kaj similaj bruoj iom pli alte en la spektro. Mildigi la siblojn reduktas la siblon de sonoj kiel S kaj Ŝ, misformiĝintaj sur la registraĵo pro tro proksima registrado aŭ pro tro levitaj altaj tonoj. Egaligi la parolon provas proksimigi la mallaŭtajn kaj la laŭtajn partojn de la registraĵo. Poste estas la Sonkoloro, tio estas kvinzona egaligilo: malalta, malalta/meza, meza (la voĉo), meza/alta kaj alta. Fine, la aŭtomata laŭteco kaj la paŭzoj, nomataj ankaŭ normaligo kaj kluzo: la normaligo levas la tutan registraĵon al la plej alta nivelo sen misformo, dum la mallaŭtigo de la paŭzoj (la kluzo) forigas la bruon, kiu restas en ili.</p>
+<p>Ĉiu filtrilo havas kvin gradojn de ago: minimuma, malforta, meza, forta kaj maksimuma. Kaj indas ripeti: ĉiu estas ŝaltebla kaj malŝaltebla aparte.</p>
+<p>Ankaŭ la sonprilaborado memoriĝas por ĉiu libro aparte.</p>
+<p>Nepre indas mencii, ke ĉi tiu sonprilaborado ne faros miraklojn kaj el malbona rekopiaĵo el la sesdekaj jaroj de la pasinta jarcento vi ne ricevos kristale klaran parolon kvazaŭ registritan en la studio Abbey Road en Londono — sed ĝi, ni esperas, kondukos vin iel ĝis la fino de la libro sen ke vi freneziĝu pro la kvalito.</p>
+<h2 id="s22">Ecoj de la teksto</h2>
+<p>Simile kiel en la agordoj por la parolo, ĉi tie vi havas la elekton de lingvo, voĉo, rapido, laŭteco kaj tonalto por la elektita libro. En la Agordoj vi elektas la defaŭltan por ĉiuj, ĉi tie vi agordas por difinita titolo. Se vi demandas kial, la plej simpla ekzemplo estas: via defaŭlta voĉo en la Agordoj estas vira, sed romanon verkitan el ina perspektivo vi preferus legi per ina voĉo — tion vi ŝanĝas en la ecoj de la teksto por tiu unu libro. Ĉiuj ceteraj libroj en tiu lingvo plu malfermiĝos per la vira voĉo, ĝis kaj se vi tion ŝanĝos. Same, ian facilan legaĵon vi povas senprobleme legi je 250 vortoj en minuto, sed ion pli pezan, pri kio vi devas survoje ankaŭ pensi, vi eble prefere metos je 180.</p>
+<p>Prononcan vortaron ĉi tie ne estas; sekvas la agordoj por brajlo kaj la ekranaj. Se vi ŝaltas la brajlan eligon, vi ricevas la elekton de la brajla tabelo por la elektita lingvo; se vi ŝaltas la ekranan eligon, vi ricevas la elekton, kiel la teksto estos montrata sur via ekrano. Se vi volas legi nur brajle aŭ nur sur la ekrano sen parolo, elektu tiun eron en la listo de voĉoj. En ĉi tiu beta-versio la brajla kaj la ekrana eligo estas grizigitaj kaj portas rimarkon pri tio; la elekto de la brajla tabelo por libroj importitaj el brajlaj dosieroj plu funkcias.</p>
+<h2 id="s23">Agordoj de la ekrana eligo</h2>
+<p class="beta">Tio ne estas inkluzivita en la unua beta-versio. La provoj kaj refaroj ankoraŭ necesaj postulas pli da tempo ol havas ĉi tiu eldono, do ĝi revenos en unu el la sekvaj.</p>
+<p>Laŭ via elekto en la Agordoj aŭ en la Ecoj, vi vidos sur la ekrano pli malgrandan kadron super la vizaĝo de la ludilo, en kiu la teksto ŝanĝiĝos kiel la subtekstoj de fremdlingva filmo aŭ serio. Se vi elektas unu el la du aliaj eblecoj, la kadro estos pli granda kaj la teksto aŭ glitos sur la ekrano kiel la finaj titoloj aŭ ŝanĝiĝos kadro post kadro. En tiuj du prezentoj la eldirata linio estas montrata en alia koloro.</p>
+<p>Ĉe la malsupro de la kadro vi povas ŝanĝi la tiparon, la grandon kaj kelkajn pliajn valorojn de la prezento, kaj estas ankaŭ bazaj klavoj por regi la ludadon. Ĉiuj klavkombinoj funkcias ankaŭ en ĉi tiu kadro.</p>
+<p>Se vi elektis uzi brajlon, aperos la malgranda kadro priskribita unue, ĉar brajlo ne povas funkcii sen la prezento de la teksto, kiu estas transdonata al la ekranlegilo. Se vi elektas nur la ekranan eligon, vi havas la elekton de la speco de prezento. En ambaŭ okazoj la prezento aperos post la ekigo de la ludado. Se vi elektis neniun el ĉi tiuj eblecoj kaj volas nur aŭskulti, sed estas scivola, kiel tio aspektas, vi ĉiam povas ŝalti kaj malŝalti la prezenton el la fenestro de la ludilo per F9.</p>
+<p>Kaj jen proksimume ĉio pri la helpa dokumento. Pli detalajn klarigojn vi trovos apud la regiloj tie, kie ili necesas — la malgranda klavo kun demandosigno, aŭ F1 en la grupo, kiu havas la fokuson. Dankon, ke vi estis pacienca kaj venis ĝis la fino de la teksto. Kiel malgranda atentaĵo pro tio, vi nun rajtas legi pri du kaŝitaj funkcioj.</p>
+<h1 id="s24">Por la plej persistaj</h1>
+<p>La unua estas alia maniero aldoni unu aŭ plurajn titolojn al la biblioteko. Anstataŭ tra la priskribitaj dialogoj Malfermi dosieron kaj Malfermi dosierujon, simple kopiu la deziratan enhavon en la dosierujon de la biblioteko per Windows aŭ la Dosierfoliumilo. Ĉe la sekva lanĉo Nemoviz Book Reader refreŝigos la bibliotekon kaj montros la novajn titolojn. Se ĝi jam kuras, simple premu en la fenestro de la biblioteko la klavon Refreŝigi.</p>
+<p>La dua kaŝita funkcio koncernas la navigadon. Super ĉio priskribita supre, tra la libro, kiun vi legas, vi povas moviĝi ankaŭ per la kombinoj de Stir + 1 ĝis Stir + 9, kiuj metas vin je 10, 20 kaj tiel plu ĝis 90% de la libro.</p>
+
+</body>
+</html>

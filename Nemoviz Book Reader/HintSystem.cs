@@ -150,11 +150,24 @@ namespace Nemoviz_Book_Reader
             {
                 string dir = System.IO.Path.GetDirectoryName(
                     System.Reflection.Assembly.GetExecutingAssembly().Location);
-                string page = System.IO.Path.Combine(dir, "Help", "index.html");
-                if (System.IO.File.Exists(page))
+
+                // THE MANUAL IS PER LANGUAGE, and it falls back rather than
+                // failing. Help\<code>\index.html for the language in force,
+                // then English, then the flat Help\index.html the app shipped
+                // with before the manual was translated. A reader whose
+                // language has no manual yet gets the English one, which is
+                // the whole point of a chain: F1 must never lead nowhere, and
+                // that was already this method's reason for existing.
+                foreach (string page in new[] {
+                             System.IO.Path.Combine(dir, "Help", Localization.CurrentLanguageCode, "index.html"),
+                             System.IO.Path.Combine(dir, "Help", "en", "index.html"),
+                             System.IO.Path.Combine(dir, "Help", "index.html") })
                 {
-                    System.Diagnostics.Process.Start(page);
-                    return;
+                    if (System.IO.File.Exists(page))
+                    {
+                        System.Diagnostics.Process.Start(page);
+                        return;
+                    }
                 }
             }
             catch { }
