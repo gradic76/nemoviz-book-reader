@@ -29,7 +29,30 @@ AppPublisher={#AppPublisher}
 AppPublisherURL={#AppUrl}
 AppSupportURL={#AppUrl}/issues
 AppUpdatesURL={#AppUrl}/releases
+; PER USER, INTO A FOLDER NBR CAN WRITE TO — AND THE PROGRAM DOES NOT WORK
+; ANY OTHER WAY.
+;
+; Everything NBR keeps lives BESIDE THE EXE: Settings.ini, the pronunciation
+; dictionaries, the stored service keys, the fetched voice catalogues and the
+; cloud character count. That is a deliberately portable design, and it is fine
+; — until the program is installed into Program Files, which a normal process
+; may not write to.
+;
+; And there is no safety net. app.manifest declares
+; requestedExecutionLevel="asInvoker", and the manifest's own comment says what
+; that costs: "Specifying requestedExecutionLevel element will disable file and
+; registry virtualization." So there is no VirtualStore to catch the writes —
+; and IniFile.Save swallows its exception, which is the worst shape a failure
+; can take: the reader changes a setting, hears nothing wrong, and finds it gone
+; next launch. MEASURED 2026-08-23: an unelevated process writing to
+; C:\Program Files gets UnauthorizedAccessException, full stop.
+;
+; So: lowest privileges, and the install goes to {localappdata}\Programs, which
+; is what {autopf} resolves to under them. This is what Chrome and VS Code do,
+; and it suits this audience twice over — no UAC prompt to navigate, and no
+; question asked that a reader has no way to answer correctly.
 DefaultDirName={autopf}\{#AppName}
+PrivilegesRequired=lowest
 DefaultGroupName={#AppName}
 OutputDir=..\installer\out
 OutputBaseFilename=NemovizBookReader-{#AppTag}-setup
@@ -49,10 +72,14 @@ ArchitecturesInstallIn64BitMode=x64compatible
 LicenseFile=..\COPYING
 InfoAfterFile={#SourceDir}\THIRD-PARTY-NOTICES.txt
 
-; A per-machine install needs elevation; Inno asks for it only when the chosen
-; folder needs it, so a reader without admin rights can still install into
-; their own profile rather than being turned away.
-PrivilegesRequiredOverridesAllowed=dialog
+; NO "for all users" CHOICE, deliberately. Offering it would offer a folder the
+; program cannot write to, and the reader would have no way to know that the
+; option they picked is the broken one. One kind of install that works beats two
+; where one of them silently does not.
+;
+; The cost, stated: two people sharing a machine each install their own copy.
+; For this audience that is nearly always one person to one machine, and a
+; second copy costs 63 MB rather than anything a reader would notice.
 
 [Languages]
 ; Nine of the eleven NBR speaks. Inno ships five of them itself; Croatian,
@@ -112,9 +139,18 @@ Filename: "{app}\Nemoviz Book Reader.exe"; Description: "{cm:LaunchProgram,{#App
 ; here: it holds the reader's books, their positions and their bookmarks, it is
 ; usually somewhere else entirely (Settings → Library location), and an
 ; uninstaller that deletes somebody's library is a disaster, not a tidy-up.
+; SETTINGS AND CACHE GO; WORK STAYS. Removing the stored service keys on
+; uninstall is a small security gain rather than a loss — nobody wants their
+; Azure key left on a machine they have finished with.
 Type: files; Name: "{app}\Settings.ini"
 Type: files; Name: "{app}\CloudUsage.ini"
 Type: files; Name: "{app}\nbr-services.dat"
 Type: files; Name: "{app}\azure-voices.txt"
 Type: files; Name: "{app}\google-voices.txt"
-Type: filesandordirs; Name: "{app}\Dictionaries"
+
+; Dictionaries is NOT deleted, and neither is the library. A pronunciation
+; dictionary is something a reader WROTE, rule by rule, to make one voice say a
+; name properly; §8j keeps each scope in its own plain file precisely so it can
+; be backed up or passed to somebody else. Leaving an empty folder behind is a
+; far smaller fault than deleting an evening's work, and it is the same
+; reasoning that keeps the uninstaller away from the library.
