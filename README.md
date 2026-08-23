@@ -50,7 +50,9 @@ Press **F1** in the program for the manual, which is in all eleven too.
 ## Installing
 
 Download the setup from the releases page and run it. Windows 10 or newer,
-64-bit.
+64-bit. It installs into Program Files; your settings, dictionaries and keys go
+to `%APPDATA%\Nemoviz Book Reader` and your books to the library, and both
+survive uninstalling.
 
 Windows SmartScreen will warn that the publisher is unknown — the installer is
 not code-signed yet. Choose *More info* and then *Run anyway*.
