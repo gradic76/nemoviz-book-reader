@@ -16,15 +16,34 @@
 #define AppVersion "1.0.0"
 #define AppRelease "Beta 1"
 #define AppTag "beta-1"        ; the git tag, and what UpdateCheck.Release must match
+
+; THE CHANNEL, and it is the ONE line that turns this into the official build.
+; Empty gives "Nemoviz Book Reader" everywhere; " Beta" gives the beta channel.
+;
+; NO NUMBER IN IT, EVER (Gordan, 2026-08-24): "neka svuda i uvijek bude samo
+; beta, bez brojeva. Tko hoće brojeve builda neka ide u Help/about." A number in
+; an installed name is a number in a FOLDER, and then beta 2 installs beside
+; beta 1 instead of over it, and a tester ends up with two of everything. The
+; build number belongs where it is read, not where it is overwritten.
+;
+; The channel exists at all because the official version goes to the Store as
+; MSIX and the betas come from GitHub as this installer. Those are two different
+; identity systems — WindowsApps and a package family name against Program Files
+; and an AppId — so they already cannot upgrade or uninstall each other, and
+; nothing had to be engineered for them to coexist. What they CAN do is look
+; identical in the Start menu, which is what this suffix prevents.
+#define AppChannel " Beta"
+#define AppInstall AppName + AppChannel
+#define ShortInstall AppShort + AppChannel
 #define AppPublisher "Nemoguća vizija"
 #define AppUrl "https://github.com/gradic76/nemoviz-book-reader"
 #define SourceDir "..\Nemoviz Book Reader\bin\x64\Release"
 
 [Setup]
 AppId={{7E3A9C21-5B4D-4F62-9A18-2C6D8E1F4B03}
-AppName={#AppName}
+AppName={#AppInstall}
 AppVersion={#AppVersion}
-AppVerName={#AppName} {#AppRelease}
+AppVerName={#AppInstall}
 AppPublisher={#AppPublisher}
 AppPublisherURL={#AppUrl}
 AppSupportURL={#AppUrl}/issues
@@ -42,10 +61,10 @@ AppUpdatesURL={#AppUrl}/releases
 ; the 480 braille tables, the eleven language files, the manuals, the fonts, the
 ; 32-bit speech host — is installed here, where every account on the machine
 ; shares one copy of it.
-DefaultDirName={autopf}\{#AppName}
-DefaultGroupName={#AppName}
+DefaultDirName={autopf}\{#AppInstall}
+DefaultGroupName={#AppInstall}
 OutputDir=..\installer\out
-OutputBaseFilename=NemovizBookReader-{#AppTag}-setup
+OutputBaseFilename=NBRsetup
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -155,12 +174,12 @@ Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs 
     Excludes: "*.pdb,{#UserOwned}"
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\Nemoviz Book Reader.exe"
-Name: "{group}\{cm:UninstallProgram,{#AppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\Nemoviz Book Reader.exe"; Tasks: desktopicon
+Name: "{group}\{#AppInstall}"; Filename: "{app}\Nemoviz Book Reader.exe"
+Name: "{group}\{cm:UninstallProgram,{#AppInstall}}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\{#AppInstall}"; Filename: "{app}\Nemoviz Book Reader.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\Nemoviz Book Reader.exe"; Description: "{cm:LaunchProgram,{#AppShort}}"; \
+Filename: "{app}\Nemoviz Book Reader.exe"; Description: "{cm:LaunchProgram,{#ShortInstall}}"; \
     Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
