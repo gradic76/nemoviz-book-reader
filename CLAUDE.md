@@ -6244,6 +6244,56 @@ run — measuring the size before that step says nothing.
 
 ---
 
+## 10j. Where a reader's own things live (2026-08-23)
+
+**`%APPDATA%\Nemoviz Book Reader`, and the program in Program Files** — Gordan:
+*"Konvencija je jos od Win 95 da aplikacije idu u Program Files… korisnicke mape
+s individualnim postavkama idu u User folder."* Installing per user was
+sidestepping the fault; `UserData.cs` fixes it.
+
+**The split is by whether NBR WRITES it, not by what the thing is.**
+
+| where | what | why |
+|---|---|---|
+| beside the exe | 480 liblouis tables, 11 `.lang`, 11 manuals, fonts, licences, `TtsHost32.exe`, the DLLs | read-only, and one copy shared by every account |
+| `%APPDATA%\Nemoviz Book Reader` | `Settings.ini`, `Dictionaries\`, `nbr-services.dat`, the two voice catalogues, `CloudUsage.ini` | written at runtime, and private to the person |
+| inside the BOOK folder | `Book.ini`, `sync.map`, `content.txt`, the speech cache, `translation-glossary.txt` | what makes a library copyable to another disk complete |
+
+**Roaming, not Local**: these belong to the PERSON and should follow a domain
+profile between machines — the cloud counter included, since a free allowance is
+reckoned per ACCOUNT and somebody on two machines should see one running total
+rather than two that each look comfortable.
+
+**THE KEYS COULD NOT STAY BESIDE THE PROGRAM**, which was the one part of
+Gordan's proposed split that could not work, and two measurements settle it:
+Program Files carries `BUILTIN\Users : ReadAndExecute`, so **every account on the
+machine can read what is there**, while `%APPDATA%\Roaming` grants only the owner
+and SYSTEM; and they are written at runtime, so a folder no ordinary process may
+write to cannot hold them at all. Beside the program they would be both
+unwritable and readable by everyone.
+
+**Migration runs from `Program.Main` before anything reads a setting** —
+`Form1`'s constructor builds an `AppSettings`, which would otherwise hand an
+upgrading reader a fresh install with no library location, no voices and no keys.
+It **copies, never moves** (the program may now be somewhere it cannot delete
+from, and the reader's only copy must not be the one in flight) and **never
+overwrites** (so running an old build once more cannot let its settings reach
+forward).
+
+**A probe testing that migration has to RUN FROM the old folder**, because it is
+defined in terms of `AppDomain.BaseDirectory` — which inside a probe is the
+PROBE's folder. The same trap made one harness report the braille tables living
+in the scratchpad, and an earlier one report every language falling back to
+English.
+
+**The uninstaller now deletes nothing of the reader's.** With the files in the
+profile, removing them would delete somebody's work from a place Windows treats
+as theirs. Checked rather than assumed that nothing else is left behind:
+`SignalTones` and `SapiWavPlayer` both use `Path.GetTempPath()`, and the speech
+cache is inside the book.
+
+---
+
 ## 11. TODO (open items)
 
 ### WHAT IS LEFT TO TEST, as of 2026-08-16 (Gordan's own list)
