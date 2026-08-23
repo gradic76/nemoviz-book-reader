@@ -928,10 +928,11 @@ namespace Nemoviz_Book_Reader
         /// spoken value can never disagree.</summary>
         private float SpeedFraction()
         {
-            int raw = form.SkinSpeedRaw;
-            // Words a minute for a text book, hundredths of a multiplier for
-            // audio — the same two ranges DragSpeedTo maps back from.
-            double f = form.SkinTextBook ? (raw - 80) / 320.0 : (raw - 50) / 150.0;
+            // Hundredths of a multiplier, 50..300, whichever kind of book is
+            // loaded — a text book multiplies its voice's natural pace where an
+            // audio book multiplies the recording's. It was words a minute for
+            // text until 2026-08-23; see currentTextSpeed in Form1.
+            double f = (form.SkinSpeedRaw - 50) / 150.0;
             return (float)Math.Max(0, Math.Min(1, f));
         }
 
@@ -1103,9 +1104,7 @@ namespace Nemoviz_Book_Reader
         private void DragSpeedTo(int x)
         {
             float f = FractionAt(NewPlayerSkin.SpeedSlot, x);
-            int want = form.SkinTextBook
-                ? (int)Math.Round((80 + f * 320) / 5.0) * 5
-                : (int)Math.Round((50 + f * 150) / 5.0) * 5;
+            int want = (int)Math.Round((50 + f * 150) / 5.0) * 5;
             int delta = want - form.SkinSpeedRaw;
             if (delta != 0) form.SkinSpeed(delta);
         }

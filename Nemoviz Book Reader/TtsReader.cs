@@ -38,7 +38,7 @@ namespace Nemoviz_Book_Reader
 
         // ── Silent reading ────────────────────────────────────────────────
         /// <summary>Read without speaking: the position still walks the book,
-        /// sentence by sentence, paced by <see cref="SilentWpm"/> instead of by a
+        /// sentence by sentence, paced by <see cref="SilentSpeed"/> instead of by a
         /// synthesiser finishing an utterance.
         ///
         /// <para>For a reader on braille or on the screen who does not want a
@@ -66,9 +66,18 @@ namespace Nemoviz_Book_Reader
         }
         private bool silent;
 
-        /// <summary>Words per minute for silent reading. Fingers and eyes are not
-        /// ears, so this is not the speech rate and does not travel with it.</summary>
-        public int SilentWpm { get { return silentWpm; } set { silentWpm = value; RestartPace(); } }
+        /// <summary>How fast silent reading walks the book, as a percentage of a
+        /// voice's natural speed — the same unit the speech control uses, so the
+        /// two read alike, and converted to words per minute here because a pace
+        /// is a duration and nothing about it is a multiplier.
+        ///
+        /// <para>Fingers and eyes are not ears: this is not the speech rate, and
+        /// a reader is free to set it somewhere else entirely.</para></summary>
+        public int SilentSpeed
+        {
+            get { return (int)Math.Round(silentWpm * 100.0 / NominalWpm); }
+            set { silentWpm = (int)Math.Round(NominalWpm * Clamp(value, 50, 300) / 100.0); RestartPace(); }
+        }
         private int silentWpm = 180;
         private System.Windows.Forms.Timer pace;
 
@@ -487,18 +496,81 @@ namespace Nemoviz_Book_Reader
             return v < lo ? lo : (v > hi ? hi : v);
         }
 
-        /// <summary>Maps a nominal words-per-minute onto SAPI's -10..10 rate
-        /// (175 WPM → 0). Nominal because the real spoken rate depends on the
-        /// voice, but it gives a familiar, monotonic control.</summary>
-        public static int WpmToRate(int wpm)
+        /// <summary>The nominal words-per-minute of a voice sitting at rate 0.
+        /// Only two things use it: the reading-time estimate, and the pace the
+        /// silent reader keeps when nothing is speaking.</summary>
+        public const int NominalWpm = 175;
+
+        /// <summary>Maps the reader's speed — a PERCENTAGE of the voice's own
+        /// natural speed, exactly like an audio book's — onto the -10..10 rate
+        /// every backend takes. 100 % is rate 0, which is the voice as its
+        /// author built it.
+        ///
+        /// <para><b>Geometric, not linear, because the rate scale is.</b> A rate
+        /// step is a ratio, not a fixed number of words: +10 is about three
+        /// times normal and -10 about a third, which is the same curve
+        /// <see cref="CloudSpeechBackend"/> hands to mpv. So the way back from a
+        /// percentage is a logarithm, and doing it linearly would make the
+        /// bottom half of the control almost nothing and the top half
+        /// everything.</para>
+        ///
+        /// <para>The floor is worth knowing: 50 % is rate -6, so rates -7 to -10
+        /// cannot be reached from this control. Nothing is lost — the old
+        /// words-per-minute control bottomed out at rate -5, so the slow end is
+        /// one step LONGER than it was.</para></summary>
+        public static int SpeedToRate(int percent)
         {
-            int r = (int)Math.Round((wpm - 175) / 17.5);
+            percent = Clamp(percent, 50, 300);
+            int r = (int)Math.Round(10.0 * Math.Log(percent / 100.0) / Math.Log(3.0));
             return Clamp(r, -10, 10);
         }
 
-        // Nominal characters per minute for a given WPM (≈ 6 chars/word incl.
-        // spaces), used to estimate reading time.
-        public static int CharsPerMinute(int wpm) { return wpm * 6; }
+        /// <summary>The way back, and it exists for ONE job: turning a setting
+        /// stored under the old words-per-minute scale into the percentage that
+        /// sounds the same. Going through the rate rather than through the words
+        /// is what makes it sound the same — the rate is what the engine was
+        /// actually being given.</summary>
+        public static int RateToSpeed(int rate)
+        {
+            rate = Clamp(rate, -10, 10);
+            int exact = Clamp((int)Math.Round(100.0 * Math.Pow(3.0, rate / 10.0)), 50, 300);
+
+            // LANDING ON THE CONTROL'S OWN TENTH, BUT ONLY WHERE IT IS FREE.
+            // A book carried over from the old scale would otherwise sit at
+            // 1.55×, half a step off every value the arrows can produce. The
+            // snap is taken only when it leaves the rate alone -- at rate -4 it
+            // does not (64 % rounds to 60, which reads back as -5), and keeping
+            // the book sounding exactly as it did outranks a tidy number.
+            // Measured over all seventeen reachable rates: sixteen snap, one
+            // does not.
+            int snapped = Clamp((int)Math.Round(exact / 10.0) * 10, 50, 300);
+            return SpeedToRate(snapped) == rate ? snapped : exact;
+        }
+
+        /// <summary>Maps a nominal words-per-minute onto SAPI's -10..10 rate
+        /// (175 WPM → 0).
+        ///
+        /// <para><b>Kept only to read settings written before 2026-08-23</b>,
+        /// when the reading speed was expressed in words per minute. Nothing
+        /// live uses it: new code goes through <see cref="SpeedToRate"/>.</para></summary>
+        public static int WpmToRate(int wpm)
+        {
+            int r = (int)Math.Round((wpm - NominalWpm) / 17.5);
+            return Clamp(r, -10, 10);
+        }
+
+        /// <summary>An old words-per-minute setting as the percentage that
+        /// sounds identical.</summary>
+        public static int WpmToSpeed(int wpm) { return RateToSpeed(WpmToRate(wpm)); }
+
+        // Nominal characters per minute at a given speed (≈ 6 chars/word incl.
+        // spaces), used to estimate reading time. Linear in the percentage and
+        // not in the rate, deliberately: this answers "how long will this take",
+        // and twice the speed really is half the time.
+        public static int CharsPerMinute(int percent)
+        {
+            return (int)Math.Round(NominalWpm * 6 * Clamp(percent, 50, 300) / 100.0);
+        }
 
         /// <summary>Reads a text file, honouring a BOM; without one, tries strict
         /// UTF-8 and falls back to Windows-1250 (Central-European ANSI, common

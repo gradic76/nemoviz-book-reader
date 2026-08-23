@@ -68,8 +68,6 @@ Player.Volume.Accessible=Laŭteco {0} procentoj
 Player.Speed.Text=Rapido: {0}x
 Player.Speed.Legend=Rapido
 Player.Speed.Accessible=Rapido {0} obla
-Player.Speed.Wpm=Rapido: {0} vpm
-Player.Speed.WpmAccessible=Rapido {0} vortoj po minuto
 Player.Position.Label=Pozicio
 Player.Position.Text=Pozicio: {0} / {1}
 Player.Position.Accessible=Pozicio {0} procentoj
@@ -175,6 +173,7 @@ Menu.Help=Helpo
 Menu.Help.Help=Helpo
 Menu.Help.About=Pri NBR
 Menu.Help.Services=Servoj kaj kontoj...
+Menu.Help.Update=Kontroli pri nova versio
 Shelf.Filter.All=Ĉiuj libroj
 Shelf.Filter.Reading=Legata
 Shelf.Filter.Unread=Nelegita
@@ -218,7 +217,7 @@ Details.Description.Open=Premu Enigi por legi ĝin
 Details.Field.SoundProcessing=Sonprilaborado
 Details.Sound.On=Jes
 Details.Sound.Off=Ne
-Details.Speed.Wpm={0} vpm
+Details.Speed.Value={0}x
 Dialog.Description.Title=Priskribo - {0}
 
 ; ---- LIBRARY - importing and deleting
@@ -345,7 +344,7 @@ Prop.Level.Medium=Meza
 Prop.Level.Strong=Forta
 Prop.Level.Maximum=Maksimuma
 Prop.ResetAll=Restarigi ĉion
-Prop.Bypass=Preterpasi la prilaboradon
+Prop.Bypass=Preterpasi la prilaboron
 Prop.Bypass.Shortcut=Stir+B ŝaltas kaj malŝaltas tion el iu ajn loko de ĉi tiu paĝo
 Prop.Analysing=La registraĵo estas analizata
 Prop.Analysing.Done=Registraĵo analizita, {0} ŝtupoj agorditaj. Ŝanĝu iun ajn el ili, se vi preferas alie.
@@ -415,6 +414,9 @@ Settings.General.UseMultimediaKeys.Hint=Vi povas uzi la aŭdvidajn klavojn de vi
 Settings.General.LibraryLocation.Hint=Ĉi tien NBR kopias la importitajn librojn. Vi povas lasi ĝin kie ĝi estas, sur la sistema subdisko, sed se vi planas grandan bibliotekon, alia subdisko aŭ alia disko estas multe pli bona solvo. NBR konservas ĉi tie ankaŭ la datumojn de ĉiu libro, do se vi volas konservi viajn legolokojn, legosignojn, rapidon kaj aliajn agordojn, notu, ke la enhavon de la malnova dosierujo necesas kopii mane al la nova loko. Kaj sampreze: metante la bibliotekon ekster la sisteman subdiskon, vi ŝirmas viajn librojn kontraŭ sistemaj paneoj kaj la kutima perdo de datumoj, kiu ilin akompanas.
 Settings.General.Language.Restart=Por ŝanĝi la lingvon NBR devas restarti. Ĉu restarti nun?
 Settings.General.Language.RestartTitle=Lingvo
+Settings.General.UpdateGroup=Novaj versioj
+Settings.General.AutoCheckUpdates=Aŭtomate kontroli pri novaj versioj
+Settings.General.AutoCheckUpdates.Hint=Kiam ĉi tio estas ŝaltita, NBR demandas unufoje ĉiutage ĉu aperis pli nova versio, kaj anoncas nur se jes. Nenio pri vi aŭ pri viaj libroj estas sendata: la peto portas nek identigilon, nek la bibliotekon, nek liston de tio, kion vi legas. Malŝaltu ĝin se vi preferas, ke NBR neniam mem iru al la reto — vi ĉiam povas demandi mem, per Helpo, Kontroli pri nova versio, en la biblioteka fenestro.
 Settings.Misc.Look=Aspekto:
 Settings.Misc.Look.Classic=Sistemaj koloroj
 Settings.Misc.Look.New=Dezajno de NBR
@@ -768,7 +770,16 @@ Dialog.About.Title=Pri NBR
 Dialog.About.Release=Alfa
 Dialog.About.Licence=🄯 Kopimaldekstro — NBR estas libera programaro laŭ la Ĝenerala Publika Permesilo de GNU, versio 3. Vi rajtas uzi ĝin, studi ĝin, kunhavigi ĝin kaj ŝanĝi ĝin; se vi transdonas ŝanĝitan version, ĝi iras plu laŭ la samaj kondiĉoj, kune kun sia fontkodo.
 Dialog.About.Text=Nemoviz Book Reader {0}\n\nKonstruo de {1}\n\nĈi tio estas plurforma kaj plureliga legilo de ciferecaj libroj kaj eldonaĵoj, desegnita speciale por blinduloj, malbonvidantoj kaj homoj kun legaj malfacilaĵoj. Ĝi estas senpaga por la baza uzo, sed se vi volas esplori kaj uzi ĝiajn spertajn funkciojn, kiel la tradukon kaj la nubajn voĉojn, vi devos registriĝi kaj eble pagi al la respektivaj eksteraj servoj.\n\nFarita de Nemoguća vizija — nemoviz.org\n\nVerkita de Gordan Radić\n\nKonstruita per Claude (Anthropic). Grandan parton de la kodo verkis ĝi, laŭ la desegno, la decidoj kaj la mezuroj de la aŭtoro; la kopirajto kaj la permesilo estas liaj.\n\n{2}\n\nSUR KIO NBR ESTAS KONSTRUITA\n\nNBR ludas sonon per libmpv, legas brajlon per liblouis, parolas tra la NVDA-regila kliento, legas etikedojn per TagLib#, eltiras tekston el PDF per PdfPig kaj malfermas arkivojn per SharpCompress. Ĉiu el ili estas aparta biblioteko, uzata senŝanĝe, kaj ĉiun eblas anstataŭigi per kongrua propra konstruo.\n\nlibmpv, kaj la FFmpeg en ĝi — LGPL 2.1 aŭ pli posta\n\nliblouis kaj ĝiaj brajlaj tabeloj — LGPL 2.1 aŭ pli posta\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress kaj la Microsoft-pakaĵoj — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend kaj OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nLa plena avizo — versioj, rajtoposedantoj kaj de kie ĉiu permesilo estis legita — troviĝas en THIRD-PARTY-NOTICES.txt apud la programo, kaj la tekstoj de la permesiloj en la dosierujo Licences.
+Update.Title=Kontrolo pri nova versio
+Update.Checking=Mi kontrolas ĉu ekzistas pli nova versio
+Update.Available=Aperis pli nova versio de Nemoviz Book Reader: {0}\n\nĈu vi volas malfermi la elŝutan paĝon?
+Update.UpToDate=Vi uzas la plej novan publikigitan version.
+Update.Failed=La kontrolo ne eblis. Eble mankas konekto, aŭ la elŝuta paĝo nun ne atingeblas.
 Hint.Button.Accessible=Helpo pri {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Nuba voĉo — la senpaga kvoto
+Cloud.Quota.Warning=Ĉi tiu libro havas {0} signojn.\n\nEl la {2} senpagaj signoj, kiujn {3} donas ĉi-monate, vi uzis {1}.\n\nLegi ĉi tiun libron kondukos vin preter la senpaga kvoto, kaj ĉio super ĝi estas ŝargata al la pagmaniero de tiu konto.\n\nĈu tamen legi ĝin?
 
 ; ---- MESSAGES AND ERRORS
 Dialog.Error.Title=Eraro

@@ -90,6 +90,18 @@ my @protect = (
     qr/\b[A-Z][A-Z0-9]{1,}\b/,                       # NBR OCR API JSON MP3 CD LGPL
     qr/\bGPL\b|\bMIT\b/,
 
+    # A SINGLE LETTER AFTER A MODIFIER IS A KEY ON THE KEYBOARD, not a word.
+    # The uppercase rule above cannot reach it -- it needs two characters, and
+    # a lone "B" is one. Found 2026-08-23 in sr-Cyrl.lang: Prop.Bypass.Shortcut
+    # read "Control Б", and there is no such key on any keyboard. Worse than a
+    # mistranslation: a reader who trusts it presses a key that does nothing,
+    # and the only way to find the real one is to guess.
+    #
+    # The arrow keys are NOT affected and must not be: they are named by
+    # direction, so "Ctrl+Лево" is right and "Ctrl+Left" would be wrong. Only a
+    # lone Latin LETTER is a key name here.
+    qr/\b(?:Ctrl|Control|Alt|Shift|Win)\s*\+?\s*[A-Za-z]\b/,
+
     # A TOKEN THAT MIXES LETTERS AND DIGITS IS AN IDENTIFIER, NOT A WORD.
     # Serbian has no word with a digit inside it, so nothing native can match
     # this -- but version strings, key names and model numbers are full of them,
@@ -206,7 +218,14 @@ die "usage: sr-cyrillic.pl [--text] <input> <output>\n" unless $in && $out;
 open(my $h, '<:raw', $in) or die "$in: $!\n";
 my $text = decode('UTF-8', do { local $/; <$h> }); close $h;
 
-my (%seen, $words, $digraphWords) = ((), 0, 0);
+# DECLARED SEPARATELY, and it has to be: a hash in a my LIST absorbs
+# everything after it, so "my (%seen, $words, $digraphWords) = ((), 0, 0)"
+# gave %seen the pair 0 => 0 and left both counters UNDEF. $words++ hid it
+# (undef++ is 1), but a run where no word held a digraph printed an
+# uninitialized-value warning over the summary line.
+my %seen;
+my $words = 0;
+my $digraphWords = 0;
 
 sub cyr {
     my $w = shift;

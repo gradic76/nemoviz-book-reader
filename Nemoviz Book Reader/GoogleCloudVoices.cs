@@ -440,6 +440,7 @@ namespace Nemoviz_Book_Reader
 
         private static string Post(string url, string contentType, byte[] body, string bearer)
         {
+            EnsureTls();
             var r = (HttpWebRequest)WebRequest.Create(url);
             r.Method = "POST";
             r.ContentType = contentType;
@@ -453,11 +454,30 @@ namespace Nemoviz_Book_Reader
 
         private static string Get(string url, string bearer)
         {
+            EnsureTls();
             var r = (HttpWebRequest)WebRequest.Create(url);
             r.Method = "GET";
             r.Timeout = 60000;
             if (bearer != null) r.Headers.Add("Authorization", "Bearer " + bearer);
             return Read(r);
+        }
+
+        /// <summary>TLS 1.2, which this service requires and .NET Framework does
+        /// not switch on by itself — its default is still "Ssl3, Tls". Without it
+        /// every call here throws "Could not create SSL/TLS secure channel",
+        /// which reads exactly like a machine with no network.
+        ///
+        /// <para>It has been working by luck: Translator and AzureProvision each
+        /// set the same flag, and the setting is process-wide, so whichever of
+        /// them ran first was carrying this file too. Nobody runs first for a
+        /// reader who only ever uses cloud voices.</para>
+        ///
+        /// <para>|= and not =, so a protocol enabled elsewhere is not taken away
+        /// again.</para></summary>
+        private static void EnsureTls()
+        {
+            try { ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12; }
+            catch { }
         }
 
         /// <summary>The reply, or null. A failure is never allowed to reach the

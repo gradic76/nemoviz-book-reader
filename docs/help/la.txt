@@ -73,6 +73,8 @@ Sequuntur duo quadratula ad claves mediorum claviaturae tuae accendendas aut exs
 
 Deinde quadratulum quo eligis utrum bibliotheca metadatis ex plicis utatur an auctorem et titulum ex nomine directorii aut plicae ostendat.
 
+Sequitur quadratum *Novas editiones sponte quaerere*. Eo accenso, NBR semel in die quaerit num editio recentior emissa sit, et tantum tum nuntiat cum adest; de te et de libris tuis nihil mittit. Si id exstinguis, NBR sua sponte ad rete numquam exibit, et quaerere tamen quandocumque poteris — in Bibliotheca, in indice Auxilium, per *Novam editionem quaerere*.
+
 Et postremo, species qua Nemoviz Book Reader tibi ostendetur. Duae offeruntur. *Colores systematis* tibi lectorem in dispositione simplici et in colorum copia quam systema tuum adhibet dant; idem accipies si magnam oppositionem accensam habes, quia NBR tunc nihil proprium pingit et schema tuum integrum transire sinit. *Species NBR* lectori aspectum paulo recentiorem dat. Si non elegisti, NBR ipse statuit: magna oppositio Colores systematis accipit, cetera omnia Speciem NBR.
 
 ## Vox et Braille
@@ -164,7 +166,7 @@ In ordine tabulandi fenestrae principalis lectoris, non necessario hoc ordine, h
 | Legere/Intermittere | spatium |
 | Ante | Maiusc + dextra |
 | Retro | Maiusc + sinistra |
-| Sonoritas | sagittae sursum et deorsum, aut F11 et F12 |
+| Sonoritas | F11 et F12 |
 | Celeritas | Ctrl + sinistra et Ctrl + dextra |
 | Progressus in libro | sagittae sinistra et dextra |
 | Gradus saliendi | Maiusc + sagittae sursum et deorsum |
@@ -187,6 +189,7 @@ Omnes claves suam compositionem habent, itaque eas facile attingis sine nimia pe
 - Spatio lectionem incipis et sistis.
 - Sagittis sinistra et dextra quinis secundis „retro volvis“ aut, si liber scriptus est, una sententia ante aut retro.
 - Ctrl + sagitta sinistra aut dextra celeritatem legendi regis.
+- Clavibus F11 et F12 sonoritatem ponis, F12 tollit, F11 deprimit. Nudae sagittae sursum et deorsum hic nihil faciunt: olim sonoritatem ferebant, sed lector tabulae, qui librum clara voce legit, versum sequentem semper petit et sonoritas sub manu abibat; itaque claves ad ordinem functionum migraverunt, ubi eas Windows Media Player viginti annos habet.
 - Maiusc + sursum aut deorsum gradum saliendi eligis (titulum, capitulum, paginam normalem, certa temporum spatia); electio pro forma et structura libri mutatur.
 - Maiusc + sagitta sinistra aut dextra gradu electo moveris.
 
@@ -212,9 +215,9 @@ Praeterea est quadratulum quod rogat utrum signaculum ad initium numerationis po
 
 Numeratio pressu clavis *Incipere* incipit; dialogus clauditur, et pro voce Horologium fenestra lectoris nunc numerum currentem ostendit. Si horologium iterum excitas, numeratio abrogatur et in dialogo novum tempus eligere aut omnia in bulla ad id destinata omittere potes.
 
-Meminisse et animadvertere oportet lectionem sisti cum quaevis ex optionibus ut Optiones, Bibliotheca et cetera excitatur. Cum in illis dialogis feceris quod agendum erat et confirmans ad fenestram lectoris redieris, lectio pergit. Excipitur dialogus Proprietates, ubi scilicet ea ponis quae interim audire velis.
+Reproductionem duo colloquia sistunt: Signa et Horologium. Cum in eis feceris quod voluisti et redeundo ad fenestram lusoris confirmaveris, reproductio pergit. Optiones, Bibliotheca, Ire ad et Proprietates librum canere sinunt — apud Proprietates id etiam consulto, quia ibi ea disponis quae interea audire vis.
 
-Pauca verba de regulis celeritatis et sonoritatis. Sagittis moventibus sonoritas quinis centesimis it, et ad extremum perveniens sonum audis. Pro libris sonoris celeritas gradibus 0,1x it, a 0,5x usque ad 3x, et cum ad communem 1x redis sonum quoque audies. In libris scriptis celeritas non multiplicatore sed verbis in minuto mensuratur et quinis it, ab 80 usque ad 400 verba in minuto.
+Pauca etiam de moderaminibus celeritatis et sonoritatis. Sonoritas in F11 et F12 est — F12 tollit, F11 deprimit — gradibus quinorum centesimorum, et ad utrumque finem signum audies. Celeritas gradibus decimarum it, a 0,5x ad 3x, eodem modo in libris sonoris et in textualibus. Hoc solum differt, quod 1x in libro sonoro celeritatem ipsius phonographematis significat, in textuali autem celeritatem qua vox electa per se loquitur. Signum audies cum celeritatem solitam transieris, in textu autem eam quae illi voci praestituta est.
 
 Quod tibi ut usori maxime refert, id est Nemoviz Book Reader omnia prorsus meminisse quae ad lectionem librorum quos audis pertinent. Meminit locum, sonoritatem et celeritatem pro sonoris, et genus, celeritatem, linguam et altitudinem soni synthesis pro scriptis; meminit numeros curationis soni pro libris sonoris et numeros exitus Braille et in quadro pro scriptis. Aliis verbis, omne quod ad vota et necessitates tuas posuisti pro singulis libris memoria tenetur.
 
@@ -228,7 +231,7 @@ Cum Proprietates soni aperis, primum quod animadvertes quadratulum Curatio soni 
 
 Sequuntur septem filtra quae tibi proderunt aut non ut sonum librorum ex vetustis, malis aut utrisque recordationibus aliquantum emendes. Quisque regulus seorsum accendi et exstingui potest, itaque omnibus simul uti non debes. Curatione soni accensa, primum quod invenis clavis Restituere est, quae omnia filtra ad numeros principales reducit. Sequitur quadratulum Praeterire, quo accenso et exstincto statim differentiam inter originale et tuas ordinationes audis. Compositio ad praetereundum Ctrl + B est, ne semper a regulis ad praeteritionem et retro ambulare debeas.
 
-Primum in serie filtrorum est Hi Pass, id est murmur tollere. Sonos in parte ima recordationis aufert, ab instrumentis electricis usque ad casualem ictum in microphonum aut mensam. Sequitur Strepitum minuere, ad sibilum taeniae, microphona vilia et similes sonos paulo altius in spectro destinatum. Sibilos mitigare sibilum sonorum ut S et Š minuit, qui in recordatione microphono nimis propinquo aut acutis nimis erectis distorti sunt. Vocem aequare partes summissas et claras recordationis propius adducere conatur. Deinde est Color soni, id est aequator quinque fasciarum: gravis, gravis/media, media (vox), media/acuta et acuta. Postremo sonoritas automata et morae, quae etiam normalizatio et cataracta vocantur: normalizatio totam recordationem ad summum gradum sine distortione tollit, mora autem summissa (cataracta) quod strepitus in eis restat aufert.
+Primum in ordine est *Murmur tollere*, quod filtrum altum vocant. Strepitus in ima parte phonographematis tollit, ab instrumentis electricis usque ad fortuitum ictum in microphonum aut mensam. Sequitur *Strepitum minuere*, taeniae sibilo, microphonis malis similibusque strepitibus paulo altioribus destinatum. *Sibilos mitigare* fragorem sonorum qualia sunt S et C minuit, qui nimis propinqua receptione aut acutis extollendis depravati sunt. *Vocem aequare* partes phonographematis submissiores et clariores aequare conatur. Deinde est *Color soni*, aequator quinque fasciarum; fasciae suis frequentiis notantur — 200, 800, 1.8k, 3.5k et 5k+ — et ultima pluteum agit, id est omnia supra se tollit aut deprimit, non unam regionem. Postremo grex *Sonoritas et morae* cum duobus moderaminibus: *Sonoritas automata* (aequatio) totum phonographema ad summum gradum sine depravatione tollit, et *Strepitus in moris* (porta) strepitum reliquum in intervallis inter sententias tollit.
 
 Quodque filtrum quinque gradus agendi habet: minimum, levem, medium, fortem et maximum. Et repetendum est: quodque seorsum accendi et exstingui potest.
 
@@ -238,9 +241,11 @@ Omnino dicendum est hanc curationem soni miracula non facturam esse, neque ex ma
 
 ## Proprietates textus
 
-Similiter atque in optionibus vocis, hic electionem linguae, vocis, celeritatis, sonoritatis et altitudinis soni pro libro electo habes. In Optionibus principem pro omnibus eligis, hic pro certo titulo ponis. Si cur rogas, exemplum simplicissimum est: vox tua princeps in Optionibus virilis est, tu autem romanum ex prospectu feminae scriptum voce feminea legere malles — id in proprietatibus textus pro illo uno libro mutas. Ceteri omnes libri in illa lingua voce virili aperiri pergent donec, et si, id mutaveris. Item, lectionem facilem sine molestia 250 verbis in minuto legere potes, sed gravius aliquid, de quo interim cogitandum est, fortasse ad 180 potius pones.
+Similiter atque in optionibus vocis, hic electionem linguae, vocis, celeritatis, sonoritatis et altitudinis soni pro libro electo habes. In Optionibus principem pro omnibus eligis, hic pro certo titulo ponis. Si cur rogas, exemplum simplicissimum est: vox tua princeps in Optionibus virilis est, tu autem romanum ex prospectu feminae scriptum voce feminea legere malles — id in proprietatibus textus pro illo uno libro mutas. Ceteri omnes libri in illa lingua voce virili aperiri pergent donec, et si, id mutaveris. Item, lectionem facilem sine molestia 1,5x legere potes, sed gravius aliquid, de quo interim cogitandum est, fortasse ad 1x aut tardius potius reduces.
 
-Lexicon pronuntiationis hic non est; sequuntur optiones pro Braille et pro quadro. Si exitum Braille accendis, electionem tabulae Braille pro lingua electa accipis; si exitum in quadro accendis, electionem accipis quomodo litterae in quadro tuo ostendantur. Si tantum Braille aut tantum in quadro sine voce legere vis, eam rem in indice vocum elige. In hac beta exitus Braille et in quadro obscurati sunt et notam de eo ferunt; electio tabulae Braille pro libris ex plicis Braille importatis adhuc operatur.
+Lexicon pronuntiationis hic non est; sequuntur optiones braillicae et visivae. Si ostensionem visivam accendis, electionem accipis quo modo textus in tabula tua appareat. Si tantum braillice aut visive legere vis, sine voce, hanc optionem in indice vocum elige. In hac beta exitus braillicus et visivus obscurati sunt et notam ferunt se non accensos esse.
+
+NBR tabulam braillicam exeuntem non habet nec habebit. Quod in linea tua braillica stat, lector tuus tabulae vertit, tabula ex suis ipsius optionibus, et is solus locus rectus est illius electionis — duae tabulae super una linea dissentire tantum possent. Sola tabula braillica in NBR est *ineuntis*: ea qua fasciculus .brf in importatione lectus est. Eam in grege Fons braillicus mutas, qui apud librum solum apparet qui ex tali fasciculo venit. Is grex etiam in hac beta operatur.
 
 ## Optiones exitus in quadro {beta}
 

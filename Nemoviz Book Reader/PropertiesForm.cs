@@ -116,7 +116,7 @@ namespace Nemoviz_Book_Reader
         private ComboBox cmbTLanguage, cmbTVoice;
         // Shown only when nothing installed speaks the book's language.
         private TextBox tbTNoVoice;
-        private NumericUpDown numTWpm, numTVolume, numTPitch;
+        private NumericUpDown numTSpeed, numTVolume, numTPitch;
         // The table a braille book was READ with. Not a preference: changing it
         // re-runs the import, which is why it is committed on OK and nowhere else.
         private ComboBox cmbTInTable;
@@ -642,7 +642,8 @@ namespace Nemoviz_Book_Reader
             // went so the tone bands could have the room; the VALUES had to stay,
             // because until they were put here they were legible nowhere at all.
             info.AddAlways(BookInfoField.Volume, book.Volume + " %", dash);
-            info.AddAlways(BookInfoField.Speed, book.Speed + " %", dash);
+            info.AddAlways(BookInfoField.Speed,
+                Localization.T("Details.Speed.Value", (book.Speed / 100.0).ToString("0.0")), dash);
             sb.Append(info.ToText(Environment.NewLine));
             sb.AppendLine();
 
@@ -1097,9 +1098,14 @@ namespace Nemoviz_Book_Reader
 
             yy += 34;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Speed"), lx, yy + 3));
-            numTWpm = SettingsForm.MakeNumeric(Localization.T("Settings.TextBooks.Speed"), cx, yy, 80, 400,
-                                               book.TextWpm >= 0 ? book.TextWpm : 175, tab++, 5);
-            box.Controls.Add(numTWpm);
+            // Same range and step as the player's own speed control: 0.5× to
+            // 3.0× in tenths. Stored as a whole percentage -- see the twin in
+            // SettingsForm for why the decimal stops at the control.
+            numTSpeed = SettingsForm.MakeDecimal(Localization.T("Settings.TextBooks.Speed"), cx, yy,
+                                                 0.5m, 3.0m,
+                                                 (book.TextSpeed >= 0 ? book.TextSpeed : 100) / 100m,
+                                                 tab++, 0.1m, 1);
+            box.Controls.Add(numTSpeed);
 
             yy += 30;
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Volume"), lx, yy + 3));
@@ -1111,7 +1117,7 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(SettingsForm.MakeLabel(Localization.T("Settings.TextBooks.Pitch"), lx, yy + 3));
             numTPitch = SettingsForm.MakeNumeric(Localization.T("Settings.TextBooks.Pitch"), cx, yy, -10, 10,
                                                  book.TextPitch >= -10 && book.TextPitch <= 10 ? book.TextPitch : 0, tab++);
-            numTWpm.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
+            numTSpeed.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
             numTVolume.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
             numTPitch.ValueChanged += (s, e) => { RefreshTextInfo(); PreviewText(); };
             box.Controls.Add(numTPitch);
@@ -1248,7 +1254,7 @@ namespace Nemoviz_Book_Reader
         /// under the voice being left, so switching back restores it.</summary>
         private void LoadPrefsForSelectedVoice()
         {
-            if (cmbTVoice == null || numTWpm == null || numTVolume == null || numTPitch == null) return;
+            if (cmbTVoice == null || numTSpeed == null || numTVolume == null || numTPitch == null) return;
             string voice = cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
             if (string.IsNullOrEmpty(voice) || string.Equals(voice, textPrefsVoice, StringComparison.OrdinalIgnoreCase))
                 return;
@@ -1261,7 +1267,7 @@ namespace Nemoviz_Book_Reader
             // preview once, instead of restarting the sentence three times.
             bool wasInit = initialising;
             initialising = true;
-            numTWpm.Value = Clamp(p.Wpm, (int)numTWpm.Minimum, (int)numTWpm.Maximum);
+            SettingsForm.SetSpeedPercent(numTSpeed, p.Speed);
             numTVolume.Value = Clamp(p.Volume, (int)numTVolume.Minimum, (int)numTVolume.Maximum);
             numTPitch.Value = Clamp(p.Pitch, (int)numTPitch.Minimum, (int)numTPitch.Maximum);
             initialising = wasInit;
@@ -1269,9 +1275,9 @@ namespace Nemoviz_Book_Reader
 
         private void StageTextPrefs()
         {
-            if (string.IsNullOrEmpty(textPrefsVoice) || numTWpm == null) return;
+            if (string.IsNullOrEmpty(textPrefsVoice) || numTSpeed == null) return;
             stagedTextPrefs.Set(textPrefsVoice,
-                new VoicePrefs((int)numTWpm.Value, (int)numTVolume.Value, (int)numTPitch.Value));
+                new VoicePrefs(SettingsForm.SpeedPercent(numTSpeed), (int)numTVolume.Value, (int)numTPitch.Value));
         }
 
         /// <summary>The table this book's braille file was READ with, and the way
@@ -1573,7 +1579,7 @@ namespace Nemoviz_Book_Reader
             if (!book.TextNoSpeech)
                 book.TextVoice = cmbTVoice.SelectedItem != null
                     ? cmbTVoice.SelectedItem.ToString() : "";
-            book.TextWpm = numTWpm != null ? (int)numTWpm.Value : -1;
+            book.TextSpeed = numTSpeed != null ? SettingsForm.SpeedPercent(numTSpeed) : -1;
             book.TextVolume = numTVolume != null ? (int)numTVolume.Value : -1;
             book.TextPitch = numTPitch != null ? (int)numTPitch.Value : -99;
             // The visual-output controls were scaffolding until now: they were
@@ -1625,7 +1631,7 @@ namespace Nemoviz_Book_Reader
         {
             if (initialising || onTextPreview == null || cmbTVoice == null) return;
             string v = cmbTVoice.SelectedItem != null ? cmbTVoice.SelectedItem.ToString() : "";
-            onTextPreview(v, (int)numTWpm.Value, (int)numTVolume.Value, (int)numTPitch.Value);
+            onTextPreview(v, SettingsForm.SpeedPercent(numTSpeed), (int)numTVolume.Value, (int)numTPitch.Value);
         }
 
         /// <summary>The Text tab's read-out: what this book will actually be read
@@ -1690,9 +1696,10 @@ namespace Nemoviz_Book_Reader
             if (lsel >= 0 && lsel < textLanguageCodes.Count)
                 sb.Append(Localization.T("Prop.Text.ReadingIn")).Append(' ')
                   .Append(SettingsForm.LanguageName(textLanguageCodes[lsel])).Append(nl);
-            if (numTWpm != null)
+            if (numTSpeed != null)
                 sb.Append(Localization.T("Settings.TextBooks.Speed")).Append(' ')
-                  .Append((int)numTWpm.Value).Append(" WPM").Append(nl);
+                  .Append(Localization.T("Details.Speed.Value",
+                      (SettingsForm.SpeedPercent(numTSpeed) / 100.0).ToString("0.0"))).Append(nl);
             if (numTVolume != null)
                 sb.Append(Localization.T("Settings.TextBooks.Volume")).Append(' ')
                   .Append((int)numTVolume.Value).Append('%').Append(nl);

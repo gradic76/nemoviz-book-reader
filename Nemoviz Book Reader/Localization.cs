@@ -64,7 +64,66 @@ namespace Nemoviz_Book_Reader
                 }
             }
 
-            LoadLanguage(string.IsNullOrEmpty(preferredCode) ? FallbackCode : preferredCode);
+            // NOTHING STORED MEANS "NOT CHOSEN YET", AND THEN WINDOWS DECIDES.
+            // Until 2026-08-23 the default was a literal "en", so NBR opened in
+            // English on a Croatian machine and the manual's promise that it
+            // picks up the system language was simply untrue. Gordan assumed it
+            // worked; it never had.
+            //
+            // Deliberately NOT offered as a row in the Settings combo. That
+            // would be a rule that resolves to one of the languages already in
+            // the list -- the same thing "Follow Windows" was in the Look combo
+            // before he removed it (SettingsForm.cs), and it would read as a
+            // third choice that behaves like one of the other two. So the
+            // system language is the STARTING POINT, and the moment a reader
+            // picks one it is theirs.
+            LoadLanguage(string.IsNullOrEmpty(preferredCode) ? SystemLanguage() : preferredCode);
+        }
+
+        /// <summary>The best match for the machine's own UI language among the
+        /// .lang files that actually shipped, or English.
+        ///
+        /// <para>Matched from the most specific to the least: the full tag,
+        /// then the tag cut back to its script, then the bare two letters. So a
+        /// machine set to sr-Cyrl-RS gets the Cyrillic file rather than the Latin
+        /// one, while sr-Latn-RS and plain sr both land on sr.</para>
+        ///
+        /// <para>InstalledUICulture, not CurrentUICulture: the first is the
+        /// language Windows itself is in, the second follows a per-user
+        /// formatting choice and can be a language the display is not in.</para></summary>
+        private static string SystemLanguage()
+        {
+            return MatchLanguage(System.Globalization.CultureInfo.InstalledUICulture);
+        }
+
+        /// <summary>The matching half of <see cref="SystemLanguage"/>, taking the
+        /// culture as an argument so the rule can be asked about a machine other
+        /// than this one. InstalledUICulture cannot be set, so without this the
+        /// rule could only ever be checked against whatever Windows this happens
+        /// to be running on -- which is one language, and never the awkward one.</summary>
+        internal static string MatchLanguage(System.Globalization.CultureInfo ui)
+        {
+            try
+            {
+                // THE ORDER IS THE WHOLE OF THIS METHOD: full tag, then the tag
+                // cut back to its SCRIPT, and only then the bare two letters.
+                // sr-Cyrl-RS has to meet sr-Cyrl before it meets sr, or every
+                // Serbian reader on a Cyrillic Windows is handed the Latin file
+                // -- which is what the first version did, because it asked for
+                // the two-letter code second and the script never got a turn.
+                string[] parts = (ui.Name ?? "").Split('-');
+                string scripted = parts.Length >= 2 ? parts[0] + "-" + parts[1] : null;
+
+                foreach (string want in new[] { ui.Name, scripted, ui.TwoLetterISOLanguageName })
+                {
+                    if (string.IsNullOrEmpty(want)) continue;
+                    foreach (var lang in AvailableLanguages)
+                        if (string.Equals(lang.Code, want, StringComparison.OrdinalIgnoreCase))
+                            return lang.Code;
+                }
+            }
+            catch { }
+            return FallbackCode;
         }
 
         /// <summary>

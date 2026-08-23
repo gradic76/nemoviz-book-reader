@@ -75,6 +75,8 @@ Slijede dva potvrdna okvira za uključivanje ili isključivanje multimedijskih f
 
 Zatim potvrdni okvir kojim birate hoće li se u Knjižnici koristiti metapodaci iz datoteka ili će se imena autora i izdanja prikazati iz imena mape ili datoteke.
 
+Slijedi potvrdni okvir *Automatski provjeravaj ima li novije verzije*. Kad je uključen, NBR jednom dnevno pita je li objavljeno novije izdanje i javlja vam se samo ako jest; o vama i o vašim knjigama ne šalje ništa. Ako ga isključite, NBR sam od sebe neće izlaziti na mrežu, a provjeru i dalje možete zatražiti kad god želite — u Knjižnici, u izborniku Pomoć, stavkom *Provjeri ima li novije verzije*.
+
 I na kraju, izbor izgleda u kojem će vam se prikazivati Nemoviz Book Reader. Ponuđene su dvije opcije. *Boje sustava* daju vam player u klasičnom izgledu i paleti boja koju koristite u sustavu; to je ujedno i ono što ćete dobiti ako imate uključen visoki kontrast, jer NBR tada ne crta ništa svoje nego pušta vašu shemu da prođe cijela. *NBR dizajn* daje prikaz playera u malo modernijem izdanju. Ako niste birali, NBR odlučuje sam: visoki kontrast dobiva Boje sustava, sve ostalo NBR dizajn.
 
 ## Govor i brajica
@@ -166,7 +168,7 @@ U Tab liniji, ne nužno ovim redoslijedom, na glavnom prozoru playera nalaze se 
 | Reprodukcija/Pauza | razmaknica |
 | Naprijed | Shift + desno |
 | Natrag | Shift + lijevo |
-| Glasnoća | strelice gore i dolje, ili F11 i F12 |
+| Glasnoća | F11 i F12 |
 | Brzina | Ctrl + lijevo i Ctrl + desno |
 | Napredak slušanja | strelice lijevo i desno |
 | Korak navigacije | Shift + strelice gore i dolje |
@@ -189,6 +191,7 @@ Sve tipke imaju svoje tipkovne prečace tako da lako možete do njih bez da prev
 - Razmaknicom pokrećete ili zaustavljate reprodukciju.
 - Strelicama lijevo ili desno „premotavate“ po pet sekundi ili, ako se radi o tekstualnoj knjizi, po rečenicu unaprijed ili unatrag.
 - Kombinacijom tipki Ctrl + strelice lijevo ili desno regulirate brzinu reprodukcije.
+- Tipkama F11 i F12 postavljate glasnoću, F12 diže a F11 spušta. Gole strelice gore i dolje ovdje ne rade ništa: nekad su nosile glasnoću, ali čitač ekrana koji čita knjigu naglas neprestano traži sljedeći redak i glasnoća bi mu odlazila ispod ruke, pa su se tipke preselile na funkcijski red gdje ih Windows Media Player drži već dvadeset godina.
 - Kombinacijom tipki Shift + gore ili dolje birate korak za navigaciju (naslov, poglavlje, kartica teksta, određene minutaže), izbor se mijenja ovisno o formatu i strukturi knjige.
 - Kombinacijom tipki Shift + strelice lijevo ili desno krećete se odabranim korakom navigacije.
 
@@ -214,9 +217,9 @@ Osim toga, tu je i potvrdni okvir koji vas pita želite li postaviti knjižnu oz
 
 Odbrojavanje počinje pritiskom na tipku *Pokreni*, dijalog se zatvara, umjesto naziva Brojač na prozoru playera sad se vidi aktivan brojčanik. Ako ponovo aktivirate opciju Brojač odbrojavanje se poništava te u dijalogu možete odabrati novo vrijeme ili sve otkazati na za to predviđenoj tipki.
 
-Treba zapamtiti i obratiti pažnju da se reprodukcija zaustavlja aktiviranjem svih opcija kao što su Postavke, Knjižnica itd. Kad napravite što imate u tim dijalozima i potvrdite vraćanjem u prozor playera reprodukcija se nastavlja. Iznimka je dijalog Svojstva gdje ipak postavljate stvari koje biste htjeli čuti kako zvuče dok to radite.
+Reprodukciju zaustavljaju dva dijaloga: Oznake i Brojač. Kad u njima napravite što ste htjeli i potvrdite vraćanjem u prozor playera, reprodukcija se nastavlja. Postavke, Knjižnica, Idi na i Svojstva puštaju knjigu da svira dalje — kod Svojstava to je i namjerno, jer ondje podešavate stvari koje želite čuti dok to radite.
 
-Nekoliko riječi i o kontrolama za brzinu i glasnoću. Navigacijom strelicama glasnoća se kreće u koracima od 5% i kad dođete do kraja čujete zvučni signal. Brzina se za zvučne knjige kreće u koracima od 0,1x, od 0,5x do 3x, a kad se vratite na normalnu brzinu od 1x čut ćete i zvučni signal. Kod tekstualnih knjiga brzina se ne mjeri množiteljem nego brojem riječi u minuti i kreće se u koracima od pet, od 80 do 400 riječi u minuti.
+Nekoliko riječi i o kontrolama za brzinu i glasnoću. Glasnoća je na tipkama F11 i F12 — F12 diže, F11 spušta — u koracima od 5%, i kad dođete do kraja čujete zvučni signal. Brzina se kreće u koracima od 0,1x, od 0,5x do 3x, i to jednako za zvučne i za tekstualne knjige. Razlika je samo u tome što 1x kod zvučne knjige znači brzinu snimke, a kod tekstualne brzinu kojom odabrani glas govori sam po sebi. Zvučni signal čut ćete kad prijeđete preko normalne brzine, odnosno kod teksta preko one koja je za taj glas zadana.
 
 Ono što je za vas kao korisnika najbitnije jeste da Nemoviz Book Reader pamti ama baš sve vezano za reprodukciju knjiga koje slušate. Pamte se položaj, glasnoća, brzina za zvučne te vrsta, brzina, jezik i visina TTS-a za tekstualne knjige, pamte se parametri obrade zvuka za zvučne knjige kao i parametri brajičnog i vizualnog prikaza za tekstualne. Drugim riječima, pamti se sve što ste postavili prema svojim željama i potrebama za svaku knjigu posebno.
 
@@ -230,7 +233,7 @@ Kada otvorite Svojstva zvuka prvo ćete primijetiti potvrdni okvir Obrada zvuka.
 
 Slijedi sedam filtera koji će vam pomoći ili ne da donekle poboljšate zvuk audio knjiga na starim, lošim ili oboje snimkama. Svaka kontrola se može zasebno uključiti ili isključiti tako da ih ne morate koristiti sve odjednom. Kad uključite Obradu zvuka prvo ćete pronaći tipku Poništi, ona sve filtere vraća na zadane postavke. Slijedi potvrdni okvir Premosti čijim uključivanjem i isključivanjem trenutno čujete razliku između izvornika i vaših podešavanja. Kratica za premošćivanje je Ctrl + B tako da se ne morate stalno vraćati od kontrola do premošćivanja i natrag.
 
-Prvi u nizu filtera je tzv. Hi Pass odnosno uklanjanje tutnjave. Uklanja šumove u niskom spektru snimke, od električnih uređaja do slučajnog treska po mikrofonu ili stolu. Slijedi Uklanjanje šuma koji je predviđen za šum vrpce, loših mikrofona i slične šumove u malo višem spektru frekvencija. Omekšavanje sibilanata smanjuje praskanje glasova poput C, S, Š i sličnih koji su se izobličili na snimci zbog prebliskog snimanja ili istaknutih visokih tonova. Poravnanje govora pokušava izjednačiti tiše i glasnije dijelove snimke. Zatim je tu Boja tona tj. petokanalni ekvilajzer, duboko, duboko/srednje, srednje (glas), srednje/visoko i visoko područje. Na kraju, automatska glasnoća i pauze, zovu se još i normalizacija i gate: normalizacija podiže ukupnu snimku do maksimalne razine bez izobličavanja a stišavanje pauza (gate) uklanja preostale šumove u pauzama.
+Prvi u nizu je *Ukloni tutnjavu*, tzv. Hi Pass. Uklanja šumove u niskom spektru snimke, od električnih uređaja do slučajnog treska po mikrofonu ili stolu. Slijedi *Smanjenje šuma*, predviđeno za šum vrpce, loših mikrofona i slične šumove u malo višem spektru frekvencija. *Ublaži siktanje* smanjuje praskanje glasova poput C, S, Š i sličnih koji su se izobličili na snimci zbog prebliskog snimanja ili istaknutih visokih tonova. *Ujednači govor* pokušava izjednačiti tiše i glasnije dijelove snimke. Zatim je tu *Ton*, petopojasni ekvilajzer; pojasevi su označeni svojim frekvencijama — 200, 800, 1.8k, 3.5k i 5k+ — a zadnji je polica, što znači da diže ili spušta sve iznad sebe, ne samo jedno područje. Na kraju je grupa *Glasnoća i pauze* s dvije kontrole: *Automatska glasnoća* (normalizacija) podiže ukupnu snimku do maksimalne razine bez izobličavanja, a *Šum u pauzama* (gate) uklanja preostale šumove u razmacima između rečenica.
 
 Svaki filter ima pet razina djelovanja, minimalno, blago, srednje, jako i maksimalno. Također, valja ponoviti, svaki se može pojedinačno uključiti ili isključiti.
 
@@ -240,9 +243,11 @@ Obavezno valja napomenuti da ova obrada zvuka neće napraviti čuda i nećete s 
 
 ## Svojstva teksta
 
-Slično kao i u postavkama za govor ovdje imate izbor jezika, glasa, brzine, glasnoće i visine za odabranu knjigu. U Postavkama birate zadano za sve, ovdje postavljate za konkretan naslov. Ako se pitate zašto, najjednostavniji primjer je ako vam je zadani glas u postavkama muški a vi biste roman pisan iz ženske perspektive čitali ženskim glasom, to u svojstvima teksta promijenite konkretno za tu knjigu. Sve ostale knjige na tom jeziku i dalje će se zadano otvarati muškim glasom dok i ako to ne promijenite. Također, neko lako štivo možete bez problema čitati na 250 riječi u minuti ali nešto teže o čemu morate usput i razmišljati radije ćete možda staviti na 180.
+Slično kao i u postavkama za govor ovdje imate izbor jezika, glasa, brzine, glasnoće i visine za odabranu knjigu. U Postavkama birate zadano za sve, ovdje postavljate za konkretan naslov. Ako se pitate zašto, najjednostavniji primjer je ako vam je zadani glas u postavkama muški a vi biste roman pisan iz ženske perspektive čitali ženskim glasom, to u svojstvima teksta promijenite konkretno za tu knjigu. Sve ostale knjige na tom jeziku i dalje će se zadano otvarati muškim glasom dok i ako to ne promijenite. Također, neko lako štivo možete bez problema čitati na 1,5x ali nešto teže o čemu morate usput i razmišljati radije ćete možda vratiti na 1x ili sporije.
 
-Ovdje rječnika izgovora nema, slijede postavke za brajicu i vizualne postavke. Ako aktivirate brajični izlaz dobijate izbor brajične tablice za odabrani jezik, ako aktivirate vizualni prikaz dobijate izbor na koji će se način tekst prikazivati na vašem ekranu. Ukoliko želite samo čitati na brajici ili vizualno bez govora, na popisu glasova odaberite tu opciju. U ovoj beti brajični i vizualni izlaz su zasivljeni i nose napomenu da nisu uključeni; izbor brajične tablice za knjige uvezene iz brajičnih datoteka i dalje radi.
+Ovdje rječnika izgovora nema, slijede postavke za brajicu i vizualne postavke. Ako aktivirate vizualni prikaz dobijate izbor na koji će se način tekst prikazivati na vašem ekranu. Ukoliko želite samo čitati na brajici ili vizualno bez govora, na popisu glasova odaberite tu opciju. U ovoj beti brajični i vizualni izlaz su zasivljeni i nose napomenu da nisu uključeni.
+
+NBR nema izlaznu brajičnu tablicu i neće je imati. Ono što stoji na vašem brajičnom retku prevodi vaš čitač ekrana, tablicom iz svojih vlastitih postavki, i to je jedino ispravno mjesto za taj izbor — dvije tablice nad jednim retkom mogle bi se samo razilaziti. Jedina brajična tablica u NBR-u je *ulazna*: ona kojom je pročitana .brf datoteka pri uvozu, i nju mijenjate u grupi Brajični izvornik, koja se pojavljuje samo kod knjige koja je iz takve datoteke i došla. Ta grupa radi i u ovoj beti.
 
 ## Postavke vizualnog prikaza {beta}
 

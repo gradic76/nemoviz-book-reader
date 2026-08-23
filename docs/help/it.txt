@@ -68,6 +68,8 @@ Seguono due caselle per attivare o disattivare i tasti multimediali della tastie
 
 Poi una casella con cui scegli se nella biblioteca si usano i metadati dei file oppure se autore e titolo vengono mostrati dal nome della cartella o del file.
 
+Segue la casella *Cerca aggiornamenti automaticamente*. Quando è attiva, NBR chiede una volta al giorno se è uscita una versione più recente e avvisa soltanto se c'è; su di lei e sui suoi libri non invia nulla. Se la disattiva, NBR non uscirà in rete da solo, e potrà comunque controllare quando vuole — nella Biblioteca, nel menu Guida, con *Cerca aggiornamenti*.
+
 E infine la scelta dell'aspetto con cui ti sarà mostrato Nemoviz Book Reader. Ce ne sono due. *Colori di sistema* ti danno il lettore in una disposizione classica e nella tavolozza che usa il tuo sistema; è anche ciò che otterrai se hai attivo il contrasto elevato, perché NBR allora non disegna nulla di suo e lascia passare intero il tuo schema. *Disegno di NBR* dà al lettore un aspetto un po' più moderno. Se non hai scelto, NBR decide da sé: al contrasto elevato tocca Colori di sistema, a tutto il resto Disegno di NBR.
 
 ## Voce e braille
@@ -159,7 +161,7 @@ Nel giro di tabulazione della finestra principale del lettore, non necessariamen
 | Riproduci/Pausa | barra spaziatrice |
 | Avanti | Maiusc + destra |
 | Indietro | Maiusc + sinistra |
-| Volume | frecce su e giù, oppure F11 e F12 |
+| Volume | F11 e F12 |
 | Velocità | Ctrl + sinistra e Ctrl + destra |
 | Avanzamento nel libro | frecce sinistra e destra |
 | Passo di spostamento | Maiusc + frecce su e giù |
@@ -182,6 +184,7 @@ Tutti i tasti hanno la loro scorciatoia, così ci arrivi facilmente senza girare
 - Con la barra spaziatrice avvii e fermi la riproduzione.
 - Con le frecce sinistra e destra «riavvolgi» di cinque secondi per volta oppure, se è un libro di testo, di una frase avanti o indietro.
 - Con Ctrl + freccia sinistra o destra regoli la velocità di lettura.
+- Con F11 e F12 imposti il volume, F12 alza e F11 abbassa. Le frecce su e giù da sole qui non fanno nulla: prima portavano il volume, ma un lettore di schermo che legge il libro ad alta voce continua a chiedere la riga successiva e il volume scivolava via da sé, così i tasti si sono spostati sulla fila dei funzionali, dove Windows Media Player li tiene da vent'anni.
 - Con Maiusc + su o giù scegli il passo di spostamento (titolo, capitolo, cartella editoriale, certe durate); la scelta cambia secondo il formato e la struttura del libro.
 - Con Maiusc + freccia sinistra o destra ti muovi del passo di spostamento scelto.
 
@@ -207,9 +210,9 @@ Oltre a questo c'è una casella che ti chiede se vuoi mettere un segnalibro all'
 
 Il conto alla rovescia comincia premendo *Avvia*; la finestra si chiude e, invece della parola Timer, la finestra del lettore mostra ora un contatore in funzione. Se attivi di nuovo il timer, il conto alla rovescia si annulla e nella finestra puoi scegliere un tempo nuovo o annullare tutto sul pulsante previsto.
 
-Va ricordato e tenuto presente che la riproduzione si ferma attivando una qualsiasi delle possibilità come Impostazioni, Biblioteca e così via. Quando avrai fatto ciò per cui sei andato in quelle finestre e confermerai tornando alla finestra del lettore, la riproduzione riprende. L'eccezione è la finestra Proprietà, dove in fondo imposti cose che vorresti sentire mentre lo fai.
+La riproduzione la fermano due finestre: Segnalibri e Timer. Quando vi avrà fatto ciò per cui è entrato e confermerà tornando alla finestra del lettore, la riproduzione riprende. Impostazioni, Biblioteca, Vai a e Proprietà lasciano il libro in riproduzione — nelle Proprietà è anche voluto, perché lì regola cose che vuole sentire mentre lo fa.
 
-Qualche parola sui comandi di velocità e volume. Muovendosi con le frecce, il volume avanza a passi del 5% e quando arrivi al limite senti un segnale acustico. Per i libri sonori la velocità avanza a passi di 0,1x, da 0,5x a 3x, e quando torni alla velocità normale di 1x sentirai anch'esso un segnale. Nei libri di testo la velocità non si misura con un moltiplicatore ma in parole al minuto e avanza a passi di cinque, da 80 a 400 parole al minuto.
+Due parole anche sui comandi di velocità e volume. Il volume è su F11 e F12 — F12 alza, F11 abbassa — a passi del 5 % e, arrivato a uno dei due limiti, sentirà un segnale. La velocità va a passi di 0,1x, da 0,5x a 3x, e allo stesso modo per i libri sonori e per quelli di testo. La differenza è solo che 1x in un libro sonoro è la velocità della registrazione, e in uno di testo la velocità con cui la voce scelta parla da sé. Il segnale lo sentirà passando per la velocità normale, e nel testo per quella impostata per quella voce.
 
 Ciò che per te come utente conta di più è che Nemoviz Book Reader ricorda proprio tutto quanto riguarda la riproduzione dei libri che ascolti. Vengono ricordati la posizione, il volume e la velocità per quelli sonori, e il tipo, la velocità, la lingua e il tono del sintetizzatore per quelli di testo; vengono ricordati i valori del trattamento del suono per i libri sonori e i valori dell'uscita braille e a schermo per quelli di testo. In altre parole, viene ricordato tutto ciò che hai impostato secondo i tuoi gusti e bisogni, per ogni libro separatamente.
 
@@ -223,7 +226,7 @@ Aprendo le Proprietà del suono, la prima cosa che noterai è la casella Trattam
 
 Seguono sette filtri che ti aiuteranno, o no, a migliorare in qualche misura il suono di audiolibri ricavati da registrazioni vecchie, cattive o entrambe le cose. Ogni comando si attiva o disattiva separatamente, quindi non devi usarli tutti insieme. Attivando il Trattamento del suono, la prima cosa che trovi è il tasto Reimposta, che riporta tutti i filtri ai valori predefiniti. Segue una casella Escludi, attivandola e disattivandola senti all'istante la differenza fra l'originale e le tue regolazioni. La scorciatoia per escludere è Ctrl + B, così non dovrai andare e tornare di continuo dai comandi all'esclusione.
 
-Il primo della serie di filtri è il cosiddetto Hi Pass, cioè togliere il rimbombo. Elimina i rumori nella parte bassa della registrazione, dagli apparecchi elettrici al colpo accidentale sul microfono o sul tavolo. Segue la Riduzione del rumore, pensata per il fruscio del nastro, i microfoni scadenti e rumori simili un po' più in alto nello spettro. Addolcire le sibilanti riduce il sibilo di suoni come S e SC, deformati sulla registrazione da una ripresa troppo ravvicinata o da acuti troppo in evidenza. Uniformare la voce cerca di avvicinare le parti piano e quelle forti della registrazione. Poi c'è il Timbro, cioè un equalizzatore a cinque bande: basso, basso/medio, medio (la voce), medio/alto e alto. Infine il volume automatico e le pause, chiamati anche normalizzazione e gate: la normalizzazione porta tutta la registrazione al livello massimo senza distorsione, mentre abbassare le pause (il gate) toglie il rumore che vi resta.
+Il primo della serie è *Togli il rimbombo*, il cosiddetto filtro passa-alto. Toglie i rumori nella parte bassa dello spettro della registrazione, dagli apparecchi elettrici al colpo accidentale sul microfono o sul tavolo. Segue *Riduzione del rumore*, pensata per il fruscio del nastro, i microfoni scadenti e rumori simili un po' più in alto in frequenza. *Addolcisci le sibilanti* attenua lo schiocco di suoni come S e Z, deformati da una ripresa troppo ravvicinata o da acuti in evidenza. *Uniforma la voce* cerca di pareggiare le parti più basse e più alte della registrazione. Poi c'è *Timbro*, un equalizzatore a cinque bande; le bande portano le loro frequenze — 200, 800, 1.8k, 3.5k e 5k+ — e l'ultima è a scaffale, cioè alza o abbassa tutto ciò che sta sopra e non una sola zona. Alla fine il gruppo *Volume e pause* con due comandi: *Volume automatico* (la normalizzazione) porta l'intera registrazione al livello massimo senza distorcere, e *Rumore nelle pause* (il gate) toglie il rumore rimasto negli spazi fra le frasi.
 
 Ogni filtro ha cinque gradi d'azione: minimo, leggero, medio, forte e massimo. E vale la pena ripeterlo: ciascuno si può attivare o disattivare singolarmente.
 
@@ -233,9 +236,11 @@ Va detto senz'altro che questo trattamento del suono non farà miracoli e da una
 
 ## Proprietà del testo
 
-Come nelle impostazioni della voce, qui hai la scelta di lingua, voce, velocità, volume e tono per il libro scelto. Nelle Impostazioni scegli il valore predefinito per tutti, qui imposti per un titolo preciso. Se ti chiedi perché, l'esempio più semplice è che la tua voce predefinita nelle Impostazioni sia maschile ma tu preferisca leggere con voce femminile un romanzo scritto da una prospettiva di donna: questo lo cambi nelle proprietà del testo per quel libro soltanto. Tutti gli altri libri in quella lingua continueranno ad aprirsi con la voce maschile finché e se non lo cambierai. Allo stesso modo, una lettura leggera puoi tranquillamente leggerla a 250 parole al minuto, mentre qualcosa di più impegnativo, su cui devi anche riflettere via via, forse preferirai metterlo a 180.
+Come nelle impostazioni della voce, qui hai la scelta di lingua, voce, velocità, volume e tono per il libro scelto. Nelle Impostazioni scegli il valore predefinito per tutti, qui imposti per un titolo preciso. Se ti chiedi perché, l'esempio più semplice è che la tua voce predefinita nelle Impostazioni sia maschile ma tu preferisca leggere con voce femminile un romanzo scritto da una prospettiva di donna: questo lo cambi nelle proprietà del testo per quel libro soltanto. Tutti gli altri libri in quella lingua continueranno ad aprirsi con la voce maschile finché e se non lo cambierai. Allo stesso modo, una lettura leggera puoi tranquillamente leggerla a 1,5x, mentre qualcosa di più impegnativo, su cui devi anche riflettere via via, forse preferirai riportarlo a 1x o più lento.
 
-Qui non c'è il dizionario di pronuncia; seguono le impostazioni per il braille e quelle a schermo. Se attivi l'uscita braille ottieni la scelta della tabella braille per la lingua scelta; se attivi l'uscita a schermo ottieni la scelta di come il testo sarà mostrato sul tuo schermo. Se vuoi leggere solo in braille o solo a schermo senza voce, scegli quella voce nell'elenco. In questa beta le uscite braille e a schermo sono in grigio e portano una nota che lo dice; la scelta della tabella braille per i libri importati da file braille continua a funzionare.
+Qui non c'è il dizionario di pronuncia; seguono le impostazioni per il braille e per lo schermo. Attivando la visualizzazione a schermo ottiene la scelta del modo in cui il testo comparirà sul suo schermo. Se vuole leggere solo in braille o a schermo, senza voce, scelga quella possibilità nell'elenco delle voci. In questa beta l'uscita braille e quella a schermo sono in grigio e portano la nota che non sono attive.
+
+NBR non ha una tabella braille di uscita e non l'avrà. Ciò che compare sulla sua barra braille lo traduce il suo lettore di schermo, con la tabella delle proprie impostazioni, ed è l'unico posto giusto per quella scelta — due tabelle su una sola barra potrebbero soltanto discordare. L'unica tabella braille in NBR è quella *di ingresso*: quella con cui un file .brf è stato letto all'importazione. Si cambia nel gruppo Origine braille, che compare soltanto per un libro venuto da un file simile. Quel gruppo funziona anche in questa beta.
 
 ## Impostazioni dell'uscita a schermo {beta}
 

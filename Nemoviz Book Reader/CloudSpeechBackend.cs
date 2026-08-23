@@ -174,9 +174,12 @@ namespace Nemoviz_Book_Reader
         /// which is not a speed. Halving and doubling are what the ear hears as
         /// symmetric anyway, so ±10 comes out 3× and one third.</para>
         ///
-        /// <para>The WPM-versus-multiplier question is still open — Gordan is
-        /// weighing showing every voice on a plain 1.0, 1.1, 1.2 scale. It changes
-        /// this one expression and nothing else.</para></summary>
+        /// <para><b>Settled 2026-08-23: the multiplier won</b>, and the control
+        /// the reader turns is now a percentage of the voice's natural speed
+        /// rather than words per minute. This expression is untouched by that —
+        /// it is the same curve, and <see cref="TtsReader.SpeedToRate"/> is
+        /// simply its inverse. That the two agree is what lets a cloud voice and
+        /// a local one be asked for "1.5×" and both deliver it.</para></summary>
         private double Speed { get { return Math.Pow(TopSpeed, rate / 10.0); } }
 
         public void Speak(string text)

@@ -75,6 +75,8 @@ Then come two check boxes for switching the multimedia keys on your keyboard on 
 
 Then a check box where you choose whether the library uses the metadata inside the files, or shows author and title from the folder or file name instead.
 
+Then the check box *Check for updates automatically*. With it on, NBR asks once a day whether a newer release has been published, and speaks up only if there is one; nothing about you or your books is sent. Turn it off and NBR will never reach the network on its own — and you can still ask whenever you like, in the Library, in the Help menu, with *Check for update*.
+
 And last, the look Nemoviz Book Reader is drawn in. There are two choices. *System colors* gives you the player in a classic layout and the palette your system uses; it is also what you get if you have high contrast switched on, because NBR then draws nothing of its own and lets your scheme through whole. *NBR design* gives the player a slightly more modern appearance. If you have not chosen, NBR decides for itself: high contrast gets System colors, everything else gets NBR design.
 
 ## Speech and braille
@@ -166,7 +168,7 @@ The tab ring of the player's main window holds the following keys and functions,
 | Play/Pause | space bar |
 | Forward | Shift + Right |
 | Back | Shift + Left |
-| Volume | Up and Down arrows, or F11 and F12 |
+| Volume | F11 and F12 |
 | Speed | Ctrl + Left and Ctrl + Right |
 | Progress through the book | Left and Right arrows |
 | Navigation step | Shift + Up and Down arrows |
@@ -189,6 +191,7 @@ Every key has its own shortcut, so you can reach it easily without walking aroun
 - The space bar starts and stops playback.
 - The Left and Right arrows "rewind" five seconds at a time or, in a text book, one sentence forwards or backwards.
 - Ctrl + Left or Right controls the reading speed.
+- F11 and F12 set the volume, F12 up and F11 down. The bare Up and Down arrows do nothing here: they used to carry the volume, but a screen reader reading the book aloud kept asking for the next line and slid the volume away underneath, so the keys moved to the function row where Windows Media Player has had them for twenty years.
 - Shift + Up or Down chooses the navigation step (heading, chapter, standard page, certain lengths of time); the choice changes with the format and structure of the book.
 - Shift + Left or Right moves you by the chosen navigation step.
 
@@ -214,9 +217,9 @@ Besides that there is a check box asking whether you want a bookmark set when th
 
 The countdown starts when you press *Start*; the dialog closes, and instead of the word Timer the player window now shows a running clock. Activate the timer again and the countdown is cancelled, and in the dialog you can choose a new time or cancel everything on the button meant for it.
 
-Do remember, and watch out for, the fact that playback stops when you activate any of the options such as Settings, Library and so on. When you have done what you came to do in those dialogs and confirm your way back to the player window, playback resumes. The exception is the Properties dialog, where you are after all setting things you would want to hear while you do it.
+Two dialogs stop playback: Bookmarks and the Sleep timer. When you have done what you came to do in them and confirm your way back to the player window, playback resumes. Settings, Library, Go To and Properties let the book play on — with Properties that is deliberate, because there you are setting things you want to hear while you do it.
 
-A few words about the speed and volume controls. Moving with the arrows, volume goes in steps of 5% and you hear a sound when you reach the end. For audio books the speed goes in steps of 0.1x, from 0.5x to 3x, and when you come back to the normal 1x you hear a sound. For text books the speed is not a multiplier but a number of words per minute, and it goes in steps of five, from 80 to 400 words per minute.
+A few words about the speed and volume controls. Volume is on F11 and F12 — F12 up, F11 down — in steps of 5%, and you hear a sound when you reach either end. Speed goes in steps of 0.1x, from 0.5x to 3x, and the same way for audio books and text books alike. The only difference is what 1x means: for an audio book it is the speed of the recording, and for a text book the speed at which the chosen voice speaks of its own accord. You hear the sound when you cross the normal speed, or in a text book the speed set for that voice.
 
 What matters most to you as a user is that Nemoviz Book Reader remembers absolutely everything about the playback of the books you listen to. It remembers the position, the volume and the speed for audio, and the kind, speed, language and pitch of the TTS for text books; it remembers the sound-processing parameters for audio books and the braille and on-screen parameters for text ones. In other words, everything you set to your own liking and needs is remembered for each book separately.
 
@@ -230,7 +233,7 @@ When you open the audio properties, the first thing you notice is the Sound proc
 
 There follow seven filters which may or may not help you improve the sound of audiobooks made from old recordings, bad ones, or both. Each control can be switched on or off separately, so you do not have to use them all at once. When you switch Sound processing on, the first thing you find is the Reset key, which returns all the filters to their default settings. Then a Bypass check box, switching which on and off lets you hear immediately the difference between the original and your adjustments. The shortcut for bypassing is Ctrl + B, so you do not have to keep travelling from the controls to the bypass and back.
 
-First in the row of filters is the high pass, that is, removing rumble. It takes out noise in the low end of the recording, from electrical equipment to an accidental knock on the microphone or the table. Then Noise reduction, meant for tape hiss, poor microphones and similar noise a little higher up the spectrum. Softening sibilance reduces the spitting of sounds like S and SH which were distorted on the recording by being recorded too close or by the highs being pushed up. Evening out speech tries to bring the quiet and loud parts of the recording closer together. Then there is Tone, that is, a five-band equalizer: low, low/mid, mid (the voice), mid/high and high. Finally, automatic loudness and pauses, also known as normalization and gate: the normalization lifts the whole recording to the maximum level without distortion, while quietening the pauses (the gate) removes what noise is left in them.
+First in the row is *Remove rumble*, the high pass. It takes out noise in the low end of the recording, from electrical equipment to an accidental knock on the microphone or the table. Then *Noise reduction*, meant for tape hiss, poor microphones and similar noise a little higher up the spectrum. *Soften sibilance* reduces the spitting of sounds like S and SH which were distorted on the recording by being recorded too close or by the highs being pushed up. *Even out speech* tries to bring the quiet and loud parts of the recording closer together. Then there is *Tone*, a five-band equalizer; the bands are labelled with their own frequencies — 200, 800, 1.8k, 3.5k and 5k+ — and the last one is a shelf, which means it lifts or drops everything above it rather than one region. Finally the *Loudness and pauses* group, with two controls: *Automatic loudness* (the normalization) lifts the whole recording to the highest level it can reach without distortion, and *Noise in pauses* (the gate) removes what noise is left in the gaps between sentences.
 
 Every filter has five levels of action: minimal, light, medium, strong and maximum. And it is worth repeating that each can be switched on or off individually.
 
@@ -240,9 +243,11 @@ It must be said that this sound processing will not work miracles, and a bad dub
 
 ## Text properties
 
-Much as in the speech settings, here you have the choice of language, voice, speed, volume and pitch for the selected book. In Settings you choose the default for everything; here you set it for one particular title. If you wonder why, the simplest example is that your default voice in Settings is a male one but you would rather read a novel written from a woman's perspective in a female voice — you change that in the text properties for that book alone. Every other book in that language will still open with the male voice by default until and unless you change it. Equally, some light reading you can happily take at 250 words a minute, but something heavier that you have to think about along the way you might rather put at 180.
+Much as in the speech settings, here you have the choice of language, voice, speed, volume and pitch for the selected book. In Settings you choose the default for everything; here you set it for one particular title. If you wonder why, the simplest example is that your default voice in Settings is a male one but you would rather read a novel written from a woman's perspective in a female voice — you change that in the text properties for that book alone. Every other book in that language will still open with the male voice by default until and unless you change it. Equally, some light reading you can happily take at 1.5x, but something heavier that you have to think about along the way you might rather bring back to 1x or slower.
 
-There is no pronunciation dictionary here; what follows are the braille and on-screen settings. Switch braille output on and you get a choice of braille table for the chosen language; switch the on-screen display on and you get a choice of how the text is shown on your screen. If you want to read only in braille or only on screen with no speech, choose that option in the list of voices. In this beta the braille and on-screen outputs are greyed out and carry a note saying so; choosing the braille table for books imported from braille files still works.
+There is no pronunciation dictionary here; what follows are the braille and on-screen settings. Switch the on-screen display on and you get a choice of how the text is shown on your screen. If you want to read only in braille or only on screen with no speech, choose that option in the list of voices. In this beta the braille and on-screen outputs are greyed out and carry a note saying so.
+
+NBR has no output braille table and will not have one. What stands on your braille display is translated by your screen reader, with the table from its own settings, and that is the only right place for the choice — two tables over one display could only ever disagree. The one braille table in NBR is the *input* table: the one a .brf file was read with when it was imported. You change it in the Braille source group, which appears only for a book that came from such a file. That group works in this beta too.
 
 ## The on-screen display {beta}
 

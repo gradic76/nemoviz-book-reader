@@ -53,10 +53,34 @@ namespace Nemoviz_Book_Reader
         {
             string a, b;
             if (GoogleCloudVoices.Split(displayName, out a, out b))
-                return GoogleCloudVoices.Synthesize(text, a, b, 1.0, 0.0);
+                return Counted(GoogleCloudVoices.Vendor, text,
+                               GoogleCloudVoices.Synthesize(text, a, b, 1.0, 0.0));
             if (AzureVoices.Split(displayName, out a, out b))
-                return AzureVoices.Synthesize(text, AzureVoices.ShortNameFor(displayName), a, 1.0, 0.0);
+                return Counted(AzureVoices.Vendor, text,
+                               AzureVoices.Synthesize(text, AzureVoices.ShortNameFor(displayName), a, 1.0, 0.0));
             return null;
+        }
+
+        /// <summary>Adds what was just sent to this month's running total, and
+        /// hands the audio straight back.
+        ///
+        /// <para><b>Here and nowhere else, and the placement is the accuracy.</b>
+        /// This method is BEHIND the speech cache — <c>CloudSpeechBackend.Render</c>
+        /// looks in the cache first and only reaches Synthesize on a miss — so a
+        /// second reading of a book, an export replayed from disk and a sentence
+        /// the look-ahead already fetched are all counted as nothing, which is
+        /// exactly how the service will bill them. Counting where speech is
+        /// SPOKEN would have counted a re-read as a fresh cost.</para>
+        ///
+        /// <para><b>Only a reply that arrived is counted.</b> A refused or
+        /// timed-out request returns null and is not charged, so it is not
+        /// counted either; the alternative overstates a reader's usage on exactly
+        /// the day their network is bad.</para></summary>
+        private static byte[] Counted(string vendor, string text, byte[] audio)
+        {
+            if (audio != null && !string.IsNullOrEmpty(text))
+                CloudUsage.Note(vendor, text.Length);
+            return audio;
         }
 
         /// <summary>The largest request a vendor will take, for the chunker that

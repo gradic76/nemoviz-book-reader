@@ -182,9 +182,10 @@ namespace Nemoviz_Book_Reader
         public bool IsTextBook { get; private set; }
         public string TextFilePath { get; private set; }
         public int TextPosition { get; set; }
-        // Per-book reading speed override (words per minute); -1 = use the
-        // global default from Settings. Set from the text book's Properties.
-        public int TextWpm { get; set; }
+        // Per-book reading speed override, as a percentage of the voice's own
+        // natural speed (50..300, the same unit an audio book's Speed uses);
+        // -1 = use the global default from Settings. Set from Properties.
+        public int TextSpeed { get; set; }
         /// <summary>Per-book speech overrides; empty/-1 means "use the Settings
         /// default". Settings holds the defaults, a book may differ. These are the
         /// values of the book's CURRENT voice — every voice this book has been
@@ -241,7 +242,7 @@ namespace Nemoviz_Book_Reader
         // What remains is BrailleTable: the table a .brf was read WITH, which is
         // an import fact and the only one of the three that ever meant anything.
         /// <summary>Read this book without a voice, the position paced by
-        /// <see cref="TextWpm"/> instead (Gordan, 2026-08-01).
+        /// <see cref="TextSpeed"/> instead (Gordan, 2026-08-01).
         ///
         /// <para>Two ways in. The reader chooses it because they do not want
         /// speech over their braille or their screen; or the player falls back to
@@ -373,8 +374,19 @@ namespace Nemoviz_Book_Reader
             DetectTextBook();
             int.TryParse(ini.Read("Progress", "TextPosition", "0"), out int tp);
             TextPosition = tp;
-            int.TryParse(ini.Read("Settings", "TextWpm", "-1"), out int tw);
-            TextWpm = tw;
+            // TextSpeed is a percentage; TextWpm was words per minute, and a book
+            // saved before 2026-08-23 carries only that. Converted through the
+            // RATE the engine was actually given, so the book sounds unchanged.
+            // The newer key is read first because a half-migrated library holds
+            // both, and only one of them means what it says.
+            int ts;
+            if (int.TryParse(ini.Read("Settings", "TextSpeed", ""), out ts))
+                TextSpeed = ts;
+            else
+            {
+                int.TryParse(ini.Read("Settings", "TextWpm", "-1"), out int tw);
+                TextSpeed = tw >= 0 ? TtsReader.WpmToSpeed(tw) : -1;
+            }
             TextVoice = ini.Read("Settings", "TextVoice", "");
             int.TryParse(ini.Read("Settings", "TextVolume", "-1"), out int tvol);
             TextVolume = tvol;
@@ -417,9 +429,9 @@ namespace Nemoviz_Book_Reader
             TextVoicePrefs.Load(ini);
             // A book saved before voices were remembered individually has one set
             // of numbers; they belong to the voice it was last read with.
-            if (!string.IsNullOrEmpty(TextVoice) && TextWpm >= 0)
+            if (!string.IsNullOrEmpty(TextVoice) && TextSpeed >= 0)
                 TextVoicePrefs.SetIfAbsent(TextVoice,
-                    new VoicePrefs(TextWpm, TextVolume >= 0 ? TextVolume : 100,
+                    new VoicePrefs(TextSpeed, TextVolume >= 0 ? TextVolume : 100,
                                    TextPitch >= -10 && TextPitch <= 10 ? TextPitch : 0));
             int.TryParse(ini.Read("Book", "TextChars", "0"), out int tc);
             TextChars = tc;
@@ -1067,13 +1079,14 @@ namespace Nemoviz_Book_Reader
             catch { }
         }
 
-        /// <summary>Estimated reading time (as "H:MM:SS") for the given nominal
-        /// words-per-minute. Empty for non-text books.</summary>
-        public string EstimatedReadingTime(int wpm)
+        /// <summary>Estimated reading time (as "H:MM:SS") at the given reading
+        /// speed — a percentage of a voice's natural pace. Empty for non-text
+        /// books.</summary>
+        public string EstimatedReadingTime(int speed)
         {
             if (!IsTextBook) return Duration;
             EnsureTextInfo();
-            int cpm = wpm * 6;
+            int cpm = TtsReader.CharsPerMinute(speed);
             if (TextChars <= 0 || cpm <= 0) return FormatTime(0);
             return FormatTime(TextChars * 60.0 / cpm);
         }
@@ -1392,7 +1405,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("Settings", "Speed", Speed.ToString());
             ini.Write("Settings", "SeekStep", SeekStep.ToString());
             ini.Write("Progress", "TextPosition", TextPosition.ToString());
-            ini.Write("Settings", "TextWpm", TextWpm.ToString());
+            ini.Write("Settings", "TextSpeed", TextSpeed.ToString());
             ini.Write("Settings", "TextVoice", TextVoice ?? "");
             ini.Write("Settings", "TextVolume", TextVolume.ToString());
             ini.Write("Settings", "TextPitch", TextPitch.ToString());

@@ -567,6 +567,15 @@ namespace Nemoviz_Book_Reader
             menuHelpAbout.Click += (s, e) => HintSystem.ShowAbout(this);
             menuHelp.DropDownItems.Add(menuHelpHelp);
 
+            // Check for update, under Help because that is where every Windows
+            // program has kept it and a reader should not have to be told
+            // (Gordan, 2026-08-23). Its automatic twin is a switch in
+            // Settings -> General; this item is the way to ask on the spot,
+            // which is what somebody does the moment they hear a fix exists.
+            var menuHelpUpdate = new ToolStripMenuItem(Localization.T("Menu.Help.Update"));
+            menuHelpUpdate.Click += (s, e) => HintSystem.CheckForUpdate(this);
+            menuHelp.DropDownItems.Add(menuHelpUpdate);
+
             // Setting a service up is a JOB with steps, done once on a web site -- not a
 
             // setting. So it lives beside Help rather than in Settings (Gordan,
@@ -1643,13 +1652,15 @@ namespace Nemoviz_Book_Reader
             info.Add(BookInfoField.Publisher, BookData.WithYear(pubT, book.Year));
             if (pubT.Length == 0) info.Add(BookInfoField.Year, book.Year);
 
-            int wpm = book.TextWpm >= 0 ? book.TextWpm : appSettings.TtsWpm;
-            info.Add(BookInfoField.Time, "≈" + book.EstimatedReadingTime(wpm));
+            int speed = book.TextSpeed >= 0 ? book.TextSpeed : appSettings.TtsSpeed;
+            info.Add(BookInfoField.Time, "≈" + book.EstimatedReadingTime(speed));
             info.Add(BookInfoField.Read, book.PercentListened + "%");
             info.Add(BookInfoField.Format, book.Format);
             if (book.TextPages.Count > 0)
                 info.Add(BookInfoField.Pages, book.TextPages.Count.ToString());
-            info.Add(BookInfoField.Speed, Localization.T("Details.Speed.Wpm", wpm));
+            // "1.5x", exactly as Properties and the player write an audio book's.
+            info.Add(BookInfoField.Speed,
+                Localization.T("Details.Speed.Value", (speed / 100.0).ToString("0.0")));
         }
 
         // Fills a book's title/author from an audio file's Album/Artist tags
@@ -1922,12 +1933,21 @@ namespace Nemoviz_Book_Reader
             BookData book = GetSelectedBook();
             if (book == null) return;
 
-            // DAISY carries a separate author + title (both drive the shelf
-            // "Author — Title" line), so it gets two edit boxes. Plain audio
-            // has only a single display name — one box, as before.
+            // AUTHOR AND TITLE, FOR EVERY BOOK (Gordan, 2026-08-23). This used
+            // to be gated on book.IsDaisy, on the reasoning that only DAISY
+            // carries a separate author — and that was never true of the shelf,
+            // which prints "Author — Title" for ANY book whose Author is set
+            // (BuildShelfItem). EPUB, M4B, MOBI, PDF and tagged audio all fill
+            // it in, so a reader could see a wrong author on the shelf and have
+            // no way to correct it: the single box wrote only the title and the
+            // author stayed whatever the metadata claimed.
+            //
+            // It is offered even where the author is empty, which is his call
+            // and the more useful one: a folder of MP3s named after the book
+            // alone can now be given its author rather than only renamed.
             string newAuthor = book.Author ?? "";
             string newTitle = book.Title ?? "";
-            if (!ShowRenameDialog(book.IsDaisy, ref newAuthor, ref newTitle))
+            if (!ShowRenameDialog(true, ref newAuthor, ref newTitle))
                 return; // cancelled
 
             newAuthor = newAuthor.Trim();
@@ -1940,14 +1960,19 @@ namespace Nemoviz_Book_Reader
             // Rename changes only the metadata in Book.ini —
             // the folder on disk is untouched by design.
             book.Title = newTitle;
-            if (book.IsDaisy) book.Author = newAuthor;
+            book.Author = newAuthor;
             book.Save();
             RebuildShelf(book);
         }
 
-        /// <summary>Rename editor. With includeAuthor (DAISY) it shows Author +
-        /// Title boxes; otherwise a single name box. Returns false if cancelled;
-        /// on OK writes the edited values back through the ref parameters.</summary>
+        /// <summary>Rename editor: Author + Title boxes. Returns false if
+        /// cancelled; on OK writes the edited values back through the ref
+        /// parameters.
+        ///
+        /// <para>includeAuthor is kept as a parameter rather than removed —
+        /// every caller passes true today, but the single-box layout below it
+        /// is the one thing here that would have to be rewritten from scratch
+        /// if a book type ever wants it back.</para></summary>
         private bool ShowRenameDialog(bool includeAuthor, ref string author, ref string title)
         {
             using (Form dlg = new Form())

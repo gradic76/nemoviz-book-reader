@@ -222,7 +222,11 @@ Services.Steps.
 = HELP AND ABOUT
 Dialog.Help
 Dialog.About
+Update.
 Hint.Button
+
+= CLOUD VOICES - what a book will cost
+Cloud.Quota.
 
 = MESSAGES AND ERRORS
 Dialog.Error

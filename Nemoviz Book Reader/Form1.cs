@@ -97,11 +97,17 @@ namespace Nemoviz_Book_Reader
 
         private int currentVolume = 100;
         private int currentSpeed = 100;
-        // Reading speed for the current text book (words per minute) and its
-        // pitch (-10..10). Both belong to the voice in use and are remembered
-        // per voice; the player has a control for the speed, pitch is set in the
-        // book's Properties.
-        private int currentWpm = 175;
+        // Reading speed for the current text book -- a percentage of the voice's
+        // own natural pace, exactly as an audio book's speed is a percentage of
+        // the recording's -- and its pitch (-10..10). Both belong to the voice in
+        // use and are remembered per voice; the player has a control for the
+        // speed, pitch is set in the book's Properties.
+        //
+        // IT WAS WORDS PER MINUTE UNTIL 2026-08-23, and Gordan's question is what
+        // retired it: since speech goes out through the audio path and is sped up
+        // there, a words-per-minute figure was a label on an engine rate that
+        // every voice interpreted its own way, and no voice ever read at it.
+        private int currentTextSpeed = 100;
         private int currentTextPitch = 0;
         private int currentProgress = 0;
         private int currentPlaylistIndex = 0;
@@ -313,10 +319,8 @@ namespace Nemoviz_Book_Reader
         /// the two can never land between steps.</summary>
         internal int SkinSpeedRaw
         {
-            get { return (currentBook != null && currentBook.IsTextBook) ? currentWpm : currentSpeed; }
+            get { return (currentBook != null && currentBook.IsTextBook) ? currentTextSpeed : currentSpeed; }
         }
-
-        internal bool SkinTextBook { get { return currentBook != null && currentBook.IsTextBook; } }
 
         /// <summary>Where the progress blade was dropped, 0–1 of the whole book.
         /// Called once on mouse-up, never during the drag: seeking on every pixel
@@ -406,6 +410,15 @@ namespace Nemoviz_Book_Reader
             // window is up, so the ordinary cost of building it is not reported
             // as a hang.
             UiWatchdog.Start(this);
+
+            // The once-a-day update check, from the player rather than the
+            // Library because the Library is not always opened -- someone
+            // resuming a book never sees it, and they are exactly the reader a
+            // fix has to reach. It runs on a pool thread and speaks only when
+            // there is something newer, so a machine with no network is
+            // indistinguishable from one that is up to date.
+            HintSystem.CheckForUpdateQuietly(this, appSettings);
+
             if (openLibraryOnStartup)
             {
                 openLibraryOnStartup = false;
@@ -1563,21 +1576,25 @@ namespace Nemoviz_Book_Reader
         // ──────────────────────────────────────────────
         private void ChangeSpeed(int delta)
         {
-            // Text book: the speed control is words-per-minute, not an mpv
-            // multiplier. Step ±5 WPM, beep when passing the Settings default.
+            // Text book: the same 50..300 % and the same ±10 step the audio
+            // branch below uses, so one control means one thing whichever kind
+            // of book is loaded. Two things still differ, and both are real:
+            // where the multiplier lands (an engine rate, not mpv's scaletempo2)
+            // and what the beep marks (the voice's own default, not 100 %).
             if (currentBook != null && currentBook.IsTextBook)
             {
-                int step = delta > 0 ? 5 : -5;
-                int newWpm = Math.Max(80, Math.Min(400, currentWpm + step));
+                int newTextSpeed = Math.Max(50, Math.Min(300, currentTextSpeed + delta));
                 // The "default" the beep marks is this voice's own default speed,
                 // not the one belonging to whichever voice Settings happens to name.
-                int def = appSettings.PrefsFor(EffectiveTextVoice()).Wpm;
-                bool crossedDefault = (currentWpm - def) * (newWpm - def) <= 0 && currentWpm != newWpm;
-                currentWpm = newWpm;
-                if (tts != null) tts.SetRate(TtsReader.WpmToRate(currentWpm));
+                int def = appSettings.PrefsFor(EffectiveTextVoice()).Speed;
+                bool crossedDefault = (currentTextSpeed - def) * (newTextSpeed - def) <= 0
+                                      && currentTextSpeed != newTextSpeed;
+                currentTextSpeed = newTextSpeed;
+                if (tts != null) tts.SetRate(TtsReader.SpeedToRate(currentTextSpeed));
                 RememberCurrentVoicePrefs();
                 UpdateSpeedDisplay();
-                AnnounceToScreenReader(lblAnnounceSpeed, Localization.T("Player.Speed.WpmAccessible", currentWpm));
+                AnnounceToScreenReader(lblAnnounceSpeed,
+                    Localization.T("Player.Speed.Text", (currentTextSpeed / 100.0).ToString("0.0")));
                 if (crossedDefault) tones.Play(new[] { (880, 70), (880, 70) });
                 return;
             }
@@ -2857,7 +2874,7 @@ namespace Nemoviz_Book_Reader
             sb.Append(Localization.T("Player.Info.VolumeLabel")).Append(' ')
               .Append(currentVolume).Append(" %").Append(nl);
             sb.Append(Localization.T("Player.Info.SpeedLabel")).Append(' ')
-              .Append(currentSpeed).Append(" %");
+              .Append(Localization.T("Details.Speed.Value", (currentSpeed / 100.0).ToString("0.0")));
 
             return sb.ToString();
         }
@@ -2926,6 +2943,74 @@ namespace Nemoviz_Book_Reader
         /// ever asked again. The voice it was started for is remembered, and a
         /// change restarts it, or stops it outright when the new voice is a local
         /// one that costs nothing to make.</para></summary>
+        /// <summary>The book and voice the free-allowance question has already
+        /// been asked about, so it is asked once and not on every pause.</summary>
+        private string quotaAskedFor;
+
+        /// <summary>Tells the reader where they stand with a cloud service's free
+        /// allowance before this book spends the rest of it, and lets them stop.
+        ///
+        /// <para><b>Gordan's idea, and the argument for it is that both services
+        /// answer this question only afterwards.</b> Google has a monitoring page
+        /// and Azure a portal; a reader who has to open one to learn what a book
+        /// costs learns it once the book has cost it. NBR counts every character
+        /// it sends (<see cref="CloudUsage"/>), so the number can stand in front
+        /// of the reader instead.</para>
+        ///
+        /// <para><b>Only when the line would actually be crossed</b>, and only
+        /// once for a given book and voice — a reader who has said yes has
+        /// decided, and asking again at every pause would turn a warning into
+        /// nagging. Changing the voice asks again, because it may be a different
+        /// service with a different allowance left.</para>
+        ///
+        /// <para><b>The book's whole length is quoted, which may be more than it
+        /// will cost</b>: anything already in the speech cache is paid for and
+        /// will not be sent again. Overstating is the safe direction for a number
+        /// somebody is about to spend money on, and the sentence says what the
+        /// book HAS rather than what it will cost, which is true either way.</para>
+        ///
+        /// <para>Deferred with BeginInvoke because the caller is
+        /// <see cref="SetPlayPauseState"/> -- a modal dialog part-way through
+        /// setting the transport state would leave the button saying one thing
+        /// and the player doing another.</para></summary>
+        private void WarnIfPastFreeTier(string voice)
+        {
+            if (currentBook == null) return;
+            string key = currentBook.FolderPath + "|" + voice;
+            if (string.Equals(quotaAskedFor, key, StringComparison.OrdinalIgnoreCase)) return;
+
+            string vendor = CloudUsage.VendorOf(voice);
+            if (vendor == null) return;
+
+            long chars = currentBook.TextChars;
+            if (chars <= 0) return;
+            if (!CloudUsage.WouldCrossFreeTier(vendor, chars)) return;
+
+            // Marked as asked BEFORE the dialog, not after: the dialog pumps
+            // messages, so a timer tick can re-enter this method while it is
+            // open and put a second copy of it on the screen.
+            quotaAskedFor = key;
+
+            long used = CloudUsage.UsedThisMonth(vendor);
+            long quota = CloudUsage.FreeCharsPerMonth(vendor);
+
+            BeginInvoke((Action)(() =>
+            {
+                bool go = MessageForm.ShowConfirm(this,
+                    Localization.T("Cloud.Quota.Warning",
+                                   chars.ToString("N0"), used.ToString("N0"),
+                                   quota.ToString("N0"), vendor),
+                    Localization.T("Cloud.Quota.Title"));
+                if (go) return;
+
+                // A no stops the spending, both halves of it: the reading that
+                // would send the next sentence, and the look-ahead that would
+                // send the rest of the book without waiting to be asked.
+                StopPrefill();
+                if (isPlaying) { PausePlaybackQuietly(); SetPlayPauseState(false); }
+            }));
+        }
+
         private void SyncPrefillToPlayback()
         {
             string voice = null;
@@ -2933,6 +3018,15 @@ namespace Nemoviz_Book_Reader
 
             bool want = isPlaying && currentBook != null && currentBook.IsTextBook
                         && !string.IsNullOrEmpty(voice) && CloudVoices.IsOne(voice);
+
+            // WHERE THE READER FINDS OUT WHAT A BOOK WILL COST, and it is here
+            // for the reason the look-ahead is: this is the one place that knows
+            // all three things at once -- something is sounding, it is a text
+            // book, and the voice making it is somebody else's to bill for.
+            // Asked BEFORE the look-ahead starts, because the look-ahead buys the
+            // whole book at ten times reading speed and would be most of the way
+            // through it before a reader could be asked anything.
+            if (want) WarnIfPastFreeTier(voice);
 
             if (want && prefill != null && prefill.Running && prefillVoice == voice) return;
             if (!want && prefill == null) return;      // nothing running, nothing to do
@@ -3026,7 +3120,7 @@ namespace Nemoviz_Book_Reader
             int bmk = currentBook != null ? currentBook.Bookmarks.Count : 0;
             sb.Append(Localization.T("Player.Info.BookmarksLabel")).Append(' ').Append(bmk).Append(nl);
 
-            // Voice + reading speed, e.g. "Voice: Karmela, 250 WPM". It said
+            // Voice + reading speed, e.g. "Voice: Karmela, 1.5x". It said
             // "Speech engine" until the engine stopped being a thing the reader
             // chooses; the value was always the voice.
             //
@@ -3043,7 +3137,10 @@ namespace Nemoviz_Book_Reader
             {
                 string voice = tts != null && !string.IsNullOrEmpty(tts.CurrentVoice) ? tts.CurrentVoice : dash;
                 sb.Append(Localization.T("Player.Info.VoiceLabel")).Append(' ')
-                  .Append(voice).Append(", ").Append(currentWpm).Append(" WPM").Append(nl).Append(nl);
+                  .Append(voice).Append(", ")
+                  .Append(Localization.T("Details.Speed.Value",
+                      (currentTextSpeed / 100.0).ToString("0.0")))
+                  .Append(nl).Append(nl);
             }
 
             int total = tts != null ? tts.TotalChars : 0;
@@ -3285,7 +3382,7 @@ namespace Nemoviz_Book_Reader
                         currentBook.PercentListened = pct;
                     }
                     currentBook.Volume = currentVolume;
-                    RememberCurrentVoicePrefs();   // fills TextWpm/TextVolume/TextPitch too
+                    RememberCurrentVoicePrefs();   // fills TextSpeed/TextVolume/TextPitch too
                     currentBook.SeekStep = EncodeSeekStep(CurrentSeekStep());
                     currentBook.Save();
                     return;
@@ -3331,6 +3428,33 @@ namespace Nemoviz_Book_Reader
         /// </summary>
         private void FinishCurrentBook()
         {
+            // THE BOOK IS OVER, AND IT SAYS SO (Gordan, 2026-08-23).
+            //
+            // Only here, which is the whole of the request: this method is
+            // reached from exactly two places and both are the natural end --
+            // mpv going idle with a book playing, and TtsReader.Finished. A book
+            // marked read from the Library goes through UnloadActiveBook
+            // instead, and neither Stop nor closing the player comes near this.
+            // So the sound cannot fire for anything the reader DID; it fires
+            // only for the one thing the book did by itself.
+            //
+            // A CADENCE, NOT A SIGNAL, and the difference is the point. Every
+            // other sound NBR makes is an event -- a five-step run for a
+            // bookmark, three flat beeps five minutes before the sleep timer,
+            // one low buzz for "that will not go". This is a major arpeggio
+            // that climbs to the octave of its own first note and HOLDS there,
+            // two and a half times as long as any step below it. A run says
+            // something happened; landing and staying is what says finished.
+            //
+            // Nothing here shares a shape with the existing vocabulary: the
+            // bookmark run is five equal 200 ms steps at 500-1100 and never
+            // holds, the timer warning is three identical 900s. Deliberately at
+            // the TOP of the method, so it sounds at the moment the reading
+            // stops rather than after the book has been saved and the library
+            // has opened over it -- it plays on the tone context's own thread
+            // (§2), so the work below runs underneath it.
+            tones.Play(new[] { (523, 160), (659, 160), (784, 160), (1047, 420) });
+
             try
             {
                 currentBook.PercentListened = 100;
@@ -3717,7 +3841,7 @@ namespace Nemoviz_Book_Reader
         private double BookBackGrace()
         {
             if (currentBook != null && currentBook.IsTextBook)
-                return Math.Max(20, TtsReader.CharsPerMinute(currentWpm) * 3.0 / 60.0);
+                return Math.Max(20, TtsReader.CharsPerMinute(currentTextSpeed) * 3.0 / 60.0);
             return 3.0;
         }
 
@@ -4136,16 +4260,16 @@ namespace Nemoviz_Book_Reader
         /// <summary>Applies a reading-setting edit from Properties to the live
         /// reader, so the voice is heard as it is chosen. Only the reader is touched;
         /// the book settles when the dialog closes, so Cancel restores it.</summary>
-        private void PreviewTextSpeech(string voice, int wpm, int volume, int pitch)
+        private void PreviewTextSpeech(string voice, int speed, int volume, int pitch)
         {
             if (tts == null) return;
             if (!string.IsNullOrEmpty(voice) &&
                 !string.Equals(tts.CurrentVoice, voice, StringComparison.OrdinalIgnoreCase))
                 tts.SetVoice(voice);
-            currentWpm = Math.Min(400, Math.Max(80, wpm));
+            currentTextSpeed = Math.Min(300, Math.Max(50, speed));
             currentVolume = Math.Min(100, Math.Max(0, volume));
             currentTextPitch = Math.Min(10, Math.Max(-10, pitch));
-            tts.SetRate(TtsReader.WpmToRate(currentWpm));
+            tts.SetRate(TtsReader.SpeedToRate(currentTextSpeed));
             tts.SetVolume(currentVolume);
             tts.SetPitch(currentTextPitch * 5);
             // The player's own fields follow the preview, so what is heard and what
@@ -4718,8 +4842,8 @@ namespace Nemoviz_Book_Reader
             if (currentBook == null || !currentBook.IsTextBook) return;
             string voice = EffectiveTextVoice();
             if (string.IsNullOrEmpty(voice)) return;
-            currentBook.TextVoicePrefs.Set(voice, new VoicePrefs(currentWpm, currentVolume, currentTextPitch));
-            currentBook.TextWpm = currentWpm;
+            currentBook.TextVoicePrefs.Set(voice, new VoicePrefs(currentTextSpeed, currentVolume, currentTextPitch));
+            currentBook.TextSpeed = currentTextSpeed;
             currentBook.TextVolume = currentVolume;
             currentBook.TextPitch = currentTextPitch;
         }
@@ -5663,7 +5787,7 @@ namespace Nemoviz_Book_Reader
             // nothing. Speed still applies — it is what paces the reading now.
             if (currentBook != null && currentBook.TextNoSpeech)
             {
-                tts.SilentWpm = currentBook.TextWpm >= 0 ? currentBook.TextWpm : appSettings.TtsWpm;
+                tts.SilentSpeed = currentBook.TextSpeed >= 0 ? currentBook.TextSpeed : appSettings.TtsSpeed;
                 tts.Silent = true;
                 textNoVoice = false;      // not a failure to find a voice: a choice
                 return;
@@ -5706,14 +5830,14 @@ namespace Nemoviz_Book_Reader
             // borrow a voice? — is the right answer and stays.
             if (textNoVoice && currentBook != null && currentBook.OpensReadingWindow)
             {
-                tts.SilentWpm = currentBook.TextWpm >= 0 ? currentBook.TextWpm : appSettings.TtsWpm;
+                tts.SilentSpeed = currentBook.TextSpeed >= 0 ? currentBook.TextSpeed : appSettings.TtsSpeed;
                 tts.Silent = true;
                 return;
             }
             if (textNoVoice) return;
 
             VoicePrefs p = ResolveVoicePrefs(voice);
-            currentWpm = p.Wpm;
+            currentTextSpeed = p.Speed;
             currentVolume = p.Volume;
             currentTextPitch = p.Pitch;
 
@@ -5725,7 +5849,7 @@ namespace Nemoviz_Book_Reader
                 currentBook != null ? currentBook.TextLanguage : "");
             tts.SetPitch(currentTextPitch * 5); // -10..10 → -50..50 %
             tts.SetVolume(currentVolume);
-            tts.SetRate(TtsReader.WpmToRate(currentWpm));
+            tts.SetRate(TtsReader.SpeedToRate(currentTextSpeed));
 
             RememberCurrentVoicePrefs();
             UpdateVolumeDisplay();
@@ -5751,14 +5875,14 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        /// <summary>Refreshes the speed field: "N WPM" for a text book, "N.Nx"
-        /// for audio.</summary>
+        /// <summary>Refreshes the speed field. One wording for both kinds of book
+        /// since 2026-08-23 -- "N.Nx" either way, a text book multiplying its
+        /// voice's natural pace and an audio book the recording's.</summary>
         private void UpdateSpeedDisplay()
         {
             bool text = currentBook != null && currentBook.IsTextBook;
-            string display = text
-                ? Localization.T("Player.Speed.Wpm", currentWpm)
-                : Localization.T("Player.Speed.Text", (currentSpeed / 100.0).ToString("0.0"));
+            string display = Localization.T("Player.Speed.Text",
+                ((text ? currentTextSpeed : currentSpeed) / 100.0).ToString("0.0"));
             lblSpeed.Text = display;
             if (!tbSpeed.Focused)
             {
@@ -5777,10 +5901,10 @@ namespace Nemoviz_Book_Reader
         }
 
         // Estimated reading time (seconds) for a character offset at the current
-        // reading speed (nominal words-per-minute → characters per minute).
+        // reading speed (a percentage of the nominal pace → characters per minute).
         private double TextSeconds(int chars)
         {
-            int cpm = TtsReader.CharsPerMinute(currentWpm);
+            int cpm = TtsReader.CharsPerMinute(currentTextSpeed);
             return cpm > 0 ? chars * 60.0 / cpm : 0;
         }
 

@@ -77,8 +77,6 @@ Player.Volume.Accessible=Sonoritas {0} centesimae
 Player.Speed.Text=Celeritas: {0}x
 Player.Speed.Legend=Celeritas
 Player.Speed.Accessible=Celeritas {0}-plex
-Player.Speed.Wpm=Celeritas: {0} vpm
-Player.Speed.WpmAccessible=Celeritas {0} verba in minuto
 Player.Position.Label=Locus
 Player.Position.Text=Locus: {0} / {1}
 Player.Position.Accessible=Locus {0} centesimae
@@ -184,6 +182,7 @@ Menu.Help=Auxilium
 Menu.Help.Help=Auxilium
 Menu.Help.About=De NBR
 Menu.Help.Services=Officia et rationes...
+Menu.Help.Update=Novam editionem quaerere
 Shelf.Filter.All=Omnes libri
 Shelf.Filter.Reading=Qui leguntur
 Shelf.Filter.Unread=Nondum lecti
@@ -227,7 +226,7 @@ Details.Description.Open=Preme Enter ut legas
 Details.Field.SoundProcessing=Curatio soni
 Details.Sound.On=Ita
 Details.Sound.Off=Minime
-Details.Speed.Wpm={0} vpm
+Details.Speed.Value={0}x
 Dialog.Description.Title=Descriptio - {0}
 
 ; ---- LIBRARY - importing and deleting
@@ -424,6 +423,9 @@ Settings.General.UseMultimediaKeys.Hint=Clavibus mediorum claviaturae tuae vel a
 Settings.General.LibraryLocation.Hint=Huc NBR libros importatos transcribit. Potes eum relinquere ubi est, in parte systematis, sed si magnam bibliothecam habere cogitas, alia pars vel alius discus multo melius consilium est. NBR hic etiam notitias cuiusque libri servat, ideo si locos lectionis, signacula, celeritatem ceterasque optiones servare vis, memento contenta veteris directorii manu in novum locum transcribenda esse. Et eodem pretio: bibliotheca extra partem systematis posita, libros tuos ab ruinis systematis et ab damno datorum quod eas comitari solet tutos praestas.
 Settings.General.Language.Restart=Ut lingua mutetur, NBR denuo incipiendum est. Visne nunc denuo incipere?
 Settings.General.Language.RestartTitle=Lingua
+Settings.General.UpdateGroup=Novae editiones
+Settings.General.AutoCheckUpdates=Novas editiones sponte quaerere
+Settings.General.AutoCheckUpdates.Hint=Hoc accenso, NBR semel in die quaerit num editio recentior emissa sit, et tantum tum nuntiat cum adest. Nihil de te nec de libris tuis mittitur: rogatio nec nomen nec bibliothecam nec indicem eorum quae legis fert. Exstingue si mavis NBR numquam sua sponte ad rete exire — ipse tamen quandocumque quaerere potes per Auxilium, Novam editionem quaerere, in fenestra bibliothecae.
 Settings.Misc.Look=Species:
 Settings.Misc.Look.Classic=Colores systematis
 Settings.Misc.Look.New=Species NBR
@@ -777,7 +779,16 @@ Dialog.About.Title=De NBR
 Dialog.About.Release=Alpha
 Dialog.About.Licence=🄯 Copyleft — NBR programma liberum est sub GNU General Public License, versione 3. Licet tibi eo uti, id studere, communicare et mutare; si versionem mutatam tradis, ea isdem condicionibus pergit, una cum codice suo fontali.
 Dialog.About.Text=Nemoviz Book Reader {0}\n\nAedificatio diei {1}\n\nHic est lector multiformis et multiexitus librorum et editionum digitalium, praesertim pro caecis, debilis visu et iis qui difficultatem in legendo habent factus. Ad usum simplicem gratuitus est, sed si facultates ulteriores eius, ut translationem et voces nubis, explorare et adhibere vis, tibi apud officia externa singula profitendum et fortasse solvendum erit.\n\nFactum a Nemoguća vizija — nemoviz.org\n\nScriptum a Gordan Radić\n\nAedificatum cum Claude (Anthropic). Magnam partem codicis id scripsit, secundum consilium, iudicia et mensuras auctoris; ius et licentia eius sunt.\n\n{2}\n\nQUIBUS REBUS NBR NITITUR\n\nNBR sonum per libmpv edit, Braille per liblouis legit, per NVDA Controller Client loquitur, titulos per TagLib# legit, textum ex PDF per PdfPig extrahit et arcas per SharpCompress aperit. Quaeque earum bibliotheca separata est, sine mutatione adhibita, et quaeque aedificatione congruenti sui ipsius suppleri potest.\n\nlibmpv, et FFmpeg in eo — LGPL 2.1 vel posterior\n\nliblouis et tabulae eius Braille — LGPL 2.1 vel posterior\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress et fasces Microsoft — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend et OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nMonitum plenum — versiones, possessores iuris, et unde quaeque licentia lecta sit — in THIRD-PARTY-NOTICES.txt iuxta programma est, et ipsa verba licentiarum in directorio Licences.
+Update.Title=Quaestio novae editionis
+Update.Checking=Quaero num editio recentior sit
+Update.Available=Editio recentior programmatis Nemoviz Book Reader emissa est: {0}\n\nVisne paginam depromendi aperire?
+Update.UpToDate=Editione novissima emissa uteris.
+Update.Failed=Quaestio fieri non potuit. Fortasse nulla est coniunctio, aut pagina depromendi nunc adiri non potest.
 Hint.Button.Accessible=Auxilium de {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Vox e nube — pars gratuita
+Cloud.Quota.Warning=Hic liber {0} litteras habet.\n\nEx {2} litteris gratuitis quas {3} hoc mense dat, {1} consumpsisti.\n\nHunc librum legens partem gratuitam excedes, et quidquid ultra eam est rationi solvendi illius rationis imputatur.\n\nVisne eum nihilominus legere?
 
 ; ---- MESSAGES AND ERRORS
 Dialog.Error.Title=Error

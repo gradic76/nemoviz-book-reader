@@ -68,6 +68,8 @@ Sekvas du markobutonoj por ŝalti aŭ malŝalti la aŭdvidajn klavojn de via kla
 
 Poste markobutono, per kiu vi elektas, ĉu la biblioteko uzas la metadatenojn el la dosieroj aŭ montras la aŭtoron kaj la titolon el la nomo de la dosierujo aŭ de la dosiero.
 
+Sekvas la markobutono *Aŭtomate kontroli pri novaj versioj*. Kiam ĝi estas ŝaltita, NBR unufoje ĉiutage demandas, ĉu aperis pli nova eldono, kaj anoncas nur se jes; pri vi kaj pri viaj libroj ĝi sendas nenion. Se vi malŝaltas ĝin, NBR mem neniam iros al la reto, kaj kontroli vi tamen povos kiam ajn — en la Biblioteko, en la menuo Helpo, per *Kontroli pri nova versio*.
+
 Kaj laste, la aspekto, en kiu Nemoviz Book Reader estos montrata al vi. Estas du elektoj. *Sistemaj koloroj* donas al vi la ludilon en klasika aranĝo kaj en la kolorpaletro, kiun uzas via sistemo; tion vi ankaŭ ricevos, se vi havas ŝaltita altan kontraston, ĉar NBR tiam nenion propran desegnas kaj lasas vian skemon trapasi tuta. *Dezajno de NBR* donas al la ludilo iom pli modernan aspekton. Se vi ne elektis, NBR decidas mem: alta kontrasto ricevas Sistemajn kolorojn, ĉio cetera la Dezajnon de NBR.
 
 ## Parolo kaj brajlo
@@ -159,7 +161,7 @@ En la taba vico de la ĉefa fenestro de la ludilo, ne nepre en ĉi tiu ordo, tro
 | Ludi/Paŭzi | spaco |
 | Antaŭen | Maj + dekstren |
 | Malantaŭen | Maj + maldekstren |
-| Laŭteco | sagoj supren kaj malsupren, aŭ F11 kaj F12 |
+| Laŭteco | F11 kaj F12 |
 | Rapido | Stir + maldekstren kaj Stir + dekstren |
 | Progreso en la libro | sagoj maldekstren kaj dekstren |
 | Saltopaŝo | Maj + sagoj supren kaj malsupren |
@@ -182,6 +184,7 @@ En la informa kampo vi ekscias la bazajn datenojn pri la ludado: aŭtoron, titol
 - Per la spaco vi ekigas kaj haltigas la ludadon.
 - Per la sagoj maldekstren kaj dekstren vi „retroiras“ po kvin sekundoj aŭ, se temas pri tekstolibro, po unu frazo antaŭen aŭ malantaŭen.
 - Per Stir + sago maldekstren aŭ dekstren vi regas la rapidon de la legado.
+- Per F11 kaj F12 vi agordas la laŭtecon, F12 levas kaj F11 mallevas. La nudaj sagoj supren kaj malsupren ĉi tie faras nenion: iam ili portis la laŭtecon, sed ekranlegilo, kiu voĉlegas la libron, senĉese petas la sekvan linion kaj la laŭteco forglitis sub ĝi, do la klavoj transiris al la funkcia vico, kie Windows Media Player tenas ilin de dudek jaroj.
 - Per Maj + supren aŭ malsupren vi elektas la saltopaŝon (titolo, ĉapitro, norma paĝo, certaj daŭroj); la elekto ŝanĝiĝas laŭ la formo kaj la strukturo de la libro.
 - Per Maj + sago maldekstren aŭ dekstren vi moviĝas laŭ la elektita saltopaŝo.
 
@@ -207,9 +210,9 @@ Krome estas markobutono, kiu demandas, ĉu vi volas meti legosignon ĉe la komen
 
 La kalkulado komenciĝas per premo de *Starti*; la dialogo fermiĝas, kaj anstataŭ la vorto Tempigilo la fenestro de la ludilo nun montras kurantan nombrilon. Se vi denove aktivigas la tempigilon, la kalkulado nuliĝas kaj en la dialogo vi povas elekti novan tempon aŭ nuligi ĉion sur la butono destinita por tio.
 
-Memoru kaj atentu, ke la ludado haltas ĉe la aktivigo de iu ajn el la eblecoj kiel Agordoj, Biblioteko kaj tiel plu. Kiam vi faris tion, por kio vi venis en tiujn dialogojn, kaj konfirmas revenante al la fenestro de la ludilo, la ludado daŭras plu. La escepto estas la dialogo Ecoj, kie vi ja agordas aferojn, kiujn vi volus aŭdi dum vi faras tion.
+La reprodukton haltigas du dialogoj: Legosignoj kaj Tempigilo. Kiam vi faris en ili tion, por kio vi venis, kaj konfirmas revenante al la fenestro de la ludilo, la reprodukto daŭras. Agordoj, Biblioteko, Iri al kaj Ecoj lasas la libron ludi plu — ĉe la Ecoj tio eĉ estas intenca, ĉar tie vi agordas aferojn, kiujn vi volas aŭdi dum vi tion faras.
 
-Kelkaj vortoj pri la regiloj de rapido kaj laŭteco. Moviĝante per la sagoj, la laŭteco iras po 5%, kaj ĉe la fino vi aŭdas sonsignalon. Por sonlibroj la rapido iras po 0,1x, de 0,5x ĝis 3x, kaj kiam vi revenas al la normala 1x vi aŭdas ankaŭ signalon. Ĉe tekstolibroj la rapido ne estas mezurata per obligilo sed per vortoj en minuto, kaj iras po kvin, de 80 ĝis 400 vortoj en minuto.
+Kelkaj vortoj ankaŭ pri la regiloj de rapido kaj laŭteco. La laŭteco estas sur F11 kaj F12 — F12 levas, F11 mallevas — paŝe po 5 %, kaj ĉe ambaŭ randoj vi aŭdas signalon. La rapido iras paŝe po 0,1x, de 0,5x ĝis 3x, kaj same por sonaj kaj por tekstaj libroj. La diferenco estas nur, ke 1x ĉe sona libro signifas la rapidon de la registraĵo, kaj ĉe teksta la rapidon, per kiu la elektita voĉo parolas per si mem. La signalon vi aŭdas transirante la normalan rapidon, ĉe teksto tiun, kiu estas agordita por tiu voĉo.
 
 Kio por vi kiel uzanto plej gravas, estas ke Nemoviz Book Reader memoras absolute ĉion pri la ludado de la libroj, kiujn vi aŭskultas. Memoriĝas la pozicio, la laŭteco kaj la rapido por la sonaj, kaj la speco, rapido, lingvo kaj tonalto de la sintezilo por la tekstaj; memoriĝas la valoroj de la sonprilaborado por sonlibroj kaj la valoroj de la brajla kaj ekrana eligo por la tekstaj. Alivorte, memoriĝas ĉio, kion vi agordis laŭ viaj deziroj kaj bezonoj, por ĉiu libro aparte.
 
@@ -223,7 +226,7 @@ Malferminte la Ecojn de la sono, la unua afero, kiun vi rimarkos, estas la marko
 
 Sekvas sep filtriloj, kiuj helpos al vi aŭ ne iom plibonigi la sonon de sonlibroj el malnovaj, malbonaj aŭ ambaŭ registraĵoj. Ĉiu regilo estas ŝaltebla kaj malŝaltebla aparte, do vi ne devas uzi ilin ĉiujn samtempe. Ŝaltinte la Sonprilaboradon, la unua afero, kiun vi trovas, estas la klavo Restarigi, kiu redonas al ĉiuj filtriloj iliajn defaŭltajn valorojn. Sekvas markobutono Preterpasi, kies ŝalto kaj malŝalto tuj aŭdigas al vi la diferencon inter la originalo kaj viaj agordoj. La kombino por preterpasi estas Stir + B, do vi ne devos senĉese iri de la regiloj al la preterpaso kaj reen.
 
-La unua en la vico de filtriloj estas la tiel nomata Hi Pass, tio estas forigo de la muĝo. Ĝi forprenas bruojn en la malalta parto de la registraĵo, de elektraj aparatoj ĝis hazarda frapo sur la mikrofonon aŭ la tablon. Sekvas la Redukto de bruo, celita al la siblo de bendo, malbonaj mikrofonoj kaj similaj bruoj iom pli alte en la spektro. Mildigi la siblojn reduktas la siblon de sonoj kiel S kaj Ŝ, misformiĝintaj sur la registraĵo pro tro proksima registrado aŭ pro tro levitaj altaj tonoj. Egaligi la parolon provas proksimigi la mallaŭtajn kaj la laŭtajn partojn de la registraĵo. Poste estas la Sonkoloro, tio estas kvinzona egaligilo: malalta, malalta/meza, meza (la voĉo), meza/alta kaj alta. Fine, la aŭtomata laŭteco kaj la paŭzoj, nomataj ankaŭ normaligo kaj kluzo: la normaligo levas la tutan registraĵon al la plej alta nivelo sen misformo, dum la mallaŭtigo de la paŭzoj (la kluzo) forigas la bruon, kiu restas en ili.
+La unua en la vico estas *Forigi la muĝon*, la tiel nomata altpasa filtrilo. Ĝi forigas bruojn en la malalta parto de la registraĵo, de elektraj aparatoj ĝis hazarda bato sur la mikrofonon aŭ la tablon. Sekvas *Redukto de bruo*, destinita por la siblo de bendo, malbonaj mikrofonoj kaj similaj bruoj iom pli alte en la frekvencoj. *Mildigi la siblojn* malpliigas la krakon de sonoj kiel S kaj Ŝ, misformitaj pro tro proksima registrado aŭ elstarigitaj altaj tonoj. *Egaligi la parolon* provas egaligi la pli mallaŭtajn kaj pli laŭtajn partojn de la registraĵo. Poste estas *Sonkoloro*, kvinbenda egaligilo; la bendoj portas siajn frekvencojn — 200, 800, 1.8k, 3.5k kaj 5k+ — kaj la lasta estas breta, tio estas, ĝi levas aŭ mallevas ĉion super si, ne nur unu areon. Fine la grupo *Laŭteco kaj paŭzoj* kun du regiloj: *Aŭtomata laŭteco* (la normaligo) levas la tutan registraĵon ĝis la plej alta nivelo sen misformo, kaj *Bruo en la paŭzoj* (la pordo) forigas la restantan bruon en la interspacoj inter la frazoj.
 
 Ĉiu filtrilo havas kvin gradojn de ago: minimuma, malforta, meza, forta kaj maksimuma. Kaj indas ripeti: ĉiu estas ŝaltebla kaj malŝaltebla aparte.
 
@@ -233,9 +236,11 @@ Nepre indas mencii, ke ĉi tiu sonprilaborado ne faros miraklojn kaj el malbona 
 
 ## Ecoj de la teksto
 
-Simile kiel en la agordoj por la parolo, ĉi tie vi havas la elekton de lingvo, voĉo, rapido, laŭteco kaj tonalto por la elektita libro. En la Agordoj vi elektas la defaŭltan por ĉiuj, ĉi tie vi agordas por difinita titolo. Se vi demandas kial, la plej simpla ekzemplo estas: via defaŭlta voĉo en la Agordoj estas vira, sed romanon verkitan el ina perspektivo vi preferus legi per ina voĉo — tion vi ŝanĝas en la ecoj de la teksto por tiu unu libro. Ĉiuj ceteraj libroj en tiu lingvo plu malfermiĝos per la vira voĉo, ĝis kaj se vi tion ŝanĝos. Same, ian facilan legaĵon vi povas senprobleme legi je 250 vortoj en minuto, sed ion pli pezan, pri kio vi devas survoje ankaŭ pensi, vi eble prefere metos je 180.
+Simile kiel en la agordoj por la parolo, ĉi tie vi havas la elekton de lingvo, voĉo, rapido, laŭteco kaj tonalto por la elektita libro. En la Agordoj vi elektas la defaŭltan por ĉiuj, ĉi tie vi agordas por difinita titolo. Se vi demandas kial, la plej simpla ekzemplo estas: via defaŭlta voĉo en la Agordoj estas vira, sed romanon verkitan el ina perspektivo vi preferus legi per ina voĉo — tion vi ŝanĝas en la ecoj de la teksto por tiu unu libro. Ĉiuj ceteraj libroj en tiu lingvo plu malfermiĝos per la vira voĉo, ĝis kaj se vi tion ŝanĝos. Same, ian facilan legaĵon vi povas senprobleme legi je 1,5x, sed ion pli pezan, pri kio vi devas survoje ankaŭ pensi, vi eble prefere remetos je 1x aŭ pli malrapide.
 
-Prononcan vortaron ĉi tie ne estas; sekvas la agordoj por brajlo kaj la ekranaj. Se vi ŝaltas la brajlan eligon, vi ricevas la elekton de la brajla tabelo por la elektita lingvo; se vi ŝaltas la ekranan eligon, vi ricevas la elekton, kiel la teksto estos montrata sur via ekrano. Se vi volas legi nur brajle aŭ nur sur la ekrano sen parolo, elektu tiun eron en la listo de voĉoj. En ĉi tiu beta-versio la brajla kaj la ekrana eligo estas grizigitaj kaj portas rimarkon pri tio; la elekto de la brajla tabelo por libroj importitaj el brajlaj dosieroj plu funkcias.
+Vortaro de prononco ĉi tie ne estas; sekvas la agordoj por brajlo kaj por la ekrano. Se vi ŝaltas la ekranan montron, vi ricevas la elekton, kiamaniere la teksto aperos sur via ekrano. Se vi volas legi nur per brajlo aŭ sur la ekrano, sen parolo, elektu tiun eblon en la listo de voĉoj. En ĉi tiu beta la brajla kaj la ekrana eligoj estas grizigitaj kaj portas la noton, ke ili ne estas ŝaltitaj.
+
+NBR ne havas eligan brajlan tabelon kaj ne havos. Tion, kio staras sur via brajla linio, tradukas via ekranlegilo, per la tabelo el siaj propraj agordoj, kaj tio estas la sola ĝusta loko por tiu elekto — du tabeloj super unu linio povus nur malkonsenti. La sola brajla tabelo en NBR estas la *eniga*: tiu, per kiu dosiero .brf estis legita ĉe la enporto. Vi ŝanĝas ĝin en la grupo Brajla fonto, kiu aperas nur ĉe libro, kiu el tia dosiero venis. Tiu grupo funkcias ankaŭ en ĉi tiu beta.
 
 ## Agordoj de la ekrana eligo {beta}
 

@@ -105,6 +105,22 @@ non-obvious code choices exist because of it.
   played in the background, which keeps its timing exact too. Tones fade in and
   out over 5 ms, because a sine that starts at full amplitude is heard as a click.
 
+- **The end of a book is a CADENCE, not a signal** (Gordan, 2026-08-23):
+  C5-E5-G5 at 160 ms each and then C6 held for 420. Every other sound NBR makes
+  is an event; this one climbs to the octave of its own first note and STAYS
+  there, two and a half times as long as any step below it. A run says something
+  happened — landing and holding is what says finished.
+  **It fires only when the book ends BY ITSELF.** `FinishCurrentBook` is reached
+  from exactly two places and both are the natural end: mpv going idle with a
+  book playing, and `TtsReader.Finished`. Marking a book read from the Library
+  goes through `UnloadActiveBook` instead, and neither Stop nor closing the
+  player comes near it — so the sound cannot fire for anything the reader did.
+  It stands at the TOP of the method, so it sounds as the reading stops rather
+  than after the book is saved and the library has opened over it.
+  Measured through `SignalTones.Render` by counting zero crossings per note —
+  1048 Hz where 1047 was asked for, and the whole cadence 1020 ms including the
+  30 ms `GapMs` that follows EVERY tone, the last one included.
+
 ### The info box lesson (do not regress this)
 
 The playback info box (`tbInfo`) was the single biggest accessibility
@@ -356,7 +372,12 @@ displays too: a modifier-free function key is the easy case for a display's key
 emulation (§8l).
 
 - **Space** — Play/Pause (the only key for it; X was removed in Session 10).
-- **Up/Down** — volume ±5 (announced; beep at 0 and at 100).
+- **F11 / F12** — volume ±5, the higher key raising (announced; beep at
+  0, 50 and 100). **The bare Up/Down arrows do nothing and are still
+  SWALLOWED**: letting them fall through hands them to WinForms, which walks the
+  focus with them. See the long note in `ProcessCmdKey` for why volume left the
+  arrows — JAWS' say-all keeps asking for the next line and the volume slid away
+  underneath, and nothing inside the app can tell its Down from the user's.
 - **Left/Right** — the plain 5-second / one-sentence nudge.
 - **Ctrl+Left/Right** — speed ±10% (range 50–300%; double beep at 100%).
   Replaced PageUp/PageDown in Session 10.
@@ -642,10 +663,27 @@ discards.
   (`FolderBrowserDialog`). Browse only *stages* the choice; `SaveSettings`
   persists via `AppSettings.SetLibraryPath` + `EnsureLibraryExists`, and only
   if it actually changed. This is the first genuinely functional control.
-- **Language** combo — app UI language. Lists only English for now
-  (`LanguageName`); **not wired** to `AppSettings.SetLanguage` yet because
-  there's nothing to switch to until `hr.lang` exists (end-of-project
-  translation pass).
+- **Language** combo — app UI language, listing every `.lang` file really in the
+  folder (eleven ship). **It follows Windows on a first run** (2026-08-23):
+  `AppSettings.LanguageCode` defaults to EMPTY rather than "en", so "not chosen
+  yet" is distinguishable from "chose English", and `Localization.Initialize`
+  then asks `MatchLanguage(CultureInfo.InstalledUICulture)`.
+  - **Matched most specific first: the full tag, then the tag cut back to its
+    SCRIPT, then the bare two letters.** The order is the whole method — ask for
+    the two letters second and sr-Cyrl-RS meets `sr` before `sr-Cyrl`, handing
+    every Serbian reader on a Cyrillic Windows the Latin file. That is exactly
+    what the first version did, and the check caught it.
+  - `InstalledUICulture`, not `CurrentUICulture`: the first is the language
+    Windows itself is in, the second follows a per-user formatting choice and can
+    name a language the display is not in.
+  - **Deliberately NO "System language" row in the combo** (Gordan's call). It
+    would be a rule that resolves to one of the languages already listed — the
+    same thing "Follow Windows" was in the Look combo before he removed it — so
+    the system language is the STARTING POINT, and the moment a reader picks one
+    it is theirs.
+  - Verified through the shipped `Localization` against thirteen cultures:
+    hr-HR→hr, sr-Cyrl-RS→sr-Cyrl, sr-Latn-RS→sr, de-AT→de, es-MX→es, ja-JP→en,
+    the invariant culture→en.
 - **Multimedia keys (done).** The first checkbox turns them on or off (off = the
   message goes back to the system, so another player gets it); the second claims
   them **system-wide** via `RegisterHotKey` → `WM_HOTKEY`, so they work while NBR
@@ -666,6 +704,50 @@ discards.
   the control it explains, and the switch takes `TabStop` away with `Visible`, so
   turning hints off also takes them out of the tab order. Verified by dumping the
   real tab order of every tab, switch on and off.
+
+- **Check for update (done 2026-08-23, `UpdateCheck.cs`).** One GET against
+  GitHub's public releases endpoint, parsed with the same hand-written `Json` the
+  translation and cloud-voice code uses — no library, no account, and nothing
+  sent about the reader, their library or what they read. Two ways in, and the
+  division is the one that put the service guides under Help and left their
+  switches in Settings: **Library → Help → Check for update** is the thing you
+  DO, **Settings → General → Updates** is the rule you set. On by default,
+  because for a beta somebody who does not know a fix exists cannot ask for it.
+  - **It runs once a DAY, not once a launch** (`[App] LastUpdateCheck`, written
+    when the check STARTS so a machine with no network does not retry on every
+    start), from `Form1.OnShown` rather than the Library — someone resuming a
+    book never opens the Library, and they are exactly the reader a fix has to
+    reach. Off the UI thread: §11 has a bulk import that blocked the window for
+    a minute and a file dialog that blocked it on a network read.
+  - **The automatic one speaks only when there is something newer.** A reader who
+    did not ask has no use for "checked, all well" and less for "the check
+    failed", so a manual check reports all three outcomes and the automatic one
+    reports one. The manual check announces that it has STARTED
+    (`ScreenReader.Announce`), or the ten seconds it may take are a silence with
+    nothing on screen and nothing said.
+  - **`UpdateCheck.Release` is the git tag this build is, and it is NOT
+    `Dialog.About.Release`.** That one is prose the reader hears, it lives in the
+    language files and it is translated; this one is an identifier compared
+    character for character. **Bump both when a release goes out** — leave this
+    one behind and every reader is told there is an update when there is not.
+  - **`UpdateCheck.Repo` names a repository that does not exist yet.** NBR's
+    source is local by design (§10e's memory), so until the beta is pushed every
+    check honestly reports that it could not be made. Verified in exactly that
+    state, and against `mpv-player/mpv` as a control so a "could not check" is
+    known to be the repository and not the code.
+
+  **AND IT FOUND A LIVE BUG IN TWO SHIPPED FILES.** The check did not work at
+  first, and the reason was not its own: **.NET Framework's default
+  `SecurityProtocol` here is still `Ssl3, Tls`** (measured — as shipped the
+  request threw *"Could not create SSL/TLS secure channel"*, forced to TLS 1.2 it
+  returned 20 402 bytes), and every modern service refuses TLS 1.0.
+  `AzureProvision` and `Translator` each carry a `|= Tls12` line; **`AzureVoices`
+  and `GoogleCloudVoices` did not**, and worked only because the flag is
+  process-wide and one of those two happened to run first. Nobody runs first for
+  a reader who only ever uses cloud voices, or who pasted an Azure key in by hand
+  and never opened the wizard. Both fixed. **A failure of this kind is
+  indistinguishable from having no network**, which is why it could sit there
+  unreported.
 
 Everything else (Text Books, Device, sliders, hints toggle) is still
 scaffolding to fill in as each subsystem is built. Sound processing was
@@ -722,7 +804,13 @@ order (no numbering — the label self-describes); the **info box** shows the
 current heading's tagline. The **seek step** gains per-depth **Heading** levels
 and, when present, **Page** — see section 6. Producers who leave metadata blank
 (e.g. Obi's "Untitled Obi Project") are shown as-is; the user fixes them with
-F2 rename (which offers Author + Title for DAISY, one field for plain audio).
+F2 rename, which offers **Author and Title for EVERY book** (Gordan, 2026-08-23).
+It was gated on `IsDaisy`, and that was never true of the shelf: `BuildShelfItem`
+prints "Author — Title" for any book whose Author is set, and EPUB, M4B, MOBI, PDF
+and tagged audio all fill it in — so a reader could see a wrong author and have no
+way to correct it, the single box writing only the title. The two fields are
+offered even where the author is empty, which is the more useful way round: a
+folder of MP3s named after the book alone can now be given its author.
 
 **Import paths for DAISY (all three now covered):** an archive containing a
 DAISY book (Add File) is handled in `ImportFile`; an already-extracted DAISY
@@ -1516,18 +1604,52 @@ line starts with a lower-case letter", which asked the wrong end of the break.
   the words tell them exactly where they were. A fragment that is only
   punctuation (a stray full stop after a page number) is skipped for the next
   sentence with actual words in it.
-- **Speed** is **words-per-minute** (nominal; real rate is voice-dependent),
-  reusing the player's speed control (`ChangeSpeed` branch): 80–400 WPM, **±5 per
-  step**, a double-beep when crossing the Settings default; maps to SAPI rate via
-  `TtsReader.WpmToRate` (175 WPM → 0). Reading-time estimates use CPM = WPM×6.
+- **Speed is a MULTIPLIER, exactly as an audio book's is — 0.5× to 3.0×, ±0.1 a
+  step** (Gordan, 2026-08-23), reusing the player's speed control (`ChangeSpeed`
+  branch), with a double-beep when crossing the current voice's own default
+  rather than 100 %. Stored as a whole percentage (50–300) so no settings file
+  ever carries a decimal point, and mapped to the backends' −10…10 rate by
+  `TtsReader.SpeedToRate`.
+
+  **It was words per minute until then, and his question is what retired it:**
+  *"otkad smo speech prebacili na audio izlaz i brzinu mu kontroliramo tamo ima
+  li smisla pričati o WPM?"* No — the figure was a label on an engine rate that
+  every voice interpreted its own way, and no voice ever read at it.
+
+  **Geometric, not linear, because the rate scale is** — the same curve
+  `CloudSpeechBackend` already handed to mpv, so `SpeedToRate` is simply its
+  inverse and a cloud voice and a local one asked for 1.5× both deliver it.
+  Consequences worth knowing: **50 % is rate −6**, so −7…−10 are unreachable
+  (the old control bottomed out at −5, so the slow end is one step LONGER than
+  it was); and 26 positions map onto 17 rates, so a few presses do not change
+  the engine — which is still far better than 65-onto-16 before.
+
+  **Migration is through the RATE, never through the words** (`WpmToSpeed` =
+  `RateToSpeed(WpmToRate(w))`), so a book set up under the old scale keeps
+  sounding exactly as it did. `RateToSpeed` snaps to the control's own tenth
+  only where that leaves the rate alone — at rate −4 it does not (64 % rounds to
+  60, which reads back as −5), and sounding unchanged outranks a tidy number.
+  Stored under NEW keys so the two scales can never be confused: `[Settings]
+  TextSpeed` in Book.ini, `[TextToSpeech] Speed` in Settings.ini, and
+  `[TextVoices] S<i>` in place of `V<i>` — a version marker was not optional,
+  since 200 is a sensible number under either reading. Verified on Gordan's own
+  Settings.ini: nine voices, all at 175 WPM, all out at 100 %, V lines gone,
+  stable on reload.
+
+  Reading-time estimates use `TtsReader.CharsPerMinute`, which IS linear in the
+  percentage — that question is "how long will this take", and twice the speed
+  really is half the time. **This moves a migrated book's estimate** (250 WPM
+  became 160 %, so 1628 chars/min where it read 1500), and toward the truth:
+  §8g′ measured the old estimate running 6.9 % long against a real export.
+
   **The spin boxes in Settings and Properties step by the same amount as the
-  player** (`MakeNumeric`'s `increment`): 5 WPM, 5 % volume, 10 % playback speed —
+  player** (`MakeDecimal`/`MakeNumeric`'s `increment`): 0.1× speed, 5 % volume —
   stepping by 1 is far too slow when every step is spoken.
-- **Global TTS defaults** (voice/WPM/pitch/volume) live in **Settings → Text
+- **Global TTS defaults** (voice/speed/pitch/volume) live in **Settings → Text
   Books** (`AppSettings` `[TextToSpeech]`), with a "Test voice" button.
 - **Display**: title bar + info box show **percentage** (one decimal — the
   integer sits at 0 for a long book), estimated Elapsed/Remaining/Time, and the
-  voice + WPM ("Voice: RHVoice Karmela, 250 WPM"). A started book is forced to
+  voice + speed ("Voice: RHVoice Karmela, 1.5x"). A started book is forced to
   ≥1 % so it lands in "Reading", not "Unread". Library shows "Plain text" and an
   estimated reading time. Single-file audio books now use the same plain
   Elapsed/Remaining/Time labels (no part/total split).
@@ -1738,6 +1860,55 @@ allowance is ~0.5 M characters a month — about ONE book, against Google's two 
 nine — and Azure's `hr-HR` has no custom pronunciations, so §8j's dictionary
 works less well there than with a local voice.
 
+### The reader is told what a book will cost BEFORE it starts (`CloudUsage.cs`, 2026-08-23)
+
+Gordan's idea, parked 2026-08-17 and built now. Both services answer this
+question only AFTERWARDS — Google has a monitoring page, Azure a portal — so a
+reader who has to open one to learn what a book costs learns it once the book has
+cost it. NBR already knows every character it sends, so the number can stand in
+front of them instead.
+
+- **Counted inside `CloudVoices.Synthesize`, which is BEHIND the speech cache.**
+  A second reading, an export replayed from disk and a sentence the look-ahead
+  already fetched are all counted as nothing — which is exactly how the service
+  bills them. Counting where speech is SPOKEN would have counted a re-read as a
+  fresh cost. Only a reply that arrived is counted: a refused or timed-out
+  request is not charged, so it is not counted either.
+- **Warned from `SyncPrefillToPlayback`**, which is the one place that knows all
+  three things at once — something is sounding, it is a text book, and the voice
+  is somebody else's to bill for. Asked BEFORE the look-ahead starts, because the
+  look-ahead buys the whole book at ten times reading speed and would be most of
+  the way through it before a reader could be asked anything. Deferred with
+  `BeginInvoke`: the caller is `SetPlayPauseState`, and a modal dialog part-way
+  through setting the transport state would leave the button saying one thing and
+  the player doing another. Once per book and voice; a voice change asks again,
+  because it may be a different service with a different allowance left.
+- **The book's whole length is quoted, which may be more than it will cost** —
+  anything already cached is paid for. Overstating is the safe direction for a
+  number somebody is about to spend money on, and the sentence says what the book
+  HAS rather than what it will cost, which is true either way.
+
+**IT LIVES IN ITS OWN FILE, AND `Settings.ini` WOULD HAVE LOST THE COUNT.**
+`IniFile` reads a whole file into memory when constructed and writes the whole of
+it back on every Save; `AppSettings` holds one such object for the life of the
+program. **The first thing it saved — a volume change, the last opened book —
+would have written its start-up snapshot back over every character counted since.**
+A reader on a long book nudging the volume would have watched the number reset
+with nothing appearing to go wrong. `CloudUsage.ini` also files it honestly: this
+is a MEASUREMENT, not a setting.
+
+**The two allowances have a source and neither is invented, but they are not the
+same KIND of fact.** Azure's **0.5 M** is Microsoft's own pricing page, read
+2026-08-23. Google's **1 M** for Chirp 3 HD is NOT from Google — its pricing page
+is JavaScript-rendered and gives up nothing to a fetch, still true from
+2026-08-17 — it is what several third-party summaries agree on, beside the $30
+per million Gordan read off Google's page himself. **And a reader's real
+allowance may be neither**: a trial credit, an account that has already paid, a
+project with billing off. So both are overridable in `CloudUsage.ini`
+(`GoogleFreeChars` / `AzureFreeChars`), and the warning is worded to stay honest
+when the figure is a little wrong — what has been used, what this book adds, and
+only then that continuing may be charged.
+
 ### The Advanced tab is split — agreed AND BUILT 2026-08-17
 
 Gordan: *"zakompliciralo se sve u Settings/Advanced, treba to malo podijeliti."*
@@ -1885,10 +2056,10 @@ card being chosen rather than the system default.
 **Speed / volume / pitch are remembered PER VOICE** (`VoicePrefs.cs`;
 `VoicePrefsTable` persists as an indexed `[TextVoices]` section in both
 Settings.ini and Book.ini). Voices differ enormously in how fast they sound at
-the same nominal WPM, so carrying the previous voice's numbers across a change of
-engine or speaker is worse than useless. Picking a voice now shows/applies, in
+the same nominal speed, so carrying the previous voice's numbers across a change
+of engine or speaker is worse than useless. Picking a voice now shows/applies, in
 order: **what this book was last read with using that voice → how that voice is
-set up in Settings → the neutral default (175 WPM, 100 %, pitch 0)** — never the
+set up in Settings → the neutral default (100 %, 100 %, pitch 0)** — never the
 settings of the voice being left behind. `Form1.ResolveVoicePrefs` is that
 cascade; `RememberCurrentVoicePrefs` files the live values under the voice in use
 (player volume/speed keys, Properties, and every save). Settings and Properties
@@ -2762,6 +2933,14 @@ needs verifying by ear before it is relied on.
   > once into one far too wide to trim, and compares the ink. Narrower in the
   > real cell means the ellipsis bit. Run it on any new language file.
   >
+  > **`tools/check-captions.cs` asks the same question of the DIALOGS**, where a
+  > control sized by the skin has no equivalent of the panel's 108-unit key.
+  > Its first run, 2026-08-23, found two captions that had been cut off since
+  > they were written: Esperanto's `Preterpasi la prilaboradon` and Ancient
+  > Greek's `Τὴν θεραπείαν παρελθεῖν`, both 182 units in a cell with 176.
+  > Neither is a language anyone here reads, which is exactly why a machine has
+  > to ask. Add a row to its `Cells` table to cover another control.
+  >
   > Measured that way, **every legend in all six shipping languages fits**, the
   > tightest being `Einschlaftimer` and Spanish `Temporizador` with 12 units
   > free. Only genuinely long phrases clip — `Knjižne oznake`, `Lesezeichen
@@ -2879,7 +3058,7 @@ less a standard 12 margin, the 4-unit groove and a 12 bezel on each side).
   is always in the same place whatever the book type, which matters more to a
   screen reader than to the eye: title (2 lines reserved) · author · chapter
   (2 lines reserved) · page · bookmarks · **times** · publisher (year) · producer
-  (year) · format · voice + WPM. **Part x/y and the per-part times are dropped**:
+  (year) · format · voice + speed. **Part x/y and the per-part times are dropped**:
   for multi-file books the chapter line shows the part's *name*, which is more
   use than "3/17". Measured against 54 real chapter labels from the library —
   half of them do not fit one line at any size, hence the two-line reservation.
@@ -3846,10 +4025,13 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 
 ### Still open
 
-- **The WPM floor.** 80 WPM was chosen for *speech*; driving **fingers** it is
-  still fast for a beginner or a foreign language. Braille probably needs its own,
-  lower range rather than inheriting the TTS number. (In *braille-leads* mode the
-  problem dissolves — but that mode needs input we may not have.)
+- **The speed floor.** The bottom of the range was chosen for *speech*; driving
+  **fingers** it is still fast for a beginner or a foreign language. Braille
+  probably needs its own, lower range rather than inheriting the speech one.
+  (In *braille-leads* mode the problem dissolves — but that mode needs input we
+  may not have.) `TtsReader.SilentSpeed` is where a separate range would go: it
+  takes the same percentage and converts to a real words-per-minute pace inside,
+  because a pace is a duration and nothing about it is a multiplier.
 - **Visual on, no voice for the language:** the book opens and is readable but
   silent. Say so once, or stay quiet? Not decided. No block either way.
 - **DECIDED (Gordan, 2026-07-29): Play, elapsed/remaining and the sleep timer are
@@ -5367,7 +5549,8 @@ Trimmed: `Settings.TextBooks.UseVisual` and `.UseBraille` (57 → 17/18),
 `.StopShutdown` (35/59 → 23/37 — the group legend "When the time expires" already
 supplies the rest, but "the computer" stays, because "shut down" alone could mean
 the app), and `Settings.TextBooks.Speed` (33 → 14): "Reading speed (words per
-minute):" became "Reading speed:", the unit moving to the value ("175 WPM"),
+minute):" became "Reading speed:", the unit moving to the value (then "175 WPM",
+now "1.0x" — see §8e),
 which also un-did a redundancy in the info glass. **That one paid twice** — §10b
 recorded it as the caption pushing the whole reading page's value column right,
 and the values moved back left when it went.

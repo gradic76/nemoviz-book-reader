@@ -64,8 +64,6 @@ Player.Volume.Accessible=Volume {0} percent
 Player.Speed.Text=Speed: {0}x
 Player.Speed.Legend=Speed
 Player.Speed.Accessible=Speed {0} times
-Player.Speed.Wpm=Speed: {0} WPM
-Player.Speed.WpmAccessible=Speed {0} words per minute
 Player.Position.Label=Position
 Player.Position.Text=Position: {0} / {1}
 Player.Position.Accessible=Position {0} percent
@@ -171,6 +169,7 @@ Menu.Help=Help
 Menu.Help.Help=Help
 Menu.Help.About=About NBR
 Menu.Help.Services=Services and accounts...
+Menu.Help.Update=Check for update
 Shelf.Filter.All=All books
 Shelf.Filter.Reading=Reading
 Shelf.Filter.Unread=Unread
@@ -214,7 +213,7 @@ Details.Description.Open=Press Enter to read it
 Details.Field.SoundProcessing=Sound processing
 Details.Sound.On=On
 Details.Sound.Off=Off
-Details.Speed.Wpm={0} WPM
+Details.Speed.Value={0}x
 Dialog.Description.Title=Description - {0}
 
 ; ---- LIBRARY - importing and deleting
@@ -411,6 +410,9 @@ Settings.General.UseMultimediaKeys.Hint=You can use your keyboard multimedia key
 Settings.General.LibraryLocation.Hint=This is the place where NBR copies imported books. You can leave it as default on your system partition, but if you plan to have a large library, another partition or disk would be a much better solution. NBR also keeps the information for each book in there, so if you want to save your reading positions, bookmarks, speed and other reading settings, note that you need to copy the content from the old library folder manually to the new location. And within the same price range: by changing the library location to somewhere other than the system partition, you are preserving your books from accidental system crashes and the usual data loss accompanying them.
 Settings.General.Language.Restart=Changing the language needs NBR to start again. Restart now?
 Settings.General.Language.RestartTitle=Language
+Settings.General.UpdateGroup=Updates
+Settings.General.AutoCheckUpdates=Check for updates automatically
+Settings.General.AutoCheckUpdates.Hint=With this on, NBR asks once a day whether a newer version has been published, and speaks up only if there is one. Nothing about you or your books is sent: the request carries no identifier, no library and no list of what you read. Turn it off if you would rather NBR never reached the network on its own — you can still ask whenever you like, with Help, Check for update, in the library window.
 Settings.Misc.Look=Look:
 Settings.Misc.Look.Classic=System colors
 Settings.Misc.Look.New=NBR design
@@ -764,7 +766,16 @@ Dialog.About.Title=About NBR
 Dialog.About.Release=Alpha
 Dialog.About.Licence=🄯 Copyleft — NBR is free software under the GNU General Public License, version 3. You may use it, study it, share it and change it; if you pass on a changed version, it goes on under the same terms, with its source.
 Dialog.About.Text=Nemoviz Book Reader {0}\n\nBuild of {1}\n\nThis is a multiformat and multioutput reader for digital books and publications, specially designed for the blind, visually impaired and people with reading disabilities. It is free for basic usage, but if you want to explore and use its advanced features such as translation and cloud voices you will need to register and possibly pay for the respective external services.\n\nMade by Nemoguća vizija — nemoviz.org\n\nWritten by Gordan Radić\n\nBuilt with Claude (Anthropic). Much of the code was written by it, to the author's design, decisions and measurements; the copyright and the licence are his.\n\n{2}\n\nWHAT NBR IS BUILT ON\n\nNBR plays sound through libmpv, reads braille through liblouis, speaks through the NVDA controller client, reads tags with TagLib#, takes text out of PDFs with PdfPig, and opens archives with SharpCompress. Each is a separate library, used unmodified, and each can be replaced by a compatible build of its own.\n\nlibmpv, and the FFmpeg inside it — LGPL 2.1 or later\n\nliblouis and its braille tables — LGPL 2.1 or later\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress and the Microsoft packages — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend and OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nThe full notice — versions, copyright holders, and where each licence was read from — is in THIRD-PARTY-NOTICES.txt beside the program, and the licence texts themselves are in the Licences folder.
+Update.Title=Check for update
+Update.Checking=Checking for a newer version
+Update.Available=A newer version of Nemoviz Book Reader has been published: {0}\n\nWould you like to open the download page?
+Update.UpToDate=You are running the newest published version.
+Update.Failed=The check could not be made. There may be no connection, or the download page may be unreachable just now.
 Hint.Button.Accessible=Help for {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Cloud voice — the free allowance
+Cloud.Quota.Warning=This book has {0} characters.\n\nOf this month's free {2} characters at {3}, you have used {1}.\n\nReading this book will take you past the free allowance, and what is beyond it is charged to the payment method on that account.\n\nRead it anyway?
 
 ; ---- MESSAGES AND ERRORS
 Dialog.Error.Title=Error

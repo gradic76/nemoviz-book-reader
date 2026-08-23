@@ -385,6 +385,16 @@ namespace Nemoviz_Book_Reader
         {
             try
             {
+                // TLS 1.2, which Azure requires and .NET Framework does not switch
+                // on by itself — its default is still "Ssl3, Tls". Without it this
+                // throws "Could not create SSL/TLS secure channel", which reads
+                // exactly like a machine with no network. It has been working by
+                // luck: AzureProvision and Translator each set the same flag and
+                // the setting is process-wide, so whichever ran first was carrying
+                // this file. Nobody runs first for a reader who pasted a key in by
+                // hand and never opened the wizard. |= so nothing is taken away.
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
                 var r = (HttpWebRequest)WebRequest.Create(url);
                 r.Method = "GET";
                 r.Timeout = 60000;
@@ -400,6 +410,7 @@ namespace Nemoviz_Book_Reader
         {
             try
             {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
                 var r = (HttpWebRequest)WebRequest.Create(url);
                 r.Method = "POST";
                 r.ContentType = "application/ssml+xml";

@@ -36,6 +36,11 @@ namespace Nemoviz_Book_Reader
         /// </summary>
         public bool GoToAutoPlay { get; private set; }
 
+        // Whether NBR asks GitHub for the newest release once a day, and when it
+        // last did. See UpdateCheck for what is and is not sent.
+        public bool AutoCheckUpdates { get; private set; }
+        public DateTime LastUpdateCheck { get; private set; }
+
 
         /// <summary>
         /// When true (default), a book's title/author come from embedded
@@ -47,11 +52,12 @@ namespace Nemoviz_Book_Reader
         public bool UseMetadata { get; private set; }
 
         // Global text-to-speech defaults for text books (per-book overrides live
-        // in Book.ini). Speed is a nominal words-per-minute; pitch is SAPI-style
-        // (-10..10); volume 0..100. These are the values of the DEFAULT voice
-        // below; every voice the user has set up keeps its own in TtsVoicePrefs.
+        // in Book.ini). Speed is a percentage of the voice's own natural pace,
+        // 50..300, exactly as an audio book's is; pitch is SAPI-style (-10..10);
+        // volume 0..100. These are the values of the DEFAULT voice below; every
+        // voice the user has set up keeps its own in TtsVoicePrefs.
         public string TtsVoice { get; private set; }
-        public int TtsWpm { get; private set; }
+        public int TtsSpeed { get; private set; }
         public int TtsPitch { get; private set; }
         public int TtsVolume { get; private set; }
 
@@ -189,12 +195,32 @@ namespace Nemoviz_Book_Reader
             LastImportFolder = ini.Read("Library", "LastImportFolder", "");
             LastImportFileFolder = ini.Read("Library", "LastImportFileFolder", "");
             LangPath = ini.Read("App", "LangPath", DefaultLangPath);
-            LanguageCode = ini.Read("App", "Language", "en");
+            // EMPTY, not "en" -- see Localization.Initialize. An empty setting means
+            // nobody has chosen, which is what lets Windows decide on a first run; a
+            // literal "en" here made that impossible to tell from a reader who chose
+            // English on purpose.
+            LanguageCode = ini.Read("App", "Language", "");
             GoToAutoPlay = ini.Read("Player", "GoToAutoPlay", "0") == "1";
+            // ON BY DEFAULT, and for a beta that is the point: someone who does
+            // not know a fix exists cannot ask for it. It is one request a day to
+            // a public endpoint, carrying nothing about the reader or their books
+            // (see UpdateCheck), and the switch beside it in Settings is there
+            // for anyone who would rather NBR did not reach the network at all.
+            AutoCheckUpdates = ini.Read("App", "AutoCheckUpdates", "1") == "1";
+            LastUpdateCheck = UpdateCheck.ParseDay(ini.Read("App", "LastUpdateCheck", ""));
             UseMetadata = ini.Read("Import", "UseMetadata", "1") == "1";
             TtsVoice = ini.Read("TextToSpeech", "Voice", "");
-            int.TryParse(ini.Read("TextToSpeech", "Wpm", "175"), out int ttsWpm);
-            TtsWpm = ttsWpm;
+            // Speed is the percentage, Wpm the words-per-minute scale it replaced
+            // on 2026-08-23. An old file carries only Wpm, and it is converted
+            // through the rate so the voice keeps sounding as it did.
+            int ttsSpeed;
+            if (int.TryParse(ini.Read("TextToSpeech", "Speed", ""), out ttsSpeed))
+                TtsSpeed = ttsSpeed;
+            else
+            {
+                int.TryParse(ini.Read("TextToSpeech", "Wpm", ""), out int ttsWpm);
+                TtsSpeed = ttsWpm > 0 ? TtsReader.WpmToSpeed(ttsWpm) : 100;
+            }
             int.TryParse(ini.Read("TextToSpeech", "Pitch", "0"), out int ttsPitch);
             TtsPitch = ttsPitch;
             int.TryParse(ini.Read("TextToSpeech", "Volume", "100"), out int ttsVol);
@@ -203,7 +229,7 @@ namespace Nemoviz_Book_Reader
             TtsVoicePrefs.Load(ini);
             // Settings written before voices were remembered individually hold one
             // set of numbers; they belong to the voice that was selected then.
-            TtsVoicePrefs.SetIfAbsent(TtsVoice, new VoicePrefs(TtsWpm, TtsVolume, TtsPitch));
+            TtsVoicePrefs.SetIfAbsent(TtsVoice, new VoicePrefs(TtsSpeed, TtsVolume, TtsPitch));
             LoadLanguageVoices();
             LoadSeenLanguages();
             LanguageSeen = NoteLanguageSeen;
@@ -529,17 +555,22 @@ namespace Nemoviz_Book_Reader
         /// <summary>Stores the default voice and how it is set up. The numbers are
         /// also filed under that voice, so returning to it later restores them
         /// even after other voices have been used in between.</summary>
-        public void SetTtsDefaults(string voice, int wpm, int pitch, int volume)
+        public void SetTtsDefaults(string voice, int speed, int pitch, int volume)
         {
             TtsVoice = voice ?? "";
-            TtsWpm = wpm;
+            TtsSpeed = speed;
             TtsPitch = pitch;
             TtsVolume = volume;
             ini.Write("TextToSpeech", "Voice", TtsVoice);
-            ini.Write("TextToSpeech", "Wpm", TtsWpm.ToString());
+            ini.Write("TextToSpeech", "Speed", TtsSpeed.ToString());
             ini.Write("TextToSpeech", "Pitch", TtsPitch.ToString());
             ini.Write("TextToSpeech", "Volume", TtsVolume.ToString());
-            SetVoicePrefs(TtsVoice, new VoicePrefs(wpm, volume, pitch));
+            // The old key is BLANKED rather than left standing (IniFile can drop a
+            // whole section but not one key), so a file cannot end up carrying two
+            // answers to one question. The load above prefers Speed anyway; this
+            // is for anything that ever reads the file without knowing that.
+            ini.Write("TextToSpeech", "Wpm", "");
+            SetVoicePrefs(TtsVoice, new VoicePrefs(speed, volume, pitch));
         }
 
         /// <summary>Remembers how one voice is set up (any voice, not just the
@@ -579,6 +610,22 @@ namespace Nemoviz_Book_Reader
         {
             LanguageCode = code;
             ini.Write("App", "Language", code);
+        }
+
+        public void SetAutoCheckUpdates(bool value)
+        {
+            AutoCheckUpdates = value;
+            ini.Write("App", "AutoCheckUpdates", value ? "1" : "0");
+        }
+
+        /// <summary>Records that the automatic check has run today. Written the
+        /// moment the check is STARTED rather than when it answers: a machine with
+        /// no network would otherwise try again on every launch, which is the one
+        /// case where retrying is most certain to be useless.</summary>
+        public void NoteUpdateCheck()
+        {
+            LastUpdateCheck = DateTime.Now;
+            ini.Write("App", "LastUpdateCheck", UpdateCheck.Today);
         }
 
         public void SetUseMetadata(bool value)

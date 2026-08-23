@@ -3,26 +3,27 @@ using System.Collections.Generic;
 
 namespace Nemoviz_Book_Reader
 {
-    /// <summary>How one voice is set up: reading speed (nominal words per
-    /// minute), volume (0..100) and pitch (-10..10, SAPI-style).</summary>
+    /// <summary>How one voice is set up: reading speed (a percentage of the
+    /// voice's own natural speed, 50..300, exactly like an audio book's),
+    /// volume (0..100) and pitch (-10..10, SAPI-style).</summary>
     public struct VoicePrefs
     {
-        public int Wpm;
+        public int Speed;
         public int Volume;
         public int Pitch;
 
-        public VoicePrefs(int wpm, int volume, int pitch) { Wpm = wpm; Volume = volume; Pitch = pitch; }
+        public VoicePrefs(int speed, int volume, int pitch) { Speed = speed; Volume = volume; Pitch = pitch; }
 
         /// <summary>What a voice starts at when nothing is remembered for it —
         /// deliberately NOT the settings of whatever voice was selected before.
         /// Voices differ enormously in how fast they sound at the same nominal
         /// speed, so carrying numbers across from another voice is worse than
         /// starting from the neutral middle.</summary>
-        public static VoicePrefs Default { get { return new VoicePrefs(175, 100, 0); } }
+        public static VoicePrefs Default { get { return new VoicePrefs(100, 100, 0); } }
 
         public VoicePrefs Clamped()
         {
-            return new VoicePrefs(Clamp(Wpm, 80, 400), Clamp(Volume, 0, 100), Clamp(Pitch, -10, 10));
+            return new VoicePrefs(Clamp(Speed, 50, 300), Clamp(Volume, 0, 100), Clamp(Pitch, -10, 10));
         }
 
         private static int Clamp(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
@@ -40,10 +41,19 @@ namespace Nemoviz_Book_Reader
     /// <code>
     /// [TextVoices]
     /// Count=2
-    /// V0=Microsoft Matej|200|90|0
+    /// S0=Microsoft Matej|115|90|0
     /// </code>
     /// The three numbers are read from the END of the line, so a name containing
     /// the separator still round-trips.
+    ///
+    /// <para><b>S, not V, and the letter is the whole migration.</b> Until
+    /// 2026-08-23 the speed was written as nominal words per minute, and a file
+    /// from then reads its lines under V. The two scales overlap — 200 is a
+    /// sensible number under either — so a version marker was not optional: read
+    /// as a percentage, a book set to 200 WPM would have come back at double
+    /// speed. A V line is therefore converted through the RATE, which is what
+    /// the engine was really being given, so the voice keeps sounding exactly as
+    /// it did. The section is rewritten whole on save, so the old lines go.</para>
     /// </summary>
     public class VoicePrefsTable
     {
@@ -103,28 +113,38 @@ namespace Nemoviz_Book_Reader
             int.TryParse(ini.Read(Section, "Count", "0"), out n);
             for (int i = 0; i < n; i++)
             {
-                string line = ini.Read(Section, "V" + i, "");
+                // S is this scale, V is the words-per-minute one. Per LINE and
+                // not per file: a Settings.ini can hold both while a machine is
+                // half-migrated, and each line says for itself which it is.
+                bool old = false;
+                string line = ini.Read(Section, "S" + i, "");
+                if (string.IsNullOrEmpty(line)) { line = ini.Read(Section, "V" + i, ""); old = true; }
                 if (string.IsNullOrEmpty(line)) continue;
                 string[] p = line.Split('|');
                 if (p.Length < 4) continue;
-                int wpm, vol, pitch;
-                if (!int.TryParse(p[p.Length - 3], out wpm)) continue;
+                int speed, vol, pitch;
+                if (!int.TryParse(p[p.Length - 3], out speed)) continue;
                 if (!int.TryParse(p[p.Length - 2], out vol)) continue;
                 if (!int.TryParse(p[p.Length - 1], out pitch)) continue;
+                if (old) speed = TtsReader.WpmToSpeed(speed);
                 string name = string.Join("|", p, 0, p.Length - 3);
                 if (name.Length == 0) continue;
-                Set(name, new VoicePrefs(wpm, vol, pitch));
+                Set(name, new VoicePrefs(speed, vol, pitch));
             }
         }
 
         public void Save(IniFile ini)
         {
+            // Cleared first, so the V lines of a file written before 2026-08-23
+            // go rather than sitting under the S lines for ever, where a later
+            // reader could pick them up if a name were ever dropped.
+            ini.DeleteSection(Section);
             ini.Write(Section, "Count", order.Count.ToString());
             for (int i = 0; i < order.Count; i++)
             {
                 VoicePrefs p = byVoice[order[i]];
-                ini.Write(Section, "V" + i,
-                          order[i] + "|" + p.Wpm + "|" + p.Volume + "|" + p.Pitch);
+                ini.Write(Section, "S" + i,
+                          order[i] + "|" + p.Speed + "|" + p.Volume + "|" + p.Pitch);
             }
         }
     }

@@ -220,6 +220,7 @@
     <Compile Include="SpeechPrefill.cs" />
     <Compile Include="AzureSpeechSetupForm.cs" />
     <Compile Include="AzureVoices.cs" />
+    <Compile Include="CloudUsage.cs" />
     <Compile Include="CloudVoices.cs" />
     <Compile Include="GoogleCloudVoices.cs" />
     <Compile Include="OcrAskForm.cs" />
@@ -254,6 +255,7 @@
     <Compile Include="LanguageDetector.cs" />
     <Compile Include="LanguagePacks.cs" />
     <Compile Include="Localization.cs" />
+    <Compile Include="UpdateCheck.cs" />
     <Compile Include="NvdaController.cs" />
     <Compile Include="PropertiesForm.cs" />
     <Compile Include="SoundSettings.cs" />

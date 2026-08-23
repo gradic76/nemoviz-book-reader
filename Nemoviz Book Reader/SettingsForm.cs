@@ -78,6 +78,8 @@ namespace Nemoviz_Book_Reader
         private ComboBox cmbTextColour;
         private ComboBox cmbBackColour;
 
+        private CheckBox chkAutoUpdate;
+
         // Misc tab — the temporary classic/new look switch.
         private ComboBox cmbLook;
 
@@ -348,7 +350,24 @@ namespace Nemoviz_Book_Reader
             page.Controls.Add(gMeta);
             y += gMeta.Height + 8;
 
-            // ── 5. Look ──────────────────────────────────────────────────
+            // ── 5. Updates ───────────────────────────────────────────────
+            // The switch only; asking on the spot is Help → Check for update in
+            // the Library, because that is a thing you DO and this is a rule you
+            // set — the same division that put the service guides under Help and
+            // left their switches here (2026-08-17).
+            GroupBox gUpd = MakeGroup(Localization.T("Settings.General.UpdateGroup"), y, GW, 56);
+            gUpd.Name = "Settings.General.AutoCheckUpdates.Hint";
+            chkAutoUpdate = new CheckBox();
+            chkAutoUpdate.Text = Localization.T("Settings.General.AutoCheckUpdates");
+            chkAutoUpdate.AccessibleName = Localization.T("Settings.General.AutoCheckUpdates");
+            chkAutoUpdate.SetBounds(LX, 22, GW - 30, 24);
+            chkAutoUpdate.TabIndex = tab++;
+            chkAutoUpdate.Checked = appSettings.AutoCheckUpdates;
+            gUpd.Controls.Add(chkAutoUpdate);
+            page.Controls.Add(gUpd);
+            y += gUpd.Height + 8;
+
+            // ── 6. Look ──────────────────────────────────────────────────
             GroupBox gLook = MakeGroup(Localization.T("Settings.General.LookGroup"), y, GW, 62);
             gLook.Name = "Settings.Misc.Look.Hint";
             gLook.Controls.Add(MakeLabel(Localization.T("Settings.Misc.Look"), LX, 26));
@@ -453,6 +472,10 @@ namespace Nemoviz_Book_Reader
             // Audio Books — metadata-vs-folder-name choice.
             if (chkUseMetadata != null)
                 appSettings.SetUseMetadata(chkUseMetadata.Checked);
+
+            // General -- the once-a-day update check.
+            if (chkAutoUpdate != null)
+                appSettings.SetAutoCheckUpdates(chkAutoUpdate.Checked);
 
             // General — hints and the media keys (the player re-applies the global
             // claim when the dialog closes).
@@ -1123,8 +1146,14 @@ namespace Nemoviz_Book_Reader
             // on every step, which a track bar does not.
             y += 40;
             box.Controls.Add(MakeLabel(Localization.T("Settings.TextBooks.Speed"), lx, y + 3));
-            numRate = MakeNumeric(Localization.T("Settings.TextBooks.Speed"), cx, y, 80, 400,
-                                  Clamp(appSettings.TtsWpm, 80, 400), tab++, 5);
+            // 0.5× to 3.0× in tenths, which is the audio player's speed range and
+            // step, written the way the player writes it. It was 80..400 words a
+            // minute until 2026-08-23; see currentTextSpeed in Form1 for why that
+            // unit went. Stored as a whole percentage, so the conversion is here
+            // and the settings file never carries a decimal point -- which would
+            // read back differently on a machine with a decimal comma.
+            numRate = MakeDecimal(Localization.T("Settings.TextBooks.Speed"), cx, y, 0.5m, 3.0m,
+                                  Clamp(appSettings.TtsSpeed, 50, 300) / 100m, tab++, 0.1m, 1);
             box.Controls.Add(numRate);
 
             y += 34;
@@ -1401,7 +1430,7 @@ namespace Nemoviz_Book_Reader
             StageCurrentPrefs();
             prefsVoice = voice;
             VoicePrefs p = stagedPrefs.Get(voice, appSettings.PrefsFor(voice));
-            numRate.Value = Clamp(p.Wpm, (int)numRate.Minimum, (int)numRate.Maximum);
+            SetSpeedPercent(numRate, p.Speed);
             numVolume.Value = Clamp(p.Volume, (int)numVolume.Minimum, (int)numVolume.Maximum);
             numPitch.Value = Clamp(p.Pitch, (int)numPitch.Minimum, (int)numPitch.Maximum);
         }
@@ -1412,7 +1441,7 @@ namespace Nemoviz_Book_Reader
         {
             if (string.IsNullOrEmpty(prefsVoice) || numRate == null) return;
             stagedPrefs.Set(prefsVoice,
-                new VoicePrefs((int)numRate.Value, (int)numVolume.Value, (int)numPitch.Value));
+                new VoicePrefs(SpeedPercent(numRate), (int)numVolume.Value, (int)numPitch.Value));
         }
 
         // ── Visual output (placeholder for the on-screen branch) ──────────────
@@ -1540,8 +1569,8 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>A spin box. <paramref name="increment"/> is the arrow step — it
-        /// matches the player's own step for the same value (5 WPM, 5 % volume,
-        /// 10 % speed), because stepping by 1 through those ranges takes far too
+        /// matches the player's own step for the same value (10 % speed, 5 %
+        /// volume), because stepping by 1 through those ranges takes far too
         /// long when every step is spoken.</summary>
         internal static NumericUpDown MakeNumeric(string name, int x, int y, int min, int max, int value, int tabIndex,
                                                   int increment = 1)
@@ -1578,6 +1607,22 @@ namespace Nemoviz_Book_Reader
             return n;
         }
 
+        /// <summary>The speed spin box read as the whole percentage every other
+        /// part of NBR stores — the control counts in tenths of a multiplier
+        /// because that is what a reader is choosing, and 1.5 is 150.</summary>
+        internal static int SpeedPercent(NumericUpDown n)
+        {
+            return n == null ? 100 : (int)Math.Round(n.Value * 100m);
+        }
+
+        /// <summary>The reverse, clamped to the box's own range.</summary>
+        internal static void SetSpeedPercent(NumericUpDown n, int percent)
+        {
+            if (n == null) return;
+            decimal v = percent / 100m;
+            n.Value = v < n.Minimum ? n.Minimum : (v > n.Maximum ? n.Maximum : v);
+        }
+
         /// <summary>Opens the user's dictionary for the language picked here, and
         /// hands it <b>every</b> voice that speaks that language — not only the one
         /// selected. A voice mangles a name whether or not it is the voice in use,
@@ -1610,7 +1655,7 @@ namespace Nemoviz_Book_Reader
                 // and it falls back to whatever is selected here.
                 string picked = string.IsNullOrEmpty(voice) ? SelectedVoiceName() : voice;
                 if (picked.Length > 0) sp.SelectVoice(picked);
-                sp.SetRate(TtsReader.WpmToRate((int)numRate.Value));
+                sp.SetRate(TtsReader.SpeedToRate(SpeedPercent(numRate)));
                 sp.SetVolume((int)numVolume.Value);
                 sp.SetPitch((int)numPitch.Value * 5);
                 sp.Cancel();
@@ -1629,7 +1674,7 @@ namespace Nemoviz_Book_Reader
                 CompositeSpeechBackend sp = EnsureSpeech();
                 string picked = SelectedVoiceName();
                 if (picked.Length > 0) sp.SelectVoice(picked);
-                sp.SetRate(TtsReader.WpmToRate((int)numRate.Value));
+                sp.SetRate(TtsReader.SpeedToRate(SpeedPercent(numRate)));
                 sp.SetVolume((int)numVolume.Value);
                 sp.SetPitch((int)numPitch.Value * 5); // -10..10 → -50..50 %
                 sp.Cancel();                      // stop any still-playing sample

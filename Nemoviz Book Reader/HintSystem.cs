@@ -210,6 +210,93 @@ namespace Nemoviz_Book_Reader
                 f.ShowDialog(owner);
         }
 
+        /// <summary>Check for update, as the reader asked for it.
+        ///
+        /// <para><b>Off the UI thread, and the reason is on record.</b> §11 has a
+        /// bulk import that blocked the window for a minute and a file dialog
+        /// that blocked it on a network read; a request to a service the machine
+        /// may not be able to reach belongs in neither. So the window stays live
+        /// and the answer arrives when it arrives.</para>
+        ///
+        /// <para>That leaves a silence of up to ten seconds with nothing on
+        /// screen and nothing said, which for this audience is the whole
+        /// problem — so the check announces that it has started. It is a
+        /// transient fact and there is no state to sit and read, which is exactly
+        /// what <see cref="ScreenReader.Announce"/> is for.</para></summary>
+        public static void CheckForUpdate(Control owner)
+        {
+            if (owner == null) return;
+            ScreenReader.Announce(owner, Localization.T("Update.Checking"));
+
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                UpdateCheck.Result r = UpdateCheck.Ask();
+                try
+                {
+                    // The window can be gone by now -- ten seconds is long enough
+                    // to close the Library -- and posting to a dead handle throws.
+                    if (owner.IsDisposed || !owner.IsHandleCreated) return;
+                    owner.BeginInvoke((Action)(() => Report(owner, r, true)));
+                }
+                catch { }
+            });
+        }
+
+        /// <summary>The once-a-day check nobody asked for. Same request, and a
+        /// deliberately quieter mouth: it speaks only when there is something to
+        /// say, because a reader who did not ask has no use for "checked, all
+        /// well" and less for "the check failed".</summary>
+        public static void CheckForUpdateQuietly(Control owner, AppSettings settings)
+        {
+            if (owner == null || !UpdateCheck.DueNow(settings)) return;
+            settings.NoteUpdateCheck();
+
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                UpdateCheck.Result r = UpdateCheck.Ask();
+                if (r.Outcome != UpdateCheck.Outcome.Newer) return;
+                try
+                {
+                    if (owner.IsDisposed || !owner.IsHandleCreated) return;
+                    owner.BeginInvoke((Action)(() => Report(owner, r, false)));
+                }
+                catch { }
+            });
+        }
+
+        private static void Report(Control owner, UpdateCheck.Result r, bool manual)
+        {
+            switch (r.Outcome)
+            {
+                case UpdateCheck.Outcome.Newer:
+                    // A QUESTION, NOT A NOTICE. There is somewhere to go, and the
+                    // reader is the one who decides whether to go now -- which
+                    // matters more here than usual, since the automatic check can
+                    // raise this in the middle of a book.
+                    if (MessageForm.ShowConfirm(owner,
+                            Localization.T("Update.Available", r.Latest),
+                            Localization.T("Update.Title")))
+                    {
+                        try { System.Diagnostics.Process.Start(UpdateCheck.ReleasesPage); }
+                        catch { MessageForm.ShowInfo(owner, UpdateCheck.ReleasesPage,
+                                                     Localization.T("Update.Title")); }
+                    }
+                    break;
+
+                case UpdateCheck.Outcome.UpToDate:
+                    if (manual)
+                        MessageForm.ShowInfo(owner, Localization.T("Update.UpToDate"),
+                                             Localization.T("Update.Title"));
+                    break;
+
+                default:
+                    if (manual)
+                        MessageForm.ShowInfo(owner, Localization.T("Update.Failed"),
+                                             Localization.T("Update.Title"));
+                    break;
+            }
+        }
+
         private static void Show(Control anchor, Control returnTo)
         {
             string key;

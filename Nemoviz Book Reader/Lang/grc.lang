@@ -77,8 +77,6 @@ Player.Volume.Accessible=Μέγεθος ἤχου {0} ἑκατοστά
 Player.Speed.Text=Τάχος: {0}x
 Player.Speed.Legend=Τάχος
 Player.Speed.Accessible=Τάχος {0}πλάσιον
-Player.Speed.Wpm=Τάχος: {0} λ.κ.λ.
-Player.Speed.WpmAccessible=Τάχος {0} λέξεις κατὰ λεπτόν
 Player.Position.Label=Θέσις
 Player.Position.Text=Θέσις: {0} / {1}
 Player.Position.Accessible=Θέσις {0} ἑκατοστά
@@ -184,6 +182,7 @@ Menu.Help=Βοήθεια
 Menu.Help.Help=Βοήθεια
 Menu.Help.About=Περὶ τοῦ NBR
 Menu.Help.Services=Ὑπηρεσίαι καὶ λόγοι...
+Menu.Help.Update=Ζητεῖν νεωτέραν ἔκδοσιν
 Shelf.Filter.All=Πάντα τὰ βιβλία
 Shelf.Filter.Reading=Ἀναγιγνωσκόμενα
 Shelf.Filter.Unread=Ἀνάγνωστα
@@ -227,7 +226,7 @@ Details.Description.Open=Πίεσον Enter ἵνα ἀναγνῷς
 Details.Field.SoundProcessing=Θεραπεία τοῦ ἤχου
 Details.Sound.On=Ναί
 Details.Sound.Off=Οὔ
-Details.Speed.Wpm={0} λ.κ.λ.
+Details.Speed.Value={0}x
 Dialog.Description.Title=Περιγραφή - {0}
 
 ; ---- LIBRARY - importing and deleting
@@ -354,7 +353,7 @@ Prop.Level.Medium=Μέσος
 Prop.Level.Strong=Ἰσχυρός
 Prop.Level.Maximum=Μέγιστος
 Prop.ResetAll=Πάντα ἀποκαταστῆσαι
-Prop.Bypass=Τὴν θεραπείαν παρελθεῖν
+Prop.Bypass=Θεραπείαν παρελθεῖν
 Prop.Bypass.Shortcut=Ctrl+B τοῦτο ἐνεργὸν καὶ ἀργὸν ποιεῖ ἐκ παντὸς τόπου τῆσδε τῆς σελίδος
 Prop.Analysing=Ἡ φωνὴ ἐξετάζεται
 Prop.Analysing.Done=Ἡ φωνὴ ἐξητάσθη, βαθμοὶ {0} ἐτέθησαν. Μετάβαλε ὅντινα βούλει, εἰ ἄλλως μᾶλλον θέλεις.
@@ -424,6 +423,9 @@ Settings.General.UseMultimediaKeys.Hint=Τοῖς πλήκτροις τῶν μ�
 Settings.General.LibraryLocation.Hint=Ἐνταῦθα ὁ NBR τὰ εἰσαχθέντα βιβλία μεταγράφει. Δύνασαι αὐτὸν ἐᾶν ὅπου ἐστίν, ἐν τῷ μέρει τοῦ συστήματος, ἀλλ᾽ εἰ μεγάλην βιβλιοθήκην ἕξειν διανοῇ, ἄλλο μέρος ἢ ἄλλος δίσκος πολλῷ βέλτιον βούλευμά ἐστιν. Ὁ NBR ἐνταῦθα καὶ τὰς ἀγγελίας ἑκάστου βιβλίου σῴζει, διὸ εἰ τὰς θέσεις τῆς ἀναγνώσεως, τὰ σημεῖα, τὸ τάχος καὶ τὰς ἄλλας ῥυθμίσεις σῴζειν βούλει, μέμνησο τὰ ἐν τῇ παλαιᾷ θήκῃ χειρὶ εἰς τὸν νέον τόπον μεταγραπτέα εἶναι. Καὶ τῇ αὐτῇ τιμῇ: τῆς βιβλιοθήκης ἔξω τοῦ μέρους τοῦ συστήματος κειμένης, τὰ βιβλία σου ἀπὸ τῶν πτωμάτων τοῦ συστήματος καὶ τῆς συνήθους ἀπωλείας τῶν δεδομένων φυλάττεις.
 Settings.General.Language.Restart=Ἵνα ἡ γλῶττα μεταβληθῇ, τὸν NBR πάλιν ἄρχεσθαι δεῖ. Ἆρα νῦν πάλιν ἄρξῃ;
 Settings.General.Language.RestartTitle=Γλῶττα
+Settings.General.UpdateGroup=Νεώτεραι ἐκδόσεις
+Settings.General.AutoCheckUpdates=Αὐτομάτως ζητεῖν νεωτέρας ἐκδόσεις
+Settings.General.AutoCheckUpdates.Hint=Τούτου ἀνημμένου, ὁ NBR ἅπαξ τῆς ἡμέρας ἐρωτᾷ εἰ νεωτέρα ἔκδοσις ἐξεδόθη, καὶ ἀγγέλλει μόνον ἐὰν ᾖ. Οὐδὲν περὶ σοῦ οὐδὲ περὶ τῶν βιβλίων σου πέμπεται· ἡ αἴτησις οὔτε σημεῖον οὔτε βιβλιοθήκην οὔτε κατάλογον ὧν ἀναγιγνώσκεις φέρει. Σβέσον εἰ βούλει τὸν NBR μηδέποτε αὐτὸν ἐφ᾽ ἑαυτοῦ εἰς τὸ δίκτυον ἐξιέναι — δύνασαι δ᾽ ἀεὶ αὐτὸς ἐρωτᾶν διὰ τῆς Βοηθείας, Ζητεῖν νεωτέραν ἔκδοσιν, ἐν τῇ θυρίδι τῆς βιβλιοθήκης.
 Settings.Misc.Look=Ὄψις:
 Settings.Misc.Look.Classic=Χρώματα τοῦ συστήματος
 Settings.Misc.Look.New=Ὄψις τοῦ NBR
@@ -777,7 +779,16 @@ Dialog.About.Title=Περὶ τοῦ NBR
 Dialog.About.Release=Ἄλφα
 Dialog.About.Licence=🄯 Copyleft — ὁ NBR ἐλεύθερόν ἐστι πρόγραμμα ὑπὸ τῇ GNU General Public License, ἐκδόσει 3. Ἔξεστί σοι αὐτῷ χρῆσθαι, αὐτὸ μελετᾶν, κοινωνεῖν καὶ μεταβάλλειν· ἐὰν ἔκδοσιν μεταβεβλημένην παραδῷς, αὕτη ἐπὶ τοῖς αὐτοῖς προστίθεται, μετὰ τοῦ πηγαίου κώδικος αὑτῆς.
 Dialog.About.Text=Nemoviz Book Reader {0}\n\nΟἰκοδομὴ τῆς ἡμέρας {1}\n\nΟὗτός ἐστιν ἀναγνώστης πολυειδὴς καὶ πολύξοδος βιβλίων καὶ ἐκδόσεων ψηφιακῶν, μάλιστα ὑπὲρ τῶν τυφλῶν, τῶν ἀσθενῶν τὴν ὄψιν καὶ τῶν ἐν τῷ ἀναγιγνώσκειν δυσκολίαν ἐχόντων πεποιημένος. Πρὸς τὴν ἁπλῆν χρῆσιν δωρεάν ἐστιν, ἀλλ᾽ εἰ τὰς περαιτέρω δυνάμεις αὐτοῦ, οἷον τὴν μετάφρασιν καὶ τὰς φωνὰς τοῦ νέφους, ἐξερευνᾶν καὶ χρῆσθαι βούλει, σοὶ παρὰ ταῖς ἔξω ὑπηρεσίαις ἑκάσταις δηλωτέον καὶ ἴσως τελεστέον ἔσται.\n\nΠεποιημένον ὑπὸ Nemoguća vizija — nemoviz.org\n\nΓεγραμμένον ὑπὸ Gordan Radić\n\nὨικοδομημένον μετὰ Claude (Anthropic). Μέγα μέρος τοῦ κώδικος ἐκεῖνο ἔγραψε, κατὰ τὸ βούλευμα, τὰς κρίσεις καὶ τὰ μέτρα τοῦ συγγραφέως· τὸ δίκαιον καὶ ἡ ἄδεια αὐτοῦ ἐστιν.\n\n{2}\n\nΕΠΙ ΤΙΝΩΝ Ο NBR ΒΕΒΗΚΕΝ\n\nὉ NBR ἦχον διὰ τοῦ libmpv ἐκπέμπει, Braille διὰ τοῦ liblouis ἀναγιγνώσκει, διὰ τοῦ NVDA Controller Client λαλεῖ, τὰς ἐπιγραφὰς διὰ τοῦ TagLib# ἀναγιγνώσκει, τὸ κείμενον ἐκ τῶν PDF διὰ τοῦ PdfPig ἐξάγει καὶ τὰ κιβώτια διὰ τοῦ SharpCompress ἀνοίγει. Ἑκάστη αὐτῶν χωριστὴ βιβλιοθήκη ἐστίν, ἀμετάβλητος χρωμένη, καὶ ἑκάστη ὑπὸ οἰκοδομῆς συμφώνου ἑαυτῆς ἀντικατασταθῆναι δύναται.\n\nlibmpv, καὶ τὸ FFmpeg ἐν αὐτῷ — LGPL 2.1 ἢ ὕστερον\n\nliblouis καὶ οἱ πίνακες αὐτοῦ Braille — LGPL 2.1 ἢ ὕστερον\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress καὶ αἱ δέσμαι Microsoft — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend καὶ OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nΤὸ πλῆρες μήνυμα — αἱ ἐκδόσεις, οἱ κύριοι τοῦ δικαίου, καὶ πόθεν ἑκάστη ἄδεια ἀνεγνώσθη — ἐν τῷ THIRD-PARTY-NOTICES.txt παρὰ τὸ πρόγραμμά ἐστιν, καὶ αὐτὰ τὰ ῥήματα τῶν ἀδειῶν ἐν τῇ θήκῃ Licences.
+Update.Title=Ζήτησις νεωτέρας ἐκδόσεως
+Update.Checking=Ζητῶ εἰ νεωτέρα ἔκδοσίς ἐστιν
+Update.Available=Νεωτέρα ἔκδοσις τοῦ Nemoviz Book Reader ἐξεδόθη· {0}\n\nΒούλει τὴν σελίδα τῆς καταγωγῆς ἀνοῖξαι;
+Update.UpToDate=Τῇ νεωτάτῃ ἐκδοθείσῃ ἐκδόσει χρῇ.
+Update.Failed=Ἡ ζήτησις οὐκ ἐγένετο. Ἴσως οὐδεμία ἐστὶ σύνδεσις, ἢ ἡ σελὶς τῆς καταγωγῆς νῦν οὐκ ἔστι προσιτή.
 Hint.Button.Accessible=Βοήθεια περὶ τοῦ {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Φωνὴ ἐκ νέφους — ἡ δωρεὰν μερίς
+Cloud.Quota.Warning=Τοῦτο τὸ βιβλίον {0} γράμματα ἔχει.\n\nἘκ τῶν {2} δωρεὰν γραμμάτων ἃ ὁ {3} τῷδε τῷ μηνὶ δίδωσιν, {1} ἀνήλωσας.\n\nΤοῦτο τὸ βιβλίον ἀναγιγνώσκων τὴν δωρεὰν μερίδα ὑπερβήσῃ, τὸ δ᾽ ὑπὲρ αὐτὴν τῷ τρόπῳ τῆς πληρωμῆς ἐκείνου τοῦ λόγου λογίζεται.\n\nΒούλει ὅμως αὐτὸ ἀναγιγνώσκειν;
 
 ; ---- MESSAGES AND ERRORS
 Dialog.Error.Title=Σφάλμα

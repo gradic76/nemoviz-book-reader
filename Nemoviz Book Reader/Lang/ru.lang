@@ -68,8 +68,6 @@ Player.Volume.Accessible=Громкость {0} процентов
 Player.Speed.Text=Скорость: {0}x
 Player.Speed.Legend=Скорость
 Player.Speed.Accessible=Скорость {0} раза
-Player.Speed.Wpm=Скорость: {0} сл/мин
-Player.Speed.WpmAccessible=Скорость {0} слов в минуту
 Player.Position.Label=Позиция
 Player.Position.Text=Позиция: {0} / {1}
 Player.Position.Accessible=Позиция {0} процентов
@@ -175,6 +173,7 @@ Menu.Help=Справка
 Menu.Help.Help=Справка
 Menu.Help.About=О программе NBR
 Menu.Help.Services=Службы и учётные записи...
+Menu.Help.Update=Проверить наличие обновления
 Shelf.Filter.All=Все книги
 Shelf.Filter.Reading=Читается
 Shelf.Filter.Unread=Не прочитано
@@ -218,7 +217,7 @@ Details.Description.Open=Нажмите Enter, чтобы прочитать
 Details.Field.SoundProcessing=Обработка звука
 Details.Sound.On=Вкл.
 Details.Sound.Off=Выкл.
-Details.Speed.Wpm={0} сл/мин
+Details.Speed.Value={0}x
 Dialog.Description.Title=Описание - {0}
 
 ; ---- LIBRARY - importing and deleting
@@ -415,6 +414,9 @@ Settings.General.UseMultimediaKeys.Hint=Мультимедийными клав�
 Settings.General.LibraryLocation.Hint=Сюда NBR копирует импортированные книги. Можно оставить как есть, на системном разделе, но если вы собираетесь держать большую библиотеку, другой раздел или диск будет решением куда лучше. NBR хранит здесь и сведения о каждой книге, поэтому, если вы хотите сохранить свои места чтения, закладки, скорость и прочие настройки, учтите: содержимое старой папки библиотеки придётся перенести на новое место вручную. И в ту же цену: перенеся библиотеку за пределы системного раздела, вы убережёте свои книги от случайных отказов системы и обычной при этом потери данных.
 Settings.General.Language.Restart=Для смены языка NBR должен запуститься заново. Перезапустить сейчас?
 Settings.General.Language.RestartTitle=Язык
+Settings.General.UpdateGroup=Обновления
+Settings.General.AutoCheckUpdates=Проверять обновления автоматически
+Settings.General.AutoCheckUpdates.Hint=Когда это включено, NBR раз в день узнаёт, вышла ли более новая версия, и сообщает только если она есть. О вас и о ваших книгах не отправляется ничего: в запросе нет ни опознавательной метки, ни библиотеки, ни списка того, что вы читаете. Выключите, если предпочитаете, чтобы NBR никогда не выходил в сеть сам — проверить можно в любой момент вручную, через Справка, Проверить наличие обновления, в окне библиотеки.
 Settings.Misc.Look=Внешний вид:
 Settings.Misc.Look.Classic=Системные цвета
 Settings.Misc.Look.New=Оформление NBR
@@ -768,7 +770,16 @@ Dialog.About.Title=О программе NBR
 Dialog.About.Release=Альфа
 Dialog.About.Licence=🄯 Копилефт — NBR является свободным программным обеспечением на условиях GNU General Public License версии 3. Вы можете пользоваться ею, изучать её, распространять и изменять; если вы передаёте изменённую версию, она идёт дальше на тех же условиях, вместе с исходным кодом.
 Dialog.About.Text=Nemoviz Book Reader {0}\n\nСборка от {1}\n\nЭто многоформатная и многовыводная читалка цифровых книг и изданий, созданная прежде всего для слепых, слабовидящих и людей с трудностями чтения. Для основного применения она бесплатна, но если вы хотите освоить и использовать её дополнительные возможности, такие как перевод и облачные голоса, вам понадобится зарегистрироваться и, возможно, заплатить соответствующим внешним службам.\n\nСоздано Nemoguća vizija — nemoviz.org\n\nНаписано Gordan Radić\n\nСобрано с Claude (Anthropic). Большая часть кода написана им, по замыслу, решениям и измерениям автора; авторское право и лицензия принадлежат автору.\n\n{2}\n\nНА ЧЁМ ПОСТРОЕН NBR\n\nNBR воспроизводит звук через libmpv, читает Брайль через liblouis, говорит через NVDA Controller Client, читает теги с помощью TagLib#, извлекает текст из PDF с помощью PdfPig и открывает архивы с помощью SharpCompress. Каждая из них — отдельная библиотека, используемая без изменений, и каждую можно заменить совместимой сборкой той же библиотеки.\n\nlibmpv и FFmpeg внутри него — LGPL 2.1 или позднее\n\nliblouis и его таблицы Брайля — LGPL 2.1 или позднее\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress и пакеты Microsoft — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend и OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nПолное уведомление — версии, правообладатели и то, откуда прочитана каждая лицензия — находится в файле THIRD-PARTY-NOTICES.txt рядом с программой, а сами тексты лицензий — в папке Licences.
+Update.Title=Проверка обновления
+Update.Checking=Проверяю, есть ли более новая версия
+Update.Available=Вышла более новая версия Nemoviz Book Reader: {0}\n\nОткрыть страницу загрузки?
+Update.UpToDate=У вас самая новая из опубликованных версий.
+Update.Failed=Проверить не удалось. Возможно, нет соединения или страница загрузки сейчас недоступна.
 Hint.Button.Accessible=Справка о разделе {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Облачный голос — бесплатная квота
+Cloud.Quota.Warning=В этой книге {0} знаков.\n\nИз бесплатных {2} знаков, которые {3} даёт в этом месяце, вы израсходовали {1}.\n\nЧтение этой книги выведет вас за пределы бесплатной квоты, а всё сверх неё оплачивается способом оплаты, привязанным к этой учётной записи.\n\nВсё равно читать?
 
 ; ---- MESSAGES AND ERRORS
 Dialog.Error.Title=Ошибка
