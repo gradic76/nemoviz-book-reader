@@ -3,3 +3,16 @@ obj/
 .vs/
 packages/
 installer/out/
+
+# Gordan's own working notes — Captain's Log, NBR.docx, the specs he writes for
+# me. They were public with the repo for a few hours on 2026-08-23 and he asked
+# them out, so docs/ was purged from the whole history. Ignoring it is what stops
+# one careless `git add` putting them straight back.
+#
+# docs/help/ is the EXCEPTION and must stay tracked: it is the source the eleven
+# manuals are generated from (tools/make-help.pl), and under the GPL it is the
+# manual's source form. Written as docs/* plus an un-ignore rather than a bare
+# docs/ so a NEW file under docs/help/ is still seen — a bare rule would ignore
+# it silently, which is the failure nobody notices.
+docs/*
+!docs/help/
