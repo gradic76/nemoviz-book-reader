@@ -8,8 +8,11 @@ namespace Nemoviz_Book_Reader
     {
         private static readonly string AppFolder =
             AppDomain.CurrentDomain.BaseDirectory;
-        private static readonly string SettingsPath =
-            Path.Combine(AppFolder, "Settings.ini");
+        // IN THE USER'S FOLDER, not beside the exe (Gordan, 2026-08-23). A
+        // program installed where Windows programs belong cannot write to its own
+        // folder; see UserData for the whole split and why the reading-only
+        // material stays put.
+        private static string SettingsPath { get { return UserData.File("Settings.ini"); } }
         private static readonly string DefaultLibraryPath =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "NBR Library");
         private static readonly string DefaultLangPath =

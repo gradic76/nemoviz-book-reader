@@ -222,7 +222,7 @@ namespace Nemoviz_Book_Reader
         /// <summary>Where the .dic files live — beside Lang, in the app folder.</summary>
         public static string Folder
         {
-            get { return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Dictionaries"); }
+            get { return UserData.SubFolder("Dictionaries"); }
         }
 
         public static SpeechDictionary Global { get { return Get(System.IO.Path.Combine(Folder, "global.dic")); } }

@@ -189,8 +189,7 @@ namespace Nemoviz_Book_Reader
 
         // ── the catalogue ─────────────────────────────────────────────────────
 
-        private static readonly string CachePath =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "azure-voices.txt");
+        private static string CachePath { get { return UserData.File("azure-voices.txt"); } }
 
         private static List<(string Short, string Display, string Language)> cache;
 

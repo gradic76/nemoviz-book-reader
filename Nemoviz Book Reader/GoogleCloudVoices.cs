@@ -201,7 +201,7 @@ namespace Nemoviz_Book_Reader
         // ── The catalogue ─────────────────────────────────────────────────────
 
         private static readonly string CachePath =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "google-voices.txt");
+            UserData.File("google-voices.txt");
 
         private static List<(string Name, string Language, string Gender)> cache;
 

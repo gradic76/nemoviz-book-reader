@@ -39,7 +39,7 @@ namespace Nemoviz_Book_Reader
         private const string FileName = "nbr-services.dat";
 
         private static readonly string StorePath =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FileName);
+            UserData.File(FileName);
 
         // engine id -> key, read once and kept, because Settings opens and closes
         // often and this is three short lines of text.

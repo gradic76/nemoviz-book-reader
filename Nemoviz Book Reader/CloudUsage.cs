@@ -167,9 +167,7 @@ namespace Nemoviz_Book_Reader
         {
             try
             {
-                string dir = Path.GetDirectoryName(
-                    System.Reflection.Assembly.GetExecutingAssembly().Location);
-                return new IniFile(Path.Combine(dir, FileName));
+                return new IniFile(UserData.File(FileName));
             }
             catch { return null; }
         }

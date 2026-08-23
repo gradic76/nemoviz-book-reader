@@ -15,6 +15,17 @@ namespace Nemoviz_Book_Reader
             // The program icon on every window, not just on the file. See AppIcon.
             AppIcon.Install();
 
+            // BEFORE ANYTHING READS A SETTING. From 2026-08-23 a reader's own
+            // things live in %APPDATA%\Nemoviz Book Reader rather than beside the
+            // exe; anyone upgrading has theirs in the old place, and the first
+            // line of Form1's constructor builds an AppSettings, which would
+            // otherwise find an empty folder and hand them a fresh install —
+            // no library location, no voices, no keys, and nothing to say why.
+            //
+            // It copies rather than moves and never overwrites, so it is safe to
+            // reach this line any number of times. See UserData.
+            UserData.MigrateFromAppFolder();
+
             // Write down what went wrong, before the dialog asks the reader to
             // decide about it.
             //

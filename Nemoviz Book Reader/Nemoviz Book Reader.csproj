@@ -256,6 +256,7 @@
     <Compile Include="LanguagePacks.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="UpdateCheck.cs" />
+    <Compile Include="UserData.cs" />
     <Compile Include="NvdaController.cs" />
     <Compile Include="PropertiesForm.cs" />
     <Compile Include="SoundSettings.cs" />

@@ -29,30 +29,20 @@ AppPublisher={#AppPublisher}
 AppPublisherURL={#AppUrl}
 AppSupportURL={#AppUrl}/issues
 AppUpdatesURL={#AppUrl}/releases
-; PER USER, INTO A FOLDER NBR CAN WRITE TO — AND THE PROGRAM DOES NOT WORK
-; ANY OTHER WAY.
+; PROGRAM FILES, where a Windows program belongs (Gordan, 2026-08-23:
+; "Konvencija je još od Win 95 da aplikacije idu u Program Files").
 ;
-; Everything NBR keeps lives BESIDE THE EXE: Settings.ini, the pronunciation
-; dictionaries, the stored service keys, the fetched voice catalogues and the
-; cloud character count. That is a deliberately portable design, and it is fine
-; — until the program is installed into Program Files, which a normal process
-; may not write to.
-;
-; And there is no safety net. app.manifest declares
-; requestedExecutionLevel="asInvoker", and the manifest's own comment says what
-; that costs: "Specifying requestedExecutionLevel element will disable file and
-; registry virtualization." So there is no VirtualStore to catch the writes —
-; and IniFile.Save swallows its exception, which is the worst shape a failure
-; can take: the reader changes a setting, hears nothing wrong, and finds it gone
-; next launch. MEASURED 2026-08-23: an unelevated process writing to
-; C:\Program Files gets UnauthorizedAccessException, full stop.
-;
-; So: lowest privileges, and the install goes to {localappdata}\Programs, which
-; is what {autopf} resolves to under them. This is what Chrome and VS Code do,
-; and it suits this audience twice over — no UAC prompt to navigate, and no
-; question asked that a reader has no way to answer correctly.
+; This was per-user for one afternoon, because NBR kept everything BESIDE THE
+; EXE and Program Files is not writable by a normal process — so installing it
+; correctly would have left it unable to save a single setting, silently
+; (IniFile.Save swallows its exception, and app.manifest's asInvoker disables
+; the VirtualStore that might otherwise have caught the writes). Moving the
+; install was sidestepping the fault. UserData fixes it instead: everything NBR
+; WRITES now lives in %APPDATA%\Nemoviz Book Reader, and only what it READS —
+; the 480 braille tables, the eleven language files, the manuals, the fonts, the
+; 32-bit speech host — is installed here, where every account on the machine
+; shares one copy of it.
 DefaultDirName={autopf}\{#AppName}
-PrivilegesRequired=lowest
 DefaultGroupName={#AppName}
 OutputDir=..\installer\out
 OutputBaseFilename=NemovizBookReader-{#AppTag}-setup
@@ -72,14 +62,11 @@ ArchitecturesInstallIn64BitMode=x64compatible
 LicenseFile=..\COPYING
 InfoAfterFile={#SourceDir}\THIRD-PARTY-NOTICES.txt
 
-; NO "for all users" CHOICE, deliberately. Offering it would offer a folder the
-; program cannot write to, and the reader would have no way to know that the
-; option they picked is the broken one. One kind of install that works beats two
-; where one of them silently does not.
-;
-; The cost, stated: two people sharing a machine each install their own copy.
-; For this audience that is nearly always one person to one machine, and a
-; second copy costs 63 MB rather than anything a reader would notice.
+; The reader may still choose to install into their own profile instead — Inno
+; asks for elevation only when the chosen folder needs it, so somebody without
+; administrator rights is not turned away. Both choices work now, which is what
+; makes offering them honest: the settings go to %APPDATA% either way.
+PrivilegesRequiredOverridesAllowed=dialog
 
 [Languages]
 ; Nine of the eleven NBR speaks. Inno ships five of them itself; Croatian,
@@ -119,9 +106,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ;   nbr-services.dat stored API keys and the Azure pair — must never ship
 ;   *-voices.txt     the fetched cloud voice catalogues, tied to that account
 ;   CloudUsage.ini   this month's character count, which is nobody else's
-; The last four are written beside the exe at runtime, so they cannot appear in
-; a clean Release build — they are named anyway, because "cannot happen" is a
-; poor reason to ship somebody's API key.
+; None of the five is written beside the exe any more — they live in %APPDATA%
+; since 2026-08-23 — but a DEVELOPER's build folder still collects them from
+; older runs, and "cannot happen" is a poor reason to risk shipping an API key.
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
     Excludes: "*.pdb,Settings.ini,nbr-services.dat,azure-voices.txt,google-voices.txt,CloudUsage.ini"
 
@@ -135,22 +122,22 @@ Filename: "{app}\Nemoviz Book Reader.exe"; Description: "{cm:LaunchProgram,{#App
     Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
-; What NBR writes beside itself while it runs. The LIBRARY is deliberately not
-; here: it holds the reader's books, their positions and their bookmarks, it is
-; usually somewhere else entirely (Settings → Library location), and an
-; uninstaller that deletes somebody's library is a disaster, not a tidy-up.
-; SETTINGS AND CACHE GO; WORK STAYS. Removing the stored service keys on
-; uninstall is a small security gain rather than a loss — nobody wants their
-; Azure key left on a machine they have finished with.
-Type: files; Name: "{app}\Settings.ini"
-Type: files; Name: "{app}\CloudUsage.ini"
-Type: files; Name: "{app}\nbr-services.dat"
-Type: files; Name: "{app}\azure-voices.txt"
-Type: files; Name: "{app}\google-voices.txt"
-
-; Dictionaries is NOT deleted, and neither is the library. A pronunciation
-; dictionary is something a reader WROTE, rule by rule, to make one voice say a
-; name properly; §8j keeps each scope in its own plain file precisely so it can
-; be backed up or passed to somebody else. Leaving an empty folder behind is a
-; far smaller fault than deleting an evening's work, and it is the same
-; reasoning that keeps the uninstaller away from the library.
+; NOTHING OF THE READER'S IS DELETED, and after the move to %APPDATA% that is
+; the whole of this section.
+;
+; Their settings, dictionaries, keys and counter are in
+; %APPDATA%\Nemoviz Book Reader, and their books are in the library — usually
+; somewhere else again (Settings → Library location). An uninstaller has no
+; business in either. A reader who uninstalls to try a newer build, or who
+; reinstalls after a Windows repair, finds everything as they left it; one who
+; genuinely wants it all gone can delete one folder they can name.
+;
+; This is a REVERSAL of what stood here for one afternoon, when those files were
+; beside the exe and leaving them meant leaving litter in Program Files. Now
+; that they are in the profile, deleting them would be deleting the reader's
+; work from a place Windows itself treats as theirs.
+;
+; CHECKED rather than assumed, since an empty section invites somebody to fill
+; it: nothing else is written here either. SignalTones and SapiWavPlayer both
+; put their temporary WAVs in Path.GetTempPath(), and the speech cache lives
+; inside the book's own folder. There is genuinely nothing left to remove.
