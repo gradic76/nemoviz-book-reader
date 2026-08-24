@@ -44,12 +44,12 @@ ErrorTitle=Greška
 ; *** SetupLdr messages
 SetupLdrStartupMessage=Ovime će se instalirati %1. Želiš li nastaviti?
 LdrCannotCreateTemp=Nije moguće stvoriti privremenu datoteku. Instalacija je prekinuta
-LdrCannotExecTemp=Nije moguće pokrenuti datoteku u privremenoj mapi. Instalacija je prekinuta
+LdrCannotExecTemp=Nije moguće pokrenuti datoteku u privremenoj fascikli. Instalacija je prekinuta
 HelpTextNote=
 
 ; *** Startup error messages
 LastErrorMessage=%1.%n%nnGreška %2: %3
-SetupFileMissing=Datoteka %1 se ne nalazi u mapi instalacije. Ispravi problem ili nabavi novu kopiju programa.
+SetupFileMissing=Datoteka %1 se ne nalazi u fascikli instalacije. Ispravi problem ili nabavi novu kopiju programa.
 SetupFileCorrupt=Datoteke instalacije su oštećene. Nabavi novu kopiju programa.
 SetupFileCorruptOrWrongVer=Datoteke instalacije su oštećene ili nisu kompatibilne s ovom verzijom instalacije. Ispravi problem ili nabavi novu kopiju programa.
 InvalidParameter=Neispravan parametar je prenet u naredbenom retku:%n%n%1
@@ -77,8 +77,8 @@ PrivilegesRequiredOverrideCurrentUser=Postavi samo za &mene
 PrivilegesRequiredOverrideCurrentUserRecommended=Postavi samo za &mene (preporučeno)
 
 ; *** Misc. errors
-ErrorCreatingDir=Instalacija nije mogla stvoriti mapu "%1"
-ErrorTooManyFilesInDir=Datoteku nije moguće stvoriti u mapi "%1", jer mapa sadrži previše datoteka
+ErrorCreatingDir=Instalacija nije mogla stvoriti fasciklu "%1"
+ErrorTooManyFilesInDir=Datoteku nije moguće stvoriti u fascikli "%1", jer fascikla sadrži previše datoteka
 
 ; *** Setup common messages
 ExitSetupTitle=Zaustavi postavljanje
@@ -102,7 +102,7 @@ ButtonNoToAll=N&e za sve
 ButtonFinish=&Završi
 ButtonBrowse=&Pregledaj...
 ButtonWizardBrowse=P&regledaj...
-ButtonNewFolder=&Stvori novu mapu
+ButtonNewFolder=&Stvori novu fasciklu
 
 ; *** "Select Language" dialog messages
 SelectLanguageTitle=Izaberite jezik postavljanja
@@ -111,9 +111,9 @@ SelectLanguageLabel=Izaberite jezik za postupak postavljanja
 ; *** Common wizard text
 ClickNext=Pritisnite Sledeće za nastavak ili otkaži za prekid postavljanja
 BeveledLabel=
-BrowseDialogTitle=Izaberite mapu
-BrowseDialogLabel=Izaberite mapu iz popisa i pritisnite U redu.
-NewFolderName=Nova mapa
+BrowseDialogTitle=Izaberite fasciklu
+BrowseDialogLabel=Izaberite fasciklu iz popisa i pritisnite U redu.
+NewFolderName=Nova fascikla
 
 ; *** "Welcome" wizard page
 WelcomeLabel1=Čarobnjak za postavljanje aplikacije[name]
@@ -150,10 +150,10 @@ UserInfoSerial=&Serijski broj:
 UserInfoNameRequired=Ime je obavezno polje.
 
 ; *** "Select Destination Location" wizard page
-WizardSelectDir=Izaberite mapu za postavljanje
+WizardSelectDir=Izaberite fasciklu za postavljanje
 SelectDirDesc=Gdje želite postaviti [name]?
-SelectDirLabel3=[name] će se postaviti u ovu mapu:
-SelectDirBrowseLabel=Za nastavak postavljanja pritisnite Sledeće. Za odabir druge mape pritisnite Pregledaj.
+SelectDirLabel3=[name] će se postaviti u ovu fasciklu:
+SelectDirBrowseLabel=Za nastavak postavljanja pritisnite Sledeće. Za odabir druge fascikle pritisnite Pregledaj.
 DiskSpaceGBLabel=Potrebno je barem [gb] GB slobodnog prostora na disku.
 DiskSpaceMBLabel=Potrebno je barem [mb] MB slobodnog prostora na disku.
 CannotInstallToNetworkDrive=Aplikacija se ne može postaviti na mrežni pogon
@@ -162,13 +162,13 @@ InvalidPath=Morate upisati punu putanju sa slovom pogona, npr:%n%nC:\APP%n%n ili
 InvalidDrive=Izabrani pogon ne postoji. Izaberite drugi.
 DiskSpaceWarningTitle=Nedovoljno prostora na izabranom pogonu
 DiskSpaceWarning=Za postavljanje je potrebno barem %1 KB slobodnog prostora, no izabrani pogon ima samo %2 KB.%n%n Svejedno nastaviti?
-DirNameTooLong=Putanja ili ime mape su predugački
-InvalidDirName=Ime mape je neispravno
-BadDirName32=Ime mape ne sme sadržavati sledeće znakove:%n%n%1
-DirExistsTitle=Mapa već postoji
-DirExists=Mapa:%n%n%1%n%nveć postoji. Svejedno postaviti?
-DirDoesntExistTitle=Mapa ne postoji
-DirDoesntExist=Mapa:%n%n%1%n%nne postoji. Želite li je stvoriti?
+DirNameTooLong=Putanja ili ime fascikle su predugački
+InvalidDirName=Ime fascikle je neispravno
+BadDirName32=Ime fascikle ne sme sadržavati sledeće znakove:%n%n%1
+DirExistsTitle=Fascikla već postoji
+DirExists=Fascikla:%n%n%1%n%nveć postoji. Svejedno postaviti?
+DirDoesntExistTitle=Fascikla ne postoji
+DirDoesntExist=Fascikla:%n%n%1%n%nne postoji. Želite li je stvoriti?
 
 ; *** "Select Components" wizard page
 WizardSelectComponents=Odaberi komponente
@@ -191,15 +191,15 @@ SelectTasksDesc=Koje dodatne postupke želite napraviti?
 SelectTasksLabel2=Izaberite postupke koji će se izvršiti prilikom postavljanja aplikacije [name], a zatim pritisnite Sledeće.
 
 ; *** "Select Start Menu Folder" wizard page
-WizardSelectProgramGroup=Izaberite mapu u meniu Start
+WizardSelectProgramGroup=Izaberite fasciklu u meniu Start
 SelectStartMenuFolderDesc=Gdje želite postaviti prečace aplikacije?
-SelectStartMenuFolderLabel3=Prečaci aplikacije postavit će se u ovu mapu menia Start
-SelectStartMenuFolderBrowseLabel=Za nastavak pritisnite Sledeće, za odabir druge mape pritisnite Pregledaj
-MustEnterGroupName=Ime mape je obavezno
-GroupNameTooLong=Putanja ili ime mape su predugački
-InvalidGroupName=Ime mape nije ispravno
-BadGroupName=Ime mape ne sme sadržavati sledeće znakove:%n%n%1
-NoProgramGroupCheck2=&Nemoj stvoriti mapu u meniu Start
+SelectStartMenuFolderLabel3=Prečaci aplikacije postavit će se u ovu fasciklu menia Start
+SelectStartMenuFolderBrowseLabel=Za nastavak pritisnite Sledeće, za odabir druge fascikle pritisnite Pregledaj
+MustEnterGroupName=Ime fascikle je obavezno
+GroupNameTooLong=Putanja ili ime fascikle su predugački
+InvalidGroupName=Ime fascikle nije ispravno
+BadGroupName=Ime fascikle ne sme sadržavati sledeće znakove:%n%n%1
+NoProgramGroupCheck2=&Nemoj stvoriti fasciklu u meniu Start
 
 ; *** "Ready to Install" wizard page
 WizardReady=Sve je spremno za postavljanje
@@ -210,7 +210,7 @@ ReadyMemoUserInfo=Korisnički podaci:
 ReadyMemoDir=Odredišno mesto:
 ReadyMemoType=Način postavljanja:
 ReadyMemoComponents=Izabrane komponente:
-ReadyMemoGroup=Mapa u meniu Start:
+ReadyMemoGroup=Fascikla u meniu Start:
 ReadyMemoTasks=Dodatni zadaci:
 
 ; *** TDownloadWizardPage wizard page and DownloadTemporaryFile
@@ -270,7 +270,7 @@ RunEntryShellExec=Prikaži %1
 ChangeDiskTitle=Instalacija treba sledeći disk
 SelectDiskLabel2=Umetni disk %1 i pritisni "U redu".%n%nAko se datoteke s ovog diska nalaze na nekom drugom mestu od dolje prikazanog, upiši ispravnu stazu ili pritisni "Odaberi".
 PathLabel=&Staza:
-FileNotInDir2=Staza "%1" ne postoji u "%2". Umetni odgovarajući disk ili odaberi jednu drugu mapu.
+FileNotInDir2=Staza "%1" ne postoji u "%2". Umetni odgovarajući disk ili odaberi jednu drugu fasciklu.
 SelectDirectoryLabel=Odredi mesto sledećeg diska.
 
 ; *** Installation phase messages
@@ -285,7 +285,7 @@ RetryCancelCancel=Otkaži
 
 ; *** Installation status messages
 StatusClosingApplications=Zatvaranje programa …
-StatusCreateDirs=Stvaranje mapa …
+StatusCreateDirs=Stvaranje fascikli …
 StatusExtractFiles=Raspakiranje datoteka …
 StatusDownloadFiles=Preuzimanje datoteka …
 StatusCreateIcons=Stvaranje prečaca …
@@ -340,14 +340,14 @@ ExistingFileNewerOverwriteExisting=&Prepiši postojeću datoteku
 ExistingFileNewerKeepExisting=&Zadrži postojeću datoteku (preporučeno)
 ExistingFileNewerOverwriteOrKeepAll=&Uradi to i u narednim slučajevima
 ErrorChangingAttr=Greška prilikom pokušaja promene svojstva postojeće datoteke:
-ErrorCreatingTemp=Greška prilikom pokušaja stvaranja datoteke u odredišnoj mapi:
+ErrorCreatingTemp=Greška prilikom pokušaja stvaranja datoteke u odredišnoj fascikli:
 ErrorReadingSource=Greška prilikom pokušaja čitanja izvorišne datoteke:
 ErrorCopying=Greška prilikom pokušaja kopiranja datoteke:
 ErrorDownloading=Greška prilikom preuzimanja datoteke:
 ErrorExtracting=Greška prilikom pokušaja raspakiravanja arhive:
 ErrorReplacingExistingFile=Greška prilikom pokušaja zamenjivanja datoteke:
 ErrorRestartReplace=Zamenjivanje nakon ponovog pokretanja nije uspjelo:
-ErrorRenamingTemp=Greška prilikom pokušaja preimenovanja datoteke u odredišnoj mapi:
+ErrorRenamingTemp=Greška prilikom pokušaja preimenovanja datoteke u odredišnoj fascikli:
 ErrorRegisterServer=Nije moguće registrirati DLL/OCX: %1
 ErrorRegSvr32Failed=Greška u RegSvr32. Izlazni kod %1
 ErrorRegisterTypeLib=Nije moguće registrirati biblioteku vrsta: %1
@@ -408,4 +408,4 @@ AssocFileExtension=&Poveži program %1 s datotečnim nastavkom %2
 AssocingFileExtension=Povezivanje programa %1 s datotečnim nastavkom %2 …
 AutoStartProgramGroupDescription=Pokretanje:
 AutoStartProgram=Automatski pokreni %1
-AddonHostProgramNotFound=%1 nije pronađen u izabranoj mapi.%n%nŽelite li svejedno nastaviti?
+AddonHostProgramNotFound=%1 nije pronađen u izabranoj fascikli.%n%nŽelite li svejedno nastaviti?
