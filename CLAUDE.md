@@ -334,6 +334,21 @@ Documented in a comment above the seek-step methods in Form1. All four coexist:
 4. **Go To... (F4)** — named navigation. For plain audio this is a list
    of the book's parts. DAISY/text structure (headings, pages) will plug in
    here later as a separate subsystem.
+   **Plus GO TO PAGE, since 2026-08-28** (Gordan's shape, from the beta notes):
+   a group of its own holding one spin box, opening on the page you are on with
+   its number selected so typing replaces it, Enter confirming exactly as it does
+   for the list. **The group is not built at all for a book with no printed
+   pages**, and then the list takes the room back. Which one the confirmation
+   meant is decided by where the reader was: a number typed or stepped, or the
+   box holding focus, means the page; anything else means the selected row.
+   A number with no marker of its own lands on the nearest one at or before it.
+   **Only NUMERIC labels are offered**, and that is measured rather than assumed:
+   across 400 EPUBs and the whole braille corpus, 98–100 % of page labels are
+   plain numbers, the rest being roman numerals on the front matter and the odd
+   "Cover Page" — those stay reachable with the Page seek step, which walks every
+   marker whatever it says. `Form1.PrintedPageNumbers` / `CurrentPrintedPage` /
+   `SeekToPrintedPage` are the only code that knows a text book keeps pages as
+   character offsets and an audio one as seconds.
 
 **Why Shift, not Ctrl, for the seek cluster (Session 10).** Ctrl+Up/Down are
 unusable as app shortcuts: when focus is on a non-edit control (a button) the
@@ -416,6 +431,15 @@ emulation (§8l).
 - **F1** Help · **F2** Settings · **F3** Library · **F4** Go To ·
   **F5** Set Bookmark · **F6** Manage Bookmarks · **F7** Sleep Timer ·
   **F9** the reading window.
+- **F10** — how far into the book you are; **pressed twice** inside 600 ms, how
+  much is LEFT (2026-08-28, from Gordan's beta notes). F8's whole info block is
+  too much to hear when the question is only "how much longer". Works on text
+  books too, where both figures are the reading-speed estimate the info box and
+  the Library already show, so the three cannot disagree; nothing loaded gets the
+  "no go" beep. **F10 was reserved for a menu bar** and this window has none —
+  the Library, which has one, is a separate form that never sees this handler.
+  A letter key was not an option for the reason the whole set moved to the
+  function row: `cmbSeek` eats letters as type-ahead whenever it has focus.
 - **F8** — announce fresh playback info. **Pressed twice inside 600 ms it moves
   focus INTO the info box**, and a third press (or Escape) brings focus back
   where it came from — the box is parked off the client area and out of the tab
@@ -1618,9 +1642,26 @@ line starts with a lower-case letter", which asked the wrong end of the break.
   **Crucially, mpv events are skipped for text books** (`EventTimer_Tick`) — an
   IDLE event would otherwise flip `isPlaying` off (killing autoplay) or wrongly
   "finish" the book. The first autoplay `Play()` is also deferred one tick.
-- **Seek steps** (per book, `RebuildSeekSteps`): 15 s / 30 s / 60 s / Sentence /
-  Paragraph / **Standard page** (1800 chars, the translation/journalism unit),
-  and **Bookmark** once the book has one.
+- **Seek steps** (per book, `RebuildSeekSteps`): the time steps, **Standard
+  page** (1800 chars, the translation/journalism unit) or the book's real Pages,
+  **Paragraph** where it is worth having, and **Bookmark** once the book has one.
+  **This list said "Sentence / Paragraph" for a long time and neither was in it**
+  — both are in `SeekStepKind` and in `TextSeek`'s dispatch, and
+  `RebuildSeekSteps` added neither, so `TtsReader.NextParagraph` could not be
+  called by anybody. Sentence stays out on purpose: the bare Left/Right arrows
+  already move by one sentence in a text book, so a step would be a second name
+  for the same thing.
+  **Paragraph is offered since 2026-08-28, and only where a paragraph is one.**
+  A paragraph is a blank-line block, and whether that is navigable depends
+  entirely on the format. Median sentences per paragraph over the test corpus:
+  **docx 2.8, epub 2.6, mobi 3.0, azw3 2.5, odt 3.2** against **braille 28.8,
+  .doc 119, .dxb 956, .rtf 1777** — where the "paragraph" is a chapter or the
+  whole book and one press would carry the reader pages away. `Form1.
+  AddParagraphStepIfUseful` gates on at least two paragraphs and **at most 15
+  sentences** in each; there is nobody between 3.2 and 28.8, so the threshold
+  sits in a gap five times wider than anything it separates. Gordan asked for the
+  step and predicted the inconsistency ("kod flatova možda i jako nekonzistentno,
+  pretpostavljam") — he was right, and the numbers say by how much.
 - **Bookmarks** work here too. A mark is stored in the book's own unit — the
   character offset for text, seconds for audio — and `BookPosition` /
   `SeekToBookPosition` / `BookBackGrace` keep one set of bookmark code serving
@@ -4164,6 +4205,35 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 > of this, because most of what looks like an obvious improvement was already
 > tried against a real disk of 1622 books and found to be wrong.
 >
+> ### The Help menu gained two items, 2026-08-28 (both from the beta notes)
+>
+> **What's new** — `HintSystem.ShowWhatsNew`, above About, because after an
+> update that is the one a reader is looking for. It is a `TextHelpForm` box and
+> **not** another HTML page: Gordan left the choice open ("ovisno o veličini
+> odabrati hoće li biti standardni box… ili još jedan HTML") and three things
+> settle it — the manual opens in the system browser and he had just reported
+> that being slow on some machines, this page is read on EVERY update, and prose
+> in the language files falls back to English by itself instead of needing eleven
+> HTML files regenerated per release. Written per release, newest first, as prose
+> for a reader rather than as the commit log.
+>
+> **Export report** — `HintSystem.ExportReport` + `DiagnosticReport.cs`, and it is
+> a **beta item** (`Beta.DiagnosticReport`), at his word. It creates no log: the
+> crash handler, the hang watchdog, the import, the speech host and the speech
+> inventory have written to `%TEMP%` since they were built — seven files, one of
+> them 970 kB unread on this machine — and what was missing was a way to send
+> them. It collects those plus `Settings.ini` and `CloudUsage.ini` and a header
+> (release, build, paths, Windows, .NET, culture) into one file through a Save
+> dialog opening on Documents with a dated name. **`nbr-services.dat` is not read
+> and its name is not in the collector**, so a fault report cannot carry the
+> reader's API keys; the finished report was searched for key-shaped words and
+> came back clean. Each log contributes its **last** 128 kB, since after a fault
+> the end is what matters.
+>
+> **The root of C: was ruled out by measurement** (he had suggested it): a write
+> there is refused even on this machine, from an unelevated process, and NBR's
+> manifest disables the virtualisation that lets some programs seem to succeed.
+>
 > **`LibraryScanner.Scan` reads and never writes** (2026-08-03). Unpacking used
 > to live inside it, which is why "Open folder" first refused any folder holding
 > an archive and then leaned on a flag defaulting to safe — both of which worked
@@ -6152,6 +6222,18 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
    guard that never fires produce exactly the same symptom, and the note picked
    the explanation it could see. Do not diagnose a nav problem from what Go To
    shows — load a book and print both lists.
+
+   **AND THE PRINTED PAGES HAD THE SAME GAP, one list further down — found
+   2026-08-28.** `BuildHybridNavFromText` carried the HEADINGS across the sync
+   map when it was written and left the PAGES in `TextPages`, where they are
+   character offsets. A hybrid is an audio book, so everything that navigates it
+   reads `DaisyPages` — which meant a narrated book that HAS printed pages showed
+   none, was offered no Page seek step, and could not have a Go To page group.
+   Both lists are now built the same way. Measured on the library: *Distribution*
+   had 431 pages in its text and **0** in navigation, now 431; *S13304* has 402
+   of its own from the DAISY navigation and is untouched, which is what shows the
+   existing path still wins. Gordan is the reason it was looked at at all —
+   *"računaj i da daisy ima stranice, čak i u audio"*.
 
    **The TOC work was kept, but it is a policy improvement and not the fix.**
    Headings now come from the NCX, then the EPUB3 nav, then `<hN>` — the same

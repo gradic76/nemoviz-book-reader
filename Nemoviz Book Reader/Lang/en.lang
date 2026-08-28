@@ -86,6 +86,7 @@ Seek.Item.Track=Track
 Seek.Item.HeadingLevel=Heading {0}
 Seek.Item.Page=Page
 Seek.Item.Bookmark=Bookmark
+Seek.Item.Paragraph=Paragraph
 Seek.Item.StandardPage=Standard page
 
 ; ---- PLAYER - the eight command keys
@@ -168,6 +169,8 @@ Menu.Sort.ActiveMark=(active)
 Menu.Help=Help
 Menu.Help.Help=Help
 Menu.Help.About=About NBR
+Menu.Help.WhatsNew=What's new
+Menu.Help.Report=Export report...
 Menu.Help.Services=Services and accounts...
 Menu.Help.Update=Check for update
 Shelf.Filter.All=All books
@@ -269,6 +272,8 @@ GoTo.List.Accessible=Book parts
 GoTo.Item.Format={0}/{1} — {2}
 GoTo.OK.Accessible=OK
 GoTo.Cancel.Accessible=Cancel
+GoTo.Page.Group=Go to page
+GoTo.Page.Accessible=Page number
 GoTo.AutoPlay=Start playing after jump
 GoTo.AutoPlay.Hint=When checked, playback starts right after the jump. When unchecked, the current state is kept: paused stays paused, playing keeps playing.
 GoTo.Hint.Accessible=Hint
@@ -762,6 +767,11 @@ Services.Steps.OpenAi=1. Open platform.openai.com in your browser. This is the d
 ; ---- HELP AND ABOUT
 Dialog.Help.ComingSoon=Help – coming soon.
 Dialog.Help.Title=Help
+Dialog.WhatsNew.Title=What's new
+Report.Filter=Text files (*.txt)|*.txt|All files (*.*)|*.*
+Report.Done=The report was saved to:\n\n{0}\n\n{1} kB. Attach it to your message.
+Report.Failed=The report could not be written. The folder may be read-only, or there may be no room on the disk.
+Dialog.WhatsNew.Text=BETA 2\n\nCombo boxes no longer say "blank" before each item under JAWS. It happened in every drop-down list, in every window, and only in the NBR look.\n\nCtrl+1 to Ctrl+9, which jump to a tenth of the book, now work in every kind of book. Until now they moved only audiobooks: in text, braille, EPUB, PDF and every other book read aloud by a voice, they did nothing at all.\n\nThe reading speed field now says which keys change it, the way every button on the panel says which key presses it.\n\nBETA 1\n\nThe first public release.
 Dialog.About.Title=About NBR
 Dialog.About.Release=Beta 1
 Dialog.About.Licence=🄯 Copyleft — NBR is free software under the GNU General Public License, version 3. You may use it, study it, share it and change it; if you pass on a changed version, it goes on under the same terms, with its source.

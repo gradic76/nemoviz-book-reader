@@ -90,6 +90,30 @@ namespace Nemoviz_Book_Reader
         public int Count { get { return sentenceText.Count; } }
         public int CurrentSentence { get { return index; } }
         public int TotalChars { get { return fullText.Length; } }
+
+        /// <summary>How many paragraphs the book split into, and how many
+        /// sentences each holds on average.
+        ///
+        /// <para><b>Why the player has to ask.</b> A paragraph is a blank-line
+        /// block, and whether that is a NAVIGABLE unit depends entirely on the
+        /// format the book came from. Measured 2026-08-28 over the whole test
+        /// corpus, median sentences per paragraph: <b>docx 2.8, epub 2.6, mobi
+        /// 3.0, odt 3.2</b> — a real paragraph — against <b>braille 28.8, .doc
+        /// 119, .dxb 956, .rtf 1777</b>, where the "paragraph" is a chapter or
+        /// the whole book, and one press of a seek step would carry the reader
+        /// pages away. So the step is offered where the number says it means
+        /// something, and withheld where it does not.</para></summary>
+        public int ParagraphCount { get { return paragraphStart.Count; } }
+
+        public double SentencesPerParagraph
+        {
+            get
+            {
+                return paragraphStart.Count > 0
+                    ? (double)sentenceText.Count / paragraphStart.Count
+                    : 0;
+            }
+        }
         public int CharPosition
         {
             get { return (index >= 0 && index < sentenceStart.Count) ? sentenceStart[index] : 0; }

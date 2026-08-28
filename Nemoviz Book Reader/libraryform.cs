@@ -590,6 +590,25 @@ namespace Nemoviz_Book_Reader
 
             menuHelp.DropDownItems.Add(menuHelpServices);
             menuHelp.DropDownItems.Add(new ToolStripSeparator());
+
+            // What's new, next to About because they answer neighbouring
+            // questions -- what this program IS, and what changed in it since
+            // last time (Gordan, from the beta notes). Above About rather than
+            // below it: after an update it is the one a reader is looking for.
+            var menuHelpWhatsNew = new ToolStripMenuItem(Localization.T("Menu.Help.WhatsNew"));
+            menuHelpWhatsNew.Click += (s, e) => HintSystem.ShowWhatsNew(this);
+            menuHelp.DropDownItems.Add(menuHelpWhatsNew);
+
+            // Export report — a BETA item (Beta.DiagnosticReport). A tester who
+            // has just met a freeze or a book that would not load needs to send
+            // back what NBR wrote about it, and the logs live in %TEMP%, which
+            // is the one folder nobody opens. Not built at all in a release.
+            if (Beta.DiagnosticReport)
+            {
+                var menuHelpReport = new ToolStripMenuItem(Localization.T("Menu.Help.Report"));
+                menuHelpReport.Click += (s, e) => HintSystem.ExportReport(this);
+                menuHelp.DropDownItems.Add(menuHelpReport);
+            }
             menuHelp.DropDownItems.Add(menuHelpAbout);
 
             menuStrip.Items.Add(menuFile);

@@ -31,5 +31,18 @@ namespace Nemoviz_Book_Reader
     {
         /// <summary>False while the reading window is held back from release.</summary>
         public const bool ReadingWindow = false;
+
+        /// <summary>The diagnostic report — Help → Export report — is a BETA
+        /// thing, at Gordan's word (2026-08-28: "ide samo na betu, barem
+        /// zasad"). It exists so a tester can send back what happened after a
+        /// freeze or a book that would not load; a finished release should not
+        /// be asking its readers for log files.
+        ///
+        /// <para>Set to false and the menu item is not built. The logs
+        /// themselves are unaffected — they are written by the crash handler,
+        /// the hang watchdog, the import and the speech host whatever this
+        /// says, exactly as they were before there was anywhere to send
+        /// them.</para></summary>
+        public const bool DiagnosticReport = true;
     }
 }

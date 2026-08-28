@@ -261,6 +261,9 @@ namespace Nemoviz_Book_Reader
         private Label lblAnnounceInfo;
         // F8 twice in quick succession walks into the info box; see ProcessCmdKey.
         private DateTime lastInfoKey = DateTime.MinValue;
+        // F10 twice in quick succession says what is LEFT rather than what has
+        // gone; its own stamp, so it cannot interfere with F8's double press.
+        private DateTime lastTimeKey = DateTime.MinValue;
         private Control infoBoxCameFrom;
 
         // ──────────────────────────────────────────────
@@ -898,12 +901,22 @@ namespace Nemoviz_Book_Reader
             for (int i = hs.Count - 1; i >= 0; i--)
                 if (hs[i].Offset <= cur) { preselect = i; break; }
 
-            using (GoToForm dlg = new GoToForm(names, preselect, appSettings.GoToAutoPlay, true))
+            using (GoToForm dlg = new GoToForm(names, preselect, appSettings.GoToAutoPlay, true,
+                                               PrintedPageNumbers(), CurrentPrintedPage()))
             {
-                if (dlg.ShowDialog(this) == DialogResult.OK &&
-                    dlg.SelectedPartIndex >= 0 && dlg.SelectedPartIndex < targets.Length)
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                appSettings.SetGoToAutoPlay(dlg.AutoPlayChecked);
+
+                // A page was asked for, so the list's selection is not what the
+                // reader meant — they never left the number box.
+                if (dlg.PageChosen)
                 {
-                    appSettings.SetGoToAutoPlay(dlg.AutoPlayChecked);
+                    SeekToPrintedPage(dlg.SelectedPage, dlg.AutoPlayChecked);
+                    return;
+                }
+
+                if (dlg.SelectedPartIndex >= 0 && dlg.SelectedPartIndex < targets.Length)
+                {
                     tts.SeekToChar(targets[dlg.SelectedPartIndex]);
                     if (dlg.AutoPlayChecked && !isPlaying)
                     {
@@ -989,6 +1002,7 @@ namespace Nemoviz_Book_Reader
                             Localization.T("Seek.Item.HeadingLevel", level));
                     if (currentBook.TextPages.Count > 0)
                         AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
+                    AddParagraphStepIfUseful();
                     AddTimeSteps15DownWithBookmark();
                     break;
 
@@ -1000,6 +1014,7 @@ namespace Nemoviz_Book_Reader
                         AddSeekStep(new SeekStep(SeekStepKind.Page), Localization.T("Seek.Item.Page"));
                     else
                         AddSeekStep(new SeekStep(SeekStepKind.StandardPage), Localization.T("Seek.Item.StandardPage"));
+                    AddParagraphStepIfUseful();
                     AddTimeSteps15DownWithBookmark();
                     break;
             }
@@ -1011,6 +1026,37 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>Appends the shared time steps 15 min → 15 s, then a Bookmark
         /// step when the current book has any bookmarks.</summary>
+        /// <summary>Offers the Paragraph step, but only for a book whose
+        /// paragraphs are paragraphs.
+        ///
+        /// <para><b>The step existed and was never reachable.</b> `SeekStepKind.
+        /// Paragraph` has been in the enum and in `TextSeek`'s dispatch since
+        /// text books were built, and `RebuildSeekSteps` never added it to the
+        /// list — so `TtsReader.NextParagraph` could not be called by anybody.
+        /// Gordan asked for it from the beta notes, guessing it would be
+        /// inconsistent on flat books. He was right, and the measurement says by
+        /// how much.</para>
+        ///
+        /// <para><b>The gate, and where its number comes from.</b> Median
+        /// sentences per paragraph over the whole test corpus: docx 2.8,
+        /// epub 2.6, mobi 3.0, azw3 2.5, odt 3.2 — against braille 28.8, .doc
+        /// 119, .dxb 956, .rtf 1777. There is no crowd in between, so the
+        /// threshold is not a fine judgement; **15** sits in a gap five times
+        /// wider than anything it separates. A book on the wrong side of it does
+        /// not lose anything it had — the step was unreachable for every book
+        /// until today.</para>
+        ///
+        /// <para>Two paragraphs are also required, because a book that came out
+        /// as one block has a "paragraph" that is the whole of it, and a step
+        /// that always lands in the same two places is worse than no step.</para></summary>
+        private void AddParagraphStepIfUseful()
+        {
+            if (tts == null) return;
+            if (tts.ParagraphCount < 2) return;
+            if (tts.SentencesPerParagraph > 15) return;
+            AddSeekStep(new SeekStep(SeekStepKind.Paragraph), Localization.T("Seek.Item.Paragraph"));
+        }
+
         private void AddTimeSteps15DownWithBookmark()
         {
             AddSeekStep(new SeekStep(SeekStepKind.Min15), Localization.T("Seek.Item.15min"));
@@ -1322,6 +1368,33 @@ namespace Nemoviz_Book_Reader
                     }
                     lastInfoKey = DateTime.UtcNow;
                     AnnounceToScreenReader(lblAnnounceInfo, BuildCurrentInfoText());
+                    return true;
+
+                case Keys.F10:
+                    // How far in you are — and pressed twice, how much is left.
+                    // Gordan's shape, from the beta notes: the two figures a
+                    // listener asks for constantly, and F8's whole info block is
+                    // far too much to hear when the question is just "how much
+                    // longer".
+                    //
+                    // F10 rather than a letter, and that is not a preference:
+                    // the seek combo eats letters as type-ahead whenever it has
+                    // focus, which is why every named command in this player
+                    // left the letter keys in the first place (§6). F10 usually
+                    // opens a menu bar and was reserved for that — this window
+                    // has none, and the Library, which does, is a separate form
+                    // that never sees this handler.
+                    //
+                    // The double press is F8's gesture and its 600 ms, so there
+                    // is one rule to learn rather than two.
+                    if (DateTime.UtcNow - lastTimeKey < TimeSpan.FromMilliseconds(600))
+                    {
+                        lastTimeKey = DateTime.MinValue;   // the next press is a fresh single
+                        AnnounceElapsedOrRemaining(true);
+                        return true;
+                    }
+                    lastTimeKey = DateTime.UtcNow;
+                    AnnounceElapsedOrRemaining(false);
                     return true;
 
                 // Speed — Ctrl+Left/Right (replaced Page Up/Down). Ctrl is
@@ -3848,6 +3921,144 @@ namespace Nemoviz_Book_Reader
             return currentBook.TotalDuration;
         }
 
+        // ── Go To a printed page ───────────────────────────────────────────
+        //
+        // A book's page markers live in two places for two kinds of book, and
+        // neither is a running count: TextPages carries (printed label, character
+        // offset) and DaisyPages carries (level, printed label, seconds). These
+        // three helpers are the only thing that knows that, so the dialog and its
+        // caller can talk about "page 231" and nothing else has to care.
+        //
+        // ONLY NUMERIC LABELS ARE OFFERED. Measured 2026-08-28 across 400 EPUBs
+        // and the whole braille corpus: 98–100 % of labels are plain numbers, and
+        // what is left is roman numerals on the front matter plus the odd "Cover
+        // Page". Those are still reached with the Page seek step, which walks
+        // every marker whatever it says — so nothing becomes unreachable, it just
+        // cannot be typed.
+
+        /// <summary>Every printed page number this book has, ascending and
+        /// distinct — or null when it has none, which is what keeps the group out
+        /// of the dialog entirely.</summary>
+        private int[] PrintedPageNumbers()
+        {
+            if (currentBook == null) return null;
+            var found = new List<int>();
+            if (currentBook.IsTextBook)
+            {
+                foreach (var p in currentBook.TextPages)
+                    if (int.TryParse((p.Label ?? "").Trim(), out int n)) found.Add(n);
+            }
+            else
+            {
+                foreach (var p in currentBook.DaisyPages)
+                    if (int.TryParse((p.Label ?? "").Trim(), out int n)) found.Add(n);
+            }
+            if (found.Count == 0) return null;
+            found.Sort();
+            var distinct = new List<int>();
+            foreach (int n in found) if (distinct.Count == 0 || distinct[distinct.Count - 1] != n) distinct.Add(n);
+            return distinct.ToArray();
+        }
+
+        /// <summary>The printed page the reader is on — the last marker at or
+        /// before where they are, which is what "the page you are reading" means
+        /// on paper too.</summary>
+        private int CurrentPrintedPage()
+        {
+            if (currentBook == null) return 0;
+            int best = 0;
+            if (currentBook.IsTextBook)
+            {
+                int at = tts != null ? tts.CharPosition : 0;
+                foreach (var p in currentBook.TextPages)
+                    if (p.Offset <= at && int.TryParse((p.Label ?? "").Trim(), out int n)) best = n;
+            }
+            else
+            {
+                double at = GetVirtualPosition();
+                foreach (var p in currentBook.DaisyPages)
+                    if (p.Position <= at && int.TryParse((p.Label ?? "").Trim(), out int n)) best = n;
+            }
+            return best;
+        }
+
+        /// <summary>Jumps to a printed page. A number with no marker of its own —
+        /// a page the producer skipped, or one typed between two that exist —
+        /// lands on the nearest one at or before it rather than refusing, because
+        /// refusing tells a reader nothing about where they may go instead.</summary>
+        private void SeekToPrintedPage(int page, bool autoPlay)
+        {
+            if (currentBook == null) return;
+
+            if (currentBook.IsTextBook)
+            {
+                int target = -1;
+                foreach (var p in currentBook.TextPages)
+                    if (int.TryParse((p.Label ?? "").Trim(), out int n) && n <= page) target = p.Offset;
+                    else if (target < 0 && int.TryParse((p.Label ?? "").Trim(), out int m) && m >= page) { target = p.Offset; break; }
+                if (target < 0) return;
+                tts.SeekToChar(target);
+                UpdateTextPositionDisplay();
+                if (autoPlay && !isPlaying) { tts.Play(); SetPlayPauseState(true); }
+                return;
+            }
+
+            double seconds = -1;
+            foreach (var p in currentBook.DaisyPages)
+                if (int.TryParse((p.Label ?? "").Trim(), out int n) && n <= page) seconds = p.Position;
+            if (seconds < 0)
+                foreach (var p in currentBook.DaisyPages)
+                    if (int.TryParse((p.Label ?? "").Trim(), out int n) && n >= page) { seconds = p.Position; break; }
+            if (seconds < 0) return;
+            SeekToVirtualPosition(seconds, () =>
+            {
+                if (autoPlay && !isPlaying)
+                {
+                    mpv_set_property_string(mpvHandle, "pause", "no");
+                    SetPlayPauseState(true);
+                }
+            });
+        }
+
+        /// <summary>F10: says how far into the book we are; twice, how much of it
+        /// is left.
+        ///
+        /// <para>Both figures already stand in the info box — this says one of
+        /// them on its own, which is the whole point: F8 reads the entire block,
+        /// and a listener who only wants to know how much longer should not have
+        /// to hear the title, the chapter and the format to find out.</para>
+        ///
+        /// <para><b>It works on a text book too</b>, where the two figures are
+        /// derived from the reading speed rather than measured — the same
+        /// estimate the info box and the Library already show, so the three
+        /// cannot disagree. Nothing loaded gets the same low "no go" beep as Go
+        /// To and the bookmarks.</para></summary>
+        private void AnnounceElapsedOrRemaining(bool remaining)
+        {
+            if (currentBook == null)
+            {
+                tones.Play(300, 150);
+                return;
+            }
+
+            double elapsed, total;
+            if (currentBook.IsTextBook)
+            {
+                elapsed = TextSeconds(tts != null ? tts.CharPosition : 0);
+                total = TextSeconds(tts != null ? tts.TotalChars : 0);
+            }
+            else
+            {
+                elapsed = GetVirtualPosition();
+                total = currentBook.TotalDuration;
+            }
+
+            string text = remaining
+                ? Localization.T("Player.Info.RemainingLabel") + " -" + FormatTime(Math.Max(0, total - elapsed))
+                : Localization.T("Player.Info.ElapsedLabel") + " " + FormatTime(elapsed);
+            AnnounceToScreenReader(lblAnnounceInfo, text);
+        }
+
         /// <summary>Ctrl+1..9: jump to a tenth of the book, whatever kind it is.
         /// Through <see cref="SeekToBookPosition"/>, which is the same path the
         /// bookmarks take and therefore already correct for both.</summary>
@@ -4555,9 +4766,16 @@ namespace Nemoviz_Book_Reader
 
             // Both DAISY headings and plain-audio parts list as bare names now
             // (no "N/M —" prefix — the name/file already self-numbers).
-            using (GoToForm dlg = new GoToForm(names, preselect, appSettings.GoToAutoPlay, true))
+            using (GoToForm dlg = new GoToForm(names, preselect, appSettings.GoToAutoPlay, true,
+                                               PrintedPageNumbers(), CurrentPrintedPage()))
             {
-                if (dlg.ShowDialog(this) == DialogResult.OK &&
+                if (dlg.ShowDialog(this) == DialogResult.OK && dlg.PageChosen)
+                {
+                    appSettings.SetGoToAutoPlay(dlg.AutoPlayChecked);
+                    SeekToPrintedPage(dlg.SelectedPage, dlg.AutoPlayChecked);
+                    return;
+                }
+                if (dlg.DialogResult == DialogResult.OK &&
                     dlg.SelectedPartIndex >= 0 && dlg.SelectedPartIndex < targets.Length)
                 {
                     // Jump to the selected target. Default: playback state is

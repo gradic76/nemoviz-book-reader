@@ -584,6 +584,18 @@ namespace Nemoviz_Book_Reader
                 case Keys.Control | Keys.Left: case Keys.Control | Keys.Right:
                 case Keys.F1: case Keys.F2: case Keys.F3: case Keys.F4:
                 case Keys.F5: case Keys.F6: case Keys.F7: case Keys.F8:
+                // F10 says how far in you are, twice how much is left (2026-08-28).
+                case Keys.F10:
+                // Ctrl+1..9 jump to a tenth of the book. They were never
+                // forwarded, and until the same day they did nothing on a text
+                // book anyway — so the one place a text book is READ was also
+                // the one place the jump could not be reached from. Both halves
+                // had to be fixed for either to be any use.
+                case Keys.Control | Keys.D1: case Keys.Control | Keys.D2:
+                case Keys.Control | Keys.D3: case Keys.Control | Keys.D4:
+                case Keys.Control | Keys.D5: case Keys.Control | Keys.D6:
+                case Keys.Control | Keys.D7: case Keys.Control | Keys.D8:
+                case Keys.Control | Keys.D9:
                 case Keys.Alt | Keys.Enter:
                 // Ctrl+G, Ctrl+T and Ctrl+B are no longer forwarded: the player
                 // no longer has them. Everything they did is on the F-keys, which

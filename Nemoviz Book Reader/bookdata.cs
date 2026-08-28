@@ -828,17 +828,41 @@ namespace Nemoviz_Book_Reader
         {
             try
             {
-                if (DaisyHeadings.Count > 0) return;         // it named its own
-                if (!IsHybrid || TextHeadings == null || TextHeadings.Count == 0) return;
-                SyncMap map = LoadSyncMap();
-                if (map == null || map.IsEmpty) return;
+                if (!IsHybrid) return;
+                SyncMap map = null;
 
-                foreach (var h in TextHeadings)
+                if (DaisyHeadings.Count == 0 && TextHeadings != null && TextHeadings.Count > 0)
                 {
-                    double at = DaisySync.SecondsAt(map, h.Offset);
-                    if (at >= 0) DaisyHeadings.Add((h.Level, h.Label, at));
+                    map = LoadSyncMap();
+                    if (map == null || map.IsEmpty) return;
+                    foreach (var h in TextHeadings)
+                    {
+                        double at = DaisySync.SecondsAt(map, h.Offset);
+                        if (at >= 0) DaisyHeadings.Add((h.Level, h.Label, at));
+                    }
+                    DaisyHeadings.Sort((x, y) => x.Position.CompareTo(y.Position));
                 }
-                DaisyHeadings.Sort((x, y) => x.Position.CompareTo(y.Position));
+
+                // THE PRINTED PAGES NEEDED THE SAME TREATMENT AND NEVER GOT IT
+                // (2026-08-28). The headings were carried across the sync map when
+                // this method was written; the pages were left in TextPages, where
+                // they are character offsets — and a hybrid is an AUDIO book, so
+                // everything that navigates it reads DaisyPages. The result was a
+                // narrated book that HAS printed pages, shows none, and is offered
+                // no Page seek step: the same shape of gap as the headings had, one
+                // list further down. Found while wiring Go To page, after Gordan
+                // pointed out that DAISY carries pages in audio too.
+                if (DaisyPages.Count == 0 && TextPages != null && TextPages.Count > 0)
+                {
+                    if (map == null) map = LoadSyncMap();
+                    if (map == null || map.IsEmpty) return;
+                    foreach (var p in TextPages)
+                    {
+                        double at = DaisySync.SecondsAt(map, p.Offset);
+                        if (at >= 0) DaisyPages.Add((0, p.Label, at));
+                    }
+                    DaisyPages.Sort((x, y) => x.Position.CompareTo(y.Position));
+                }
             }
             catch { }
         }

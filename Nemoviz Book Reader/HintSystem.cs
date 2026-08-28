@@ -175,6 +175,71 @@ namespace Nemoviz_Book_Reader
                                  Localization.T("Dialog.Help.Title"));
         }
 
+        /// <summary>Export report — collects what NBR has already written about
+        /// itself into one file the tester chooses the place for.
+        ///
+        /// <para>A Save dialog rather than a fixed folder, opening on Documents
+        /// with a dated name: the reader is about to attach this to a mail, so
+        /// they must know where it went, and two reports from one day must not
+        /// overwrite each other. Afterwards it says where it landed and how big
+        /// it is — a report is only useful if it gets sent, and a silent success
+        /// is indistinguishable from nothing having happened.</para></summary>
+        public static void ExportReport(IWin32Window owner)
+        {
+            string path = null;
+            try
+            {
+                using (var sfd = new SaveFileDialog())
+                {
+                    string suggested = DiagnosticReport.SuggestedPath();
+                    sfd.FileName = System.IO.Path.GetFileName(suggested);
+                    try { sfd.InitialDirectory = System.IO.Path.GetDirectoryName(suggested); } catch { }
+                    sfd.Filter = Localization.T("Report.Filter");
+                    sfd.Title = Localization.T("Menu.Help.Report");
+                    if (sfd.ShowDialog(owner) != DialogResult.OK) return;
+                    path = sfd.FileName;
+                }
+            }
+            catch { return; }
+
+            string written = DiagnosticReport.Write(path);
+            if (written == null)
+            {
+                MessageForm.ShowInfo(owner, Localization.T("Report.Failed"),
+                                     Localization.T("Menu.Help.Report"));
+                return;
+            }
+
+            long size = 0;
+            try { size = new System.IO.FileInfo(written).Length; } catch { }
+            MessageForm.ShowInfo(owner,
+                Localization.T("Report.Done", written, (size / 1024).ToString()),
+                Localization.T("Menu.Help.Report"));
+        }
+
+        /// <summary>What's new — the changes since the release before this one.
+        ///
+        /// <para><b>A box and not another HTML page.</b> Gordan left the choice
+        /// open (2026-08-27, "ovisno o veličini odabrati hoće li biti standardni
+        /// box… ili još jedan HTML"), and three things settle it — the first
+        /// being his own report from the same list: the manual opens in the
+        /// system browser and on some machines that is slow, while THIS page is
+        /// read on every update, by somebody who has just been told there is
+        /// one. It is short by nature. And it goes through the language files
+        /// like every other piece of prose, so it falls back to English by
+        /// itself instead of needing eleven HTML files regenerated per
+        /// release.</para>
+        ///
+        /// <para><b>Written per RELEASE, newest first, and as prose for a reader
+        /// rather than as the commit log.</b> "Combo boxes no longer say blank"
+        /// is the change; which line of which skin caused it is not.</para></summary>
+        public static void ShowWhatsNew(IWin32Window owner)
+        {
+            using (var f = new TextHelpForm(Localization.T("Dialog.WhatsNew.Title"),
+                                            Localization.T("Dialog.WhatsNew.Text"), true))
+                f.ShowDialog(owner);
+        }
+
         /// <summary>About NBR — the window it will be, standing empty until
         /// somebody writes what goes in it (Gordan, 2026-08-03). It is wired now
         /// rather than left dead so the menu item leads somewhere: what is

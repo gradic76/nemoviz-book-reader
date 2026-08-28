@@ -221,6 +221,8 @@ Services.Steps.
 
 = HELP AND ABOUT
 Dialog.Help
+Dialog.WhatsNew
+Report.
 Dialog.About
 Update.
 Hint.Button

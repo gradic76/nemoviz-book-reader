@@ -10,6 +10,10 @@ namespace Nemoviz_Book_Reader
         public CheckBox AutoPlay;
         public TextBox AutoPlayHint;
         public Button OK, Cancel;
+        // Present only for a book that has printed pages; null otherwise, and
+        // then the list simply takes the room back.
+        public GroupBox PageGroup;
+        public NumericUpDown PageBox;
     }
 
     internal sealed class BookmarksParts
@@ -84,6 +88,25 @@ namespace Nemoviz_Book_Reader
             int buttonsY = LargeH - Margin - DialogSkin.ButtonH;
             int checkY = buttonsY - 12 - 24;
             int listBottom = checkY - 12;
+
+            // The page group, when the book has printed pages, sits between the
+            // list and the auto-play check — so the list gives up its height and
+            // nothing below it moves. A book without pages has no group at all
+            // and the list keeps the room, which is why the height is taken from
+            // the control being there rather than from a flag.
+            const int PageGroupH = 62;
+            if (p.PageGroup != null)
+            {
+                listBottom -= PageGroupH + 12;
+                DialogSkin.AsSticker(p.PageGroup,
+                    new Rectangle(Margin, listBottom + 12, LargeW - 2 * Margin, PageGroupH));
+                if (p.PageBox != null)
+                {
+                    p.PageBox.Font = DialogSkin.FBody;
+                    p.PageBox.SetBounds(12, 26, 120, 26);
+                    DialogSkin.OnGlass(p.PageBox);
+                }
+            }
 
             p.List.Font = DialogSkin.FBody;
             if (DialogSkin.Painting)
