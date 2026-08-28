@@ -281,6 +281,7 @@ namespace Nemoviz_Book_Reader
         /// braille patterns. CR/LF end a line, form feed (0x0C) ends a page.</summary>
         private static List<List<string>> ToBraillePages(byte[] bytes)
         {
+            int[] cellOf = UsesFrenchConvention(bytes) ? FrenchCellOfByte : CellOfByte;
             var pages = new List<List<string>>();
             var page = new List<string>();
             var line = new StringBuilder();
@@ -298,12 +299,90 @@ namespace Nemoviz_Book_Reader
                 if (b == 0x0D) continue;                 // CR — the LF ends the line
                 if (b == 0x0A) { endLine(); continue; }
                 if (b == 0x0C) { endPage(); continue; }
-                int dots = CellOfByte[b];
+                int dots = cellOf[b];
                 if (dots < 0) continue;                  // stray byte — skip
                 line.Append((char)(0x2800 + dots));
             }
             endPage();
             return pages;
+        }
+
+        /// <summary>The same cells written the French way.
+        ///
+        /// <para>A French producer writes the PUNCTUATION as the printed character
+        /// it stands for -- a full stop as ".", a comma as "," -- where braille
+        /// ASCII writes them as "4" and "1". Nineteen bytes differ, and reading a
+        /// French file with the ordinary map turns every one of them into some
+        /// other cell: measured, the six French-convention books in the corpus came
+        /// out with ZERO full stops and ZERO commas, against 9 to 16 per thousand
+        /// characters in their own North-American twins. A book with no sentence
+        /// boundaries is read by TTS as one unbroken run, and the sentence
+        /// navigation collapses with it.</para>
+        ///
+        /// <para><b>Derived, not written from memory.</b> The Valentin Hauy library
+        /// ships each title in BOTH conventions, so the two files are the same book
+        /// byte for byte apart from this. Aligning them line by line -- 11 628
+        /// comparable lines -- yields the mapping directly, and all six pairs
+        /// (three titles x two grades) produce exactly the same 34 pairs with no
+        /// byte mapping two ways. Fourteen of the 34 are the accented letters
+        /// AddLatin1Cells already handles, and every one of those AGREES with the
+        /// alignment, which is an independent check on that work. The one byte it
+        /// did not know, 0xA4, is the last of the brief's "stray byte not yet
+        /// mapped".</para></summary>
+        private static readonly int[] FrenchCellOfByte = BuildFrenchCellMap();
+
+        private static int[] BuildFrenchCellMap()
+        {
+            var map = (int[])CellOfByte.Clone();
+
+            // Left of the arrow: what a French file writes. Right: the braille
+            // ASCII byte standing for the same cell. Taken from the alignment, and
+            // expressed as a LOOKUP rather than as dot numbers, so this cannot
+            // disagree with the map it is derived from.
+            string[] pairs =
+            {
+                "!6", "\"7", "%+", "(8", ")0", "*9", ",1", ".4", "0#", "9[",
+                ":3", ";2", ">;", "?5", "@>", "^@", "_\"", "`,", "|_",
+            };
+            foreach (string p in pairs) map[p[0]] = CellOfByte[p[1]];
+
+            map[0xA4] = CellOfByte['^'];   // the byte AddLatin1Cells did not know
+            return map;
+        }
+
+        /// <summary>The bytes a French producer uses for the accented cells. A file
+        /// whose high bytes are ALL from this set is written in that convention;
+        /// one whose high bytes are spread more widely is something else in a code
+        /// page -- the Braillo samples are Cyrillic under 1251 and reach only 43 to
+        /// 45 % of this set, against 100.00 % for every French file measured.</summary>
+        private static readonly bool[] FrenchHighByte = BuildFrenchHighBytes();
+
+        private static bool[] BuildFrenchHighBytes()
+        {
+            var f = new bool[256];
+            foreach (int b in new[] { 0xA4, 0xA8, 0xE0, 0xE2, 0xE7, 0xE8, 0xE9, 0xEA,
+                                      0xEB, 0xEE, 0xEF, 0xF4, 0xF9, 0xFB, 0xFC })
+                f[b] = true;
+            return f;
+        }
+
+        /// <summary>True when the file writes its cells the French way.
+        ///
+        /// <para>Measured over 93 braille files: the six French-convention books
+        /// score <b>100.00 %</b>, the five Braillo files 43 to 45 %, and one English
+        /// book has a single high byte and scores 0. The minimum count is there so
+        /// that one stray byte cannot decide a whole book -- the smallest genuine
+        /// file carries 2 037 of them.</para></summary>
+        private static bool UsesFrenchConvention(byte[] bytes)
+        {
+            int high = 0, french = 0;
+            foreach (byte b in bytes)
+            {
+                if (b < 0xA0) continue;
+                high++;
+                if (FrenchHighByte[b]) french++;
+            }
+            return high >= 50 && french >= high * 0.95;
         }
 
         /// <summary>Removes cells liblouis had no text for -- formatting indicators
@@ -667,7 +746,25 @@ namespace Nemoviz_Book_Reader
             // The decisive signal: how much of the output is made of this language's
             // own everyday words. Real prose runs a quarter to a third stopwords;
             // text decoded with the wrong table scores a small fraction of that.
-            score += 3.0 * StopwordRate(text, tableId);
+            //
+            // WEIGHT 6, NOT 3, since 2026-08-28, and the reason is the term above
+            // it. letters/n rewards a table for turning cells into letters whether
+            // or not the letters mean anything, and that bias was demonstrated
+            // twice in one session: EBAE beat UEB on a UEB book because it expands
+            // indicator cells into contractions, and it beat Portuguese on a
+            // Portuguese one by producing 3 065 letters where the right table
+            // produced 1 780. The stopword rate is the only term that knows what
+            // language it is looking at, so the balance moved toward it.
+            //
+            // Six is the smallest value that fixes the known miss: 4 and 5 change
+            // nothing at all, and 7 starts moving books whose language has no table
+            // here around between equally wrong ones. Measured end to end over 88
+            // braille books, weight 6 changes exactly three: 4147bd_001.BRF finds
+            // Portuguese, and a Thai and a Korean book -- neither of which has a
+            // table in the tried set -- move between two wrong answers. Croatian,
+            // French and English are untouched. The value is chosen against that
+            // corpus and should be re-measured if the corpus grows.
+            score += 6.0 * StopwordRate(text, tableId);
 
             // Accent rate: a little is expected for languages that have them; a lot
             // means this table is painting another language's accents over the text.

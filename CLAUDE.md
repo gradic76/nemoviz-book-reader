@@ -6092,6 +6092,15 @@ and the loss falls to 0.09%. **Read the table, never write dot patterns from
 memory.** Line width is 31, 39 or 41 depending on producer — nothing may assume
 40.
 
+**AND THE FRENCH CONVENTION IS MORE THAN ITS ACCENTS (2026-08-28).** It also
+rewrites the PUNCTUATION — a full stop as `.` where braille ASCII writes `4`, a
+comma as `,` where it writes `1` — **nineteen ASCII bytes in all**, plus `0xA4`.
+Read with the ordinary map those six books came out with **zero full stops and
+zero commas**. `BrfParser.FrenchCellOfByte` and `UsesFrenchConvention` handle it;
+the mapping was derived by aligning the same title in both conventions rather
+than written from memory, and the fourteen accented bytes it re-derives agree
+exactly with `AddLatin1Cells`. Full account in §11.
+
 **A percentage test cannot identify a format.** Genuine `.brf` runs from 0.00% to
 **13.96%** non-cell bytes; Duxbury starts at **2.95%**. The ranges overlap, so any
 threshold that refused Duxbury would refuse real books. Hence two tests: a wide
@@ -6199,8 +6208,10 @@ available and needs nobody to know the language.
   escape per cell. `StripUntranslated` drops the notation now, and the `∷` run
   goes with it because the line left behind is caught by `IsDecorative`. See §11
   for why this was pointless before the table detection was fixed and is not now.
-- Stray byte not yet mapped: `0xA4` in one abridged French file. (`0x60` and
-  `0x7C` are fixed — see the first bullet.)
+- ~~Stray byte not yet mapped: `0xA4` in one abridged French file.~~ **MAPPED
+  2026-08-28** — it is `^`, dots 45, and it fell out of the convention alignment
+  in §11 rather than being hunted for. (`0x60` and `0x7C` were fixed earlier —
+  see the first bullet.)
 - ~~**Running heads and page numbers end up inside the sentences.**~~ **— FIXED
   2026-08-04, and generally rather than per book.** A paragraph running over a
   page break came back with the producer's furniture spliced into it: *"You can
@@ -6696,6 +6707,89 @@ as ever.
 **The twelfth is `4137A-7.brf`, which is Vietnamese**, and it moved from one wrong
 table to another. Neither is right and neither is worse; `vi-vn-g0.utb` is in the
 catalogue and reachable from the picker.
+
+#### The French files were losing ALL their punctuation — a second ASCII convention
+
+The `_FR` half of the Valentin Haüy pairs came out with **zero full stops and
+zero commas**, where their `_US` twins have 9 to 16 of each per thousand
+characters. A book with no sentence boundaries is read by TTS as one unbroken
+run and the sentence navigation goes with it, so this was the worst single fault
+in the braille path and it had been read past for weeks as "the French markup
+looks odd".
+
+**A French producer writes the PUNCTUATION as the printed character it stands
+for** — a full stop as `.`, a comma as `,`, a question mark as `?` — where
+braille ASCII writes those cells as `4`, `1` and `5`. Nineteen bytes differ.
+Read with the ordinary map every one of them became some other cell, which is
+why `fr-g2` also produced *"Et dans Franceieu c'est un auteur à succèseur"*: the
+comma and the full stop were arriving as the contractions `ieu` and `eur`.
+
+**The mapping was DERIVED, not written from memory**, and the library handed us
+the instrument: it ships each title in **both** conventions, so the two files are
+the same book byte for byte apart from this. Aligning them line by line — 11 628
+comparable lines — gives the answer directly, and **all six pairs (three titles ×
+two grades) produce exactly the same 34 pairs, with no byte mapping two ways.**
+
+**Fourteen of the 34 are the accented letters `AddLatin1Cells` already handles,
+and every one AGREES with the alignment** — an independent check on §10g's work,
+arrived at from a completely different direction. The one byte it did not know is
+**`0xA4`**, which is §10g's last "stray byte not yet mapped"; it is `^`, dots 45.
+
+**Detection is the byte SET, not the byte count.** A file whose high bytes all
+come from the French fifteen is written that way; one whose high bytes are spread
+wider is something else in a code page. Measured over 93 files:
+
+| | share of high bytes in the French set |
+|---|---|
+| the six French-convention books | **100.00 %** |
+| the five Braillo files (Cyrillic under 1251) | 43–45 % |
+| one English book with a single high byte | 0 % |
+
+`UsesFrenchConvention` asks for at least 50 high bytes and 95 % of them in the
+set. The smallest genuine file carries 2 037, so the minimum cannot bite.
+
+**Verified the only way that really settles it — the same book, both
+conventions, compared word for word:**
+
+| | | |
+|---|---|---|
+| Brûlez tout, abrégé | 65 452 / 65 452 words | **65 451 match** |
+| Liaison, intégral | 78 054 / 78 054 | **78 053 match** |
+| Les Métamorphoses, abrégé | 6 807 / 6 807 | **6 806 match** |
+
+The single word that differs in each is the books' own self-description — the
+title page says *"Code Français"* in one and *"Code Us"* in the other. Full stops
+and commas now match their twin **to two decimal places** per thousand
+characters.
+
+**No book's detected table changes** — verified through the real `Detect` over
+all 88 before and after. This corrects the CELLS, and the tables were already
+right for these books.
+
+#### And the stopword term is weighted 6, not 3
+
+The Portuguese book `4147bd_001.BRF` was missed at the LANGUAGE stage, which
+`RefineStandard` never sees. The cause is the term above it: **`letters/n`
+rewards a table for turning cells into letters whether or not the letters mean
+anything** — the same bias demonstrated twice already, EBAE beating UEB and then
+beating Portuguese by producing 3 065 letters where the right table produced
+1 780. The stopword rate is the only term that knows what language it is looking
+at, so the balance moved toward it.
+
+**Six is the smallest value that fixes the known miss** — 4 and 5 change nothing
+at all, and 7 starts moving books whose language has no table here between
+equally wrong answers. Measured end to end over 88 books, weight 6 changes
+exactly three: `4147bd_001.BRF` finds Portuguese, and a Thai and a Korean book
+— neither of which has a table in the tried set — move between two wrong
+tables. **Croatian, French and English are untouched.** The value is chosen
+against this corpus and should be re-measured if the corpus grows.
+
+**Method note: the simulation was validated before it was trusted.** The rule was
+tried offline against a dump of every table's score and round trip, and the
+simulation reproduces the shipped detector on **88 of 88 books at the current
+weight** before any candidate was tested. Without that check an offline sweep
+says nothing — see the `Sample(pages)` note above, which is exactly the mistake
+it prevents.
 
 ### PARKED, WITH THE MEASUREMENTS DONE: the RHVoice voices ignore volume below 10 (2026-08-28)
 
