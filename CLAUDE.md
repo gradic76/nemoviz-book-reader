@@ -6791,7 +6791,7 @@ weight** before any candidate was tested. Without that check an offline sweep
 says nothing — see the `Sample(pages)` note above, which is exactly the mistake
 it prevents.
 
-### PARKED AND UNDECIDED: "Add to the NBR library" on Explorer's context menu (2026-08-28)
+### DEFERRED TO THE LAST BETA: "Add to the NBR library" on Explorer's context menu (2026-08-28)
 
 Gordan's idea, discussed and left open the same day: *"moram malo porazmisliti o
 tome, stavka nije nužna."* It is recorded here because it existed in no file at
@@ -6814,13 +6814,42 @@ conversation is an item that gets lost.
    written on demand rather than by the installer, the installer is not touched
    at all and the registry is only written if the reader asks for it.
 
-**The recommendation, 2026-08-28: leave it out of beta 2.** The Library already
+**GORDAN'S DECISION, 2026-08-28: it goes in the beta BEFORE the official
+release**, not this one — *"kad porješavamo sve repove s brajičnim i vizualnim
+izlazom, eventualno još neke druge greške i dodamo ako nam što padne na pamet,
+onda ćemo to riješiti za kraj."* So it is not cancelled and not next: it is the
+kind of thing that goes in when the list of tails is empty, which is also when
+the single-instance work can be done without competing with a fault report.
+
+**Why it was not beta 2.** The Library already
 has Add File and Add Folder, so nothing is unreachable without it; the
 functionality freeze (§10) makes it a reopening; and it is the only item on the
 list that writes to the registry. If it comes back it is a post-beta job and
 parts 1, 2 and 4 are an afternoon — part 3 is the day.
 
-### PARKED, WITH THE MEASUREMENTS DONE: the RHVoice voices ignore volume below 10 (2026-08-28)
+### CLOSED — NOT OUR BUG: the RHVoice voices ignore volume below 10 (Gordan, 2026-08-28)
+
+**GORDAN'S DECISION, and his reasoning beat mine.** I recommended the small fix
+— zero means silence. He turned it down, and the argument that settles it is one
+about NBR rather than about RHVoice: **the volume control on a text book already
+restarts the sentence on every step** (SAPI applies volume to the NEXT utterance,
+so a live change re-speaks the current one — §8e), and stopping the speech dead
+at the bottom of the range would pile a second oddity on the first. *"Malo čudno
+ponašanje na koje bi se trebalo naviknuti."*
+
+The rest of it, in his words: *"nije na nama da kroz aplikaciju kompliciramo
+stvari da bismo popravljali tuđe greške"* — it is not our bug, no other engine
+here does it, so it belongs to the RHVoice developers. The voice does still
+quieten as far as its own floor, and a sleep timer that stops a book which is not
+quite silent is not a disaster: *"Ima tajmera i koji ne stišavaju glasnoću pa
+nitko nije umro zbog toga."*
+
+**So neither option is built, and the large one is not held in reserve for this.**
+If live local speech ever moves onto our own output it will be for the cache and
+the export speed, which are reasons of its own — never as a volume fix.
+
+**Keep the measurements below.** They are what makes this a decision rather than
+a shrug, and they are the answer if anyone reports the same thing again.
 
 Gordan, reading a text book with **Dragana**: turned the volume down to zero and
 the speech was still there. It is not ours — it is the driver — but it hits
@@ -6880,14 +6909,6 @@ to about 30 % and then **stops there**, and what a listener hears as the end is
 the timer's own pause cutting it off. The audible part of the fade is the stretch
 from 100 to 10; the last 4.5 seconds of it are a plateau.
 
-**Recommendation, 2026-08-28: take the small option now.** It fixes the reported
-symptom AND the timer's ending, and it is not a stopgap — the complaint was that
-zero is not zero. That 5 % and 10 % sound alike is a finding of the measurement,
-not something anybody reported. **One design question belongs to Gordan before it
-is written:** an audio book at volume 0 keeps playing silently and its position
-advances, so a text book that stops sending sentences would instead FREEZE, which
-is a pause. The same control would then mean two different things depending on
-the kind of book.
 
 ### WHAT IS LEFT TO TEST, as of 2026-08-16 (Gordan's own list)
 
