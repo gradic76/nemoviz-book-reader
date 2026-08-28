@@ -6791,6 +6791,35 @@ weight** before any candidate was tested. Without that check an offline sweep
 says nothing — see the `Sample(pages)` note above, which is exactly the mistake
 it prevents.
 
+### PARKED AND UNDECIDED: "Add to the NBR library" on Explorer's context menu (2026-08-28)
+
+Gordan's idea, discussed and left open the same day: *"moram malo porazmisliti o
+tome, stavka nije nužna."* It is recorded here because it existed in no file at
+all — neither this brief nor memory — and an item that lives only in a
+conversation is an item that gets lost.
+
+**What it would take, four parts, and only the third is awkward:**
+
+1. A registry entry under `HKCU\Software\Classes` for the audio and book
+   extensions (and `Directory` for a folder of MP3s). `HKCU`, never `HKLM`, so it
+   needs no elevation — which also means it is per user, which is right.
+2. A command line NBR already almost has: it opens a file passed as an argument.
+3. **Single instance.** This is the whole difficulty. Double-clicking a second
+   book while NBR is running must reach the RUNNING copy rather than start a
+   second one — two players fighting over one sound card, one library and one
+   `Settings.ini` is a fault the reader cannot diagnose. It wants a named mutex
+   plus a message to the existing window, and §11 already records what happens
+   when two things hold the same audio endpoint.
+4. A switch in Settings → General, which is Gordan's own framing: with the entry
+   written on demand rather than by the installer, the installer is not touched
+   at all and the registry is only written if the reader asks for it.
+
+**The recommendation, 2026-08-28: leave it out of beta 2.** The Library already
+has Add File and Add Folder, so nothing is unreachable without it; the
+functionality freeze (§10) makes it a reopening; and it is the only item on the
+list that writes to the registry. If it comes back it is a post-beta job and
+parts 1, 2 and 4 are an afternoon — part 3 is the day.
+
 ### PARKED, WITH THE MEASUREMENTS DONE: the RHVoice voices ignore volume below 10 (2026-08-28)
 
 Gordan, reading a text book with **Dragana**: turned the volume down to zero and
@@ -6842,6 +6871,23 @@ normally.
    of reading itself, which is where the stolen sentence-beginnings of §8g′ came
    from, so it wants its own day and a test across all three voices plus the
    32-bit eSpeak.
+
+**AND IT BREAKS THE SLEEP TIMER'S FADE ON EXACTLY THOSE VOICES** (found
+2026-08-28, from the same measurement seen from the other side). §7's 45-second
+fadeout drives a text book through `tts.SetVolumeQuiet` → `backend.SetVolume`,
+i.e. SAPI's volume — so on Dragana, Karmela and Marija the ramp runs 100 % down
+to about 30 % and then **stops there**, and what a listener hears as the end is
+the timer's own pause cutting it off. The audible part of the fade is the stretch
+from 100 to 10; the last 4.5 seconds of it are a plateau.
+
+**Recommendation, 2026-08-28: take the small option now.** It fixes the reported
+symptom AND the timer's ending, and it is not a stopgap — the complaint was that
+zero is not zero. That 5 % and 10 % sound alike is a finding of the measurement,
+not something anybody reported. **One design question belongs to Gordan before it
+is written:** an audio book at volume 0 keeps playing silently and its position
+advances, so a text book that stops sending sentences would instead FREEZE, which
+is a pause. The same control would then mean two different things depending on
+the kind of book.
 
 ### WHAT IS LEFT TO TEST, as of 2026-08-16 (Gordan's own list)
 
