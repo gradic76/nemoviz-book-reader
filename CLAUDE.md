@@ -6390,6 +6390,58 @@ cache is inside the book.
 
 ## 11. TODO (open items)
 
+### PARKED, WITH THE MEASUREMENTS DONE: the RHVoice voices ignore volume below 10 (2026-08-28)
+
+Gordan, reading a text book with **Dragana**: turned the volume down to zero and
+the speech was still there. It is not ours — it is the driver — but it hits
+precisely the voices Croatian and Serbian books are read with.
+
+**Measured by rendering one sentence at each volume and taking the peak sample,
+so no ear and none of our code is in the chain:**
+
+| volume | 100 | 50 | 10 | 1 | 0 |
+|---|---|---|---|---|---|
+| **Dragana** | 0.91 | 0.51 | 0.256 | 0.256 | **0.256** |
+| **Karmela** | 0.93 | 0.59 | 0.296 | 0.296 | **0.296** |
+| **Marija** | 0.93 | 0.61 | 0.303 | 0.303 | **0.303** |
+| Zira (Microsoft) | 0.76 | 0.18 | 0.057 | 0.006 | **0.0001** |
+
+All three RHVoice voices **stop obeying SAPI's volume below 10 and sit at about
+30 % of full amplitude**, which is plainly audible. The Microsoft voice goes to
+silence properly. So the bottom tenth of the scale does nothing on the voices
+this project cares most about, and "zero" is not zero.
+
+**Why the app cannot fix it where it stands:** a 64-bit SAPI voice speaks LIVE
+through `voice.Speak`, i.e. through the driver, and the driver is what ignores
+the number. The buffered path — render, then play through mpv — is the one where
+volume really works, and today only the cloud backend and the 32-bit host use it.
+
+**THE EXPORT IS NOT AFFECTED, and this was checked rather than assumed** (his
+question): `SpeechExportForm` renders through `ISpeechRenderer` → `Sapi5Backend.
+Render`, which **sets `renderVoice.Volume = 100` itself** before rendering
+anything. The player's current volume never reaches an exported MP3 — a recording
+is a record, not what you happen to be hearing. RHVoice voices make MP3 books
+normally.
+
+**Two ways out, both costed, neither built — Gordan parked it 2026-08-28
+("ajmo mi to zasad ostaviti kako jeste"):**
+
+1. **Small: zero means silence.** At 0, stop sending the sentence to the driver
+   and cut what is sounding; raise the volume and it resumes where it stopped.
+   Ten lines, touches no timing. Fixes only the endpoint — 5 % and 10 % still
+   sound identical on these voices.
+2. **Large, and it is Gordan's own idea: put live local speech through our own
+   output**, rendering each sentence and playing it through mpv exactly as
+   cached and cloud speech already are. Volume and speed then work regardless of
+   the driver, the whole scale becomes real, and local voices gain the cache and
+   therefore a much faster export. **Measured as feasible: Dragana renders 35×
+   faster than she speaks** — 692 ms for 24.0 s of speech, worst single sentence
+   409 ms (first, so it carries the voice's start-up), the rest 16–130 ms — and
+   the existing look-ahead hides even that. The cost is that it moves the timing
+   of reading itself, which is where the stolen sentence-beginnings of §8g′ came
+   from, so it wants its own day and a test across all three voices plus the
+   32-bit eSpeak.
+
 ### WHAT IS LEFT TO TEST, as of 2026-08-16 (Gordan's own list)
 
 He worked through the whole untested list that day. **Cleared, by ear, nothing
