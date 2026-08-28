@@ -89,6 +89,7 @@ Seek.Item.Part=Dio
 Seek.Item.Track=Track
 Seek.Item.HeadingLevel=Naslov {0}
 Seek.Item.Page=Stranica
+Seek.Item.Paragraph=Odlomak
 Seek.Item.Bookmark=Knjižna oznaka
 Seek.Item.StandardPage=Kartica teksta
 
@@ -172,6 +173,8 @@ Menu.Sort.ActiveMark=(aktivno)
 Menu.Help=Pomoć
 Menu.Help.Help=Pomoć
 Menu.Help.About=O programu NBR
+Menu.Help.WhatsNew=Što je novo
+Menu.Help.Report=Izvezi izvještaj...
 Menu.Help.Services=Servisi i računi...
 Menu.Help.Update=Provjeri ima li novije verzije
 Shelf.Filter.All=Sve knjige
@@ -273,6 +276,8 @@ GoTo.List.Accessible=Dijelovi knjige
 GoTo.Item.Format={0}/{1} — {2}
 GoTo.OK.Accessible=U redu
 GoTo.Cancel.Accessible=Otkaži
+GoTo.Page.Group=Idi na stranicu
+GoTo.Page.Accessible=Broj stranice
 GoTo.AutoPlay=Reproduciraj nakon skoka
 GoTo.AutoPlay.Hint=Kad je uključeno, reprodukcija kreće odmah nakon skoka. Kad nije, stanje ostaje kakvo je bilo: pauzirano ostaje pauzirano, a što svira nastavlja svirati.
 GoTo.Hint.Accessible=Savjet
@@ -475,7 +480,7 @@ Settings.Device.UseOptical=Koristi optički pogon
 Settings.Device.OpticalWhich=Pogon:
 Settings.Device.OpticalAuto=Onaj u kojem je disk
 Settings.Device.KeepAlive.Hint=Neki zvučni izlazi — osobito HDMI — gase se čim zvuk stane, pa im onda treba trenutak da se probude. Ono što čujete jest prva riječ rečenice koja nestaje, iznova i iznova, a da ništa očito nije u kvaru. Dok je ovo uključeno, NBR na kartici koju koristi svira ton daleko ispod svega što možete čuti, pa kartica nikad ne dobije priliku zaspati između rečenica. Isključite ako vaša kartica to ne radi: dok knjiga svira, izlaz ostaje otvoren.
-Settings.Device.UseOptical.Hint=Knjige su se nekad izdavale na običnim zvučnim CD-ima i NBR ih zna svirati. Disk čita odjednom umjesto da ga ostavlja da se vrti: cijela se strana pročita u jednom prolazu, ravno i bez vraćanja, pa pogon radi nekoliko minuta i onda je tih do kraja knjige. Sporo čitanje bilo bi tiše na sekundu, a bučnije na sat. Uključite samo ako to želite — u početku je isključeno, i na računalu koje ima pogon, a dok je isključeno NBR pogon uopće ne dira.
+Settings.Device.UseOptical.Hint=Knjige su se nekad izdavale na običnim zvučnim CD-ima i NBR ih zna svirati. NBR odmah pročita cijeli disk i privremeno ga pohrani na računalo, kako vas zujanje pogona ne bi ometalo u čitanju: pogon radi nekoliko minuta i onda je tih do kraja knjige. Uključite samo ako to želite — u početku je isključeno, i na računalu koje ima pogon, a dok je isključeno NBR pogon uopće ne dira.
 
 ; ---- SETTINGS - Advanced
 Settings.Ocr.Group=Knjige s tekstom u slikama
@@ -766,6 +771,10 @@ Services.Steps.OpenAi=1. Otvorite platform.openai.com u pregledniku. To je razvo
 ; ---- HELP AND ABOUT
 Dialog.Help.ComingSoon=Pomoć – uskoro.
 Dialog.Help.Title=Pomoć
+Dialog.WhatsNew.Title=Što je novo
+Report.Filter=Tekstualne datoteke (*.txt)|*.txt|Sve datoteke (*.*)|*.*
+Report.Done=Izvještaj je spremljen u:\n\n{0}\n\n{1} kB. Priložite ga svojoj poruci.
+Report.Failed=Izvještaj nije bilo moguće zapisati. Mapa je možda samo za čitanje ili na disku nema mjesta.
 Dialog.About.Title=O programu NBR
 Dialog.About.Release=Beta 1
 Dialog.About.Licence=🄯 Copyleft — NBR je slobodan softver pod GNU Općom javnom licencom, verzija 3. Smijete ga koristiti, proučavati, dijeliti i mijenjati; ako proslijedite izmijenjenu verziju, ona ide dalje pod istim uvjetima, zajedno sa svojim izvornim kodom.

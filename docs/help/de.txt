@@ -32,9 +32,9 @@ Besondere Formate: Daisy 2.02 Audio, Daisy 3 Audio, Daisy 2.02 Text, Daisy 3 Tex
 
 Brailleformate: .brf, .brl, .bra, .dxb und .i55.
 
-Alle genannten Formate lassen sich auch unmittelbar aus einem .7z-, .rar- oder .zip-Archiv öffnen. Mehrteilige Archive werden unterstützt, ebenso passwortgeschützte — sofern Sie das Passwort natürlich kennen.
+Alle genannten Formate lassen sich auch unmittelbar aus einem .7z-, .rar- oder .zip-Archiv öffnen. Mehrteilige Archive werden unterstützt, ebenso passwortgeschützte — natürlich, sofern Sie das Passwort kennen.
 
-Auch Bücher aus Bildern lassen sich öffnen — jene, in denen die Seiten Abbildungen von Text und kein echter Text sind, etwa ein eingescanntes PDF oder ein EPUB aus Seitenbildern. Ebenso gewöhnliche Bilder wie .bmp, .jpg, .tif und so weiter: Haben Sie also zufällig ein Buch als ordentlich nummerierte Bilderfolge, nimmt Nemoviz Book Reader auch das. Der Text auf den Bildern wird über Microsoft OCR automatisch erkannt, und nach kurzer Zeit steht ein ordentlich lesbarer Titel in Ihrem Bücherregal.
+Auch Bücher aus Bildern lassen sich öffnen — jene, in denen die Seiten Abbildungen von Text und kein echter Text sind, etwa ein eingescanntes PDF oder ein EPUB aus Seitenbildern. Ebenso gewöhnliche Bilder wie .bmp, .jpg, .tif und so weiter: Haben Sie also zufällig ein Buch als ordentlich nummerierte Bilderfolge, nimmt Nemoviz Book Reader es auch. Der Text auf den Bildern wird durch Microsoft OCR automatisch erkannt, und nach kurzer Zeit steht ein ordentlich lesbarer Titel in Ihrem Bücherregal.
 
 Achtung! Alle genannten Formate und ihre Spielarten laden in Nemoviz Book Reader, solange sie nicht durch eine Digital-Rights-Management-Lizenz geschützt sind. NBR kann DRM-geschützte Titel nicht öffnen; haben Sie solche, spielen Sie sie mit dem dafür vorgesehenen Hardware- oder Software-Player ab. Einzelheiten erfragen Sie dort, wo Sie diese Titel bezogen haben.
 
@@ -104,7 +104,7 @@ Wir weisen darauf hin, dass auch diese Stimmen bezahlt werden. Google gibt eine 
 
 Damit es kein Missverständnis und keine versehentlichen Ausgaben gibt, haben wir das Einrichten der Cloud-Stimmen eingeschränkt. In den Einstellungen für Sprache und Braille sehen Sie diese Stimmen nicht und können sie nicht zum Standard machen; sichtbar sind sie nur in den Eigenschaften eines gewählten Buches, und auch das erst, nachdem Sie sie in den erweiterten Einstellungen freigeschaltet haben. In den Eigenschaften eines Buches können Sie eine dieser Stimmen für dieses Buch wählen, und sie gilt allein für dieses Buch.
 
-Da bei Cloud-Stimmen auch dann Zeichen verbraucht werden, wenn Sie zurückspulen, eine Stelle wiederholen oder auf andere Weise bereits gelesene Zeichen noch einmal durchlaufen, hält NBR einen Zwischenspeicher dessen bereit, was gesprochen wurde, sodass Zurückspulen und Ähnliches nicht erneut berechnet wird. Derselbe Zwischenspeicher ist es auch, der Ihnen erlaubt, das Buch nach dem Lesen als MP3 auszugeben und so ein gewöhnliches Hörbuch zu bekommen.
+Da Zeichen bei Cloud-Stimmen auch dann verbraucht werden, wenn Sie zurückspulen, eine Stelle wiederholen oder auf andere Weise bereits gelesene Zeichen noch einmal durchlaufen, hält NBR einen Zwischenspeicher dessen bereit, was gesprochen wurde, sodass Zurückspulen und Ähnliches nicht erneut berechnet wird. Derselbe Zwischenspeicher ist es auch, der Ihnen erlaubt, das Buch nach dem Lesen als MP3 auszugeben und so ein gewöhnliches Hörbuch zu bekommen.
 
 # Bibliothek
 
@@ -114,7 +114,7 @@ Bei jedem Titel in der Bibliothek können Sie mit einem einfachen Druck auf die 
 
 ## Titel hinzufügen
 
-Im Menü Datei finden Sie zwei Einträge: Datei öffnen (Strg + O) und Ordner öffnen (Strg + Umschalt + O). Haben Sie in den Einstellungen die Unterstützung für das optische Laufwerk eingeschaltet, finden Sie auch Audio-CD öffnen. Daneben gibt es eine Möglichkeit, ein Bilderbuch erneut erkennen zu lassen, eine, um ein Hörbuch zu erzeugen, und eine zum Übersetzen. Es gibt außerdem einen Eintrag, den Sie nicht anrühren sollten, wenn es nicht wirklich sein muss: *Bibliothek leeren*. Er sagt von selbst, was er tut, und nach dem Aufrufen bekommen Sie noch eine Warnung. Bestätigen Sie bis zum Ende, ist Ihre Bibliothek gelöscht: alle Lesezeichen und alle Lesestellen fort, und die Sprach- und Tempoeinstellungen der Bücher darin gleich mit. Machen Sie um diesen Eintrag also lieber einen Bogen, solange Sie nicht ganz sicher sind, dass Sie die Bibliothek leeren wollen.
+Im Menü Datei finden Sie zwei Einträge: Datei öffnen (Strg + O) und Ordner öffnen (Strg + Umschalt + O). Haben Sie in den Einstellungen die Unterstützung für das optische Laufwerk eingeschaltet, finden Sie auch Audio-CD öffnen. Daneben gibt es eine Möglichkeit, ein Bilderbuch erneut erkennen zu lassen, eine, um ein Hörbuch zu erzeugen, und eine zum Übersetzen. Es gibt außerdem einen Eintrag, den Sie nicht anrühren sollten, wenn es nicht wirklich notwendig ist: *Bibliothek leeren*. Er sagt von selbst, was er tut, und nach dem Aufrufen bekommen Sie noch eine Warnung. Bestätigen Sie bis zum Ende, ist Ihre Bibliothek gelöscht: alle Lesezeichen und alle Lesestellen fort, und die Sprach- und Tempoeinstellungen der Bücher darin gleich mit. Machen Sie um diesen Eintrag also lieber einen Bogen, solange Sie nicht ganz sicher sind, dass Sie die Bibliothek leeren wollen.
 
 Mit der ersten Möglichkeit öffnen Sie eine einzelne Datei (ein MP3-Buch in einer Datei, ein EPUB-Dokument oder eine ncc.html-Datei für einen Daisy-Titel), mit dem Öffnen eines Ordners ein Hörbuch, das über mehrere Dateien in einem Ordner verteilt ist. Darüber hinaus können Sie beim Öffnen eines Ordners auch eine größere Menge verschiedener Dateien einlesen, also eine Sammlung mehrerer Titel. Nemoviz Book Reader hat Regeln für das Sortieren eingebaut und wird sein Bestes tun, einen solchen Ordner so gut wie irgend möglich zu ordnen.
 
@@ -128,7 +128,7 @@ Der Eintrag für die wiederholte Erkennung ist dafür da, die Texterkennung eine
 
 Buch übersetzen öffnet einen Dialog, in dem Sie die Ausgangssprache wählen, die Sprache, in die übersetzt werden soll, den Dienst oder die Dienste, die Sie verwenden möchten, und ein Feld, in das Sie ein paar grundlegende Hinweise schreiben können, was und wie übersetzt werden soll.
 
-Als Hörbuch exportieren tut genau das, was der Name sagt. Ob Sie einen der installierten Sprachsynthesizer oder die Cloud-Stimmen verwenden — Sie können aus einem Textbuch ein Tonbuch machen und es an einen Ort Ihrer Wahl ausgeben. Das Buch wird als eine einzige .mp3-Datei ausgegeben, die Werte entsprechen denen der von Ihnen verwendeten Sprachausgabe, und die Aufnahmequalität entspricht der beim Zuhören. Vorher fragt NBR nach einer Bestätigung und sagt, wie lange die Herstellung dauern dürfte.
+Die Option *Als Hörbuch exportieren* tut genau das, was der Name sagt. Ob Sie einen der installierten Sprachsynthesizer oder die Cloud-Stimmen verwenden — Sie können aus einem Textbuch ein Hörbuch machen und es an einen Ort Ihrer Wahl ausgeben. Das Buch wird als eine einzige .mp3-Datei ausgegeben, die Werte entsprechen denen der von Ihnen verwendeten Sprachausgabe, und die Aufnahmequalität entspricht der beim Zuhören. Vorher fragt NBR nach einer Bestätigung und sagt, wie lange die Herstellung dauern dürfte.
 
 ## Das Bücherregal
 
@@ -140,7 +140,7 @@ Neben den Grundangaben wie Autor und Titel hören Sie beim Bewegen durch diese L
 
 Sind Sie auf einem Titel stehen geblieben, bringt Sie die Tabulatortaste an eine Stelle, an der Ihnen die Pfeiltasten auf und ab eine Fülle von Angaben zum Buch geben, mit Blick darauf, wo Sie stehen geblieben sind, wie viel des Buches gelesen ist und wie viel bleibt, in Prozent und in Zeit, wo das Buch verlegt und hergestellt wurde, technische Angaben zur Aufnahme und so weiter. Diese Angaben hängen vom Format des Buches ab und werden sich von Titel zu Titel unterscheiden.
 
-Gehen Sie weiter durch das Bibliotheksfenster, kommen Sie zum Suchfeld, das nach dem einfachen Grundsatz arbeitet, die eingetippte Zeichenfolge in den Namen der Einträge im Bücherregal zu suchen. Tippen Sie „ana“, findet es gewiss Autorinnen namens Ana — aber es findet auch *7000 dana u Sibiru*.
+Gehen Sie weiter durch das Bibliotheksfenster, kommen Sie zum Suchfeld, das nach dem einfachen Grundsatz arbeitet, die eingetippte Zeichenfolge in den Namen der Einträge im Bücherregal zu suchen. Tippen Sie „anna“, findet es gewiss Autorinnen namens Anna — aber es findet auch *Unser Mann in Havanna*.
 
 Nach dem Suchfeld steht ein Filter-Kombinationsfeld, in dem Sie bestimmen, welche Bücher gezeigt werden. Standardmäßig sind dort immer alle Bücher, doch Sie können den Filter auf Wird gelesen, Ungelesen, Gelesen und Favoriten umstellen, und das Bücherregal richtet sich nach Ihrer Wahl.
 
@@ -228,7 +228,7 @@ Es folgen sieben Filter, die Ihnen helfen mögen oder auch nicht, den Klang von 
 
 Der erste ist *Rumpeln entfernen*, ein Hochpassfilter. Er nimmt Geräusche im tiefen Bereich der Aufnahme weg, von Elektrogeräten bis zum versehentlichen Schlag ans Mikrofon oder an den Tisch. Es folgt *Rauschminderung*, gedacht für Bandrauschen, schlechte Mikrofone und ähnliche Geräusche etwas weiter oben im Frequenzbereich. *Zischlaute mildern* dämpft das Prasseln von Lauten wie S, Z und Sch, die durch zu nahes Besprechen oder betonte Höhen verzerrt aufgenommen wurden. *Sprache angleichen* versucht, leisere und lautere Stellen der Aufnahme anzugleichen. Dann kommt *Klangfarbe*, ein Fünfband-Equalizer; die Bänder sind mit ihren Frequenzen beschriftet — 200, 800, 1.8k, 3.5k und 5k+ — und das letzte ist ein Kuhschwanzfilter, das heißt, es hebt oder senkt alles darüber und nicht nur einen Bereich. Zum Schluss die Gruppe *Lautheit und Pausen* mit zwei Reglern: *Automatische Lautheit* (die Normalisierung) hebt die gesamte Aufnahme bis an die höchste unverzerrte Stufe, und *Rauschen in Pausen* (das Gate) nimmt die restlichen Geräusche in den Abständen zwischen den Sätzen weg.
 
-Jeder Filter hat fünf Stufen: minimal, leicht, mittel, stark und maximal. Und es sei wiederholt: Jeder lässt sich einzeln ein- und ausschalten.
+Jeder Filter hat fünf Stufen: minimal, leicht, mittel, stark und maximal. Und es sei wiederholt: jede lässt sich einzeln ein- und ausschalten.
 
 Auch die Klangbearbeitung wird für jedes Buch einzeln behalten.
 

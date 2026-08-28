@@ -476,7 +476,7 @@ Settings.Device.OpticalGroup=Optical drive
 Settings.Device.UseOptical=Use the optical drive
 Settings.Device.OpticalWhich=Drive:
 Settings.Device.OpticalAuto=Whichever has a disc in it
-Settings.Device.UseOptical.Hint=Books were once published on ordinary audio CDs, and NBR can play them. It reads the disc itself rather than leaving it spinning: the whole side is read in one pass, straight through and without going back, so the drive works for a few minutes and is then silent for the rest of the book. Reading slowly would be quieter for a second and noisier for an hour. Turn this on only if you want it - it is off to begin with, even on a machine that has a drive, and while it is off NBR never touches the drive at all.
+Settings.Device.UseOptical.Hint=Books were once published on ordinary audio CDs, and NBR can play them. NBR reads the whole disc at once and keeps it on your computer for the time being, so the drive's whirring does not sit under your reading: it works for a few minutes and is then silent for the rest of the book. Turn this on only if you want it - it is off to begin with, even on a machine that has a drive, and while it is off NBR never touches the drive at all.
 
 ; ---- SETTINGS - Advanced
 Settings.Ocr.Group=Books with text in pictures
