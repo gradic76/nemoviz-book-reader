@@ -6666,15 +6666,36 @@ across 88 books**. `BrfParser.Punctuation` covers them now. On its own it change
 no book's table (verified through the real `Detect` before and after); it is
 correctness, not the repair.
 
-#### Still open
+#### Portuguese joined the tried set, and the "no table" claim was wrong
 
-- **Languages with no table of their own.** The Portuguese books (Biblioteca
-  Nacional de Portugal) improve — their bodies now read as correct Portuguese
-  where EBAE gave `naro havia censura prforvia` — but `en-g1` renders their
-  capital sign as a Greek letter, so the title reads `βiblioteca νacional`. There
-  is no Portuguese table in the curated set; the per-book picker is the remedy,
-  as §10g already says for Korean, Thai and Vietnamese.
-- French `<auteur>` markup still arrives as text, now as `àauteurù`.
+This section first said there is no Portuguese table. **There are five**, and the
+mistake was testing two of them and stopping: `pt-pt-g1.utb` declares
+`#+direction: both` and back-translates to **nothing at all**, and `pt-pt-g2.ctb`
+does the same, so a quick look says Portuguese is unsupported. `pt.tbl` works, and
+so does `pt-comp6.utb` — which is `#+type: computer` and therefore filtered out of
+the catalogue by design, correctly.
+
+`BrailleTables.All` gained `pt-g1` (`pt.tbl`) and `Plausibility` gained a
+Portuguese stopword list, without which a Portuguese table is judged on ENGLISH
+everyday words and cannot win. Measured over the same 93 files: **12 books move to
+Portuguese and nothing else changes at all** — Croatian, French and English are
+untouched, and the cost stays 11.8 s for the corpus.
+
+| | before | after |
+|---|---|---|
+| title | `αs trs µarias ⦵oana µeirim` | `As três Marias Joana Meirim` |
+| credits | `τranscrio e reviso: σlvia γomes` | `Transcrição e revisão: Sílvia Gomes` |
+
+**11 of the 12 are right; `4147bd_001.BRF` is not.** It is Portuguese, `pt-g1`
+reads it correctly, and detection leaves it on `en-g1` while its own volumes 2 and
+3 move. The miss is at the LANGUAGE stage, which `RefineStandard` never sees —
+that stage only compares tables of the winner's own language, so once
+plausibility says English, Portuguese is out of reach. The picker is the remedy,
+as ever.
+
+**The twelfth is `4137A-7.brf`, which is Vietnamese**, and it moved from one wrong
+table to another. Neither is right and neither is worse; `vi-vn-g0.utb` is in the
+catalogue and reachable from the picker.
 
 ### PARKED, WITH THE MEASUREMENTS DONE: the RHVoice voices ignore volume below 10 (2026-08-28)
 

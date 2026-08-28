@@ -244,6 +244,13 @@ namespace Nemoviz_Book_Reader
             new BrailleTableInfo("en-us-g2", "en-us-g2.ctb",      "English (EBAE, American) — contracted", "en"),
             new BrailleTableInfo("en-us-g1", "en-us-g1.ctb",      "English (EBAE, American) — uncontracted", "en"),
             new BrailleTableInfo("en-gb-g2", "en-GB-g2.ctb",      "English (British) — contracted", "en"),
+            // Portuguese joins the tried set because the corpus needed it: twelve
+            // books from the Biblioteca Nacional de Portugal were landing on
+            // English and French tables. pt.tbl is the one that back-translates --
+            // pt-pt-g1.utb declares "direction: both" and returns nothing, and
+            // pt-comp6.utb works but is #+type:computer and so is filtered out of
+            // the catalogue by design.
+            new BrailleTableInfo("pt-g1",   "pt.tbl",             "Portuguese", "pt"),
             new BrailleTableInfo("fr-g2",   "fr-bfu-g2.ctb",      "French — contracted", "fr"),
             new BrailleTableInfo("fr-g1",   "fr-bfu-comp6.utb",   "French — uncontracted", "fr"),
         };

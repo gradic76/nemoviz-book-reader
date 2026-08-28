@@ -605,10 +605,14 @@ namespace Nemoviz_Book_Reader
         private static readonly HashSet<string> FrStop = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "le","la","les","de","des","du","et","un","une","est","que","qui","pour","dans","en","il","elle","ne","pas","se","sur","au","aux","ce","vous","je" };
 
+        private static readonly HashSet<string> PtStop = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "de","a","o","que","e","do","da","em","um","para","com","não","uma","os","no","se","na","por","mais","as","dos","como","mas","ao","ele","das","seu","sua","ou","quando" };
+
         /// <summary>Share of words that are everyday words of the table's language.</summary>
         private static double StopwordRate(string text, string tableId)
         {
             HashSet<string> stop = tableId.StartsWith("hr-", StringComparison.Ordinal) ? HrStop
+                                 : tableId.StartsWith("pt-", StringComparison.Ordinal) ? PtStop
                                  : tableId.StartsWith("fr-", StringComparison.Ordinal) ? FrStop
                                  : EnStop;
             int words = 0, hits = 0;
