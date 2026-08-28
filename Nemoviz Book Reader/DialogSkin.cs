@@ -402,9 +402,62 @@ namespace Nemoviz_Book_Reader
             }
             c.BackColor = Color.FromArgb(0x12, 0x18, 0x15);
             ComboBox cb = c as ComboBox;
-            if (cb != null) cb.FlatStyle = FlatStyle.Flat;
+            if (cb != null) PaintComboItems(cb);
             NumericUpDown n = c as NumericUpDown;
             if (n != null) n.BorderStyle = BorderStyle.FixedSingle;
+        }
+
+        /// <summary>Gives a combo the skin's colours by drawing its ITEMS, and
+        /// leaves the box itself to Windows.
+        ///
+        /// <para><b>This replaces <c>FlatStyle.Flat</c>, and the reason is
+        /// JAWS.</b> Flat takes the drawing away from Windows and hands the
+        /// whole control to WinForms — and JAWS then reads the combo off the
+        /// SCREEN rather than off the control: arrowing through a closed one, it
+        /// spoke the window's own title before each item. In a test program that
+        /// came out as the title, cut off mid-word ("Combo test 7 — Fl") the way
+        /// text read off a narrow caption bar is; in NBR the skin leaves no text
+        /// behind the box, so there was nothing to read and it said
+        /// <b>"blank"</b> — reported by Gordan on three machines, in every combo
+        /// of every window, and only on the NBR look.</para>
+        ///
+        /// <para><b>Measured before it was changed</b> (2026-08-28), five combos
+        /// differing in one thing each, judged by ear under JAWS over three
+        /// passes: <c>Standard</c>, <c>System</c>, Standard with these colours,
+        /// and Standard with this owner-drawing are all clean; <c>Flat</c> is
+        /// not, and <c>Popup</c> was not either. So neither the colours nor the
+        /// owner-drawing is at fault — only who paints the BOX.</para>
+        ///
+        /// <para>The accessibility layers say nothing about any of this: MSAA
+        /// and UIA, recorded from outside, are identical either way and carry
+        /// nothing without a name. It is not a channel an application can
+        /// see, which is why this was found by ear and by elimination.</para></summary>
+        private static void PaintComboItems(ComboBox cb)
+        {
+            cb.DrawMode = DrawMode.OwnerDrawFixed;
+            // OnGlass is called from several skins and may reach one control
+            // more than once; subtract before adding so the item is not painted
+            // twice over.
+            cb.DrawItem -= PaintComboItem;
+            cb.DrawItem += PaintComboItem;
+        }
+
+        private static void PaintComboItem(object sender, DrawItemEventArgs e)
+        {
+            ComboBox cb = sender as ComboBox;
+            if (cb == null) return;
+            bool on = (e.State & DrawItemState.Selected) != 0;
+            using (var br = new SolidBrush(on ? Color.FromArgb(0x1E, 0x2A, 0x24)
+                                              : Color.FromArgb(0x12, 0x18, 0x15)))
+                e.Graphics.FillRectangle(br, e.Bounds);
+            // Index -1 is the empty box before anything is selected: the
+            // background is drawn and there is nothing to write in it.
+            if (e.Index < 0 || e.Index >= cb.Items.Count) return;
+            object item = cb.Items[e.Index];
+            TextRenderer.DrawText(e.Graphics, item == null ? string.Empty : item.ToString(), e.Font,
+                new Rectangle(e.Bounds.X + 3, e.Bounds.Y, e.Bounds.Width - 4, e.Bounds.Height),
+                NewPlayerSkin.Lit,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
 
         /// <summary>A silver key on the rim, same face as the player's.</summary>

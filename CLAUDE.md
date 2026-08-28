@@ -2813,6 +2813,70 @@ the hidden `TabControl` still fills the client area) plus one `?` key.
 before any of this work** — re-checked after every change in this run, since
 that is the invariant §8k's closure depends on.
 
+### `FlatStyle.Flat` MADE JAWS READ THE COMBO OFF THE SCREEN (2026-08-28)
+
+Reported from beta 1, on Win 11 and two Win 10 machines: arrowing through a
+**closed** combo, JAWS said **"blank"** before each item — clean going down the
+list, and from the first press back **up** it said it every time and never
+stopped. Every combo, every window, **and only on the NBR look**.
+
+**The cause was one line, set on every combo by the skin and only when it
+paints**: `cb.FlatStyle = FlatStyle.Flat`, in `DialogSkin.OnGlass` and
+`NewPlayerSkin.LayOutCombo`. That is exactly why classic was clean — both
+methods return before it. Flat takes the drawing away from Windows and hands the
+whole control to WinForms, **and JAWS then reads the combo off the SCREEN rather
+than off the control**.
+
+**Fixed by splitting the job:** `DialogSkin.PaintComboItems` draws the ITEMS
+(`OwnerDrawFixed`, glass background, `Lit` text, a darker band for the selected
+row) and the BOX goes back to Windows. The player's seek combo already had item
+drawing, so it only lost the one line. Same colours; the frame and arrow are now
+the system's, which Gordan accepted (*"vizualno ne mogu procijeniti no nije ni
+toliko bitno"*). Measured before and after on the Shift+arrow path: **65–70 ms
+either way**, so nothing slowed.
+
+**The finding that outlives the bug: neither accessibility channel could see
+it.** MSAA (`SetWinEventHook` + `AccessibleObjectFromEvent`) and UIA
+(`System.Windows.Automation`), both recorded from outside the process, are
+**identical with the fault and without it**, and neither ever carried an element
+with an empty name. **JAWS's own speech history does not record the blank
+either.** When a reader reports something no event stream shows, the remaining
+channel is the screen — and the way in is to vary how the control is DRAWN.
+
+**What proved it:** five combos in one throwaway program, differing in one thing
+each, judged by ear over three passes. Standard, Standard with the theme's
+colours, and Standard with our owner-drawing are all clean; **Flat is not**, and
+Popup was not once. The mechanism showed itself the moment the test window had a
+title of its own: JAWS spoke `Combo test 7 — Fl` — the window title, **cut off
+mid-word**, the way text read off a narrow caption bar is. NBR's skin leaves no
+text behind the box, so there was nothing to read and it said "blank".
+
+**SIX WRONG DIAGNOSES CAME FIRST, each disproved rather than argued away** —
+kept so they are not re-tried: owner-draw · nesting in panels · the skin as such
+(classic shows the same MSAA event) · our UIA notification, early and late ·
+`SpeakOnChange` and the NVDA client · the manifest and comctl v6 · and the .NET
+accessibility switches.
+
+**And a red herring worth naming.** Every NBR combo emits an extra
+`EVENT_OBJECT_SELECTION` whose objid is a **process-wide counter** and whose
+object oleacc will not hand over. Real and reproducible — it comes from WinForms'
+4.7.1+ accessibility improvements, and a bare `csc` build reproduces it the
+moment the `TargetFramework` attribute is added — and
+`Switch.UseLegacyAccessibilityFeatures.3=true` removes it. **It was tried in the
+shipped `.exe.config` and the blank survived.** A finding that is genuine,
+measurable and irrelevant is the most expensive kind there is.
+
+**The instruments are kept in `D:\Player\JAWS test\`**: `MsaaSpy.exe`
+(`<pid|exe>`, plus `--send "{TAB}|{DOWN}"`, `--for <seconds>`, `--drive N`),
+`UiaSpy.exe`, `Snimi.cmd` for a 120-second recording while a human drives, and
+the ComboTest programs. `MsaaSpy --send` doubles as a way to walk a window nobody
+here can see — the FOCUS lines name every control in tab order.
+
+**Not this bug, and confirmed unchanged:** JAWS says **"selected"** before each
+Shift+arrow announcement. That is its own reading of the key (§6), it predates
+all of this, and NVDA does not do it — which is most of why the same step feels
+slower under JAWS.
+
 > ### High contrast is the DEFAULT, not a lock (2026-08-03)
 >
 > Gordan asked the question that fixed this: *does a reader with a high-contrast

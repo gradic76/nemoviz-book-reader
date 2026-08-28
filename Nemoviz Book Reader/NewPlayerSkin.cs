@@ -505,7 +505,9 @@ namespace Nemoviz_Book_Reader
             if (cb == null) return;
             cb.SetBounds(ComboRect.X, ComboRect.Y, ComboRect.Width, ComboRect.Height);
             cb.DropDownStyle = ComboBoxStyle.DropDownList;
-            cb.FlatStyle = FlatStyle.Flat;
+            // NOT FlatStyle.Flat — that is what made JAWS read this combo off
+            // the screen and say "blank" before every step. The item drawing
+            // below already carries the whole look; see DialogSkin.PaintComboItems.
             cb.BackColor = Glass;
             cb.ForeColor = Lit;
             cb.Font = FCombo;
