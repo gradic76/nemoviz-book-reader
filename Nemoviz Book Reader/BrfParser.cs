@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Nemoviz_Book_Reader
 {
@@ -305,11 +306,33 @@ namespace Nemoviz_Book_Reader
             return pages;
         }
 
-        /// <summary>Removes cells liblouis had no text for — formatting indicators
+        /// <summary>Removes cells liblouis had no text for -- formatting indicators
         /// (emphasis, producer marks) that would otherwise reach TTS as raw braille
-        /// characters.</summary>
+        /// characters, or as liblouis's own spelling of them.
+        ///
+        /// <para><b>Two shapes, one meaning.</b> A cell that survives untranslated
+        /// arrives either as the braille character itself (U+2800..U+28FF) or, more
+        /// often, in liblouis's escape notation -- a backslash, the dot numbers and
+        /// a slash, so the UEB italic indicator comes through as \46/. Both mean
+        /// "this cell has no text", and a reader hears the second one spoken out as
+        /// "backslash four six slash".
+        ///
+        /// <para><b>Why it was not worth doing until now.</b> Measured over 88
+        /// braille books BEFORE the round-trip refinement, the escape notation
+        /// appeared 2 997 times -- because the wrong table was usually winning, and
+        /// a wrong table does not fail honestly: it reads an indicator cell as a
+        /// contraction and produces a word. With the right table chosen the count is
+        /// 36 680, so honest failure is now visible where silent damage used to be,
+        /// and this is what turns it back into text.
+        ///
+        /// <para><b>Safe by construction.</b> The notation is liblouis's own and
+        /// cannot occur in a book: nothing writes a backslash, digits and a slash
+        /// with no spaces in running prose. It is dropped rather than replaced,
+        /// because what it marks is emphasis, which nothing downstream can
+        /// render.</summary>
         private static string StripUntranslated(string line)
         {
+            if (line.IndexOf((char)92) >= 0) line = Untranslated.Replace(line, "");
             var sb = new StringBuilder(line.Length);
             foreach (char c in line)
                 if (c < 0x2800 || c > 0x28FF) sb.Append(c);
@@ -391,7 +414,148 @@ namespace Nemoviz_Book_Reader
                 }
                 if (score > bestScore) { bestScore = score; best = t; }
             }
-            return best;
+            return RefineStandard(sample, best);
+        }
+
+        /// <summary>How much better a same-language table must round-trip before it
+        /// overrides the plausibility winner, and how well it must do in absolute
+        /// terms. Both bars come from the corpus, not from taste.</summary>
+        private const double MinAdvantage = 6.0;
+        private const double MinAgreement = 70.0;
+
+        /// <summary>Plausibility chooses the LANGUAGE; this chooses the STANDARD and
+        /// the GRADE, which plausibility measurably cannot.
+        ///
+        /// <para><b>Why a second stage at all.</b> Reading a UEB book with an EBAE
+        /// table scores HIGHER, and not by a little: on <c>1670702.brf</c> (The
+        /// Yield, produced by the Australian Braille Writing Association, and
+        /// Australia has been UEB since 2005) EBAE won by 0.032. The scorer is not
+        /// merely blind here, it is biased -- EBAE expands UEB indicator cells into
+        /// contractions, so it produces MORE letters and MORE common English words
+        /// than the correct table, and the letter and stopword terms both reward it
+        /// for the damage. Measured: with the junk term removed entirely the wrong
+        /// table still wins, so no reweighting of the existing terms can fix it.
+        ///
+        /// <para><b>What the round trip asks.</b> Cells to text and back to cells
+        /// with the same table, compared as MULTISETS OF WORDS. The wrong table has
+        /// nowhere to hide: the book spells "by" out in full and EBAE writes it as
+        /// one cell, so that word cannot come back. Read off the shipped tables
+        /// rather than from memory -- "by the way" is <c>BY ! WAY</c> under UEB and
+        /// <c>0! WAY</c> under EBAE; likewise "table" (TABLE / TA#) and "o'clock"
+        /// (O'CLOCK / O'C).</para>
+        ///
+        /// <para><b>Words, not cells.</b> A cell-by-cell comparison was tried first
+        /// and is not usable: it depends on exactly how the <c>\NNN/</c> escapes are
+        /// stripped, and changing that detail flipped the answer. Word multisets
+        /// have no alignment to lose, so a mis-contracted word fails on its own
+        /// instead of dragging everything after it down with it.</para>
+        ///
+        /// <para><b>Same language only, and this is load-bearing.</b> An
+        /// uncontracted table is close to an identity map -- cells to letters and
+        /// straight back -- so it round-trips at 95% and better on any file
+        /// whatever, in any language. Measured over 93 files, letting the round trip
+        /// choose freely handed 44 books to Croatian, Thai and Korean ones included.
+        /// It answers "does this table explain these cells"; it has no opinion about
+        /// what language they are in, and must not be asked for one.</para>
+        ///
+        /// <para><b>The two bars.</b> Both measured. The Valentin Hauy library ships
+        /// the same title contracted and uncontracted, and the uncontracted editions
+        /// win by <b>+63 to +73 points</b> while the contracted ones are
+        /// mis-preferred by at most +4.8 -- so an advantage of 6 separates them with
+        /// room to spare. The absolute bar catches the rest: the Ukrainian and
+        /// Korean files have no table here at all, and their best reaches only
+        /// 61-65%, where every genuine correction lands at 70% or better and the
+        /// English ones at 92-99%.</para>
+        ///
+        /// <para><b>What it changes, over 93 files:</b> every book recorded in the
+        /// brief as carrying untranslated markers moves to UEB, and the French
+        /// uncontracted editions move to grade 1 -- which is also the brief's "Hauy
+        /// comes out Haouy". The contracted editions stay where they were.</para>
+        /// </summary>
+        private static BrailleTableInfo RefineStandard(string sample, BrailleTableInfo best)
+        {
+            if (best == null || string.IsNullOrEmpty(sample)) return best;
+
+            List<string> src = CellWords(sample);
+            if (src.Count < 40) return best;   // too little to judge; leave it alone
+
+            double baseline = RoundTrip(sample, src, best);
+            if (baseline <= 0) return best;
+
+            BrailleTableInfo winner = best;
+            double winning = baseline;
+            foreach (BrailleTableInfo t in BrailleTables.All)
+            {
+                if (t == best || t.Language != best.Language) continue;
+                double a = RoundTrip(sample, src, t);
+                if (a > winning) { winning = a; winner = t; }
+            }
+
+            if (winner == best) return best;
+            if (winning < MinAgreement || winning - baseline < MinAdvantage) return best;
+            return winner;
+        }
+
+        /// <summary>Back-translate the sample with this table, translate the result
+        /// straight back, and report how much of it returned.</summary>
+        private static double RoundTrip(string sample, List<string> src, BrailleTableInfo t)
+        {
+            string text = LibLouis.BackTranslate(sample, t.File);
+            if (string.IsNullOrEmpty(text)) return 0;
+
+            // liblouis writes a cell it cannot back-translate as \<dots>/. Forward
+            // translating that SPELLING would turn one cell into half a dozen, so
+            // the escapes come out and the words around them are judged instead.
+            text = Untranslated.Replace(text, "");
+
+            string cells = LibLouis.Translate(text, t.File);
+            if (string.IsNullOrEmpty(cells)) return 0;
+            return WordAgreement(src, CellWords(cells));
+        }
+
+        private static readonly Regex Untranslated = new Regex(@"\\\d+/", RegexOptions.Compiled);
+
+        /// <summary>The cells as whitespace-separated words, written in braille
+        /// ASCII whichever way the table chose to display them -- the English and
+        /// French tables emit braille ASCII, the Croatian ones Unicode cells, and
+        /// they are the same dots either way.</summary>
+        private static List<string> CellWords(string s)
+        {
+            var words = new List<string>();
+            var w = new StringBuilder();
+            foreach (char c in s)
+            {
+                int dots = -1;
+                if (c >= 0x2800 && c <= 0x283F) dots = c - 0x2800;
+                else if (c < 256 && CellOfByte[c] >= 0) dots = CellOfByte[c];
+
+                if (dots > 0) { w.Append(BrailleAscii[dots]); continue; }
+                // dots == 0 is the blank cell, i.e. a space; anything unmapped
+                // (a stray byte, a line break) separates words just as well.
+                if (w.Length > 0) { words.Add(w.ToString()); w.Length = 0; }
+            }
+            if (w.Length > 0) words.Add(w.ToString());
+            return words;
+        }
+
+        /// <summary>Share of the source words that came back, compared as multisets
+        /// so that nothing depends on alignment.</summary>
+        private static double WordAgreement(List<string> src, List<string> got)
+        {
+            if (src.Count == 0 || got.Count == 0) return 0;
+            var bag = new Dictionary<string, int>();
+            foreach (string w in got)
+            {
+                int v;
+                bag[w] = bag.TryGetValue(w, out v) ? v + 1 : 1;
+            }
+            int hit = 0;
+            foreach (string w in src)
+            {
+                int v;
+                if (bag.TryGetValue(w, out v) && v > 0) { bag[w] = v - 1; hit++; }
+            }
+            return 100.0 * hit / Math.Max(src.Count, got.Count);
         }
 
         private static string Sample(List<List<string>> pages)
@@ -415,6 +579,23 @@ namespace Nemoviz_Book_Reader
         // sparingly (a few per cent of letters at most).
         private const string CroatianMarks = "čćšžđČĆŠŽĐ";
         private const string FrenchMarks = "éèêàçùôîïûœÉÈÊÀÇÙ";
+
+        // Punctuation a real book may contain, so it does not count against the
+        // table that produced it. The dashes, the curly quotes and the asterisk
+        // are here because a table that back-translates into proper typography
+        // was being PENALISED for doing so at 3 points a character: measured
+        // over 88 braille books, 22 344 legitimate characters were being
+        // charged as junk.
+        //
+        // It changes NO book's detected table on that corpus -- verified by
+        // running the real, sample-based Detect over all 88 before and after.
+        // It is correctness, not the repair -- the wrong-table faults recorded in
+        // the brief are fixed by RefineStandard below, not by reweighting a term.
+        private const string Punctuation =
+            ".,;:!?-'\"()[]«»…"   // as before
+          + "—–"                 // em dash, en dash
+          + "‘’“”‚„"             // curly quotes, single and double
+          + "*";                 // a scene break, "* * *"
 
         // Everyday words that dominate ordinary prose in each supported language.
         private static readonly HashSet<string> HrStop = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -472,7 +653,7 @@ namespace Nemoviz_Book_Reader
                 }
                 inWord = false; prevLower = false;
                 if (char.IsWhiteSpace(c) || char.IsDigit(c)) continue;
-                if (".,;:!?-'\"()[]«»…".IndexOf(c) < 0) junk++;
+                if (Punctuation.IndexOf(c) < 0) junk++;
             }
             if (letters == 0) return double.MinValue;
 

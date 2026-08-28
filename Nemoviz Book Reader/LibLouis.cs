@@ -32,6 +32,13 @@ namespace Nemoviz_Book_Reader
             uint[] outbuf, ref int outlen,
             ushort[] typeform, byte[] spacing, int mode);
 
+        [DllImport(Dll, CallingConvention = Conv, CharSet = CharSet.Ansi)]
+        private static extern int lou_translateString(
+            [MarshalAs(UnmanagedType.LPStr)] string tableList,
+            uint[] inbuf, ref int inlen,
+            uint[] outbuf, ref int outlen,
+            ushort[] typeform, byte[] spacing, int mode);
+
         [DllImport(Dll, CallingConvention = Conv)]
         private static extern void lou_free();
 
@@ -107,6 +114,59 @@ namespace Nemoviz_Book_Reader
 
                 int rc = lou_backTranslateString(table, inbuf, ref inlen, outbuf, ref outlen,
                                                  null, null, 0);
+                if (rc == 0) return null;
+
+                var sb = new StringBuilder(outlen);
+                for (int i = 0; i < outlen; i++)
+                {
+                    uint c = outbuf[i];
+                    if (c == 0) continue;
+                    if (c <= 0xFFFF) sb.Append((char)c);
+                    else sb.Append(char.ConvertFromUtf32((int)c));
+                }
+                return sb.ToString();
+            }
+            catch { return null; }
+        }
+
+        /// <summary>Text to braille cells -- the direction NBR does not read books
+        /// in, and needs for exactly one thing: asking a table whether it explains
+        /// the cells in front of it.
+        ///
+        /// <para>A .brf declares no standard and no grade, and back-translation
+        /// alone cannot tell them apart -- EBAE reading a UEB book produces
+        /// confident nonsense that scores WELL, because it expands indicator cells
+        /// into contractions and so yields more letters and more common words than
+        /// the right table does. Translating the result back and comparing it with
+        /// the cells we started from asks the question the other way round, where
+        /// the wrong table has nowhere to hide: it wrote "by" as one cell and the
+        /// book spells it out.</para>
+        ///
+        /// <para>Output is in the table's own display convention -- braille ASCII
+        /// for the English and French tables, Unicode cells for the Croatian ones --
+        /// so a caller comparing it against anything must reduce both sides to dot
+        /// patterns first. See <see cref="BrfParser"/>.</para></summary>
+        public static string Translate(string text, string tableFile)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            if (!Available) return null;
+            string table = TablePath(tableFile);
+            if (table == null) return null;
+
+            try
+            {
+                uint[] inbuf = new uint[text.Length];
+                for (int i = 0; i < text.Length; i++) inbuf[i] = text[i];
+                int inlen = inbuf.Length;
+
+                // Forward translation contracts, so it shrinks -- but an
+                // uncontracted table can add capital and number signs, so this
+                // still needs headroom rather than the input length.
+                int outlen = Math.Max(64, inlen * 2);
+                uint[] outbuf = new uint[outlen];
+
+                int rc = lou_translateString(table, inbuf, ref inlen, outbuf, ref outlen,
+                                             null, null, 0);
                 if (rc == 0) return null;
 
                 var sb = new StringBuilder(outlen);

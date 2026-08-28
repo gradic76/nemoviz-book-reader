@@ -6180,11 +6180,25 @@ available and needs nobody to know the language.
   Vietnamese files land on English or French tables — wrong, and expected, since
   detection is only offered the nine it can score. **That is what the per-book
   chooser is for.**
-- French `<auteur>` markup arrives as text (`chauteuroi`), and `Haüy` comes out
-  `Haouy`.
+- French `<auteur>` markup arrives as text, now as `àauteurù`. **The `Haüy` half
+  is FIXED (2026-08-28), and it was the wrong GRADE, not a bad cell.** The
+  Valentin Haüy library ships each book four ways -- `_ABR_` (abrégé, contracted)
+  and `_INT_` (intégral, uncontracted) × the French and the North American ASCII
+  convention -- and detection used to give all four `fr-g2`. The `_INT_` files now
+  detect as `fr-g1` and open *"Presses de la Cité … Association Valentin Haüy"*
+  where they read *"Brûleez tout … Haouy"* before; the `_ABR_` files are genuinely
+  contracted and correctly stay on `fr-g2`. Done by the round-trip refinement in
+  §11, which separates the two editions by 63 to 73 points. **The filename says
+  which** (`INT` = intégral = grade 1), and so does the book's own title page --
+  worth knowing before anyone chases it in the cell map again.
 - `.i55` decorative rules survive as `\5/∷∷∷∷∷:`. **The guess that these were the
-  `{ | } ~` bytes was wrong** — those are mapped now, and the rules come out byte
-  for byte unchanged, so it is something else.
+  `{ | } ~` bytes was wrong** -- those are mapped now, and the rules came out byte
+  for byte unchanged. **ANSWERED AND GONE (2026-08-28):** `\5/` is liblouis's own
+  notation for a cell it cannot back-translate, the digits being the dot numbers,
+  so the rule was not surviving -- it was being reported as untranslatable, one
+  escape per cell. `StripUntranslated` drops the notation now, and the `∷` run
+  goes with it because the line left behind is caught by `IsDecorative`. See §11
+  for why this was pointless before the table detection was fixed and is not now.
 - Stray byte not yet mapped: `0xA4` in one abridged French file. (`0x60` and
   `0x7C` are fixed — see the first bullet.)
 - ~~**Running heads and page numbers end up inside the sentences.**~~ **— FIXED
@@ -6538,32 +6552,129 @@ cache is inside the book.
 
 ## 11. TODO (open items)
 
-### FOR DIGGING: braille books carry untranslated braille markers into the text (2026-08-28)
+### FIXED: the braille markers were a WRONG TABLE, and the round trip is what tells them apart (2026-08-28)
 
-Found while measuring what the cleaner leaves behind, not by looking for it.
-Counting `\p{Ll}\p{Lu}` — a lower-case letter followed by a capital, the print of
-a lost space — over 355 books gave **73 057 hits across 77 braille books, about
-950 a book**, against 23 in an average PDF. That was far too large to accept, so
-the hits were read, and they are three different things:
+§11 asked what `ghBraille`, `ComSaint`, `Cdd`, `Vdd` are. They are **UEB indicator
+cells read with an EBAE table** — the book is written in one English standard and
+back-translated with another. Nothing was missing from the tables and nothing was
+wrong with the cell map; the table CHOICE was wrong, and it is now chosen in two
+stages instead of one.
 
-| | |
-|---|---|
-| legitimate | `McDonalds`, `McLean`, `McPherson`, `VapoRub`, `MacCallum` |
-| really glued words | `outsideThink`, `studentsAugust`, `nameMercy`, `peaceAnd`, `placesTo` |
-| **untranslated braille markers** | **`ghBraille`, `ComSaint`, `ComI`, `CddS`, `CddMddH`, `VddD`, `ghShannon`, `ghAT`, `ghThe`** |
+**Measured over 88 braille books, before and after, through the shipped parser:**
 
-The third group is the finding. `gh`, `Com`, `Cdd`, `Vdd`, `Mdd` are not words —
-they are marker sequences that came through back-translation unread, and they are
-**in the reading text**, so a braille book is being read aloud with them in it.
-Whether that belongs to the tables (§8i's own `hr-*.ctb`, or the shipped English
-ones), to `BrfParser`'s cell map, or to the fact that these samples use a
-convention we do not model, is exactly what nobody has looked at.
+| | prije | poslije |
+|---|---|---|
+| marker tokens (`ghX`, `ComX`, `CddX`…) | 383 | **0** |
+| symbols a wrong table invents (`< > ~ ^`) | 17 959 | **12 106** |
+| untranslated-cell notation reaching the reader | 2 997 | **0** |
 
-**It is NOT a job for the text cleaner** — a cleaner that deleted `Com…` would
-also delete real words, and the fault is upstream of it. Start by taking one
-sample, finding those tokens in the original braille bytes, and asking what cells
-they are; §10g's cell-map bug (all of `0x40..0x5E` shifting, not just A–Z) is the
-kind of thing this smells of, and that one was found the same way.
+`1670702.brf` — *The Yield*, Tara June Winch, produced by the Australian Braille
+Writing Association, and **Australia has been UEB since 2005** — now reads
+*"I cycled out to Massacre Food Mart and I bought milk and a $1 Harbour Bridge
+scratchie"* where it used to read `"ghBraille House"ar`.
+
+**53 of 88 books change table; the six Croatian ones do not.**
+
+#### Why the existing scorer could not be repaired
+
+**It is not blind here, it is biased.** EBAE expands UEB's indicator cells into
+contractions, so it produces MORE letters and MORE common English words than the
+correct table — and `Plausibility`'s letter and stopword terms both reward it for
+the damage. On `1670702` it won by **0.032**. Measured: **with the junk term
+removed entirely the wrong table still wins**, so no reweighting of the existing
+terms can fix it. Three candidate reweightings were measured across the corpus and
+all three failed; do not re-try them:
+
+1. **Weight the mid-word capital more.** No safe weight exists — anything that
+   flips the English books also flips French grade 2 → grade 1 on books that are
+   right today, and the target book never flips at any weight up to 200.
+2. **Penalise characters that never occur in prose** (`< > ~ \``). Ranks the
+   CORRECT table worse: its escapes are made of backslashes.
+3. **Score the whole book rather than the sample.** See the method note below.
+
+#### The fix: plausibility picks the LANGUAGE, the round trip picks the STANDARD
+
+`BrfParser.RefineStandard`, on top of the unchanged `Plausibility`.
+
+**The round trip** takes the detector's own sample, back-translates it with a
+table, translates the result straight back with the same table, and compares the
+two as **multisets of words**. The wrong table has nowhere to hide: the book
+spells `BY` out in full and EBAE writes it as the single cell `0`, so that word
+cannot come back. Read off the shipped tables rather than from memory — *"by the
+way"* is `BY ! WAY` under UEB and `0! WAY` under EBAE; likewise *table*
+(`TABLE`/`TA#`) and *o'clock* (`O'CLOCK`/`O'C`). `LibLouis.Translate` binds
+`lou_translateString` for it; it is the only reason NBR ever translates text INTO
+braille.
+
+**Words, not cells.** A cell-by-cell LCS was tried first and is not usable: it
+depends on exactly how liblouis's `\NNN/` escapes are stripped, and changing that
+detail flipped the answer. Word multisets have no alignment to lose.
+
+**Same language only, and this is load-bearing.** An uncontracted table is close
+to an identity map — cells to letters and straight back — so it round-trips at
+95 % and better on any file whatever. Measured: letting the round trip choose
+freely handed **44 of 93 files to Croatian**, Thai and Korean ones included. It
+answers *"does this table explain these cells"*; it has no opinion about what
+language they are in and must not be asked for one.
+
+**Two bars, both measured** (`MinAdvantage = 6.0`, `MinAgreement = 70.0`). The
+Valentin Haüy library ships the same title contracted and uncontracted: the
+uncontracted editions win by **+63 to +73 points** while the contracted ones are
+mis-preferred by at most **+4.8**, so 6 separates them with room to spare. The
+absolute bar catches the rest — the Ukrainian and Korean files have no table here
+at all and their best reaches only 61–65 %, where every genuine correction lands
+at 70 % or better and the English ones at 92–99 %.
+
+**Cost: 125 ms a book**, measured over the corpus, against ~90 ms before.
+
+#### It closes §10g's `Haüy` bullet as well
+
+The French `_INT_` (intégral) editions were being read with the contracted table.
+They now detect as `fr-g1` and read *"Presses de la Cité … Association Valentin
+Haüy"* instead of *"Brûleez tout … Haouy"*; the `_ABR_` editions are genuinely
+contracted and correctly stay on `fr-g2`.
+
+#### And the escapes finally became worth stripping
+
+`StripUntranslated` now also drops liblouis's `\NNN/` notation for a cell it could
+not back-translate. **That was pointless before and is not now**, which is the
+whole point: with the wrong table usually winning the notation appeared 2 997
+times, because a wrong table does not fail honestly — it reads an indicator cell
+as a contraction and produces a word. With the right table chosen it appeared
+**36 680** times, i.e. honest failure became visible where silent damage used to
+be, and a reader would have heard *"backslash four six slash"* through the book.
+Safe by construction: nothing in prose writes a backslash, digits and a slash with
+no spaces.
+
+#### Two method notes worth more than the fix
+
+**`Detect` scores `Sample(pages)`, not the book.** The first analysis rescored
+whole back-translated books and predicted two flips; the shipped detector produced
+neither. Any future rule must be tested through `Detect` itself.
+
+**Read the tokens, do not count them.** What settled which table was right was
+reading them: `en-g2`'s 23 suspicious tokens are `2nd`, `£5`, `70cm`,
+`McDonalds`, `GoPro`, `1838—1st` — all real English — while `en-us-g2`'s 237 are
+`~7yarran`, `>3tinent`, `Prot~steg~ste`, `ComSaint`. The counts alone said the
+opposite of the truth.
+
+#### Also fixed in passing: typography was being charged as junk
+
+`Plausibility`'s whitelist was `".,;:!?-'\"()[]«»…"`, so an em dash, a curly quote
+and the `* * *` scene break each cost 3 points — **22 344 legitimate characters
+across 88 books**. `BrfParser.Punctuation` covers them now. On its own it changes
+no book's table (verified through the real `Detect` before and after); it is
+correctness, not the repair.
+
+#### Still open
+
+- **Languages with no table of their own.** The Portuguese books (Biblioteca
+  Nacional de Portugal) improve — their bodies now read as correct Portuguese
+  where EBAE gave `naro havia censura prforvia` — but `en-g1` renders their
+  capital sign as a Greek letter, so the title reads `βiblioteca νacional`. There
+  is no Portuguese table in the curated set; the per-book picker is the remedy,
+  as §10g already says for Korean, Thai and Vietnamese.
+- French `<auteur>` markup still arrives as text, now as `àauteurù`.
 
 ### PARKED, WITH THE MEASUREMENTS DONE: the RHVoice voices ignore volume below 10 (2026-08-28)
 
