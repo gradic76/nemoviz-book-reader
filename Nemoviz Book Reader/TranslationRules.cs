@@ -57,7 +57,11 @@ namespace Nemoviz_Book_Reader
         private static readonly Dictionary<string, string> byLanguage =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            { "hr", Croatian }
+            { "hr", Croatian },
+            // One Serbian, in LATIN, and it serves sr-Cyrl too — because For()
+            // strips the script off the tag. That is Gordan's call and the reason
+            // is in the rules text below.
+            { "sr", Serbian }
         };
 
         private const string Croatian =
@@ -82,6 +86,61 @@ Pravila za književni prijevod na hrvatski:
 - Čuvaj ritam i duljinu rečenica kada su stilski važni, ali ne po cijenu neprirodnog hrvatskog. Dugu rečenicu smiješ prirodno preoblikovati ako bi doslovna struktura bila teška ili nejasna.
 - Dosljedno koristi ista imena, termine, nadimke, titule, način obraćanja i gramatičke izbore kroz cijelu knjigu.
 - Prijevod mora biti točan, tečan, prirodan i književan. Čitatelj ne smije osjećati strukturu stranog jezika iza hrvatskog teksta.
+";
+
+        // ── Serbian ────────────────────────────────────────────────────────
+        //
+        // Gordan's colleague again, and her Serbian rules are the same document
+        // as the Croatian one rather than a translation of it — so two of the
+        // three changes below are the ones he already approved for Croatian:
+        //
+        //   1. ONE SENTENCE PER LINE IS GONE. It suits a chat window she reads
+        //      and edits; here it would retire the paragraph-count check, which
+        //      has caught a model merging 63 source lines into 51 and another
+        //      splitting 68.
+        //   2. NAMES MUST BE DECLINED. A model obeying "keep the name" literally
+        //      leaves it undeclined and the language pads around the hole.
+        //
+        //   3. AND ONE THAT IS SERBIAN'S OWN: FOREIGN NAMES STAY IN LATIN, and
+        //      are NOT transcribed phonetically. Hers says to adapt them to
+        //      Serbian, which is what Serbian normally does — and Gordan
+        //      overruled it for this pipe with the case that settles it
+        //      (2026-08-28): *"je li Jean Žan ili Džin?"*. Phonetic transcription
+        //      needs a glossary, we have none, and a wrong one is silent — the
+        //      reader has no way to know the name they are hearing was invented
+        //      by a model. A Latin name inside a Serbian sentence is at worst
+        //      unidiomatic; a mis-transcribed one is a different person.
+        //
+        // THERE IS THEREFORE ONE SERBIAN AND IT IS IN LATIN, and it is what
+        // sr-Cyrl gets as well, since For() strips the script. Writing a Cyrillic
+        // variant would have meant either transcribing names — the thing just
+        // ruled out — or Latin names embedded in Cyrillic text, which is a
+        // decision nobody has taken. Left as it stands rather than guessed at.
+
+        private const string Serbian =
+@"
+Pravila za književni prevod na srpski:
+
+- Prevedi tekst prirodnim, književnim srpskim jezikom. Ne prevodi bukvalno. Prenesi značenje, ton, atmosferu, emociju i stil originala tako da tekst zvuči kao da je izvorno napisan na srpskom.
+- Poštuj standardnu srpsku gramatiku, pravopis, sintaksu i prirodan red reči. Izbegavaj konstrukcije preslikane iz izvornog jezika.
+- Ne ponavljaj nepotrebno lične zamenice. Umesto konstrukcija poput ""ja sam bio"", ""ja sam hteo"", ""ja sam rekao"", kada kontekst to dopušta koristi prirodnije ""bio sam"", ""hteo sam"", ""rekao sam"".
+- Ne ponavljaj nepotrebno imena likova i subjekte ako je iz konteksta jasno na koga se rečenica odnosi.
+- Izbegavaj neprirodno ponavljanje istih reči, glagola i konstrukcija. Kada smisao dopušta, koristi prirodnu srpsku sinonimiju i menjaj strukturu rečenice.
+- Ne preslikavaj engleski red reči. Slobodno preuredi rečenicu kada je to potrebno da bi zvučala prirodno na srpskom.
+- Pazi na prirodnu upotrebu svršenih i nesvršenih glagola, na padeže, slaganje roda i broja, glagolska vremena, predloge i veznike.
+- Dijalog mora zvučati kao stvaran govor na srpskom, u skladu sa karakterom, uzrastom, raspoloženjem i odnosom među likovima. Ne pravi dijalog knjiški ukočenim ako original nije takav.
+- Psovke, humor, ironiju, sarkazam, nežnost, grubost i druge registre prenesi funkcionalnim srpskim ekvivalentom, a ne doslovnim prevodom.
+- Idiome, frazeme i ustaljene izraze prevodi njihovim prirodnim srpskim ekvivalentima kad postoje. Ne zadržavaj strani izraz ako postoji prirodan srpski izraz koji prenosi isto značenje.
+- Strane izraze prevodi kad god je to prirodno i moguće. Ne prevodi termine, nazive ili izraze koje je u srpskom prirodnije ostaviti u izvornom obliku.
+- Lična i druga strana imena zadrži u izvornom obliku i u latinici, nemoj ih fonetski transkribovati, ali ih OBAVEZNO menjaj po padežima: ""sa Tobijem"", ""Vonvaltova presuda"", ""kod Jeana"" — nikada nepromenjen oblik uz opisnu konstrukciju. Ako za ime, istorijsku ličnost ili geografski naziv postoji odomaćen srpski oblik, koristi taj oblik. Jednom izabran oblik imena koristi dosledno kroz ceo tekst.
+- Nazive mesta, institucija, titula i drugih pojmova prevedi ili prilagodi prema prirodnoj i standardnoj srpskoj upotrebi. Ne izmišljaj prevod vlastitog imena ako se ono u srpskom uobičajeno ne prevodi.
+- Čuvaj značenje originala. Ne dodaj informacije kojih nema. Ne izostavljaj sadržaj. Ne ublažavaj niti pojačavaj značenje bez razloga.
+- Čuvaj karakterizaciju likova. Likovi treba da zadrže svoj način govora i međusobne razlike.
+- Čuvaj ritam i dužinu rečenica kada su stilski važni, ali ne po cenu neprirodnog srpskog. Dugačku rečenicu smeš prirodno preoblikovati ako bi doslovna struktura bila teška ili nejasna.
+- Dosledno koristi ista imena, termine, nadimke, titule, način obraćanja i gramatičke izbore kroz celu knjigu. Ako prethodni deo teksta pokazuje rod lika, odnos među likovima ili već usvojen prevod termina, poštuj ga.
+- Sačuvaj pasuse i dijaloge smisleno. Ne spajaj različite replike.
+- Piši srpskom latinicom, sa slovima č, ć, dž, đ, š i ž.
+- Prevod mora biti tačan, tečan, prirodan i književan. Čitalac ne treba da oseća strukturu stranog jezika iza srpskog teksta.
 ";
     }
 }
