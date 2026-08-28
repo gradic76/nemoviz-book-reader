@@ -578,8 +578,36 @@ namespace Nemoviz_Book_Reader
             if (tbSpeed.Text != want)
             {
                 tbSpeed.Text = want;
-                tbSpeed.AccessibleName = want;
+                tbSpeed.AccessibleName = SpeedAccessibleName(want);
             }
+        }
+
+        /// <summary>The speed field's accessible name: its value, and then the
+        /// keys that change it.
+        ///
+        /// <para><b>Why the name and not the tooltip.</b> `Tip.Speed` has carried
+        /// "Ctrl+Left and Ctrl+Right" in all eleven languages since it was
+        /// written — but §2's rule is that JAWS does not read a tooltip on tab
+        /// focus, so a reader arriving here was told the speed and never how to
+        /// change it. Every button on the panel embeds its shortcut in the name
+        /// ("Forward, Shift+Right"); this field was the one control that did
+        /// not. Gordan asked for it from the beta notes, 2026-08-28.</para>
+        ///
+        /// <para><b>Built from the two strings that already exist</b>, so it
+        /// needed no new key and every language had it the moment it was
+        /// written — and the tooltip and the spoken name cannot drift apart,
+        /// since they are the same words.</para>
+        ///
+        /// <para><b>The shortcut goes at the END, and that is the whole of the
+        /// care needed here.</b> Ctrl+Left/Right are word-navigation keys, so
+        /// JAWS re-reads the focused control on every press (§6). With the value
+        /// first, a reader stepping quickly hears each new speed and cuts the
+        /// tail off with the next press; the shortcut is heard by whoever
+        /// stops, which is whoever wanted it.</para></summary>
+        private static string SpeedAccessibleName(string valueText)
+        {
+            string keys = Localization.T("Tip.Speed");
+            return string.IsNullOrEmpty(keys) ? valueText : valueText + ", " + keys;
         }
 
         private object uiaHostProvider;      // cached IRawElementProviderSimple for this HWND
@@ -1616,7 +1644,7 @@ namespace Nemoviz_Book_Reader
             if (!tbSpeed.Focused)
             {
                 tbSpeed.Text = text;
-                tbSpeed.AccessibleName = tbSpeed.Text;
+                tbSpeed.AccessibleName = SpeedAccessibleName(tbSpeed.Text);
             }
 
             AnnounceToScreenReader(lblAnnounceSpeed, text);
@@ -2018,7 +2046,7 @@ namespace Nemoviz_Book_Reader
             tbSpeed.TabStop = true;
             tbSpeed.TabIndex = 9;
             tbSpeed.Text = Localization.T("Player.Speed.Text", "1.0");
-            tbSpeed.AccessibleName = tbSpeed.Text;
+            tbSpeed.AccessibleName = SpeedAccessibleName(tbSpeed.Text);
             tbSpeed.BackColor = SystemColors.Window;
             // Static text for the same reason as tbVolume (harmless for Speed,
             // which uses Page Up/Down, but keeps the two fields consistent).
@@ -5914,7 +5942,7 @@ namespace Nemoviz_Book_Reader
             if (!tbSpeed.Focused)
             {
                 tbSpeed.Text = display;
-                tbSpeed.AccessibleName = display;
+                tbSpeed.AccessibleName = SpeedAccessibleName(display);
             }
         }
 
@@ -6046,7 +6074,7 @@ namespace Nemoviz_Book_Reader
             string spdText = Localization.T("Player.Speed.Text", speedStr);
             lblSpeed.Text = spdText;
             tbSpeed.Text = spdText;
-            tbSpeed.AccessibleName = tbSpeed.Text;
+            tbSpeed.AccessibleName = SpeedAccessibleName(tbSpeed.Text);
 
             mpv_set_property_string(mpvHandle, "volume", currentVolume.ToString());
             double speed = currentSpeed / 100.0;

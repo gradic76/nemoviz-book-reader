@@ -49,6 +49,18 @@ non-obvious code choices exist because of it.
   "Go To, F4", "Sleep Timer, F7". Tooltips are separate and for
   sighted/mouse use. (These read `Ctrl+G` / `Ctrl+T` until the shortcuts moved
   onto function keys — `en.lang` was migrated with the code, this file was not.)
+  **The SPEED field was the one control that broke the convention** — its keys
+  lived in `Tip.Speed` alone, which is a tooltip, which is exactly what this rule
+  says a reader never hears. Fixed 2026-08-28 (`SpeedAccessibleName`), and built
+  by joining `Player.Speed.Text` with `Tip.Speed` rather than by adding a key:
+  all eleven languages already carried that phrase, so the fix needed no
+  translation, and the tooltip and the spoken name are now literally the same
+  words and cannot drift. **The shortcut goes LAST here**, after the value,
+  because Ctrl+Left/Right are word-navigation keys and JAWS re-reads the control
+  on every press (§6) — value first means a reader stepping quickly hears each
+  new speed and cuts the tail off with the next press.
+  **Position keeps its tooltip and gains nothing** (Gordan, 2026-08-28): Ctrl+1–9
+  is *"kao skrivena kontrola"*, so its keys stay off the spoken name.
 - **Screen-reader announcements** of transient changes (volume, speed, timer
   set/cancelled, info-on-demand, bookmark set) go through
   `AnnounceToScreenReader(label, text)`. **As of Session 10 this speaks the
