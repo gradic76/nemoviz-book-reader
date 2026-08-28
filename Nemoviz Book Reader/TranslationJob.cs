@@ -293,9 +293,32 @@ namespace Nemoviz_Book_Reader
                 else { piece.Text = c.Text; }        // left as it was written
 
                 pieces.Add(piece);
+                // THE LENGTH RATIO IS LOGGED EVEN WHEN IT PASSES, and that is the
+                // point of it. TranslationChecks computes it for every piece and
+                // then drops it unless it trips the 0.55-1.60 gate, so the only
+                // ratios anyone ever saw were the failures.
+                //
+                // Gordan, 2026-08-28, on being offered a synthetic test for
+                // paraphrasing: *"time ne bismo nista dobili... jedino sto cemo
+                // saznati tim testom jest da moze proci a to znamo i sad"*. He is
+                // right -- feeding the gate an input built to pass it measures the
+                // gate's own definition. What DOES carry information is the
+                // distribution over a real book: Croatian runs 0.93-0.95 of the
+                // English source, so an engine quietly retelling rather than
+                // translating would sit systematically low and IN BAND, say 0.75
+                // across every piece, which no single-piece threshold can see and a
+                // column of numbers shows at a glance.
+                //
+                // One number in a line that was already being written. It answers
+                // nothing by itself; it makes the question answerable from any run
+                // that has already happened.
+                string ratio = piece.Engine == null || piece.Text == null || c.Text.Length == 0
+                    ? "     "
+                    : string.Format(CultureInfo.InvariantCulture, "{0,5:0.00}",
+                                    piece.Text.Length / (double)c.Text.Length);
                 Log(opt, string.Format(CultureInfo.InvariantCulture,
-                    "{0,4}/{1}  {2,6} chars  {3,-14} {4} ask{5}  {6,7:N1} s  {7}",
-                    c.Index + 1, chunks.Count, c.Text.Length,
+                    "{0,4}/{1}  {2,6} chars {3}x  {4,-14} {5} ask{6}  {7,7:N1} s  {8}",
+                    c.Index + 1, chunks.Count, c.Text.Length, ratio,
                     piece.Engine ?? "-", piece.Asks, piece.Asks == 1 ? " " : "s",
                     piece.Ms / 1000.0,
                     piece.Engine == null ? "LEFT IN THE ORIGINAL — " + (piece.Why ?? "no reason recorded")
