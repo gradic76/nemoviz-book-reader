@@ -95,6 +95,13 @@ namespace Nemoviz_Book_Reader
             // now transliterates and comes back in Cyrillic.
             sb.AppendLine("- Render proper names the way the target language normally does, transliterating them into its own script where that is its convention, and inflect them as its grammar requires (cases, endings). Be consistent throughout the book.");
             sb.AppendLine("- Use straight double quotes for speech throughout.");
+            // Her Serbian document asks for this in as many words -- "Ne koristi
+            // Markdown. Ne koristi zvezdice za naglašavanje." -- and nothing here
+            // said it. The source is plain text and carries none, so anything the
+            // model adds is its own habit; a stray ** reaches the reader as
+            // "zvjezdica zvjezdica" or is silently eaten by the cleaner, and
+            // neither is what the author wrote.
+            sb.AppendLine("- Return plain text. No Markdown, no asterisks for emphasis, no headings the source does not have.");
             // The same comparison showed our version running 100 % of the source's
             // length where the human translation ran 92 %, and reading as a
             // word-for-word trace of the English: "je uređivanje teksta omogućeno
