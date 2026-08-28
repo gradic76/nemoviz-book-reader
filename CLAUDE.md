@@ -4679,6 +4679,72 @@ them; this is not a fine judgement. The page count is already in hand —
 `PdfParser` fills `doc.Pages`. Keep the absolute test for a book with no pages.
 **Not implemented — Gordan's call.**
 
+### THE PDF TEXT PATH NOW STRIPS FURNITURE AND HAS PARAGRAPHS (2026-08-28)
+
+Ten books off a sharing forum (`D:\Player\Blind test\pdf uzorci`) — the first
+samples of that kind we have had, and Gordan's note was that the forum "svašta
+trpa u njih". Measured through the shipped classes, and two different faults came
+out, neither of them what the eye would guess.
+
+**1. The furniture was never stripped.** §10g's `RunningHeads.Strip` was written
+for braille and this file recorded that whether the PDF path runs it was
+unchecked. It did not — and a PDF is the ONE format that hands us real page
+boundaries, which is exactly what that stripper needs. `PdfParser` was throwing
+them away by appending every page straight into one StringBuilder. It now reads
+every page into lines, strips, and assembles; **the page offsets are computed
+after the strip**, or every mark would point past its own page.
+
+| | before | after |
+|---|---|---|
+| printed page number as a line of its own | 166–334 a book, **in all ten** | **0** |
+| scanner's signature in the FOOTER of every page | 222–334 a book, in five of ten | **1** (the one at the end) |
+| text lost | | **0.1–1.3 %** |
+
+The 0.1–0.2 % books are the ones that only had numbers; 0.8–1.3 % are the ones
+that also carried the signature. **Control is clean**: Gordan's own scans lose
+nothing, and `meditationsofmar00marc` keeps its 35 bare numbers because they
+appear on too few pages to reach the 60 % share. The single signature at the END
+of a book is deliberately left — it appears once, so it is not furniture, and
+Gordan's call was that a tail there does not matter as long as it is not mixed
+into the reading.
+
+**2. A PDF has no paragraphs at all.** Measured before writing anything: the
+extracted lines have **no indent** — every one starts at column zero — and no
+blank line, so the only break in the book is between pages. On all ten that came
+out as paragraphs == pages: no pauses for the reader, and the Paragraph seek step
+correctly refusing to appear because a paragraph was a whole page.
+
+**The signal was already there and simply not written down: a line that ENDS A
+SENTENCE ends a paragraph**, everything else having been wrapped at the right
+margin. That is the same test `TextCleaner.Unwrap` uses from the other side, so
+the two meet — what is marked as a break stays one, what is left as a single
+newline gets joined back. Result: **2 764 – 5 103 paragraphs a book, one every
+98–198 characters**, which for a novel full of dialogue is the right order.
+Nothing is invented; every one of those breaks was already in the text as a
+single newline.
+
+**Deliberately NOT the reference cleaner's `auto_paragraf`**, which breaks after
+every sentence: run after unwrapping it gives one paragraph per sentence, and a
+Paragraph step identical to a Sentence step.
+
+**A bug in the first build of that rule, caught by READING a passage and not by
+the counts:** the list of closing marks had `»` but not `«`, and Croatian and
+Serbian quote as »ovako« — so every line of dialogue stayed glued to the next.
+The numbers looked entirely plausible either way.
+
+### Drawn rules are gone from every format (2026-08-28)
+
+`TextCleaner.DrawnRule` removes a line that is ten or more of the SAME character
+(`═════`, `─────`). A speech engine reads it out one character at a time and it
+carries nothing.
+
+**Ten of the same, NOT "three or more symbols"** — that rule would also take
+`* * *`, which is a scene break and means something. The threshold is the one the
+reference cleaner arrived at independently. Measured over 355 books: rules 192
+(docx) + 99 (braille) + 71 (epub) + 43 (txt) → **0**, while `* * *` survives 60,
+69, 42 and 38 times. Collateral damage: **245 characters in 101.8 million** of
+docx, and braille, txt and epub identical to the character.
+
 ### AND THE REFUSAL IS WRONG — it throws away books that OCR perfectly well
 
 Gordan's question, and it is the one nobody asked: *"Ovo zadnje bi značilo da
@@ -6471,6 +6537,33 @@ cache is inside the book.
 ---
 
 ## 11. TODO (open items)
+
+### FOR DIGGING: braille books carry untranslated braille markers into the text (2026-08-28)
+
+Found while measuring what the cleaner leaves behind, not by looking for it.
+Counting `\p{Ll}\p{Lu}` — a lower-case letter followed by a capital, the print of
+a lost space — over 355 books gave **73 057 hits across 77 braille books, about
+950 a book**, against 23 in an average PDF. That was far too large to accept, so
+the hits were read, and they are three different things:
+
+| | |
+|---|---|
+| legitimate | `McDonalds`, `McLean`, `McPherson`, `VapoRub`, `MacCallum` |
+| really glued words | `outsideThink`, `studentsAugust`, `nameMercy`, `peaceAnd`, `placesTo` |
+| **untranslated braille markers** | **`ghBraille`, `ComSaint`, `ComI`, `CddS`, `CddMddH`, `VddD`, `ghShannon`, `ghAT`, `ghThe`** |
+
+The third group is the finding. `gh`, `Com`, `Cdd`, `Vdd`, `Mdd` are not words —
+they are marker sequences that came through back-translation unread, and they are
+**in the reading text**, so a braille book is being read aloud with them in it.
+Whether that belongs to the tables (§8i's own `hr-*.ctb`, or the shipped English
+ones), to `BrfParser`'s cell map, or to the fact that these samples use a
+convention we do not model, is exactly what nobody has looked at.
+
+**It is NOT a job for the text cleaner** — a cleaner that deleted `Com…` would
+also delete real words, and the fault is upstream of it. Start by taking one
+sample, finding those tokens in the original braille bytes, and asking what cells
+they are; §10g's cell-map bug (all of `0x40..0x5E` shifting, not just A–Z) is the
+kind of thing this smells of, and that one was found the same way.
 
 ### PARKED, WITH THE MEASUREMENTS DONE: the RHVoice voices ignore volume below 10 (2026-08-28)
 

@@ -28,6 +28,21 @@ namespace Nemoviz_Book_Reader
             new Regex(@"[\uE000-\uF8FF\u200B-\u200F\uFEFF]", RegexOptions.Compiled);
         // letter-hyphen-newline-letter → glue the word back together.
         private static readonly Regex Dehyphenate = new Regex(@"(\p{L})-\n(\p{L})", RegexOptions.Compiled);
+        /// <summary>A drawn rule — a line of ten or more of the SAME character.
+        ///
+        /// <para>A speech engine reads it out one character at a time, and it
+        /// carries nothing: it is a picture of a line. Measured 2026-08-28 over
+        /// 355 books: 292 in 25 PDFs, 192 in 196 docx, 99 in 77 braille books.</para>
+        ///
+        /// <para><b>Ten of the same, and not "three or more symbols", which is the
+        /// rule that would also catch <c>* * *</c>.</b> That one is a scene break
+        /// — it means something, and a reader who loses it loses the pause between
+        /// two scenes. The threshold is taken from the same place the rest of this
+        /// file's judgements are: what the corpus shows a rule to be, rather than
+        /// what looks tidy. It is also the rule the reference cleaner used
+        /// (`Korice.py`, Gordan's colleague), arrived at independently.</para></summary>
+        private static readonly Regex DrawnRule =
+            new Regex(@"(?m)^[ \t]*([=\-*_~#.])\1{9,}[ \t]*$", RegexOptions.Compiled);
         /// <summary>True when this line finished a sentence — allowing for the
         /// closing quotes and brackets that come after the stop.</summary>
         private static readonly Regex LineEndsSentence =
@@ -319,6 +334,9 @@ namespace Nemoviz_Book_Reader
             t = t.Replace('\t', ' ');
             t = Noise.Replace(t, "");
             t = Invisible.Replace(t, " ");
+            // Before Dehyphenate, or a rule drawn with hyphens loses its first
+            // character to it and stops being ten of the same.
+            t = DrawnRule.Replace(t, "");
             t = Dehyphenate.Replace(t, "$1$2");
             t = SpacedDash.Replace(t, ", ");
             t = TrailingSpace.Replace(t, "\n");
