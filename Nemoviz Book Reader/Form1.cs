@@ -1475,31 +1475,31 @@ namespace Nemoviz_Book_Reader
                     return true;
 
                 case Keys.Control | Keys.D1:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.1);
+                    JumpToFraction(0.1);
                     return true;
                 case Keys.Control | Keys.D2:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.2);
+                    JumpToFraction(0.2);
                     return true;
                 case Keys.Control | Keys.D3:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.3);
+                    JumpToFraction(0.3);
                     return true;
                 case Keys.Control | Keys.D4:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.4);
+                    JumpToFraction(0.4);
                     return true;
                 case Keys.Control | Keys.D5:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.5);
+                    JumpToFraction(0.5);
                     return true;
                 case Keys.Control | Keys.D6:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.6);
+                    JumpToFraction(0.6);
                     return true;
                 case Keys.Control | Keys.D7:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.7);
+                    JumpToFraction(0.7);
                     return true;
                 case Keys.Control | Keys.D8:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.8);
+                    JumpToFraction(0.8);
                     return true;
                 case Keys.Control | Keys.D9:
-                    if (currentBook != null) SeekToVirtualPosition(currentBook.TotalDuration * 0.9);
+                    JumpToFraction(0.9);
                     return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
@@ -3801,6 +3801,33 @@ namespace Nemoviz_Book_Reader
             if (currentBook != null && currentBook.IsTextBook)
                 return tts != null ? tts.CharPosition : 0;
             return GetVirtualPosition();
+        }
+
+        /// <summary>How long the book is, in that same unit — seconds of audio,
+        /// or characters of text.
+        ///
+        /// <para>Written for Ctrl+1..9, which had asked <c>currentBook.
+        /// TotalDuration</c> directly and so did nothing at all on a text book:
+        /// a text book has no audio timeline, `Chapters` is empty, and
+        /// <see cref="SeekToVirtualPosition"/> returns at its first line. That is
+        /// every .txt, EPUB, braille, PDF, Word and text DAISY — most of the
+        /// shelf (Gordan, 2026-08-28). A hybrid is an audio book and always
+        /// worked.</para></summary>
+        private double BookLength()
+        {
+            if (currentBook == null) return 0;
+            if (currentBook.IsTextBook) return tts != null ? tts.TotalChars : 0;
+            return currentBook.TotalDuration;
+        }
+
+        /// <summary>Ctrl+1..9: jump to a tenth of the book, whatever kind it is.
+        /// Through <see cref="SeekToBookPosition"/>, which is the same path the
+        /// bookmarks take and therefore already correct for both.</summary>
+        private void JumpToFraction(double fraction)
+        {
+            double length = BookLength();
+            if (length <= 0) return;
+            SeekToBookPosition(length * fraction);
         }
 
         /// <summary>Jumps there, in this book's own unit.</summary>

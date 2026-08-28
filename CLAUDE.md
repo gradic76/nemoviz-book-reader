@@ -276,8 +276,26 @@ Documented in a comment above the seek-step methods in Form1. All four coexist:
 
 1. **Left/Right arrows** — plain 5-second seek, like any player. Intercepted
    even when the seek dropdown has focus (so Left/Right always means seek).
-2. **Ctrl+1..9** — percentage jumps to 10%–90% of the whole book's virtual
-   duration.
+2. **Ctrl+1..9** — jumps to 10%–90% of the book, **in whatever unit that book
+   measures itself in**: seconds of audio, or characters of text.
+   **It said "virtual duration" here and that is exactly why it did nothing on a
+   text book, from the initial commit until 2026-08-28.** The nine cases asked
+   `SeekToVirtualPosition(currentBook.TotalDuration * X)`, and that method
+   returns at its first line when `Chapters` is empty — which a text book's
+   always is. So the keys were dead on every .txt, EPUB, MOBI, PDF, Word,
+   FB2, HTML, braille file, text DAISY and OCR import, i.e. most of a real
+   shelf, while working perfectly on audio, M4B, CUE, DAISY audio and hybrids.
+   Nobody had noticed because the formats it worked on are the ones it was
+   written against.
+   They now go through `JumpToFraction` → **`SeekToBookPosition`**, the path the
+   bookmarks already took and which was therefore already right for both, with
+   `BookLength()` as the counterpart of the existing `BookPosition()`. The audio
+   branch is unchanged code — for a non-text book `SeekToBookPosition` is
+   literally `SeekToVirtualPosition`.
+   **Reported by Gordan as a question, not a bug** (*"Imaju li svi formati knjiga
+   CTRL + 1-9 kao navigaciju?"*), which is worth noting: an accessible shortcut
+   that silently does nothing gives a reader no evidence at all, so it can sit
+   there for the life of a project.
 3. **Shift+Left / Shift+Right, media Next/Prev, and the on-screen Back/Forward
    buttons** — jump by the step currently selected in the seek dropdown.
    **Shift+Up / Shift+Down change which step is selected** (`ChangeSeekStep`,
