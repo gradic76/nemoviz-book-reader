@@ -401,6 +401,32 @@ namespace Nemoviz_Book_Reader
 #pragma warning restore 618
         }
 
+        /// <summary>Writes one line to the same log, now, without waiting for a
+        /// stall.
+        ///
+        /// <para><b>Why this exists beside <see cref="Note"/>.</b> Note only fills
+        /// an in-memory ring, and the ring is written out when the watchdog catches
+        /// the UI stopped for <see cref="StallSeconds"/>. That is right for a hang
+        /// and useless for something merely SLOW: Gordan reported F3 taking a
+        /// couple of seconds on a library of sixteen books (2026-08-29), and two
+        /// seconds never reaches a five-second threshold, so every crumb about it
+        /// was discarded. A caller that has measured something worth keeping needs
+        /// to say so itself.</para>
+        ///
+        /// <para>Callers are expected to be sparing and to have a threshold of
+        /// their own — this appends to the log every time it is called.</para></summary>
+        public static void Report(string line)
+        {
+            if (string.IsNullOrEmpty(line)) return;
+            try
+            {
+                File.AppendAllText(LogPath,
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "  " + line + Environment.NewLine,
+                    new UTF8Encoding(false));
+            }
+            catch { }
+        }
+
         public static string LogPath
         {
             get

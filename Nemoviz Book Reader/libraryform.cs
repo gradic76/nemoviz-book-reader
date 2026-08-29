@@ -98,6 +98,44 @@ namespace Nemoviz_Book_Reader
 
         public BookData SelectedBook { get; private set; }
 
+        // ── how long opening this window took, and where it went ───────────
+        //
+        // Gordan, 2026-08-29: F3 "nekad" takes a couple of seconds, on a library
+        // of SIXTEEN books. "Sometimes" is the whole clue — it rules out the work
+        // done on every open, and those were measured from outside the running app
+        // and are not the seconds: reading every Book.ini is 3 ms, the optical
+        // drive enumeration behind the CD menu entry is 13 ms cold and 0 warm, and
+        // AbsorbArchives reads only file NAMES in the library root.
+        //
+        // What is left does not happen every time — the first open after launch,
+        // where a Debug build JITs this form and the whole of LibrarySkin's
+        // drawing; and a book that has never had EnsureFormatDetails, which is one
+        // synchronous TagLib open on the first selection.
+        //
+        // Rather than choose between them by reasoning, which this project has on
+        // record as the expensive way (four wrong diagnoses on one HDMI endpoint),
+        // the window times its own phases and says so ONLY when it was slow. Below
+        // the threshold it writes nothing at all, so the normal case costs a
+        // Stopwatch and no I/O.
+        private const int SlowOpenMs = 400;
+        private readonly System.Diagnostics.Stopwatch openClock = System.Diagnostics.Stopwatch.StartNew();
+        private long msBuildUi, msArchives, msScan, msShelf;
+        private bool openReported;
+
+        private void ReportSlowOpen()
+        {
+            if (openReported) return;
+            openReported = true;
+            long total = openClock.ElapsedMilliseconds;
+            if (total < SlowOpenMs) return;
+            UiWatchdog.Report(string.Format(CultureInfo.InvariantCulture,
+                "library: opened in {0} ms — BuildUI {1}, archives {2}, scan {3}, shelf {4}, "
+                + "then {5} to show; {6} books",
+                total, msBuildUi, msArchives, msScan, msShelf,
+                total - msBuildUi - msArchives - msScan - msShelf,
+                books == null ? 0 : books.Count));
+        }
+
         public LibraryForm(AppSettings settings, string activeBookFolderPath = null,
             Action unloadActiveBook = null)
         {
@@ -112,7 +150,9 @@ namespace Nemoviz_Book_Reader
             this.activeBookFolderPath = activeBookFolderPath;
             this.unloadActiveBook = unloadActiveBook;
             books = new List<BookData>();
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             BuildUI();
+            msBuildUi = sw.ElapsedMilliseconds;
             LoadBooks();
         }
 
@@ -131,6 +171,9 @@ namespace Nemoviz_Book_Reader
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            // The window is now on screen, which is the moment the reader has been
+            // waiting since F3 for. Silent unless it took longer than SlowOpenMs.
+            ReportSlowOpen();
             // Default tab order would land on the search box first. The library
             // opens on NOW READING (Gordan, 2026-08-03) — the question a reader
             // most often comes here with is "carry on with what I was reading",
@@ -1006,9 +1049,13 @@ namespace Nemoviz_Book_Reader
             // place allowed to make it: an archive dropped into the library
             // through Explorer is unpacked there and the original removed,
             // because that folder is NBR's own. Scanning itself never writes.
+            var swPhase = System.Diagnostics.Stopwatch.StartNew();
             scanner.AbsorbArchives();
+            msArchives = swPhase.ElapsedMilliseconds; swPhase.Restart();
             books = scanner.Scan();
+            msScan = swPhase.ElapsedMilliseconds; swPhase.Restart();
             RebuildShelf(null);
+            msShelf = swPhase.ElapsedMilliseconds;
         }
 
         /// <summary>
