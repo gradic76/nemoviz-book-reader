@@ -1184,6 +1184,19 @@ namespace Nemoviz_Book_Reader
     /// <para>Plain text and not an INI: this is bulk, the same reason
     /// <c>sync.map</c> is its own file. Records are separated by a marker that
     /// cannot occur in book text.</para>
+        /// <para><b>THE KEY IS THE TEXT, NOT THE PROMPT — and that is a trap worth
+        /// knowing before it costs an afternoon.</b> A cached piece comes back
+        /// unchanged however much the SYSTEM prompt has moved: new language rules,
+        /// a corrected glossary, a fixed narrator, all of it. Measured 2026-08-29:
+        /// after four fixes to the prompt the book was re-translated and came back
+        /// in <b>2.8 seconds with 0 requests</b>, every piece from cache, carrying
+        /// exactly the text the old prompt had produced. Only DetectBible runs
+        /// regardless, so a glossary fix shows and a wording fix does not.
+        ///
+        /// <para>That is the right default — the cache exists so a stop, a crash or
+        /// a corrected line costs seconds instead of a book — but a change to the
+        /// RULES means the cache has to go, and nothing says so. Delete
+        /// <c>translation.cache</c> beside the book to force a real run.</para>
     /// </summary>
     internal sealed class TranslationCache
     {
