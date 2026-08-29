@@ -486,6 +486,34 @@ namespace Nemoviz_Book_Reader
                                                Detail = blocked ?? finish ?? "empty" };
             }
 
+            // A TRUNCATED ANSWER IS NOT A GOOD ONE, and it used to pass as one.
+            // finishReason was read only when the text came back EMPTY, so a
+            // reply cut off at the output ceiling — real text, and then nothing —
+            // was returned with Ok = true and went into the book.
+            //
+            // Nothing has been hurt by it yet: 6000 characters of Croatian is
+            // roughly 2 200 tokens against an 8 000 allowance, so no piece has
+            // come near. The gap matters the moment anyone raises the piece size,
+            // which is exactly the question Gordan was weighing (2026-08-29), and
+            // a guard that only holds while nobody tests it is not a guard.
+            //
+            // The two nets that would have caught a BAD case are indirect and
+            // neither is reliable for a mild one: the length ratio only fires
+            // below 0.55, and a reply missing its last paragraph lands around
+            // 0.85 and passes.
+            //
+            // Reported as a failure rather than trimmed, so the chain retries and
+            // the reason reaches the log — a piece that cannot be finished is a
+            // piece for the next engine, not a piece to publish half of.
+            string cut = Json.PathString(json, "candidates", "0", "finishReason")
+                         ?? Json.PathString(json, "choices", "0", "finish_reason");
+            if (!string.IsNullOrEmpty(cut)
+                && (cut.Equals("MAX_TOKENS", StringComparison.OrdinalIgnoreCase)
+                    || cut.Equals("length", StringComparison.OrdinalIgnoreCase)))
+                return new TranslationResult { Ok = false, Status = status,
+                                               Error = Localization.T("Settings.Translate.Test.Empty"),
+                                               Detail = "the answer was cut off at the output limit (" + cut + ")" };
+
             return new TranslationResult { Ok = true, Status = status, Text = text };
         }
 
