@@ -7302,20 +7302,43 @@ to. NBR's own shorter figure is the WPM estimate, not a measurement. See §8g′
   pane, which for this audience is arguably not a cost at all — but it is a
   visible change and therefore Gordan's call, not one to make on a hypothesis.
 
-- **A SEPARATE stall, fully diagnosed in the same log and NOT the Ctrl+O one**
-  (2026-08-10; different stack, different wait reason, CPU 13 % against 0 %).
-  `RebuildShelf` (libraryform.cs:930) sets `ListViewItem.Selected`, which fires
-  `SelectedIndexChanged` **synchronously** → `ShowDetails` →
-  `EnsureDurationDetails` → `BuildChaptersFromFolder` → TagLib opening **every
-  audio file of the book on the UI thread**, waiting on `Executive` inside
-  `CreateFile`. Measured from the breadcrumbs: **~18 s per shelf rebuild**, three
-  in a row.
-  It is **once per book ever** — `EnsureDurationDetails` returns early once
-  `Chapters` is built and caches to `Book.ini`, and the log shows later rebuilds
-  are instant — so it bites the first time a big newly-added book is selected.
-  Still serious for a reader arrowing down the shelf. **Not fixed**: §9 allows a
-  bug reported from use, but moving this to a background thread needs care —
-  `BookData` is not thread-safe and `SaveChapters` writes `Book.ini`.
+- ~~**A SEPARATE stall, fully diagnosed in the same log and NOT the Ctrl+O one**~~
+  **— FIXED, and this note was stale until 2026-08-29.** `RebuildShelf` sets
+  `ListViewItem.Selected`, which fires `SelectedIndexChanged` **synchronously**,
+  which reached `EnsureDurationDetails` and had TagLib open **every audio file of
+  the book on the UI thread** — measured at **~18 s per shelf rebuild**, three in
+  a row, on a 145-file book. `QueueDurations` now measures off the UI thread and
+  fills the values in when they arrive. **Only the MEASURING moved**: `BookData`
+  is not thread-safe and `SaveChapters` writes the ini, so the worker is handed a
+  plain list of paths and gives back a plain array of seconds, and everything
+  that mutates the book happens back on the UI thread. It also declines to redraw
+  while the reader is standing in the details list, which would be exactly the
+  chatter §2 exists to avoid.
+
+  **Still synchronous on selection, and unmeasured:** `ShowDetails` calls
+  `book.EnsureFormatDetails()`, one TagLib open per book ever, for the detailed
+  format label.
+
+- **OPEN, and NOT yet located: F3 sometimes takes a couple of seconds** (Gordan,
+  2026-08-29) on a library of **sixteen** books, which is what makes it worth
+  chasing — at 1622 it would be unusable. **"Sometimes" is the clue**, and it
+  rules out everything done on every open. Measured that day, from outside the
+  running app: the scan of every `Book.ini` is **3 ms**, `DriveInfo.GetDrives()`
+  for the optical-drive menu item is **13 ms cold and 0 warm**, and
+  `AbsorbArchives` only reads file NAMES in the library root. None of them is
+  the seconds.
+
+  What is left is what does NOT happen every time: the **first** open after
+  launch, where a Debug build JITs `LibraryForm` and the whole of `LibrarySkin`'s
+  drawing; and a book that has never had `EnsureFormatDetails`, which is one
+  synchronous TagLib open.
+
+  **Do not guess between them — instrument.** `UiWatchdog` already exists and
+  `LoadBooks` already leaves one breadcrumb; three or four more around the phases
+  of opening (BuildUI done, scan done, shelf built, shown) would make the next
+  slow F3 name its own phase. That is how the Ctrl+O freeze was solved, and this
+  file records four wrong diagnoses from the one time it was approached the other
+  way round.
 - **Waiting on Gordan's own eyes and hands** (list opened 2026-08-03). None of
   these is a suspected fault — they are things that were built, measured and
   found correct by probe, and that a measurement *cannot* confirm:
