@@ -662,7 +662,37 @@ namespace Nemoviz_Book_Reader
                 return bible;
             }
 
-            foreach (string line in r.Text.Replace("\r\n", "\n").Split('\n')) bible.ReadLine(line);
+            // THE LAST-DITCH READ MUST TAKE THE VETO WITH IT, and until
+            // 2026-08-29 it did not — it parsed the raw answer straight into
+            // `bible`, putting back the very line the veto had just removed.
+            //
+            // Seen in Gordan's own log, twice, on Second Strike:
+            //
+            //     narrator "masculine" refused -- only 6 first-person words per
+            //              100,000 of narration, so this book is not written in
+            //              the first person
+            //     narrator masculine
+            //
+            // Refused on one line and adopted on the next. It happens whenever the
+            // chain's answer carries a narrator and NO names: the veto empties the
+            // narrator, `bible` is therefore empty, and this block re-reads the
+            // same text with nothing checking it. Which is exactly the fault the
+            // veto exists for — the comment above it records Robin Cook's
+            // Pandemic, a third-person novel rewritten into a voice it was not
+            // written in — and the consequence is that all 112 requests of a
+            // third-person thriller were told "The narrator speaks in the first
+            // person and is masculine. Every first-person past-tense form must
+            // agree with that, in every passage."
+            var late = new TranslationBible();
+            foreach (string line in r.Text.Replace("\r\n", "\n").Split('\n')) late.ReadLine(line);
+            if (firstPerson >= 0 && firstPerson < FirstPersonFloor && late.NarratorGender.Length > 0)
+            {
+                Log(opt, "narrator      \"" + late.NarratorGender + "\" refused -- only "
+                         + firstPerson + " first-person words per 100,000 of narration, so this "
+                         + "book is not written in the first person");
+                late.NarratorGender = "";
+            }
+            bible.FillGapsFrom(late);
             return bible;
         }
 
