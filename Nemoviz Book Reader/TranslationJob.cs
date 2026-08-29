@@ -292,7 +292,24 @@ namespace Nemoviz_Book_Reader
             // one call for whatever it does not already answer. Inheriting is
             // narrowed to the names this book really uses, so book one's cast does
             // not ride along in every request.
-            TranslationBible bible = TranslationBible.Load(opt.InheritBiblePath);
+            // THE BOOK'S OWN GLOSSARY COMES FIRST, and until 2026-08-29 it was
+            // never read at all. Load() took only the INHERITED path — the one
+            // picked in the dialog, whose list excludes the book being translated
+            // — so a re-run of the same book started from nothing, asked the model
+            // again, and SAVED OVER what was there.
+            //
+            // Which made a documented feature impossible: this file says of itself
+            // that it is "meant to be opened and corrected by the reader after they
+            // have read the book". A correction could not take effect and was
+            // destroyed by the next run. That is exactly the repair Helena Sedanka
+            // needed — three novels with a first-person narrator read as a man.
+            //
+            // The cascade is the one the rest of the app already uses for voices:
+            // what this book says, then what it inherits, then what the model can
+            // work out. Found because Gordan said he would re-translate "uz
+            // postojeći glosar" and it would not have been.
+            TranslationBible bible = TranslationBible.Load(opt.BiblePath);
+            bible.FillGapsFrom(TranslationBible.Load(opt.InheritBiblePath));
             bible.KeepOnlyPresentIn(parts.Body);
             bible.FillGapsFrom(DetectBible(parts.Body, opt, report));
             bible.Save(opt.BiblePath);
