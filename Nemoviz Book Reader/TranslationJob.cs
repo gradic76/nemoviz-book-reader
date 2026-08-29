@@ -694,8 +694,36 @@ namespace Nemoviz_Book_Reader
                         // report said only that a later engine had been used --
                         // which reads as a content refusal and sent this session
                         // hunting the wrong fault twice.
-                        if (!r.Ok && !whyRefused.ContainsKey(engine))
-                            whyRefused[engine] = (r.Error + " " + r.Detail).Trim();
+                        if (!whyRefused.ContainsKey(engine))
+                        {
+                            // BOTH KINDS OF FAILURE, and until 2026-08-29 only one
+                            // of them was recorded. A service that REFUSES sets
+                            // Error and Detail and was written down; a service that
+                            // ANSWERS and has its answer thrown out by our own
+                            // checks set nothing, so the log said
+                            //
+                            //     handed on piece 112 -- Azure Translator took it.
+                            //     Gemini (Google):
+                            //
+                            // with nothing after the colon. WhyEarlierStopsFailed
+                            // does try to fall back to Describe(lastIssues), and
+                            // that cannot work from there: by the time it runs,
+                            // `lastIssues` has been overwritten by the SUCCEEDING
+                            // engine's own findings, which are empty precisely
+                            // because that engine passed. The reason has to be
+                            // taken here, at the moment the answer is rejected.
+                            //
+                            // Gordan found it from one line of a real log and was
+                            // right that it was worth chasing: this is the same
+                            // shape as the fault fixed on 2026-08-21, reached down
+                            // the other branch, and it has been hiding every
+                            // check-rejection in every book since the checks were
+                            // written.
+                            string said = !r.Ok
+                                ? (r.Error + " " + r.Detail).Trim()
+                                : "answered, but our own check rejected it — " + Describe(issues);
+                            if (said.Length > 0) whyRefused[engine] = said;
+                        }
                         if (attempt == attempts - 1 && !refused.Contains(engine)) refused.Add(engine);
                         continue;
                     }

@@ -80,6 +80,7 @@ Pravila za književni prijevod na hrvatski:
 - Psovke, humor, ironiju, sarkazam, nježnost, grubost i druge registre prenesi funkcionalnim hrvatskim ekvivalentom, a ne doslovnim prijevodom.
 - Idiome, frazeme i ustaljene izraze prevodi njihovim prirodnim hrvatskim ekvivalentima kada postoje. Ne zadržavaj strani izraz ako postoji prirodan hrvatski izraz koji prenosi isto značenje. Ne kalkiraj strane kolokacije.
 - Strane izraze prevodi kad god je to prirodno i moguće. Ne prevodi termine, nazive ili izraze koje je u hrvatskom prirodnije ostaviti u izvornom obliku.
+- SLAVENSKA imena (ruska, poljska, češka, ukrajinska i slična) prenesi prema uobičajenoj hrvatskoj praksi: ""Pjotr"", ""Tatjana"", ""Dostojevski"" — ne u engleskoj transliteraciji ""Piotr"", ""Tatiana"", ""Dostoyevsky"". Jednom izabran oblik koristi dosljedno kroz cijeli tekst.
 - Osobna i druga strana imena u pravilu zadrži u izvornom obliku i u latinici, ali ih OBAVEZNO sklanjaj po hrvatskim padežima: ""u Tobiju"", ""s Kristom"", ""Vonvaltova presuda"" — nikada ""u programu Tobi"". Ako za ime, povijesnu osobu ili zemljopisni naziv postoji uvriježen hrvatski oblik, koristi taj oblik. Jednom izabran oblik koristi dosljedno kroz cijeli tekst.
 - Nazive mjesta, institucija, titula i drugih pojmova prevedi ili prilagodi prema prirodnoj i standardnoj hrvatskoj uporabi. Ne izmišljaj prijevod vlastitog imena ako se ono u hrvatskom uobičajeno ne prevodi.
 - Čuvaj značenje izvornika. Ne dodaj informacije kojih nema. Ne izostavljaj sadržaj. Ne ublažavaj niti pojačavaj značenje bez razloga.
@@ -154,6 +155,7 @@ Pravila za književni prevod na srpski:
 - Psovke, humor, ironiju, sarkazam, nežnost, grubost i druge registre prenesi funkcionalnim srpskim ekvivalentom, a ne doslovnim prevodom.
 - Idiome, frazeme i ustaljene izraze prevodi njihovim prirodnim srpskim ekvivalentima kad postoje. Ne zadržavaj strani izraz ako postoji prirodan srpski izraz koji prenosi isto značenje. Ne kalkiraj strane kolokacije.
 - Strane izraze prevodi kad god je to prirodno i moguće. Ne prevodi termine, nazive ili izraze koje je u srpskom prirodnije ostaviti u izvornom obliku.
+- SLOVENSKA imena (ruska, poljska, češka, ukrajinska i slična) prenesi prema uobičajenoj srpskoj praksi: ""Pjotr"", ""Tatjana"", ""Dostojevski"" — ne u engleskoj transliteraciji ""Piotr"", ""Tatiana"", ""Dostoyevsky"". Jednom izabran oblik koristi dosledno kroz ceo tekst.
 - Lična i druga strana imena zadrži u izvornom obliku i u latinici, nemoj ih fonetski transkribovati, ali ih OBAVEZNO menjaj po padežima: ""sa Tobijem"", ""Vonvaltova presuda"", ""kod Jeana"" — nikada nepromenjen oblik uz opisnu konstrukciju. Ako za ime, istorijsku ličnost ili geografski naziv postoji odomaćen srpski oblik, koristi taj oblik. Jednom izabran oblik imena koristi dosledno kroz ceo tekst.
 - Nazive mesta, institucija, titula i drugih pojmova prevedi ili prilagodi prema prirodnoj i standardnoj srpskoj upotrebi. Ne izmišljaj prevod vlastitog imena ako se ono u srpskom uobičajeno ne prevodi.
 - Čuvaj značenje originala. Ne dodaj informacije kojih nema. Ne izostavljaj sadržaj. Ne ublažavaj niti pojačavaj značenje bez razloga.
