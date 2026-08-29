@@ -546,6 +546,21 @@ namespace Nemoviz_Book_Reader
 
             menuFile.DropDownItems.Add(new ToolStripSeparator());
 
+            // WHERE THE BOOKS ACTUALLY ARE, without going to look for it. Gordan,
+            // 2026-08-29: "da se može odmah uskočiti tamo bez da se kopa po
+            // Exploreru." The path is in Settings and can be moved there, so a
+            // reader who wants to copy a book in, back the shelf up or look at a
+            // Book.ini has to read it off one dialog and then find it in another
+            // program.
+            //
+            // It sits beside Clear library rather than beside Open file, and the
+            // grouping is the point: the three at the top bring a BOOK in, these
+            // two act on the LIBRARY itself.
+            ToolStripMenuItem menuFileLibraryFolder =
+                new ToolStripMenuItem(Localization.T("Menu.File.OpenLibraryFolder"));
+            menuFileLibraryFolder.Click += (s, e) => OpenLibraryFolder();
+            menuFile.DropDownItems.Add(menuFileLibraryFolder);
+
             ToolStripMenuItem menuFileClear = new ToolStripMenuItem(Localization.T("Menu.File.ClearLibrary"));
             menuFileClear.Click += (s, e) => ClearLibrary();
             menuFile.DropDownItems.Add(menuFileClear);
@@ -2119,6 +2134,32 @@ namespace Nemoviz_Book_Reader
         /// <summary>Removes every book from the library (folders and their files),
         /// after a strong confirmation. The book currently open in the player is
         /// left in place — it can't be deleted while active.</summary>
+        /// <summary>Shows the library folder in the file manager.
+        ///
+        /// <para>The folder is CREATED first if it has gone -- a reader whose
+        /// library sits on a drive that was not plugged in would otherwise get
+        /// Explorer's own error about a path, which says nothing about NBR. Making
+        /// it is what <see cref="AppSettings.EnsureLibraryExists"/> already does
+        /// everywhere else the path is used.</para>
+        ///
+        /// <para>Started through explorer.exe with the path quoted rather than by
+        /// handing the folder to Process.Start directly: a library path with a
+        /// space in it is the normal case, not the exception.</para></summary>
+        private void OpenLibraryFolder()
+        {
+            try
+            {
+                string path = appSettings != null ? appSettings.LibraryPath : null;
+                if (string.IsNullOrEmpty(path)) return;
+                if (appSettings != null) appSettings.EnsureLibraryExists();
+                System.Diagnostics.Process.Start("explorer.exe", "\"" + path + "\"");
+            }
+            catch (Exception ex)
+            {
+                MessageForm.ShowInfo(this, ex.Message, Localization.T("Menu.File.OpenLibraryFolder"));
+            }
+        }
+
         private void ClearLibrary()
         {
             int count = books.Count;
