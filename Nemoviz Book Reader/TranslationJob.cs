@@ -137,9 +137,38 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>What is actually sent: the context, clearly marked as not to be
-        /// translated, then the passage.</summary>
-        private static string BuildUserMessage(TextChunk c)
+        /// translated, then the passage.
+        ///
+        /// <para><b>AZURE GETS THE BARE PASSAGE AND NOTHING ELSE, and the first
+        /// real Azure output this project ever saw is why.</b> Azure Translator is
+        /// a machine translator, not a model you talk to: it does not read
+        /// instructions, it translates whatever text it is handed. Handed the
+        /// scaffolding below it translated THAT too, so two pieces of Second Strike
+        /// reached the reader carrying "KONTEKST (kraj prethodnog odlomka, radi
+        /// kontinuiteta — NEMOJTE ga prevoditi niti ponavljati):" and "PREVEDI:" as
+        /// running text, with the whole previous passage repeated between them.
+        /// Read aloud, which is the only way this reader meets it, that is a
+        /// paragraph of nonsense followed by a page they have already heard.</para>
+        ///
+        /// <para>The system prompt was already dropped for Azure and the comment in
+        /// <c>Translator.Send</c> says so plainly — but the USER message was built
+        /// once per piece, before the chain knew which engine would take it, so the
+        /// half nobody had thought about went out unchanged. It cost nothing for
+        /// three years of chat models and everything the first time a translator
+        /// took a piece.</para>
+        ///
+        /// <para>Nothing is lost by it: the lead exists to give a model context it
+        /// can read, and Azure has no use for context in any form — it translates
+        /// sentence by sentence and carries nothing between requests.</para>
+        ///
+        /// <para><b>The length ratio is what caught it</b>, and only because it was
+        /// logged for every piece the night before rather than only for failures:
+        /// Gemini ran 0.93-1.05 through the book and the two Azure pieces came back
+        /// at <b>1.11 and 1.50</b> — inflated by exactly the context and the labels.
+        /// Neither tripped the 1.60 gate.</para></summary>
+        private static string BuildUserMessage(TextChunk c, TranslationEngine engine)
         {
+            if (engine != null && engine.Kind == EngineKind.AzureTranslator) return c.Text;
             if (string.IsNullOrEmpty(c.Lead)) return "TRANSLATE:\n" + c.Text;
             return "CONTEXT (the end of the previous passage, for continuity — do NOT translate or repeat it):\n"
                    + c.Lead + "\n\nTRANSLATE:\n" + c.Text;
@@ -287,8 +316,7 @@ namespace Nemoviz_Book_Reader
                     continue;
                 }
 
-                string user = BuildUserMessage(c);
-                Piece piece = TranslateOne(c, user, system, opt, report, chainState);
+                Piece piece = TranslateOne(c, system, opt, report, chainState);
                 if (piece.Text != null) cache.Put(c.Start, c.Text, piece.Text);
                 else { piece.Text = c.Text; }        // left as it was written
 
@@ -626,7 +654,7 @@ namespace Nemoviz_Book_Reader
             if (report == null) return;
             report.Issues.Add(new TranslationIssue { Severity = sev, Kind = kind, Detail = detail });
         }
-        private static Piece TranslateOne(TextChunk c, string user, string system,
+        private static Piece TranslateOne(TextChunk c, string system,
                                           Options opt, TranslationReport report, ChainState state)
         {
             TranslationResult last = null;
@@ -639,6 +667,7 @@ namespace Nemoviz_Book_Reader
             for (int stop = 0; stop < opt.Chain.Count; stop++)
             {
                 TranslationEngine engine = opt.Chain[stop];
+                string user = BuildUserMessage(c, engine);
                 if (state.IsDown(engine)) continue;
                 int attempts = Math.Max(1, engine.Attempts);
 
