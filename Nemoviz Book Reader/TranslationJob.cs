@@ -325,6 +325,7 @@ namespace Nemoviz_Book_Reader
             // is what had to go: every book's log says what was read and how
             // much of it, and a language with none says so in as many words.
             {
+                TranslationRules.Reload();
                 string rulesText = TranslationRules.For(opt.TargetLang);
                 Log(opt, "rules         " + (rulesText.Length > 0
                     ? rulesText.Length + " characters from " + TranslationRules.PathFor(opt.TargetLang)

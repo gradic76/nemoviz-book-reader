@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Text;
 
@@ -72,13 +73,36 @@ namespace Nemoviz_Book_Reader
             }
         }
 
-        /// <summary>The file a language's rules would be read from, whether or
-        /// not it exists. Public so the dialog and the log can name it.</summary>
+        /// <summary>Where a reader's OWN rules live, which is the whole point of
+        /// the rules being files.
+        ///
+        /// <para>The shipped folder sits beside the program, and a program
+        /// installed where Windows programs belong cannot be written to -- the
+        /// same wall that moved the settings and the service keys out in August.
+        /// A reader editing the rules there would need elevation to save, and the
+        /// next installer would overwrite the result. So their copy goes in their
+        /// own folder and WINS, and the shipped file stays untouched underneath as
+        /// the reference and the way back: delete your copy and the default
+        /// returns.</para></summary>
+        public static string UserFolder
+        {
+            get { try { return UserData.File("Translation"); } catch { return ""; } }
+        }
+
+        /// <summary>The file a language's rules are actually read from -- the
+        /// reader's own if they have made one, otherwise the shipped one. Public
+        /// so the dialog and the log can name the file that was really used, which
+        /// is the only honest way to show it.</summary>
         public static string PathFor(string targetLang)
         {
             string code = Normalize(targetLang);
             if (code.Length == 0) return "";
-            try { return Path.Combine(Folder, code + ".rules"); }
+            try
+            {
+                string mine = Path.Combine(UserFolder, code + ".rules");
+                if (File.Exists(mine)) return mine;
+                return Path.Combine(Folder, code + ".rules");
+            }
             catch { return ""; }
         }
 
@@ -98,19 +122,34 @@ namespace Nemoviz_Book_Reader
 
         public static bool Has(string targetLang) { return For(targetLang).Length > 0; }
 
+        /// <summary>Forgets what has been read, so the next ask goes to disk.
+        /// Called when a translation starts: a reader who has just edited their
+        /// rules expects the next book to use them, and telling them to restart
+        /// NBR for it would be a poor answer to a file they were invited to
+        /// edit.</summary>
+        public static void Reload() { cache.Clear(); }
+
         /// <summary>Every language code that has a rules file, sorted. This is
         /// what the dialog's language list is built from -- it lists what is
         /// actually on disk rather than a list kept in step by hand.</summary>
         public static List<string> AvailableLanguages()
         {
             List<string> codes = new List<string>();
-            try
+            foreach (string where in new[] { Folder, UserFolder })
             {
-                if (Directory.Exists(Folder))
-                    foreach (string file in Directory.GetFiles(Folder, "*.rules"))
-                        codes.Add(Path.GetFileNameWithoutExtension(file));
+                try
+                {
+                    if (string.IsNullOrEmpty(where) || !Directory.Exists(where)) continue;
+                    foreach (string file in Directory.GetFiles(where, "*.rules"))
+                    {
+                        string code = Path.GetFileNameWithoutExtension(file);
+                        // A reader's own file for a language we ship is the SAME
+                        // language, not a second entry in the list.
+                        if (!codes.Contains(code, StringComparer.OrdinalIgnoreCase)) codes.Add(code);
+                    }
+                }
+                catch { }
             }
-            catch { }
             codes.Sort(StringComparer.OrdinalIgnoreCase);
             return codes;
         }
