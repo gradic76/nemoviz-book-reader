@@ -130,9 +130,17 @@ namespace Nemoviz_Book_Reader
             return code;
         }
 
-        /// <summary>Reads a rules file and drops its ';' header lines. Everything
-        /// else goes to the service verbatim, blank lines included: the paragraph
-        /// shape is part of the instruction.</summary>
+        /// <summary>Reads a rules file and drops its comment lines. Everything else
+        /// goes to the service verbatim, blank lines included: the paragraph shape
+        /// is part of the instruction.
+        ///
+        /// <para><b>TWO comment characters, and the difference is for the reader,
+        /// not for us</b> -- both are dropped identically. ';' heads the file's own
+        /// notes, as in a .lang. '#' marks a rule PARKED: text that was in force
+        /// once, or came with the document and was taken out on purpose, kept where
+        /// it can be found and put back by deleting one character. Gordan asked for
+        /// exactly that (2026-09-01) so that nothing we remove is lost, and it costs
+        /// the prompt nothing, since neither kind is ever sent.</para></summary>
         private static string Read(string path)
         {
             try
@@ -141,7 +149,8 @@ namespace Nemoviz_Book_Reader
                 StringBuilder sb = new StringBuilder();
                 foreach (string line in File.ReadAllLines(path, Encoding.UTF8))
                 {
-                    if (line.TrimStart().StartsWith(";")) continue;
+                    string head = line.TrimStart();
+                    if (head.StartsWith(";") || head.StartsWith("#")) continue;
                     sb.AppendLine(line);
                 }
                 return sb.ToString().Trim();
