@@ -1,0 +1,805 @@
+; Nemoviz Book Reader
+;
+; Translated by:            Gemini (Google), 2026
+; Verified and modified by: 
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Suomi
+Btn.OK=OK
+Btn.Yes=Kyllä
+Btn.No=Ei
+Btn.Cancel=Peruuta
+Btn.Close=Sulje
+Btn.Continue=Jatka
+Btn.Refresh=Päivitä
+Btn.Refresh.Accessible=Päivitä
+Common.Dash=-
+Common.Error=Virhe
+Common.DateFormatLong=d. MMMM yyyy
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Otsikko:
+Player.Info.AuthorLabel=Kirjailija:
+Player.Info.ProducerLabel=Tuottaja:
+Player.Info.PublisherLabel=Julkaisija:
+Player.Info.ChapterLabel=Luku:
+Player.Info.PartLabel=Osa:
+Player.Info.PageLabel=Sivu:
+Player.Info.BookmarksLabel=Kirjanmerkit:
+Player.Info.VoiceLabel=Ääni:
+Player.Info.NoVoiceLabel=Ei asennettua ääntä
+Player.Info.PartNumElapsed=Osa {0} kulunut:
+Player.Info.PartNumRemaining=Osa {0} jäljellä:
+Player.Info.ElapsedLabel=Aikaa kulunut:
+Player.Info.RemainingLabel=Aikaa jäljellä:
+Player.Info.VolumeLabel=Äänenvoimakkuus:
+Player.Info.SpeedLabel=Nopeus:
+Player.Info.AccessibleName=Toiston tiedot, F8
+Player.Info.Prepared=Puhe valmiina: {0} jaksoa, {1} Mt
+Player.Info.Preparing=Valmistellaan kirjan loppuosaa: {0} / {1} jaksoa
+Player.TitleBar.Paused=tauolla
+Player.ReadingSurface.Accessible=Lukualue
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Toista, Välilyönti
+Btn.Pause.Accessible=Tauko, Välilyönti
+Btn.Back.Accessible=Taaksepäin, Vaihto+Vasen
+Btn.Forward.Accessible=Eteenpäin, Vaihto+Oikea
+Btn.VolumeUp.Accessible=Lisää äänenvoimakkuutta, F12
+Btn.VolumeDown.Accessible=Vähennä äänenvoimakkuutta, F11
+Btn.Power.Accessible=Poistu, Alt+F4
+Player.Volume.Text=Äänenvoimakkuus: {0}%
+Player.Volume.Accessible=Äänenvoimakkuus {0} prosenttia
+Player.Speed.Text=Nopeus: {0}x
+Player.Speed.Legend=Nopeus
+Player.Speed.Accessible=Nopeus {0}-kertainen
+Player.Position.Label=Kohta
+Player.Position.Text=Kohta: {0} / {1}
+Player.Position.Accessible=Kohta {0} prosenttia
+Player.Progress.Legend=Edistyminen
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Siirtymäaskel:
+Player.Seek.Accessible=Siirtymäaskel, Vaihto+Ylös tai Vaihto+Alas
+Player.Seek.Announce=Siirtyminen: {0}
+Seek.Item.15s=15 sekuntia
+Seek.Item.30s=30 sekuntia
+Seek.Item.1min=1 minuutti
+Seek.Item.5min=5 minuuttia
+Seek.Item.10min=10 minuuttia
+Seek.Item.15min=15 minuuttia
+Seek.Item.30min=30 minuuttia
+Seek.Item.Chapter=Luku
+Seek.Item.Part=Osa
+Seek.Item.Track=Raita
+Seek.Item.HeadingLevel=Otsikkotaso {0}
+Seek.Item.Page=Sivu
+Seek.Item.Paragraph=Kappale
+Seek.Item.Bookmark=Kirjanmerkki
+Seek.Item.StandardPage=Standardisivu
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Kirjasto
+Btn.Library.Accessible=Kirjasto, F3
+Btn.Library.Legend=Kirjasto
+Btn.Settings=Asetukset
+Btn.Settings.Accessible=Asetukset, F2
+Btn.Settings.Legend=Asetukset
+Btn.Properties.Legend=Ominaisuudet
+Btn.Properties=Ominaisuudet
+Btn.Properties.Accessible=Ominaisuudet, Alt+Enter
+Btn.Help=Ohje
+Btn.Help.Accessible=Ohje, F1
+Btn.Help.Legend=Ohje
+Btn.GoTo.Legend=Siirry...
+Btn.GoTo=Siirry...
+Btn.GoTo.Accessible=Siirry, F4
+Btn.SetBookmark.Legend=Kirjanmerkki
+Btn.SetBookmark=Aseta kirjanmerkki
+Btn.SetBookmark.Accessible=Aseta kirjanmerkki, F5
+Btn.ManageBookmarks.Legend=Kirjanmerkit
+Btn.ManageBookmarks=Hallitse kirjanmerkkejä
+Btn.ManageBookmarks.Accessible=Hallitse kirjanmerkkejä, F6
+Btn.Timer=Uniajastin
+Btn.Timer.Legend=Ajastin
+Btn.Timer.Accessible=Uniajastin, F7
+Btn.Timer.Countdown=Uniajastin {0}
+Btn.Timer.Accessible.Active=Uniajastin, {0} jäljellä, aktivoi pysäyttääksesi toiston ja peruuttaaksesi ajastimen
+Btn.Timer.Accessible.LessThanMinute=Uniajastin, alle minuutti jäljellä
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Takaisin (Shift+Vasen nuoli)
+Tip.PlayPause=Toista/Tauko (Välilyönti)
+Tip.Forward=Eteenpäin (Shift+Oikea nuoli)
+Tip.Seek=Muuta Shift+Ylös ja Shift+Alas -näppäimillä; hyppää Shift+Vasen ja Shift+Oikea -näppäimillä (myös Takaisin/Eteenpäin)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enter
+Tip.Timer=F7
+Tip.Volume=F11 ja F12
+Tip.Speed=Ctrl+Vasen ja Ctrl+Oikea
+Tip.Progress=Ctrl+1–9: hyppää 10–90 % kohtaan
+Player.OpenFile.Title=Valitse kirja
+Player.NoVoiceForLanguage=Mikään asennettu ääni ei puhu kieltä {0}. Avaa Ominaisuudet näppäinyhdistelmällä Alt+Enter valitaksesi äänen.
+Filter.Audiobooks=Äänikirjat
+Filter.TextBooks=Tekstikirjat
+Filter.BrailleBooks=Pistekirjoituskirjat
+Filter.Archives=Arkistot
+Filter.AllSupported=Kaikki tuetut tiedostot
+Filter.AllFiles=Kaikki tiedostot
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Kirjasto
+Library.List.Accessible=Kirjahylly
+Library.NowReading.Accessible=Luetaan parhaillaan
+Library.NowReading.Empty=Ei ladattua kirjaa
+Library.Search.Accessible=Hae
+Library.Filter.Accessible=Suodata tilan mukaan
+Library.Details.Accessible=Kirjan tiedot
+Library.Btn.Load=Lataa
+Library.Btn.Load.Accessible=Lataa
+Library.Btn.Close=Sulje
+Library.Btn.Close.Accessible=Sulje
+Menu.File=Tiedosto
+Menu.File.OpenFile=Avaa tiedosto...
+Menu.File.OpenFolder=Avaa kansio...
+Menu.File.OpenAudioCd=Avaa ääni-CD
+Menu.File.ClearLibrary=Tyhjennä kirjasto...
+Menu.File.OpenLibraryFolder=Avaa kirjastokansio
+Menu.File.Exit=Poistu
+Menu.File.ExportAudio=Vie äänikirjana...
+Menu.File.Translate=Käännä kirja...
+Menu.Sort=Lajittele
+Menu.Sort.Alphabetically=Aakkosjärjestyksessä
+Menu.Sort.DateAdded=Lisäyspäivämäärän mukaan
+Menu.Sort.Format=Muodon mukaan
+Menu.Sort.Status=Tilan mukaan
+Menu.Sort.Ascending=Nouseva
+Menu.Sort.Descending=Laskeva
+Menu.Sort.ActiveMark=(aktiivinen)
+Menu.Help=Ohje
+Menu.Help.Help=Ohje
+Menu.Help.About=Tietoja NBR-ohjelmasta
+Menu.Help.WhatsNew=Mitä uutta
+Menu.Help.Report=Vie raportti...
+Menu.Help.Services=Palvelut ja tilit...
+Menu.Help.Update=Tarkista päivitykset
+Shelf.Filter.All=Kaikki kirjat
+Shelf.Filter.Reading=Luettavana
+Shelf.Filter.Unread=Lukemattomat
+Shelf.Filter.Read=Luetut
+Shelf.Filter.Favorites=Suosikit
+Shelf.Status.NowReading=Luetaan parhaillaan
+Shelf.Status.Reading=Luetaan
+Shelf.Status.Unread=Lukematon
+Shelf.Status.Read=Luettu
+Context.Open=Avaa
+Context.MarkRead=Merkitse luetuksi
+Context.MarkUnread=Merkitse lukemattomaksi
+Context.Rename=Nimeä uudelleen
+Context.Delete=Poista
+Context.Properties=Ominaisuudet
+Context.ReadOcr=Tunnista teksti
+Context.ReReadOcr=Tunnista uudelleen toisella kielellä
+Context.Translate=Käännä kirja...
+Context.Favorite=Merkitse suosikiksi
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Nimi
+Details.Field.Author=Kirjailija
+Details.Field.Format=Muoto
+Details.Field.Speed=Nopeus
+Details.Field.Volume=Äänenvoimakkuus
+Details.Field.Added=Lisätty
+Details.Field.Producer=Tuottaja
+Details.Field.Publisher=Julkaisija
+Details.Field.Year=Vuosi
+Details.Field.Time=Aika
+Details.Field.Elapsed=Kulunut aika
+Details.Field.Remaining=Jäljellä
+Details.Field.Read=Luettu
+Details.Field.Pages=Sivut
+Details.Field.Headings=Otsikot
+Details.Field.Characters=Merkkejä
+Details.Field.Language=Tunnistettu kieli
+Details.Field.Description=Kuvaus
+Details.Description.Open=Paina Enter lukeaksesi sen
+Details.Field.SoundProcessing=Äänen käsittely
+Details.Sound.On=Päällä
+Details.Sound.Off=Pois päältä
+Details.Speed.Value={0}x
+Dialog.Description.Title=Kuvaus - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Lisää kirja kirjastoon
+Library.ImportFolder.Description=Valitse kansio, jossa on kirjoja
+Dialog.ConfirmImport.Message=Valitusta sijainnista löytyi {0} kirjaa: {1} äänikirjaa, {2} tekstikirjaa, {3} erikoismuotoa ja {4} arkistoa.\n\nJos tämä on oikein, vahvistamisen jälkeen kirjat kopioidaan kirjastoon ja arkistot puretaan sinne. Kirjastosi sijaitsee osoitteessa {5}.\n\nAlkuperäisessä sijainnissa mikään ei muutu – kaikki pysyy ennallaan, joten ei huolta.\n\nJos määrät eivät vastaa odotuksiasi, yritä järjestellä tuotavat tiedot uudelleen. Massatuonnissa on rajoituksia kirjojen nimien erottamisessa, eikä NBR voi taata, että jokainen tunnistetaan oikein.\n\nTämä voi kestää hetken, joten yritä olla keskeyttämättä prosessia.
+Dialog.ConfirmImport.One=Löytyi yksi kirja. Tuodaanko se?
+Dialog.ConfirmImport.Title=Lisää kansio
+Dialog.NoBooksFound.Message=Valitusta kansiosta ei löytynyt tuettuja kirjoja.
+Dialog.NoBooksFound.Title=Lisää kansio
+Dialog.ImportSuccess.Message=Kirja lisätty kirjastoon.
+Dialog.ImportSuccess.Title=Lisää kirja
+Dialog.ImportError.Message=Virhe lisättäessä kirjaa: {0}
+Dialog.ImportFolderSuccess.Message=Tuotu {0} kirjaa.
+Dialog.ImportFolderSuccess.Skipped={0} jätettiin pois.
+Dialog.ImportFolderSuccess.SkippedList=Näitä ei tuotu:
+Dialog.ImportFolderSuccess.Title=Lisää kansio
+Dialog.ImportFolderError.Message=Virhe tuotaessa kansiota: {0}
+Dialog.ReimportExisting.Title=Jo kirjastossa
+Dialog.ReimportExisting.Message={0} on jo hyllyssä. Uudelleentuonti päivittää kirjakansion sisällön. Kohtasi kirjassa ja kirjanmerkkisi säilyvät – mutta jos tiedosto on muuttunut edellisestä kerrasta, tekstin sijainti on muuttunut, etkä enää jatka samasta kohdasta. Tuodaanko uudelleen?
+Dialog.Skipped.Drm=suojattu
+Dialog.Skipped.Cancelled=peruutettu
+Dialog.Skipped.MissingFirstVolume=tämän sarjan ensimmäinen osa puuttuu
+Dialog.Skipped.Empty=tiedosto on tyhjä
+Dialog.Rename.Title=Nimeä kirja uudelleen
+Dialog.Rename.Prompt=Uusi nimi:
+Dialog.Rename.AuthorLabel=Kirjailija:
+Dialog.Rename.TitleLabel=Otsikko:
+Dialog.ConfirmDelete.Message=Haluatko varmasti poistaa kohteen "{0}" pysyvästi levyltä? Tätä toimintoa ei voi kumota.
+Dialog.ConfirmDelete.Title=Poista kirja
+Dialog.DeleteError.Message=Virhe poistettaessa kirjaa levyltä: {0}
+Dialog.ActiveBook.Message="{0}" on parhaillaan ladattuna soittimeen, eikä sitä voi poistaa. Sulje kirjasto, avaa toinen kirja tai pysäytä toisto ja yritä uudelleen.
+Dialog.ActiveBook.Title=Kirja on käytössä
+Dialog.ClearLibrary.Title=Tyhjennä kirjasto
+Dialog.ClearLibrary.Message=Poistetaanko kaikki {0} kirjaa kirjastosta? Tämä poistaa niiden tiedostot pysyvästi levyltä, eikä toimintoa voi kumota.
+Dialog.ClearLibrary.Empty=Kirjasto on jo tyhjä.
+Dialog.ClearLibrary.Done=Poistettiin {0} kirjaa.
+Dialog.ClearLibrary.Skipped={0} ei voitu poistaa (käytössä tai parhaillaan avoinna).
+Dialog.DrmProtected.Title=Suojattu kirja
+Dialog.DrmProtected.Message=Tämä kirja on DRM-suojattu (sen sisältö on salattu), joten sitä ei voi avata. Käytä DRM-vapaata kopiota.
+Dialog.ArchivePassword.Title=Salasana vaaditaan
+Dialog.ArchivePassword.Prompt=Arkisto "{0}" on salattu salasanalla. Syötä salasana avataksesi sen:
+Dialog.ArchivePassword.Retry=Salasana ei toiminut. Yritä uudelleen kohteelle "{0}":
+Dialog.ArchivePassword.Field=Arkiston salasana
+Extract.Progress.Title=Puretaan
+Extract.Progress.Preparing=Valmistellaan…
+Extract.Progress.Determinate=Puretaan… {0} / {1} tiedostoa
+Extract.Progress.Indeterminate=Puretaan… {0} tiedostoa
+
+; ---- GO TO
+Dialog.GoTo.Title=Siirry
+GoTo.List.Accessible=Kirjan osat
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=OK
+GoTo.Cancel.Accessible=Peruuta
+GoTo.Page.Group=Siirry sivulle
+GoTo.Page.Accessible=Sivunumero
+GoTo.AutoPlay=Aloita toisto siirtymisen jälkeen
+GoTo.AutoPlay.Hint=Kun valittu, toisto alkaa heti siirtymisen jälkeen. Kun valinta on poistettu, nykyinen tila säilyy: tauko pysyy taukona, toisto jatkuu toistona.
+GoTo.Hint.Accessible=Vihje
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Uniajastin
+SleepTimer.Duration.Group=Kesto
+SleepTimer.Duration.15=15 minuuttia
+SleepTimer.Duration.30=30 minuuttia
+SleepTimer.Duration.45=45 minuuttia
+SleepTimer.Duration.60=60 minuuttia
+SleepTimer.Duration.Custom=Mukautettu:
+SleepTimer.Custom.Accessible=Mukautettu kesto minuuteissa
+SleepTimer.Bookmark=Lisää kirjanmerkki aloituskohtaan
+SleepTimer.Action.Group=Kun aika loppuu
+SleepTimer.Action.Stop=Pysäytä toisto
+SleepTimer.Action.StopClose=Pysäytä ja sulje ohjelma
+SleepTimer.Action.StopShutdown=Pysäytä, sulje ja sammuta tietokone
+SleepTimer.Start=Käynnistä
+SleepTimer.Start.Accessible=Käynnistä uniajastin
+SleepTimer.CancelBtn=Peruuta
+SleepTimer.CancelBtn.Accessible=Peruuta
+SleepTimer.Announce.Set=Uniajastin asetettu: {0} minuuttia
+SleepTimer.Announce.Cancelled=Uniajastin peruutettu
+SleepTimer.Announce.Finished=Uniajastin päättyi, toisto pysäytetty
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Hallitse kirjanmerkkejä
+Bookmark.Announce.Set=Kirjanmerkki asetettu
+Bookmark.Item.Format=Kirjanmerkki {0} ({1})
+ManageBookmarks.List.Accessible=Kirjanmerkit
+ManageBookmarks.Delete=Poista
+ManageBookmarks.Delete.Accessible=Poista
+ManageBookmarks.OK.Accessible=OK
+ManageBookmarks.Cancel.Accessible=Peruuta
+ManageBookmarks.Selected=Valittu
+ManageBookmarks.NotSelected=Ei valittu
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Äänen käsittely
+Dialog.SoundProcessing.Message=Äänenkäsittely tekee huonosta tallenteesta helpommin kuunneltavan. Se ei korjaa sitä.\n\nSe ei voi palauttaa sitä, mitä ei ole koskaan tallennettu, ja liian voimakkaana se tekee enemmän haittaa kuin hyötyä. Jätä se yksinkertaisesti päälle, kuuntele muutama minuutti ja kokeile vasta sitten erillisiä vaiheita.\n\nOhje selittää, mitä kukin niistä tekee.
+Prop.Info.Accessible=Kirjan tiedot
+Prop.Info.ProcessingOff=Äänenkäsittely: pois päältä
+Prop.Info.ProcessingOn=Äänenkäsittely: päällä
+Prop.Info.Bypassed=(ohitus käytössä)
+Prop.Info.Off=pois päältä
+Prop.Info.Protection=Särönsuojaus
+Prop.Tab.Audio=Ääni
+Prop.Tab.Text=Teksti
+Prop.On=päällä
+Prop.Off=pois päältä
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Käytä äänenkäsittelyä
+Prop.SoundProcessing=Äänenkäsittely
+Prop.Stage.Level=Taso
+Prop.Highpass.Title=Poista jyrinä
+Prop.Denoise.Title=Kohinanvaimennus
+Prop.Deesser.Title=Pehmennä suhinaa
+Prop.Compressor.Title=Tasoita puhetta
+Prop.Eq.Title=Äänensävy
+Prop.Eq.Shelf={0} ja korkeammat
+Prop.Loudness.Title=Voimakkuus ja tauot
+Prop.Normalize.Title=Automaattinen voimakkuus
+Prop.Gate.Title=Kohina tauoissa
+Prop.Level.Minimal=Minimaalinen
+Prop.Level.Light=Kevyt
+Prop.Level.Medium=Keskitaso
+Prop.Level.Strong=Voimakas
+Prop.Level.Maximum=Enimmäistaso
+Prop.ResetAll=Palauta kaikki
+Prop.Bypass=Ohita
+Prop.Bypass.Shortcut=Control B kytkee tämän päälle ja pois päältä mistä tahansa tällä sivulla
+Prop.Analysing=Analysoidaan tallennetta
+Prop.Analysing.Done=Tallenne analysoitu, {0} vaihetta asetettu. Muuta niitä tarvittaessa.
+Prop.Analysing.Failed=Tallenteen analysointi epäonnistui. Asetukset pysyvät ennallaan.
+Analyse.Progress.Title=Analysoidaan tallennetta
+Analyse.Progress.Starting=Aloitetaan analysointi...
+Analyse.Progress.Working=Segmentti {0} / {1}. {2}
+Analyse.Progress.Quarter={0} prosenttia valmiina. {1}
+Analyse.Progress.Cancel=Peruuta
+Analyse.Progress.Cancelling=Pysäytetään tämän segmentin jälkeen. Asetukset pysyvät ennallaan.
+Analyse.Progress.Estimating=Arvioidaan kestoa.
+Analyse.Progress.AlmostDone=Melkein valmis.
+Analyse.Progress.Seconds=Noin {0} sekuntia jäljellä.
+Analyse.Progress.Minutes=Noin {0} minuuttia jäljellä.
+Hint.SoundProcessing=Äänikäsittelyn avulla voit hienosäätää tallenteen ääntä. Voit poistaa erilaisia kohinoita, vahvistaa äänenvoimakkuutta ja muokata yleissoundia taajuuskorjaimella. Käytettävissä on kuusi säätöryhmää, jotka voit kytkeä päälle ja pois päältä erikseen. Voit myös säätää jokaista ohjainta erikseen. Voit ohittaa koko äänikäsittelyketjun väliaikaisesti painamalla Ctrl+B, jotta voit kuulla eron alkuperäisen tallenteen ja ääniasetustesi välillä.
+Hint.RemoveRumble=Leikkaa matalimmat taajuudet – liikenteen, ilmastoinnin ja käsittelyäänet. Se ei voi korjata puuroista tallennetta, mutta se selkeyttää alapäätä, jolloin puheelle jää tilaa.
+Hint.NoiseRemoval=Vähentää jatkuvaa taustasuhinaa, jota nauhat tai halvat mikrofonit aiheuttavat. Liian voimakas asetus alkaa syödä ääntä, joten nosta sitä vain siihen asti, kunnes suhina katoaa.
+Hint.SoftenSibilance=Pehmentää teräviä S- ja Š-äänteitä. Hyödyllinen lähellä mikrofonia lukeville ja tallenteille, joita on kirkastettu liikaa.
+Hint.EvenOutSpeech=Kaventaa hiljaisten ja kovien kohtien välistä eroa, jolloin kuiskaus ja huuto ovat lähempänä toisiaan. Tätä kannattaa käyttää, kun joudut jatkuvasti säätämään äänenvoimakkuutta.
+Hint.Tone=Viisi taajuusaluetta desibeleinä, nimetty taajuutensa mukaan. Matalin on 200 Hz, missä kumiseva tai puuroinen ääni yleensä sijaitsee; ylin on hyllykorjain, joten se nostaa tai laskee kaikkea sen yläpuolella olevaa yhden alueen sijaan. Taajuusalueet menevät tarkoituksella päällekkäin, mikä mahdollistaa tasaisen käyrän, mutta tarkoittaa myös sitä, että ne summautuvat – kolme vierekkäistä aluetta +4 dB:n asetuksella tuottaa enemmän kuin +4 dB niiden välillä. Pienet muutokset vaikuttavat paljon, ja yli muutaman desibelin muutokset tarkoittavat yleensä, että jokin muu vaihe on oikea ratkaisu.
+Hint.AutomaticLoudness=Nämä kaksi toimintoa vaikuttavat toisiinsa, minkä vuoksi ne on sijoitettu samaan ryhmään. Automaattinen äänenvoimakkuus pitää kokonaistason tasaisena koko kirjan ajan, myös eri päivinä äänitettyjen tiedostojen välillä; se seuraa ääntä koko signaalin sijaan, mikä on puheäänitteille suositeltavaa. Kohinanvaimennus tauoissa toimii päinvastoin: kaikki valittua tasoa hiljaisempi ääni vaimenee, jolloin lukemisen taustalla kuuluva suhina tai hurina lakkaa kuulumasta lauseiden välisissä tauoissa. Se ei kosketa itse puhetta ja se vaimentaa ääntä sen sijaan, että se hiljentäisi sen kokonaan (jokaisen lauseen välissä päälle ja pois kytkeytyvä kohina on väsyttävämpää kuin tasainen taustakohina). Äänenvoimakkuuden nostaminen nostaa myös taustakohinaa, joten jos näin käy, tämä on oikea säädin sen hallintaan.
+
+; ---- PROPERTIES - the text page
+Prop.Text.ReadingIn=Luetaan kielellä:
+Prop.Text.NoVoiceShort=Mikään asennettu ääni ei puhu kieltä {0} — valitse alta.
+Prop.Text.NoVoiceForLanguage=Mikään asennettu ääni ei puhu kieltä {0}. Asenna ääni kielelle {0} tai valitse ylhäältä kieli ja ääni, jolla haluat lukea tämän kirjan. Valinta koskee vain tätä kirjaa.
+Prop.Text.InputBrailleGroup=Pistekirjoituksen lähde
+Prop.Text.InputBrailleTable=Syötteen pistekirjoitustaulukko:
+Hint.Text0=Täällä voit valita kielen ja äänen tämän kirjan lukemiseen. Voit määrittää kirjaston jokaiselle kirjalle omat asetukset. Jokainen ääni muistaa omat asetuksensa – nopeuden, äänenvoimakkuuden ja korkeuden – joten niitä ei tarvitse säätää uudelleen, kun vaihdat takaisin aiemmin käytettyyn ääneen.\n\nMuista, että voit valita "Ei puhetta", jos haluat lukea visuaalisesti tai pistekirjoitusnäytöltä ilman ääniopastusta.
+Hint.TextVisual=Täällä voit säätää lukemisen näkymää. Voit valita tekstitysmäisen asettelun, lopputekstien tavoin vierivän tekstin tai välittömän sivunvaihdon. Voit myös valita taustan, tekstin ja korostuksen värit sekä sen, merkitäänkö luettava rivi vai koko lause.\n\nHuomaa, että tämä ei vaikuta puheeseen.
+Hint.TextBrailleSource=Tämä kirja on peräisin pistekirjoitustiedostosta, ja tämä on taulukko, jolla se luettiin – se, joka muutti pistekirjoitussolut takaisin sanoiksi.\n\nPistekirjoitustiedosto ei kerro mitään kielestään, asteestaan tai siitä, mitä kansallista standardia se noudattaa, joten NBR:n on pääteltävä taulukko itse tekstistä. Se on yleensä oikein, mutta ei aina, ja väärä taulukko tuottaa sanoja, jotka ovat melkein oikein: "Have", kun kirjassa lukee "How".\n\nJos näet tällaista, valitse tästä toinen taulukko ja paina OK. Kirja luetaan uudelleen tuomastasi pistekirjoitustiedostosta, joka säilytetään sen rinnalla, joten voit kokeilla niin monta taulukkoa kuin haluat ja palata ensimmäiseen milloin tahansa.\n\nTarjotut taulukot ovat yllä mainitun kielen taulukoita. Jos kieli on väärä, vaihda se, niin taulukot päivittyvät.\n\nTällä ei ole mitään tekemistä sen kanssa, mitä pistenäyttösi näyttää. Ruudunlukuohjelmasi kääntää sen käyttämällä omissa asetuksissaan olevaa taulukkoa.
+NoVoice.Title=Ei ääntä tälle kirjalle
+NoVoice.Message=Tämä kirja on kielellä {0}, eikä mikään asennettu ääni puhu sitä. Valitse ääni, jolla se luetaan vain tällä kertaa, tai jätä se lukematta, kunnes kielelle {0} on asennettu ääni.
+NoVoice.Read=Lue tällä äänellä
+NoVoice.Leave=Jätä lukematta
+Dialog.BrailleReread.Title=Luetaanko pistekirjoitustiedosto uudelleen?
+Dialog.BrailleReread.Message=Tämä kirja luetaan uudelleen alkuperäisestä pistekirjoitustiedostostaan käyttäen taulukkoa {0}.\n\nTeksti tuotetaan uudelleen, joten kaikki vanhaan tekstiin viittaava katoaa: lukukohtasi, kirjanmerkkisi ja luettu prosenttiosuus. Itse kirjaan ei kosketa, ja voit lukea sen uudelleen toisella taulukolla niin usein kuin haluat.
+Dialog.BrailleReread.Failed=Pistekirjoitustiedostoa ei voitu lukea kyseisellä taulukolla. Kirja on jätetty ennalleen.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Asetukset
+Settings.Tab.General=Yleiset
+Settings.Tab.TextBooks=Puhe ja pistekirjoitus
+Settings.Tab.Device=Laitteet
+Settings.Tab.Advanced=Lisäasetukset
+Settings.OK.Accessible=OK
+Settings.Cancel.Accessible=Peruuta
+Settings.Apply=Käytä
+Settings.Apply.Accessible=Käytä
+
+; ---- SETTINGS - General
+Settings.General.Language.Restart=Kielen vaihtaminen edellyttää NBR:n uudelleenkäynnistystä. Käynnistetäänkö nyt uudelleen?
+Settings.General.Language.RestartTitle=Kieli
+Settings.General.LanguageGroup=Kieli
+Settings.General.Language=Kieli:
+Settings.General.LibraryGroup=Kirjaston sijainti
+Settings.General.LibraryLocation=Kirjaston sijainti:
+Settings.General.LibraryLocation.Browse=Valitse kansio, johon kirjakirjastosi on tallennettu
+Settings.General.Browse=Selaa...
+Settings.General.Browse.Accessible=Selaa kirjastokansiota
+Settings.General.MediaKeysGroup=Mediapainikkeet
+Settings.General.UseMultimediaKeys=Käytä mediapainikkeita
+Settings.General.UseMultimediaKeysGlobally=Käytä mediapainikkeita järjestelmänlaajuisesti
+Settings.General.MetadataGroup=Kirjan tiedot
+Settings.General.UseMetadata=Käytä upotettuja metatietoja
+Settings.General.LookGroup=Ulkoasu
+Settings.General.LibraryLocation.Hint=Tämä on paikka, johon NBR kopioi tuodut kirjat. Voit jättää sen oletusarvoiseksi järjestelmäosiolle, mutta jos suunnittelet suurta kirjastoa, toinen osio tai levy olisi huomattavasti parempi ratkaisu. NBR säilyttää myös kunkin kirjan tiedot tässä kansiossa, joten jos haluat tallentaa lukukohtasi, kirjanmerkit, nopeuden ja muut lukuasetukset, huomioi, että sinun on kopioitava sisältö vanhasta kirjastokansiosta uuteen sijaintiin manuaalisesti. Samalla vaivalla: muuttamalla kirjaston sijainnin muualle kuin järjestelmäosiolle, suojaat kirjojasi järjestelmän odottamattomilta kaatumisilta ja niihin liittyvältä tietojen menetykseltä.
+Settings.General.UseMultimediaKeys.Hint=Voit käyttää näppäimistösi mediapainikkeita tai kuulokkeiden painikkeita kirjan toistamiseen, tauottamiseen ja selaamiseen valitsemallasi siirtymäaskeleella.\n\nToinen valinta tekee niistä järjestelmänlaajuisia, jolloin ne ohjautuvat NBR:lle mistä tahansa – vastineeksi ne eivät toimi muissa soittimissa NBR:n ollessa käynnissä.
+Settings.General.UseMetadata.Hint=Joissakin tiedostomuodoissa on metatietoja, jotka sisältävät lisätietoja kirjoittajasta, nimikkeestä, julkaisijasta, tuottajasta ja niin edelleen. NBR voi lukea ja näyttää nämä tiedot, jos ne ovat olemassa. Jos tiedot ovat kuitenkin virheellisiä tai puuttuvat, NBR voi hakea perustiedot kansion ja tiedoston nimistä. Viimeisenä keinona voit aina nimetä kirjat uudelleen kirjastossa.
+Settings.General.UpdateGroup=Päivitykset
+Settings.General.AutoCheckUpdates=Tarkista päivitykset automaattisesti
+Settings.General.AutoCheckUpdates.Hint=Kun tämä on päällä, NBR kysyy kerran päivässä, onko uudempi versio julkaistu, ja ilmoittaa vain, jos sellainen on saatavilla. Mitään tietoja sinusta tai kirjoistasi ei lähetetä: pyyntö ei sisällä tunnisteita, kirjastotietoja tai listaa lukemistasi kirjoista. Kytke tämä pois päältä, jos haluat, ettei NBR koskaan ota yhteyttä verkkoon itsestään – voit silti tarkistaa päivitykset milloin tahansa kirjastoikkunan Ohje-valikon kautta kohdasta Tarkista päivitykset.
+Settings.Misc.Look=Ulkoasu:
+Settings.Misc.Look.Classic=Järjestelmän värit
+Settings.Misc.Look.New=NBR-ulkoasu
+Settings.Misc.Look.RestartTitle=Muuta ulkoasua
+Settings.Misc.Look.Restart=Ulkoasun muuttaminen vaatii NBR:n uudelleenkäynnistyksen. Lukukohtasi säilyy. Käynnistetäänkö uudelleen nyt?
+Settings.Misc.Look.Hint=Miten NBR piirtää itsensä, ja tähän on kaksi vastausta.\n\nNBR-ulkoasu on ohjelman oma ulkoasu, jolla se käynnistyy.\n\nJärjestelmän värit tekee siitä tavallisen ikkunan, joka käyttää Windowsin omia värejä ja fontteja. Se ei piirrä mitään omaa, joten oma teemasi näkyy kokonaisuudessaan – mikä on toivottua korkean kontrastin teeman kanssa ja toimii parhaiten suurennuslasin kanssa. Jos korkea kontrasti on jo päällä, NBR käynnistyy tällä asetuksella.\n\nValinta on joka tapauksessa sinun ja voit muuttaa sen milloin vain: näppäimistö ja ruudunlukuohjelmasi eivät vaikuta tähän, ja F2 tuo sinut takaisin tähän kohtaan.
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.SpeechGroup=Puhe
+Settings.TextBooks.Language=Kieli:
+Settings.TextBooks.BookLanguage=Kirjat tällä kielellä:
+Settings.TextBooks.AllOtherLanguages=Kaikki muut kielet
+Settings.TextBooks.VoiceNotSet=(ääntä ei valittu)
+Settings.TextBooks.AddVoices=Lisää uusia kieliä...
+Settings.TextBooks.LanguageNoVoice={0} — ääntä ei asennettu
+Settings.TextBooks.LanguageUnknown=(kieltä ei määritetty)
+Settings.TextBooks.Voice=Ääni:
+Settings.TextBooks.Speed=Nopeus:
+Settings.TextBooks.Test=Testaa ääntä
+Settings.TextBooks.TestSample=Tämä on näyte valitusta äänestä.
+Settings.TextBooks.Volume=Äänenvoimakkuus:
+Settings.TextBooks.Pitch=Korkeus:
+Settings.TextBooks.NoSpeech=Ei puhetta
+Settings.TextBooks.VisualGroup=Visuaalinen ulostulo
+Settings.TextBooks.UseVisual=Käytä visuaalista ulostuloa
+Settings.TextBooks.VisualMode=Näyttötila:
+Settings.TextBooks.VisualMode.TwoRows=Kaksi tekstiriviä (tekstitystyyli)
+Settings.TextBooks.VisualMode.FullInstant=Koko näytön teksti (sivu kerrallaan)
+Settings.TextBooks.VisualMode.FullScrolling=Koko näytön teksti (vierittävä)
+Settings.TextBooks.Highlight=Korostus:
+Settings.TextBooks.Highlight.None=Ei korostusta
+Settings.TextBooks.Highlight.Line=Nykyinen rivi
+Settings.TextBooks.Highlight.Sentence=Nykyinen lause
+Settings.TextBooks.HighlightColour=Korostusväri:
+Settings.TextBooks.TextColour=Tekstin väri:
+Settings.TextBooks.BackColour=Taustaväri:
+Settings.TextBooks.Speech.Hint=Tässä on luettelo järjestelmääsi asennetuista kielistä ja äänistä. Voit valita oletusäänen jokaiselle tässä näkyvälle kielelle, jolloin jokainen kyseisellä kielellä oleva uusi teos avautuu valitulla äänellä. Äänen valitseminen kielelle tekee siitä oletusäänen – muuta painiketta ei tarvita. Jos uusi kirjasi on kirjoitettu kielellä, jota ei ole luettelossa, on parasta olla asettamatta sille oletusääntä täällä. Voit aina määrittää äänen kirjan omista ominaisuuksista sen Teksti-sivulla tai valita Ei puhetta ja jatkaa lukemista pistekirjoituksella tai näytöltä. Saat myös ilmoituksen, jos kielelle ei ole asennettu ääntä.
+Settings.TextBooks.Dictionary.Hint=Täällä voit korjata puhesynteettimien tekemiä virheitä. Voit korjata nimien ja paikkojen ääntämystä, korjata väärää painotusta ja paljon muuta – käytä vain mielikuvitustasi. Parasta on, että voit tehdä tämän erikseen kielen ja äänen mukaan, koska eri syntetisaattorit tekevät erilaisia virheitä samalla kielellä.
+Settings.TextBooks.Visual.Hint=Tekstin näyttämiseksi näytöllä samalla kun sitä luetaan ääneen, kaikille, jotka lukevat sekä silmillään että korvillaan. Kun tämä on päällä, ikkuna avautuu automaattisesti aina, kun painat Toista. Sen voi myös avata ja sulkea käsin milloin tahansa näppäimellä F9, riippumatta siitä, onko tämä asetus päällä vai ei – voit siis kokeilla sitä kirjaan muuttamatta sen ominaisuuksia.
+Settings.Colour.White=Valkoinen
+Settings.Colour.Black=Musta
+Settings.Colour.Yellow=Keltainen
+Settings.Colour.Blue=Sininen
+Settings.Colour.Green=Vihreä
+Settings.Colour.Red=Punainen
+Voices.Add.Title=Kielet tekstin lukemiseen
+Voices.Add.Hint=Valitse haluamasi kielet ja paina Asenna. Asetuksistasi riippuen Windows saattaa pyytää lupaa ja ladata sitten kyseisen kielen äänet. Ääni on sidottu korostukseensa, joten brittiläinen ja amerikkalainen englanti ovat erillisiä kohteita.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Äänilähtö
+Settings.Device.SoundCard=Äänikortti:
+Settings.Device.KeepAlive=Pidä äänikortti hereillä
+Settings.Device.Default=Järjestelmän oletus (automaattinen)
+Settings.Device.OpticalGroup=Optinen asema
+Settings.Device.UseOptical=Käytä optista asemaa
+Settings.Device.OpticalWhich=Asema:
+Settings.Device.OpticalAuto=Se, jossa on levy sisällä
+Settings.Device.KeepAlive.Hint=Jotkin äänilähdöt – erityisesti HDMI – sammuvat heti, kun ääni lakkaa, ja niiden herääminen kestää hetken. Lopputuloksena kuulet lauseen ensimmäisen sanan puuttuvan toistuvasti, vaikka mitään varsinaista vikaa ei ole. Kun tämä on päällä, NBR toistaa käyttämällään kortilla ääntä, joka on huomattavasti kuuloalueesi alapuolella, joten kortti ei pääse nukahtamaan lauseiden välissä. Kytke tämä pois päältä, jos korttisi ei tee tätä: se pitää lähdön auki niin kauan kuin kirjaa toistetaan.
+Settings.Device.UseOptical.Hint=Kirjoja julkaistiin aiemmin tavallisilla ääni-CD-levyillä, ja NBR osaa toistaa niitä. NBR lukee koko levyn kerralla ja tallentaa sen väliaikaisesti tietokoneellesi, jotta aseman hurina ei häiritse lukemista: se toimii muutaman minuutin ja on sen jälkeen hiljaa loppukirjan ajan. Ota tämä käyttöön vain, jos haluat sitä – se on oletuksena pois päältä, jopa koneessa, jossa on levyasema, ja kun se on pois päältä, NBR ei koske levyasemaan lainkaan.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Kirjat, joissa on tekstiä kuvissa
+Settings.Ocr.Language=Tunnistuskieli
+Settings.Ocr.Automatic=Automaattinen
+Settings.Ocr.AddLanguage=Lisää kieli...
+Settings.Ocr.None=Windowsiin ei ole asennettu tekstintunnistusta.
+Settings.Ocr.Hint=Jotkin kirjat ovat valokuvia sivuistaan tekstin sijaan – esimerkiksi skannattu PDF tai kansio, jossa on numeroituja kuvia. NBR osaa tunnistaa niissä olevat sanat ja lukea ne ääneen kuten minkä tahansa muun kirjan. Tämä on vain aloitusvalinta – kun kieliä on useampi kuin yksi, NBR kysyy käytettävää kieltä aina kirjaa luettaessa.
+Settings.Translate.Group=Käännös
+Settings.Translate.Service=Käännöspalvelu
+Settings.Translate.Key=API-avain...
+Settings.Translate.State.Have={0}, avain tallennettu
+Settings.Translate.State.None={0}, ei avainta
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (suurempi malli)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, edullisempi)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, kallein)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Notes=Huomautuksia kääntäjälle:
+Settings.Translate.Rules=Käännössäännöt
+Settings.Translate.Test.NoEngine=Käännöspalvelua ei ole valittu.
+Settings.Translate.Test.NoKey=Ei tarkistettavaa avainta.
+Settings.Translate.Test.NoNetwork=NBR ei saanut yhteyttä palveluun.
+Settings.Translate.Test.Refused=Palvelu hylkäsi pyynnön ({0}).
+Settings.Translate.Test.Empty=Palvelu ei vastannut mitään.
+Settings.Translate.Hint=NBR voi kääntää kirjan verkkopalvelun avulla. Jokainen palvelu vaatii avaimen omalta tililtäsi, jonka liität tähän; NBR ei käsittele maksuja, ne hoidetaan palveluntarjoajan verkkosivustolla tai muulla tavoin. Jos et tarvitse tekoälykäännöstä, jätä valinta tyhjäksi.\n\nKäännös lähettää KOKO kirjan valitsemallesi palvelulle, ja niiden toimintatavat vaihtelevat – jotkut käyttävät ilmaistason sisältöä tuotteidensa parantamiseen, toiset eivät. Kunkin palvelun oma kuvaus kohdassa Ohje, Palvelut ja tilit kertoo, miten kukin toimii.
+Settings.Cloud.Group=Google Cloud -äänet
+Settings.Cloud.VoicesGroup=Pilviäänet
+Settings.Cloud.Where=Google ja Azure määritetään kohdassa Ohje, Palvelut ja tilit, jossa selitetään kunkin palvelun toiminta ja opastetaan tilin avaamisessa vaihe vaiheelta.
+Settings.Cloud.State.None=Google: palvelutiliä ei ole tallennettu, joten yksikään näistä äänistä ei ole käytettävissä.
+Settings.Cloud.State.Have=Google: {0} ääntä on käytettävissä, jotka lukevat yhteensä {1} kielellä.
+Settings.Cloud.State.HaveNoList=Google: palvelutili on tallennettu, mutta äänilistaa ei ole vielä haettu. Määritä se uudelleen ollessasi yhteydessä verkkoon.
+Settings.Cloud.Load=Palvelutilitiedosto...
+Settings.Cloud.Filter=Palvelutili (*.json)|*.json|Kaikki tiedostot (*.*)|*.*
+Settings.Cloud.Forget=Unohda palvelutili
+Settings.Cloud.ForgetAsk=Unohdetaanko tallennettu palvelutili? Nämä äänet eivät ole enää käytettävissä, ja ääneen lukeminen keskeytyy, kunnes valitset toisen äänen.
+Settings.Cloud.UseGroup=Pilviäänten käyttö
+Settings.Cloud.Use=Tarjoa pilviääniä
+Settings.Cloud.Why=Mitään ei voi vielä kytkeä päälle: määritä Google tai Azure yllä, niin tämä tulee käyttöön.
+Settings.Cloud.NoList=Tili hyväksyttiin, mutta äänilistaa ei voitu hakea. Tämä johtuu yleensä verkosta; äänet tulevat näkyviin, kun yhteys on muodostettu.
+Settings.Azure.Group=Azure Speech -äänet
+Settings.Azure.Resource=Resurssin nimi:
+Settings.Azure.Key=Avain:
+Settings.Azure.Save=Tarkista ja tallenna
+Settings.Azure.NoResource=Täytä resurssin nimi – se on päätepisteen ensimmäinen osa samalla sivulla kuin avain.
+Settings.Azure.NoKey=Täytä avain.
+Settings.Azure.Refused=Azure ei hyväksynyt kyseistä paria. Tarkista resurssin nimi ja avain sekä se, että resurssi on Speech-tyyppinen.
+Settings.Azure.State.None=Azure: avainta ei ole tallennettu, joten yksikään näistä äänistä ei ole käytettävissä.
+Settings.Azure.State.Have=Azure: {0} ääntä on käytettävissä, jotka lukevat yhteensä {1} kielellä.
+Settings.Azure.Forget=Unohda avain
+Settings.Azure.ForgetAsk=Unohdetaanko tallennettu Azure-avain? Näitä ääniä ei enää tarjota, ja kirja, jota luetaan tällaisella äänellä, vaikenee, kunnes annat sille toisen äänen.
+Hint.Settings.Cloud=
+Hint.Settings.CloudUse=Tämä kytkee pilviäänten käytön päälle ja pois, eli kaikki Internetistä tulevat äänet, ei tietokoneellesi asennetut SAPI- tai One Core -äänet.\n\nSe päättää, TARJOTAANKO näitä ääniä, kun valitset ääntä tietylle kirjalle. Niitä ei koskaan määritetä automaattisesti, eivätkä ne koskaan tule kielen oletusääneksi — se säilyy tietokoneelle asennetuilla äänillä, jotka ovat ilmaisia eivätkä vaadi verkkoyhteyttä.\n\nKirja, jota luetaan jo pilviäänellä, säilyttää sen riippumatta siitä, onko tämä päällä vai pois; kytkin ohjaa valitsinta, ei sitä, mitä voidaan toistaa.
+Hint.Settings.Azure=Google- ja Azure-äänten käyttö vaatii Google-, Microsoft- ja Azure-tunnistetietoja sekä hieman työtä niiden verkkosivuilla. Lue lisää Ohjeesta.
+Google.Cred.NotJson=Tiedostoa ei voi lukea JSON-muodossa, joten se ei ole Googlen antama tiedosto. Haluamasi tiedosto ladattiin, kun loit palvelutilin, ja sen nimi päättyy .json-päätteeseen.
+Google.Cred.NotServiceAccount=JSON on luettavissa, mutta se ei ole palvelutili — siinä ei ole tilin osoitetta eikä yksityistä avainta. Google tarjoaa useita erilaisia tunnistetietoja; näille äänille tarkoitettu on palvelutilin avain.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Ääntämissanakirja
+Dict.Open=Ääntämissanakirja...
+Dict.Open.Accessible=Ääntämissanakirja
+Dict.Scope=Nämä säännöt koskevat:
+Dict.Scope.Global=Kaikkea lukemaani
+Dict.Scope.Language=Kaikkea kielellä {0} lukemaani
+Dict.Scope.Voice=Kaikkea äänellä {0} lukemaani
+Dict.List.Accessible=Säännöt
+Dict.Column.Pattern=Kirjoitusasu
+Dict.Column.Says=Äännetään muodossa
+Dict.Column.Match=Täsmäys
+Dict.Column.Case=Kirjainkoko
+Dict.Column.State=Sääntö
+Dict.Column.Comment=Huomautus
+Dict.Add=Lisää...
+Dict.Edit=Muokkaa...
+Dict.Remove=Poista
+Dict.State.On=Päällä
+Dict.State.Off=Pois päältä
+Dict.Try=Kokeile lausetta:
+Dict.TryButton=Kokeile
+Dict.Rule.TitleNew=Uusi sääntö
+Dict.Rule.TitleEdit=Muokkaa sääntöä
+Dict.Field.Pattern=Mitä kirjoitettu:
+Dict.Field.Replacement=Sano sen sijaan:
+Dict.Field.Match=Vastaavuus:
+Dict.Field.CaseSensitive=Huomioi kirjainkoko
+Dict.Field.Skip=Ohita
+Dict.Field.Comment=Huomautus:
+Dict.Field.Enabled=Sääntö on käytössä
+Dict.Match.WholeWord=Koko sana
+Dict.Match.Anywhere=Missä tahansa, myös sanan sisällä
+Dict.Match.Regex=Säännöllinen lauseke
+Dict.Error.Title=Tätä sääntöä ei voi käyttää
+Dict.Error.NoPattern=Täytä se, mitä kirjassa on kirjoitettu.
+Dict.Error.TooSlow=Tämän mallin täsmääminen kestää liian kauan. Yksinkertaista sitä.
+Dict.Help=RegEx-ohje...
+Dict.Help.Title=Säännölliset lausekkeet ääntämissanakirjassa
+Dict.Help.Text=Vanha Zen-viisaus sanoo:\n\n    Kehittäjällä oli ongelma.\n    Kehittäjä päätti ratkaista ongelman säännöllisillä lausekkeilla.\n    Kehittäjällä oli kaksi ongelmaa.\n\nRegEx eli säännölliset lausekkeet ovat jotain, mitä mieluummin välttäisit, mutta on hienoa, että vaihtoehto on olemassa, joten tässä se on.\n\nJos tiedät mitä teet, anna mennä. Jos et, älä käytä sitä tai kysy Googlelta.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=API-avain palvelulle {0}
+Dialog.TranslateKey.Field=API-avain
+Dialog.TranslateKey.Prompt=Liitä {0}-palvelusta saamasi avain. Se säilytetään tällä tietokoneella omassa tiedostossaan luettavassa muodossa, joten käsittele sitä kuin salasanaa. Voit korvata tai poistaa sen milloin tahansa, ja voit peruuttaa avaimen itse palvelussa.
+Dialog.TranslateKey.Region=Alue (tyhjä, jos globaali):
+Dialog.TranslateKey.Remove=Poista
+Dialog.TranslateKey.Status=Tulos
+Dialog.TranslateKey.Stored=Tälle palvelulle on tallennettu avain.
+Dialog.TranslateKey.NotStored=Tälle palvelulle ei ole tallennettu avainta.
+Dialog.TranslateKey.Test=Tarkista avain
+Dialog.TranslateKey.Testing=Tarkistetaan avainta...
+Dialog.TranslateKey.Works=Avain toimii.
+Azure.Setup.Title=Määritä Azure Speech
+Azure.Setup.Open=Luo se puolestani...
+Azure.Setup.Intro=NBR voi luoda Azure-resurssin puolestasi, joten portaalia ei tarvitse käyttää. Kirjaudut Microsoftille kerran lyhyellä koodilla, valitset tilauksen, johon se liitetään, ja NBR luo sen ilmaisversiolla ja tallentaa avaimen. Mitään ei luoda ennen kuin olet kirjautunut sisään.
+Azure.Setup.Start=Aloita
+Azure.Setup.SigningIn=Pyydetään kirjautumiskoodia Microsoftilta.
+Azure.Setup.CodeLabel=Kirjautumiskoodi:
+Azure.Setup.EnterCode=Kirjautumiskoodisi on alla olevassa kentässä, valmiina kopioitavaksi. Valitse "Avaa kirjautumissivu" avataksesi {0} selaimessasi, kirjaudu sisään, niin tämä ikkuna jatkaa toimintaansa automaattisesti.
+Azure.Setup.OpenPage=Avaa kirjautumissivu
+Azure.Setup.OpenFailed=Selainta ei voitu avata. Osoite on yllä olevalla rivillä; avaa se käsin.
+Azure.Setup.Directory=Hakemisto:
+Azure.Setup.Subscription=Tilaus:
+Azure.Setup.SignedIn=Kirjauduttu sisään. {0} tilausta löytyi — valitse yksi ja valitse Luo.
+Azure.Setup.Create=Luo resurssi
+Azure.Setup.NoSubscription=Kyseisellä tilillä ei ole Azure-tilausta, joten resurssin luomiseen ei ole paikkaa.
+Azure.Setup.Creating=Luodaan resurssia. Tämä kestää minuutin tai kaksi; Azure ilmoittaa sen olevan valmis ennen kuin se todellisuudessa on, joten NBR odottaa.
+Azure.Setup.Done=Valmis. Resurssi on luotu ja sen avain on tallennettu — {0} ääntä on käytettävissä.
+Azure.Setup.DoneNoList=Resurssi on luotu ja sen avain on tallennettu, mutta äänilistaa ei voitu hakea. Tämä johtuu yleensä verkosta; äänet ilmestyvät, kun yhteys on muodostettu.
+Azure.Setup.Failed=Se ei toiminut: {0}
+Azure.Setup.HaveOne=Tai jos sinulla on jo puheresurssi, kirjoita sen kaksi tietoa tähän:
+Azure.Setup.Kept=Azure hyväksyi tiedot ja ne on tallennettu. Nämä äänet ovat nyt käytettävissä.
+Azure.Setup.DirectoryHint=Jätä tämä tyhjäksi, jos kirjaudut sisään työ- tai oppilaitostilillä. Jos Azure-tilauksesi on HENKILÖKOHTAINEN Microsoft-tili, Microsoft estää kirjautumisen tavallisessa osoitteessa, ja sinun on annettava hakemisto, jonka Azure loi tilauksen yhteydessä – joko sen nimi, joka päättyy onmicrosoft.com, tai sen hakemisto- eli vuokralais-ID. Tätä kysytään kerran ja se muistetaan.
+
+; ---- THE READING WINDOW
+Reading.Title=Lukeminen
+Reading.Back=Takaisin
+Reading.Back.Accessible=Askel taaksepäin
+Reading.PlayPause=Toista/Tauko
+Reading.PlayPause.Accessible=Toista tai keskeytä, välilyönti
+Reading.Forward=Eteenpäin
+Reading.Forward.Accessible=Askel eteenpäin
+Reading.Smaller=Pienempi
+Reading.Smaller.Accessible=Pienempi teksti, miinus-näppäin
+Reading.Bigger=Suurempi
+Reading.Bigger.Accessible=Suurempi teksti, plus-näppäin
+Reading.Font.Accessible=Fontti
+Reading.Size.Announce=Tekstin koko {0}
+Beta.Suffix= — ei tässä beta-versiossa
+Beta.NoReadingWindow=Lukemisen ikkuna on pois päältä tässä beta-versiossa. Näytöltä lukemista ja sitä seuraavaa pistekirjoitusta testataan vielä, ja ne palaavat myöhemmässä julkaisussa.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Tunnista teksti
+Ocr.Ask.Question={0} ei sisällä tekstiä — se on {1} sivua kuvia. NBR voi tunnistaa niissä olevan tekstin, mikä kestää {2}. Tunnistetaanko nyt?
+Ocr.Ask.ReadWith=Tunnistustapa:
+Ocr.Ask.Read=Tunnista
+Ocr.Ask.Skip=Ohita
+Ocr.Ask.UnderAMinute=alle minuutin
+Ocr.Ask.Minutes=noin {0} minuuttia
+Ocr.Result.NoText=Kuvista ei tunnistettu tekstiä. Kirja on lisätty, mutta siinä ei ole mitään luettavaa.
+Ocr.Refusal.NoEngine=Tekstintunnistusta ei ole asennettu. Valitse Asetukset, Lisäasetukset ja "Lisää kieli...", niin NBR asentaa sellaisen puolestasi.
+Ocr.Refusal.NoPages=Tässä ei ole sivuja luettavaksi.
+Ocr.Progress.Title=Tunnistetaan tekstiä
+Ocr.Progress.Starting=Aloitetaan tunnistus...
+Ocr.Progress.Working=Sivu {0} / {1}. {2}
+Ocr.Progress.Quarter={0} prosenttia valmiina. {1}
+Ocr.Progress.Cancel=Peruuta
+Ocr.Progress.Cancelling=Pysäytetään tämän sivun jälkeen. Mitään ei tallenneta.
+Ocr.Progress.Estimating=Arvioidaan kestoa.
+Ocr.Progress.AlmostDone=Melkein valmis.
+Ocr.Progress.Seconds=Noin {0} sekuntia jäljellä.
+Ocr.Progress.Minutes=Noin {0} minuuttia jäljellä.
+Ocr.Unread.Message=Tätä kirjaa ei ole vielä tunnistettu – se on yhä kuvia sivuistaan, joten siinä ei ole mitään luettavaa. Tunnistetaanko se nyt?
+Ocr.Sparse.Message=Vain {0} kirjan {1} sivusta sisältää tekstiä. Kyseessä on todennäköisesti skannaus, jonka tekstikerros on rikki, joten sanat ovat yhä kuvia. Tunnistetaanko ne nyt?
+Ocr.Blank.Question={0} sivua peräkkäin ei sisältänyt lainkaan tekstiä. Loput {1} sivua saattavat olla samanlaisia, ja niiden tunnistaminen vie aikaa. Jatkaako tunnistusta?
+Ocr.Blank.Jbig2={0} sivua peräkkäin ei sisältänyt lainkaan tekstiä. Tämä PDF tallentaa sanansa muodossa, jota Windows ei osaa piirtää, joten sivut näyttävät tyhjältä paperilta ilman tunnistettavaa tekstiä – jäljellä olevien {1} sivun lukeminen ei todennäköisesti tuota tulosta. Jatkaako tunnistusta?
+Ocr.Read.Question=Tämä kirja koostuu {0} sivusta kuvia, eikä sitä ole vielä tunnistettu. Tunnistaminen kestää {1}.
+Ocr.ReRead.Question=Tämä kirja tunnistettiin {0} sivusta kuvia. Sen tunnistaminen uudelleen toisella kielellä kestää {1}. Kuvat säilytetään kirjan mukana, joten tämän voi tehdä niin usein kuin haluat.
+Ocr.ReRead.Done=Kirja on tunnistettu uudelleen ja korvattu.
+Ocr.ReRead.Locate=Kirjan kuvia ei ole tallennettu sen mukana, joten NBR:n on löydettävä ne uudelleen. Valitse skannattu tiedosto tai – jos kirja saapui erillisinä sivukuvina – mikä tahansa näistä sivuista.
+Ocr.ReRead.LocateTitle=Etsi kirjan kuvat
+Ocr.ReRead.Filter=Skannatut kirjat ja kuvat|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Kaikki tiedostot|*.*
+Ocr.ReRead.WholeFolder=Kyseisessä kansiossa on {0} kuvaa. Tunnistetaanko ne kaikki tämän kirjan sivuiksi?
+Ocr.Add.Title=OCR-kielet
+Ocr.Add.List=Kielet
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — jo asennettu
+Ocr.Add.Install=Asenna
+Ocr.Add.WindowsSettings=Windows-asetukset...
+Ocr.Add.Close=Sulje
+Ocr.Add.Installing=Asennetaan {0}. Windows Update hakee tämän, joten kesto riippuu sen kuormituksesta — muutama minuutti on tavallista, kymmenen ei ole tavatonta. Voit sulkea tämän ikkunan ja jatkaa työskentelyä; asennus jatkuu taustalla.
+Ocr.Add.Done={0} on asennettu ja käyttövalmis.
+Ocr.Add.DonePartly={0} on asennettu ja käyttövalmis. {1} ei tullut perille — Windows saattaa vielä käsitellä sitä, tai se ei ehkä ole saatavilla tälle versiolle.
+Ocr.Add.NotStarted=Mitään ei asennettu. Windows ei antanut lupaa.
+Ocr.Add.Failed={0} ei asentunut. Windows saattaa vielä käsitellä sitä, tai kieli ei ehkä ole saatavilla tälle Windows-versiolle.
+Ocr.Add.LeftRunning=Windows asentaa sitä parhaillaan. Se valmistuu itsestään.
+Ocr.Add.Hint=Valitse haluamasi kielet ja paina Asenna. Asetuksistasi riippuen Windows saattaa pyytää lupaa ja ladata sitten kyseisen kielen tunnistustiedot — kyseessä on pieni tiedosto, ei koko Windowsin kielipaketti.
+
+; ---- TRANSLATION
+Translate.Progress.Title=Käännetään kirjaa
+Translate.Progress.Starting=Valmistellaan. Voit keskeyttää milloin tahansa; tähän mennessä käännetty teksti säilytetään, ja uudelleen aloittaminen jatkaa siitä mihin jäätiin.
+Translate.Progress.Working=Kappale {0} / {1}. Noin {2} jäljellä. Voit keskeyttää milloin tahansa — tehty työ säilytetään.
+Translate.Progress.Quarter={0} prosenttia käännetty, noin {1} jäljellä.
+Translate.Progress.Cancel=Pysäytä
+Translate.Progress.Cancelling=Pysäytetään tämän kappaleen jälkeen. Jo käännetty teksti säilytetään.
+Translate.Progress.StillOn=Työstetään edelleen tätä, kulunut {0} sekuntia.
+Translate.Progress.StillWorking=Käännetään edelleen kappaletta {0} / {1}. Palvelu vastaa hitaasti.
+Translate.Progress.Estimating=arvioidaan kestoa
+Translate.Progress.AlmostDone=hetki
+Translate.Progress.Seconds={0} sekuntia
+Translate.Progress.Minutes={0} minuuttia
+Translate.Ask.Title=Käännä kirja
+Translate.Ask.Info={0} — noin {1} merkkiä, suunnilleen {2}. Käännöksestä tulee uusi kirja; tätä kirjaa ei muuteta.
+Translate.Ask.HybridNote=Tässä kirjassa on sekä äänite että teksti. Vain teksti voidaan kääntää, joten käännös on tekstikirja ilman kerrontaa.
+Translate.Ask.From=Kirjan kieli:
+Translate.Ask.To=Käännä kielelle:
+Translate.Ask.Model=Malli {0}:
+Translate.Ask.Model.None=— ei mitään, päätä ketju tähän —
+Translate.Ask.ChainNote=Jos tekstijakso hylätään, NBR yrittää sitä uudelleen ja kokeilee sitten muita palveluitasi vuorotellen. Kaikki, mitä mikään palvelu ei hyväksy, jätetään kirjan alkuperäiselle kielelle.
+Translate.Ask.NoEngine=Millään palvelulla ei ole vielä avainta
+Translate.Ask.Standing=Pysyvä huomautuksesi koskee myös tätä kirjaa: {0}
+Translate.Ask.Inherit=Jatka sarjaa käyttäen sanastoa:
+Translate.Ask.Inherit.None=Ei mitään — tämä kirja on itsenäinen
+Translate.Ask.Notes=Mitä kääntäjän tulisi tietää TÄSTÄ kirjasta (valinnainen). Kertoja ja nimet tunnistetaan tekstistä automaattisesti; tämä on tarkoitettu asioille, joita teksti ei kerro — termi, jonka haluat käännettävän tietyllä tavalla, tai miten kaksi hahmoa puhuttelevat toisiaan:
+Translate.Ask.Start=Käännä
+Translate.LastResort.Begin=Seuraavan osan on kääntänyt Microsoft Azure — varaudu yllätyksiin.
+Translate.LastResort.End=Microsoft Azuren kääntämän osan loppu.
+Translate.NotText=Vain tekstikirja voidaan kääntää. Tämä on äänite.
+Translate.Empty=Tässä kirjassa ei ole tekstiä käännettäväksi.
+Translate.NoService=Millään käännöspalvelulla ei ole vielä avainta. Lisää sellainen asetuksista kohdasta Lisäasetukset.
+Translate.Done={0} tekstijaksoa käännetty. Käännös on hyllyssä uutena kirjana.
+Translate.DoneLeft={0} tekstijaksoa käännetty, {1} jätetty alkuperäiselle kielelle.
+Translate.Took=Se kesti {0}. Rivi riviltä etenevä loki löytyy tiedostosta translation.log alkuperäisen kirjan vierestä.
+Translate.Failed=Kirjaa ei voitu kääntää: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Vain tekstikirjasta voidaan tehdä äänikirja. Tämä on jo äänikirja.
+Export.NoVoice=Tässä kirjassa ei ole ääntä sen lukemiseen, joten tallennettavaa ei ole. Määritä sille ääni ensin Ominaisuudet-kohdassa.
+Export.Empty=Tässä kirjassa ei ole tekstiä luettavaksi.
+Export.Filter=Äänitiedosto (*.mp3)|*.mp3
+Export.Ask.Ready=Kaikki tämän kirjan {0} katkelmaa on jo luettu, joten kyse on vain yhdistämisestä, joka vie hetken. Luodaanko tiedosto?
+Export.Ask.Missing={0} tämän kirjan {1} katkelmasta on vielä tallennettava. Niiden tallentaminen vie noin {2} minuuttia – tämä on tiedoston luomiseen kuluva aika, ei kirjan kuunteluaika. Edistymisikkuna näyttää luvun, joka päivittyy työn edetessä. Voit keskeyttää milloin tahansa: kaikki tallennettu säilytetään, ja uudelleen aloittaminen jatkaa siitä mihin jäätiin. Luodaanko tiedosto?
+Export.Progress.Title=Luodaan äänikirjaa
+Export.Progress.Starting=Valmistellaan. Voit keskeyttää milloin tahansa; kaikki tallennettu säilytetään, ja uudelleen aloittaminen jatkaa siitä mihin jäätiin.
+Export.Progress.Making=Katkelma {0} / {1}. Noin {2} jäljellä.
+Export.Progress.Joining=Yhdistetään kaikki yhdeksi tiedostoksi.
+Export.Done=Valmis – {0} katkelmaa, tallennettu nimellä {1}
+Export.DoneShort=Tallennettu nimellä {2}, mutta {1} kappaletta {0} katkelmasta jäi lukematta ja puuttuu tiedostosta.
+Export.Failed=Äänikirjaa ei voitu luoda.
+
+; ---- AUDIO CD
+Cd.Progress.Title=Audio-CD
+Cd.Progress.Preparing=Luetaan levyä...
+Cd.Progress.Track=Luetaan raitaa {0} / {1}
+Cd.Progress.Stopping=Pysäytetään...
+Cd.BookTitle=Audio-CD ({0} raitaa)
+Cd.Format=Audio-CD - Compact Disc Digital Audio
+Cd.NoDisc=Asemassa ei ole levyä, tai asema lukee sitä vielä. Aseta audio-CD asemaan ja yritä uudelleen.
+Cd.DataDisc=Tämä on datalevy, ei audio-CD. Jos se sisältää kirjan MP3-tiedostoina, avaa se valitsemalla Tiedosto, Avaa kansio - NBR toistaa ne jo valmiiksi.
+Cd.ReadFailed=Levyä ei voitu lukea: {0}
+Cue.Track=Raita {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Palvelut ja tilit
+Services.List.Accessible=Palvelut
+Services.State.Ready=TÄMÄ ON MÄÄRITETTY. Voit käydä vaiheet uudelleen läpi korvataksesi tallennetut tiedot.
+Services.State.NotSet=Tätä ei ole vielä määritetty.
+Services.SetUp=Määritä tämä palvelu...
+Services.Forget=Unohda tämä tili
+Services.ForgetAsk=Unohdetaanko tallennettu avain kohteelle {0}? Sitä ei enää tarjota, ennen kuin määrität sen uudelleen.
+Services.Disclaimer=ALLA OLEVAT VAIHEET EIVÄT EHKÄ VASTAA NÄKEMÄÄSI. Nämä palvelut uudistavat verkkosivustojaan ilman varoitusta, joten painike on saattanut siirtyä tai sen nimi on voinut muuttua tämän kirjoittamisen jälkeen. Suoritettavien vaiheiden JÄRJESTYS muuttuu harvoin; asioiden nimet muuttuvat. Jos eksyt, yllä oleva osa kertoo, mitä yrität saavuttaa.
+Services.Item.Gemini=Gemini-käännös
+Services.Item.DeepSeek=DeepSeek-käännös
+Services.Item.OpenAi=GPT-käännös (OpenAI)
+Services.Item.GoogleVoices=Google Cloud -äänet
+Services.Item.AzureVoices=Azure Speech -äänet
+Services.About.Gemini=Gemini kääntää kokonaisen kirjan toiselle kielelle käyttäen Googlen omaa mallia. Arvioitu korvakuulolla parhaaksi – mutta siinä on yksi koukku.\n\nSe kieltäytyy kääntämästä suunnilleen joka kuudennen katkelman julkaistusta romaanista. Syynä ei ole sisältö: kuvio näyttää siltä, että malli tunnistaa tuntemansa kirjan, eikä mikään asetus muuta tätä. Siksi NBR pyytää toiselta palvelulta kaiken sen, mitä ensimmäinen ei suostu ottamaan, ja siksi ketju kannattaa määrittää yhden moottorin varaan jättämisen sijaan.\n\nPalvelussa on ilmainen taso, joka on riittävän antelias normaalikäyttöön: todellisessa projektissa mitattuna Gemini 3.1 Flash Lite sallii 500 pyyntöä päivässä, mikä vastaa noin kuutta kirjaa. Maksullinen käyttö maksaa noin 25 senttiä 450 000 merkin romaanilta.\n\nASIA, JOKA ON SYYTÄ PUNNITA ENNEN ILMAISVERSION VALINTAA. Googlen oman hinnoittelusivun mukaan ilmaisella tasolla sisältöäsi käytetään heidän tuotteidensa parantamiseen, kun taas maksullisella tasolla ei. Käännös lähettää koko kirjan, joten tämä on todellinen ero. Valinta on sinun – mutta sen tulisi olla tietoinen valinta eikä yllätys.\n\nAvaimen hankkiminen on näistä neljästä pisin prosessi, ja alla olevat vaiheet on kirjoitettu todellisen suorituksen perusteella, koska ilmeisin reitti ei toimi.
+Services.About.DeepSeek=DeepSeek kääntää kokonaisen kirjan toiselle kielelle. NBR:n käyttämistä palveluista se on vakain – se kieltäytyy harvimmin – ja se on ylivoimaisesti halvin.\n\nYksi asia on tehtävä: tili DeepSeek-palveluun ja sille hieman saldoa. Ilmaista kiintiötä ei ole, mutta käännöksestä veloitetaan tekstin määrän mukaan, ja kirja maksaa hyvin vähän.\n\nTämä palvelu antaa avaimen, jonka kopioit, ja se on näistä neljästä yksinkertaisin. Huomioitavaa on, että avain näytetään VAIN KERRAN, kun luot sen. Jos suljet ikkunan kopioimatta sitä, sitä ei voi enää näyttää uudelleen, ja sinun on luotava uusi.
+Services.About.OpenAi=OpenAI kääntää kokonaisen kirjan toiselle kielelle GPT-malleja käyttäen. Sitä tarjotaan kolmella tasolla yhdellä tilillä ja yhdellä avaimella: Terra, jolla on hyvä aloittaa, Luna, joka on halvempi, ja Sol, joka on kallein.\n\nIlmaista käyttöoikeutta ei ole lainkaan, ja tämä on se kohta, johon ihmiset kompastuvat: ChatGPT-tilaus EI maksa tätä. API laskutetaan erikseen, ja uusi tili on PREPAID-tyyppinen – lataat sille pienen summan saldoa, ja kutsut kuluttavat tätä saldoa. Viisi tai kymmenen dollaria riittää mainiosti näkemään, mitä kirja todellisuudessa maksaa, ennen kuin päätät mitään.\n\nKirjan hinta laskettuna 450 000 merkin romaanille ja käyttäen tapaa, jolla kroatia todellisuudessa jakautuu tokeneiksi peukalosäännön sijaan: karkeasti kaksi ja puoli dollaria Terralla, yksi dollari Lunalla, viisi Solilla. Vertailun vuoksi sama kirja maksoi noin kaksikymmentäkolme senttiä Geminillä. Mikä tahansa näistä on pieni hinta kirjasta, josta välität; Terra on noin kymmenen kertaa Gemini, jos tätä käyttää säännöllisesti.\n\nAvain on tavallinen merkkijono, jonka liität tähän, mikä tekee tästä palvelusta helpoimman ottaa käyttöön.
+Services.About.GoogleVoices=Google Cloud -äänet lukevat kirjoja ääneen internetin välityksellä Googlen omilla äänillä. Ne ovat useimmilla kielillä pilvipalveluäänistä parhaat, ja ilmainen käyttöoikeus on suurin – noin miljoona merkkiä kuukaudessa, mikä vastaa noin kahta kirjaa.\n\nKolme asiaa on tehtävä tässä järjestyksessä. Tarvitset GOOGLE-TILIN, joka useimmilla ihmisillä jo on. Sen sisällä luot PROJEKTIN ja kytket Text-to-Speech-palvelun päälle kyseiselle projektille – ja Google ei kytke sitä päälle ennen kuin laskutus on määritetty, joten maksukortti tarvitaan, vaikka ilmainen käyttöoikeus ei maksakaan mitään. Sitten luot PALVELUTILIN (service account) ja lataat sen avaimen.\n\nViimeinen osa tekee tästä epätavallisen. Google ei jaa avainta, jonka voit kopioida ja liittää: se antaa pienen .json-päätteisen tiedoston, joka ladataan kerran. NBR säilyttää tiedoston sisällön itse tiedoston sijaan, joten voit siirtää tai poistaa latauksen sen jälkeen.
+Services.About.AzureVoices=Azure Speech -äänet lukevat kirjoja ääneen internetin välityksellä Microsoftin äänillä. Ne ovat erittäin hyviä englanniksi ja monilla muilla kielillä. Kroatian kielellä ne ovat tavallisia, eikä Azure tue siellä ääntämissanakirjaa, joten kirjoittamaasi nimen ääntämissääntöä ei noudateta. Ilmainen kiintiö on noin puoli miljoonaa merkkiä kuukaudessa, mikä vastaa karkeasti yhtä kirjaa.\n\nKaksi asiaa on tapahduttava, ja vain ensimmäinen on sinun tehtäväsi. Tarvitset MICROSOFT-TILIN ennen kuin voit hankkia Azure-tilin, ja sen jälkeen AZURE-TILAUKSEEN — joka vaatii henkilöllisyyden varmentamisen, kortin ja sopimuksen. Henkilön on tehtävä tämä tietoisesti, joten sitä ei voi automatisoida, eikä NBR yritä sitä.\n\nKaikki sen jälkeen on NBR:n tehtävä. Se kirjautuu sisään lyhyellä koodilla, luo resurssin ilmaiselle tasolle ja säilyttää avaimen. Sinun ei tarvitse koskaan avata Azure-portaalia.\n\nYksi asia yllättää käyttäjät. Kun tilauksesi luodaan, Azure luo sille hiljaa HAKEMISTON. Jos Microsoft-tilisi on henkilökohtainen — Gmail, Outlook, Hotmail — Azure kieltäytyy kirjautumisesta, ellet nimeä kyseistä hakemistoa, koska se ei tunnista henkilökohtaisia tilejä tähän tarkoitukseen. Sen nimi päättyy muotoon onmicrosoft.com.
+Services.Steps.DeepSeek=1. Avaa platform.deepseek.com selaimessasi.\n\n2. Paina Sign up. Voit täyttää sähköpostiosoitteen ja salasanan tai valita rekisteröitymisen Google-tilillä, mikä on nopeampaa.\n\n3. Vahvista sähköpostiosoitteesi, jos sitä pyydetään.\n\n4. Kun olet kirjautunut sisään, etsi Top up tai Billing ja lisää pieni määrä saldoa.\n\n5. Etsi vasemmasta valikosta API keys.\n\n6. Paina Create new API key, anna sille mikä tahansa nimi ja paina Create.\n\n7. Kopioi avain ENNEN kuin suljet kyseisen ikkunan.\n\n8. Palaa takaisin tänne, paina "Set up this service" ja liitä se.
+Services.Steps.GoogleVoices=1. Avaa console.cloud.google.com selaimessasi ja kirjaudu sisään Google-tilillä.\n\n2. Hyväksy ehdot, jos niitä pyydetään, ja luo projekti, kun sitä tarjotaan. Mikä tahansa nimi käy.\n\n3. Etsi yläreunan hakukenttä, kirjoita "Cloud Text-to-Speech API", valitse se tuloksista ja paina Enable.\n\n4. Google pyytää sinua määrittämään laskutuksen ennen kuin se ottaa API:n käyttöön. Lisää kortti.\n\n5. Etsi uudelleen "Service accounts" ja avaa se. Paina Create service account, anna sille mikä tahansa nimi ja paina Done. Mitään roolia tai käyttöoikeutta ei tarvitse valita.\n\n6. Avaa juuri luomasi tili, siirry Keys-välilehdelle, paina Add key, sitten Create new key ja valitse JSON. Tiedosto latautuu.\n\n7. Palaa takaisin tänne, paina "Set up this service" ja valitse kyseinen ladattu tiedosto.
+Services.Steps.AzureVoices=1. Avaa azure.microsoft.com/free selaimessasi ja paina Aloita ilmainen käyttö.\n\n2. Kirjaudu sisään Microsoft-tilillä tai luo sellainen.\n\n3. Täytä tietosi. Azure pyytää maksukorttia henkilöllisyyden todentamiseksi; ilmaisesta tasosta ei veloiteta.\n\n4. Jos tilisi on henkilökohtainen, etsi hakemistosi nimi: kirjaudu portaaliin, niin se näkyy osoiterivillä @-merkin jälkeen päättyen muotoon onmicrosoft.com.\n\n5. Palaa takaisin tänne ja paina "Määritä tämä palvelu".\n\n6. Täytä hakemiston nimi, jos tilisi on henkilökohtainen, ja jätä se tyhjäksi, jos kyseessä on työ- tai oppilaitostili. Paina Aloita.\n\n7. Avaa kirjautumissivu painikkeesta, kirjoita näkyviin tuleva lyhyt koodi ja kirjaudu sisään.\n\n8. Valitse tilauksesi ja paina Luo. NBR luo resurssin ja tallentaa sen avaimen. Sinun ei tarvitse kirjoittaa mitään muuta.
+Services.Steps.Gemini=ÄLÄ KÄYTÄ AI STUDIOTA TÄHÄN. Sen "Create API key" -painike epäonnistuu virheellä "The request is suspicious. Please try again." — mitattu uudella tilillä, johon ei ole koskaan lisätty maksutapaa, ja jossa projekti on jo luotu ja tuotu. Taustalla oleva todellinen virhe on 403 Googlen omasta palvelusta. Kaikki alla oleva tehdään sen sijaan CLOUD CONSOLE -palvelussa, ja se reitti toimii.\n\nJärjestyksellä on väliä: projekti, sitten API, sitten palvelutili ja vasta sitten avain. Tässä järjestyksessä tehtynä avain syntyy yhdellä kertaa.\n\n1. Avaa selaimessasi console.cloud.google.com/projectcreate ja kirjaudu sisään.\n\n2. Anna projektille nimi, jonka tunnistat, kuten NBR. Jätä Organization-kohdaksi "No organization" — se on normaali vastaus henkilökohtaiselle tilille, ja organisaatio tuo mukanaan käytäntöjä, joita et hallitse. Valitse CREATE ja odota, että projekti ilmestyy.\n\n3. JOS GOOGLE TARJOAA ILMAISTA KOKEILUA 300 DOLLARIN SALDOLLA, KIELTÄYDY SIITÄ. Tuo saldo ei kata Gemini API -palvelua lainkaan — se on eri lompakko eri tuotteelle. Vielä pahempaa, sen hyväksyminen luo laskutustilin, ja Google linkittää laskutuksen automaattisesti jokaiseen uuteen projektiin, mikä poistaa projektin ilmaiselta tasolta. Se pyytää myös maksukorttia. Sano ei.\n\n4. Avaa console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Tarkista, että yläpalkissa näkyvä projektin nimi on juuri luomasi. Sivun otsikkona on "Gemini API". Valitse ENABLE ja odota, kunnes painike katoaa.\n\n5. Avaa console.cloud.google.com/iam-admin/serviceaccounts/create. Tämä vaihe säästää sinut seuraavan vaiheen tekemiseltä kahdesti: avain ei voi käyttää Geminiä, ellei se ole sidottu palvelutiliin, ja sen tekeminen nyt tarkoittaa, että se on valmiina, kun tarvitset sitä.\n\n6. Täytä "Create service account" -sivulla vain ensimmäinen kenttä, "Service account name" — nbr-translate on hyvä nimi, ja alla oleva tunnus täyttyy itsestään. Valitse "CREATE AND CONTINUE". Vaihe 2, "Permissions", on valinnainen: jätä se tyhjäksi, roolia ei tarvita. Valitse alhaalta DONE.\n\n7. Avaa console.cloud.google.com/apis/credentials. Tarkista projektin nimi yläpalkista uudelleen. Valitse "Credentials"-otsikon vieressä olevasta toimintorivistä "+ CREATE CREDENTIALS" ja valitse avautuvasta valikosta ENSIMMÄINEN vaihtoehto, "API key" — ei "OAuth client ID" eikä "Service account".\n\n8. Oikealle avautuu paneeli, jonka otsikkona on "Create API key". Kirjoita aivan ylhäällä olevaan "Name"-kenttään nimi, kuten NBR.\n\n9. Vieritä paneelin sisällä ALASPÄIN, "APIs that can be accessed using this key" -osion ohi, valintaruutuun, jonka teksti on "Authenticate API calls through a service account". VALITSE SE. Tämä on vaihe, jota kukaan ei arvaa: ennen kuin se on valittu, Geminiä ei voi valita lainkaan — sen kohde pysyy harmaana ja vain työkaluvihje kertoo miksi.\n\n10. "Service account" -otsikoitu osio ilmestyy juuri alapuolelle. Valitse "+ Select a service account", valitse vaiheessa 6 luomasi tili valitsemalla sen rivin vasemmalla puolella oleva ympyrä ja valitse ikkunan alareunasta SELECT.\n\n11. Vieritä nyt paneelissa YLÖSPÄIN kohtaan "APIs that can be accessed using this key" ja avaa "Select API restrictions" -kohdan alla oleva luettelo. "Gemini API" voidaan nyt valita. Valitse se ja valitse OK.\n\n12. Vieritä paneelin alareunaan ja valitse CREATE. Jätä "Application restrictions" -asetukseksi "None".\n\n13. Näkyviin tulee ikkuna "API key created", jossa avain on. Se alkaa AQ.-tunnuksella AIza-tunnuksen sijaan, mikä on oikein palvelutiliin sidotulle avaimelle. Kopioi se kentän oikealla puolella olevalla kopiointikuvakkeella.\n\n14. Palaa tänne, valitse Set up this service ja liitä avain. NBR tarkistaa sen Googlen kanssa ennen tallentamista.\n\nJOS KONSOLI ILMOITTAA, ETTÄ TARVITSET LISÄOIKEUKSIA ja nimeää puuttuvan oikeuden, olet lähes varmasti kirjautunut väärälle Google-tilille sen sijaan, että oikeudet puuttuisivat. Lisää osoitteen loppuun authuser=1 — tai authuser=2 jne. — kunnes projekti ilmestyy.
+Services.Steps.OpenAi=1. Avaa platform.openai.com selaimessasi. Tämä on kehittäjäalusta, ei ChatGPT-sivusto, ja se on erillinen asia, vaikka maksaisit jo ChatGPT:stä.\n\n2. Kirjaudu sisään tililläsi tai luo uusi tili.\n\n3. TARKISTA ENSIN, missä organisaatiossa olet. Nimi on sivun vasemmassa yläkulmassa ja se on valikko: avaa se ja valitse omasi, jonka nimi on yleensä Personal. Jos sinut on joskus kutsuttu jonkun toisen organisaatioon tai sinulla on ChatGPT Team- tai Business-tilaus työn kautta, alusta voi asettaa sinut TUOHON organisaatioon – jossa olet vain jäsen, laskutus hylkää sinut virheellä "required permission: api.billing.read", ja luomasi avain kuuluisi väärälle tilille. Kaiken alla olevan on tapahduttava omassa organisaatiossasi.\n\n4. Mene osoitteeseen platform.openai.com/settings/organization/billing/overview. Laskutus (Billing) löytyy kohdasta ORGANIZATION, ei tavalliselta asetussivulta, josta sitä on helppo etsiä löytämättä sitä. Valitse Add to balance, lisää maksukortti ja osta saldoa. Kymmenen dollaria on minimi ja enemmän kuin tarpeeksi aloittamiseen. Mikään ei toimi ennen kuin tilillä on saldoa.\n\n5. Kun olet siellä, aseta kuukausittainen käyttöraja. Se ei maksa mitään ja tarkoittaa, ettei virhe voi kerryttää laskua.\n\n6. Avaa API keys samoista asetuksista ja valitse Create new secret key. Anna sille nimi, jonka tunnistat, kuten NBR. Varmista, että olet edelleen samassa organisaatiossa kuin saldo.\n\n7. Kopioi avain heti, kun se ilmestyy. Se näytetään VAIN KERRAN. Jos suljet ikkunan kopioimatta sitä, sitä ei voi enää näyttää – poista se vain ja luo uusi.\n\n8. Palaa tänne, valitse Set up this service ja liitä avain.\n\n9. NBR tarkistaa avaimen OpenAI:n kanssa ennen sen tallentamista, joten saat heti tietää, toimiiko se.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Ohje – tulossa pian.
+Dialog.Help.Title=Ohje
+Dialog.WhatsNew.Title=Uutta
+Report.Filter=Tekstitiedostot (*.txt)|*.txt|Kaikki tiedostot (*.*)|*.*
+Report.Done=Raportti tallennettiin kohteeseen:\n\n{0}\n\n{1} kt. Liitä se viestiisi.
+Report.Failed=Raporttia ei voitu kirjoittaa. Kansio voi olla vain luku -muotoinen tai levytila voi olla lopussa.
+Dialog.About.Title=Tietoja NBR:stä
+Dialog.About.Release=Beta 1
+Dialog.About.Licence=🄯 Copyleft — NBR on vapaa ohjelmisto GNU General Public License, versio 3:n alaisena. Voit käyttää, tutkia, jakaa ja muuttaa sitä; jos jaat muutetun version eteenpäin, se tapahtuu samoilla ehdoilla ja sen lähdekoodin kanssa.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nVersio {1}\n\nTämä on monimuotoinen ja monilähtöinen digitaalisten kirjojen ja julkaisujen lukija, joka on suunniteltu erityisesti sokeille, näkövammaisille ja lukemisesteisille. Se on ilmainen peruskäytössä, mutta jos haluat tutustua ja käyttää sen lisäominaisuuksia, kuten käännöksiä ja pilvipohjaisia ääniä, sinun on rekisteröidyttävä ja mahdollisesti maksettava vastaavista ulkoisista palveluista.\n\nValmistaja: Nemoguća vizija — nemoviz.org\n\nKirjoittanut: Gordan Radić\n\nLuotu käyttäen Claudea (Anthropic). Suuri osa koodista on sen kirjoittamaa, tekijän suunnitelmien, päätösten ja mittausten mukaisesti; tekijänoikeudet ja lisenssi kuuluvat hänelle.\n\n{2}\n\nMIHIN NBR PERUSTUU\n\nNBR toistaa ääntä libmpv:n kautta, lukee pistekirjoitusta liblouis-kirjaston avulla, puhuu NVDA-ohjainasiakkaan kautta, lukee tunnisteita TagLib#-kirjastolla, purkaa tekstiä PDF-tiedostoista PdfPig-kirjastolla ja avaa arkistoja SharpCompress-kirjastolla. Jokainen on erillinen kirjasto, jota käytetään muokkaamattomana, ja jokainen voidaan korvata omalla yhteensopivalla versiollaan.\n\nlibmpv ja sen sisältämä FFmpeg — LGPL 2.1 tai uudempi\n\nliblouis ja sen pistekirjoitustaulukot — LGPL 2.1 tai uudempi\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress ja Microsoft-paketit — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend ja OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nTäydellinen ilmoitus — versiot, tekijänoikeuksien haltijat ja tiedot siitä, mistä kukin lisenssi on luettu — löytyy ohjelman vieressä olevasta THIRD-PARTY-NOTICES.txt-tiedostosta, ja itse lisenssitekstit ovat Licences-kansiossa.
+Dialog.Rules.Title=Käännössäännöt
+Dialog.Rules.Language=Kieli
+Dialog.Rules.Text.Accessible=Tälle kielelle lähetetyt säännöt
+Dialog.Rules.None=Tälle kielelle ei ole kirjoitettu sääntöjä. NBR kääntää sille silti käyttäen sääntöjä, jotka pätevät kaikkiin kieliin, sekä kirjaa itseään koskevia päätelmiä.
+Dialog.Rules.From=Luetaan tiedostosta {0}\nJos haluat käyttää omaa tiedostoasi, kopioi kyseinen tiedosto kansioon {1} ja muokkaa kopiota. Poista kopiosi, niin tämä tiedosto palautuu käyttöön.
+Dialog.Rules.FromYours=Luetaan omasta kopiostasi: {0}\nPoista se, niin NBR:n mukana tulleet säännöt tulevat taas käyttöön.
+Dialog.Rules.Make=Kirjoittaaksesi sääntöjä tälle kielelle, aseta {1} kansioon {0}.
+Update.Title=Tarkista päivitykset
+Update.Checking=Tarkistetaan uudempaa versiota
+Update.Available=Nemoviz Book Readerista on julkaistu uudempi versio: {0}\n\nHaluatko avata lataussivun?
+Update.UpToDate=Käytössäsi on uusin julkaistu versio.
+Update.Failed=Tarkistusta ei voitu suorittaa. Yhteyttä ei ehkä ole, tai lataussivu ei ole juuri nyt tavoitettavissa.
+Hint.Button.Accessible=Ohje kohteelle {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Pilviääni — ilmainen kiintiö
+Cloud.Quota.Warning=Tässä kirjassa on {0} merkkiä.\n\nOlet käyttänyt tämän kuukauden ilmaisista {2} merkistä {1} palvelussa {3}.\n\nTämän kirjan lukeminen ylittää ilmaisen kiintiön, ja ylimenevä osuus veloitetaan kyseisen tilin maksutavalta.\n\nLuetaanko se silti?
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Virhe
+Dialog.Error.General=Virhe: {0}
+Dialog.DontShowAgain=Älä näytä tätä uudelleen

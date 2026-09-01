@@ -1,0 +1,805 @@
+; Nemoviz Book Reader
+;
+; Translated by:            Gemini (Google), 2026
+; Verified and modified by: 
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Dansk
+Btn.OK=OK
+Btn.Yes=Ja
+Btn.No=Nej
+Btn.Cancel=Annuller
+Btn.Close=Luk
+Btn.Continue=Fortsæt
+Btn.Refresh=Opdater
+Btn.Refresh.Accessible=Opdater
+Common.Dash=-
+Common.Error=Fejl
+Common.DateFormatLong=dd. MMMM yyyy
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Titel:
+Player.Info.AuthorLabel=Forfatter:
+Player.Info.ProducerLabel=Producent:
+Player.Info.PublisherLabel=Udgiver:
+Player.Info.ChapterLabel=Kapitel:
+Player.Info.PartLabel=Del:
+Player.Info.PageLabel=Side:
+Player.Info.BookmarksLabel=Bogmærker:
+Player.Info.VoiceLabel=Stemme:
+Player.Info.NoVoiceLabel=Ingen installeret stemme
+Player.Info.PartNumElapsed=Del {0} forløbet:
+Player.Info.PartNumRemaining=Del {0} resterer:
+Player.Info.ElapsedLabel=Tid forløbet:
+Player.Info.RemainingLabel=Tid resterer:
+Player.Info.VolumeLabel=Lydstyrke:
+Player.Info.SpeedLabel=Hastighed:
+Player.Info.AccessibleName=Afspilningsoplysninger, F8
+Player.Info.Prepared=Tale gemt: {0} passager, {1} MB
+Player.Info.Preparing=Forbereder resten af denne bog: {0} af {1} passager
+Player.TitleBar.Paused=sat på pause
+Player.ReadingSurface.Accessible=Læseflade
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Afspil, Mellemrum
+Btn.Pause.Accessible=Pause, Mellemrum
+Btn.Back.Accessible=Tilbage, Shift+Venstre
+Btn.Forward.Accessible=Frem, Shift+Højre
+Btn.VolumeUp.Accessible=Lydstyrke op, F12
+Btn.VolumeDown.Accessible=Lydstyrke ned, F11
+Btn.Power.Accessible=Afslut, Alt+F4
+Player.Volume.Text=Lydstyrke: {0}%
+Player.Volume.Accessible=Lydstyrke {0} procent
+Player.Speed.Text=Hastighed: {0}x
+Player.Speed.Legend=Hastighed
+Player.Speed.Accessible=Hastighed {0} gange
+Player.Position.Label=Position
+Player.Position.Text=Position: {0} / {1}
+Player.Position.Accessible=Position {0} procent
+Player.Progress.Legend=Forløb
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Navigationstrin:
+Player.Seek.Accessible=Navigationstrin, Shift+Op eller Shift+Ned
+Player.Seek.Announce=Navigation: {0}
+Seek.Item.15s=15 sekunder
+Seek.Item.30s=30 sekunder
+Seek.Item.1min=1 minut
+Seek.Item.5min=5 minutter
+Seek.Item.10min=10 minutter
+Seek.Item.15min=15 minutter
+Seek.Item.30min=30 minutter
+Seek.Item.Chapter=Kapitel
+Seek.Item.Part=Del
+Seek.Item.Track=Spor
+Seek.Item.HeadingLevel=Overskrift {0}
+Seek.Item.Page=Side
+Seek.Item.Paragraph=Afsnit
+Seek.Item.Bookmark=Bogmærke
+Seek.Item.StandardPage=Standardside
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Bibliotek
+Btn.Library.Accessible=Bibliotek, F3
+Btn.Library.Legend=Bibliotek
+Btn.Settings=Indstillinger
+Btn.Settings.Accessible=Indstillinger, F2
+Btn.Settings.Legend=Indstillinger
+Btn.Properties.Legend=Egenskaber
+Btn.Properties=Egenskaber
+Btn.Properties.Accessible=Egenskaber, Alt+Enter
+Btn.Help=Hjælp
+Btn.Help.Accessible=Hjælp, F1
+Btn.Help.Legend=Hjælp
+Btn.GoTo.Legend=Gå til...
+Btn.GoTo=Gå til...
+Btn.GoTo.Accessible=Gå til, F4
+Btn.SetBookmark.Legend=Bogmærke
+Btn.SetBookmark=Opret bogmærke
+Btn.SetBookmark.Accessible=Opret bogmærke, F5
+Btn.ManageBookmarks.Legend=Bogmærker
+Btn.ManageBookmarks=Administrer bogmærker
+Btn.ManageBookmarks.Accessible=Administrer bogmærker, F6
+Btn.Timer=Sleep-timer
+Btn.Timer.Legend=Timer
+Btn.Timer.Accessible=Sleep-timer, F7
+Btn.Timer.Countdown=Sleep-timer {0}
+Btn.Timer.Accessible.Active=Sleep-timer, {0} tilbage, aktiver for at stoppe afspilning og annullere timeren
+Btn.Timer.Accessible.LessThanMinute=Sleep-timer, mindre end et minut tilbage
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Tilbage (Shift+Venstre)
+Tip.PlayPause=Afspil/Pause (Mellemrum)
+Tip.Forward=Frem (Shift+Højre)
+Tip.Seek=Skift med Shift+Op og Shift+Ned; spring med Shift+Venstre og Shift+Højre (også Tilbage/Frem)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enter
+Tip.Timer=F7
+Tip.Volume=F11 og F12
+Tip.Speed=Ctrl+Venstre og Ctrl+Højre
+Tip.Progress=Ctrl+1–9: spring til 10–90%
+Player.OpenFile.Title=Vælg en bog
+Player.NoVoiceForLanguage=Ingen installeret stemme taler {0}. Åbn Egenskaber med Alt+Enter for at vælge en.
+Filter.Audiobooks=Lydbøger
+Filter.TextBooks=Tekstbøger
+Filter.BrailleBooks=Punktskriftsbøger
+Filter.Archives=Arkiver
+Filter.AllSupported=Alle understøttede filer
+Filter.AllFiles=Alle filer
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Bibliotek
+Library.List.Accessible=Bogreol
+Library.NowReading.Accessible=Læser nu
+Library.NowReading.Empty=Ingen bog indlæst
+Library.Search.Accessible=Søg
+Library.Filter.Accessible=Filtrer efter status
+Library.Details.Accessible=Bogdetaljer
+Library.Btn.Load=Indlæs
+Library.Btn.Load.Accessible=Indlæs
+Library.Btn.Close=Luk
+Library.Btn.Close.Accessible=Luk
+Menu.File=Filer
+Menu.File.OpenFile=Åbn fil...
+Menu.File.OpenFolder=Åbn mappe...
+Menu.File.OpenAudioCd=Åbn lyd-cd
+Menu.File.ClearLibrary=Ryd bibliotek...
+Menu.File.OpenLibraryFolder=Åbn biblioteksmappen
+Menu.File.Exit=Afslut
+Menu.File.ExportAudio=Eksporter som lydbog...
+Menu.File.Translate=Oversæt bogen...
+Menu.Sort=Sorter
+Menu.Sort.Alphabetically=Alfabetisk
+Menu.Sort.DateAdded=Dato tilføjet
+Menu.Sort.Format=Format
+Menu.Sort.Status=Status
+Menu.Sort.Ascending=Stigende
+Menu.Sort.Descending=Faldende
+Menu.Sort.ActiveMark=(aktiv)
+Menu.Help=Hjælp
+Menu.Help.Help=Hjælp
+Menu.Help.About=Om NBR
+Menu.Help.WhatsNew=Nyheder
+Menu.Help.Report=Eksporter rapport...
+Menu.Help.Services=Tjenester og konti...
+Menu.Help.Update=Søg efter opdatering
+Shelf.Filter.All=Alle bøger
+Shelf.Filter.Reading=Læser
+Shelf.Filter.Unread=Ulæst
+Shelf.Filter.Read=Læst
+Shelf.Filter.Favorites=Favoritter
+Shelf.Status.NowReading=Læser nu
+Shelf.Status.Reading=Læser
+Shelf.Status.Unread=Ulæst
+Shelf.Status.Read=Læst
+Context.Open=Åbn
+Context.MarkRead=Marker som læst
+Context.MarkUnread=Marker som ulæst
+Context.Rename=Omdøb
+Context.Delete=Slet
+Context.Properties=Egenskaber
+Context.ReadOcr=Genkend tekst
+Context.ReReadOcr=Genkend igen på et andet sprog
+Context.Translate=Oversæt bogen...
+Context.Favorite=Marker som favorit
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Titel
+Details.Field.Author=Forfatter
+Details.Field.Format=Format
+Details.Field.Speed=Hastighed
+Details.Field.Volume=Lydstyrke
+Details.Field.Added=Tilføjet
+Details.Field.Producer=Producent
+Details.Field.Publisher=Udgiver
+Details.Field.Year=År
+Details.Field.Time=Tid
+Details.Field.Elapsed=Forløbet
+Details.Field.Remaining=Resterende
+Details.Field.Read=Læst
+Details.Field.Pages=Sider
+Details.Field.Headings=Overskrifter
+Details.Field.Characters=Tegn
+Details.Field.Language=Registreret sprog
+Details.Field.Description=Beskrivelse
+Details.Description.Open=Tryk på Enter for at læse den
+Details.Field.SoundProcessing=Lydbehandling
+Details.Sound.On=Til
+Details.Sound.Off=Fra
+Details.Speed.Value={0}x
+Dialog.Description.Title=Beskrivelse - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Tilføj bog til bibliotek
+Library.ImportFolder.Description=Vælg en mappe med bøger
+Dialog.ConfirmImport.Message={0} bøger fundet på den valgte placering: {1} lydbøger, {2} tekstbøger, {3} specialformater og {4} arkiver.\n\nHvis dette er korrekt, vil bøgerne efter din bekræftelse blive kopieret til dit bibliotek, og arkiverne vil blive udpakker der. Dit bibliotek er placeret på {5}.\n\nIntet ændres på kildeplaceringen — alt forbliver intakt, så du behøver ikke bekymre dig.\n\nHvis tallene ikke stemmer overens med det, du forventede, så prøv at omorganisere de data, du vil importere. Masseimport har visse begrænsninger i at skelne mellem titler, og NBR kan ikke garantere, at den rammer plet hver gang.\n\nDette kan tage et stykke tid, så prøv ikke at afbryde processen.
+Dialog.ConfirmImport.One=Fandt én bog. Vil du importere den?
+Dialog.ConfirmImport.Title=Tilføj mappe
+Dialog.NoBooksFound.Message=Der blev ikke fundet nogen understøttede bøger i den valgte mappe.
+Dialog.NoBooksFound.Title=Tilføj mappe
+Dialog.ImportSuccess.Message=Bog tilføjet til bibliotek.
+Dialog.ImportSuccess.Title=Tilføj bog
+Dialog.ImportError.Message=Fejl ved tilføjelse af bog: {0}
+Dialog.ImportFolderSuccess.Message=Importerede {0} bøger.
+Dialog.ImportFolderSuccess.Skipped={0} blev udeladt.
+Dialog.ImportFolderSuccess.SkippedList=Disse kom ikke med:
+Dialog.ImportFolderSuccess.Title=Tilføj mappe
+Dialog.ImportFolderError.Message=Fejl ved import af mappe: {0}
+Dialog.ReimportExisting.Title=Allerede i biblioteket
+Dialog.ReimportExisting.Message={0} er allerede på hylden. Hvis du importerer den igen, opdateres indholdet i bogmappen. Din placering i bogen og dine bogmærker bevares – men hvis filen er ændret siden sidst, vil ordene have flyttet sig, og din placering vil ikke længere være, hvor du forlod den. Vil du importere den igen?
+Dialog.Skipped.Drm=beskyttet
+Dialog.Skipped.Cancelled=annulleret
+Dialog.Skipped.MissingFirstVolume=den første del af dette sæt mangler
+Dialog.Skipped.Empty=filen er tom
+Dialog.Rename.Title=Omdøb bog
+Dialog.Rename.Prompt=Nyt navn:
+Dialog.Rename.AuthorLabel=Forfatter:
+Dialog.Rename.TitleLabel=Titel:
+Dialog.ConfirmDelete.Message=Er du sikker på, at du vil slette "{0}" permanent fra disken? Denne handling kan ikke fortrydes.
+Dialog.ConfirmDelete.Title=Slet bog
+Dialog.DeleteError.Message=Fejl ved sletning af bog fra disken: {0}
+Dialog.ActiveBook.Message="{0}" er i øjeblikket indlæst i afspilleren og kan ikke slettes. Luk biblioteket, åbn en anden bog eller stop afspilningen, og prøv derefter igen.
+Dialog.ActiveBook.Title=Bogen er aktiv
+Dialog.ClearLibrary.Title=Ryd bibliotek
+Dialog.ClearLibrary.Message=Slet alle {0} bøger fra biblioteket? Dette fjerner permanent deres filer fra disken og kan ikke fortrydes.
+Dialog.ClearLibrary.Empty=Biblioteket er allerede tomt.
+Dialog.ClearLibrary.Done=Fjernede {0} bøger.
+Dialog.ClearLibrary.Skipped={0} kunne ikke fjernes (i brug eller i øjeblikket åben).
+Dialog.DrmProtected.Title=Beskyttet bog
+Dialog.DrmProtected.Message=Denne bog er DRM-beskyttet (dens indhold er krypteret), så den kan ikke åbnes. Brug venligst en DRM-fri kopi.
+Dialog.ArchivePassword.Title=Adgangskode påkrævet
+Dialog.ArchivePassword.Prompt=Arkivet "{0}" er beskyttet med adgangskode. Indtast adgangskoden for at åbne det:
+Dialog.ArchivePassword.Retry=Den adgangskode virkede ikke. Prøv igen for "{0}":
+Dialog.ArchivePassword.Field=Arkivets adgangskode
+Extract.Progress.Title=Udpakker
+Extract.Progress.Preparing=Forbereder…
+Extract.Progress.Determinate=Udpakker… {0} / {1} filer
+Extract.Progress.Indeterminate=Udpakker… {0} filer
+
+; ---- GO TO
+Dialog.GoTo.Title=Gå til
+GoTo.List.Accessible=Bogdele
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=OK
+GoTo.Cancel.Accessible=Annuller
+GoTo.Page.Group=Gå til side
+GoTo.Page.Accessible=Sidenummer
+GoTo.AutoPlay=Start afspilning efter spring
+GoTo.AutoPlay.Hint=Når denne er markeret, starter afspilningen umiddelbart efter springet. Når den ikke er markeret, bevares den nuværende tilstand: pauset forbliver pauset, afspilning fortsætter.
+GoTo.Hint.Accessible=Tip
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Sleep-timer
+SleepTimer.Duration.Group=Varighed
+SleepTimer.Duration.15=15 minutter
+SleepTimer.Duration.30=30 minutter
+SleepTimer.Duration.45=45 minutter
+SleepTimer.Duration.60=60 minutter
+SleepTimer.Duration.Custom=Brugerdefineret:
+SleepTimer.Custom.Accessible=Brugerdefineret varighed i minutter
+SleepTimer.Bookmark=Opret bogmærke ved startpunktet
+SleepTimer.Action.Group=Når tiden udløber
+SleepTimer.Action.Stop=Stop afspilning
+SleepTimer.Action.StopClose=Stop og luk programmet
+SleepTimer.Action.StopShutdown=Stop, luk og afslut Windows
+SleepTimer.Start=Start
+SleepTimer.Start.Accessible=Start sleep-timer
+SleepTimer.CancelBtn=Annuller
+SleepTimer.CancelBtn.Accessible=Annuller
+SleepTimer.Announce.Set=Sleep-timer indstillet til: {0} minutter
+SleepTimer.Announce.Cancelled=Sleep-timer annulleret
+SleepTimer.Announce.Finished=Sleep-timer færdig, afspilning stoppet
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Administrer bogmærker
+Bookmark.Announce.Set=Bogmærke oprettet
+Bookmark.Item.Format=Bogmærke {0} ({1})
+ManageBookmarks.List.Accessible=Bogmærker
+ManageBookmarks.Delete=Slet
+ManageBookmarks.Delete.Accessible=Slet
+ManageBookmarks.OK.Accessible=OK
+ManageBookmarks.Cancel.Accessible=Annuller
+ManageBookmarks.Selected=Valgt
+ManageBookmarks.NotSelected=Ikke valgt
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Lydbehandling
+Dialog.SoundProcessing.Message=Lydbehandling gør en dårlig optagelse lettere at lytte til. Den reparerer den ikke.\n\nDen kan ikke genskabe det, der aldrig er blevet optaget, og hvis den presses for hårdt, gør den mere skade end gavn. Lad den blot være tændt, lyt i et par minutter, og juster først derefter de enkelte trin.\n\nHjælpen forklarer, hvad hver enkelt gør.
+Prop.Info.Accessible=Boginformation
+Prop.Info.ProcessingOff=Lydbehandling: fra
+Prop.Info.ProcessingOn=Lydbehandling: til
+Prop.Info.Bypassed=(bypass aktiv)
+Prop.Info.Off=fra
+Prop.Info.Protection=Beskyttelse mod forvrængning
+Prop.Tab.Audio=Lyd
+Prop.Tab.Text=Tekst
+Prop.On=til
+Prop.Off=fra
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Brug lydbehandling
+Prop.SoundProcessing=Lydbehandling
+Prop.Stage.Level=Niveau
+Prop.Highpass.Title=Fjern rumlen
+Prop.Denoise.Title=Støjreduktion
+Prop.Deesser.Title=Blødgør sibilanter
+Prop.Compressor.Title=Udjævn tale
+Prop.Eq.Title=Tone
+Prop.Eq.Shelf={0} og derover
+Prop.Loudness.Title=Lydstyrke og pauser
+Prop.Normalize.Title=Automatisk lydstyrke
+Prop.Gate.Title=Støj i pauser
+Prop.Level.Minimal=Minimal
+Prop.Level.Light=Let
+Prop.Level.Medium=Mellem
+Prop.Level.Strong=Stærk
+Prop.Level.Maximum=Maksimum
+Prop.ResetAll=Nulstil alt
+Prop.Bypass=Omgå
+Prop.Bypass.Shortcut=Control B slår dette til og fra overalt på denne side
+Prop.Analysing=Analyserer optagelsen
+Prop.Analysing.Done=Optagelse analyseret, {0} trin indstillet. Skift dem hvis du foretrækker det.
+Prop.Analysing.Failed=Optagelsen kunne ikke analyseres. Indstillingerne er uændrede.
+Analyse.Progress.Title=Analyserer optagelsen
+Analyse.Progress.Starting=Starter analysen...
+Analyse.Progress.Working=Segment {0} af {1}. {2}
+Analyse.Progress.Quarter={0} procent færdig. {1}
+Analyse.Progress.Cancel=Annuller
+Analyse.Progress.Cancelling=Stopper efter dette segment. Indstillingerne forbliver uændrede.
+Analyse.Progress.Estimating=Beregner hvor lang tid dette vil tage.
+Analyse.Progress.AlmostDone=Næsten færdig.
+Analyse.Progress.Seconds=Cirka {0} sekunder tilbage.
+Analyse.Progress.Minutes=Cirka {0} minutter tilbage.
+Hint.SoundProcessing=Ved hjælp af lydbehandling kan du finjustere lyden af optagelsen. Du kan fjerne forskellig støj, øge lydstyrken og farve den overordnede lyd med equalizeren. Der er seks grupper af kontroller, som du hver især kan slå til og fra. Du kan også justere hver kontrol separat. Du kan midlertidigt omgå hele lydbehandlingskæden ved at trykke på Ctrl+B for at høre forskellen mellem den originale optagelse og dine lydindstillinger.
+Hint.RemoveRumble=Skærer de allerlaveste frekvenser væk — trafik, aircondition, håndteringsstøj. Den kan ikke redde en mudret optagelse, men den renser bunden, så tale får plads.
+Hint.NoiseRemoval=Reducerer konstant baggrundssus, den slags som et bånd eller en billig mikrofon efterlader. En for stærk indstilling begynder at spise stemmen med, så hæv den kun indtil suset forsvinder.
+Hint.SoftenSibilance=Tager toppen af skarpe S- og Š-lyde. Nyttig ved tæt-mikrofonerede oplæsere og ved optagelser, der er blevet gjort for lyse.
+Hint.EvenOutSpeech=Indsnævrer afstanden mellem de stille og de høje dele, så en hvisken og et råb ender tættere på hinanden. Dette er værktøjet, du skal bruge, når du hele tiden justerer lydstyrken.
+Hint.Tone=Fem bånd, i decibel, navngivet efter deres frekvens. Det laveste ligger på 200 Hz, hvor en boomy eller mudret optagelse normalt befinder sig; det øverste er en hylde, så den løfter eller sænker alt over sig i stedet for blot ét område. Båndene overlapper med vilje, hvilket gør en jævn kurve mulig, men det betyder også, at de lægges sammen -- tre nabobånd på +4 giver snarere mere end +4 imellem dem. Små justeringer rækker langt, og alt over et par dB betyder normalt, at et andet trin er den rigtige løsning.
+Hint.AutomaticLoudness=To ting, der modvirker hinanden, og derfor deler de samme boks. Automatisk lydstyrke holder det overordnede niveau stabilt gennem hele bogen, også mellem filer optaget på forskellige dage; den følger stemmen frem for hele signalet, hvilket er hvad en taleoptagelse kræver. Støj i pauser fungerer modsat: alt, der er mere støjsvagt end det valgte niveau, skubbes ned, så en susen eller brummen, der ligger under oplæsningen, holder op med at være hørbar i pauserne mellem sætninger. Den rører aldrig selve stemmen, og den dæmper frem for at gøre tavs (en støj, der tænder og slukker omkring hver frase, er mere trættende end en, der blot bliver). Skru op for lydstyrken, og støjen nedenunder følger med, så hvis det sker, er dette kontrollen til det.
+
+; ---- PROPERTIES - the text page
+Prop.Text.ReadingIn=Læser på:
+Prop.Text.NoVoiceShort=Ingen installeret stemme taler {0} — vælg nedenfor.
+Prop.Text.NoVoiceForLanguage=Ingen installeret stemme taler {0}. Installer en stemme til {0}, eller vælg et sprog og en stemme ovenfor for at læse denne bog med den. Valget gælder kun for denne bog.
+Prop.Text.InputBrailleGroup=Punktskriftskilde
+Prop.Text.InputBrailleTable=Input-punktskriftstabel:
+Hint.Text0=Her kan du vælge sprog og stemme til oplæsning af denne bog. Du kan have forskellige indstillinger for hver enkelt bog i biblioteket. Hver stemme husker sine egne indstillinger — hastighed, lydstyrke og tonehøjde — så der er ingen grund til at indstille dem igen, efter du har skiftet tilbage fra en anden stemme.\n\nHusk, at du kan vælge "Ingen tale", hvis du vil læse visuelt eller på punktskriftsdisplayet uden at høre lyd.
+Hint.TextVisual=Her kan du justere skærmlayoutet til læsning. Du kan vælge mellem et undertekst-lignende layout, rullende tekst som rulletekster i film eller øjeblikkelige sideskift. Du kan også vælge baggrunds-, tekst- og markeringsfarver, samt om linjen, der læses, eller hele sætningen markeres.\n\nBemærk, at dette ikke ændrer noget ved talen.
+Hint.TextBrailleSource=Denne bog stammer fra en punktskriftsfil, og dette er den tabel, den blev læst med — den der omdannede punktskriftscellerne tilbage til ord.\n\nEn punktskriftsfil siger intet om sit sprog, sin grad eller hvilken national standard den følger, så NBR er nødt til at finde frem til tabellen ud fra selve teksten. Den har som regel ret, men ikke altid, og en forkert tabel giver ord, der næsten er rigtige: "Have", hvor bogen siger "How".\n\nHvis det er det, du ser, skal du vælge en anden tabel her og trykke på OK. Bogen læses igen fra den punktskriftsfil, du importerede, som opbevares ved siden af den, så du kan prøve så mange tabeller, du vil, og vende tilbage til den første når som helst.\n\nDe tilbudte tabeller er dem for sproget ovenfor. Hvis det sprog er forkert, skal du ændre det, hvorefter tabellerne følger med.\n\nDette har intet at gøre med, hvad din punktskriftslinje viser. Din skærmlæser oversætter det ved hjælp af tabellen i sine egne indstillinger.
+NoVoice.Title=Ingen stemme til denne bog
+NoVoice.Message=Denne bog er på {0}, og ingen installeret stemme taler det. Vælg en stemme til at læse den med, bare denne ene gang, eller lad den forblive ulæst, indtil en stemme til {0} er installeret.
+NoVoice.Read=Læs med denne stemme
+NoVoice.Leave=Lad den forblive ulæst
+Dialog.BrailleReread.Title=Læs punktskriftsfilen igen?
+Dialog.BrailleReread.Message=Denne bog vil blive læst igen fra sin oprindelige punktskriftsfil ved hjælp af {0}.\n\nTeksten produceres på ny, så alt, hvad der pegede ind i den gamle tekst, går tabt: hvor langt du var nået, dine bogmærker og den læste procentdel. Selve bogen bliver ikke berørt, og du kan læse den igen med en anden tabel, så ofte du vil.
+Dialog.BrailleReread.Failed=Punktskriftsfilen kunne ikke læses med den tabel. Bogen er forblevet, som den var.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Indstillinger
+Settings.Tab.General=Generelt
+Settings.Tab.TextBooks=Tale og punktskrift
+Settings.Tab.Device=Enheder
+Settings.Tab.Advanced=Avanceret
+Settings.OK.Accessible=OK
+Settings.Cancel.Accessible=Annuller
+Settings.Apply=Anvend
+Settings.Apply.Accessible=Anvend
+
+; ---- SETTINGS - General
+Settings.General.Language.Restart=Ændring af sproget kræver, at NBR genstarter. Genstart nu?
+Settings.General.Language.RestartTitle=Sprog
+Settings.General.LanguageGroup=Sprog
+Settings.General.Language=Sprog:
+Settings.General.LibraryGroup=Biblioteksplacering
+Settings.General.LibraryLocation=Biblioteksplacering:
+Settings.General.LibraryLocation.Browse=Vælg mappen, hvor dit bogbibliotek er gemt
+Settings.General.Browse=Gennemse...
+Settings.General.Browse.Accessible=Gennemse efter biblioteksmappe
+Settings.General.MediaKeysGroup=Medietaster
+Settings.General.UseMultimediaKeys=Brug medietaster
+Settings.General.UseMultimediaKeysGlobally=Brug medietaster globalt
+Settings.General.MetadataGroup=Bogdetaljer
+Settings.General.UseMetadata=Brug indlejrede metadata
+Settings.General.LookGroup=Udseende
+Settings.General.LibraryLocation.Hint=Dette er stedet, hvor NBR kopierer importerede bøger. Du kan lade den forblive som standard på din systempartition, men hvis du planlægger at have et stort bibliotek, vil en anden partition eller disk være en meget bedre løsning. NBR gemmer også informationen for hver bog heri, så hvis du vil gemme dine læsepositioner, bogmærker, hastighed og andre læseindstillinger, skal du være opmærksom på, at du manuelt skal kopiere indholdet fra den gamle biblioteksmappe til den nye placering. Og i samme prisklasse: Ved at ændre bibliotekets placering til et andet sted end systempartitionen, beskytter du dine bøger mod utilsigtede systemnedbrud og det sædvanlige datatab, der følger med dem.
+Settings.General.UseMultimediaKeys.Hint=Du kan bruge dit tastaturs medietaster eller headset-taster til at afspille, sætte på pause og navigere i bogen ved hjælp af det navigationstrin, du har valgt.\n\nDen anden kontakt gør dem systemdækkende, så de når NBR fra hvor som helst — til prisen for at tage dem fra alle andre afspillere, mens NBR kører.
+Settings.General.UseMetadata.Hint=Nogle filformater har metadata med yderligere information om forfatter, titel, udgiver, producent og så videre. NBR kan læse og vise den information, hvor den findes. Men hvis den information er forkert eller mangler, kan NBR i stedet hente de grundlæggende detaljer fra mappe- og filnavne. Som en sidste udvej kan du altid omdøbe bøger i Biblioteket.
+Settings.General.UpdateGroup=Opdateringer
+Settings.General.AutoCheckUpdates=Søg automatisk efter opdateringer
+Settings.General.AutoCheckUpdates.Hint=Med denne slået til spørger NBR én gang om dagen, om en nyere version er blevet udgivet, og giver kun besked, hvis der er en. Intet om dig eller dine bøger sendes: forespørgslen indeholder ingen identifikator, intet bibliotek og ingen liste over, hvad du læser. Slå den fra, hvis du hellere vil have, at NBR aldrig selv tilgår netværket — du kan stadig spørge, når du vil, via Hjælp, Søg efter opdatering, i biblioteksvinduet.
+Settings.Misc.Look=Udseende:
+Settings.Misc.Look.Classic=Systemfarver
+Settings.Misc.Look.New=NBR-design
+Settings.Misc.Look.RestartTitle=Skift udseende
+Settings.Misc.Look.Restart=Ændring af udseendet kræver, at NBR genstarter. Din position i bogen bevares. Genstart nu?
+Settings.Misc.Look.Hint=Hvordan NBR tegner sig selv, og der er to svar.\n\nNBR-design er dets eget udseende, og det, det starter med.\n\nSystemfarver gør det til et enkelt vindue i de farver og skrifttyper, som Windows er indstillet til. Det maler intet af sit eget, så dit eget skema træder helt igennem — hvilket er det, du ønsker med et højkontrasttema, og hvad der fungerer bedst med et forstørrelsesprogram. Hvis du allerede har højkontrast slået til, er dette det, NBR starter med.\n\nUanset hvad er valget dit at tage og dit at fortryde: tastaturet og din skærmlæser påvirkes ikke af det, og F2 bringer dig tilbage hertil.
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.SpeechGroup=Tale
+Settings.TextBooks.Language=Sprog:
+Settings.TextBooks.BookLanguage=Bøger på dette sprog:
+Settings.TextBooks.AllOtherLanguages=Alle andre sprog
+Settings.TextBooks.VoiceNotSet=(ingen stemme valgt)
+Settings.TextBooks.AddVoices=Tilføj nye sprog...
+Settings.TextBooks.LanguageNoVoice={0} — ingen stemme installeret
+Settings.TextBooks.LanguageUnknown=(sprog ikke angivet)
+Settings.TextBooks.Voice=Stemme:
+Settings.TextBooks.Speed=Hastighed:
+Settings.TextBooks.Test=Test stemme
+Settings.TextBooks.TestSample=Dette er en prøve af den valgte stemme.
+Settings.TextBooks.Volume=Lydstyrke:
+Settings.TextBooks.Pitch=Tonehøjde:
+Settings.TextBooks.NoSpeech=Ingen tale
+Settings.TextBooks.VisualGroup=Visuel visning
+Settings.TextBooks.UseVisual=Brug visuel visning
+Settings.TextBooks.VisualMode=Visningstilstand:
+Settings.TextBooks.VisualMode.TwoRows=To tekstlinjer (undertekst-stil)
+Settings.TextBooks.VisualMode.FullInstant=Fuldskærmstekst (side for side)
+Settings.TextBooks.VisualMode.FullScrolling=Fuldskærmstekst (rullende)
+Settings.TextBooks.Highlight=Markering:
+Settings.TextBooks.Highlight.None=Ingen markering
+Settings.TextBooks.Highlight.Line=Nuværende linje
+Settings.TextBooks.Highlight.Sentence=Nuværende sætning
+Settings.TextBooks.HighlightColour=Markeringsfarve:
+Settings.TextBooks.TextColour=Tekstfarve:
+Settings.TextBooks.BackColour=Baggrundsfarve:
+Settings.TextBooks.Speech.Hint=Her er listen over de sprog og stemmer, der er installeret på dit system. Du kan vælge standardstemmen for hvert sprog, der vises her, så enhver ny titel på det sprog åbnes med den valgte stemme. Valget af en stemme til et sprog gør den til standard — der er ikke andet, du skal trykke på. Hvis din nye bog er skrevet på et sprog, der ikke er på listen, er det bedst ikke at indstille en standardstemme for det her. Du kan altid indstille en stemme under bogens egenskaber på siden Tekst, eller vælge Ingen tale og fortsætte med at læse med punktskrift eller på skærmen. Du vil også se en meddelelse, når et sprog ikke har nogen installeret stemme.
+Settings.TextBooks.Dictionary.Hint=Her kan du ændre det, som talesynthesizere udtaler forkert. Du kan rette udtalen af navne og steder, rette forkert tryk og meget mere — brug blot din fantasi. Det bedste er, at du kan gøre dette separat for hvert sprog og hver stemme, da forskellige synthesizere laver forskellige fejl på det samme sprog.
+Settings.TextBooks.Visual.Hint=Til visning af teksten på skærmen, mens den læses højt, for alle der læser med både øjne og ører. Når denne er slået til her, åbnes vinduet automatisk, hver gang du trykker på Afspil. Det kan også åbnes og lukkes manuelt når som helst med F9, uanset om denne indstilling er slået til eller ej — så du kan prøve det på en bog uden at ændre dens egenskaber.
+Settings.Colour.White=Hvid
+Settings.Colour.Black=Sort
+Settings.Colour.Yellow=Gul
+Settings.Colour.Blue=Blå
+Settings.Colour.Green=Grøn
+Settings.Colour.Red=Rød
+Voices.Add.Title=Sprog til oplæsning af tekst
+Voices.Add.Hint=Vælg de sprog, du ønsker, og tryk på Installer. Afhængigt af dine indstillinger kan Windows bede om din tilladelse og derefter downloade stemmerne til det sprog. En stemme er knyttet til sin accent, så britisk og amerikansk engelsk er separate poster.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Lydoutput
+Settings.Device.SoundCard=Lydkort:
+Settings.Device.KeepAlive=Hold lydkortet vågent
+Settings.Device.Default=Systemstandard (auto)
+Settings.Device.OpticalGroup=Optisk drev
+Settings.Device.UseOptical=Brug det optiske drev
+Settings.Device.OpticalWhich=Drev:
+Settings.Device.OpticalAuto=Det drev, der indeholder en disk
+Settings.Device.KeepAlive.Hint=Nogle lydudgange — især HDMI — går i dvale, så snart lyden stopper, og tager derefter et øjeblik om at vågne igen. Det, du hører, er det første ord i en sætning, der mangler igen og igen, uden at der er noget åbenlyst galt. Mens denne er slået til, afspiller NBR en tone langt under det, du kan høre, på det kort, det bruger, så kortet aldrig får chancen for at falde i søvn mellem sætninger. Slå den fra, hvis dit kort ikke gør dette: den holder outputtet åbent, så længe en bog afspilles.
+Settings.Device.UseOptical.Hint=Bøger blev engang udgivet på almindelige lyd-cd'er, og NBR kan afspille dem. NBR læser hele disken på én gang og gemmer den midlertidigt på din computer, så drevets snurren ikke forstyrrer din læsning: det arbejder i et par minutter og er derefter lydløst resten af bogen. Slå kun dette til, hvis du ønsker det - det er som udgangspunkt slået fra, selv på en maskine med et drev, og så længe det er slået fra, rører NBR slet ikke drevet.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Bøger med tekst i billeder
+Settings.Ocr.Language=Genkendelsessprog
+Settings.Ocr.Automatic=Automatisk
+Settings.Ocr.AddLanguage=Tilføj et sprog...
+Settings.Ocr.None=Windows har ingen installeret tekstgenkendelse.
+Settings.Ocr.Hint=Nogle bøger er fotografier af deres sider frem for tekst — en scannet PDF eller en mappe med nummererede billeder. NBR kan genkende ordene på dem og derefter læse dem op som enhver anden bog. Dette er kun startvalget — når du har mere end ét sprog, spørger NBR hvilket der skal bruges, hver gang den læser en bog.
+Settings.Translate.Group=Oversættelse
+Settings.Translate.Service=Oversættelsestjeneste
+Settings.Translate.Key=API-nøgle...
+Settings.Translate.State.Have={0}, nøgle gemt
+Settings.Translate.State.None={0}, ingen nøgle
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (større model)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, billigere)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, dyrest)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Notes=Noter til oversætteren:
+Settings.Translate.Rules=Oversættelsesregler
+Settings.Translate.Test.NoEngine=Ingen oversættelsestjeneste er valgt.
+Settings.Translate.Test.NoKey=Der er ingen nøgle at kontrollere.
+Settings.Translate.Test.NoNetwork=NBR kunne ikke få kontakt til tjenesten.
+Settings.Translate.Test.Refused=Tjenesten afviste anmodningen ({0}).
+Settings.Translate.Test.Empty=Tjenesten svarede med ingenting.
+Settings.Translate.Hint=NBR kan oversætte en bog ved hjælp af en onlinetjeneste. Hver tjeneste kræver en nøgle fra din egen konto hos dem, som du indsætter her; NBR håndterer aldrig betaling, det er dit eget ansvar via tjenesteudbyderens hjemmeside eller på anden vis. Hvis du ikke har brug for AI-maskinoversættelse, skal du blot lade feltet være umarkeret.\n\nEn oversættelse sender HELE bogen til den tjeneste, du vælger, og hvad hver af dem gør med den, varierer — nogle bruger indhold fra gratis-abonnementer til at forbedre deres egne produkter, andre gør ikke. Hver tjenestes egen beskrivelse under Hjælp, Tjenester og konti angiver hvilken.
+Settings.Cloud.Group=Google Cloud-stemmer
+Settings.Cloud.VoicesGroup=Cloud-stemmer
+Settings.Cloud.Where=Google og Azure konfigureres under Hjælp, Tjenester og konti, som forklarer hvad hver enkelt er, og guider dig trin for trin gennem oprettelse af en konto.
+Settings.Cloud.State.None=Google: ingen tjenestekonto er gemt, så ingen af disse stemmer er tilgængelige.
+Settings.Cloud.State.Have=Google: {0} stemmer er tilgængelige, som tilsammen læser {1} sprog.
+Settings.Cloud.State.HaveNoList=Google: en tjenestekonto er gemt, men listen over stemmer er endnu ikke hentet. Konfigurer den igen, mens du er forbundet.
+Settings.Cloud.Load=Tjenestekontofil...
+Settings.Cloud.Filter=Tjenestekonto (*.json)|*.json|Alle filer (*.*)|*.*
+Settings.Cloud.Forget=Glem tjenestekontoen
+Settings.Cloud.ForgetAsk=Glem den gemte tjenestekonto? Disse stemmer vil ikke længere blive tilbudt, og en bog, der allerede læses med en af dem, vil forblive tavs, indtil du giver den en anden stemme.
+Settings.Cloud.UseGroup=Brug af cloud-stemmer
+Settings.Cloud.Use=Tilbyd cloud-stemmer
+Settings.Cloud.Why=Der er endnu intet at aktivere: konfigurer Google eller Azure ovenfor, så bliver dette tilgængeligt.
+Settings.Cloud.NoList=Kontoen blev accepteret, men listen over stemmer kunne ikke hentes. Det skyldes normalt netværket; stemmerne vil dukke op, når der er forbindelse.
+Settings.Azure.Group=Azure Speech-stemmer
+Settings.Azure.Resource=Ressourcenavn:
+Settings.Azure.Key=Nøgle:
+Settings.Azure.Save=Kontrollér og gem
+Settings.Azure.NoResource=Udfyld ressourcenavnet — det er den første del af slutpunktet på samme side som nøglen.
+Settings.Azure.NoKey=Udfyld nøglen.
+Settings.Azure.Refused=Azure ville ikke acceptere det par. Kontrollér ressourcenavnet og nøglen, og at ressourcen er af typen Speech.
+Settings.Azure.State.None=Azure: ingen nøgle er gemt, så ingen af disse stemmer er tilgængelige.
+Settings.Azure.State.Have=Azure: {0} stemmer er tilgængelige, som tilsammen læser {1} sprog.
+Settings.Azure.Forget=Glem nøglen
+Settings.Azure.ForgetAsk=Glem den gemte Azure-nøgle? Disse stemmer vil ikke længere blive tilbudt, og en bog, der allerede læses med en af dem, bliver tavs, indtil du vælger en anden stemme.
+Hint.Settings.Cloud=
+Hint.Settings.CloudUse=Denne indstilling slår brugen af cloud-stemmer til og fra, hvilket betyder alle stemmer fra internettet, ikke dine installerede SAPI- eller One Core-stemmer.\n\nDen afgør, om disse stemmer bliver TILBUDT, når du vælger en stemme til en bestemt bog. De bliver aldrig tildelt automatisk og bliver aldrig et sprogs standardstemme — det forbliver de stemmer, der er installeret på denne computer, som er gratis og ikke kræver internetforbindelse.\n\nEn bog, der allerede læses med en cloud-stemme, beholder den, uanset om dette er slået til eller fra; kontakten styrer kun vælgeren, ikke hvad der kan afspilles.
+Hint.Settings.Azure=Brugen af Google- og Azure-stemmer kræver visse Google-, Microsoft- og Azure-legitimationsoplysninger og lidt arbejde på deres hjemmesider. Læs mere i Hjælp.
+Google.Cred.NotJson=Denne fil kan ikke læses som JSON, så det er ikke den fil, Google gav dig. Den fil, du skal bruge, blev downloadet, da du oprettede tjenestekontoen, og dens navn slutter på .json.
+Google.Cred.NotServiceAccount=Denne JSON-fil kan læses, men det er ikke en tjenestekonto — den indeholder ingen kontoadresse og ingen privat nøgle. Google tilbyder flere typer legitimationsoplysninger; den, der skal bruges til disse stemmer, er tjenestekontonøglen.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Udtaleordbog
+Dict.Open=Udtaleordbog...
+Dict.Open.Accessible=Udtaleordbog
+Dict.Scope=Disse regler gælder for:
+Dict.Scope.Global=Alt hvad jeg læser
+Dict.Scope.Language=Alt hvad jeg læser på {0}
+Dict.Scope.Voice=Alt hvad jeg læser med {0}
+Dict.List.Accessible=Regler
+Dict.Column.Pattern=Skrevet
+Dict.Column.Says=Udtales som
+Dict.Column.Match=Match
+Dict.Column.Case=Store/små bogstaver
+Dict.Column.State=Regel
+Dict.Column.Comment=Note
+Dict.Add=Tilføj...
+Dict.Edit=Rediger...
+Dict.Remove=Fjern
+Dict.State.On=Til
+Dict.State.Off=Fra
+Dict.Try=Prøv en sætning:
+Dict.TryButton=Prøv det
+Dict.Rule.TitleNew=Ny regel
+Dict.Rule.TitleEdit=Rediger regel
+Dict.Field.Pattern=Hvad der står:
+Dict.Field.Replacement=Sig dette i stedet:
+Dict.Field.Match=Match:
+Dict.Field.CaseSensitive=Forskel på store og små bogstaver
+Dict.Field.Skip=Spring over
+Dict.Field.Comment=Note:
+Dict.Field.Enabled=Reglen er aktiveret
+Dict.Match.WholeWord=Hele ordet
+Dict.Match.Anywhere=Overalt, også inde i et ord
+Dict.Match.Regex=Regulært udtryk
+Dict.Error.Title=Denne regel kan ikke bruges
+Dict.Error.NoPattern=Udfyld hvad der står i bogen.
+Dict.Error.TooSlow=Dette mønster tager for lang tid at matche. Forenkl det.
+Dict.Help=Hjælp til Regex...
+Dict.Help.Title=Regulære udtryk i udtaleordbogen
+Dict.Help.Text=Den gamle Zen-visdom siger:\n\n    Udvikleren havde et problem.\n    Udvikleren besluttede at løse problemet med regulære udtryk.\n    Udvikleren havde to problemer.\n\nRegEx, eller regulære udtryk, er noget, man helst vil undgå, men det er smart at have muligheden, så her er den.\n\nHvis du ved, hvad du gør, så slå dig løs. Hvis ikke, så lad være med at bruge det, eller spørg Google.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=API-nøgle til {0}
+Dialog.TranslateKey.Field=API-nøgle
+Dialog.TranslateKey.Prompt=Indsæt den nøgle, du har fået fra {0}. Den gemmes på denne computer i en separat fil i læsbar form, så behandl den som en adgangskode. Du kan til enhver tid erstatte eller fjerne den, og du kan annullere nøglen hos selve tjenesten.
+Dialog.TranslateKey.Region=Region (tom hvis Global):
+Dialog.TranslateKey.Remove=Fjern
+Dialog.TranslateKey.Status=Resultat
+Dialog.TranslateKey.Stored=Der er gemt en nøgle til denne tjeneste.
+Dialog.TranslateKey.NotStored=Der er ikke gemt nogen nøgle til denne tjeneste.
+Dialog.TranslateKey.Test=Kontrollér nøglen
+Dialog.TranslateKey.Testing=Kontrollerer nøglen...
+Dialog.TranslateKey.Works=Nøglen virker.
+Azure.Setup.Title=Opsætning af Azure Speech
+Azure.Setup.Open=Opret den for mig...
+Azure.Setup.Intro=NBR kan oprette Azure-ressourcen for dig, så du slipper for at arbejde i portalen. Du logger på Microsoft én gang med en kort kode, vælger hvilket abonnement den skal tilknyttes, og NBR opretter den på det gratis niveau og gemmer nøglen. Intet oprettes, før du har logget på.
+Azure.Setup.Start=Start
+Azure.Setup.SigningIn=Anmoder Microsoft om en log-ind-kode.
+Azure.Setup.CodeLabel=Log-ind-kode:
+Azure.Setup.EnterCode=Din log-ind-kode står i feltet nedenfor, klar til at blive kopieret. Vælg "Åbn log-ind-siden" for at åbne {0} i din browser, log på der, hvorefter dette vindue fortsætter af sig selv.
+Azure.Setup.OpenPage=Åbn log-ind-siden
+Azure.Setup.OpenFailed=Browseren kunne ikke åbnes. Adressen står på linjen ovenfor; åbn den manuelt.
+Azure.Setup.Directory=Mappe:
+Azure.Setup.Subscription=Abonnement:
+Azure.Setup.SignedIn=Logget på. {0} abonnement(er) fundet — vælg et og vælg Opret.
+Azure.Setup.Create=Opret ressourcen
+Azure.Setup.NoSubscription=Den konto har intet Azure-abonnement, så der er ikke noget sted at oprette ressourcen.
+Azure.Setup.Creating=Opretter ressourcen. Dette tager et minuts tid eller to; Azure rapporterer den som klar, før den reelt er det, så NBR venter.
+Azure.Setup.Done=Færdig. Ressourcen er oprettet, og dens nøgle er gemt — {0} stemmer er tilgængelige.
+Azure.Setup.DoneNoList=Ressourcen er oprettet, og dens nøgle er gemt, men listen over stemmer kunne ikke hentes. Det skyldes normalt netværket; stemmerne vises, så snart der er forbindelse.
+Azure.Setup.Failed=Det virkede ikke: {0}
+Azure.Setup.HaveOne=Eller, hvis du allerede har en tale-ressource, skal du indtaste dens to detaljer her i stedet:
+Azure.Setup.Kept=Azure accepterede parret, og det er gemt. Disse stemmer er nu tilgængelige.
+Azure.Setup.DirectoryHint=Lad dette felt være tomt, hvis du logger ind med en arbejds- eller skolekonto. Hvis dit Azure er på en PERSONLIG Microsoft-konto, vil Microsoft afvise login på den almindelige adresse, og du skal angive den mappe, som Azure oprettede, da abonnementet blev oprettet — enten dens navn, der slutter på onmicrosoft.com, eller dens mappe-id (tenant ID). Det bliver spurgt om én gang og huskes derefter.
+
+; ---- THE READING WINDOW
+Reading.Title=Læsning
+Reading.Back=Tilbage
+Reading.Back.Accessible=Et skridt tilbage
+Reading.PlayPause=Afspil/Pause
+Reading.PlayPause.Accessible=Afspil eller pause, Mellemrum
+Reading.Forward=Frem
+Reading.Forward.Accessible=Et skridt frem
+Reading.Smaller=Mindre
+Reading.Smaller.Accessible=Mindre tekst, minus-tast
+Reading.Bigger=Større
+Reading.Bigger.Accessible=Større tekst, plus-tast
+Reading.Font.Accessible=Skrifttype
+Reading.Size.Announce=Tekststørrelse {0}
+Beta.Suffix= — ikke i denne beta
+Beta.NoReadingWindow=Læsevinduet er deaktiveret i denne beta. Læsning på skærmen, og den punktskrift der følger med, testes stadig og vender tilbage i en senere udgivelse.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Genkend teksten
+Ocr.Ask.Question={0} indeholder ingen tekst — det er {1} sider med billeder. NBR kan genkende teksten på dem, hvilket bør tage {2}. Vil du genkende den nu?
+Ocr.Ask.ReadWith=Genkend som:
+Ocr.Ask.Read=Genkend
+Ocr.Ask.Skip=Spring over
+Ocr.Ask.UnderAMinute=under et minut
+Ocr.Ask.Minutes=cirka {0} minutter
+Ocr.Result.NoText=Der blev ikke genkendt nogen tekst i billederne. Bogen er blevet tilføjet, men der er intet at læse fra den.
+Ocr.Refusal.NoEngine=Der er ikke installeret nogen tekstgenkendelse. Brug "Tilføj et sprog..." i Indstillinger under Avanceret, så installerer NBR et for dig.
+Ocr.Refusal.NoPages=Der er ingen sider i dette, der kan læses.
+Ocr.Progress.Title=Genkender tekst
+Ocr.Progress.Starting=Starter genkendelse...
+Ocr.Progress.Working=Side {0} af {1}. {2}
+Ocr.Progress.Quarter={0} procent færdig. {1}
+Ocr.Progress.Cancel=Annuller
+Ocr.Progress.Cancelling=Stopper efter denne side. Intet gemmes.
+Ocr.Progress.Estimating=Beregner hvor lang tid dette vil tage.
+Ocr.Progress.AlmostDone=Næsten færdig.
+Ocr.Progress.Seconds=Cirka {0} sekunder tilbage.
+Ocr.Progress.Minutes=Cirka {0} minutter tilbage.
+Ocr.Unread.Message=Denne bog er endnu ikke blevet genkendt – den består stadig af billeder af siderne, så der er intet at læse op. Vil du genkende den nu?
+Ocr.Sparse.Message=Kun {0} af denne bogs {1} sider indeholder tekst. Det er sandsynligvis en scanning, hvor tekstlaget er beskadiget, så ordene er stadig billeder. Vil du genkende dem nu?
+Ocr.Blank.Question={0} sider i træk returnerede ingen tekst overhovedet. Resten af de {1} sider er muligvis ens, og det vil tage et stykke tid at genkende dem. Vil du fortsætte?
+Ocr.Blank.Jbig2={0} sider i træk returnerede ingen tekst overhovedet. Denne PDF gemmer sine ord i et format, som Windows ikke kan læse, så siderne fremstår som blankt papir uden noget at genkende – det er meget sandsynligt, at læsning af de resterende {1} sider ikke vil give noget resultat. Vil du fortsætte?
+Ocr.Read.Question=Denne bog består af {0} sider med billeder og er endnu ikke blevet genkendt. Det tager {1} at genkende den.
+Ocr.ReRead.Question=Denne bog blev genkendt ud fra {0} sider med billeder. Det tager {1} at genkende den igen på et andet sprog. Billederne gemmes sammen med bogen, så dette kan gøres så ofte, du vil.
+Ocr.ReRead.Done=Bogen er blevet genkendt igen og erstattet.
+Ocr.ReRead.Locate=Billederne til denne bog er ikke gemt sammen med den, så NBR er nødt til at finde dem igen. Vælg den scannede fil, eller – hvis bogen ankom som separate sidebilleder – en hvilken som helst af disse sider.
+Ocr.ReRead.LocateTitle=Find billederne til denne bog
+Ocr.ReRead.Filter=Scannede bøger og billeder|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Alle filer|*.*
+Ocr.ReRead.WholeFolder=Der er {0} billeder i den mappe. Skal de alle genkendes som siderne i denne bog?
+Ocr.Add.Title=OCR-sprog
+Ocr.Add.List=Sprog
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — allerede installeret
+Ocr.Add.Install=Installer
+Ocr.Add.WindowsSettings=Windows-indstillinger...
+Ocr.Add.Close=Luk
+Ocr.Add.Installing=Installerer {0}. Windows Update henter dette, så hvor lang tid det tager afhænger af belastningen — et par minutter er normalt, og ti minutter er ikke uhørt. Du kan lukke dette vindue og fortsætte; det vil fortsætte af sig selv.
+Ocr.Add.Done={0} er installeret og klar til brug.
+Ocr.Add.DonePartly={0} er installeret og klar til brug. {1} blev ikke hentet — Windows arbejder muligvis stadig, eller også er det ikke tilgængeligt til denne version.
+Ocr.Add.NotStarted=Intet blev installeret. Windows gav ikke tilladelse.
+Ocr.Add.Failed={0} blev ikke installeret. Windows arbejder muligvis stadig på det, eller sproget er muligvis ikke tilgængeligt til denne version af Windows.
+Ocr.Add.LeftRunning=Windows installerer det stadig. Det vil blive færdigt af sig selv.
+Ocr.Add.Hint=Vælg de sprog, du ønsker, og tryk på Installer. Afhængigt af dine indstillinger kan Windows bede om din tilladelse og derefter downloade genkendelsen for det sprog — en lille fil, ikke et helt Windows-sprog.
+
+; ---- TRANSLATION
+Translate.Progress.Title=Oversætter bogen
+Translate.Progress.Starting=Gør klar. Du kan stoppe når som helst; alt hvad der er blevet oversat gemmes, og når du starter igen, fortsættes der herfra.
+Translate.Progress.Working=Passage {0} af {1}. Cirka {2} tilbage. Du kan stoppe når som helst — det der er udført gemmes.
+Translate.Progress.Quarter={0} procent oversat, cirka {1} tilbage.
+Translate.Progress.Cancel=Stop
+Translate.Progress.Cancelling=Stopper efter denne passage. Det der allerede er oversat gemmes.
+Translate.Progress.StillOn=Stadig i gang med denne, {0} sekunder indtil videre.
+Translate.Progress.StillWorking=Oversætter stadig passage {0} af {1}. Tjenesten svarer langsomt.
+Translate.Progress.Estimating=beregner hvor lang tid dette vil tage
+Translate.Progress.AlmostDone=et øjeblik
+Translate.Progress.Seconds={0} sekunder
+Translate.Progress.Minutes={0} minutter
+Translate.Ask.Title=Oversæt bogen
+Translate.Ask.Info={0} — cirka {1} tegn, omtrent {2}. Oversættelsen bliver til en ny bog; denne ændres ikke.
+Translate.Ask.HybridNote=Denne bog har både en indtaling og tekst. Kun teksten kan oversættes, så oversættelsen bliver en tekstbog uden indtaling.
+Translate.Ask.From=Bogens sprog:
+Translate.Ask.To=Oversæt til:
+Translate.Ask.Model=Model {0}:
+Translate.Ask.Model.None=— ingen, afslut kæden her —
+Translate.Ask.ChainNote=Hvis en passage afvises, prøver NBR igen og forsøger derefter dine andre tjenester efter tur. Alt, som ingen af dem vil acceptere, forbliver på det sprog, bogen kom på.
+Translate.Ask.NoEngine=Ingen tjeneste har en nøgle endnu
+Translate.Ask.Standing=Din stående note anvendes også på denne bog: {0}
+Translate.Ask.Inherit=Fortsæt en serie ved brug af ordlisten fra:
+Translate.Ask.Inherit.None=Intet — denne bog står for sig selv
+Translate.Ask.Notes=Alt hvad oversætteren bør vide om DENNE bog (valgfrit). Oplæseren og navnene findes automatisk ud fra teksten; dette er til det, som teksten ikke siger — et udtryk du ønsker oversat på en bestemt måde, eller hvordan to karakterer tiltaler hinanden:
+Translate.Ask.Start=Oversæt
+Translate.LastResort.Begin=Den næste del blev oversat af Microsoft Azure — forvent det uventede.
+Translate.LastResort.End=Slut på den del, der blev oversat af Microsoft Azure.
+Translate.NotText=Kun en tekstbog kan oversættes. Denne er en indtaling.
+Translate.Empty=Der er ingen tekst i denne bog at oversætte.
+Translate.NoService=Ingen oversættelsestjeneste har en nøgle endnu. Tilføj en under Indstillinger, under Avanceret.
+Translate.Done={0} passager oversat. Oversættelsen ligger på hylden som en ny bog.
+Translate.DoneLeft={0} passager oversat, {1} tilbage på originalsproget.
+Translate.Took=Det tog {0}. En linje-for-linje-log findes i translation.log ved siden af den originale bog.
+Translate.Failed=Bogen kunne ikke oversættes: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Kun en tekstbog kan laves til en lydbog. Denne er allerede lyd.
+Export.NoVoice=Denne bog har ingen stemme at læse med, så der er intet at optage. Giv den en i Egenskaber først.
+Export.Empty=Der er ingen tekst i denne bog at læse.
+Export.Filter=Lydfil (*.mp3)|*.mp3
+Export.Ask.Ready=Alle {0} passager i denne bog er allerede blevet læst op, så dette er kun sammenføjningen og vil tage et øjeblik. Opret filen?
+Export.Ask.Missing={0} af denne bogs {1} passager skal stadig optages. At optage dem bør tage omkring {2} minutter — det er så lang tid oprettelsen tager, ikke hvor lang bogen er at lytte til. Statusvinduet viser et tal, der måles løbende. Du kan stoppe når som helst: alt hvad der er læst op gemmes, og når du starter igen, fortsættes der herfra. Opret filen?
+Export.Progress.Title=Opretter lydbog
+Export.Progress.Starting=Gør klar. Du kan stoppe når som helst; alt hvad der er læst op gemmes, og når du starter igen, fortsættes der herfra.
+Export.Progress.Making=Passage {0} af {1}. Omkring {2} tilbage.
+Export.Progress.Joining=Samler det hele til én fil.
+Export.Done=Færdig — {0} passager, gemt som {1}
+Export.DoneShort=Gemt som {2}, men {1} af de {0} passager kunne ikke læses op og mangler i den.
+Export.Failed=Lydbogen kunne ikke oprettes.
+
+; ---- AUDIO CD
+Cd.Progress.Title=Audio-CD
+Cd.Progress.Preparing=Læser disken...
+Cd.Progress.Track=Læser spor {0} af {1}
+Cd.Progress.Stopping=Stopper...
+Cd.BookTitle=Audio-CD ({0} spor)
+Cd.Format=Audio-CD - Compact Disc Digital Audio
+Cd.NoDisc=Der er ingen disk i drevet, eller drevet er stadig ved at læse den. Indsæt en Audio-CD og prøv igen.
+Cd.DataDisc=Dette er en datadisk, ikke en Audio-CD. Hvis den indeholder en bog som MP3-filer, så åbn den med Filer, Åbn mappe i stedet - NBR afspiller allerede det.
+Cd.ReadFailed=Disken kunne ikke læses: {0}
+Cue.Track=Spor {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Tjenester og konti
+Services.List.Accessible=Tjenester
+Services.State.Ready=DENNE ER KONFIGURERET. Du kan gennemgå trinnene igen for at erstatte det, der er gemt.
+Services.State.NotSet=Denne er endnu ikke konfigureret.
+Services.SetUp=Konfigurer denne tjeneste...
+Services.Forget=Glem denne konto
+Services.ForgetAsk=Glem den gemte nøgle til {0}? Den vil ikke længere blive tilbudt, før du konfigurerer den igen.
+Services.Disclaimer=TRINNENE HERUNDER PASSER MULIGVIS IKKE PÅ DET, DU SER. Disse tjenester designer deres websteder om uden varsel, så en knap kan være flyttet eller omdøbt, siden dette blev skrevet. RÆKKEFØLGEN af hvad der skal gøres ændrer sig sjældent; navnene på tingene gør. Hvis du farer vild, fortæller delen ovenfor dig, hvad du forsøger at opnå.
+Services.Item.Gemini=Gemini-oversættelse
+Services.Item.DeepSeek=DeepSeek-oversættelse
+Services.Item.OpenAi=GPT-oversættelse (OpenAI)
+Services.Item.GoogleVoices=Google Cloud-stemmer
+Services.Item.AzureVoices=Azure Speech-stemmer
+Services.About.Gemini=Gemini oversætter en hel bog til et andet sprog ved hjælp af Googles egen model. Vurderet som den bedste af dem rent lydmæssigt — og den med en hage.\n\nDen afviser cirka hver sjette passage i en udgivet roman. Ikke på grund af indholdet: mønsteret ligner, at modellen genkender en bog, den kender, og ingen indstilling ændrer det. Det er derfor, NBR spørger en anden tjeneste om det, som den første ikke vil tage, og hvorfor kæden er værd at konfigurere frem for at overlade det til én motor.\n\nDer er et gratis niveau, og det er generøst nok til at være den normale måde at bruge dette på: målt på et reelt projekt tillader Gemini 3.1 Flash Lite 500 anmodninger om dagen, hvilket svarer til cirka seks bøger. Betalt brug koster cirka 25 cent for en roman på 450.000 tegn.\n\nÉN TING AT OVERVEJE FØR DU VÆLGER GRATIS. Googles egen prisside siger, at dit indhold på det gratis niveau bruges til at forbedre deres produkter, og at det ikke gør på det betalte niveau. En oversættelse sender hele bogen, så det er en reel forskel. Det er dit valg uanset hvad — men det bør være et valg og ikke en overraskelse.\n\nAt få nøglen er den længste af de fire, og trinnene herunder er skrevet ud fra en reel kørsel, fordi den åbenlyse rute ikke virker.
+Services.About.DeepSeek=DeepSeek oversætter en hel bog til et andet sprog. Af de tjenester, NBR kan bruge, er den mest stabile — den afviser sjældnest — og den er langt den billigste.\n\nÉn ting skal ske: en konto hos DeepSeek og noget kredit på den. Der er ingen gratis kvote, men oversættelse afregnes efter mængden af tekst, og en bog koster meget lidt.\n\nDenne giver en nøgle, som du indsætter, og den er den enkleste af de fire. Det eneste, du skal være opmærksom på, er, at nøglen kun vises ÉN GANG, når du opretter den. Hvis du lukker det vindue uden at kopiere den, kan den ikke vises igen, og du skal blot oprette en ny.
+Services.About.OpenAi=OpenAI oversætter en hel bog til et andet sprog ved hjælp af GPT-modellerne. Det tilbydes i tre niveauer på én konto og én nøgle: Terra, som er den man starter med, Luna, som er billigere, og Sol, som er den dyreste.\n\nDer er ingen form for gratis kvote, og det er her, folk bliver overraskede: et ChatGPT-abonnement betaler IKKE for dette. API'et faktureres separat, og en ny konto er FORUDBETALT — du indsætter et lille beløb på den, og kald trækkes fra denne saldo. Fem eller ti dollars er rigeligt til at se, hvad en bog reelt koster, før man beslutter sig for noget.\n\nHvad en bog koster, beregnet for en roman på 450.000 tegn og ved at bruge den måde, kroatisk rent faktisk opdeles i tokens på i stedet for en tommelfingerregel: cirka to en halv dollar på Terra, én dollar på Luna, fem på Sol. Til sammenligning kostede den samme bog omkring treogtyve cents på Gemini. Enhver af dem er et lille beløb for en bog, du holder af; Terra er omkring ti gange dyrere end Gemini, hvis det bliver en vane.\n\nNøglen er en almindelig nøgle, som du indsætter her, hvilket gør dette til den nemmeste af tjenesterne at konfigurere.
+Services.About.GoogleVoices=Google Cloud-stemmer læser bøger højt over internettet ved hjælp af Googles egne stemmer. De er de bedste af cloud-stemmerne til de fleste sprog, og den gratis kvote er den største — omkring en million tegn om måneden, hvilket svarer til cirka to bøger.\n\nTre ting skal ske i denne rækkefølge. Du skal have en GOOGLE-KONTO, som de fleste allerede har. Inde i den opretter du et PROJEKT og aktiverer Text-to-Speech-tjenesten for det projekt — og Google vil ikke aktivere den, før fakturering er konfigureret, så et kort er nødvendigt, selvom den gratis kvote ikke koster noget. Derefter opretter du en TJENESTEKONTO og downloader dens nøgle.\n\nDen sidste del er det, der gør denne usædvanlig. Google udleverer ikke en nøgle, du kan indsætte: den giver en lille fil, der slutter på .json, som downloades én gang. NBR gemmer indholdet af filen i stedet for selve filen, så du kan flytte eller slette downloaden bagefter.
+Services.About.AzureVoices=Azure Speech-stemmer læser bøger højt over internettet ved hjælp af Microsofts stemmer. De er meget gode på engelsk og mange andre sprog. For kroatisk er de almindelige, og Azure understøtter ikke udtaleordbogen dér, så en regel du skriver for et navn, vil ikke blive fulgt. Den gratis kvote er på omkring en halv million tegn om måneden, svarende til cirka én bog.\n\nTo ting skal ske, og kun den første er din. Du skal have en MICROSOFT-KONTO, før du kan få en Azure-konto, og derefter et AZURE-ABONNEMENT — hvilket kræver identitetskontrol, et kort og en aftale. En person skal gøre dette bevidst, så det kan ikke automatiseres, og NBR forsøger ikke.\n\nAlt derefter er NBR's opgave. Det logger ind med en kort kode, opretter ressourcen på det gratis niveau og gemmer nøglen. Du åbner aldrig Azure-portalen.\n\nÉn ting overrasker folk. Når dit abonnement er oprettet, opretter Azure i stilhed et MAPPESYSTEM (DIRECTORY) til det. Hvis din Microsoft-konto er personlig — Gmail, Outlook, Hotmail — nægter Azure login, medmindre du navngiver dette mappesystem, fordi det ikke genkender personlige konti til dette. Navnet ender på onmicrosoft.com.
+Services.Steps.DeepSeek=1. Åbn platform.deepseek.com i din browser.\n\n2. Tryk på Sign up. Du kan indtaste en e-mail og adgangskode eller vælge at tilmelde dig med Google, hvilket er hurtigere.\n\n3. Bekræft din e-mail, hvis du bliver bedt om det.\n\n4. Når du er logget ind, skal du finde Top up eller Billing og tilføje et lille beløb i kredit.\n\n5. Find API keys i menuen til venstre.\n\n6. Tryk på Create new API key, giv den et navn, og tryk på Create.\n\n7. Kopiér nøglen FØR du lukker det vindue.\n\n8. Kom tilbage hertil, tryk på "Set up this service", og indsæt den.
+Services.Steps.GoogleVoices=1. Åbn console.cloud.google.com i din browser og log ind med en Google-konto.\n\n2. Acceptér vilkårene, hvis du bliver bedt om det, og opret et projekt, når det tilbydes. Ethvert navn kan bruges.\n\n3. Find søgefeltet øverst, skriv "Cloud Text-to-Speech API", vælg det fra resultaterne og tryk på Enable.\n\n4. Google vil bede dig om at opsætte fakturering, før API'en aktiveres. Tilføj et kort.\n\n5. Søg igen efter "Service accounts" og åbn det. Tryk på Create service account, giv den et navn, og tryk på Done. Ingen rolle eller tilladelse behøver at blive valgt.\n\n6. Åbn den konto, du lige har oprettet, gå til fanen Keys, tryk på Add key, derefter Create new key, og vælg JSON. Filen downloades.\n\n7. Kom tilbage hertil, tryk på "Set up this service", og vælg den downloadede fil.
+Services.Steps.AzureVoices=1. Åbn azure.microsoft.com/free i din browser og tryk på Start gratis.\n\n2. Log ind med en Microsoft-konto, eller opret en.\n\n3. Udfyld dine oplysninger. Azure beder om et betalingskort for at bekræfte, at du er en person; den gratis version bliver ikke opkrævet betaling.\n\n4. Hvis din konto er en personlig konto, skal du finde dit mappenavn: log ind på portalen, så vises det i adresselinjen efter @-tegnet, sluttende med onmicrosoft.com.\n\n5. Vend tilbage hertil og tryk på "Konfigurer denne tjeneste".\n\n6. Udfyld mappenavnet, hvis din konto er en personlig konto, og lad feltet stå tomt, hvis det er en arbejds- eller skolekonto. Tryk på Start.\n\n7. Åbn log ind-siden med knappen, indtast den viste korte kode, og log ind.\n\n8. Vælg dit abonnement og tryk på Opret. NBR opretter ressourcen og gemmer dens nøgle. Du skal ikke indtaste andet.
+Services.Steps.Gemini=BRUG IKKE AI STUDIO TIL DETTE. Deres "Create API key"-knap fejler med "The request is suspicious. Please try again." — målt på en ny konto, der aldrig har haft en betalingsmetode, med projektet allerede oprettet og importeret. Den egentlige fejl under overfladen er en 403 fra Googles egen tjeneste. Alt nedenfor foregår i CLOUD CONSOLE i stedet, og den rute virker.\n\nRækkefølgen betyder noget: projektet, derefter API'et, derefter en tjenestekonto, og først derefter nøglen. Udført i den rækkefølge oprettes nøglen i ét hug.\n\n1. Åbn console.cloud.google.com/projectcreate i din browser og log ind.\n\n2. Giv projektet et navn, du kan genkende, såsom NBR. Lad Organisation være sat til "No organization" — det er det normale svar for en personlig konto, og en organisation medfører politikker, du ikke kontrollerer. Vælg CREATE og vent på, at projektet dukker op.\n\n3. HVIS GOOGLE TILBYDER EN GRATIS PRØVEPERIODE MED 300 DOLLARS I KREDIT, SÅ AFVIS DEN. Den kredit betaler slet ikke for Gemini API — det er en anden tegnebog til et andet produkt. Værre endnu: Hvis du accepterer den, oprettes en faktureringskonto, og Google linker derefter automatisk fakturering til ethvert nyt projekt, hvilket tager projektet UD AF gratis-niveauet. Den beder også om et betalingskort. Sig nej.\n\n4. Åbn console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Kontrollér, at projektnavnet vist i bjælken øverst er det, du lige har lavet. Siden har overskriften "Gemini API". Vælg ENABLE og vent, indtil knappen forsvinder.\n\n5. Åbn console.cloud.google.com/iam-admin/serviceaccounts/create. Dette er trinnet, der sparer dig for at gøre det næste to gange: nøglen kan ikke nå Gemini, medmindre den er bundet til en tjenestekonto, og ved at lave den nu betyder det, at den er klar, når du har brug for den.\n\n6. På siden med overskriften "Create service account" skal du kun udfylde det første felt, "Service account name" — nbr-translate er et godt navn, og ID'et nedenunder udfylder sig selv. Vælg "CREATE AND CONTINUE". Trin 2, "Permissions", er valgfrit: lad det stå tomt, ingen rolle er nødvendig. Vælg DONE nederst.\n\n7. Åbn console.cloud.google.com/apis/credentials. Kontrollér projektnavnet i den øverste bjælke igen. I rækken af handlinger ved siden af overskriften "Credentials" skal du vælge "+ CREATE CREDENTIALS", og fra menuen, der ruller ned, vælge det FØRSTE punkt, "API key" — ikke "OAuth client ID" og ikke "Service account".\n\n8. Et panel åbner til højre med overskriften "Create API key". I feltet "Name" helt øverst skal du skrive et navn såsom NBR.\n\n9. Rul NED inde i det panel, forbi sektionen "APIs that can be accessed using this key", til et afkrydsningsfelt mærket "Authenticate API calls through a service account". MARKÉR DET. Dette er trinnet, ingen gætter: indtil det er markeret, kan Gemini slet ikke vælges — dens post forbliver gråtonet, og kun et værktøjstip forklarer hvorfor.\n\n10. En sektion med overskriften "Service account" dukker op lige nedenunder. Vælg "+ Select a service account", vælg den konto, du lavede i trin 6, ved at vælge cirklen til venstre for dens række, og vælg SELECT nederst i det vindue.\n\n11. Rul nu OP i panelet til "APIs that can be accessed using this key" og åbn listen under "Select API restrictions". "Gemini API" kan markeres nu. Markér det og vælg OK.\n\n12. Rul NED til bunden af panelet og vælg CREATE. Lad "Application restrictions" være sat til "None".\n\n13. Et vindue med overskriften "API key created" vises med nøglen i. Den starter med AQ. i stedet for AIza, hvilket er korrekt for en nøgle bundet til en tjenestekonto. Kopiér den med kopi-ikonet til højre for feltet.\n\n14. Kom tilbage hertil, vælg Set up this service, og indsæt nøglen. NBR tjekker den med Google, før den gemmes.\n\nHVIS KONSOLEN SIGER, AT DU HAR BRUG FOR YDERLIGERE ADGANG og nævner en manglende tilladelse, er du næsten helt sikkert logget ind på den forkerte Google-konto frem for at mangle rettigheder. Tilføj authuser=1 til slutningen af adressen — eller authuser=2, og så videre — indtil projektet dukker op.
+Services.Steps.OpenAi=1. Åbn platform.openai.com i din browser. Dette er udviklerplatformen, ikke ChatGPT-siden, og det er en separat ting, selvom du allerede betaler for ChatGPT.\n\n2. Log ind med din konto, eller opret en.\n\n3. Tjek FØRST hvilken organisation du er i. Navnet står øverst til venstre på siden og er en menu: åbn den og vælg din egen, som normalt hedder Personal. Hvis du nogensinde er blevet inviteret ind i en andens organisation, eller du har en ChatGPT Team- eller Business-plads gennem arbejdet, kan platformen placere dig i DEN – hvor du kun er medlem, fakturering afviser dig med "required permission: api.billing.read", og enhver nøgle du har lavet, ville tilhøre den forkerte konto. Alt nedenfor skal ske i din egen organisation.\n\n4. Gå til platform.openai.com/settings/organization/billing/overview. Fakturering ligger under ORGANIZATION, ikke under den almindelige indstillingsside, hvor det er let at lede efter den og ikke finde den. Vælg Add to balance, tilføj et betalingskort, og køb noget kredit. Ti dollars er minimum og mere end rigeligt til at begynde. Intet virker, før der er kredit på kontoen.\n\n5. Mens du er der, skal du indstille en månedlig forbrugsgrænse. Det koster intet, og det betyder, at en fejl ikke kan løbe op i en regning.\n\n6. Åbn API keys i de samme indstillinger, og vælg Create new secret key. Giv den et navn, du kan genkende, såsom NBR. Sørg for, at du stadig er i den samme organisation som kreditten.\n\n7. Kopier nøglen i det øjeblik, den vises. Den vises KUN ÉN GANG. Hvis du lukker det vindue uden at kopiere den, kan den ikke vises igen – du sletter den blot og laver en ny.\n\n8. Kom tilbage hertil, vælg Set up this service, og indsæt nøglen.\n\n9. NBR tjekker nøglen med OpenAI, før den gemmes, så du finder ud af med det samme, om den virker.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Hjælp – kommer snart.
+Dialog.Help.Title=Hjælp
+Dialog.WhatsNew.Title=Nyheder
+Report.Filter=Tekstfiler (*.txt)|*.txt|Alle filer (*.*)|*.*
+Report.Done=Rapporten blev gemt i:\n\n{0}\n\n{1} kB. Vedhæft den til din besked.
+Report.Failed=Rapporten kunne ikke skrives. Mappen er muligvis skrivebeskyttet, eller der er muligvis ikke plads på disken.
+Dialog.About.Title=Om NBR
+Dialog.About.Release=Beta 1
+Dialog.About.Licence=🄯 Copyleft — NBR er fri software under GNU General Public License, version 3. Du må bruge den, studere den, dele den og ændre den; hvis du videregiver en ændret version, sker det under de samme vilkår, med dens kildekode.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nBuild fra {1}\n\nDette er en læser til digitale bøger og publikationer med understøttelse af flere formater og output, specielt designet til blinde, svagsynede og personer med læsevanskeligheder. Den er gratis til grundlæggende brug, men hvis du ønsker at udforske og bruge dens avancerede funktioner såsom oversættelse og cloud-stemmer, skal du registrere dig og eventuelt betale for de respektive eksterne tjenester.\n\nLavet af Nemoguća vizija — nemoviz.org\n\nSkrevet af Gordan Radić\n\nBygget med Claude (Anthropic). Meget af koden er skrevet af den, efter forfatterens design, beslutninger og målinger; ophavsretten og licensen tilhører ham.\n\n{2}\n\nHVAD NBR ER BYGGET PÅ\n\nNBR afspiller lyd via libmpv, læser punktskrift via liblouis, taler via NVDA-controllerklienten, læser tags med TagLib#, udtrækker tekst fra PDF-filer med PdfPig og åbner arkiver med SharpCompress. Hver del er et separat bibliotek, der bruges uændret, og hver kan erstattes af en kompatibel version af sit eget.\n\nlibmpv og FFmpeg indeni den — LGPL 2.1 eller nyere\n\nliblouis og dens punktskriftstabeller — LGPL 2.1 eller nyere\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress og Microsoft-pakkerne — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend og OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nDen fulde meddelelse — versioner, indehavere af ophavsret og hvor hver licens blev læst fra — findes i THIRD-PARTY-NOTICES.txt ved siden af programmet, og selve licensteksterne findes i mappen Licences.
+Dialog.Rules.Title=Oversættelsesregler
+Dialog.Rules.Language=Sprog
+Dialog.Rules.Text.Accessible=Reglerne sendt for dette sprog
+Dialog.Rules.None=Der er ikke skrevet nogen regler for dette sprog. NBR oversætter stadig til det ved hjælp af de regler, der gælder for alle sprog, og hvad den selv finder ud af om bogen.
+Dialog.Rules.From=Læses fra {0}\nFor at bruge din egen i stedet, skal du kopiere den fil til {1} og redigere kopien. Slet din kopi, og denne kommer tilbage.
+Dialog.Rules.FromYours=Læses fra din egen kopi: {0}\nSlet den, og de regler, der fulgte med NBR, bruges igen.
+Dialog.Rules.Make=For at skrive regler for dette sprog, placer {1} i {0}.
+Update.Title=Søg efter opdatering
+Update.Checking=Søger efter en nyere version
+Update.Available=En nyere version af Nemoviz Book Reader er blevet udgivet: {0}\n\nVil du åbne download-siden?
+Update.UpToDate=Du kører den nyeste udgivne version.
+Update.Failed=Kontrollen kunne ikke udføres. Der er muligvis ingen forbindelse, eller download-siden er muligvis ikke tilgængelig lige nu.
+Hint.Button.Accessible=Hjælp til {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Cloud-stemme — den gratis kvote
+Cloud.Quota.Warning=Denne bog har {0} tegn.\n\nAf denne måneds gratis {2} tegn hos {3} har du brugt {1}.\n\nHvis du læser denne bog, overskrider du den gratis kvote, og det overskydende beløb trækkes via betalingsmetoden på den pågældende konto.\n\nVil du læse den alligevel?
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Fejl
+Dialog.Error.General=Fejl: {0}
+Dialog.DontShowAgain=Vis ikke dette igen

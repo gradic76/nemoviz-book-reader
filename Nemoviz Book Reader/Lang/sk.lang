@@ -1,0 +1,805 @@
+; Nemoviz Book Reader
+;
+; Translated by:            Gemini (Google), 2026
+; Verified and modified by: 
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Slovenčina
+Btn.OK=OK
+Btn.Yes=Áno
+Btn.No=Nie
+Btn.Cancel=Zrušiť
+Btn.Close=Zavrieť
+Btn.Continue=Pokračovať
+Btn.Refresh=Obnoviť
+Btn.Refresh.Accessible=Obnoviť
+Common.Dash=-
+Common.Error=Chyba
+Common.DateFormatLong=dd. MMMM yyyy
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Názov:
+Player.Info.AuthorLabel=Autor:
+Player.Info.ProducerLabel=Producent:
+Player.Info.PublisherLabel=Vydavateľ:
+Player.Info.ChapterLabel=Kapitola:
+Player.Info.PartLabel=Časť:
+Player.Info.PageLabel=Strana:
+Player.Info.BookmarksLabel=Záložky:
+Player.Info.VoiceLabel=Hlas:
+Player.Info.NoVoiceLabel=Žiadny nainštalovaný hlas
+Player.Info.PartNumElapsed=Časť {0} uplynulo:
+Player.Info.PartNumRemaining=Časť {0} zostáva:
+Player.Info.ElapsedLabel=Uplynulý čas:
+Player.Info.RemainingLabel=Zostávajúci čas:
+Player.Info.VolumeLabel=Hlasitosť:
+Player.Info.SpeedLabel=Rýchlosť:
+Player.Info.AccessibleName=Informácie o prehrávaní, F8
+Player.Info.Prepared=Reč pripravená: {0} pasáží, {1} MB
+Player.Info.Preparing=Pripravuje sa zvyšok tejto knihy: {0} z {1} pasáží
+Player.TitleBar.Paused=pozastavené
+Player.ReadingSurface.Accessible=Plocha na čítanie
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Prehrať, Medzerník
+Btn.Pause.Accessible=Pozastaviť, Medzerník
+Btn.Back.Accessible=Späť, Shift+Šípka doľava
+Btn.Forward.Accessible=Dopredu, Shift+Šípka doprava
+Btn.VolumeUp.Accessible=Zvýšiť hlasitosť, F12
+Btn.VolumeDown.Accessible=Znížiť hlasitosť, F11
+Btn.Power.Accessible=Ukončiť, Alt+F4
+Player.Volume.Text=Hlasitosť: {0}%
+Player.Volume.Accessible=Hlasitosť {0} percent
+Player.Speed.Text=Rýchlosť: {0}x
+Player.Speed.Legend=Rýchlosť
+Player.Speed.Accessible=Rýchlosť {0} násobok
+Player.Position.Label=Pozícia
+Player.Position.Text=Pozícia: {0} / {1}
+Player.Position.Accessible=Pozícia {0} percent
+Player.Progress.Legend=Priebeh
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Krok navigácie:
+Player.Seek.Accessible=Krok navigácie, Shift+Šípka nahor alebo Shift+Šípka nadol
+Player.Seek.Announce=Navigácia: {0}
+Seek.Item.15s=15 sekúnd
+Seek.Item.30s=30 sekúnd
+Seek.Item.1min=1 minúta
+Seek.Item.5min=5 minút
+Seek.Item.10min=10 minút
+Seek.Item.15min=15 minút
+Seek.Item.30min=30 minút
+Seek.Item.Chapter=Kapitola
+Seek.Item.Part=Časť
+Seek.Item.Track=Stopa
+Seek.Item.HeadingLevel=Nadpis {0}
+Seek.Item.Page=Strana
+Seek.Item.Paragraph=Odsek
+Seek.Item.Bookmark=Záložka
+Seek.Item.StandardPage=Štandardná strana
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Knižnica
+Btn.Library.Accessible=Knižnica, F3
+Btn.Library.Legend=Knižnica
+Btn.Settings=Nastavenia
+Btn.Settings.Accessible=Nastavenia, F2
+Btn.Settings.Legend=Nastavenia
+Btn.Properties.Legend=Vlastnosti
+Btn.Properties=Vlastnosti
+Btn.Properties.Accessible=Vlastnosti, Alt+Enter
+Btn.Help=Pomocník
+Btn.Help.Accessible=Pomocník, F1
+Btn.Help.Legend=Pomocník
+Btn.GoTo.Legend=Prejsť na...
+Btn.GoTo=Prejsť na...
+Btn.GoTo.Accessible=Prejsť na, F4
+Btn.SetBookmark.Legend=Záložka
+Btn.SetBookmark=Nastaviť záložku
+Btn.SetBookmark.Accessible=Nastaviť záložku, F5
+Btn.ManageBookmarks.Legend=Záložky
+Btn.ManageBookmarks=Spravovať záložky
+Btn.ManageBookmarks.Accessible=Spravovať záložky, F6
+Btn.Timer=Časovač vypnutia
+Btn.Timer.Legend=Časovač
+Btn.Timer.Accessible=Časovač vypnutia, F7
+Btn.Timer.Countdown=Časovač vypnutia {0}
+Btn.Timer.Accessible.Active=Časovač vypnutia, zostáva {0}, aktivujte pre zastavenie prehrávania a zrušenie časovača
+Btn.Timer.Accessible.LessThanMinute=Časovač vypnutia, zostáva menej ako minúta
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Späť (Shift+šípka doľava)
+Tip.PlayPause=Prehrať/Pozastaviť (Medzerník)
+Tip.Forward=Dopredu (Shift+šípka doprava)
+Tip.Seek=Zmeniť pomocou Shift+šípka hore a Shift+šípka dole; preskočiť pomocou Shift+šípka doľava a Shift+šípka doprava (tiež Späť/Dopredu)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enter
+Tip.Timer=F7
+Tip.Volume=F11 a F12
+Tip.Speed=Ctrl+šípka doľava a Ctrl+šípka doprava
+Tip.Progress=Ctrl+1–9: presun na 10–90 %
+Player.OpenFile.Title=Vybrať knihu
+Player.NoVoiceForLanguage=Žiadny nainštalovaný hlas nehovorí jazykom {0}. Otvorte Vlastnosti pomocou Alt+Enter a vyberte iný.
+Filter.Audiobooks=Audioknihy
+Filter.TextBooks=Textové knihy
+Filter.BrailleBooks=Braillove knihy
+Filter.Archives=Archívy
+Filter.AllSupported=Všetky podporované súbory
+Filter.AllFiles=Všetky súbory
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Knižnica
+Library.List.Accessible=Polica s knihami
+Library.NowReading.Accessible=Práve čítané
+Library.NowReading.Empty=Žiadna kniha nie je načítaná
+Library.Search.Accessible=Hľadať
+Library.Filter.Accessible=Filtrovať podľa stavu
+Library.Details.Accessible=Podrobnosti o knihe
+Library.Btn.Load=Načítať
+Library.Btn.Load.Accessible=Načítať
+Library.Btn.Close=Zavrieť
+Library.Btn.Close.Accessible=Zavrieť
+Menu.File=Súbor
+Menu.File.OpenFile=Otvoriť súbor...
+Menu.File.OpenFolder=Otvoriť priečinok...
+Menu.File.OpenAudioCd=Otvoriť zvukové CD
+Menu.File.ClearLibrary=Vymazať knižnicu...
+Menu.File.OpenLibraryFolder=Otvoriť priečinok knižnice
+Menu.File.Exit=Ukončiť
+Menu.File.ExportAudio=Exportovať ako audioknihu...
+Menu.File.Translate=Preložiť knihu...
+Menu.Sort=Zoradiť
+Menu.Sort.Alphabetically=Podľa abecedy
+Menu.Sort.DateAdded=Dátum pridania
+Menu.Sort.Format=Formát
+Menu.Sort.Status=Stav
+Menu.Sort.Ascending=Vzostupne
+Menu.Sort.Descending=Zostupne
+Menu.Sort.ActiveMark=(aktívne)
+Menu.Help=Pomocník
+Menu.Help.Help=Pomocník
+Menu.Help.About=O aplikácii NBR
+Menu.Help.WhatsNew=Čo je nové
+Menu.Help.Report=Exportovať hlásenie...
+Menu.Help.Services=Služby a účty...
+Menu.Help.Update=Skontrolovať aktualizácie
+Shelf.Filter.All=Všetky knihy
+Shelf.Filter.Reading=Čítané
+Shelf.Filter.Unread=Neprečítané
+Shelf.Filter.Read=Prečítané
+Shelf.Filter.Favorites=Obľúbené
+Shelf.Status.NowReading=Práve čítané
+Shelf.Status.Reading=Číta sa
+Shelf.Status.Unread=Neprečítané
+Shelf.Status.Read=Prečítané
+Context.Open=Otvoriť
+Context.MarkRead=Označiť ako prečítané
+Context.MarkUnread=Označiť ako neprečítané
+Context.Rename=Premenovať
+Context.Delete=Odstrániť
+Context.Properties=Vlastnosti
+Context.ReadOcr=Rozpoznať text
+Context.ReReadOcr=Rozpoznať znova v inom jazyku
+Context.Translate=Preložiť knihu...
+Context.Favorite=Označiť ako obľúbené
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Názov
+Details.Field.Author=Autor
+Details.Field.Format=Formát
+Details.Field.Speed=Rýchlosť
+Details.Field.Volume=Hlasitosť
+Details.Field.Added=Pridané
+Details.Field.Producer=Producent
+Details.Field.Publisher=Vydavateľ
+Details.Field.Year=Rok
+Details.Field.Time=Čas
+Details.Field.Elapsed=Uplynutý čas
+Details.Field.Remaining=Zostávajúci čas
+Details.Field.Read=Prečítané
+Details.Field.Pages=Strany
+Details.Field.Headings=Nadpisy
+Details.Field.Characters=Znaky
+Details.Field.Language=Zistený jazyk
+Details.Field.Description=Popis
+Details.Description.Open=Stlačením klávesu Enter ho otvoríte
+Details.Field.SoundProcessing=Spracovanie zvuku
+Details.Sound.On=Zapnuté
+Details.Sound.Off=Vypnuté
+Details.Speed.Value={0}x
+Dialog.Description.Title=Popis - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Pridať knihu do knižnice
+Library.ImportFolder.Description=Vyberte priečinok s knihami
+Dialog.ConfirmImport.Message=V zvolenom umiestnení bolo zistených {0} kníh: {1} audiokníh, {2} textových kníh, {3} špeciálnych formátov a {4} archívov.\n\nAk je to správne, po potvrdení sa knihy skopírujú do vašej knižnice a archívy sa v nej rozbalia. Vaša knižnica je v {5}.\n\nV zdrojovom umiestnení sa nič nemení — všetko zostáva nedotknuté, takže sa nemusíte obávať.\n\nAk počty nezodpovedajú vašim očakávaniam, skúste usporiadať údaje, ktoré chcete importovať. Hromadný import má určité obmedzenia pri rozpoznávaní názvov a NBR nemôže zaručiť, že rozpozná každý z nich správne.\n\nMôže to chvíľu trvať, preto sa proces nesnažte prerušiť.
+Dialog.ConfirmImport.One=Nájdená jedna kniha. Importovať ju?
+Dialog.ConfirmImport.Title=Pridať priečinok
+Dialog.NoBooksFound.Message=Vo vybranom priečinku sa nenašli žiadne podporované knihy.
+Dialog.NoBooksFound.Title=Pridať priečinok
+Dialog.ImportSuccess.Message=Kniha bola pridaná do knižnice.
+Dialog.ImportSuccess.Title=Pridať knihu
+Dialog.ImportError.Message=Chyba pri pridávaní knihy: {0}
+Dialog.ImportFolderSuccess.Message=Importovaných {0} kníh.
+Dialog.ImportFolderSuccess.Skipped={0} boli vynechané.
+Dialog.ImportFolderSuccess.SkippedList=Tieto neboli pridané:
+Dialog.ImportFolderSuccess.Title=Pridať priečinok
+Dialog.ImportFolderError.Message=Chyba pri importe priečinka: {0}
+Dialog.ReimportExisting.Title=Už v knižnici
+Dialog.ReimportExisting.Message={0} sa už nachádza na poličke. Opätovný import obnoví obsah priečinka knihy. Vaša pozícia v knihe a záložky zostanú zachované – ak sa však súbor od posledného razu zmenil, text sa posunul a vaša pozícia už nemusí byť tam, kde ste ju zanechali. Importovať znova?
+Dialog.Skipped.Drm=chránené
+Dialog.Skipped.Cancelled=zrušené
+Dialog.Skipped.MissingFirstVolume=chýba prvá časť tejto sady
+Dialog.Skipped.Empty=súbor je prázdny
+Dialog.Rename.Title=Premenovať knihu
+Dialog.Rename.Prompt=Nový názov:
+Dialog.Rename.AuthorLabel=Autor:
+Dialog.Rename.TitleLabel=Názov:
+Dialog.ConfirmDelete.Message=Naozaj chcete natrvalo odstrániť "{0}" z disku? Túto akciu nie je možné vrátiť späť.
+Dialog.ConfirmDelete.Title=Odstrániť knihu
+Dialog.DeleteError.Message=Chyba pri odstraňovaní knihy z disku: {0}
+Dialog.ActiveBook.Message="{0}" je momentálne načítaná v prehrávači a nemožno ju odstrániť. Zatvorte knižnicu, otvorte inú knihu alebo zastavte prehrávanie a skúste to znova.
+Dialog.ActiveBook.Title=Kniha je aktívna
+Dialog.ClearLibrary.Title=Vymazať knižnicu
+Dialog.ClearLibrary.Message=Odstrániť všetkých {0} kníh z knižnice? Týmto sa natrvalo odstránia ich súbory z disku a akciu nie je možné vrátiť späť.
+Dialog.ClearLibrary.Empty=Knižnica je už prázdna.
+Dialog.ClearLibrary.Done=Odstránených {0} kníh.
+Dialog.ClearLibrary.Skipped={0} sa nepodarilo odstrániť (používa sa alebo je práve otvorená).
+Dialog.DrmProtected.Title=Chránená kniha
+Dialog.DrmProtected.Message=Táto kniha je chránená technológiou DRM (jej obsah je šifrovaný), preto ju nemožno otvoriť. Použite kópiu bez ochrany DRM.
+Dialog.ArchivePassword.Title=Vyžaduje sa heslo
+Dialog.ArchivePassword.Prompt=Archív „{0}“ je chránený heslom. Zadajte heslo na jeho otvorenie:
+Dialog.ArchivePassword.Retry=Toto heslo nefunguje. Skúste to znova pre „{0}“:
+Dialog.ArchivePassword.Field=Heslo archívu
+Extract.Progress.Title=Rozbaľovanie
+Extract.Progress.Preparing=Pripravuje sa…
+Extract.Progress.Determinate=Rozbaľuje sa… {0} / {1} súborov
+Extract.Progress.Indeterminate=Rozbaľuje sa… {0} súborov
+
+; ---- GO TO
+Dialog.GoTo.Title=Prejsť na
+GoTo.List.Accessible=Časti knihy
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=OK
+GoTo.Cancel.Accessible=Zrušiť
+GoTo.Page.Group=Prejsť na stranu
+GoTo.Page.Accessible=Číslo strany
+GoTo.AutoPlay=Spustiť prehrávanie po presune
+GoTo.AutoPlay.Hint=Ak je začiarknuté, prehrávanie sa spustí ihneď po presune. Ak nie je začiarknuté, zachová sa aktuálny stav: pozastavené zostane pozastavené, prehrávanie bude pokračovať.
+GoTo.Hint.Accessible=Pomôcka
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Časovač vypnutia
+SleepTimer.Duration.Group=Trvanie
+SleepTimer.Duration.15=15 minút
+SleepTimer.Duration.30=30 minút
+SleepTimer.Duration.45=45 minút
+SleepTimer.Duration.60=60 minút
+SleepTimer.Duration.Custom=Vlastné:
+SleepTimer.Custom.Accessible=Vlastné trvanie v minútach
+SleepTimer.Bookmark=Vytvoriť záložku na začiatku
+SleepTimer.Action.Group=Po uplynutí času
+SleepTimer.Action.Stop=Zastaviť prehrávanie
+SleepTimer.Action.StopClose=Zastaviť a ukončiť program
+SleepTimer.Action.StopShutdown=Zastaviť, ukončiť a vypnúť počítač
+SleepTimer.Start=Spustiť
+SleepTimer.Start.Accessible=Spustiť časovač vypnutia
+SleepTimer.CancelBtn=Zrušiť
+SleepTimer.CancelBtn.Accessible=Zrušiť
+SleepTimer.Announce.Set=Časovač vypnutia nastavený na: {0} minút
+SleepTimer.Announce.Cancelled=Časovač vypnutia zrušený
+SleepTimer.Announce.Finished=Časovač vypnutia dokončený, prehrávanie zastavené
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Správa záložiek
+Bookmark.Announce.Set=Záložka nastavená
+Bookmark.Item.Format=Záložka {0} ({1})
+ManageBookmarks.List.Accessible=Záložky
+ManageBookmarks.Delete=Odstrániť
+ManageBookmarks.Delete.Accessible=Odstrániť
+ManageBookmarks.OK.Accessible=OK
+ManageBookmarks.Cancel.Accessible=Zrušiť
+ManageBookmarks.Selected=Vybraté
+ManageBookmarks.NotSelected=Nevybraté
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Spracovanie zvuku
+Dialog.SoundProcessing.Message=Spracovanie zvuku uľahčuje počúvanie nekvalitných nahrávok. Neopravuje ich však.\n\nNedokáže vrátiť to, čo nebolo nikdy nahraté, a pri prílišnom nastavení narobí viac škody ako úžitku. Ponechajte ho jednoducho zapnuté, počúvajte niekoľko minút a až potom siahnite po jednotlivých fázach.\n\nPomocník vysvetľuje, čo každá z nich robí.
+Prop.Info.Accessible=Informácie o knihe
+Prop.Info.ProcessingOff=Spracovanie zvuku: vypnuté
+Prop.Info.ProcessingOn=Spracovanie zvuku: zapnuté
+Prop.Info.Bypassed=(obchádzanie aktívne)
+Prop.Info.Off=vypnuté
+Prop.Info.Protection=Ochrana pred skreslením
+Prop.Tab.Audio=Zvuk
+Prop.Tab.Text=Text
+Prop.On=zapnuté
+Prop.Off=vypnuté
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Použiť spracovanie zvuku
+Prop.SoundProcessing=Spracovanie zvuku
+Prop.Stage.Level=Úroveň
+Prop.Highpass.Title=Odstránenie dunenia
+Prop.Denoise.Title=Redukcia šumu
+Prop.Deesser.Title=Zjemnenie sykaviek
+Prop.Compressor.Title=Vyrovnanie reči
+Prop.Eq.Title=Tón
+Prop.Eq.Shelf={0} a viac
+Prop.Loudness.Title=Hlasitosť a pauzy
+Prop.Normalize.Title=Automatická hlasitosť
+Prop.Gate.Title=Šum v pauzách
+Prop.Level.Minimal=Minimálna
+Prop.Level.Light=Nízka
+Prop.Level.Medium=Stredná
+Prop.Level.Strong=Silná
+Prop.Level.Maximum=Maximálna
+Prop.ResetAll=Obnoviť všetko
+Prop.Bypass=Obísť
+Prop.Bypass.Shortcut=Klávesová skratka Control B zapína a vypína túto funkciu odkiaľkoľvek na tejto stránke
+Prop.Analysing=Analyzujem nahrávku
+Prop.Analysing.Done=Nahrávka analyzovaná, nastavených {0} úrovní. Ak chcete, môžete ktorúkoľvek z nich zmeniť.
+Prop.Analysing.Failed=Nahrávku sa nepodarilo analyzovať. Nastavenia zostali nezmenené.
+Analyse.Progress.Title=Analyzujem nahrávku
+Analyse.Progress.Starting=Spúšťam analýzu...
+Analyse.Progress.Working=Segment {0} z {1}. {2}
+Analyse.Progress.Quarter={0} percent hotových. {1}
+Analyse.Progress.Cancel=Zrušiť
+Analyse.Progress.Cancelling=Zastavujem po tomto segmente. Nastavenia zostali nezmenené.
+Analyse.Progress.Estimating=Odhadujem čas trvania.
+Analyse.Progress.AlmostDone=Takmer hotovo.
+Analyse.Progress.Seconds=Zostáva približne {0} sekúnd.
+Analyse.Progress.Minutes=Zostáva približne {0} minút.
+Hint.SoundProcessing=Pomocou spracovania zvuku môžete doladiť zvuk nahrávky. Môžete odstrániť rôzne šumy, zvýšiť hlasitosť a upraviť celkový zvuk pomocou ekvalizéra. K dispozícii je šesť skupín ovládacích prvkov, z ktorých každú môžete samostatne zapnúť alebo vypnúť. Každý prvok môžete tiež doladiť osobitne. Celý reťazec spracovania zvuku môžete dočasne obísť stlačením Ctrl+B, aby ste počuli rozdiel medzi pôvodnou nahrávkou a vašimi nastaveniami zvuku.
+Hint.RemoveRumble=Odstraňuje najnižšie frekvencie – hluk dopravy, klimatizácie, manipulácie. Nedokáže zachrániť nekvalitnú nahrávku, ale vyčistí spodné pásmo, aby mal hlas priestor.
+Hint.NoiseRemoval=Znižuje stály šum v pozadí, aký zanecháva páska alebo lacný mikrofón. Príliš silné nastavenie začne pohlcovať aj hlas, preto ho zvyšujte len dovtedy, kým šum nezmizne.
+Hint.SoftenSibilance=Zjemňuje ostré zvuky S a Š. Užitočné pri čitateľoch blízko mikrofónu a pri nahrávkach, ktoré boli príliš zvýraznené.
+Hint.EvenOutSpeech=Zmenšuje rozdiel medzi tichými a hlasnými časťami, takže šepot a krik sú bližšie k sebe. Toto je funkcia, ktorú treba použiť, ak neustále upravujete hlasitosť.
+Hint.Tone=Päť pásiem v decibeloch, pomenovaných podľa frekvencie. Najnižšie je na 200 Hz, kde sa zvyčajne nachádza dunivá alebo zastretá nahrávka; najvyššie je policový filter, takže upravuje všetko nad ním, nielen jednu oblasť. Pásma sa zámerne prekrývajú, čo umožňuje hladkú krivku, ale znamená to aj to, že sa sčítavajú – tri susedné pásma na +4 pridajú viac než len +4. Malé zmeny majú veľký účinok a čokoľvek nad niekoľko dB zvyčajne znamená, že skutočným riešením je iná úroveň spracovania.
+Hint.AutomaticLoudness=Dve veci, ktoré pôsobia proti sebe, a preto zdieľajú jeden rámček. Automatická hlasitosť udržiava celkovú úroveň stabilnú v celej knihe, vrátane súborov nahraných v rôzne dni; sleduje hlas, nie celý signál, čo je to, čo hovorená nahrávka vyžaduje. Šum v pauzách funguje opačne: všetko, čo je tichšie ako zvolená úroveň, sa potlačí, takže syk alebo hučanie pod čítaním prestane byť v medzerách medzi vetami počuteľné. Nikdy sa nedotkne samotného hlasu a skôr stíši, než úplne stlmí (šum, ktorý sa vypína a zapína okolo každej frázy, je únavnejší než ten, ktorý jednoducho zostane). Zvýšenie hlasitosti zvýši aj šum pod ňou, takže ak sa to stane, toto je ovládací prvok pre neho.
+
+; ---- PROPERTIES - the text page
+Prop.Text.ReadingIn=Číta sa v:
+Prop.Text.NoVoiceShort=Žiadny nainštalovaný hlas nehovorí {0} — vyberte nižšie.
+Prop.Text.NoVoiceForLanguage=Žiadny nainštalovaný hlas nehovorí {0}. Nainštalujte hlas pre {0} alebo vyberte jazyk a hlas vyššie, aby ste s ním mohli čítať túto knihu. Voľba sa vzťahuje iba na túto knihu.
+Prop.Text.InputBrailleGroup=Zdroj Braillovho písma
+Prop.Text.InputBrailleTable=Vstupná tabuľka Braillovho písma:
+Hint.Text0=Tu si môžete vybrať jazyk a hlas na čítanie tejto knihy. Pre každú jednotlivú knihu v knižnici môžete mať iné nastavenia. Každý hlas si pamätá svoje vlastné nastavenia — rýchlosť, hlasitosť a výšku tónu — takže po prepnutí späť z iného hlasu ich nemusíte nastavovať znova.\n\nNezabudnite, že ak chcete čítať vizuálne alebo na braillovskom riadku bez počúvania zvuku, môžete vybrať možnosť „Žiadna reč“.
+Hint.TextVisual=Tu môžete upraviť rozloženie obrazovky na čítanie. Môžete si vybrať medzi rozložením podobným titulkom, posúvaním textu ako pri záverečných titulkoch filmu alebo okamžitou zmenou strán. Môžete tiež zvoliť farby pozadia, textu a zvýraznenia a určiť, či sa má označiť práve čítaný riadok alebo celá veta.\n\nUpozorňujeme, že toto nemá žiadny vplyv na reč.
+Hint.TextBrailleSource=Táto kniha pochádza z braillovského súboru a toto je tabuľka, s ktorou bola prečítaná – tá, ktorá premenila braillovské znaky späť na slová.\n\nBraillovský súbor neobsahuje informácie o svojom jazyku, stupni ani o tom, ktorý národný štandard nasleduje, takže NBR musí tabuľku určiť zo samotného textu. Zvyčajne je správna, ale nie vždy, a nesprávna tabuľka vytvorí slová, ktoré sú takmer správne: napríklad „Have“ tam, kde kniha hovorí „How“.\n\nAk vidíte niečo také, vyberte tu inú tabuľku a stlačte OK. Kniha sa znovu načíta z braillovského súboru, ktorý ste importovali a ktorý je uložený vedľa nej, takže môžete vyskúšať toľko tabuliek, koľko chcete, a kedykoľvek sa vrátiť k tej prvej.\n\nPonúkané tabuľky sú určené pre jazyk uvedený vyššie. Ak je tento jazyk nesprávny, zmeňte ho a tabuľky sa prispôsobia.\n\nToto nemá nič spoločné s tým, čo zobrazuje váš braillovský riadok. Váš odčítač obrazovky to prekladá pomocou tabuľky vo svojich vlastných nastaveniach.
+NoVoice.Title=Žiadny hlas pre túto knihu
+NoVoice.Message=Táto kniha je v jazyku {0} a žiadny nainštalovaný hlas ju nevie čítať. Vyberte hlas, ktorým sa má prečítať, len tentoraz, alebo ju nechajte neprečítanú, kým nebude nainštalovaný hlas pre jazyk {0}.
+NoVoice.Read=Čítať týmto hlasom
+NoVoice.Leave=Nechať neprečítanú
+Dialog.BrailleReread.Title=Znovu načítať braillovský súbor?
+Dialog.BrailleReread.Message=Táto kniha bude znovu načítaná z pôvodného braillovského súboru pomocou {0}.\n\nText sa vytvorí nanovo, takže všetko, čo odkazovalo na starý text, sa stratí: miesto, kde ste skončili, vaše záložky a percento prečítania. Samotná kniha zostane nedotknutá a môžete ju znovu čítať s inou tabuľkou, koľkokrát chcete.
+Dialog.BrailleReread.Failed=Braillovský súbor sa nepodarilo prečítať s touto tabuľkou. Kniha zostala v pôvodnom stave.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Nastavenia
+Settings.Tab.General=Všeobecné
+Settings.Tab.TextBooks=Reč a Braillovo písmo
+Settings.Tab.Device=Zariadenia
+Settings.Tab.Advanced=Rozšírené
+Settings.OK.Accessible=OK
+Settings.Cancel.Accessible=Zrušiť
+Settings.Apply=Použiť
+Settings.Apply.Accessible=Použiť
+
+; ---- SETTINGS - General
+Settings.General.Language.Restart=Zmena jazyka vyžaduje reštartovanie NBR. Reštartovať teraz?
+Settings.General.Language.RestartTitle=Jazyk
+Settings.General.LanguageGroup=Jazyk
+Settings.General.Language=Jazyk:
+Settings.General.LibraryGroup=Umiestnenie knižnice
+Settings.General.LibraryLocation=Umiestnenie knižnice:
+Settings.General.LibraryLocation.Browse=Vyberte priečinok, v ktorom je uložená vaša knižnica kníh
+Settings.General.Browse=Prehľadávať...
+Settings.General.Browse.Accessible=Prehľadať priečinok knižnice
+Settings.General.MediaKeysGroup=Multimediálne klávesy
+Settings.General.UseMultimediaKeys=Používať multimediálne klávesy
+Settings.General.UseMultimediaKeysGlobally=Používať multimediálne klávesy globálne
+Settings.General.MetadataGroup=Podrobnosti o knihe
+Settings.General.UseMetadata=Používať vložené metadáta
+Settings.General.LookGroup=Vzhľad
+Settings.General.LibraryLocation.Hint=Toto je miesto, kam NBR kopíruje importované knihy. Môžete ho nechať ako predvolené na systémovom oddiele, ale ak plánujete mať veľkú knižnicu, iný oddiel alebo disk by bol oveľa lepším riešením. NBR tam tiež uchováva informácie o každej knihe, takže ak si chcete uložiť pozície čítania, záložky, rýchlosť a ďalšie nastavenia čítania, nezabudnite, že obsah zo starého priečinka knižnice musíte skopírovať do nového umiestnenia manuálne. A v rovnakej cenovej kategórii: zmenou umiestnenia knižnice mimo systémového oddielu chránite svoje knihy pred náhodnými pádmi systému a bežnou stratou dát, ktorá ich sprevádza.
+Settings.General.UseMultimediaKeys.Hint=Na prehrávanie, pozastavenie a navigáciu v knihe pomocou zvoleného navigačného kroku môžete použiť multimediálne klávesy na klávesnici alebo tlačidlá na náhlavnej súprave.\n\nDruhý prepínač ich aktivuje v rámci celého systému, takže budú NBR ovládať odkiaľkoľvek – za cenu toho, že ich odoberiete všetkým ostatným prehrávačom, kým je NBR spustené.
+Settings.General.UseMetadata.Hint=Niektoré formáty súborov obsahujú metadáta s dodatočnými informáciami o autorovi, názve, vydavateľovi, producentovi atď. NBR dokáže tieto informácie prečítať a zobraziť, ak existujú. Ak sú však tieto informácie nesprávne alebo chýbajú, NBR môže namiesto toho prevziať základné podrobnosti z názvov priečinkov a súborov. Ako poslednú možnosť môžete knihy v knižnici kedykoľvek premenovať.
+Settings.General.UpdateGroup=Aktualizácie
+Settings.General.AutoCheckUpdates=Automaticky kontrolovať aktualizácie
+Settings.General.AutoCheckUpdates.Hint=Ak je táto možnosť zapnutá, NBR sa raz denne opýta, či bola vydaná novšia verzia, a ohlási sa, iba ak nejaká existuje. O vás ani o vašich knihách sa nič neodosiela: požiadavka neobsahuje žiadny identifikátor, knižnicu ani zoznam toho, čo čítate. Vypnite to, ak chcete, aby NBR nikdy samo nepristupovalo k sieti – stále sa môžete opýtať kedykoľvek budete chcieť pomocou ponuky Pomocník, Skontrolovať aktualizácie v okne knižnice.
+Settings.Misc.Look=Vzhľad:
+Settings.Misc.Look.Classic=Systémové farby
+Settings.Misc.Look.New=Dizajn NBR
+Settings.Misc.Look.RestartTitle=Zmena vzhľadu
+Settings.Misc.Look.Restart=Zmena vzhľadu vyžaduje reštartovanie NBR. Vaša pozícia v knihe zostane zachovaná. Reštartovať teraz?
+Settings.Misc.Look.Hint=Ako sa NBR vykresľuje, existujú dve odpovede.\n\nDizajn NBR je jeho vlastný vzhľad, s ktorým sa spúšťa.\n\nSystémové farby z neho robia obyčajné okno vo farbách a písmach, ktoré sú nastavené vo Windows. Nemaľuje nič vlastné, takže váš vlastný vzhľad sa prejaví v plnom rozsahu – čo je to, čo chcete pri téme s vysokým kontrastom a čo najlepšie funguje s lupou. Ak už máte zapnutý vysoký kontrast, toto je vzhľad, s ktorým NBR začína.\n\nTak či onak, voľba je na vás a môžete ju kedykoľvek vrátiť späť: klávesnica a váš odčítač obrazovky tým nie sú ovplyvnené a kláves F2 vás vráti sem.
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.SpeechGroup=Reč
+Settings.TextBooks.Language=Jazyk:
+Settings.TextBooks.BookLanguage=Knihy v tomto jazyku:
+Settings.TextBooks.AllOtherLanguages=Všetky ostatné jazyky
+Settings.TextBooks.VoiceNotSet=(nevybratý žiadny hlas)
+Settings.TextBooks.AddVoices=Pridať nové jazyky...
+Settings.TextBooks.LanguageNoVoice={0} — nie je nainštalovaný žiadny hlas
+Settings.TextBooks.LanguageUnknown=(jazyk nie je určený)
+Settings.TextBooks.Voice=Hlas:
+Settings.TextBooks.Speed=Rýchlosť:
+Settings.TextBooks.Test=Vyskúšať hlas
+Settings.TextBooks.TestSample=Toto je ukážka vybratého hlasu.
+Settings.TextBooks.Volume=Hlasitosť:
+Settings.TextBooks.Pitch=Výška hlasu:
+Settings.TextBooks.NoSpeech=Žiadna reč
+Settings.TextBooks.VisualGroup=Vizuálny výstup
+Settings.TextBooks.UseVisual=Použiť vizuálny výstup
+Settings.TextBooks.VisualMode=Režim zobrazenia:
+Settings.TextBooks.VisualMode.TwoRows=Dva riadky textu (štýl titulkov)
+Settings.TextBooks.VisualMode.FullInstant=Text na celú obrazovku (strana po strane)
+Settings.TextBooks.VisualMode.FullScrolling=Text na celú obrazovku (rolovanie)
+Settings.TextBooks.Highlight=Zvýraznenie:
+Settings.TextBooks.Highlight.None=Bez zvýraznenia
+Settings.TextBooks.Highlight.Line=Aktuálny riadok
+Settings.TextBooks.Highlight.Sentence=Aktuálna veta
+Settings.TextBooks.HighlightColour=Farba zvýraznenia:
+Settings.TextBooks.TextColour=Farba textu:
+Settings.TextBooks.BackColour=Farba pozadia:
+Settings.TextBooks.Speech.Hint=Tu je zoznam jazykov a hlasov nainštalovaných vo vašom systéme. Pre každý zobrazený jazyk môžete vybrať predvolený hlas, takže každý nový titul v tomto jazyku sa otvorí s vybraným hlasom. Výber hlasu pre jazyk z neho urobí predvolený — netreba nič iné stláčať. Ak je vaša nová kniha napísaná v jazyku, ktorý nie je v zozname, je najlepšie preň tu nenastavovať predvolený hlas. Hlas môžete kedykoľvek nastaviť vo vlastnostiach samotnej knihy na stránke Text, alebo zvoliť možnosť Žiadna reč a pokračovať v čítaní v Braillovom písme alebo na obrazovke. Upozornenie uvidíte aj vtedy, ak pre daný jazyk nie je nainštalovaný žiadny hlas.
+Settings.TextBooks.Dictionary.Hint=Tu môžete zmeniť to, čo syntetizátory reči vyslovujú nesprávne. Môžete opraviť výslovnosť mien a miest, upraviť nesprávny prízvuk a mnoho ďalšieho — stačí použiť vašu predstavivosť. Najlepšie na tom je, že to môžete robiť samostatne podľa jazyka a hlasu, pretože rôzne syntetizátory robia v tom istom jazyku rôzne chyby.
+Settings.TextBooks.Visual.Hint=Na zobrazenie textu na obrazovke počas jeho čítania nahlas, pre každého, kto číta očami aj ušami. Ak je táto možnosť zapnutá, okno sa otvorí samo zakaždým, keď stlačíte Prehrať. Dá sa tiež kedykoľvek otvoriť a zatvoriť ručne pomocou F9, bez ohľadu na to, či je táto možnosť zapnutá alebo nie — takže si to môžete vyskúšať na knihe bez zmeny jej vlastností.
+Settings.Colour.White=Biela
+Settings.Colour.Black=Čierna
+Settings.Colour.Yellow=Žltá
+Settings.Colour.Blue=Modrá
+Settings.Colour.Green=Zelená
+Settings.Colour.Red=Červená
+Voices.Add.Title=Jazyky na čítanie textu
+Voices.Add.Hint=Vyberte jazyky, ktoré chcete, a stlačte Inštalovať. V závislosti od vašich nastavení môže Windows vyžadovať vaše povolenie a následne stiahne hlasy pre daný jazyk. Hlas je viazaný na svoj prízvuk, takže britská a americká angličtina sú samostatné položky.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Zvukový výstup
+Settings.Device.SoundCard=Zvuková karta:
+Settings.Device.KeepAlive=Udržiavať zvukovú kartu aktívnu
+Settings.Device.Default=Predvolené v systéme (automaticky)
+Settings.Device.OpticalGroup=Optická mechanika
+Settings.Device.UseOptical=Použiť optickú mechaniku
+Settings.Device.OpticalWhich=Mechanika:
+Settings.Device.OpticalAuto=Tá, v ktorej je vložený disk
+Settings.Device.KeepAlive.Hint=Niektoré zvukové výstupy — najmä HDMI — sa vypnú hneď, ako zvuk prestane hrať, a potom chvíľu trvá, kým sa opäť prebudia. To, čo počujete, je opakovane chýbajúce prvé slovo vety, pričom zdanlivo nie je nič v neporiadku. Keď je táto možnosť zapnutá, NBR prehráva na používanej karte tón s frekvenciou hlboko pod hranicou počuteľnosti, takže karta nemá šancu medzi vetami zaspať. Vypnite to, ak vaša karta tento problém nemá: udržiava výstup otvorený tak dlho, kým sa kniha prehráva.
+Settings.Device.UseOptical.Hint=Knihy boli kedysi vydávané na bežných zvukových CD a NBR ich dokáže prehrávať. NBR načíta celý disk naraz a dočasne ho uloží do počítača, aby vás bzučanie mechaniky nerušilo pri čítaní: pracuje len niekoľko minút a zvyšok knihy je ticho. Zapnite túto možnosť, len ak ju chcete – predvolene je vypnutá, aj keď má počítač mechaniku, a kým je vypnutá, NBR sa mechaniky vôbec nedotkne.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Knihy s textom v obrázkoch
+Settings.Ocr.Language=Jazyk rozpoznávania
+Settings.Ocr.Automatic=Automaticky
+Settings.Ocr.AddLanguage=Pridať jazyk...
+Settings.Ocr.None=Windows nemá nainštalované rozpoznávanie textu.
+Settings.Ocr.Hint=Niektoré knihy sú skôr fotografiami strán než textom – napríklad skenované PDF alebo priečinok s očíslovanými obrázkami. NBR dokáže rozpoznať slová na nich a následne ich prečítať ako akúkoľvek inú knihu. Toto je len počiatočná voľba – ak máte viac ako jeden jazyk, NBR sa pri každom čítaní knihy opýta, ktorý použiť.
+Settings.Translate.Group=Preklad
+Settings.Translate.Service=Prekladateľská služba
+Settings.Translate.Key=Kľúč API...
+Settings.Translate.State.Have={0}, kľúč je uložený
+Settings.Translate.State.None={0}, chýba kľúč
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (väčší model)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, lacnejší)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, najdrahší)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Notes=Poznámky pre prekladateľa:
+Settings.Translate.Rules=Pravidlá prekladu
+Settings.Translate.Test.NoEngine=Nie je vybratá žiadna prekladateľská služba.
+Settings.Translate.Test.NoKey=Neexistuje žiadny kľúč na overenie.
+Settings.Translate.Test.NoNetwork=NBR sa nedokázalo spojiť so službou.
+Settings.Translate.Test.Refused=Služba zamietla požiadavku ({0}).
+Settings.Translate.Test.Empty=Služba neodpovedala ničím.
+Settings.Translate.Hint=NBR dokáže preložiť knihu pomocou online služby. Každá služba vyžaduje kľúč z vášho vlastného účtu, ktorý sem vložíte; NBR nikdy nerieši platby, to je na vás na webovej stránke poskytovateľa služby alebo iným spôsobom. Ak nepotrebujete strojový preklad AI, jednoducho to nechajte nezačiarknuté.\n\nPreklad odošle CELÚ knihu vami zvolenej službe a to, čo s ňou každá z nich urobí, sa líši — niektoré používajú obsah bezplatnej úrovne na vylepšenie svojich vlastných produktov, iné nie. Vlastný popis každej služby v časti Pomocník, Služby a účty uvádza, ktorá je ktorá.
+Settings.Cloud.Group=Hlasy Google Cloud
+Settings.Cloud.VoicesGroup=Cloudové hlasy
+Settings.Cloud.Where=Služby Google a Azure sa nastavujú v časti Pomocník, Služby a účty, kde je vysvetlené, čo každá z nich je, a prevedie vás krok za krokom otvorením účtu.
+Settings.Cloud.State.None=Google: nie je uložený žiadny účet služby, takže žiadny z týchto hlasov nie je k dispozícii.
+Settings.Cloud.State.Have=Google: k dispozícii je {0} hlasov, ktoré čítajú v {1} jazykoch.
+Settings.Cloud.State.HaveNoList=Google: účet služby je uložený, ale zoznam hlasov ešte nebol načítaný. Nastavte ho znova, kým ste pripojení.
+Settings.Cloud.Load=Súbor účtu služby...
+Settings.Cloud.Filter=Účet služby (*.json)|*.json|Všetky súbory (*.*)|*.*
+Settings.Cloud.Forget=Zabudnúť účet služby
+Settings.Cloud.ForgetAsk=Zabudnúť uložený účet služby? Tieto hlasy sa prestanú ponúkať a kniha, ktorá sa už s jedným z nich číta, stíchne, kým jej nepriradíte iný hlas.
+Settings.Cloud.UseGroup=Používanie cloudových hlasov
+Settings.Cloud.Use=Ponúkať cloudové hlasy
+Settings.Cloud.Why=Zatiaľ nie je čo zapnúť: nastavte Google alebo Azure vyššie a táto možnosť bude k dispozícii.
+Settings.Cloud.NoList=Účet bol prijatý, ale zoznam hlasov sa nepodarilo načítať. Zvyčajne je to problém siete; hlasy sa objavia, akonáhle bude sieť dostupná.
+Settings.Azure.Group=Hlasy Azure Speech
+Settings.Azure.Resource=Názov prostriedku:
+Settings.Azure.Key=Kľúč:
+Settings.Azure.Save=Skontrolovať a ponechať
+Settings.Azure.NoResource=Vyplňte názov prostriedku — je to prvá časť koncového bodu na tej istej stránke ako kľúč.
+Settings.Azure.NoKey=Vyplňte kľúč.
+Settings.Azure.Refused=Azure tento pár neprijal. Skontrolujte názov prostriedku a kľúč a uistite sa, že prostriedok je typu Speech.
+Settings.Azure.State.None=Azure: nie je uložený žiadny kľúč, takže žiadny z týchto hlasov nie je k dispozícii.
+Settings.Azure.State.Have=Azure: k dispozícii je {0} hlasov, ktoré čítajú v {1} jazykoch.
+Settings.Azure.Forget=Zabudnúť kľúč
+Settings.Azure.ForgetAsk=Zabudnúť uložený kľúč Azure? Tieto hlasy sa prestanú ponúkať a kniha, ktorá sa práve číta jedným z nich, stíchne, kým jej nepriradíte iný hlas.
+Hint.Settings.Cloud=
+Hint.Settings.CloudUse=Toto zapína a vypína používanie cloudových hlasov, čo znamená všetky hlasy z internetu, nie vaše nainštalované hlasy SAPI alebo One Core.\n\nRozhoduje o tom, či sa tieto hlasy budú PONÚKAŤ, keď vyberáte hlas pre konkrétnu knihu. Nikdy nie sú priradené automaticky a nikdy sa nestanú predvoleným hlasom jazyka — tým zostávajú hlasy nainštalované v tomto počítači, ktoré sú bezplatné a nevyžadujú pripojenie.\n\nKniha, ktorá sa už číta pomocou cloudového hlasu, si ho ponechá bez ohľadu na to, či je toto zapnuté alebo vypnuté; prepínač ovláda výber, nie to, čo možno prehrať.
+Hint.Settings.Azure=Používanie hlasov Google a Azure vyžaduje určité poverenia Google, Microsoft a Azure a trochu práce na ich webových stránkach. Viac sa dočítate v Pomocníkovi.
+Google.Cred.NotJson=Tento súbor nie je čitateľný ako JSON, takže to nie je ten, ktorý vám dal Google. Súbor, ktorý potrebujete, bol stiahnutý pri vytvorení servisného účtu a jeho názov končí príponou .json.
+Google.Cred.NotServiceAccount=Tento JSON je čitateľný, ale nie je to servisný účet — neobsahuje adresu účtu ani súkromný kľúč. Google ponúka niekoľko druhov poverení; to, ktoré je určené pre tieto hlasy, je kľúč servisného účtu.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Slovník výslovnosti
+Dict.Open=Slovník výslovnosti...
+Dict.Open.Accessible=Slovník výslovnosti
+Dict.Scope=Tieto pravidlá sa vzťahujú na:
+Dict.Scope.Global=Všetko, čo čítam
+Dict.Scope.Language=Všetko, čo čítam v jazyku {0}
+Dict.Scope.Voice=Všetko, čo čítam hlasom {0}
+Dict.List.Accessible=Pravidlá
+Dict.Column.Pattern=Napísané
+Dict.Column.Says=Vyslovené ako
+Dict.Column.Match=Zhoda
+Dict.Column.Case=Veľké a malé písmená
+Dict.Column.State=Pravidlo
+Dict.Column.Comment=Poznámka
+Dict.Add=Pridať...
+Dict.Edit=Upraviť...
+Dict.Remove=Odstrániť
+Dict.State.On=Zapnuté
+Dict.State.Off=Vypnuté
+Dict.Try=Vyskúšajte vetu:
+Dict.TryButton=Vyskúšať
+Dict.Rule.TitleNew=Nové pravidlo
+Dict.Rule.TitleEdit=Upraviť pravidlo
+Dict.Field.Pattern=Čo je napísané:
+Dict.Field.Replacement=Namiesto toho povedať:
+Dict.Field.Match=Zhoda:
+Dict.Field.CaseSensitive=Rozlišovať veľké a malé písmená
+Dict.Field.Skip=Preskočiť
+Dict.Field.Comment=Poznámka:
+Dict.Field.Enabled=Pravidlo je zapnuté
+Dict.Match.WholeWord=Celé slovo
+Dict.Match.Anywhere=Kdekoľvek, aj vo vnútri slova
+Dict.Match.Regex=Regulárny výraz
+Dict.Error.Title=Toto pravidlo nemožno použiť
+Dict.Error.NoPattern=Vyplňte, čo je v knihe napísané.
+Dict.Error.TooSlow=Zhoda tohto vzoru trvá príliš dlho. Zjednodušte ho.
+Dict.Help=Pomocník pre regulárne výrazy...
+Dict.Help.Title=Regulárne výrazy v slovníku výslovnosti
+Dict.Help.Text=Stará zenová múdrosť hovorí:\n\n    Vývojár mal problém.\n    Vývojár sa rozhodol vyriešiť problém pomocou regulárnych výrazov.\n    Vývojár mal dva problémy.\n\nRegEx, alebo regulárne výrazy, sú niečo, čomu by ste sa radšej vyhli, ale je fajn mať túto možnosť, tak tu je.\n\nAk viete, čo robíte, smelo do toho. Ak nie, radšej ich nepoužívajte alebo sa opýtajte Google.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=API kľúč pre {0}
+Dialog.TranslateKey.Field=API kľúč
+Dialog.TranslateKey.Prompt=Vložte kľúč, ktorý ste získali od {0}. Ukladá sa v tomto počítači do vlastného súboru v čitateľnej podobe, preto s ním zaobchádzajte ako s heslom. Kedykoľvek ho môžete nahradiť alebo odstrániť a kľúč môžete zrušiť priamo v danej službe.
+Dialog.TranslateKey.Region=Región (prázdne, ak globálny):
+Dialog.TranslateKey.Remove=Odstrániť
+Dialog.TranslateKey.Status=Výsledok
+Dialog.TranslateKey.Stored=Pre túto službu je uložený kľúč.
+Dialog.TranslateKey.NotStored=Pre túto službu nie je uložený žiadny kľúč.
+Dialog.TranslateKey.Test=Overiť kľúč
+Dialog.TranslateKey.Testing=Overujem kľúč...
+Dialog.TranslateKey.Works=Kľúč funguje.
+Azure.Setup.Title=Nastavenie Azure Speech
+Azure.Setup.Open=Vytvoriť za mňa...
+Azure.Setup.Intro=NBR môže vytvoriť prostriedok Azure za vás, takže nemusíte pracovať s portálom. Raz sa prihlásite do Microsoftu pomocou krátkeho kódu, vyberiete si predplatné, na ktoré ho umiestnite, a NBR ho vytvorí v bezplatnej úrovni a uloží kľúč. Nič sa nevytvorí, kým sa neprihlásite.
+Azure.Setup.Start=Spustiť
+Azure.Setup.SigningIn=Žiadam Microsoft o prihlasovací kód.
+Azure.Setup.CodeLabel=Prihlasovací kód:
+Azure.Setup.EnterCode=Váš prihlasovací kód je v poli nižšie, pripravený na skopírovanie. Vyberte „Otvoriť prihlasovaciu stránku“ pre otvorenie {0} vo vašom prehliadači, prihláste sa tam a toto okno bude pokračovať samo.
+Azure.Setup.OpenPage=Otvoriť prihlasovaciu stránku
+Azure.Setup.OpenFailed=Prehliadač sa nepodarilo otvoriť. Adresa je v riadku vyššie; otvorte ju manuálne.
+Azure.Setup.Directory=Adresár:
+Azure.Setup.Subscription=Predplatné:
+Azure.Setup.SignedIn=Prihlásené. Nájdené predplatné: {0} — vyberte jedno a zvoľte Vytvoriť.
+Azure.Setup.Create=Vytvoriť prostriedok
+Azure.Setup.NoSubscription=Tento účet nemá žiadne predplatné Azure, takže nie je kde vytvoriť prostriedok.
+Azure.Setup.Creating=Vytváram prostriedok. Trvá to minútu alebo dve; Azure ho nahlási ako pripravený skôr, než skutočne je, takže NBR čaká.
+Azure.Setup.Done=Hotovo. Prostriedok je vytvorený a jeho kľúč je uložený — k dispozícii je {0} hlasov.
+Azure.Setup.DoneNoList=Prostriedok je vytvorený a jeho kľúč je uložený, ale zoznam hlasov sa nepodarilo získať. Zvyčajne je to sieť; hlasy sa objavia, akonáhle bude dostupná.
+Azure.Setup.Failed=Nefunguje to: {0}
+Azure.Setup.HaveOne=Alebo, ak už máte prostriedok Reč, zadajte sem namiesto toho jeho dva údaje:
+Azure.Setup.Kept=Azure túto dvojicu prijal a je uložená. Tieto hlasy sú teraz k dispozícii.
+Azure.Setup.DirectoryHint=Ak sa prihlasujete pracovným alebo školským kontom, nechajte toto pole prázdne. Ak je váš Azure na OSOBNOM konte Microsoft, Microsoft odmietne prihlásenie na bežnej adrese a musíte zadať adresár, ktorý Azure vytvoril pri založení predplatného — buď jeho názov končiaci na onmicrosoft.com, alebo jeho ID adresára (tenanta). Pýta sa na to raz a zapamätá si to.
+
+; ---- THE READING WINDOW
+Reading.Title=Čítanie
+Reading.Back=Späť
+Reading.Back.Accessible=O krok späť
+Reading.PlayPause=Prehrať/Pozastaviť
+Reading.PlayPause.Accessible=Prehrať alebo pozastaviť, kláves Medzerník
+Reading.Forward=Dopredu
+Reading.Forward.Accessible=O krok dopredu
+Reading.Smaller=Menšie
+Reading.Smaller.Accessible=Menší text, kláves mínus
+Reading.Bigger=Väčšie
+Reading.Bigger.Accessible=Väčší text, kláves plus
+Reading.Font.Accessible=Písmo
+Reading.Size.Announce=Veľkosť textu {0}
+Beta.Suffix= — v tejto beta verzii nie je k dispozícii
+Beta.NoReadingWindow=Okno čítania je v tejto beta verzii vypnuté. Čítanie na obrazovke a braillovo písmo, ktoré ho nasleduje, sa stále testujú a vrátia sa v neskoršom vydaní.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Rozpoznať text
+Ocr.Ask.Question={0} neobsahuje žiadny text — je to {1} strán obrázkov. NBR dokáže rozpoznať text na nich, čo by malo trvať {2}. Rozpoznať ho teraz?
+Ocr.Ask.ReadWith=Rozpoznať ako:
+Ocr.Ask.Read=Rozpoznať
+Ocr.Ask.Skip=Preskočiť
+Ocr.Ask.UnderAMinute=menej ako minútu
+Ocr.Ask.Minutes=približne {0} minút
+Ocr.Result.NoText=Na obrázkoch nebol rozpoznaný žiadny text. Kniha bola pridaná, ale nie je z nej čo čítať.
+Ocr.Refusal.NoEngine=Nie je nainštalované rozpoznávanie textu. Použite „Pridať jazyk...“ v Nastaveniach, v časti Rozšírené, a NBR ho za vás nainštaluje.
+Ocr.Refusal.NoPages=V tomto dokumente nie sú žiadne strany na čítanie.
+Ocr.Progress.Title=Rozpoznávanie textu
+Ocr.Progress.Starting=Spúšťam rozpoznávanie...
+Ocr.Progress.Working=Strana {0} z {1}. {2}
+Ocr.Progress.Quarter=Hotovo {0} percent. {1}
+Ocr.Progress.Cancel=Zrušiť
+Ocr.Progress.Cancelling=Zastavujem po tejto strane. Nič sa neuloží.
+Ocr.Progress.Estimating=Odhadujem čas trvania.
+Ocr.Progress.AlmostDone=Takmer hotovo.
+Ocr.Progress.Seconds=Zostáva približne {0} sekúnd.
+Ocr.Progress.Minutes=Zostáva približne {0} minút.
+Ocr.Unread.Message=Táto kniha ešte nebola rozpoznaná – stále ide o obrázky jej strán, takže nie je čo čítať. Rozpoznať ju teraz?
+Ocr.Sparse.Message=Len {0} z {1} strán tejto knihy obsahuje text. Pravdepodobne ide o sken, ktorého textová vrstva je poškodená, takže slová sú stále obrázkami. Rozpoznať ich teraz?
+Ocr.Blank.Question={0} strán po sebe neobsahovalo žiadny text. Zvyšných {1} môže byť rovnakých a ich rozpoznávanie by chvíľu trvalo. Pokračovať?
+Ocr.Blank.Jbig2={0} strán po sebe neobsahovalo žiadny text. Tento PDF súbor ukladá slová vo forme, ktorú Windows nedokáže vykresliť, takže tieto strany prichádzajú ako prázdny papier bez textu na rozpoznanie – čítanie zvyšných {1} strán pravdepodobne nič nenájde. Pokračovať?
+Ocr.Read.Question=Táto kniha obsahuje {0} strán obrázkov a zatiaľ nebola rozpoznaná. Rozpoznávanie trvá {1}.
+Ocr.ReRead.Question=Táto kniha bola rozpoznaná z {0} strán obrázkov. Jej opätovné rozpoznanie v inom jazyku trvá {1}. Obrázky sú uložené spolu s knihou, takže to môžete robiť tak často, ako chcete.
+Ocr.ReRead.Done=Kniha bola opätovne rozpoznaná a nahradená.
+Ocr.ReRead.Locate=Obrázky pre túto knihu nie sú uložené spolu s ňou, takže NBR ich musí nájsť znova. Vyberte naskenovaný súbor, alebo – ak kniha prišla ako samostatné obrázky strán – ktorúkoľvek z týchto strán.
+Ocr.ReRead.LocateTitle=Nájsť obrázky pre túto knihu
+Ocr.ReRead.Filter=Naskenované knihy a obrázky|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Všetky súbory|*.*
+Ocr.ReRead.WholeFolder=V tomto priečinku je {0} obrázkov. Rozpoznať všetky ako strany tejto knihy?
+Ocr.Add.Title=Jazyky OCR
+Ocr.Add.List=Jazyky
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — už nainštalované
+Ocr.Add.Install=Inštalovať
+Ocr.Add.WindowsSettings=Nastavenia systému Windows...
+Ocr.Add.Close=Zavrieť
+Ocr.Add.Installing=Inštaluje sa {0}. Sťahuje sa to cez Windows Update, takže trvanie závisí od jeho vyťaženosti — zvyčajne je to pár minút, niekedy aj desať. Toto okno môžete zavrieť a pokračovať v práci; inštalácia bude prebiehať na pozadí.
+Ocr.Add.Done={0} je nainštalovaný a pripravený na použitie.
+Ocr.Add.DonePartly={0} je nainštalovaný a pripravený na použitie. {1} sa nepodarilo získať — Windows možno stále pracuje, alebo tento jazyk nie je pre túto verziu dostupný.
+Ocr.Add.NotStarted=Nič nebolo nainštalované. Windows neudelil povolenie.
+Ocr.Add.Failed={0} nebol nainštalovaný. Windows na tom možno stále pracuje, alebo tento jazyk nie je pre túto verziu systému Windows dostupný.
+Ocr.Add.LeftRunning=Windows ho stále inštaluje. Dokončí sa to automaticky.
+Ocr.Add.Hint=Vyberte požadované jazyky a stlačte Inštalovať. V závislosti od vašich nastavení si Windows môže vyžiadať povolenie a následne stiahnuť rozpoznávanie pre daný jazyk — ide o malý súbor, nie o celý jazykový balík systému Windows.
+
+; ---- TRANSLATION
+Translate.Progress.Title=Prekladanie knihy
+Translate.Progress.Starting=Pripravuje sa. Kedykoľvek môžete prestať; to, čo už bolo preložené, sa uloží a pri opätovnom spustení sa bude pokračovať odtiaľ.
+Translate.Progress.Working=Pasáž {0} z {1}. Zostáva približne {2}. Kedykoľvek môžete prestať — to, čo je hotové, sa uloží.
+Translate.Progress.Quarter=Preložených {0} percent, zostáva približne {1}.
+Translate.Progress.Cancel=Zastaviť
+Translate.Progress.Cancelling=Zastavuje sa po tejto pasáži. To, čo už je preložené, sa uloží.
+Translate.Progress.StillOn=Stále na tejto časti, zatiaľ {0} sekúnd.
+Translate.Progress.StillWorking=Stále sa prekladá pasáž {0} z {1}. Služba odpovedá pomaly.
+Translate.Progress.Estimating=zisťuje sa odhadovaný čas
+Translate.Progress.AlmostDone=chvíľka
+Translate.Progress.Seconds={0} sekúnd
+Translate.Progress.Minutes={0} minút
+Translate.Ask.Title=Preložiť knihu
+Translate.Ask.Info={0} — približne {1} znakov, zhruba {2}. Preklad sa stane novou knihou; táto zostane nezmenená.
+Translate.Ask.HybridNote=Táto kniha obsahuje nahrávku aj text. Preložiť možno iba text, takže preklad bude textová kniha bez rozprávania.
+Translate.Ask.From=Jazyk knihy:
+Translate.Ask.To=Preložiť do:
+Translate.Ask.Model=Model {0}:
+Translate.Ask.Model.None=— žiadny, tu ukončiť reťazec —
+Translate.Ask.ChainNote=Ak je pasáž odmietnutá, NBR to skúsi znova a následne postupne vyskúša vaše ďalšie služby. Čokoľvek, čo žiadna z nich neprijme, zostane v jazyku, v ktorom bola kniha pôvodne.
+Translate.Ask.NoEngine=Zatiaľ nie je nastavený kľúč pre žiadnu službu
+Translate.Ask.Standing=Vaša trvalá poznámka sa vzťahuje aj na túto knihu: {0}
+Translate.Ask.Inherit=Pokračovať v sérii s použitím glosára z:
+Translate.Ask.Inherit.None=Nič — táto kniha je samostatná
+Translate.Ask.Notes=Čokoľvek, čo by mal prekladateľ vedieť o TEJTO knihe (voliteľné). Rozprávač a mená sú spracované z textu automaticky; toto je pre informácie, ktoré v texte nie sú — termín, ktorý chcete preložiť konkrétnym spôsobom, alebo ako sa dve postavy oslovujú:
+Translate.Ask.Start=Preložiť
+Translate.LastResort.Begin=Nasledujúca časť bola preložená službou Microsoft Azure — očakávajte neočakávané.
+Translate.LastResort.End=Koniec časti preloženej službou Microsoft Azure.
+Translate.NotText=Preložiť možno iba textovú knihu. Táto je nahrávka.
+Translate.Empty=V tejto knihe nie je žiadny text na preklad.
+Translate.NoService=Zatiaľ nie je nastavený kľúč pre žiadnu prekladateľskú službu. Pridajte ho v Nastaveniach, v časti Rozšírené.
+Translate.Done={0} pasáží preložených. Preklad je na poličke ako nová kniha.
+Translate.DoneLeft={0} pasáží preložených, {1} zostalo v pôvodnom jazyku.
+Translate.Took=Trvalo to {0}. Záznam po riadkoch je v súbore translation.log vedľa pôvodnej knihy.
+Translate.Failed=Knihu sa nepodarilo preložiť: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Na audioknihu možno previesť iba textovú knihu. Táto už je zvuková.
+Export.NoVoice=Táto kniha nemá hlas, ktorým by sa dala čítať, takže nie je čo nahrávať. Najprv jej ho priraďte vo Vlastnostiach.
+Export.Empty=V tejto knihe nie je žiadny text na čítanie.
+Export.Filter=Zvukový súbor (*.mp3)|*.mp3
+Export.Ask.Ready=Všetkých {0} pasáží tejto knihy už bolo nahovorených, takže ide len o spojenie, čo bude trvať chvíľu. Vytvoriť súbor?
+Export.Ask.Missing={0} z {1} pasáží tejto knihy treba ešte nahovoriť. Ich nahrávanie by malo trvať približne {2} minút – to je čas potrebný na vytvorenie, nie dĺžka knihy na počúvanie. Okno priebehu zobrazuje hodnotu meranú počas procesu. Kedykoľvek môžete prestať: všetko, čo bolo nahovorené, sa uloží a opätovné spustenie bude pokračovať odtiaľ. Vytvoriť súbor?
+Export.Progress.Title=Vytváranie audioknihy
+Export.Progress.Starting=Pripravujem sa. Kedykoľvek môžete prestať; všetko, čo bolo nahovorené, sa uloží a opätovné spustenie bude pokračovať odtiaľ.
+Export.Progress.Making=Pasáž {0} z {1}. Zostáva približne {2}.
+Export.Progress.Joining=Spájam všetko do jedného súboru.
+Export.Done=Hotovo – {0} pasáží, uložených ako {1}
+Export.DoneShort=Uložené ako {2}, ale {1} z {0} pasáží sa nepodarilo nahovoriť a v súbore chýbajú.
+Export.Failed=Audioknihu sa nepodarilo vytvoriť.
+
+; ---- AUDIO CD
+Cd.Progress.Title=Audio CD
+Cd.Progress.Preparing=Čítam disk...
+Cd.Progress.Track=Čítam stopu {0} z {1}
+Cd.Progress.Stopping=Zastavujem...
+Cd.BookTitle=Audio CD ({0} stôp)
+Cd.Format=Audio CD - Compact Disc Digital Audio
+Cd.NoDisc=V mechanike nie je žiadny disk alebo ho mechanika stále číta. Vložte audio CD a skúste to znova.
+Cd.DataDisc=Toto je dátový disk, nie audio CD. Ak obsahuje knihu ako súbory MP3, otvorte ju pomocou Súbor, Otvoriť priečinok – NBR to už prehráva.
+Cd.ReadFailed=Disk sa nepodarilo prečítať: {0}
+Cue.Track=Stopa {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Služby a účty
+Services.List.Accessible=Služby
+Services.State.Ready=TÁTO JE NASTAVENÁ. Môžete znova prejsť krokmi a nahradiť to, čo je uložené.
+Services.State.NotSet=Táto služba ešte nie je nastavená.
+Services.SetUp=Nastaviť túto službu...
+Services.Forget=Zabudnúť tento účet
+Services.ForgetAsk=Zabudnúť uložený kľúč pre {0}? Prestane sa ponúkať, kým ho znova nenastavíte.
+Services.Disclaimer=POSTUP NIŽŠIE NEMUSÍ ZODPOVEDAŤ TOMU, ČO VIDÍTE. Tieto služby menia dizajn svojich webových stránok bez varovania, takže tlačidlo sa mohlo presunúť alebo premenovať od napísania tohto textu. PORADIE krokov sa mení zriedkavo, názvy prvkov áno. Ak sa stratíte, časť vyššie vám povie, čo sa snažíte dosiahnuť.
+Services.Item.Gemini=Preklad Gemini
+Services.Item.DeepSeek=Preklad DeepSeek
+Services.Item.OpenAi=Preklad GPT (OpenAI)
+Services.Item.GoogleVoices=Hlasy Google Cloud
+Services.Item.AzureVoices=Hlasy Azure Speech
+Services.About.Gemini=Gemini preloží celú knihu do iného jazyka pomocou vlastného modelu od Google. Podľa sluchu je hodnotený ako najlepší z nich – a má jeden háčik.\n\nOdmieta približne každú šiestu pasáž publikovaného románu. Nie kvôli obsahu: vzorec vyzerá tak, že model rozpoznáva knihu, ktorú pozná, a žiadne nastavenie to nezmení. Preto sa NBR pýta druhej služby na všetko, čo prvá odmietne, a preto sa oplatí nastaviť reťazec namiesto ponechania len jedného enginu.\n\nExistuje bezplatná úroveň a je dostatočne štedrá na to, aby bola bežným spôsobom používania: merané na skutočnom projekte, Gemini 3.1 Flash Lite umožňuje 500 požiadaviek denne, čo je asi šesť kníh. Platené použitie stojí približne dvadsaťpäť centov za román so 450 000 znakmi.\n\nJEDNA VEC NA ZVÁŽENIE PRED VÝBEROM BEZPLATNEJ VERZIE. Vlastná stránka s cenami Google uvádza, že v bezplatnej úrovni sa váš obsah používa na zlepšovanie ich produktov a v platenej úrovni nie. Preklad odošle celú knihu, takže je to skutočný rozdiel. Je to vaša voľba – ale mala by to byť voľba a nie prekvapenie.\n\nZískanie kľúča je najdlhšie zo štyroch a kroky nižšie sú napísané podľa skutočného postupu, pretože zjavná cesta nefunguje.
+Services.About.DeepSeek=DeepSeek preloží celú knihu do iného jazyka. Zo služieb, ktoré môže NBR použiť, je najstabilnejšia – odmieta najmenej často – a je zďaleka najlacnejšia.\n\nJedna vec sa musí stať: účet v DeepSeek a nejaký kredit na ňom. Neexistuje žiadny bezplatný limit, ale preklad je spoplatnený podľa množstva textu a kniha stojí veľmi málo.\n\nTáto služba poskytuje kľúč, ktorý vložíte, a je najjednoduchšia zo štyroch. Jedna vec, na ktorú si treba dať pozor, je, že kľúč sa zobrazí IBA RAZ, keď ho vytvoríte. Ak zatvoríte toto okno bez jeho skopírovania, už sa nedá zobraziť a jednoducho vytvoríte ďalší.
+Services.About.OpenAi=OpenAI prekladá celú knihu do iného jazyka pomocou modelov GPT. Ponúka sa v troch úrovniach pod jedným účtom a jedným kľúčom: Terra, ktorá je vhodná na začiatok, Luna, ktorá je lacnejšia, a Sol, ktorá je najdrahšia.\n\nNeexistuje žiadny bezplatný limit akéhokoľvek druhu, a to je časť, na ktorú ľudia doplácajú: predplatné ChatGPT za toto NEPLATÍ. API sa účtuje samostatne a nový účet je PREDPLATENÝ — vložíte naň malý kredit a volania sa odpočítavajú z tohto zostatku. Päť alebo desať dolárov bohato stačí na to, aby ste zistili, koľko kniha skutočne stojí, než sa pre čokoľvek rozhodnete.\n\nKoľko kniha stojí, vypočítané pre román so 450 000 znakmi a pri použití spôsobu, akým sa chorvátčina skutočne rozdeľuje na tokeny namiesto odhadu: približne dva a pol dolára na Terra, jeden dolár na Luna, päť na Sol. Pre porovnanie, tá istá kniha stála približne dvadsaťtri centov na Gemini. Ktorákoľvek z nich je pre knihu, na ktorej vám záleží, malá suma; Terra je pri pravidelnom používaní asi desaťkrát drahšia ako Gemini.\n\nKľúč je obyčajný text, ktorý sem vložíte, čo z tejto služby robí najjednoduchšiu na nastavenie.
+Services.About.GoogleVoices=Hlasy Google Cloud čítajú knihy nahlas cez internet pomocou vlastných hlasov spoločnosti Google. Pre väčšinu jazykov sú najlepšie spomedzi cloudových hlasov a bezplatný limit je najväčší — približne milión znakov mesačne, čo sú asi dve knihy.\n\nMusia sa stať tri veci, a to v tomto poradí. Potrebujete ÚČET GOOGLE, ktorý už väčšina ľudí má. V ňom vytvoríte PROJEKT a zapnete službu prevodu textu na reč (Text-to-Speech) pre tento projekt — a Google ju nezapne, kým nebude nastavená fakturácia, takže karta je potrebná, aj keď bezplatný limit nestojí nič. Potom vytvoríte SERVISNÝ ÚČET a stiahnete si jeho kľúč.\n\nTá posledná časť je to, čo robí túto službu nezvyčajnou. Google nevydáva kľúč, ktorý by ste mohli vložiť: poskytuje malý súbor s príponou .json, ktorý sa stiahne iba raz. NBR si uchováva obsah tohto súboru, nie súbor samotný, takže stiahnutý súbor môžete následne presunúť alebo odstrániť.
+Services.About.AzureVoices=Hlasy Azure Speech čítajú knihy nahlas cez internet pomocou hlasov od spoločnosti Microsoft. Sú veľmi kvalitné v angličtine a mnohých ďalších jazykoch. Pre chorvátčinu sú priemerné a Azure tam nepodporuje slovník výslovnosti, takže pravidlo, ktoré napíšete pre meno, nebude rešpektované. Bezplatný limit je približne pol milióna znakov mesačne, čo je zhruba jedna kniha.\n\nMusia sa stať dve veci a len tá prvá je na vás. Predtým, než môžete mať konto Azure, potrebujete KONTO MICROSOFT a následne PREDPLATNÉ AZURE – ktoré vyžaduje overenie totožnosti, kartu a súhlas. Človek to musí urobiť zámerne, takže sa to nedá automatizovať a NBR sa o to ani nepokúša.\n\nVšetko ostatné po tomto kroku je úlohou NBR. Prihlási sa pomocou krátkeho kódu, vytvorí prostriedok v bezplatnej úrovni a ponechá si kľúč. Portál Azure nikdy neotvárate.\n\nJedna vec ľudí zvykne zaskočiť. Keď sa vytvorí vaše predplatné, Azure preň potichu vytvorí ADRESÁR. Ak je vaše konto Microsoft osobné – Gmail, Outlook, Hotmail – Azure odmietne prihlásenie, pokiaľ tento adresár nepomenujete, pretože na tento účel osobné kontá nerozpoznáva. Jeho názov končí na onmicrosoft.com.
+Services.Steps.DeepSeek=1. Otvorte platform.deepseek.com vo svojom prehliadači.\n\n2. Stlačte Sign up (Registrovať sa). Môžete vyplniť e-mail a heslo alebo zvoliť registráciu cez Google, čo je rýchlejšie.\n\n3. Ak vás o to požiadajú, potvrďte svoj e-mail.\n\n4. Po prihlásení nájdite Top up (Dobiť) alebo Billing (Fakturácia) a pridajte malú sumu kreditu.\n\n5. V ponuke naľavo nájdite API keys (Kľúče API).\n\n6. Stlačte Create new API key (Vytvoriť nový kľúč API), dajte mu ľubovoľný názov a stlačte Create (Vytvoriť).\n\n7. Kľúč si skopírujte PREDTÝM, než zatvoríte dané okno.\n\n8. Vráťte sa sem, stlačte „Set up this service“ (Nastaviť túto službu) a vložte ho tam.
+Services.Steps.GoogleVoices=1. Otvorte console.cloud.google.com vo svojom prehliadači a prihláste sa pomocou konta Google.\n\n2. Ak vás o to požiadajú, prijmite podmienky a vytvorte projekt, keď vám to bude ponúknuté. Akýkoľvek názov bude stačiť.\n\n3. Nájdite vyhľadávacie pole v hornej časti, napíšte „Cloud Text-to-Speech API“, vyberte ho z výsledkov a stlačte Enable (Povoliť).\n\n4. Google vás pred povolením API požiada o nastavenie fakturácie. Pridajte kartu.\n\n5. Znova vyhľadajte „Service accounts“ (Servisné účty) a otvorte ho. Stlačte Create service account (Vytvoriť servisný účet), dajte mu ľubovoľný názov a stlačte Done (Hotovo). Netreba vyberať žiadnu rolu ani povolenie.\n\n6. Otvorte účet, ktorý ste práve vytvorili, prejdite na kartu Keys (Kľúče), stlačte Add key (Pridať kľúč), potom Create new key (Vytvoriť nový kľúč) a zvoľte JSON. Súbor sa stiahne.\n\n7. Vráťte sa sem, stlačte „Set up this service“ (Nastaviť túto službu) a vyberte tento stiahnutý súbor.
+Services.Steps.AzureVoices=1. Otvorte azure.microsoft.com/free vo svojom prehliadači a stlačte Začať bezplatne.\n\n2. Prihláste sa pomocou konta Microsoft alebo si ho vytvorte.\n\n3. Vyplňte svoje údaje. Azure vyžaduje kartu na overenie, že ste osoba; bezplatná úroveň nie je spoplatnená.\n\n4. Ak je vaše konto osobné, nájdite názov svojho adresára: prihláste sa na portál a nájdete ho v paneli s adresou za znakom @, končiaci na onmicrosoft.com.\n\n5. Vráťte sa sem a stlačte "Nastaviť túto službu".\n\n6. Vyplňte názov adresára, ak je vaše konto osobné, a nechajte ho prázdny, ak ide o pracovné alebo školské konto. Stlačte Štart.\n\n7. Otvorte prihlasovaciu stránku pomocou tlačidla, zadajte zobrazený krátky kód a prihláste sa.\n\n8. Vyberte svoje predplatné a stlačte Vytvoriť. NBR vytvorí zdroj a ponechá si jeho kľúč. Nič iné nemusíte zadávať.
+Services.Steps.Gemini=NEPOUŽÍVAJTE NA TOTO AI STUDIO. Jeho tlačidlo „Create API key“ zlyhá s chybou „The request is suspicious. Please try again.“ — overené na novom účte, ktorý nikdy nemal platobnú metódu, s už vytvoreným a importovaným projektom. Skutočnou chybou v pozadí je 403 zo samotnej služby Google. Všetko nižšie sa vykonáva v CLOUD CONSOLE, táto cesta funguje.\n\nPoradie je dôležité: projekt, potom API, potom servisný účet a až potom kľúč. Ak to urobíte v tomto poradí, kľúč sa vytvorí na jeden pokus.\n\n1. Otvorte console.cloud.google.com/projectcreate vo svojom prehliadači a prihláste sa.\n\n2. Dajte projektu názov, ktorý spoznáte, napríklad NBR. Ponechajte položku Organization nastavenú na „No organization“ — to je bežná odpoveď pre osobný účet a organizácia prináša pravidlá, ktoré nemáte pod kontrolou. Vyberte CREATE a počkajte, kým sa projekt zobrazí.\n\n3. AK GOOGLE PONÚKA BEZPLATNÚ SKÚŠOBNÚ VERZIU S KREDITOM 300 DOLÁROV, ODMIETNITE JU. Tento kredit neplatí za Gemini API vôbec — je to iná peňaženka pre iný produkt. Horšie je, že jej prijatie vytvorí fakturačný účet a Google potom automaticky prepojí fakturáciu s každým novým projektom, čím projekt vyradí z bezplatnej úrovne. Taktiež si to pýta platobnú kartu. Povedzte nie.\n\n4. Otvorte console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Skontrolujte, či názov projektu zobrazený v paneli hore je ten, ktorý ste práve vytvorili. Stránka má nadpis „Gemini API“. Vyberte ENABLE a počkajte, kým tlačidlo nezmizne.\n\n5. Otvorte console.cloud.google.com/iam-admin/serviceaccounts/create. Toto je krok, ktorý vám ušetrí dvojité vykonávanie nasledujúceho kroku: kľúč sa nemôže dostať k Gemini, pokiaľ nie je naviazaný na servisný účet, a jeho vytvorenie teraz znamená, že bude pripravený, keď ho budete potrebovať.\n\n6. Na stránke s nadpisom „Create service account“ vyplňte iba prvé pole, „Service account name“ — nbr-translate je dobrý názov a ID pod ním sa vyplní samo. Vyberte „CREATE AND CONTINUE“. Krok 2, „Permissions“, je voliteľný: nechajte ho prázdny, žiadna rola nie je potrebná. Vyberte DONE v dolnej časti.\n\n7. Otvorte console.cloud.google.com/apis/credentials. Znova skontrolujte názov projektu v hornom paneli. V riadku akcií vedľa nadpisu „Credentials“ vyberte „+ CREATE CREDENTIALS“ a z rozbaľovacej ponuky vyberte PRVÚ položku, „API key“ — nie „OAuth client ID“ a nie „Service account“.\n\n8. Napravo sa otvorí panel s nadpisom „Create API key“. Do poľa „Name“ úplne hore napíšte názov, napríklad NBR.\n\n9. Posuňte sa NADOL v rámci tohto panela, za sekciu „APIs that can be accessed using this key“, k zaškrtávaciemu políčku s názvom „Authenticate API calls through a service account“. ZAŠKRTNITE HO. Toto je krok, ktorý nikto neuhádne: kým nie je zaškrtnuté, Gemini sa nedá vôbec vybrať — jeho položka zostáva sivá a iba popis (tooltip) hovorí prečo.\n\n10. Sekcia s nadpisom „Service account“ sa objaví tesne pod tým. Vyberte „+ Select a service account“, zvoľte účet, ktorý ste vytvorili v kroku 6, výberom krúžku vľavo od jeho riadku, a vyberte SELECT v dolnej časti tohto okna.\n\n11. Teraz sa posuňte NAHOR v paneli k „APIs that can be accessed using this key“ a otvorte zoznam pod „Select API restrictions“. „Gemini API“ sa teraz dá zaškrtnúť. Zaškrtnite ho a vyberte OK.\n\n12. Posuňte sa NADOL na koniec panela a vyberte CREATE. Ponechajte „Application restrictions“ nastavené na „None“.\n\n13. Zobrazí sa okno s nadpisom „API key created“ s kľúčom v ňom. Začína sa AQ. namiesto AIza, čo je správne pre kľúč naviazaný na servisný účet. Skopírujte ho pomocou ikony kopírovania napravo od poľa.\n\n14. Vráťte sa sem, vyberte Set up this service a vložte kľúč. NBR ho pred uložením skontroluje v Google.\n\nAK KONZOLA HOVORÍ, ŽE POTREBUJETE DODATOČNÝ PRÍSTUP a uvádza chýbajúce oprávnenie, takmer určite ste prihlásení do nesprávneho účtu Google a nie je to nedostatok práv. Pridajte authuser=1 na koniec adresy — alebo authuser=2 atď. — kým sa projekt nezobrazí.
+Services.Steps.OpenAi=1. Otvorte platform.openai.com vo svojom prehliadači. Toto je vývojárska platforma, nie stránka ChatGPT, a je to samostatná vec, aj keď už za ChatGPT platíte.\n\n2. Prihláste sa svojím účtom alebo si vytvorte nový.\n\n3. NAJPRV skontrolujte, v ktorej organizácii sa nachádzate. Názov sa nachádza v ľavom hornom rohu stránky a je to ponuka: otvorte ju a vyberte si vlastnú, ktorá sa zvyčajne nazýva Personal. Ak ste boli niekedy pozvaní do organizácie niekoho iného alebo máte pracovný prístup k ChatGPT Team alebo Business, platforma vás môže zaradiť do TEJTO organizácie – kde ste len členom, fakturácia vás odmietne s chybou „required permission: api.billing.read“ a akýkoľvek kľúč, ktorý vytvoríte, by patril nesprávnemu účtu. Všetko nižšie sa musí udiať vo vašej vlastnej organizácii.\n\n4. Prejdite na platform.openai.com/settings/organization/billing/overview. Fakturácia (Billing) sa nachádza pod položkou ORGANIZATION, nie na bežnej stránke nastavení, kde je ľahké ju hľadať a nenájsť. Vyberte Add to balance, pridajte platobnú kartu a kúpte si kredit. Desať dolárov je minimum a na začiatok viac než dosť. Nič nebude fungovať, kým na účte nebude kredit.\n\n5. Keď tam budete, nastavte si mesačný limit útraty. Nestojí to nič a znamená to, že chyba vám nespôsobí vysoký účet.\n\n6. Otvorte API keys v rovnakých nastaveniach a vyberte Create new secret key. Dajte mu názov, ktorý spoznáte, napríklad NBR. Uistite sa, že ste stále v tej istej organizácii, v ktorej máte kredit.\n\n7. Kľúč skopírujte v momente, keď sa zobrazí. Zobrazí sa IBA RAZ. Ak zatvoríte okno bez jeho skopírovania, už sa znova nezobrazí – jednoducho ho odstráňte a vytvorte ďalší.\n\n8. Vráťte sa sem, vyberte Set up this service a vložte kľúč.\n\n9. NBR skontroluje kľúč v OpenAI predtým, než ho uloží, takže hneď zistíte, či funguje.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Pomocník – pripravujeme.
+Dialog.Help.Title=Pomocník
+Dialog.WhatsNew.Title=Čo je nové
+Report.Filter=Textové súbory (*.txt)|*.txt|Všetky súbory (*.*)|*.*
+Report.Done=Správa bola uložená do:\n\n{0}\n\n{1} kB. Priložte ju k svojej správe.
+Report.Failed=Správu sa nepodarilo zapísať. Priečinok môže byť len na čítanie alebo na disku nie je dostatok miesta.
+Dialog.About.Title=O aplikácii NBR
+Dialog.About.Release=Beta 1
+Dialog.About.Licence=🄯 Copyleft — NBR je slobodný softvér pod licenciou GNU General Public License, verzia 3. Môžete ho používať, študovať, zdieľať a meniť; ak šírite zmenenú verziu, musí byť šírená za rovnakých podmienok spolu so zdrojovým kódom.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nZostavenie z {1}\n\nIde o multiformátovú a multioýstupovú čítačku digitálnych kníh a publikácií, špeciálne navrhnutú pre nevidiacich, slabozrakých a ľudí s poruchami čítania. Pre základné používanie je bezplatná, ale ak chcete preskúmať a využívať jej pokročilé funkcie, ako sú preklad a cloudové hlasy, budete sa musieť zaregistrovať a prípadne zaplatiť za príslušné externé služby.\n\nVyrobila spoločnosť Nemoguća vizija — nemoviz.org\n\nNapísal Gordan Radić\n\nVytvorené s pomocou Claude (Anthropic). Väčšinu kódu napísal tento nástroj podľa autorovho návrhu, rozhodnutí a meraní; autorské práva a licencia patria jemu.\n\n{2}\n\nNA ČOM JE NBR POSTAVENÝ\n\nNBR prehráva zvuk cez libmpv, číta Braillovo písmo cez liblouis, hovorí cez NVDA controller client, číta tagy pomocou TagLib#, extrahuje text z PDF pomocou PdfPig a otvára archívy pomocou SharpCompress. Každá z nich je samostatná knižnica, použitá v nezmenenej podobe a každú možno nahradiť kompatibilným zostavením.\n\nlibmpv a FFmpeg v ňom — LGPL 2.1 alebo novšia\n\nliblouis a jeho braillovské tabuľky — LGPL 2.1 alebo novšia\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress a balíky Microsoft — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend a OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nÚplné oznámenie — verzie, držitelia autorských práv a zdroj, z ktorého bola každá licencia načítaná — sa nachádza v súbore THIRD-PARTY-NOTICES.txt vedľa programu a samotné texty licencií sú v priečinku Licences.
+Dialog.Rules.Title=Pravidlá prekladu
+Dialog.Rules.Language=Jazyk
+Dialog.Rules.Text.Accessible=Pravidlá odoslané pre tento jazyk
+Dialog.Rules.None=Pre tento jazyk neboli napísané žiadne pravidlá. NBR doň napriek tomu prekladá pomocou pravidiel, ktoré platia pre každý jazyk, a na základe toho, čo zistí o samotnej knihe.
+Dialog.Rules.From=Číta sa z {0}\nAk chcete použiť vlastné, skopírujte tento súbor do {1} a kópiu upravte. Ak kópiu odstránite, táto sa vráti späť.
+Dialog.Rules.FromYours=Číta sa z vašej vlastnej kópie: {0}\nAk ju odstránite, znova sa použijú pravidlá, ktoré boli súčasťou NBR.
+Dialog.Rules.Make=Ak chcete napísať pravidlá pre tento jazyk, vložte {1} do {0}.
+Update.Title=Kontrola aktualizácií
+Update.Checking=Kontroluje sa novšia verzia
+Update.Available=Bola zverejnená novšia verzia Nemoviz Book Reader: {0}\n\nChcete otvoriť stránku na stiahnutie?
+Update.UpToDate=Používate najnovšiu zverejnenú verziu.
+Update.Failed=Kontrolu nebolo možné vykonať. Možno nie je k dispozícii pripojenie alebo je stránka na stiahnutie momentálne nedostupná.
+Hint.Button.Accessible=Pomocník pre {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Cloudový hlas — bezplatný limit
+Cloud.Quota.Warning=Táto kniha má {0} znakov.\n\nZ tohtomesačného bezplatného limitu {2} znakov v službe {3} ste už vyčerpali {1}.\n\nČítanie tejto knihy prekročí bezplatný limit a všetko nad tento rámec bude účtované spôsobom platby priradeným k danému účtu.\n\nChcete napriek tomu pokračovať v čítaní?
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Chyba
+Dialog.Error.General=Chyba: {0}
+Dialog.DontShowAgain=Túto správu už nezobrazovať

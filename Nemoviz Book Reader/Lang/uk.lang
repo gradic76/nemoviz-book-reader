@@ -1,0 +1,805 @@
+; Nemoviz Book Reader
+;
+; Translated by:            Gemini (Google), 2026
+; Verified and modified by: 
+;
+; Human translators: write your name and the year after the colon above.
+; If somebody has signed there already, add another line like theirs
+; underneath - every one of them is kept when this file is reordered.
+;
+; Translate what stands to the RIGHT of the equals sign, and nothing else.
+; Anything in braces - {0}, {1} - is filled in by the program and has to
+; survive. The two characters \n mean a line break and \n\n a blank line;
+; never break a line with a real Enter, because everything after it is
+; thrown away when the file is read.
+;
+; The order is the same in every language and is set in
+; tools/lang-order.txt. It follows the program as it is used: the player
+; and its panel, then window by window, and inside a window the thing
+; itself before the dialogs it opens.
+
+; ---- The program name, and the buttons that recur everywhere
+LanguageName=Українська
+Btn.OK=ОК
+Btn.Yes=Так
+Btn.No=Ні
+Btn.Cancel=Скасувати
+Btn.Close=Закрити
+Btn.Continue=Продовжити
+Btn.Refresh=Оновити
+Btn.Refresh.Accessible=Оновити
+Common.Dash=-
+Common.Error=Помилка
+Common.DateFormatLong=dd MMMM yyyy р.
+
+; ---- PLAYER - the glass, where the book describes itself
+Player.Info.TitleLabel=Назва:
+Player.Info.AuthorLabel=Автор:
+Player.Info.ProducerLabel=Виробник:
+Player.Info.PublisherLabel=Видавець:
+Player.Info.ChapterLabel=Розділ:
+Player.Info.PartLabel=Частина:
+Player.Info.PageLabel=Сторінка:
+Player.Info.BookmarksLabel=Закладки:
+Player.Info.VoiceLabel=Голос:
+Player.Info.NoVoiceLabel=Немає встановленого голосу
+Player.Info.PartNumElapsed=Минуло часу в частині {0}:
+Player.Info.PartNumRemaining=Залишилося часу в частині {0}:
+Player.Info.ElapsedLabel=Минуло часу:
+Player.Info.RemainingLabel=Залишилося часу:
+Player.Info.VolumeLabel=Гучність:
+Player.Info.SpeedLabel=Швидкість:
+Player.Info.AccessibleName=Інформація про відтворення, F8
+Player.Info.Prepared=Мовлення збережено: {0} фрагментів, {1} МБ
+Player.Info.Preparing=Підготовка решти цієї книги: {0} з {1} фрагментів
+Player.TitleBar.Paused=пауза
+Player.ReadingSurface.Accessible=Поверхня читання
+
+; ---- PLAYER - transport and the ring
+Btn.Play.Accessible=Відтворити, Space
+Btn.Pause.Accessible=Пауза, Space
+Btn.Back.Accessible=Назад, Shift+Left
+Btn.Forward.Accessible=Вперед, Shift+Right
+Btn.VolumeUp.Accessible=Збільшити гучність, F12
+Btn.VolumeDown.Accessible=Зменшити гучність, F11
+Btn.Power.Accessible=Вихід, Alt+F4
+Player.Volume.Text=Гучність: {0}%
+Player.Volume.Accessible=Гучність {0} відсотків
+Player.Speed.Text=Швидкість: {0}x
+Player.Speed.Legend=Швидкість
+Player.Speed.Accessible=Швидкість {0} разів
+Player.Position.Label=Позиція
+Player.Position.Text=Позиція: {0} / {1}
+Player.Position.Accessible=Позиція {0} відсотків
+Player.Progress.Legend=Прогрес
+
+; ---- PLAYER - the navigation step
+Player.Seek.Label=Крок навігації:
+Player.Seek.Accessible=Крок навігації, Shift+Up або Shift+Down
+Player.Seek.Announce=Навігація: {0}
+Seek.Item.15s=15 секунд
+Seek.Item.30s=30 секунд
+Seek.Item.1min=1 хвилина
+Seek.Item.5min=5 хвилин
+Seek.Item.10min=10 хвилин
+Seek.Item.15min=15 хвилин
+Seek.Item.30min=30 хвилин
+Seek.Item.Chapter=Розділ
+Seek.Item.Part=Частина
+Seek.Item.Track=Доріжка
+Seek.Item.HeadingLevel=Заголовок {0}
+Seek.Item.Page=Сторінка
+Seek.Item.Paragraph=Абзац
+Seek.Item.Bookmark=Закладка
+Seek.Item.StandardPage=Стандартна сторінка
+
+; ---- PLAYER - the eight command keys
+Btn.Library=Бібліотека
+Btn.Library.Accessible=Бібліотека, F3
+Btn.Library.Legend=Бібліотека
+Btn.Settings=Налаштування
+Btn.Settings.Accessible=Налаштування, F2
+Btn.Settings.Legend=Налаштування
+Btn.Properties.Legend=Властивості
+Btn.Properties=Властивості
+Btn.Properties.Accessible=Властивості, Alt+Enter
+Btn.Help=Довідка
+Btn.Help.Accessible=Довідка, F1
+Btn.Help.Legend=Довідка
+Btn.GoTo.Legend=Перейти до...
+Btn.GoTo=Перейти до...
+Btn.GoTo.Accessible=Перейти до, F4
+Btn.SetBookmark.Legend=Закладка
+Btn.SetBookmark=Додати закладку
+Btn.SetBookmark.Accessible=Додати закладку, F5
+Btn.ManageBookmarks.Legend=Закладки
+Btn.ManageBookmarks=Керування закладками
+Btn.ManageBookmarks.Accessible=Керування закладками, F6
+Btn.Timer=Таймер сну
+Btn.Timer.Legend=Таймер
+Btn.Timer.Accessible=Таймер сну, F7
+Btn.Timer.Countdown=Таймер сну {0}
+Btn.Timer.Accessible.Active=Таймер сну, залишилося {0}, активуйте, щоб зупинити відтворення та скасувати таймер
+Btn.Timer.Accessible.LessThanMinute=Таймер сну, залишилося менше хвилини
+
+; ---- PLAYER - mouse tips and the rest
+Tip.Back=Назад (Shift+Left)
+Tip.PlayPause=Відтворення/Пауза (Space)
+Tip.Forward=Вперед (Shift+Right)
+Tip.Seek=Змінюйте за допомогою Shift+Up та Shift+Down; перестрибуйте за допомогою Shift+Left та Shift+Right (також Назад/Вперед)
+Tip.GoTo=F4
+Tip.Properties=Alt+Enter
+Tip.Timer=F7
+Tip.Volume=F11 та F12
+Tip.Speed=Ctrl+стрілка вліво та Ctrl+стрілка вправо
+Tip.Progress=Ctrl+1–9: перехід до 10–90%
+Player.OpenFile.Title=Виберіть книгу
+Player.NoVoiceForLanguage=Немає встановленого голосу для мови {0}. Відкрийте властивості за допомогою Alt+Enter, щоб вибрати його.
+Filter.Audiobooks=Аудіокниги
+Filter.TextBooks=Текстові книги
+Filter.BrailleBooks=Книги шрифтом Брайля
+Filter.Archives=Архіви
+Filter.AllSupported=Усі підтримувані файли
+Filter.AllFiles=Усі файли
+
+; ---- LIBRARY - the window, the shelf and the menus
+Library.Title=Бібліотека
+Library.List.Accessible=Книжкова полиця
+Library.NowReading.Accessible=Зараз читається
+Library.NowReading.Empty=Немає завантаженої книги
+Library.Search.Accessible=Пошук
+Library.Filter.Accessible=Фільтрувати за статусом
+Library.Details.Accessible=Відомості про книгу
+Library.Btn.Load=Завантажити
+Library.Btn.Load.Accessible=Завантажити
+Library.Btn.Close=Закрити
+Library.Btn.Close.Accessible=Закрити
+Menu.File=Файл
+Menu.File.OpenFile=Відкрити файл...
+Menu.File.OpenFolder=Відкрити папку...
+Menu.File.OpenAudioCd=Відкрити аудіо-CD
+Menu.File.ClearLibrary=Очистити бібліотеку...
+Menu.File.OpenLibraryFolder=Відкрити папку бібліотеки
+Menu.File.Exit=Вихід
+Menu.File.ExportAudio=Експортувати як аудіокнигу...
+Menu.File.Translate=Перекласти книгу...
+Menu.Sort=Сортування
+Menu.Sort.Alphabetically=За алфавітом
+Menu.Sort.DateAdded=За датою додавання
+Menu.Sort.Format=За форматом
+Menu.Sort.Status=За статусом
+Menu.Sort.Ascending=За зростанням
+Menu.Sort.Descending=За спаданням
+Menu.Sort.ActiveMark=(активний)
+Menu.Help=Довідка
+Menu.Help.Help=Довідка
+Menu.Help.About=Про NBR
+Menu.Help.WhatsNew=Що нового
+Menu.Help.Report=Експортувати звіт...
+Menu.Help.Services=Служби та облікові записи...
+Menu.Help.Update=Перевірити наявність оновлень
+Shelf.Filter.All=Усі книги
+Shelf.Filter.Reading=Читаються
+Shelf.Filter.Unread=Непрочитані
+Shelf.Filter.Read=Прочитані
+Shelf.Filter.Favorites=Вибране
+Shelf.Status.NowReading=Читається зараз
+Shelf.Status.Reading=Читається
+Shelf.Status.Unread=Непрочитане
+Shelf.Status.Read=Прочитане
+Context.Open=Відкрити
+Context.MarkRead=Позначити як прочитане
+Context.MarkUnread=Позначити як непрочитане
+Context.Rename=Перейменувати
+Context.Delete=Видалити
+Context.Properties=Властивості
+Context.ReadOcr=Розпізнати текст
+Context.ReReadOcr=Розпізнати знову іншою мовою
+Context.Translate=Перекласти книгу...
+Context.Favorite=Позначити як вибране
+
+; ---- LIBRARY - what a book says about itself
+Details.Field.Title=Назва
+Details.Field.Author=Автор
+Details.Field.Format=Формат
+Details.Field.Speed=Швидкість
+Details.Field.Volume=Гучність
+Details.Field.Added=Додано
+Details.Field.Producer=Виробник
+Details.Field.Publisher=Видавець
+Details.Field.Year=Рік
+Details.Field.Time=Час
+Details.Field.Elapsed=Минуло
+Details.Field.Remaining=Залишилося
+Details.Field.Read=Прочитано
+Details.Field.Pages=Сторінки
+Details.Field.Headings=Заголовки
+Details.Field.Characters=Символи
+Details.Field.Language=Визначена мова
+Details.Field.Description=Опис
+Details.Description.Open=Натисніть Enter, щоб прочитати
+Details.Field.SoundProcessing=Обробка звуку
+Details.Sound.On=Увімкнено
+Details.Sound.Off=Вимкнено
+Details.Speed.Value={0}x
+Dialog.Description.Title=Опис - {0}
+
+; ---- LIBRARY - importing and deleting
+Library.ImportFile.Title=Додати книгу до бібліотеки
+Library.ImportFolder.Description=Виберіть папку з книгами
+Dialog.ConfirmImport.Message=Виявлено {0} книг у вибраному місці: {1} аудіокниг, {2} текстових книг, {3} спеціальних форматів та {4} архівів.\n\nЯкщо це правильно, після підтвердження книги будуть скопійовані до вашої бібліотеки, а архіви розпаковані. Ваша бібліотека знаходиться за адресою {5}.\n\nУ вихідному місці нічого не змінюється — усе залишається без змін, тому не хвилюйтеся.\n\nЯкщо кількість не відповідає очікуваній, спробуйте впорядкувати дані, які ви хочете імпортувати. Масовий імпорт має певні обмеження щодо розпізнавання назв, і NBR не може гарантувати, що кожна з них буде визначена правильно.\n\nЦе може зайняти деякий час, тому намагайтеся не переривати процес.
+Dialog.ConfirmImport.One=Знайдено одну книгу. Імпортувати її?
+Dialog.ConfirmImport.Title=Додати папку
+Dialog.NoBooksFound.Message=У вибраній папці не знайдено підтримуваних книг.
+Dialog.NoBooksFound.Title=Додати папку
+Dialog.ImportSuccess.Message=Книгу додано до бібліотеки.
+Dialog.ImportSuccess.Title=Додати книгу
+Dialog.ImportError.Message=Помилка додавання книги: {0}
+Dialog.ImportFolderSuccess.Message=Імпортовано {0} книг.
+Dialog.ImportFolderSuccess.Skipped={0} було пропущено.
+Dialog.ImportFolderSuccess.SkippedList=Вони не були додані:
+Dialog.ImportFolderSuccess.Title=Додати папку
+Dialog.ImportFolderError.Message=Помилка під час імпорту папки: {0}
+Dialog.ReimportExisting.Title=Вже є в бібліотеці
+Dialog.ReimportExisting.Message={0} вже є на полиці. Повторний імпорт оновлює вміст папки книги. Ваша позиція в книзі та закладки зберігаються, але якщо файл змінився з минулого разу, текст міг зміститися, і ваша позиція більше не відповідатиме попередній. Імпортувати знову?
+Dialog.Skipped.Drm=захищено
+Dialog.Skipped.Cancelled=скасовано
+Dialog.Skipped.MissingFirstVolume=відсутня перша частина цього набору
+Dialog.Skipped.Empty=файл порожній
+Dialog.Rename.Title=Перейменувати книгу
+Dialog.Rename.Prompt=Нова назва:
+Dialog.Rename.AuthorLabel=Автор:
+Dialog.Rename.TitleLabel=Назва:
+Dialog.ConfirmDelete.Message=Ви впевнені, що хочете назавжди видалити "{0}" з диска? Цю дію неможливо скасувати.
+Dialog.ConfirmDelete.Title=Видалити книгу
+Dialog.DeleteError.Message=Помилка під час видалення книги з диска: {0}
+Dialog.ActiveBook.Message="{0}" зараз завантажено в програвач, тому її неможливо видалити. Закрийте бібліотеку, відкрийте іншу книгу або зупиніть відтворення, а потім спробуйте знову.
+Dialog.ActiveBook.Title=Книга активна
+Dialog.ClearLibrary.Title=Очистити бібліотеку
+Dialog.ClearLibrary.Message=Видалити всі {0} книг з бібліотеки? Це назавжди видалить їхні файли з диска, і цю дію неможливо скасувати.
+Dialog.ClearLibrary.Empty=Бібліотека вже порожня.
+Dialog.ClearLibrary.Done=Видалено {0} книг.
+Dialog.ClearLibrary.Skipped={0} не вдалося видалити (використовується або зараз відкрита).
+Dialog.DrmProtected.Title=Захищена книга
+Dialog.DrmProtected.Message=Ця книга захищена DRM (її вміст зашифровано), тому її неможливо відкрити. Будь ласка, використовуйте копію без DRM.
+Dialog.ArchivePassword.Title=Потрібен пароль
+Dialog.ArchivePassword.Prompt=Архів "{0}" захищено паролем. Введіть пароль, щоб відкрити його:
+Dialog.ArchivePassword.Retry=Цей пароль не підійшов. Спробуйте ще раз для "{0}":
+Dialog.ArchivePassword.Field=Пароль до архіву
+Extract.Progress.Title=Розпакування
+Extract.Progress.Preparing=Підготовка…
+Extract.Progress.Determinate=Розпакування… {0} / {1} файлів
+Extract.Progress.Indeterminate=Розпакування… {0} файлів
+
+; ---- GO TO
+Dialog.GoTo.Title=Перейти
+GoTo.List.Accessible=Частини книги
+GoTo.Item.Format={0}/{1} — {2}
+GoTo.OK.Accessible=ОК
+GoTo.Cancel.Accessible=Скасувати
+GoTo.Page.Group=Перейти до сторінки
+GoTo.Page.Accessible=Номер сторінки
+GoTo.AutoPlay=Почати відтворення після переходу
+GoTo.AutoPlay.Hint=Якщо встановлено, відтворення розпочнеться одразу після переходу. Якщо не встановлено, поточний стан зберігається: пауза залишається паузою, відтворення продовжується.
+GoTo.Hint.Accessible=Підказка
+
+; ---- SLEEP TIMER
+Dialog.Timer.Title=Таймер сну
+SleepTimer.Duration.Group=Тривалість
+SleepTimer.Duration.15=15 хвилин
+SleepTimer.Duration.30=30 хвилин
+SleepTimer.Duration.45=45 хвилин
+SleepTimer.Duration.60=60 хвилин
+SleepTimer.Duration.Custom=Власна:
+SleepTimer.Custom.Accessible=Власна тривалість у хвилинах
+SleepTimer.Bookmark=Створити закладку на початковій точці
+SleepTimer.Action.Group=Після завершення часу
+SleepTimer.Action.Stop=Зупинити відтворення
+SleepTimer.Action.StopClose=Зупинити та закрити програму
+SleepTimer.Action.StopShutdown=Зупинити, закрити та вимкнути комп'ютер
+SleepTimer.Start=Пуск
+SleepTimer.Start.Accessible=Запустити таймер сну
+SleepTimer.CancelBtn=Скасувати
+SleepTimer.CancelBtn.Accessible=Скасувати
+SleepTimer.Announce.Set=Таймер сну встановлено на {0} хвилин
+SleepTimer.Announce.Cancelled=Таймер сну скасовано
+SleepTimer.Announce.Finished=Таймер сну завершено, відтворення зупинено
+
+; ---- BOOKMARKS
+Dialog.ManageBookmarks.Title=Керування закладками
+Bookmark.Announce.Set=Закладку встановлено
+Bookmark.Item.Format=Закладка {0} ({1})
+ManageBookmarks.List.Accessible=Закладки
+ManageBookmarks.Delete=Видалити
+ManageBookmarks.Delete.Accessible=Видалити
+ManageBookmarks.OK.Accessible=ОК
+ManageBookmarks.Cancel.Accessible=Скасувати
+ManageBookmarks.Selected=Вибрано
+ManageBookmarks.NotSelected=Не вибрано
+
+; ---- PROPERTIES - shared by both pages
+Dialog.SoundProcessing.Title=Обробка звуку
+Dialog.SoundProcessing.Message=Обробка звуку полегшує прослуховування записів низької якості, але не виправляє їх.\n\nВона не може відновити те, що не було записано, а надмірне використання принесе більше шкоди, ніж користі. Просто увімкніть її, послухайте кілька хвилин, і лише потім переходьте до налаштування окремих етапів.\n\nУ довідці пояснюється призначення кожного з них.
+Prop.Info.Accessible=Інформація про книгу
+Prop.Info.ProcessingOff=Обробка звуку: вимкнено
+Prop.Info.ProcessingOn=Обробка звуку: увімкнено
+Prop.Info.Bypassed=(обхід активовано)
+Prop.Info.Off=вимкнено
+Prop.Info.Protection=Захист від спотворень
+Prop.Tab.Audio=Аудіо
+Prop.Tab.Text=Текст
+Prop.On=увімкнено
+Prop.Off=вимкнено
+
+; ---- PROPERTIES - sound processing
+Prop.UseSoundProcessing=Використовувати обробку звуку
+Prop.SoundProcessing=Обробка звуку
+Prop.Stage.Level=Рівень
+Prop.Highpass.Title=Усунення гуркоту
+Prop.Denoise.Title=Шумопоглинання
+Prop.Deesser.Title=Пом'якшення шиплячих
+Prop.Compressor.Title=Вирівнювання мовлення
+Prop.Eq.Title=Тембр
+Prop.Eq.Shelf={0} і вище
+Prop.Loudness.Title=Гучність і паузи
+Prop.Normalize.Title=Автоматична гучність
+Prop.Gate.Title=Шум у паузах
+Prop.Level.Minimal=Мінімальний
+Prop.Level.Light=Легкий
+Prop.Level.Medium=Середній
+Prop.Level.Strong=Сильний
+Prop.Level.Maximum=Максимальний
+Prop.ResetAll=Скинути все
+Prop.Bypass=Обхід
+Prop.Bypass.Shortcut=Control B вмикає та вимикає це з будь-якого місця на цій сторінці
+Prop.Analysing=Аналіз запису
+Prop.Analysing.Done=Запис проаналізовано, встановлено {0} етапів. Змініть будь-який з них, якщо бажаєте.
+Prop.Analysing.Failed=Не вдалося проаналізувати запис. Налаштування залишилися без змін.
+Analyse.Progress.Title=Аналіз запису
+Analyse.Progress.Starting=Початок аналізу...
+Analyse.Progress.Working=Сегмент {0} з {1}. {2}
+Analyse.Progress.Quarter=Виконано {0} відсотків. {1}
+Analyse.Progress.Cancel=Скасувати
+Analyse.Progress.Cancelling=Зупинка після цього сегмента. Налаштування залишаються без змін.
+Analyse.Progress.Estimating=Розрахунок часу, необхідного для виконання.
+Analyse.Progress.AlmostDone=Майже готово.
+Analyse.Progress.Seconds=Залишилося близько {0} секунд.
+Analyse.Progress.Minutes=Залишилося близько {0} хвилин.
+Hint.SoundProcessing=Використовуючи обробку звуку, ви можете налаштувати звучання запису. Ви можете видалити різні шуми, збільшити гучність і забарвити загальний звук за допомогою еквалайзера. Є шість груп елементів керування, кожну з яких можна вмикати та вимикати окремо. Ви також можете налаштувати кожен елемент керування окремо. Ви можете тимчасово обійти весь ланцюжок обробки звуку, натиснувши Ctrl+B, щоб почути різницю між оригінальним записом і вашими налаштуваннями звуку.
+Hint.RemoveRumble=Зрізає найнижчі частоти — шум транспорту, кондиціонера, шум від дотиків. Це не може виправити нечіткий запис, але очищує нижній діапазон, щоб звільнити місце для мовлення.
+Hint.NoiseRemoval=Зменшує постійне фонове шипіння, яке залишається від плівки або дешевого мікрофона. Занадто сильне налаштування починає поглинати голос разом із ним, тому підвищуйте його лише доти, доки шипіння не зникне.
+Hint.SoftenSibilance=Згладжує різкі звуки «С» та «Ш». Корисно для читців, які працюють близько до мікрофона, та для записів, які були надто яскравими.
+Hint.EvenOutSpeech=Зменшує розрив між тихими та гучними частинами, щоб шепіт і крик звучали ближче один до одного. Це те, що варто використовувати, коли ви постійно крутите ручку гучності.
+Hint.Tone=П'ять смуг у децибелах, названих за їхньою частотою. Найнижча знаходиться на рівні 200 Гц, де зазвичай виникає гул або нечіткість запису; верхня смуга є поличковою, тому вона піднімає або опускає все, що вище неї, а не лише одну область. Смуги навмисно перекриваються, що дозволяє отримати плавну криву, але також означає, що вони додаються — три сусідні смуги на +4 дають трохи більше ніж +4 між ними. Невеликі зміни мають велике значення, і будь-яке значення понад кілька дБ зазвичай означає, що справжнім рішенням є інший етап.
+Hint.AutomaticLoudness=Дві функції, що взаємодіють одна з одною, тому вони розміщені в одному блоці. Автоматична гучність підтримує стабільний загальний рівень звуку протягом усієї книги, навіть між файлами, записаними в різні дні; вона відстежує голос, а не весь сигнал, що є необхідним для мовних записів. Пригнічення шуму в паузах працює навпаки: усе, що тихіше за обраний рівень, приглушується, тому шипіння або гул, що присутні під час читання, стають нечутними в проміжках між реченнями. Це ніколи не впливає на сам голос і лише приглушує, а не вимикає звук повністю (шум, що вмикається і вимикається навколо кожної фрази, втомлює більше, ніж той, що залишається постійним). Збільшення гучності призводить до посилення шуму під нею, тому, якщо це стається, використовуйте цей регулятор.
+
+; ---- PROPERTIES - the text page
+Prop.Text.ReadingIn=Читання мовою:
+Prop.Text.NoVoiceShort=Жоден встановлений голос не підтримує {0} — оберіть нижче.
+Prop.Text.NoVoiceForLanguage=Жоден встановлений голос не підтримує {0}. Встановіть голос для {0} або оберіть мову та голос вище, щоб читати цю книгу. Цей вибір застосовується лише до цієї книги.
+Prop.Text.InputBrailleGroup=Джерело шрифту Брайля
+Prop.Text.InputBrailleTable=Таблиця вводу шрифтом Брайля:
+Hint.Text0=Тут ви можете обрати мову та голос для читання цієї книги. Ви можете мати різні налаштування для кожної окремої книги в Бібліотеці. Кожен голос запам'ятовує власні налаштування — швидкість, гучність і висоту тону — тому немає потреби налаштовувати їх знову після перемикання з іншого голосу.\n\nПам'ятайте, що ви можете обрати "Без мовлення", якщо хочете читати візуально або за допомогою брайлівського дисплея без прослуховування аудіо.
+Hint.TextVisual=Тут ви можете налаштувати макет екрана для читання. Ви можете обрати між макетом на кшталт субтитрів, текстом, що прокручується, як титри у фільмі, або миттєвою зміною сторінок. Ви також можете обрати кольори фону, тексту та виділення, а також те, чи буде позначено рядок, що читається, чи все речення.\n\nЗауважте, що це жодним чином не впливає на мовлення.
+Hint.TextBrailleSource=Ця книга отримана з файлу шрифту Брайля, і це таблиця, за допомогою якої вона була прочитана — та, що перетворила клітинки Брайля назад у слова.\n\nФайл шрифту Брайля не містить інформації про свою мову, ступінь скорочення чи національний стандарт, якого він дотримується, тому NBR має визначити таблицю на основі самого тексту. Зазвичай вона правильна, але не завжди, а неправильна таблиця дає слова, які майже правильні: «Have» там, де в книзі написано «How».\n\nЯкщо ви бачите таке, виберіть іншу таблицю тут і натисніть OK. Книга буде прочитана знову з файлу шрифту Брайля, який ви імпортували і який зберігається поруч із нею, тому ви можете спробувати стільки таблиць, скільки забажаєте, і в будь-який час повернутися до першої.\n\nЗапропоновані таблиці відповідають мові, вказаній вище. Якщо ця мова неправильна, змініть її, і таблиці оновляться.\n\nЦе ніяк не впливає на те, що відображає ваш дисплей Брайля. Ваш екранний диктор перекладає це, використовуючи таблицю у власних налаштуваннях.
+NoVoice.Title=Немає голосу для цієї книги
+NoVoice.Message=Ця книга мовою {0}, і жоден встановлений голос не підтримує її. Виберіть голос для читання, лише цього разу, або залиште її непрочитаною, доки не буде встановлено голос для {0}.
+NoVoice.Read=Читати цим голосом
+NoVoice.Leave=Залишити непрочитаною
+Dialog.BrailleReread.Title=Прочитати файл шрифту Брайля знову?
+Dialog.BrailleReread.Message=Цю книгу буде прочитано знову з її оригінального файлу шрифту Брайля, використовуючи {0}.\n\nТекст буде створено заново, тому все, що вказувало на старий текст, буде втрачено: місце, де ви зупинилися, ваші закладки та відсоток прочитаного. Сама книга не змінюється, і ви можете читати її знову з іншою таблицею скільки завгодно разів.
+Dialog.BrailleReread.Failed=Не вдалося прочитати файл шрифту Брайля з цією таблицею. Книгу залишено без змін.
+
+; ---- SETTINGS - the frame and its tabs
+Dialog.Settings.Title=Налаштування
+Settings.Tab.General=Загальні
+Settings.Tab.TextBooks=Мовлення та шрифт Брайля
+Settings.Tab.Device=Пристрої
+Settings.Tab.Advanced=Додатково
+Settings.OK.Accessible=OK
+Settings.Cancel.Accessible=Скасувати
+Settings.Apply=Застосувати
+Settings.Apply.Accessible=Застосувати
+
+; ---- SETTINGS - General
+Settings.General.Language.Restart=Для зміни мови потрібно перезапустити NBR. Перезапустити зараз?
+Settings.General.Language.RestartTitle=Мова
+Settings.General.LanguageGroup=Мова
+Settings.General.Language=Мова:
+Settings.General.LibraryGroup=Розташування бібліотеки
+Settings.General.LibraryLocation=Розташування бібліотеки:
+Settings.General.LibraryLocation.Browse=Виберіть папку, де зберігається ваша бібліотека книг
+Settings.General.Browse=Огляд...
+Settings.General.Browse.Accessible=Огляд папки бібліотеки
+Settings.General.MediaKeysGroup=Мультимедійні клавіші
+Settings.General.UseMultimediaKeys=Використовувати мультимедійні клавіші
+Settings.General.UseMultimediaKeysGlobally=Використовувати мультимедійні клавіші глобально
+Settings.General.MetadataGroup=Відомості про книгу
+Settings.General.UseMetadata=Використовувати вбудовані метадані
+Settings.General.LookGroup=Вигляд
+Settings.General.LibraryLocation.Hint=Це місце, куди NBR копіює імпортовані книги. Ви можете залишити його за замовчуванням на системному розділі, але якщо ви плануєте мати велику бібліотеку, інший розділ або диск буде набагато кращим рішенням. NBR також зберігає там інформацію про кожну книгу, тому, якщо ви хочете зберегти свої позиції читання, закладки, швидкість та інші налаштування читання, зверніть увагу, що вам потрібно вручну скопіювати вміст зі старої папки бібліотеки до нового місця. І в межах того самого цінового діапазону: змінивши розташування бібліотеки на інше, ніж системний розділ, ви вбережете свої книги від випадкових збоїв системи та звичайної втрати даних, що їх супроводжує.
+Settings.General.UseMultimediaKeys.Hint=Ви можете використовувати мультимедійні клавіші клавіатури або гарнітури для відтворення, паузи та навігації книгою, використовуючи обраний вами крок навігації.\n\nДругий перемикач робить їх системними, тому вони досягають NBR з будь-якого місця — ціною того, що вони забираються у кожного іншого програвача, поки запущено NBR.
+Settings.General.UseMetadata.Hint=Деякі формати файлів мають метадані з додатковою інформацією про автора, назву, видавця, продюсера тощо. NBR може читати та відображати цю інформацію там, де вона є. Однак, якщо ця інформація неправильна або відсутня, NBR може натомість взяти основні відомості з назв папок і файлів. Як останній засіб, ви завжди можете перейменувати книги в Бібліотеці.
+Settings.General.UpdateGroup=Оновлення
+Settings.General.AutoCheckUpdates=Автоматично перевіряти наявність оновлень
+Settings.General.AutoCheckUpdates.Hint=Якщо цей параметр увімкнено, NBR раз на день запитує, чи була опублікована новіша версія, і повідомляє лише в тому випадку, якщо вона є. Нічого про вас або ваші книги не надсилається: запит не містить ідентифікатора, бібліотеки та списку того, що ви читаєте. Вимкніть це, якщо ви хочете, щоб NBR ніколи не звертався до мережі самостійно — ви все одно можете запитати, коли захочете, за допомогою Довідка, Перевірити наявність оновлень, у вікні бібліотеки.
+Settings.Misc.Look=Вигляд:
+Settings.Misc.Look.Classic=Системні кольори
+Settings.Misc.Look.New=Дизайн NBR
+Settings.Misc.Look.RestartTitle=Зміна вигляду
+Settings.Misc.Look.Restart=Для зміни вигляду потрібно перезапустити NBR. Ваше місце в книзі буде збережено. Перезапустити зараз?
+Settings.Misc.Look.Hint=Як NBR відображає себе, і є дві відповіді.\n\nДизайн NBR — це власний вигляд, з яким він запускається.\n\nСистемні кольори роблять його звичайним вікном у кольорах і шрифтах, встановлених у Windows. Він не малює нічого свого, тому ваша власна схема відображається повністю — це те, що вам потрібно з висококонтрастною темою, і те, що найкраще працює з екранною лупою. Якщо у вас уже ввімкнено високу контрастність, це те, з чого NBR запускається.\n\nУ будь-якому випадку вибір за вами, і ви можете його скасувати: клавіатура та ваш екранний зчитувач не залежать від цього, а F2 повертає вас сюди.
+
+; ---- SETTINGS - Speech and Braille
+Settings.TextBooks.SpeechGroup=Мовлення
+Settings.TextBooks.Language=Мова:
+Settings.TextBooks.BookLanguage=Книги цією мовою:
+Settings.TextBooks.AllOtherLanguages=Усі інші мови
+Settings.TextBooks.VoiceNotSet=(голос не вибрано)
+Settings.TextBooks.AddVoices=Додати нові мови...
+Settings.TextBooks.LanguageNoVoice={0} — голос не встановлено
+Settings.TextBooks.LanguageUnknown=(мова не визначена)
+Settings.TextBooks.Voice=Голос:
+Settings.TextBooks.Speed=Швидкість:
+Settings.TextBooks.Test=Перевірити голос
+Settings.TextBooks.TestSample=Це зразок звучання вибраного голосу.
+Settings.TextBooks.Volume=Гучність:
+Settings.TextBooks.Pitch=Висота тону:
+Settings.TextBooks.NoSpeech=Без мовлення
+Settings.TextBooks.VisualGroup=Візуальне відображення
+Settings.TextBooks.UseVisual=Використовувати візуальне відображення
+Settings.TextBooks.VisualMode=Режим відображення:
+Settings.TextBooks.VisualMode.TwoRows=Два рядки тексту (стиль субтитрів)
+Settings.TextBooks.VisualMode.FullInstant=Текст на весь екран (посторінково)
+Settings.TextBooks.VisualMode.FullScrolling=Текст на весь екран (прокручування)
+Settings.TextBooks.Highlight=Виділення:
+Settings.TextBooks.Highlight.None=Без виділення
+Settings.TextBooks.Highlight.Line=Поточний рядок
+Settings.TextBooks.Highlight.Sentence=Поточне речення
+Settings.TextBooks.HighlightColour=Колір виділення:
+Settings.TextBooks.TextColour=Колір тексту:
+Settings.TextBooks.BackColour=Колір фону:
+Settings.TextBooks.Speech.Hint=Тут наведено список мов і голосів, встановлених у вашій системі. Ви можете вибрати голос за замовчуванням для кожної мови, щоб кожна нова книга цією мовою відкривалася з обраним голосом. Вибір голосу для мови робить його голосом за замовчуванням — натискати нічого більше не потрібно. Якщо ваша нова книга написана мовою, якої немає в списку, краще не встановлювати для неї голос за замовчуванням. Ви завжди можете встановити голос у властивостях самої книги на сторінці «Текст» або вибрати «Без мовлення» і продовжувати читання шрифтом Брайля або на екрані. Ви також побачите сповіщення, якщо для мови не встановлено жодного голосу.
+Settings.TextBooks.Dictionary.Hint=Тут ви можете змінити те, що синтезатори мовлення вимовляють неправильно. Ви можете виправити вимову імен та назв місць, виправити неправильний наголос і багато іншого — просто скористайтеся своєю уявою. Найкраще те, що ви можете робити це окремо для кожної мови та голосу, оскільки різні синтезатори роблять різні помилки в одній і тій самій мові.
+Settings.TextBooks.Visual.Hint=Для відображення тексту на екрані під час його озвучування, для тих, хто читає очима разом із прослуховуванням. Якщо цей параметр увімкнено, вікно відкривається автоматично щоразу, коли ви натискаєте «Відтворити». Його також можна відкрити або закрити вручну в будь-який час клавішею F9, незалежно від того, увімкнено цей параметр чи ні, тому ви можете спробувати його на книзі, не змінюючи її властивостей.
+Settings.Colour.White=Білий
+Settings.Colour.Black=Чорний
+Settings.Colour.Yellow=Жовтий
+Settings.Colour.Blue=Синій
+Settings.Colour.Green=Зелений
+Settings.Colour.Red=Червоний
+Voices.Add.Title=Мови для озвучування тексту
+Voices.Add.Hint=Виберіть потрібні мови та натисніть «Встановити». Залежно від ваших налаштувань, Windows може запитати ваш дозвіл, а потім завантажити голоси для цієї мови. Голос прив'язаний до свого акценту, тому британська та американська англійська є окремими пунктами.
+
+; ---- SETTINGS - Devices
+Settings.Device.OutputGroup=Аудіовихід
+Settings.Device.SoundCard=Звукова карта:
+Settings.Device.KeepAlive=Підтримувати звукову карту в активному стані
+Settings.Device.Default=Системний за замовчуванням (авто)
+Settings.Device.OpticalGroup=Оптичний привід
+Settings.Device.UseOptical=Використовувати оптичний привід
+Settings.Device.OpticalWhich=Привід:
+Settings.Device.OpticalAuto=Той, у якому є диск
+Settings.Device.KeepAlive.Hint=Деякі аудіовиходи, особливо HDMI, вимикаються, як тільки звук припиняється, а потім потребують часу на повторне ввімкнення. Ви чуєте, як перше слово речення постійно зникає, хоча з обладнанням усе гаразд. Коли цей параметр увімкнено, NBR відтворює на використовуваній карті звук із частотою, нижчою за поріг чутності, тому карта ніколи не переходить у режим сну між реченнями. Вимкніть це, якщо ваша карта так не робить: вона тримає вихід відкритим, поки відтворюється книга.
+Settings.Device.UseOptical.Hint=Раніше книги видавалися на звичайних аудіодисках, і NBR може їх відтворювати. NBR зчитує весь диск одразу і тимчасово зберігає його на вашому комп'ютері, щоб шум дисковода не заважав вам під час читання: він працює кілька хвилин, а потім замовкає на решту книги. Вмикайте це лише за потреби — за замовчуванням ця функція вимкнена, навіть якщо у вашому пристрої є дисковод, і поки вона вимкнена, NBR взагалі не звертається до дисковода.
+
+; ---- SETTINGS - Advanced
+Settings.Ocr.Group=Книги з текстом на зображеннях
+Settings.Ocr.Language=Мова розпізнавання
+Settings.Ocr.Automatic=Автоматично
+Settings.Ocr.AddLanguage=Додати мову...
+Settings.Ocr.None=У Windows не встановлено засобів розпізнавання тексту.
+Settings.Ocr.Hint=Деякі книги є фотографіями сторінок, а не текстом — наприклад, відсканований PDF або папка з пронумерованими зображеннями. NBR може розпізнати слова на них і озвучити їх, як будь-яку іншу книгу. Це лише початковий вибір — якщо у вас додано більше однієї мови, NBR щоразу запитуватиме, яку використовувати під час читання книги.
+Settings.Translate.Group=Переклад
+Settings.Translate.Service=Служба перекладу
+Settings.Translate.Key=API-ключ...
+Settings.Translate.State.Have={0}, ключ збережено
+Settings.Translate.State.None={0}, ключ відсутній
+Settings.Translate.Engine.Gemini=Gemini (Google)
+Settings.Translate.Engine.DeepSeek=DeepSeek
+Settings.Translate.Engine.DeepSeekPro=DeepSeek (велика модель)
+Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
+Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, дешевша)
+Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, найдорожча)
+Settings.Translate.Engine.Azure=Azure Translator
+Settings.Translate.Notes=Примітки для перекладача:
+Settings.Translate.Rules=Правила перекладу
+Settings.Translate.Test.NoEngine=Не вибрано службу перекладу.
+Settings.Translate.Test.NoKey=Немає ключа для перевірки.
+Settings.Translate.Test.NoNetwork=NBR не вдалося з'єднатися зі службою.
+Settings.Translate.Test.Refused=Служба відхилила запит ({0}).
+Settings.Translate.Test.Empty=Сервіс не надав жодної відповіді.
+Settings.Translate.Hint=NBR може перекладати книги за допомогою онлайн-сервісів. Для кожного сервісу потрібен ключ із вашого особистого облікового запису, який ви вставляєте сюди; NBR ніколи не здійснює платежі, це ваша відповідальність на вебсайті постачальника послуг або іншими способами. Якщо вам не потрібен машинний переклад зі штучним інтелектом, просто залиште цей пункт неактивним.\n\nПереклад надсилає ВСЮ книгу до обраного вами сервісу, і кожен із них обробляє її по-різному — деякі використовують вміст безкоштовних рівнів для покращення власних продуктів, деякі — ні. Опис кожного сервісу в розділі «Довідка», «Сервіси та облікові записи» містить відповідну інформацію.
+Settings.Cloud.Group=Голоси Google Cloud
+Settings.Cloud.VoicesGroup=Хмарні голоси
+Settings.Cloud.Where=Сервіси Google та Azure налаштовуються в розділі «Довідка», «Сервіси та облікові записи», де пояснюється, що це таке, і покроково описано процес створення облікового запису.
+Settings.Cloud.State.None=Google: обліковий запис сервісу не збережено, тому жоден із цих голосів недоступний.
+Settings.Cloud.State.Have=Google: доступно {0} голосів, які підтримують {1} мов.
+Settings.Cloud.State.HaveNoList=Google: обліковий запис сервісу збережено, але список голосів ще не отримано. Налаштуйте його знову, коли будете підключені до мережі.
+Settings.Cloud.Load=Файл облікового запису сервісу...
+Settings.Cloud.Filter=Обліковий запис сервісу (*.json)|*.json|Усі файли (*.*)|*.*
+Settings.Cloud.Forget=Забути обліковий запис сервісу
+Settings.Cloud.ForgetAsk=Забути збережений обліковий запис сервісу? Ці голоси перестануть пропонуватися, а книга, яка вже читається одним із них, замовкне, доки ви не оберете інший голос.
+Settings.Cloud.UseGroup=Використання хмарних голосів
+Settings.Cloud.Use=Пропонувати хмарні голоси
+Settings.Cloud.Why=Поки що нічого вмикати: налаштуйте Google або Azure вище, і ця функція стане доступною.
+Settings.Cloud.NoList=Обліковий запис прийнято, але список голосів не вдалося отримати. Зазвичай це пов'язано з мережею; голоси з'являться, як тільки з'єднання буде встановлено.
+Settings.Azure.Group=Голоси Azure Speech
+Settings.Azure.Resource=Назва ресурсу:
+Settings.Azure.Key=Ключ:
+Settings.Azure.Save=Перевірити та зберегти
+Settings.Azure.NoResource=Введіть назву ресурсу — це перша частина кінцевої точки (endpoint) на тій самій сторінці, де знаходиться ключ.
+Settings.Azure.NoKey=Введіть ключ.
+Settings.Azure.Refused=Azure не прийняв цю пару. Перевірте назву ресурсу та ключ, а також переконайтеся, що ресурс є типом Speech.
+Settings.Azure.State.None=Azure: ключ не збережено, тому жоден із цих голосів недоступний.
+Settings.Azure.State.Have=Azure: доступно {0} голосів, які підтримують {1} мов.
+Settings.Azure.Forget=Забути ключ
+Settings.Azure.ForgetAsk=Забути збережений ключ Azure? Ці голоси більше не будуть пропонуватися, а книга, що вже читається одним із них, замовкне, доки ви не оберете інший голос.
+Hint.Settings.Cloud=
+Hint.Settings.CloudUse=Цей перемикач вмикає або вимикає використання хмарних голосів, тобто всіх голосів з Інтернету, а не встановлених у вас голосів SAPI або One Core.\n\nВін визначає, чи будуть ці голоси ПРОПОНУВАТИСЯ, коли ви обираєте голос для певної книги. Вони ніколи не призначаються автоматично і не стають голосом мови за замовчуванням — це залишається за голосами, встановленими на цьому комп'ютері, які є безкоштовними і не потребують підключення.\n\nКнига, що вже читається хмарним голосом, продовжує його використовувати незалежно від того, увімкнено це чи вимкнено; перемикач керує лише засобом вибору, а не тим, що може відтворюватися.
+Hint.Settings.Azure=Використання голосів Google та Azure потребує облікових даних Google, Microsoft та Azure, а також певних налаштувань на їхніх вебсайтах. Докладніше читайте у Довідці.
+Google.Cred.NotJson=Цей файл неможливо прочитати як JSON, тому це не той файл, який надав вам Google. Потрібний вам файл було завантажено під час створення сервісного облікового запису, і його назва закінчується на .json.
+Google.Cred.NotServiceAccount=Цей JSON можна прочитати, але це не сервісний обліковий запис — у ньому немає адреси облікового запису та закритого ключа. Google пропонує кілька видів облікових даних; для цих голосів потрібен ключ сервісного облікового запису.
+
+; ---- SETTINGS - the pronunciation dictionary
+Dict.Title=Словник вимови
+Dict.Open=Словник вимови...
+Dict.Open.Accessible=Словник вимови
+Dict.Scope=Ці правила застосовуються до:
+Dict.Scope.Global=Усього, що я читаю
+Dict.Scope.Language=Усього, що я читаю мовою {0}
+Dict.Scope.Voice=Усього, що я читаю голосом {0}
+Dict.List.Accessible=Правила
+Dict.Column.Pattern=Написання
+Dict.Column.Says=Вимова
+Dict.Column.Match=Збіг
+Dict.Column.Case=Регістр
+Dict.Column.State=Правило
+Dict.Column.Comment=Примітка
+Dict.Add=Додати...
+Dict.Edit=Редагувати...
+Dict.Remove=Видалити
+Dict.State.On=Увімкнено
+Dict.State.Off=Вимкнено
+Dict.Try=Спробуйте речення:
+Dict.TryButton=Спробувати
+Dict.Rule.TitleNew=Нове правило
+Dict.Rule.TitleEdit=Редагувати правило
+Dict.Field.Pattern=Що написано:
+Dict.Field.Replacement=Вимовляти як:
+Dict.Field.Match=Збіг:
+Dict.Field.CaseSensitive=Враховувати регістр
+Dict.Field.Skip=Пропустити
+Dict.Field.Comment=Примітка:
+Dict.Field.Enabled=Правило увімкнено
+Dict.Match.WholeWord=Ціле слово
+Dict.Match.Anywhere=Будь-де, навіть всередині слова
+Dict.Match.Regex=Регулярний вираз
+Dict.Error.Title=Це правило неможливо використати
+Dict.Error.NoPattern=Заповніть поле «Що написано в книзі».
+Dict.Error.TooSlow=Цей шаблон потребує забагато часу для обробки. Спростіть його.
+Dict.Help=Довідка з регулярних виразів...
+Dict.Help.Title=Регулярні вирази у словнику вимови
+Dict.Help.Text=Стара дзен-мудрість каже:\n\n    У розробника була проблема.\n    Розробник вирішив розв'язати проблему за допомогою регулярних виразів.\n    У розробника стало дві проблеми.\n\nRegEx, або регулярні вирази — це те, з чим краще не мати справи, але добре мати таку можливість, тому ось вона.\n\nЯкщо ви знаєте, що робите — дерзайте. Якщо ні, просто не використовуйте це або запитайте Google.
+
+; ---- SETTINGS - a service key, and the Azure wizard
+Dialog.TranslateKey.Title=API-ключ для {0}
+Dialog.TranslateKey.Field=API-ключ
+Dialog.TranslateKey.Prompt=Вставте ключ, отриманий від {0}. Він зберігається на цьому комп'ютері у власному файлі у відкритому вигляді, тому ставтеся до нього як до пароля. Ви можете замінити або видалити його в будь-який час, а також скасувати ключ на самому сервісі.
+Dialog.TranslateKey.Region=Регіон (порожньо, якщо Global):
+Dialog.TranslateKey.Remove=Видалити
+Dialog.TranslateKey.Status=Результат
+Dialog.TranslateKey.Stored=Ключ для цієї служби збережено.
+Dialog.TranslateKey.NotStored=Ключ для цієї служби не збережено.
+Dialog.TranslateKey.Test=Перевірити ключ
+Dialog.TranslateKey.Testing=Перевірка ключа...
+Dialog.TranslateKey.Works=Ключ працює.
+Azure.Setup.Title=Налаштування Azure Speech
+Azure.Setup.Open=Створити для мене...
+Azure.Setup.Intro=NBR може створити ресурс Azure для вас, тому вам не доведеться працювати з порталом. Ви один раз входите до Microsoft за допомогою короткого коду, обираєте підписку, а NBR створює ресурс на безкоштовному рівні та зберігає ключ. Нічого не створюється, доки ви не ввійдете в систему.
+Azure.Setup.Start=Почати
+Azure.Setup.SigningIn=Запит коду для входу до Microsoft.
+Azure.Setup.CodeLabel=Код для входу:
+Azure.Setup.EnterCode=Ваш код для входу знаходиться в полі нижче, він готовий до копіювання. Виберіть «Відкрити сторінку входу», щоб відкрити {0} у вашому браузері, увійдіть там, і це вікно продовжить роботу автоматично.
+Azure.Setup.OpenPage=Відкрити сторінку входу
+Azure.Setup.OpenFailed=Не вдалося відкрити браузер. Адреса вказана в рядку вище; відкрийте її вручну.
+Azure.Setup.Directory=Каталог:
+Azure.Setup.Subscription=Підписка:
+Azure.Setup.SignedIn=Вхід виконано. Знайдено підписок: {0} — виберіть одну та натисніть «Створити».
+Azure.Setup.Create=Створити ресурс
+Azure.Setup.NoSubscription=Цей обліковий запис не має підписки Azure, тому ресурс ніде створювати.
+Azure.Setup.Creating=Створення ресурсу. Це займає хвилину або дві; Azure повідомляє про готовність раніше, ніж це стається насправді, тому NBR чекає.
+Azure.Setup.Done=Готово. Ресурс створено, а його ключ збережено — доступно голосів: {0}.
+Azure.Setup.DoneNoList=Ресурс створено, а його ключ збережено, але не вдалося отримати список голосів. Зазвичай це пов'язано з мережею; голоси з'являться, як тільки з'єднання буде встановлено.
+Azure.Setup.Failed=Не вдалося: {0}
+Azure.Setup.HaveOne=Або, якщо у вас уже є ресурс мовлення, введіть тут його два параметри:
+Azure.Setup.Kept=Azure прийняла цю пару, і вона збережена. Ці голоси тепер доступні.
+Azure.Setup.DirectoryHint=Залиште це поле порожнім, якщо ви входите за допомогою робочого або навчального облікового запису. Якщо ваш Azure на ОСОБИСТОМУ обліковому записі Microsoft, Microsoft відхилить вхід за звичайною адресою, і ви повинні вказати каталог, створений Azure під час оформлення підписки — або його назву, що закінчується на onmicrosoft.com, або його ідентифікатор каталогу (орендаря). Це запитується один раз і запам'ятовується.
+
+; ---- THE READING WINDOW
+Reading.Title=Читання
+Reading.Back=Назад
+Reading.Back.Accessible=Крок назад
+Reading.PlayPause=Відтворити/Призупинити
+Reading.PlayPause.Accessible=Відтворити або призупинити, клавіша Space
+Reading.Forward=Вперед
+Reading.Forward.Accessible=Крок вперед
+Reading.Smaller=Менше
+Reading.Smaller.Accessible=Менший текст, клавіша мінус
+Reading.Bigger=Більше
+Reading.Bigger.Accessible=Більший текст, клавіша плюс
+Reading.Font.Accessible=Шрифт
+Reading.Size.Announce=Розмір тексту {0}
+Beta.Suffix= — відсутнє у цій бета-версії
+Beta.NoReadingWindow=Вікно читання вимкнено у цій бета-версії. Читання на екрані та шрифт Брайля, що слідує за ним, все ще тестуються і повернуться у наступному випуску.
+
+; ---- RECOGNIZING TEXT (OCR)
+Ocr.Ask.Title=Розпізнати текст
+Ocr.Ask.Question={0} не містить тексту — це {1} сторінок із зображеннями. NBR може розпізнати текст на них, що має зайняти {2}. Розпізнати зараз?
+Ocr.Ask.ReadWith=Розпізнати як:
+Ocr.Ask.Read=Розпізнати
+Ocr.Ask.Skip=Пропустити
+Ocr.Ask.UnderAMinute=менше хвилини
+Ocr.Ask.Minutes=близько {0} хвилин
+Ocr.Result.NoText=На зображеннях не розпізнано жодного тексту. Книжку додано, але читати з неї нічого.
+Ocr.Refusal.NoEngine=Не встановлено засіб розпізнавання тексту. Використайте «Додати мову...» у розділі «Додатково» налаштувань, і NBR встановить його для вас.
+Ocr.Refusal.NoPages=У цьому документі немає сторінок для читання.
+Ocr.Progress.Title=Розпізнавання тексту
+Ocr.Progress.Starting=Початок розпізнавання...
+Ocr.Progress.Working=Сторінка {0} з {1}. {2}
+Ocr.Progress.Quarter=Виконано {0} відсотків. {1}
+Ocr.Progress.Cancel=Скасувати
+Ocr.Progress.Cancelling=Зупинка після цієї сторінки. Нічого не зберігається.
+Ocr.Progress.Estimating=Визначення часу, що залишився.
+Ocr.Progress.AlmostDone=Майже готово.
+Ocr.Progress.Seconds=Залишилося приблизно {0} секунд.
+Ocr.Progress.Minutes=Залишилося приблизно {0} хвилин.
+Ocr.Unread.Message=Цю книжку ще не розпізнано — вона все ще складається із зображень сторінок, тому озвучувати нічого. Розпізнати її зараз?
+Ocr.Sparse.Message=Лише {0} з {1} сторінок цієї книжки містять текст. Найімовірніше, це скан із пошкодженим текстовим шаром, тому слова залишаються зображеннями. Розпізнати їх зараз?
+Ocr.Blank.Question={0} сторінок поспіль не містять жодного тексту. Решта {1} сторінок можуть бути такими ж, а їх розпізнавання займе певний час. Продовжити?
+Ocr.Blank.Jbig2={0} сторінок поспіль не містять жодного тексту. Цей PDF зберігає слова у форматі, який Windows не може обробити, тому ці сторінки сприймаються як порожні аркуші, на яких нічого розпізнавати — читання решти {1} сторінок, швидше за все, нічого не дасть. Продовжити?
+Ocr.Read.Question=Ця книжка складається з {0} сторінок-зображень і ще не була розпізнана. Розпізнавання займе {1}.
+Ocr.ReRead.Question=Цю книжку було розпізнано з {0} сторінок-зображень. Повторне розпізнавання іншою мовою займе {1}. Зображення зберігаються разом із книжкою, тому це можна робити скільки завгодно разів.
+Ocr.ReRead.Done=Книжку було розпізнано повторно, а результат замінено.
+Ocr.ReRead.Locate=Зображення для цієї книжки не зберігаються разом із нею, тому NBR потрібно знайти їх знову. Виберіть відсканований файл або, якщо книжка складається з окремих зображень сторінок, будь-яку з цих сторінок.
+Ocr.ReRead.LocateTitle=Знайти зображення для цієї книжки
+Ocr.ReRead.Filter=Відскановані книжки та зображення|*.pdf;*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif|Усі файли|*.*
+Ocr.ReRead.WholeFolder=У цій папці {0} зображень. Розпізнати всі їх як сторінки цієї книжки?
+Ocr.Add.Title=Мови OCR
+Ocr.Add.List=Мови
+Ocr.Add.Row={0}
+Ocr.Add.RowInstalled={0} — вже встановлено
+Ocr.Add.Install=Встановити
+Ocr.Add.WindowsSettings=Налаштування Windows...
+Ocr.Add.Close=Закрити
+Ocr.Add.Installing=Встановлення {0}. Windows Update завантажує це, тому тривалість залежить від навантаження — зазвичай це займає кілька хвилин, іноді до десяти. Ви можете закрити це вікно і продовжувати роботу; процес триватиме у фоновому режимі.
+Ocr.Add.Done={0} встановлено і готово до використання.
+Ocr.Add.DonePartly={0} встановлено і готово до використання. {1} не вдалося отримати — можливо, Windows ще працює, або цей компонент недоступний для цієї версії.
+Ocr.Add.NotStarted=Нічого не було встановлено. Windows не надала дозвіл.
+Ocr.Add.Failed={0} не було встановлено. Можливо, Windows ще працює над цим, або мова недоступна для цієї версії Windows.
+Ocr.Add.LeftRunning=Windows продовжує встановлення. Процес завершиться автоматично.
+Ocr.Add.Hint=Виберіть потрібні мови та натисніть «Встановити». Залежно від ваших налаштувань, Windows може запитати дозвіл, а потім завантажити розпізнавання для цієї мови — це невеликий файл, а не цілий мовний пакет Windows.
+
+; ---- TRANSLATION
+Translate.Progress.Title=Переклад книги
+Translate.Progress.Starting=Підготовка. Ви можете зупинитися в будь-який момент; усе, що вже перекладено, буде збережено, а повторний запуск продовжить роботу з того самого місця.
+Translate.Progress.Working=Уривок {0} із {1}. Залишилося приблизно {2}. Ви можете зупинитися в будь-який момент — виконана робота буде збережена.
+Translate.Progress.Quarter=Перекладено {0} відсотків, залишилося приблизно {1}.
+Translate.Progress.Cancel=Зупинити
+Translate.Progress.Cancelling=Зупинка після завершення цього уривка. Те, що вже перекладено, буде збережено.
+Translate.Progress.StillOn=Все ще на цьому етапі, триває {0} секунд.
+Translate.Progress.StillWorking=Триває переклад уривка {0} із {1}. Служба відповідає повільно.
+Translate.Progress.Estimating=розрахунок часу, що залишився
+Translate.Progress.AlmostDone=мить
+Translate.Progress.Seconds={0} секунд
+Translate.Progress.Minutes={0} хвилин
+Translate.Ask.Title=Перекласти книгу
+Translate.Ask.Info={0} — приблизно {1} символів, орієнтовно {2}. Переклад стане новою книгою; ця книга не зміниться.
+Translate.Ask.HybridNote=Ця книга має запис, а також текст. Перекласти можна лише текст, тому переклад буде текстовою книгою без озвучення.
+Translate.Ask.From=Мова книги:
+Translate.Ask.To=Перекласти на:
+Translate.Ask.Model=Модель {0}:
+Translate.Ask.Model.None=— немає, завершити ланцюжок тут —
+Translate.Ask.ChainNote=Якщо уривок відхилено, NBR спробує ще раз, а потім по черзі спробує інші ваші сервіси. Усе, що не прийме жоден із них, залишиться мовою оригіналу книги.
+Translate.Ask.NoEngine=Жоден сервіс ще не має ключа
+Translate.Ask.Standing=Ваша постійна примітка застосовується і до цієї книги: {0}
+Translate.Ask.Inherit=Продовжити серію, використовуючи глосарій:
+Translate.Ask.Inherit.None=Нічого — ця книга є самостійною
+Translate.Ask.Notes=Будь-що, що перекладач має знати про ЦЮ книгу (необов'язково). Оповідач та імена визначаються з тексту автоматично; це поле для того, чого в тексті немає — термін, який ви хочете передати певним чином, або як персонажі звертаються один до одного:
+Translate.Ask.Start=Перекласти
+Translate.LastResort.Begin=Наступна частина була перекладена Microsoft Azure — очікуйте непередбачуваного.
+Translate.LastResort.End=Кінець частини, перекладеної Microsoft Azure.
+Translate.NotText=Можна перекласти лише текстову книгу. Ця книга є записом.
+Translate.Empty=У цій книзі немає тексту для перекладу.
+Translate.NoService=Жоден сервіс перекладу ще не має ключа. Додайте його в Налаштуваннях, у розділі Додатково.
+Translate.Done={0} уривків перекладено. Переклад знаходиться на полиці як нова книга.
+Translate.DoneLeft={0} уривків перекладено, {1} залишилося мовою оригіналу.
+Translate.Took=Це зайняло {0}. Порядковий запис знаходиться у файлі translation.log поруч із оригінальною книгою.
+Translate.Failed=Книгу не вдалося перекласти: {0}
+Translate.Suffix={0} ({1})
+
+; ---- EXPORT AS AN AUDIOBOOK
+Export.NotText=Лише текстову книгу можна перетворити на аудіокнигу. Ця книга вже є аудіо.
+Export.NoVoice=У цій книзі немає голосу для читання, тому записувати нічого. Спочатку призначте його у властивостях.
+Export.Empty=У цій книзі немає тексту для читання.
+Export.Filter=Аудіофайл (*.mp3)|*.mp3
+Export.Ask.Ready=Усі {0} фрагментів цієї книги вже озвучені, тому залишилося лише об'єднання, що займе кілька митей. Створити файл?
+Export.Ask.Missing={0} із {1} фрагментів цієї книги ще потрібно озвучити. Це займе приблизно {2} хвилин — це час на створення файлу, а не тривалість прослуховування книги. Вікно прогресу показує значення, що оновлюється під час роботи. Ви можете зупинитися в будь-який момент: усе, що вже озвучено, буде збережено, а повторний запуск продовжить процес із того самого місця. Створити файл?
+Export.Progress.Title=Створення аудіокниги
+Export.Progress.Starting=Підготовка. Ви можете зупинитися в будь-який момент; усе, що вже озвучено, буде збережено, а повторний запуск продовжить процес із того самого місця.
+Export.Progress.Making=Фрагмент {0} із {1}. Залишилося приблизно {2}.
+Export.Progress.Joining=Об'єднання в один файл.
+Export.Done=Готово — {0} фрагментів, збережено як {1}
+Export.DoneShort=Збережено як {2}, але {1} із {0} фрагментів не вдалося озвучити, тому вони відсутні.
+Export.Failed=Не вдалося створити аудіокнигу.
+
+; ---- AUDIO CD
+Cd.Progress.Title=Аудіодиск
+Cd.Progress.Preparing=Читання диска...
+Cd.Progress.Track=Читання доріжки {0} із {1}
+Cd.Progress.Stopping=Зупинка...
+Cd.BookTitle=Аудіодиск ({0} доріжок)
+Cd.Format=Аудіодиск - Compact Disc Digital Audio
+Cd.NoDisc=У дисководі немає диска або він ще зчитується. Вставте аудіодиск і спробуйте знову.
+Cd.DataDisc=Це диск із даними, а не аудіодиск. Якщо на ньому книга у форматі MP3, відкрийте її через «Файл», «Відкрити папку» — NBR вже підтримує такий формат.
+Cd.ReadFailed=Не вдалося прочитати диск: {0}
+Cue.Track=Доріжка {0}
+
+; ---- SERVICES AND ACCOUNTS
+Services.Title=Служби та облікові записи
+Services.List.Accessible=Служби
+Services.State.Ready=ЦЮ СЛУЖБУ НАЛАШТОВАНО. Ви можете пройти кроки знову, щоб замінити збережені дані.
+Services.State.NotSet=Цей ще не налаштовано.
+Services.SetUp=Налаштувати цю службу...
+Services.Forget=Забути цей обліковий запис
+Services.ForgetAsk=Забути збережений ключ для {0}? Його не буде запропоновано, доки ви не налаштуєте його знову.
+Services.Disclaimer=КРОКИ НИЖЧЕ МОЖУТЬ НЕ ЗБІГАТИСЯ З ТИМ, ЩО ВИ БАЧИТЕ. Ці служби змінюють дизайн своїх вебсайтів без попередження, тому кнопка могла переміститися або змінити назву з моменту написання цього тексту. ПОРЯДОК дій рідко змінюється; назви елементів — так. Якщо ви розгубилися, частина вище підкаже, чого саме ви намагаєтеся досягти.
+Services.Item.Gemini=Переклад Gemini
+Services.Item.DeepSeek=Переклад DeepSeek
+Services.Item.OpenAi=Переклад GPT (OpenAI)
+Services.Item.GoogleVoices=Голоси Google Cloud
+Services.Item.AzureVoices=Голоси Azure Speech
+Services.About.Gemini=Gemini перекладає цілу книгу іншою мовою, використовуючи власну модель Google. На слух визнана найкращою з них — але з певним нюансом.\n\nВона відмовляється перекладати приблизно кожен шостий уривок опублікованого роману. І справа не в змісті: закономірність схожа на те, що модель розпізнає книгу, яка їй відома, і жодне налаштування це не змінює. Саме тому NBR запитує другу службу про те, що не прийняла перша, і саме тому варто налаштувати ланцюжок, а не покладатися на один рушій.\n\nІснує безкоштовний рівень, і він достатньо щедрий, щоб бути основним способом використання: згідно з вимірюваннями на реальному проєкті, Gemini 3.1 Flash Lite дозволяє 500 запитів на день, що дорівнює приблизно шести книгам. Платне використання коштує приблизно двадцять п'ять центів за роман на 450 000 символів.\n\nОДИН МОМЕНТ, ЯКИЙ ВАРТО ЗВАЖИТИ ПЕРЕД ВИБОРОМ БЕЗКОШТОВНОЇ ВЕРСІЇ. На сторінці цін Google зазначено, що на безкоштовному рівні ваш контент використовується для покращення їхніх продуктів, а на платному — ні. Переклад надсилає всю книгу, тому це суттєва різниця. Це ваш вибір у будь-якому разі — але це має бути вибір, а не сюрприз.\n\nОтримання ключа — найдовший процес із чотирьох, і кроки нижче написані на основі реального досвіду, оскільки очевидний шлях не працює.
+Services.About.DeepSeek=DeepSeek перекладає цілу книгу іншою мовою. З усіх служб, які може використовувати NBR, ця є найбільш стабільною — вона найрідше відмовляє — і вона значно дешевша за інші.\n\nПотрібно зробити одне: створити обліковий запис у DeepSeek і поповнити баланс. Безкоштовного ліміту немає, але переклад оплачується залежно від обсягу тексту, і книга коштує дуже мало.\n\nЦя служба надає ключ, який ви вставляєте, і це найпростіший процес із чотирьох. Варто звернути увагу на те, що ключ відображається ОДИН РАЗ, під час створення. Якщо ви закриєте це вікно, не скопіювавши його, його неможливо буде переглянути знову, і вам доведеться просто створити інший.
+Services.About.OpenAi=OpenAI перекладає цілу книгу іншою мовою, використовуючи моделі GPT. Вона пропонується у трьох рівнях для одного облікового запису та одного ключа: Terra, з якого варто почати, Luna, який дешевший, і Sol, який є найдорожчим.\n\nТут немає жодних безкоштовних лімітів, і це те, на чому люди часто помиляються: підписка ChatGPT НЕ оплачує цю послугу. API оплачується окремо, а новий обліковий запис є ПЕРЕДПЛАТНИМ — ви вносите невелику суму кредиту, і запити витрачають цей баланс. П'яти або десяти доларів цілком достатньо, щоб побачити, скільки насправді коштує книга, перш ніж приймати будь-яке рішення.\n\nВартість книги, розрахована для роману на 450 000 символів з урахуванням того, як хорватська мова насправді розбивається на токени, а не за приблизними правилами: приблизно два з половиною долари на Terra, один долар на Luna, п'ять на Sol. Для порівняння, та сама книга коштує близько двадцяти трьох центів на Gemini. Будь-який з цих варіантів є невеликою сумою для книги, яка вам важлива; Terra приблизно вдесятеро дорожча за Gemini, якщо користуватися постійно.\n\nКлюч — це звичайний рядок, який ви вставляєте сюди, що робить цей сервіс найпростішим у налаштуванні.
+Services.About.GoogleVoices=Голоси Google Cloud читають книги вголос через інтернет, використовуючи власні голоси Google. Вони є найкращими хмарними голосами для більшості мов, а безкоштовний ліміт є найбільшим — близько мільйона символів на місяць, що становить приблизно дві книги.\n\nПотрібно виконати три кроки в такому порядку. Вам потрібен ОБЛІКОВИЙ ЗАПИС GOOGLE, який є у більшості людей. У ньому ви створюєте ПРОЄКТ і вмикаєте службу Text-to-Speech для цього проєкту — Google не ввімкне її, доки не буде налаштовано білінг, тому потрібна картка, навіть якщо безкоштовний ліміт нічого не коштує. Потім ви створюєте СЕРВІСНИЙ ОБЛІКОВИЙ ЗАПИС і завантажуєте його ключ.\n\nЦя остання частина робить цей сервіс незвичним. Google не надає ключ, який можна просто скопіювати та вставити: він надає невеликий файл із розширенням .json, який завантажується один раз. NBR зберігає вміст цього файлу, а не сам файл, тому ви можете перемістити або видалити завантажений файл після цього.
+Services.About.AzureVoices=Голоси Azure Speech читають книги вголос через інтернет, використовуючи голоси Microsoft. Вони дуже якісні англійською та багатьма іншими мовами. Для хорватської мови вони звичайні, і Azure не підтримує там словник вимови, тому правило, яке ви створите для імені, не буде застосовано. Безкоштовний ліміт становить близько пів мільйона символів на місяць, приблизно одна книга.\n\nМають відбутися дві речі, і лише перша залежить від вас. Вам потрібен ОБЛІКОВИЙ ЗАПИС MICROSOFT, перш ніж ви зможете отримати обліковий запис Azure, а потім ПІДПИСКА AZURE — яка потребує перевірки особи, картки та згоди. Людина має зробити це свідомо, тому це неможливо автоматизувати, і NBR не намагається цього робити.\n\nУсе після цього — завдання NBR. Програма входить у систему за допомогою короткого коду, створює ресурс на безкоштовному рівні та зберігає ключ. Ви ніколи не відкриваєте портал Azure.\n\nОдна річ збиває людей з пантелику. Коли ваша підписка створена, Azure тихо створює для неї КАТАЛОГ. Якщо ваш обліковий запис Microsoft є особистим — Gmail, Outlook, Hotmail — Azure відмовляє у вході, якщо ви не вкажете назву цього каталогу, оскільки він не розпізнає особисті облікові записи для цього. Його назва закінчується на onmicrosoft.com.
+Services.Steps.DeepSeek=1. Відкрийте platform.deepseek.com у вашому браузері.\n\n2. Натисніть Sign up. Ви можете ввести електронну пошту та пароль або вибрати реєстрацію через Google, що швидше.\n\n3. Підтвердьте свою електронну пошту, якщо вас про це попросять.\n\n4. Після входу в систему знайдіть Top up або Billing і додайте невелику суму кредиту.\n\n5. Знайдіть API keys у меню зліва.\n\n6. Натисніть Create new API key, дайте йому будь-яку назву та натисніть Create.\n\n7. Скопіюйте ключ ПЕРЕД тим, як закрити це вікно.\n\n8. Поверніться сюди, натисніть "Set up this service" і вставте його.
+Services.Steps.GoogleVoices=1. Відкрийте console.cloud.google.com у вашому браузері та увійдіть за допомогою облікового запису Google.\n\n2. Прийміть умови, якщо вас про це попросять, і створіть проєкт, коли він буде запропонований. Підійде будь-яка назва.\n\n3. Знайдіть поле пошуку вгорі, введіть "Cloud Text-to-Speech API", виберіть його з результатів і натисніть Enable.\n\n4. Google попросить вас налаштувати білінг, перш ніж увімкнути API. Додайте картку.\n\n5. Знову знайдіть "Service accounts" і відкрийте його. Натисніть Create service account, дайте йому будь-яку назву та натисніть Done. Жодну роль або дозвіл вибирати не потрібно.\n\n6. Відкрийте обліковий запис, який ви щойно створили, перейдіть на вкладку Keys, натисніть Add key, потім Create new key і виберіть JSON. Файл завантажиться.\n\n7. Поверніться сюди, натисніть "Set up this service" і виберіть цей завантажений файл.
+Services.Steps.AzureVoices=1. Відкрийте azure.microsoft.com/free у вашому браузері та натисніть «Почати безкоштовно».\n\n2. Увійдіть за допомогою облікового запису Microsoft або створіть його.\n\n3. Введіть свої дані. Azure запитує картку, щоб підтвердити, що ви реальна особа; безкоштовний рівень не тарифікується.\n\n4. Якщо ваш обліковий запис є особистим, знайдіть назву свого каталогу: увійдіть на портал, і вона відобразиться в адресному рядку після знака @, закінчуючись на onmicrosoft.com.\n\n5. Поверніться сюди та натисніть «Налаштувати цю службу».\n\n6. Введіть назву каталогу, якщо ваш обліковий запис є особистим, або залиште поле порожнім, якщо це робочий чи навчальний обліковий запис. Натисніть «Почати».\n\n7. Відкрийте сторінку входу за допомогою кнопки, введіть відображений короткий код і увійдіть.\n\n8. Виберіть свою підписку та натисніть «Створити». NBR створить ресурс і збереже його ключ. Вам більше нічого вводити не потрібно.
+Services.Steps.Gemini=НЕ ВИКОРИСТОВУЙТЕ AI STUDIO ДЛЯ ЦЬОГО. Його кнопка "Create API key" видає помилку "The request is suspicious. Please try again." — перевірено на новому обліковому записі без доданого способу оплати, з уже створеним та імпортованим проєктом. Справжня помилка — це 403 від власного сервісу Google. Усе, що описано нижче, виконується в CLOUD CONSOLE, і цей шлях працює.\n\nПорядок має значення: спочатку проєкт, потім API, потім сервісний обліковий запис, і лише після цього ключ. Якщо виконувати в такому порядку, ключ створюється за один прохід.\n\n1. Відкрийте console.cloud.google.com/projectcreate у браузері та увійдіть у систему.\n\n2. Дайте проєкту назву, яку ви впізнаєте, наприклад NBR. Залиште для "Organization" значення "No organization" — це стандартна відповідь для особистого облікового запису, а організація додає політики, які ви не контролюєте. Виберіть CREATE і зачекайте, поки проєкт з'явиться.\n\n3. ЯКЩО GOOGLE ПРОПОНУЄ БЕЗКОШТОВНУ ПРОБНУ ВЕРСІЮ З 300 ДОЛАРАМИ КРЕДИТУ, ВІДМОВТЕСЯ. Цей кредит не покриває оплату Gemini API — це інший гаманець для іншого продукту. Гірше того, прийняття цієї пропозиції створює платіжний обліковий запис, і Google автоматично прив'язує оплату до кожного нового проєкту, що виводить його з безкоштовного рівня. Також запитується платіжна картка. Скажіть ні.\n\n4. Відкрийте console.cloud.google.com/apis/library/generativelanguage.googleapis.com. Перевірте, чи назва проєкту в рядку зверху збігається з тією, яку ви щойно створили. Сторінка має заголовок "Gemini API". Виберіть ENABLE і зачекайте, поки кнопка зникне.\n\n5. Відкрийте console.cloud.google.com/iam-admin/serviceaccounts/create. Цей крок позбавить вас необхідності робити наступний двічі: ключ не зможе отримати доступ до Gemini, якщо він не прив'язаний до сервісного облікового запису, а створення його зараз означає, що він буде готовий, коли знадобиться.\n\n6. На сторінці з заголовком "Create service account" заповніть лише перше поле, "Service account name" — nbr-translate є гарною назвою, а ID нижче заповниться автоматично. Виберіть "CREATE AND CONTINUE". Крок 2, "Permissions", є необов'язковим: залиште його порожнім, жодна роль не потрібна. Виберіть DONE внизу.\n\n7. Відкрийте console.cloud.google.com/apis/credentials. Знову перевірте назву проєкту у верхньому рядку. У рядку дій поруч із заголовком "Credentials" виберіть "+ CREATE CREDENTIALS", і з меню, що випадає, оберіть ПЕРШИЙ пункт, "API key" — не "OAuth client ID" і не "Service account".\n\n8. Праворуч відкриється панель із заголовком "Create API key". У полі "Name" в самому верху введіть назву, наприклад NBR.\n\n9. Прокрутіть ВНИЗ у цій панелі, повз розділ "APIs that can be accessed using this key", до прапорця з написом "Authenticate API calls through a service account". ПОСТАВТЕ ЙОГО. Це крок, про який ніхто не здогадується: поки він не встановлений, Gemini взагалі неможливо вибрати — його пункт залишається сірим, і лише підказка пояснює чому.\n\n10. Розділ із заголовком "Service account" з'явиться трохи нижче. Виберіть "+ Select a service account", оберіть обліковий запис, який ви створили на кроці 6, вибравши кружечок ліворуч від його рядка, і натисніть SELECT внизу цього вікна.\n\n11. Тепер прокрутіть ВГОРУ на панелі до "APIs that can be accessed using this key" і відкрийте список під "Select API restrictions". Тепер можна відмітити "Gemini API". Поставте прапорець і виберіть OK.\n\n12. Прокрутіть ВНИЗ до самого низу панелі та виберіть CREATE. Залиште "Application restrictions" зі значенням "None".\n\n13. З'явиться вікно з заголовком "API key created", що містить ключ. Він починається з AQ., а не AIza, що є правильним для ключа, прив'язаного до сервісного облікового запису. Скопіюйте його за допомогою значка копіювання праворуч від поля.\n\n14. Поверніться сюди, виберіть Set up this service і вставте ключ. NBR перевірить його через Google перед збереженням.\n\nЯКЩО КОНСОЛЬ ПОВІДОМЛЯЄ, ЩО ВАМ ПОТРІБЕН ДОДАТКОВИЙ ДОСТУП, і вказує на відсутній дозвіл, ви майже напевно ввійшли не в той обліковий запис Google, а не маєте недостатньо прав. Додайте authuser=1 до кінця адреси — або authuser=2 і так далі — поки проєкт не з'явиться.
+Services.Steps.OpenAi=1. Відкрийте platform.openai.com у своєму браузері. Це платформа для розробників, а не сайт ChatGPT, і це окремий ресурс, навіть якщо ви вже платите за ChatGPT.\n\n2. Увійдіть у свій обліковий запис або створіть новий.\n\n3. ПЕРШОЧЕРГОВО перевірте, у якій організації ви перебуваєте. Назва відображається у верхньому лівому куті сторінки і є меню: відкрийте його та виберіть власну, яка зазвичай називається Personal. Якщо вас колись запрошували до чужої організації або ви маєте корпоративну підписку ChatGPT Team чи Business, платформа може автоматично перемкнути вас на ТУ організацію, де ви є лише учасником, білінг відхилить запит із помилкою "required permission: api.billing.read", а будь-який створений ключ належатиме не тому обліковому запису. Усе нижчеописане має відбуватися у вашій власній організації.\n\n4. Перейдіть на сторінку platform.openai.com/settings/organization/billing/overview. Розділ Billing знаходиться в меню ORGANIZATION, а не на звичайній сторінці налаштувань, де його легко шукати, але не знайти. Виберіть Add to balance, додайте платіжну картку та придбайте кредит. Десять доларів — це мінімум, якого цілком достатньо для початку. Ніщо не працюватиме, доки на рахунку не буде коштів.\n\n5. Перебуваючи там, встановіть місячний ліміт витрат. Це нічого не коштує і гарантує, що помилка не призведе до великого рахунку.\n\n6. Відкрийте API keys у тих самих налаштуваннях і виберіть Create new secret key. Дайте йому назву, яку ви впізнаєте, наприклад NBR. Переконайтеся, що ви все ще перебуваєте в тій самій організації, де поповнили баланс.\n\n7. Скопіюйте ключ одразу після його появи. Він відображається ЛИШЕ ОДИН РАЗ. Якщо ви закриєте вікно, не скопіювавши його, побачити його знову не вдасться — вам доведеться просто видалити його і створити новий.\n\n8. Поверніться сюди, виберіть Set up this service і вставте ключ.\n\n9. NBR перевіряє ключ через OpenAI перед збереженням, тому ви одразу дізнаєтеся, чи він працює.
+
+; ---- HELP AND ABOUT
+Dialog.Help.ComingSoon=Довідка – незабаром.
+Dialog.Help.Title=Довідка
+Dialog.WhatsNew.Title=Що нового
+Report.Filter=Текстові файли (*.txt)|*.txt|Усі файли (*.*)|*.*
+Report.Done=Звіт було збережено за адресою:\n\n{0}\n\n{1} кБ. Додайте його до свого повідомлення.
+Report.Failed=Не вдалося записати звіт. Можливо, папка доступна лише для читання або на диску немає вільного місця.
+Dialog.About.Title=Про NBR
+Dialog.About.Release=Бета 1
+Dialog.About.Licence=🄯 Copyleft — NBR є вільним програмним забезпеченням під ліцензією GNU General Public License, версія 3. Ви можете використовувати, вивчати, поширювати та змінювати його; якщо ви передаєте змінену версію, вона поширюється на тих самих умовах разом із вихідним кодом.
+Dialog.About.Text=Nemoviz Book Reader {0}\n\nЗбірка від {1}\n\nЦе багатоформатний пристрій для читання цифрових книг та публікацій з різними варіантами виводу, спеціально розроблений для незрячих, людей з порушеннями зору та людей з труднощами при читанні. Він є безкоштовним для базового використання, але якщо ви хочете випробувати та використовувати його розширені функції, такі як переклад та хмарні голоси, вам потрібно буде зареєструватися та, можливо, оплатити відповідні зовнішні послуги.\n\nСтворено Nemoguća vizija — nemoviz.org\n\nАвтор: Gordan Radić\n\nСтворено за допомогою Claude (Anthropic). Більшу частину коду було написано ним згідно з дизайном, рішеннями та вимірюваннями автора; авторське право та ліцензія належать йому.\n\n{2}\n\nНА ЧОМУ ПОБУДОВАНИЙ NBR\n\nNBR відтворює звук через libmpv, читає шрифт Брайля через liblouis, озвучує текст через NVDA controller client, зчитує теги за допомогою TagLib#, витягує текст із PDF за допомогою PdfPig та відкриває архіви за допомогою SharpCompress. Кожна з них є окремою бібліотекою, що використовується без змін, і кожну можна замінити сумісною збіркою власної розробки.\n\nlibmpv та FFmpeg всередині нього — LGPL 2.1 або пізніша версія\n\nliblouis та його таблиці Брайля — LGPL 2.1 або пізніша версія\n\nNVDA Controller Client — LGPL 2.1\n\nTagLib# — LGPL 2.1\n\nPdfPig — Apache License 2.0\n\nSharpCompress та пакети Microsoft — MIT\n\nAndika, Atkinson Hyperlegible Next, Lexend та OpenDyslexic — SIL Open Font License 1.1\n\nLuciole — Creative Commons Attribution 4.0\n\nПовне повідомлення — версії, власники авторських прав та джерела, звідки було прочитано кожну ліцензію — міститься у файлі THIRD-PARTY-NOTICES.txt поруч із програмою, а тексти самих ліцензій знаходяться у папці Licences.
+Dialog.Rules.Title=Правила перекладу
+Dialog.Rules.Language=Мова
+Dialog.Rules.Text.Accessible=Правила, встановлені для цієї мови
+Dialog.Rules.None=Для цієї мови не було написано жодних правил. NBR все одно перекладає нею, використовуючи загальні правила для всіх мов та автоматичне визначення параметрів книги.
+Dialog.Rules.From=Читається з {0}\nЩоб використовувати власні правила, скопіюйте цей файл у {1} і відредагуйте копію. Видаліть свою копію, і ці правила повернуться.
+Dialog.Rules.FromYours=Читається з вашої власної копії: {0}\nВидаліть її, і знову будуть використовуватися правила, що постачалися разом із NBR.
+Dialog.Rules.Make=Щоб написати правила для цієї мови, помістіть {1} у {0}.
+Update.Title=Перевірка оновлень
+Update.Checking=Перевірка наявності новішої версії
+Update.Available=Опубліковано новішу версію Nemoviz Book Reader: {0}\n\nБажаєте відкрити сторінку завантаження?
+Update.UpToDate=Ви використовуєте найновішу опубліковану версію.
+Update.Failed=Не вдалося виконати перевірку. Можливо, немає підключення до мережі або сторінка завантаження зараз недоступна.
+Hint.Button.Accessible=Довідка для {0}
+
+; ---- CLOUD VOICES - what a book will cost
+Cloud.Quota.Title=Хмарний голос — безкоштовний ліміт
+Cloud.Quota.Warning=Ця книга містить {0} символів.\n\nЗ доступних у цьому місяці {2} безкоштовних символів у {3} ви використали {1}.\n\nЧитання цієї книги перевищить ліміт безкоштовних символів, і обсяг понад нього буде списано з платіжного засобу, прив'язаного до цього облікового запису.\n\nЧитати все одно?
+
+; ---- MESSAGES AND ERRORS
+Dialog.Error.Title=Помилка
+Dialog.Error.General=Помилка: {0}
+Dialog.DontShowAgain=Більше не показувати
