@@ -224,6 +224,7 @@ Dialog.Help
 Dialog.WhatsNew
 Report.
 Dialog.About
+Dialog.Rules.
 Update.
 Hint.Button
 

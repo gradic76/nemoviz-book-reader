@@ -32,7 +32,7 @@ namespace Nemoviz_Book_Reader
     /// invisible one -- which is more than the compiled-in version offered,
     /// since that one could not be inspected at all.</para>
     ///
-    /// <para><b>The Croatian text is a colleague of Gordan's</b>, used with her
+    /// <para><b>The Croatian text is Mila Kuran's</b>, used with her
     /// agreement and kept in her words, with two changes he approved:</para>
     ///
     /// <para><b>1. Names.</b> Hers said to keep foreign names in their original

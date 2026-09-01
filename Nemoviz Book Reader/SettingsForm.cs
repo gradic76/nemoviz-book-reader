@@ -946,12 +946,32 @@ namespace Nemoviz_Book_Reader
             tbTranslateNotes.AccessibleName = Localization.T("Settings.Translate.Notes");
             tbTranslateNotes.Text = appSettings != null ? appSettings.TranslationNotes : "";
 
-            box.Size = new Size(500, 176);
+            // WHAT WE ACTUALLY SEND, on screen (Gordan, 2026-09-01): "Korisnik
+            // fakticki ne zna sto player salje servisu." The rules are files now
+            // and can be read and edited there; this is the way in for a reader
+            // who does not know they exist. It opens on the interface language
+            // when that language has rules, because someone reading NBR in
+            // Croatian is the likeliest person to be translating into it.
+            Button rules = new Button();
+            rules.Text = Localization.T("Settings.Translate.Rules");
+            rules.AccessibleName = rules.Text;
+            rules.SetBounds(14, 176, 220, 30);
+            rules.TabIndex = 3;
+            rules.Click += (s, e) =>
+            {
+                string prefer = TranslationRules.Has(Localization.CurrentLanguageCode)
+                              ? Localization.CurrentLanguageCode : null;
+                using (var d = new TranslationRulesForm(prefer)) d.ShowDialog(this);
+            };
+
+
+            box.Size = new Size(500, 218);
             box.Controls.Add(lbl);
             box.Controls.Add(cmbTranslateEngine);
             box.Controls.Add(where);
             box.Controls.Add(lblNotes);
             box.Controls.Add(tbTranslateNotes);
+            box.Controls.Add(rules);
             box.Resize += (s, e) =>
             {
                 int right = box.ClientSize.Width - 14;

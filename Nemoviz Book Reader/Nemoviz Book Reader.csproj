@@ -174,6 +174,7 @@
     <Compile Include="TranslationJob.cs" />
     <Compile Include="TranslationLanguages.cs" />
     <Compile Include="TranslationRules.cs" />
+    <Compile Include="TranslationRulesForm.cs" />
     <Compile Include="TranslationProgressForm.cs" />
     <Compile Include="TranslateBookForm.cs" />
     <Compile Include="TranslationKeys.cs" />
