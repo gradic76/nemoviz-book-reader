@@ -92,7 +92,12 @@ namespace Nemoviz_Book_Reader
             where.Multiline = true;
             where.ReadOnly = true;
             where.TabStop = true;
-            where.ScrollBars = ScrollBars.Vertical;
+            // NO SCROLLBAR. It had one, and the screenshot showed what that looks
+            // like: a dead scrollbar with two arrows and no thumb, beside a
+            // message that fits on one line. Two lines is the most this ever
+            // holds and both fit in the 40 it is given, so the bar was never
+            // going to be used -- and with a screen reader it is one more object
+            // between the reader and the next control.
             where.BorderStyle = BorderStyle.None;
             where.BackColor = SystemColors.Control;
             where.SetBounds(14, 414, 632, 40);
@@ -155,6 +160,11 @@ namespace Nemoviz_Book_Reader
             if (text.Length == 0)
             {
                 body.Text = Localization.T("Dialog.Rules.None");
+                // Caret to the top here as well as below: a screen reader that
+                // reads from the caret should start at the first word of the
+                // message, not after its full stop.
+                body.SelectionStart = 0;
+                body.SelectionLength = 0;
                 where.Text = string.Format(Localization.T("Dialog.Rules.Make"),
                                            TranslationRules.UserFolder, ShortCode(code) + ".rules");
                 return;
