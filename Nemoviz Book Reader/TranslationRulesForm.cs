@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Nemoviz_Book_Reader
@@ -54,6 +55,15 @@ namespace Nemoviz_Book_Reader
             MinimizeBox = false;
             MaximizeBox = false;
             ClientSize = new Size(660, 500);
+
+            // MAKE THE FOLDER BEFORE NAMING IT. Every line this window prints
+            // about a reader's own copy points at a folder that UserData.File
+            // only ever COMBINED a path for -- so the instruction was "copy it
+            // into <path>" for a path Explorer answers "not found" to. Someone
+            // opening this window is exactly the person who might write a rules
+            // file, and an empty folder costs nothing next to the ini and the
+            // dictionaries already there.
+            try { Directory.CreateDirectory(TranslationRules.UserFolder); } catch { }
 
             BuildOrder();
 

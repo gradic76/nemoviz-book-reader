@@ -5,6 +5,10 @@
 ;
 ;     %APPDATA%\Nemoviz Book Reader\Translation\sr.rules
 ;
+; That is where it goes on nearly every machine. NBR names the exact
+; folder itself at the foot of Settings > Advanced > Translation rules,
+; which is the one to trust if the two ever disagree.
+;
 ; If that file exists, NBR reads it INSTEAD of this one. Copy this file
 ; there, change what you like, and the next book you translate uses it --
 ; nothing to rebuild, no need to restart. Delete your copy and this one is
