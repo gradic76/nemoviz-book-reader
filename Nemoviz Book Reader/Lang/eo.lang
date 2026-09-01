@@ -1,7 +1,7 @@
 ; Nemoviz Book Reader
 ;
 ; Translated by:            Claude (Anthropic), 2026
-; Verified and modified by: 
+; Verified and modified by: Gradimir Kragić, 2026
 ;
 ; Human translators: write your name and the year after the colon above.
 ; If somebody has signed there already, add another line like theirs
@@ -196,7 +196,7 @@ Context.Properties=Ecoj
 Context.ReadOcr=Rekoni la tekston
 Context.ReReadOcr=Rekoni denove en alia lingvo
 Context.Translate=Traduki la libron...
-Context.Favorite=Marki kiel preferatan
+Context.Favorite=Marki kiel favorata
 
 ; ---- LIBRARY - what a book says about itself
 Details.Field.Title=Titolo
@@ -324,12 +324,12 @@ Prop.Info.Accessible=Detaloj de la libro
 Prop.Info.ProcessingOff=Sonprilaborado: malŝaltita
 Prop.Info.ProcessingOn=Sonprilaborado: ŝaltita
 Prop.Info.Bypassed=(prilaborado preterpasita)
-Prop.Info.Off=Malŝaltita
+Prop.Info.Off=malŝaltita
 Prop.Info.Protection=Protekto kontraŭ distordo
 Prop.Tab.Audio=Sono
 Prop.Tab.Text=Teksto
-Prop.On=Ŝaltita
-Prop.Off=Malŝaltita
+Prop.On=ŝaltita
+Prop.Off=malŝaltita
 
 ; ---- PROPERTIES - sound processing
 Prop.UseSoundProcessing=Uzi la sonprilaboradon
@@ -421,7 +421,7 @@ Settings.General.LibraryLocation.Hint=Ĉi tien NBR kopias la importitajn librojn
 Settings.General.Language.Restart=Por ŝanĝi la lingvon NBR devas rekomenci. Ĉu rekomenci nun?
 Settings.General.Language.RestartTitle=Lingvo
 Settings.General.UpdateGroup=Novaj versioj
-Settings.General.AutoCheckUpdates=Aŭtomate kontroli pri novaj versioj
+Settings.General.AutoCheckUpdates=Aŭtomate kontroli ĝisdatigojn
 Settings.General.AutoCheckUpdates.Hint=Kiam ĉi tio estas ŝaltita, NBR demandas unufoje ĉiutage ĉu aperis pli nova versio, kaj anoncas nur se jes. Nenio pri vi aŭ pri viaj libroj estas sendata: la peto portas nek identigilon, nek la bibliotekon, nek liston de tio, kion vi legas. Malŝaltu ĝin se vi preferas, ke NBR neniam mem iru al la reto — vi ĉiam povas mem kontroli pri ĝisdatigoj per Helpo > Kontroli ĝisdatigojn en la biblioteka fenestro.
 Settings.Misc.Look=Aspekto:
 Settings.Misc.Look.Classic=Sistemaj koloroj
@@ -772,7 +772,7 @@ Services.Steps.OpenAi=1. Malfermu platform.openai.com en via retumilo. Ĉi tio e
 ; ---- HELP AND ABOUT
 Dialog.Help.ComingSoon=Helpo – baldaŭ venos.
 Dialog.Help.Title=Helpo
-Dialog.WhatsNew.Title=Kio estas nova
+Dialog.WhatsNew.Title=Novaĵoj
 Report.Filter=Tekstaj dosieroj (*.txt)|*.txt|Ĉiuj dosieroj (*.*)|*.*
 Report.Done=La raporto konserviĝis en:\n\n{0}\n\n{1} kB. Aldonu ĝin al via mesaĝo.
 Report.Failed=Ne eblis skribi la raporton. Eble la dosierujo estas nurlega, aŭ mankas spaco sur la disko.
