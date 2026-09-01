@@ -4186,6 +4186,74 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 
 ---
 
+## 8m. The translation rules are FILES, and a reader can read them (2026-09-01)
+
+`Translation\hr.rules`, `Translation\sr.rules`, `TranslationRules.cs`,
+`TranslationRulesForm.cs`. They were compiled-in string constants until this day.
+Gordan's reason for moving them is one sentence and it decides the whole shape:
+*"Korisnik faktički ne zna što player šalje servisu."*
+
+- **A reader's own copy WINS.** `%APPDATA%\Nemoviz Book Reader\Translation\<code>.rules`
+  is read before the shipped one beside the exe; delete it and the default
+  returns. This is not a convenience -- the shipped folder is under Program
+  Files in a real install, so editing it needs elevation AND the next installer
+  overwrites it. "Users can adjust the rules themselves" did not actually work
+  until the override existed. Same wall as 10j.
+- **A language NBR ships nothing for works the same way**: a new `<code>.rules`
+  in the user folder is found, listed and used, with no change to the program.
+- **Two comment characters, both dropped before sending.** `;` heads the file's
+  own notes, as in a .lang. `#` marks a rule PARKED -- in force once, or shipped
+  with the document and taken out on purpose, kept where it can be found.
+  Deleting one character puts it back. Gordan asked for exactly that so nothing
+  we remove is lost, and it costs the prompt nothing.
+- **`TranslationRules.Reload()` runs when a job starts**, so an edit lands on the
+  next BOOK rather than the next launch.
+- **Every book's `translation.log` records the file read and its size**, or says
+  `none for xx -- looked in <path>`. That is the answer to the old doc comment's
+  objection that a file can go missing and a translator silently loses its rules:
+  the silence is what went, not the argument.
+
+**Settings > Advanced > Translation rules** opens `TranslationRulesForm`: a combo
+of every language NBR can translate into, that language's rules in full, and
+under them the file they came from plus how to make your own. It follows
+`ServicesForm` down to the rule stated there -- the text field is never a Label,
+because a reader driven by Tab never visits one and here the text is the whole
+window. **Languages that HAVE rules come first**, or reaching the only two with
+anything to show means arrowing past a hundred entries.
+
+**NO TICK BOXES, and it was decided rather than skipped.** Three reasons, and the
+second is the one nobody would guess: the rules are prose with a stated order of
+priority, so switching off item three of five leaves the rest ranked against
+something gone; **the translation cache is keyed on the SOURCE TEXT and not on
+the prompt**, so an unticked rule would hand back the identical old translation
+and look broken -- that must be fixed first, by hashing the active rule set into
+the key; and two hundred check boxes is a poor walk with a screen reader.
+
+### The long rulebooks were measured, not adopted
+
+Mila Kuran wrote both, and a longer pair arrived 2026-08-31 (hr 18 115
+characters against 3 958, sr 13 602 against 4 088). A/B on Tryon's *Lady* through
+Gemini, same text and same engine, the rules the only difference:
+
+- **Run it WITH a glossary or the result is a phantom.** Without one the long
+  Croatian rules produced "gospoda Lady" throughout -- a title the source has
+  nowhere -- which looked like a damning systematic fault. With two names in the
+  bible it vanished completely.
+- **Croatian:** the long rulebook kept the author's deliberate mis-spellings
+  ("Magwifishent! Wowdafil!") where the short one silently corrected them. That
+  was the most consequential of 17 differences.
+- **Serbian:** the long rulebook produced one ungrammatical sentence and
+  contradicted itself between two adjacent paragraphs. Gordan's verdict was that
+  the short rules are slightly better there.
+- **So neither won, and the shipped files are a MERGE** of the long base with
+  what it dropped grafted back: Slavic names and the `u Tobiju` declension
+  example for Croatian; for Serbian the personal- and place-name TRANSCRIPTION
+  taken out and parked in place, because it reverses Gordan's decision of
+  2026-08-28 -- transcription needs a glossary of pronunciations, NBR has none,
+  and a wrong one is SILENT.
+
+---
+
 ## 9. Library window
 
 > ### NAILED DOWN — 2026-08-03 (Gordan)
