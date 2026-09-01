@@ -318,6 +318,19 @@ namespace Nemoviz_Book_Reader
             if (bible.Names.Count > 0)
                 Log(opt, "glossary      " + bible.Names.Count + " names and terms");
 
+            // WHICH RULEBOOK, AND HOW BIG. The rules used to be compiled in, and
+            // the argument for that was that a file can go missing and a
+            // translator that silently loses its rules produces work that looks
+            // finished. They are files now (Gordan, 2026-09-01), so the silence
+            // is what had to go: every book's log says what was read and how
+            // much of it, and a language with none says so in as many words.
+            {
+                string rulesText = TranslationRules.For(opt.TargetLang);
+                Log(opt, "rules         " + (rulesText.Length > 0
+                    ? rulesText.Length + " characters from " + TranslationRules.PathFor(opt.TargetLang)
+                    : "none for " + opt.TargetLang + " -- looked in "
+                      + TranslationRules.PathFor(opt.TargetLang)));
+            }
             var cache = TranslationCache.Open(opt.CachePath);
             string system = BuildSystemPrompt(opt.SourceLang, opt.TargetLang, opt.ReaderNotes, bible);
 

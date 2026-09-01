@@ -17,6 +17,11 @@ namespace Nemoviz_Book_Reader
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "NBR Library");
         private static readonly string DefaultLangPath =
             Path.Combine(AppFolder, "Lang");
+        // Beside Lang, and settable the same way: a reader who writes
+        // rules for a language NBR has none for needs somewhere to put them,
+        // and somewhere they survive an upgrade.
+        private static readonly string DefaultRulesPath =
+            Path.Combine(AppFolder, "Translation");
 
         private IniFile ini;
 
@@ -30,6 +35,7 @@ namespace Nemoviz_Book_Reader
         /// (Gordan, 2026-08-03), so both dialogs now reopen where they were.</summary>
         public string LastImportFileFolder { get; private set; }
         public string LangPath { get; private set; }
+        public string RulesPath { get; private set; }
         public string LanguageCode { get; private set; }
 
         /// <summary>
@@ -198,6 +204,7 @@ namespace Nemoviz_Book_Reader
             LastImportFolder = ini.Read("Library", "LastImportFolder", "");
             LastImportFileFolder = ini.Read("Library", "LastImportFileFolder", "");
             LangPath = ini.Read("App", "LangPath", DefaultLangPath);
+            RulesPath = ini.Read("App", "RulesPath", DefaultRulesPath);
             // EMPTY, not "en" -- see Localization.Initialize. An empty setting means
             // nobody has chosen, which is what lets Windows decide on a first run; a
             // literal "en" here made that impossible to tell from a reader who chose

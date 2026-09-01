@@ -1,0 +1,43 @@
+;--------------------------------------------------------------------------
+; Nemoviz Book Reader -- translation rules for: hr
+;
+; This whole file, minus these ';' lines, is sent to the translation
+; service with EVERY passage of a book. It is written in the TARGET
+; language, not in the language of the interface: it is instruction for
+; the translator, so it is read by a machine that is about to write hr.
+;
+; Pravila za knjizevni prijevod na hrvatski
+;
+; Written by:               a colleague of the author's, used with her
+;                           permission
+; Verified and modified by: 
+;
+; Edit this file and the next book you translate uses it -- there is
+; nothing to rebuild. A language with no file here simply gets no rules,
+; which is every language except the ones somebody has sat down and done.
+;--------------------------------------------------------------------------
+
+Pravila za književni prijevod na hrvatski:
+
+- Prevedi tekst prirodnim, književnim standardnim hrvatskim jezikom. Ne prevodi doslovno. Prenesi značenje, ton, atmosferu, emociju i stil izvornika tako da tekst zvuči kao da je izvorno napisan na hrvatskom.
+- Poštuj standardnu hrvatsku gramatiku, pravopis, sintaksu i prirodan red riječi. Izbjegavaj konstrukcije preslikane iz izvornog jezika.
+- Ne ponavljaj nepotrebno osobne i posvojne zamjenice. Umjesto konstrukcija poput "ja sam bio", "ja sam htio", "ja sam rekao", kada kontekst to dopušta koristi prirodnije "bio sam", "htio sam", "rekao sam".
+- Ne ponavljaj nepotrebno imena likova i subjekte ako je iz konteksta jasno na koga se rečenica odnosi.
+- Izbjegavaj neprirodno ponavljanje istih riječi, glagola i konstrukcija. Kada smisao dopušta, koristi prirodnu hrvatsku sinonimiju i mijenjaj strukturu rečenice.
+- Ne preslikavaj engleski ili drugi strani red riječi. Slobodno preuredi rečenicu kada je to potrebno da bi zvučala prirodno na hrvatskom.
+- Pazi na prirodnu uporabu glagolskih vidova, padeža, roda i broja, glagolskih vremena, prijedloga i veznika. Pazi na prirodan položaj enklitika.
+- Engleski Present Perfect, Past Perfect i progresivne oblike ne preslikavaj mehanički. Participne i infinitivne konstrukcije preoblikuj u prirodnu hrvatsku rečenicu. Pasiv preoblikuj u aktiv kada je to prirodnije i kada se značenje ne mijenja.
+- Dijalog mora zvučati kao stvaran hrvatski govor, u skladu s karakterom, dobi, raspoloženjem i odnosom među likovima. Ne čini dijalog knjiški ukočenim ako izvornik nije takav.
+- Psovke, humor, ironiju, sarkazam, nježnost, grubost i druge registre prenesi funkcionalnim hrvatskim ekvivalentom, a ne doslovnim prijevodom.
+- Idiome, frazeme i ustaljene izraze prevodi njihovim prirodnim hrvatskim ekvivalentima kada postoje. Ne zadržavaj strani izraz ako postoji prirodan hrvatski izraz koji prenosi isto značenje. Ne kalkiraj strane kolokacije.
+- Strane izraze prevodi kad god je to prirodno i moguće. Ne prevodi termine, nazive ili izraze koje je u hrvatskom prirodnije ostaviti u izvornom obliku.
+- SLAVENSKA imena (ruska, poljska, češka, ukrajinska i slična) prenesi prema uobičajenoj hrvatskoj praksi: "Pjotr", "Tatjana", "Dostojevski" — ne u engleskoj transliteraciji "Piotr", "Tatiana", "Dostoyevsky". Jednom izabran oblik koristi dosljedno kroz cijeli tekst.
+- Osobna i druga strana imena u pravilu zadrži u izvornom obliku i u latinici, ali ih OBAVEZNO sklanjaj po hrvatskim padežima: "u Tobiju", "s Kristom", "Vonvaltova presuda" — nikada "u programu Tobi". Ako za ime, povijesnu osobu ili zemljopisni naziv postoji uvriježen hrvatski oblik, koristi taj oblik. Jednom izabran oblik koristi dosljedno kroz cijeli tekst.
+- Nazive mjesta, institucija, titula i drugih pojmova prevedi ili prilagodi prema prirodnoj i standardnoj hrvatskoj uporabi. Ne izmišljaj prijevod vlastitog imena ako se ono u hrvatskom uobičajeno ne prevodi.
+- Čuvaj značenje izvornika. Ne dodaj informacije kojih nema. Ne izostavljaj sadržaj. Ne ublažavaj niti pojačavaj značenje bez razloga.
+- Čuvaj karakterizaciju likova. Likovi trebaju zadržati svoj način govora i međusobne razlike.
+- Čuvaj ritam i duljinu rečenica kada su stilski važni, ali ne po cijenu neprirodnog hrvatskog. Dugu rečenicu smiješ prirodno preoblikovati ako bi doslovna struktura bila teška ili nejasna.
+- Dosljedno koristi ista imena, termine, nadimke, titule, način obraćanja i gramatičke izbore kroz cijelu knjigu.
+- Sačuvaj odlomke i dijaloge smisleno. Ne spajaj različite replike. Ne mijenjaj raspored teksta bez potrebe.
+- Prije nego što vratiš prijevod, pročitaj ga kao samostalan hrvatski tekst. Ako neka rečenica zvuči prevedeno, preoblikuj je tako da zvuči kao da je izvorno napisana na hrvatskom.
+- Prijevod mora biti točan, tečan, prirodan i književan. Čitatelj ne smije osjećati strukturu stranog jezika iza hrvatskog teksta.

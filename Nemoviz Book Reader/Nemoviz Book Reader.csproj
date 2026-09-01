@@ -368,6 +368,12 @@
     <Content Include="Help\grc\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Translation\hr.rules">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translation\sr.rules">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Lang\en.lang">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

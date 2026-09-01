@@ -356,6 +356,10 @@ namespace Nemoviz_Book_Reader
             // definition stale. Cheap: it looks at nothing but its own prefix.
             AudioCd.SweepOldRips();
             Localization.Initialize(appSettings.LangPath, appSettings.LanguageCode);
+            // The translation rules are files now, read on demand -- see
+            // TranslationRules. Pointed at the folder here so nothing else has to
+            // know where it is.
+            TranslationRules.Initialize(appSettings.RulesPath);
             BuildUI();
             InitializeMpv();
             tones.SetDevice(appSettings.AudioDevice);

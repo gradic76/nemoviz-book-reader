@@ -1,0 +1,44 @@
+;--------------------------------------------------------------------------
+; Nemoviz Book Reader -- translation rules for: sr
+;
+; This whole file, minus these ';' lines, is sent to the translation
+; service with EVERY passage of a book. It is written in the TARGET
+; language, not in the language of the interface: it is instruction for
+; the translator, so it is read by a machine that is about to write sr.
+;
+; Pravila za knjizevni prevod na srpski (latinica), vrijede i za sr-Cyrl
+;
+; Written by:               a colleague of the author's, used with her
+;                           permission
+; Verified and modified by: 
+;
+; Edit this file and the next book you translate uses it -- there is
+; nothing to rebuild. A language with no file here simply gets no rules,
+; which is every language except the ones somebody has sat down and done.
+;--------------------------------------------------------------------------
+
+Pravila za književni prevod na srpski:
+
+- Prevedi tekst prirodnim, književnim srpskim jezikom. Ne prevodi bukvalno. Prenesi značenje, ton, atmosferu, emociju i stil originala tako da tekst zvuči kao da je izvorno napisan na srpskom.
+- Poštuj standardnu srpsku gramatiku, pravopis, sintaksu i prirodan red reči. Izbegavaj konstrukcije preslikane iz izvornog jezika.
+- Ne ponavljaj nepotrebno lične zamenice. Umesto konstrukcija poput "ja sam bio", "ja sam hteo", "ja sam rekao", kada kontekst to dopušta koristi prirodnije "bio sam", "hteo sam", "rekao sam".
+- Ne ponavljaj nepotrebno imena likova i subjekte ako je iz konteksta jasno na koga se rečenica odnosi.
+- Izbegavaj neprirodno ponavljanje istih reči, glagola i konstrukcija. Kada smisao dopušta, koristi prirodnu srpsku sinonimiju i menjaj strukturu rečenice.
+- Ne preslikavaj engleski red reči. Slobodno preuredi rečenicu kada je to potrebno da bi zvučala prirodno na srpskom.
+- Pazi na prirodnu upotrebu svršenih i nesvršenih glagola, na padeže, slaganje roda i broja, glagolska vremena, predloge i veznike. Pazi na prirodan položaj enklitika.
+- Engleski Present Perfect, Past Perfect i progresivne oblike ne preslikavaj mehanički. Participne i infinitivne konstrukcije preoblikuj u prirodnu srpsku rečenicu. Pasiv preoblikuj u aktiv kada je to prirodnije i kada se značenje ne menja.
+- Dijalog mora zvučati kao stvaran govor na srpskom, u skladu sa karakterom, uzrastom, raspoloženjem i odnosom među likovima. Ne pravi dijalog knjiški ukočenim ako original nije takav.
+- Psovke, humor, ironiju, sarkazam, nežnost, grubost i druge registre prenesi funkcionalnim srpskim ekvivalentom, a ne doslovnim prevodom.
+- Idiome, frazeme i ustaljene izraze prevodi njihovim prirodnim srpskim ekvivalentima kad postoje. Ne zadržavaj strani izraz ako postoji prirodan srpski izraz koji prenosi isto značenje. Ne kalkiraj strane kolokacije.
+- Strane izraze prevodi kad god je to prirodno i moguće. Ne prevodi termine, nazive ili izraze koje je u srpskom prirodnije ostaviti u izvornom obliku.
+- SLOVENSKA imena (ruska, poljska, češka, ukrajinska i slična) prenesi prema uobičajenoj srpskoj praksi: "Pjotr", "Tatjana", "Dostojevski" — ne u engleskoj transliteraciji "Piotr", "Tatiana", "Dostoyevsky". Jednom izabran oblik koristi dosledno kroz ceo tekst.
+- Lična i druga strana imena zadrži u izvornom obliku i u latinici, nemoj ih fonetski transkribovati, ali ih OBAVEZNO menjaj po padežima: "sa Tobijem", "Vonvaltova presuda", "kod Jeana" — nikada nepromenjen oblik uz opisnu konstrukciju. Ako za ime, istorijsku ličnost ili geografski naziv postoji odomaćen srpski oblik, koristi taj oblik. Jednom izabran oblik imena koristi dosledno kroz ceo tekst.
+- Nazive mesta, institucija, titula i drugih pojmova prevedi ili prilagodi prema prirodnoj i standardnoj srpskoj upotrebi. Ne izmišljaj prevod vlastitog imena ako se ono u srpskom uobičajeno ne prevodi.
+- Čuvaj značenje originala. Ne dodaj informacije kojih nema. Ne izostavljaj sadržaj. Ne ublažavaj niti pojačavaj značenje bez razloga.
+- Čuvaj karakterizaciju likova. Likovi treba da zadrže svoj način govora i međusobne razlike.
+- Čuvaj ritam i dužinu rečenica kada su stilski važni, ali ne po cenu neprirodnog srpskog. Dugačku rečenicu smeš prirodno preoblikovati ako bi doslovna struktura bila teška ili nejasna.
+- Dosledno koristi ista imena, termine, nadimke, titule, način obraćanja i gramatičke izbore kroz celu knjigu. Ako prethodni deo teksta pokazuje rod lika, odnos među likovima ili već usvojen prevod termina, poštuj ga.
+- Sačuvaj pasuse i dijaloge smisleno. Ne spajaj različite replike. Ne menjaj raspored teksta bez potrebe.
+- Pre nego što vratiš prevod, pročitaj ga kao samostalan srpski tekst. Ako neka rečenica zvuči prevedeno, preoblikuj je tako da zvuči kao da je prvobitno napisana na srpskom.
+- Piši srpskom latinicom, sa slovima č, ć, dž, đ, š i ž.
+- Prevod mora biti tačan, tečan, prirodan i književan. Čitalac ne treba da oseća strukturu stranog jezika iza srpskog teksta.
