@@ -718,7 +718,8 @@ discards.
   persists via `AppSettings.SetLibraryPath` + `EnsureLibraryExists`, and only
   if it actually changed. This is the first genuinely functional control.
 - **Language** combo — app UI language, listing every `.lang` file really in the
-  folder (eleven ship). **It follows Windows on a first run** (2026-08-23):
+  folder (TWENTY-ONE ship since 2026-09-02: the original eleven plus cs, da,
+  fr, nb, pl, sk, sl, fi, sv and uk, put through Gemini -- see 8n). **It follows Windows on a first run** (2026-08-23):
   `AppSettings.LanguageCode` defaults to EMPTY rather than "en", so "not chosen
   yet" is distinguishable from "chose English", and `Localization.Initialize`
   then asks `MatchLanguage(CultureInfo.InstalledUICulture)`.
@@ -4254,6 +4255,41 @@ Gemini, same text and same engine, the rules the only difference:
 
 ---
 
+## 8n. Twenty-one interface languages (2026-09-02)
+
+The original eleven plus **cs, da, fr, nb, pl, sk, sl, fi, sv, uk**, put through
+Gemini at Gordan's word with one instruction beyond the obvious: use each
+language's own COMPUTING AND TECHNOLOGY vocabulary -- the words that language's
+Windows, screen readers and media players use.
+
+- **The combo needed no change at all.** `Localization.Initialize` scans the
+  folder for `*.lang` and takes each entry's display name from that file's own
+  `LanguageName` key, so a language joins the list by existing. The csproj is the
+  only other place that had to know.
+- **Structure from `hr.lang`, values from `en.lang`.** Croatian carries the
+  translator-instruction block English does not, and exactly the 724 keys a
+  shipped file has -- English has two more on purpose. So parity is by
+  construction rather than checked afterwards.
+- **`nb`, not `no`.** A Norwegian Windows reports `nb-NO`, and `MatchLanguage`
+  tries the full tag, then the script, then the two letters. **Nynorsk (`nn-NO`)
+  falls back to English** and would need its own file -- a gap, not a fault.
+- **A deliberately EMPTY English value cost 25 keys per language.**
+  `Hint.Settings.Cloud` is empty on purpose (8g: that is how "no ? button at all"
+  is spelt), the harness demanded a value back for every key it sent, the model
+  correctly returned nothing, and the whole batch fell back to English three
+  attempts later. Any future bulk-translation harness must treat an empty source
+  value as nothing to translate.
+- **Not translated, both known:** the Help manual, generated from
+  `docs/help/*.txt`, which falls back to English for a language with no folder;
+  and the installer's own language list, frozen until the next beta.
+
+Verified through the shipped `Localization` rather than by reading the files: 21
+languages listed and named, twelve real Windows tags resolving to the right file
+with `hr-HR` and `sr-Cyrl-RS` unchanged, and per file 724 keys in the template's
+order with every placeholder and every `\n` accounted for against English.
+
+---
+
 ## 9. Library window
 
 > ### NAILED DOWN — 2026-08-03 (Gordan)
@@ -6549,7 +6585,10 @@ does a genuinely silent install, which is what Store policy 10.2.9 demands of an
   happen" is a poor reason to risk shipping somebody's API key.
 - **x64 only**, and not as a preference: libmpv is 64-bit and a 32-bit process
   loading it dies with 0x8007000B.
-- **Nine of the eleven languages.** Inno ships five; Croatian, both Serbians and
+- **Nine of the ELEVEN the installer knew in August.** It has not been revisited
+  since ten more interface languages arrived on 2026-09-02, and most of those ten
+  ARE official Inno translations -- the installer language list is frozen until
+  the next beta. Inno ships five; Croatian, both Serbians and
   Esperanto are among its UNOFFICIAL translations and are **vendored into
   `installer\languages`**, so the script compiles on any machine with Inno and
   nobody has to copy files into Program Files first. Latin and Ancient Greek have
