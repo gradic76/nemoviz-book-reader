@@ -360,14 +360,13 @@ namespace Nemoviz_Book_Reader
             // TranslationRules. Pointed at the folder here so nothing else has to
             // know where it is.
             TranslationRules.Initialize(appSettings.RulesPath);
-            // The two we supply are written into that folder the FIRST time only
-            // -- see TranslationRules.SeedSupplied. A launch that put a deleted
-            // one back would undo the reader's decision without saying so.
-            if (!appSettings.RulesSeeded)
-            {
-                TranslationRules.SeedSupplied();
-                appSettings.MarkRulesSeeded();
-            }
+            // Writes the two we supply on the FIRST run, brings a newer one
+            // forward over an untouched file, and parks it beside an edited one.
+            // Never puts back a rulebook the reader deleted -- that is what
+            // RulesSeeded guards. Three cases, and why the installer cannot do
+            // any of it: TranslationRules.UpdateSupplied.
+            TranslationRules.UpdateSupplied(appSettings);
+            appSettings.MarkRulesSeeded();
             BuildUI();
             InitializeMpv();
             tones.SetDevice(appSettings.AudioDevice);

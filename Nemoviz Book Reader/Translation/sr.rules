@@ -1,5 +1,6 @@
 ;----------------------------------------------------------------------------
 ; Nemoviz Book Reader -- translation rules for: sr  (Srpski)
+; NBR-Rules-Version: 1
 ;
 ; THIS FILE IS YOURS. It lives in
 ;
@@ -23,6 +24,18 @@
 ; A LANGUAGE THAT HAS NO RULES YET: Settings > Advanced > Translation rules,
 ; choose the language, press Add. NBR makes the file, with its instructions
 ; written in that language.
+;
+; WHEN NBR IS UPDATED a newer version of this rules file may appear. You
+; will be told about it, and your own file is never overwritten: the new one
+; is put beside it. Look through what changed and combine it with your own
+; rules if you want to.
+;
+; THE RULES SAY "izvornik", NOT "English" (2026-09-02). Gordan's point: NBR
+; translates from any language, so a rule about English syntax is wrong for a
+; French book. The source language is named in the prompt NBR builds around
+; these rules, so the rules need not name it -- which also avoids declining a
+; language name in every target language. The one English example left is
+; marked as an example. The parked short rulebook at the foot is untouched.
 ;
 ; Save as UTF-8, or the accented letters will not survive.
 ;
@@ -51,9 +64,9 @@ Ako se zahtevi naizgled sukobe, primeni sledeći red prioriteta:
 5. očuvanje strukture i formata originala.
 PRIRODAN SRPSKI
 Koristi standardnu srpsku gramatiku, pravopis, sintaksu i prirodan red reči.
-Ne preslikavaj englesku sintaksu, red reči, kolokacije i gramatičke konstrukcije.
+Ne preslikavaj sintaksu izvornika, red reči, kolokacije i gramatičke konstrukcije.
 Slobodno preuredi rečenicu kada je to potrebno da bi na srpskom zvučala prirodno, ali bez menjanja značenja, naglaska, ritma ili tona.
-Izbegavaj nepotrebno ponavljanje ličnih zamenica i subjekata karakteristično za engleski.
+Izbegavaj nepotrebno ponavljanje ličnih zamenica i subjekata karakteristično za izvornik.
 Na primer, kada kontekst dopušta:
 "I wanted" -> "Hteo sam / Htela sam", a ne automatski "Ja sam hteo / Ja sam htela".
 Ne ponavljaj ime lika ako je u srpskom prirodnije izostaviti subjekat i potpuno je jasno na koga se rečenica odnosi.
@@ -71,12 +84,12 @@ Posebno pazi na:
 * prirodan red reči;
 * referencu zamenica i subjekata;
 * logičke i vremenske odnose među radnjama.
-Engleska vremena i konstrukcije ne preslikavaj mehanički.
-Present Perfect, Past Perfect i progresivne oblike prevedi onim srpskim vremenom ili konstrukcijom koja najbolje odgovara njihovom stvarnom značenju u konkretnom kontekstu.
+Vremena i konstrukcije izvornika ne preslikavaj mehanički.
+Primera radi, engleski Present Perfect, Past Perfect i progresivne oblike prevedi onim srpskim vremenom ili konstrukcijom koja najbolje odgovara njihovom stvarnom značenju u konkretnom kontekstu.
 Participne, gerundske i infinitivne konstrukcije preoblikuj u prirodnu srpsku sintaksu kada bi njihovo doslovno preslikavanje zvučalo neprirodno.
 Pasiv preoblikuj u aktiv kada je aktiv u srpskom prirodniji, ali samo ako se time ne menjaju fokus, perspektiva, značenje ili stilski efekat rečenice.
-Pazi na prirodnu upotrebu svršenih i nesvršenih glagola. Ne određuj glagolski vid prema gramatičkom obliku engleskog glagola, već prema značenju, toku radnje i kontekstu.
-Ne zadržavaj englesku konstrukciju samo zato što je gramatički moguća na srpskom ako bi izvorni govornik srpskog istu misao prirodno izrazio drugačije.
+Pazi na prirodnu upotrebu svršenih i nesvršenih glagola. Ne određuj glagolski vid prema gramatičkom obliku glagola u izvorniku, već prema značenju, toku radnje i kontekstu.
+Ne zadržavaj konstrukciju izvornika samo zato što je gramatički moguća na srpskom ako bi izvorni govornik srpskog istu misao prirodno izrazio drugačije.
 DIJALOG
 Dijalog mora zvučati kao stvaran govor na srpskom.
 Sačuvaj uzrast, karakter, obrazovanje, poreklo kada je stilski relevantno, raspoloženje i način govora svakog lika, kao i odnos među likovima.
@@ -86,7 +99,7 @@ Kolokvijalni govor prevedi prirodnim srpskim kolokvijalnim govorom, bez nepotreb
 Ako lik govori gramatički nepravilno, fragmentarno, nesigurno ili na drugi način karakteristično, ne ispravljaj automatski njegov govor ako je ta osobina namerna i važna za karakterizaciju.
 Psovke, humor, ironiju, sarkazam, nežnost, grubost, zadirkivanje, pretnju, nelagodu i druge registre prenesi funkcionalnim srpskim ekvivalentom odgovarajuće jačine.
 Ne pojačavaj niti ublažavaj izraz bez razloga.
-Ne prevodi doslovno engleske uzrečice, poštapalice i reakcije ako bi tako zvučale neprirodno na srpskom. Prenesi njihovu funkciju, intenzitet i karakter.
+Ne prevodi doslovno uzrečice, poštapalice i reakcije ako bi tako zvučale neprirodno na srpskom. Prenesi njihovu funkciju, intenzitet i karakter.
 PRIPOVEDAČKI GLAS
 Sačuvaj osobenosti pripovedačkog glasa kroz ceo tekst.
 Vodi računa o stepenu formalnosti, emocionalnoj distanci, humoru, ironiji, cinizmu, nežnosti, grubosti, jednostavnosti ili složenosti izraza i karakterističnom izboru reči pripovedača.
@@ -96,8 +109,8 @@ Ne čini pripovedački glas elegantnijim, mudrijim, duhovitijim ili ekspresivnij
 IDIOMI, IZRAZI I STILSKE SLIKE
 Idiome, frazeme, poslovice, uzrečice i ustaljene izraze ne prevodi doslovno ako postoji prirodan srpski funkcionalni ekvivalent.
 Prenesi njihovo značenje, funkciju, ton i jačinu.
-Ne kalkiraj engleske kolokacije.
-Ako postoji uobičajen i prirodan srpski izraz, koristi njega umesto konstrukcije koja samo preslikava engleski.
+Ne kalkiraj kolokacije iz izvornika.
+Ako postoji uobičajen i prirodan srpski izraz, koristi njega umesto konstrukcije koja samo preslikava izvornik.
 Ako je strani izraz, naziv ili termin u srpskom jeziku uobičajeno ostaviti u izvornom obliku, nemoj ga nasilno prevoditi.
 Metafore, poređenja, personifikacije i druge stilske slike ne objašnjavaj niti svodi na njihovo doslovno značenje.
 Sačuvaj sliku i njen efekat kad god je to moguće. Ako doslovno preslikavanje slike na srpskom ne funkcioniše, pronađi prirodnu formulaciju koja prenosi istu sliku, funkciju i stilski utisak bez dodavanja novog značenja.
@@ -186,7 +199,7 @@ Kod dijaloga koristi dosledan način obeležavanja u skladu sa srpskim pravopiso
 ZAVRŠNA PROVERA
 Pre nego što vratiš prevod, pročitaj ga kao samostalan srpski književni tekst.
 Neprimetno ispravi:
-* kalkove iz engleskog;
+* kalkove iz izvornika;
 * neprirodne kolokacije;
 * neprirodan red reči;
 * pogrešne ili nezgrapne enklitike;
@@ -201,7 +214,7 @@ Neprimetno ispravi:
 * gramatičke, pravopisne i interpunkcijske greške.
 Proveri da nijedna informacija, rečenica, deo rečenice ili replika nije slučajno izostavljena.
 Proveri da ništa nije dodato što original ne govori ili jasno ne podrazumeva.
-Proveri da prevod ne zvuči kao doslovan prevod sa engleskog.
+Proveri da prevod ne zvuči kao doslovan prevod.
 Pri završnoj obradi ne ulepšavaj tekst i ne menjaj značenje, činjenice, karakterizaciju, pripovedačku perspektivu, ton ili stil originala.
 NAJVAŽNIJE PRAVILO
 Prevod mora istovremeno biti TAČAN, PRIRODAN, TEČAN, DOSLEDAN I STILSKI VERAN ORIGINALU.

@@ -1,5 +1,6 @@
 ;----------------------------------------------------------------------------
 ; Nemoviz Book Reader -- translation rules for: hr  (Hrvatski)
+; NBR-Rules-Version: 1
 ;
 ; THIS FILE IS YOURS. It lives in
 ;
@@ -23,6 +24,18 @@
 ; A LANGUAGE THAT HAS NO RULES YET: Settings > Advanced > Translation rules,
 ; choose the language, press Add. NBR makes the file, with its instructions
 ; written in that language.
+;
+; WHEN NBR IS UPDATED a newer version of this rules file may appear. You
+; will be told about it, and your own file is never overwritten: the new one
+; is put beside it. Look through what changed and combine it with your own
+; rules if you want to.
+;
+; THE RULES SAY "izvornik", NOT "English" (2026-09-02). Gordan's point: NBR
+; translates from any language, so a rule about English syntax is wrong for a
+; French book. The source language is named in the prompt NBR builds around
+; these rules, so the rules need not name it -- which also avoids declining a
+; language name in every target language. The one English example left is
+; marked as an example. The parked short rulebook at the foot is untouched.
 ;
 ; Save as UTF-8, or the accented letters will not survive.
 ;
@@ -52,9 +65,9 @@ Ako se zahtjevi naizgled sukobe, primijeni sljedeći red prioriteta:
 PRIRODAN HRVATSKI JEZIK
 Koristi standardnu hrvatsku gramatiku, pravopis, sintaksu, leksik i prirodan red riječi.
 Prijevod mora biti hrvatski ne samo po ijekavskom izgovoru nego i po izboru riječi, frazeologiji, sintaksi, tvorbi riječi, rekciji, pravopisu i ustaljenoj hrvatskoj jezičnoj uporabi.
-Ne preslikavaj englesku sintaksu, red riječi, kolokacije i gramatičke konstrukcije.
+Ne preslikavaj sintaksu izvornika, red riječi, kolokacije i gramatičke konstrukcije.
 Slobodno preuredi rečenicu kada je to potrebno da bi na hrvatskom zvučala prirodno, ali bez mijenjanja značenja, naglaska, ritma ili tona.
-Izbjegavaj nepotrebno ponavljanje osobnih zamjenica i subjekata karakteristično za engleski.
+Izbjegavaj nepotrebno ponavljanje osobnih zamjenica i subjekata karakteristično za izvornik.
 Na primjer, kada kontekst dopušta:
 "I wanted" -> "Htio sam / Htjela sam", a ne automatski "Ja sam htio / Ja sam htjela".
 Ne ponavljaj ime lika ako je u hrvatskom prirodnije izostaviti subjekt i potpuno je jasno na koga se rečenica odnosi.
@@ -89,27 +102,27 @@ Posebno pazi na:
 * referencu zamjenica i subjekata;
 * rekciju glagola, imenica i pridjeva;
 * logičke i vremenske odnose među radnjama.
-Engleska vremena i konstrukcije ne preslikavaj mehanički.
-Present Perfect, Past Perfect i progresivne oblike prevedi onim hrvatskim vremenom ili konstrukcijom koja najbolje odgovara njihovu stvarnom značenju u konkretnom kontekstu.
+Vremena i konstrukcije izvornika ne preslikavaj mehanički.
+Primjerice, engleski Present Perfect, Past Perfect i progresivne oblike prevedi onim hrvatskim vremenom ili konstrukcijom koja najbolje odgovara njihovu stvarnom značenju u konkretnom kontekstu.
 Participne, gerundske i infinitivne konstrukcije preoblikuj u prirodnu hrvatsku sintaksu kada bi njihovo doslovno preslikavanje zvučalo neprirodno.
 Pasiv preoblikuj u aktiv kada je aktivna konstrukcija u hrvatskom prirodnija, ali samo ako se time ne mijenjaju fokus, perspektiva, značenje ili stilski učinak rečenice.
-Pazi na prirodnu uporabu svršenih i nesvršenih glagola. Ne određuj glagolski vid prema gramatičkom obliku engleskog glagola, nego prema značenju, tijeku radnje i kontekstu.
-Ne zadržavaj englesku konstrukciju samo zato što je gramatički moguća na hrvatskom ako bi izvorni govornik hrvatskog istu misao prirodno izrazio drukčije.
-Pazi na prirodan položaj enklitika. Ne slaži riječi prema engleskom redu ako time hrvatska rečenica postaje ukočena ili neprirodna.
+Pazi na prirodnu uporabu svršenih i nesvršenih glagola. Ne određuj glagolski vid prema gramatičkom obliku glagola u izvorniku, nego prema značenju, tijeku radnje i kontekstu.
+Ne zadržavaj konstrukciju izvornika samo zato što je gramatički moguća na hrvatskom ako bi izvorni govornik hrvatskog istu misao prirodno izrazio drukčije.
+Pazi na prirodan položaj enklitika. Ne slaži riječi prema redu iz izvornika ako time hrvatska rečenica postaje ukočena ili neprirodna.
 Ne upotrebljavaj posvojne zamjenice ondje gdje ih hrvatski prirodno izostavlja ili zamjenjuje povratno-posvojnom zamjenicom "svoj".
-Ne preslikavaj automatski engleske posvojne konstrukcije.
+Ne preslikavaj automatski posvojne konstrukcije izvornika.
 DIJALOG
 Dijalog mora zvučati kao stvaran govor na hrvatskom.
 Sačuvaj dob, karakter, obrazovanje, podrijetlo kada je stilski relevantno, raspoloženje i način govora svakog lika, kao i odnos među likovima.
 Dosljedno vodi računa o tome obraćaju li se likovi jedni drugima s "ti" ili "Vi".
 Ne čini dijalog formalnijim, književnijim, pravilnijim ili uglađenijim nego što je u izvorniku.
 Kolokvijalni govor prevedi prirodnim hrvatskim kolokvijalnim govorom, bez nepotrebnog žargona koji izvornik nema.
-Ne pretvaraj automatski neutralan razgovorni engleski u regionalno obilježen hrvatski govor.
+Ne pretvaraj automatski neutralan razgovorni jezik izvornika u regionalno obilježen hrvatski govor.
 Dijalekt, regionalizam ili lokalni govor uvodi samo ako za to postoji jasan razlog u izvorniku i ako se takvim rješenjem može sačuvati njegova funkcija bez stvaranja pogrešne geografske ili društvene karakterizacije.
 Ako lik govori gramatički nepravilno, fragmentarno, nesigurno ili na drugi karakterističan način, ne ispravljaj automatski njegov govor ako je ta osobina namjerna i važna za karakterizaciju.
 Psovke, humor, ironiju, sarkazam, nježnost, grubost, zadirkivanje, prijetnju, nelagodu i druge registre prenesi funkcionalnim hrvatskim ekvivalentom odgovarajuće jačine.
 Ne pojačavaj niti ublažavaj izraz bez razloga.
-Ne prevodi doslovno engleske uzrečice, poštapalice, reakcije i kratke govorne formule ako bi tako zvučale neprirodno na hrvatskom. Prenesi njihovu funkciju, intenzitet, spontanost i karakter.
+Ne prevodi doslovno uzrečice, poštapalice, reakcije i kratke govorne formule ako bi tako zvučale neprirodno na hrvatskom. Prenesi njihovu funkciju, intenzitet, spontanost i karakter.
 PRIPOVJEDAČKI GLAS
 Sačuvaj osobitosti pripovjedačkog glasa kroz cijeli tekst.
 Vodi računa o stupnju formalnosti, emocionalnoj distanci, humoru, ironiji, cinizmu, nježnosti, grubosti, jednostavnosti ili složenosti izraza i karakterističnom izboru riječi pripovjedača.
@@ -120,8 +133,8 @@ Ako je pripovijedanje namjerno hladno, suzdržano, naivno, nepouzdano, fragmenta
 IDIOMI, IZRAZI I STILSKE SLIKE
 Idiome, frazeme, poslovice, uzrečice i ustaljene izraze ne prevodi doslovno ako postoji prirodan hrvatski funkcionalni ekvivalent.
 Prenesi njihovo značenje, funkciju, ton i jačinu.
-Ne kalkiraj engleske kolokacije.
-Ako postoji uobičajen i prirodan hrvatski izraz, upotrijebi njega umjesto konstrukcije koja samo preslikava engleski.
+Ne kalkiraj kolokacije iz izvornika.
+Ako postoji uobičajen i prirodan hrvatski izraz, upotrijebi njega umjesto konstrukcije koja samo preslikava izvornik.
 Ako je strani izraz, naziv ili termin u hrvatskom jeziku uobičajeno ostaviti u izvornom obliku, nemoj ga nasilno prevoditi.
 Metafore, usporedbe, personifikacije i druge stilske slike ne objašnjavaj niti svodi na njihovo doslovno značenje.
 Sačuvaj sliku i njezin učinak kad god je to moguće. Ako doslovno preslikavanje slike na hrvatskom ne funkcionira, pronađi prirodnu formulaciju koja prenosi istu sliku, funkciju i stilski dojam bez dodavanja novog značenja.
@@ -140,12 +153,12 @@ Jane -> Jane
 Michael -> Michael
 George -> George
 Charlotte -> Charlotte
-Ne transkribiraj engleska i druga strana osobna imena fonetski samo zato da bi njihov zapis odgovarao izgovoru.
+Ne transkribiraj strana osobna imena fonetski samo zato da bi njihov zapis odgovarao izgovoru.
 Ne piši, primjerice, "Džejn" umjesto "Jane" ili "Majkl" umjesto "Michael", osim ako poseban kontekst, već ustaljen hrvatski oblik ili priroda samog djela izričito zahtijeva drukčije.
 ;  >> grafted 2026-09-01: rule 14 of the short rulebook. The long document
 ;     has nothing about Slavic names, and its default -- keep the English
 ;     spelling -- leaves a Russian character in an English novel as 'Piotr'.
-SLAVENSKA imena (ruska, poljska, češka, ukrajinska i slična) prenesi prema uobičajenoj hrvatskoj praksi: "Pjotr", "Tatjana", "Dostojevski" — ne u engleskoj transliteraciji "Piotr", "Tatiana", "Dostoyevsky". Jednom izabran oblik koristi dosljedno kroz cijeli tekst.
+SLAVENSKA imena (ruska, poljska, češka, ukrajinska i slična) prenesi prema uobičajenoj hrvatskoj praksi: "Pjotr", "Tatjana", "Dostojevski" — ne u transliteraciji izvornika "Piotr", "Tatiana", "Dostoyevsky". Jednom izabran oblik koristi dosljedno kroz cijeli tekst.
 ;  >> grafted 2026-09-01: rule 15, for its EXAMPLE. The long document has the
 ;     principle ('primjenjuj hrvatska pravila sklonidbe'); this is the case
 ;     that made it necessary, and the one a model actually fails.
@@ -217,7 +230,7 @@ Kod dijaloga koristi dosljedan način označavanja u skladu s hrvatskim pravopis
 ZAVRŠNA PROVJERA
 Prije nego što vratiš prijevod, pročitaj ga kao samostalan hrvatski književni tekst.
 Neprimjetno ispravi:
-* kalkove iz engleskog;
+* kalkove iz izvornika;
 * neprirodne kolokacije;
 * sintaktičke konstrukcije koje ne zvuče prirodno hrvatski;
 * riječi i oblike koji ne odgovaraju hrvatskom standardnom jeziku;
@@ -237,7 +250,7 @@ Neprimjetno ispravi:
 Posebno provjeri da tekst nije samo ijekaviziran, nego da doista zvuči kao izvorno napisan hrvatski tekst.
 Provjeri da nijedna informacija, rečenica, dio rečenice ili replika nije slučajno izostavljena.
 Provjeri da ništa nije dodano što izvornik ne govori ili jasno ne podrazumijeva.
-Provjeri da prijevod ne zvuči kao doslovan prijevod s engleskog.
+Provjeri da prijevod ne zvuči kao doslovan prijevod.
 Provjeri dosljednost osobnih imena i pobrini se da strana osobna imena nisu nepotrebno fonetski transkribirana.
 Pri završnoj obradi ne uljepšavaj tekst i ne mijenjaj značenje, činjenice, karakterizaciju, pripovjedačku perspektivu, ton ili stil izvornika.
 NAJVAŽNIJE PRAVILO

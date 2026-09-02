@@ -326,6 +326,22 @@ namespace Nemoviz_Book_Reader
         /// decision, and a launch that put it back would undo it silently.</summary>
         public bool RulesSeeded { get; private set; }
 
+
+        /// <summary>The fingerprint of the supplied rules file NBR last wrote for a
+        /// language, so that "the reader has edited it" is a fact rather than a
+        /// guess. Kept per language under [RulesStamp].</summary>
+        public string GetRulesStamp(string code)
+        {
+            if (string.IsNullOrEmpty(code)) return "";
+            return ini.Read("RulesStamp", code, "");
+        }
+
+        public void SetRulesStamp(string code, string fingerprint)
+        {
+            if (string.IsNullOrEmpty(code)) return;
+            ini.Write("RulesStamp", code, fingerprint ?? "");
+        }
+
         public void MarkRulesSeeded()
         {
             if (RulesSeeded) return;

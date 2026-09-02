@@ -131,41 +131,188 @@ namespace Nemoviz_Book_Reader
             {
                 if (Directory.Exists(Folder))
                     foreach (string file in Directory.GetFiles(Folder, "*.rules"))
-                        codes.Add(Path.GetFileNameWithoutExtension(file));
+                    {
+                        // A parked "<code> (new).rules" is a copy, not a language.
+                        // Normalize refuses anything that is not letters, which is the
+                        // same test the loader uses to keep a code inside the folder.
+                        string code = Path.GetFileNameWithoutExtension(file);
+                        if (Normalize(code) != code.ToLowerInvariant()) continue;
+                        codes.Add(code);
+                    }
             }
             catch { }
             codes.Sort(StringComparer.OrdinalIgnoreCase);
             return codes;
         }
 
-        /// <summary>Writes the supplied rulebooks into the reader's folder, for any
-        /// that are not there. Call ONCE -- AppSettings.RulesSeeded remembers that
-        /// it happened -- so that deleting one of them is a decision that stays
-        /// made rather than being undone by the next launch.</summary>
-        public static int SeedSupplied()
+
+        /// <summary>The file a newer supplied rulebook is parked in when the
+        /// reader has edited their own. Never read by the translator -- it is a
+        /// copy left where they will find it.</summary>
+        public static string PendingPath(string targetLang)
         {
-            int written = 0;
+            string c = Normalize(targetLang);
+            if (c.Length == 0) return "";
+            try { return Path.Combine(Folder, c + " (new).rules"); }
+            catch { return ""; }
+        }
+
+        public static bool HasPending(string targetLang)
+        {
+            try { string p = PendingPath(targetLang); return p.Length > 0 && File.Exists(p); }
+            catch { return false; }
+        }
+
+        private static string Supply(string code)
+        {
             try
             {
-                Directory.CreateDirectory(Folder);
                 Assembly asm = Assembly.GetExecutingAssembly();
-                string prefix = typeof(TranslationRules).Namespace + ".Translation.";
-                foreach (string code in Supplied)
+                string name = typeof(TranslationRules).Namespace + ".Translation." + code + ".rules";
+                using (Stream s = asm.GetManifestResourceStream(name))
                 {
-                    string path = Path.Combine(Folder, code + ".rules");
-                    if (File.Exists(path)) continue;
-                    using (Stream s = asm.GetManifestResourceStream(prefix + code + ".rules"))
-                    {
-                        if (s == null) continue;
-                        using (var r = new StreamReader(s, new UTF8Encoding(false)))
-                            File.WriteAllText(path, r.ReadToEnd(), new UTF8Encoding(false));
-                    }
-                    written++;
+                    if (s == null) return null;
+                    using (var rd = new StreamReader(s, new UTF8Encoding(false))) return rd.ReadToEnd();
                 }
             }
-            catch { }
-            if (written > 0) cache.Clear();
-            return written;
+            catch { return null; }
+        }
+
+        /// <summary>The version stamped in a rulebook header, or 0 for a file that
+        /// carries none -- which is every file a reader wrote themselves, and is why
+        /// an unstamped file is never replaced.</summary>
+        private static int VersionOf(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return 0;
+            const string mark = "NBR-Rules-Version:";
+            int i = text.IndexOf(mark, StringComparison.Ordinal);
+            if (i < 0) return 0;
+            int j = i + mark.Length;
+            int n = 0; bool any = false;
+            while (j < text.Length && text[j] == 32) j++;
+            while (j < text.Length && text[j] >= 48 && text[j] <= 57) { n = n * 10 + (text[j] - 48); j++; any = true; }
+            return any ? n : 0;
+        }
+
+
+        /// <summary>Whether two rulebooks are the same but for their version
+        /// stamp. This is what recognises a file NBR wrote before the stamp
+        /// existed -- Gordan's own hr.rules and sr.rules, seeded the day before --
+        /// as ours rather than as something a reader had edited, and it also
+        /// recovers when Settings.ini has been lost. The fingerprint stays the
+        /// primary test, because it is the only one that can tell an UNEDITED old
+        /// version from an edited one once the supplied text really changes.</summary>
+        private static bool SameButForStamp(string a, string b)
+        {
+            return Destamp(a) == Destamp(b);
+        }
+
+        private static string Destamp(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            var sb = new StringBuilder();
+            foreach (string line in text.Replace("\r\n", "\n").Split((char)10))
+            {
+                if (line.IndexOf("NBR-Rules-Version", StringComparison.Ordinal) >= 0) continue;
+                sb.Append(line).Append((char)10);
+            }
+            return sb.ToString();
+        }
+
+        private static string Fingerprint(string text)
+        {
+            try
+            {
+                using (var sha = System.Security.Cryptography.SHA1.Create())
+                {
+                    byte[] h = sha.ComputeHash(new UTF8Encoding(false).GetBytes(text ?? ""));
+                    var sb = new StringBuilder(h.Length * 2);
+                    foreach (byte b in h) sb.Append(b.ToString("x2"));
+                    return sb.ToString();
+                }
+            }
+            catch { return ""; }
+        }
+
+        /// <summary>Brings the supplied rulebooks up to date, and returns the
+        /// languages where a newer one is waiting because the reader had changed
+        /// theirs.
+        ///
+        /// <para><b>Three cases, and only the third needed deciding</b> (Gordan,
+        /// 2026-09-02). No file: write ours. A file we wrote and nobody has touched:
+        /// replace it, since nothing of theirs is lost, and that is the common case.
+        /// A file they HAVE edited: never touch it -- park the new one beside it and
+        /// say so in the dialog.</para>
+        ///
+        /// <para><b>Prose cannot be merged automatically, which is why there is no
+        /// attempt at it.</b> These are instructions with a stated order of priority;
+        /// two editions spliced together can contradict each other, and nothing
+        /// reports it -- the book simply reads worse.</para>
+        ///
+        /// <para><b>The installer cannot do this either.</b> The folder is per USER
+        /// and the installer runs once for the machine, elevated; on a machine with
+        /// three accounts it would have to reach into three profiles. It also runs
+        /// before anyone has launched NBR, and after somebody has deleted their file
+        /// on purpose.</para>
+        ///
+        /// <para>Whether the reader edited it is a FACT here rather than a guess: the
+        /// fingerprint of what we last wrote is kept in Settings.ini.</para></summary>
+        public static List<string> UpdateSupplied(AppSettings settings)
+        {
+            var parked = new List<string>();
+            try { Directory.CreateDirectory(Folder); } catch { }
+            foreach (string code in Supplied)
+            {
+                string supplied = Supply(code);
+                if (string.IsNullOrEmpty(supplied)) continue;
+                string path = Path.Combine(Folder, code + ".rules");
+
+                if (!File.Exists(path))
+                {
+                    // FIRST RUN ONLY. After that a missing rulebook is one the
+                    // reader deleted, and putting it back would undo that silently.
+                    if (settings != null && settings.RulesSeeded) continue;
+                    try
+                    {
+                        File.WriteAllText(path, supplied, new UTF8Encoding(false));
+                        if (settings != null) settings.SetRulesStamp(code, Fingerprint(supplied));
+                    }
+                    catch { }
+                    continue;
+                }
+
+                string mine;
+                try { mine = File.ReadAllText(path, Encoding.UTF8); } catch { continue; }
+                if (VersionOf(mine) >= VersionOf(supplied)) continue;
+
+                string wrote = settings == null ? "" : settings.GetRulesStamp(code);
+                bool untouched = (wrote.Length > 0 && wrote == Fingerprint(mine))
+                                 || SameButForStamp(mine, supplied);
+                try
+                {
+                    if (untouched)
+                    {
+                        File.WriteAllText(path, supplied, new UTF8Encoding(false));
+                        if (settings != null) settings.SetRulesStamp(code, Fingerprint(supplied));
+                    }
+                    else
+                    {
+                        // ONCE PER VERSION. Without this the copy would be written on
+                        // every launch, so deleting it -- the reader saying they have
+                        // dealt with it -- would be undone by the next start, and the
+                        // dialog would go on announcing it for ever.
+                        string mark = "parked-" + code;
+                        string already = settings == null ? "" : settings.GetRulesStamp(mark);
+                        if (already == VersionOf(supplied).ToString()) continue;
+                        File.WriteAllText(PendingPath(code), supplied, new UTF8Encoding(false));
+                        if (settings != null) settings.SetRulesStamp(mark, VersionOf(supplied).ToString());
+                        parked.Add(code);
+                    }
+                }
+                catch { }
+            }
+            cache.Clear();
+            return parked;
         }
 
         /// <summary>Creates an empty rules file for a language, carrying nothing but

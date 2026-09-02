@@ -207,6 +207,12 @@ namespace Nemoviz_Book_Reader
                     ? Localization.T("Dialog.Rules.Empty")
                     : text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
                 where.Text = string.Format(Localization.T("Dialog.Rules.File"), file);
+                // "o tome cete biti obavijesteni" (Gordan, 2026-09-02). This window is
+                // the channel he agreed to, and it is the right one: whoever edited
+                // their rules is the person who comes back here.
+                if (TranslationRules.HasPending(l.Code))
+                    where.Text += Environment.NewLine + string.Format(
+                        Localization.T("Dialog.Rules.Newer"), TranslationRules.PendingPath(l.Code));
             }
             body.SelectionStart = 0;
             body.SelectionLength = 0;
