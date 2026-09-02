@@ -1170,6 +1170,24 @@ namespace Nemoviz_Book_Reader
         /// another — which over a book means the quotes change between chapters and
         /// reads as a broken file rather than a choice.</para>
         ///
+        /// <para><b>AND FLAT IS THE RIGHT TARGET, for a reason that is not
+        /// typographic</b> (Gordan, 2026-09-02). Splitting the rules per language
+        /// made the model start writing each language's own marks -- Croatian
+        /// low-9 quotes, French guillemets -- and the instinct was to keep them and
+        /// normalise to those instead. He turned it down on the one ground that
+        /// outranks print convention here: <b>this book is read ALOUD</b>, and a
+        /// speech engine meets an unusual character however it likes -- reads it,
+        /// ignores it, or announces something like "char2334" when its encoding or
+        /// its inventory does not cover it. The straight ASCII pair is the one every
+        /// engine handles. Same class of problem as the Private Use Area characters
+        /// TextCleaner blanks, and the same answer.</para>
+        ///
+        /// <para>The single family goes with it, to a straight apostrophe rather
+        /// than a quote, since U+2019 is far more often an apostrophe than a
+        /// quotation mark. Measured on two real translated books: 103 + 27 + 1 of
+        /// them in one, 15 in the other, against zero in the English source -- so
+        /// the model introduces them, which is exactly what this method is for.</para>
+        ///
         /// <para>This is the general lesson and it is worth taking further: <b>a
         /// rule that can be enforced afterwards should be, not requested.</b> An
         /// instruction is a request the model may honour; a substitution is a fact.
@@ -1178,11 +1196,16 @@ namespace Nemoviz_Book_Reader
         /// asked for.</para></summary>
         private static string Tidy(string s)
         {
-            s = s.Replace('„', '"')     // „
-                 .Replace('“', '"')     // “
-                 .Replace('”', '"')     // ”
-                 .Replace('«', '"')     // «
-                 .Replace('»', '"');    // »
+            s = s.Replace('„', '"')      // „
+                 .Replace('“', '"')      // “
+                 .Replace('”', '"')      // ”
+                 .Replace('«', '"')      // «
+                 .Replace('»', '"')      // »
+                 .Replace('‚', '\'')     // ‚
+                 .Replace('‘', '\'')     // ‘
+                 .Replace('’', '\'')     // ’  also the curly apostrophe
+                 .Replace('‹', '\'')     // ‹
+                 .Replace('›', '\'');    // ›
             return s.TrimEnd('\r', '\n', ' ', '\t') + Environment.NewLine + Environment.NewLine;
         }
     }

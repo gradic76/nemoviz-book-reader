@@ -33,6 +33,14 @@
 ; A LANGUAGE THAT HAS NO RULES YET: Settings > Advanced > Translation rules,
 ; choose the language, press Add.
 ;
+; NO RULE ABOUT QUOTATION MARKS, AND THAT IS DELIBERATE (Gordan,
+; 2026-09-02). One was written here and taken out the same day. NBR reads
+; books ALOUD, and a speech engine meets an unusual character however it
+; likes -- reads it, ignores it, or says something like "char2334". So NBR
+; flattens every quotation mark to the straight ASCII pair on its way out,
+; whatever this language prints, and asking the model for anything else
+; only makes the two fight. Do not put the rule back.
+;
 ; Save as UTF-8, or the accented letters will not survive.
 ;
 ; Written by:               Mila Kuran, 2026
@@ -127,7 +135,6 @@ Koristi obične i standardne interpunkcijske znakove.
 Ne uvodi Markdown znakove, zvjezdice, ljestve, ukrasne simbole ili druga tehnička obilježavanja kojih nema u izvorniku.
 Ne koristi em dash ili en dash kao stilski ukras ili kao automatsku zamjenu za standardnu hrvatsku interpunkciju.
 Kod dijaloga koristi dosljedan način označavanja u skladu s hrvatskim pravopisom, književnom praksom i formatom izvornika.
-U hrvatskome se navodnici pišu kao „ovako”, a navodnici unutar navodnika kao ‚ovako’.
 
 #--------------------------------------------------------------------------
 # PARKED -- NOT SENT. The short Croatian rulebook, in force until 2026-09-01.
