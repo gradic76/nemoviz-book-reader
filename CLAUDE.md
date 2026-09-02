@@ -388,6 +388,58 @@ is audio, text or hybrid — including the plain Left/Right arrows. Standing on 
 first mark of anything, Back beeps rather than silently re-seeking to where you
 already are. Verified across every text step at both ends of a real book.
 
+### JAWS RE-INJECTS THE READER'S OWN KEYSTROKES, so the app cannot tell them from its (2026-09-02)
+
+Gordan asked whether an application can override JAWS: *"nepojmljivo mi je da
+ne postoji neki mehanizam da nadjacamo Jaws... aplikacija je ipak nesto sto se
+koristi iz nekog razloga a citac ekrana je samo assistive utility."* The
+research and the measurement both came back, and between them they close this
+for good.
+
+**There IS a supported override, and it is the wrong price.** Freedom
+Scientific's own script manual says that if a keystroke is in neither the
+application nor the default key map, it *"is passed through to the application
+just as if JAWS were not running"*, and an application `.jkm` takes precedence
+over the default one. Third-party products ship such files into
+`C:\ProgramData\Freedom Scientific\JAWS\<version>\Settings\enu`. **Gordan
+refused it, and the reason is the founding policy: NBR must work with ANY
+screen reader and with none.** A file written into another vendor's product,
+per JAWS version and per language, is the opposite of that. Do not re-propose
+it.
+
+**And the injected-input idea is DEAD, measured.** This file used to say
+"nothing inside the app can tell its Down from the user's", which was a guess.
+Microsoft documents `KBDLLHOOKSTRUCT.flags` bit 4, `LLKHF_INJECTED`, as
+"Specifies whether the event was injected", so a low-level hook can in
+principle separate a synthesised keystroke from a typed one. `D:\Player\JAWS
+test\InjectProbe.exe <seconds>` logs every arrow with that flag, the Ctrl and
+Shift state, and the foreground process; it swallows nothing.
+
+| where | arrows | origin |
+|---|---|---|
+| the terminal, him reading with arrows | 27 | **all HARDWARE** |
+| Notepad, JAWS say-all | 85 | **all INJECTED** |
+| NBR, say-all AND 14 Ctrl+arrows he pressed himself | 56 | **all INJECTED** |
+
+**Not one hardware event inside NBR, including the keys his own fingers
+pressed.** The terminal column is what makes that conclusive rather than a
+broken harness: the probe reports hardware correctly when there is hardware to
+report. So JAWS intercepts and RE-INJECTS, and the flag is set on everything
+the application receives. **The old conclusion was right; nobody had
+established why.**
+
+So both halves of the layout Gordan wanted -- volume and speed on Up/Down with
+and without Ctrl -- are closed with evidence rather than by hunch:
+
+- **bare Up/Down cannot carry volume**: JAWS say-all sends Downs and the flag
+  cannot separate them from a reader's;
+- **Ctrl+Up/Down cannot carry speed**: already measured, the Ctrl is eaten and
+  focus flies to the desktop (see the Shift-not-Ctrl note above).
+
+F11/F12 for volume and Ctrl+Left/Right for speed stay. **The one modifier
+nobody has tried is Alt**; that is a minute's work with the probe if the
+question ever comes back, and nothing more should be spent on it otherwise.
+
 ### Virtual timeline
 
 A book is many files but presents as one continuous timeline.
