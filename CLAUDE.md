@@ -4491,14 +4491,70 @@ Windows, screen readers and media players use.
   correctly returned nothing, and the whole batch fell back to English three
   attempts later. Any future bulk-translation harness must treat an empty source
   value as nothing to translate.
-- **Not translated, both known:** the Help manual, generated from
-  `docs/help/*.txt`, which falls back to English for a language with no folder;
-  and the installer's own language list, frozen until the next beta.
+- **The Help manual followed on 2026-09-03** and is no longer a gap: all
+  twenty-one, translated from `hr.txt` by **`tools/translate-help.cs`**, with
+  `make-help.pl` reporting "every language has the same shape as hr" for the
+  first time. **The installer's own language list is still frozen** until the
+  next beta -- but that costs the manuals nothing, because the installer
+  packages the output folder WHOLE (10i), so a new `.lang` and a new manual
+  arrive in it without the script being touched at all.
 
 Verified through the shipped `Localization` rather than by reading the files: 21
 languages listed and named, twelve real Windows tags resolving to the right file
 with `hr-HR` and `sr-Cyrl-RS` unchanged, and per file 724 keys in the template's
 order with every placeholder and every `\n` accounted for against English.
+
+### The manual, and the tool that is KEPT this time (2026-09-03)
+
+`tools/translate-help.cs` -- `check`, `sync <code>`, `full <code>` -- translating
+`docs/help/hr.txt` through the same Gemini model and the same stored key NBR
+itself uses, read via `TranslationKeys.Get` so the tool never holds a copy of
+it. **Kept in `tools/` at Gordan's word**, because the ten interface languages
+of the day before were done by a harness that lived in a scratchpad and is gone:
+*"cuvaj alat za ubuduce, bit ce toga."*
+
+**Shape is the invariant, so it is enforced rather than hoped for.** Lines go
+out NUMBERED and the same numbers are demanded back; every line must keep its
+leading marker and a table row its cell count, or the chunk is retried once and
+then refused. A translation that reads well and does not fit the shape is not
+usable here, since `make-help.pl` shares one page template across every
+language.
+
+**`sync` exists because Gordan edits the Croatian.** It re-translates only the
+sections whose block count differs from hr, plus any named with `--sections` --
+for a change that does not move the count, like the sentence he cut from the
+volume bullet, which no counting can see.
+
+**Three measurements from the first real use:**
+
+- **20 minutes a language became 1:10.** It sent one SECTION per request, and a
+  section is a handful of short lines, so nearly all of it was round trips
+  rather than generation. Grouping to ~5000-character chunks -- the size the
+  book translator settled on -- is seventeen times faster.
+- **It translated the Croatian HEADER faithfully**, so the Czech file announced
+  itself as "the manual, Croatian" and claimed Gordan's docx as its source.
+  Neither is true of a translation. The block is REPLACED before the chunking
+  now, so the model renders the right sentence rather than a good translation of
+  the wrong one.
+- **`sr-Cyrl` is NOT translated**: `tools/sr-cyrillic.pl --text` transliterates
+  it from `sr.txt` -- 5315 words, 403 carrying a digraph.
+
+**AND THE TEN WOULD NEVER HAVE REACHED A READER.** The csproj lists Help pages
+BY HAND, one `Content Include="Help\<code>\index.html"` per language. A manual
+that exists on disk and is not named there is generated and silently never
+copied to the output, and the reader goes on getting English with nothing
+anywhere to say why. **This is exactly the failure mode 10i's installer avoids
+by packaging the folder whole and excluding** -- the same project, two files,
+opposite habits. Ten entries added, and verified by BUILDING and listing
+`bin\x64\Debug\Help`, which now holds twenty-one folders. **Add a language and
+the csproj is the third file that has to know**, after `Lang\` and
+`docs/help/`.
+
+**Machine translation is primary and human review is welcome when it comes**
+(Gordan, 2026-09-02): *"Strojni prijevod nam je primaran, ljudski uvid kad nam
+se netko smiluje, kako je tako je."* So `sync` re-translates a section a
+reviewer had been through like any other, and only the sections that had to
+change lose their review.
 
 ---
 
@@ -6841,7 +6897,7 @@ sidestepping the fault; `UserData.cs` fixes it.
 
 | where | what | why |
 |---|---|---|
-| beside the exe | 480 liblouis tables, 11 `.lang`, 11 manuals, fonts, licences, `TtsHost32.exe`, the DLLs | read-only, and one copy shared by every account |
+| beside the exe | 480 liblouis tables, **21** `.lang`, **21** manuals, fonts, licences, `TtsHost32.exe`, the DLLs | read-only, and one copy shared by every account |
 | `%APPDATA%\Nemoviz Book Reader` | `Settings.ini`, `Dictionaries\`, `nbr-services.dat`, the two voice catalogues, `CloudUsage.ini` | written at runtime, and private to the person |
 | inside the BOOK folder | `Book.ini`, `sync.map`, `content.txt`, the speech cache, `translation-glossary.txt` | what makes a library copyable to another disk complete |
 
