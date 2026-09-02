@@ -462,13 +462,129 @@ player that a screen reader cannot read, in exchange for arrow keys, is not a
 trade this project can make.
 
 **2. A JAWS script.** Refused above, on the founding policy: NBR works with any
-screen reader and with none.
+screen reader and with none. **SUPERSEDED THE SAME DAY -- read the section
+below before acting on this line.** Gordan reopened it and landed somewhere
+else: the script ships as an inert file the reader copies for themselves, and
+NBR still never writes into JAWS.
 
 **So the cost is known and it is accepted.** Volume lives on F11/F12 and speed
 on Ctrl+Left/Right, not because nothing else is possible, but because
 everything else is bought with the accessibility the whole program exists for.
 Anyone reopening this should start by re-reading this paragraph rather than the
 keyboard code.
+
+#### "SO WHY NOT JUST SHIP A JAWS SCRIPT?" -- the answer, worked out 2026-09-02
+
+Gordan raised it himself, and he was right to: nearly every problem in three
+months has come from JAWS while NVDA has been smooth, so the keyboard is
+compromised for one reader's sake. Someone will ask again.
+
+**GORDAN'S FIRST ANSWER, in his words**: *"ubacivanje skripte, makar i jednog
+fajla, mijenja politiku koje smo se drzali od pocetka, sve mora raditi s bilo
+kakvim citacem i bez njega."*
+
+**AND THEN HE REFINED IT, and the refinement is the decision**: the script is
+ONE INERT FILE parked in a `Jaws\` subfolder beside the program, which the
+reader copies for themselves if they want it. **NBR never writes into JAWS.**
+That is what saves it -- the objection was always to US installing into another
+vendor's product, and a file we ship but never install does not change what NBR
+requires in order to run. The founding policy is intact: the player still works
+with any reader and with none, and the script only improves one.
+
+**WHERE THE FILE GOES IS A SOLVED CONVENTION, and I over-thought it** (Gordan,
+2026-09-02, correcting an earlier draft of this section). The instruction is the
+standard one for JAWS scripting -- *"copy this to your JAWS User folder"* -- and
+JAWS itself supplies the way there: Start menu, JAWS, **Utilities**, then
+**Explore My Settings** and **Explore Shared Settings**, two shortcuts that open
+the user and the shared folder. So the version-and-language path is never typed
+and never has to be known. **User folder, not Shared**, which is the convention
+for a third-party script. This file made a caveat of it; it is not one.
+
+**AND THE LAST CAVEAT IS ANSWERED TOO** (Gordan, 2026-09-02): an update WITHIN
+a JAWS version keeps the same settings, so nothing happens at all; a yearly
+upgrade to a NEW version ASKS whether to carry them forward. **So the script can
+never revert silently** -- either it survives untouched, or the reader was asked
+and answered. The one thing this section worried about does not exist. The
+manual needs the copy instruction and, at most, a line noting the yearly prompt.
+
+What the script buys is a nicer layout, not a missing capability -- nothing is
+unreachable today.
+
+**GORDAN'S OBJECTION KILLED THE OBVIOUS COMPROMISE, and it is the sharpest
+thing in the whole thread: a script FREES keys, it does not ASSIGN them.**
+Volume would still be on F11/F12 in the code, so the user would get free arrows
+that do nothing, and making them do something means user-remappable shortcuts
+-- a whole Settings page. Out of proportion.
+
+**HIS OWN COMBO ANSWERED IT, three days later.** A remapping tab was needed only
+because nothing else could ASSIGN the freed keys. One combo choosing between two
+fixed layouts assigns them: the script stops JAWS eating Ctrl+arrows, the combo
+puts speed on them. Two halves of one thing, and neither works without the
+other -- which is also why the script must never be presented as a fix on its
+own.
+
+**His counter-proposal**: ship his layout as the default, since it works for
+NVDA and for no reader, and tell JAWS users to use a script or accept two known
+faults. He rates them mild: Ctrl+arrows throw focus out of the player, which
+one keystroke undoes, and say-all lowers the volume, which is audible and rare
+because running say-all inside the player window has little purpose.
+
+**My objection, and it stands**: the first fault does not move focus within the
+app but OUT of it, and by his own reckoning it would be hit OFTEN, since it
+would be the speed control. A blind reader ends up on the desktop mid-book with
+playback continuing and their keys now doing something invisible elsewhere.
+And it reverses section 2 -- *"When a behavior must be tuned for one reader,
+JAWS wins"* -- which is a founding decision and must be reversed explicitly if
+at all.
+
+**Auto-detection was measured and then dropped.** `D:\Player\JAWS
+test\ReaderProbe.exe` watched three signals across 23 state changes:
+
+| signal | behaviour | cost |
+|---|---|---|
+| `nvdaController_testIfRunning` (already vendored) | reliable | 6-37 us |
+| `SPI_GETSCREENREADER` | **FLICKERS while JAWS runs** | 0.4-2 us |
+| the `jfw.exe` process | reliable | 1-5 ms |
+
+JAWS sets the system flag about a second AFTER its process appears, and then
+**turns it off and on again while still running** -- three times in five
+minutes. A rule built on that flag would have decided "no screen reader" with
+JAWS live, at random, which is the kind of fault nobody can report. The
+reliable JAWS test is the process, a thousand times dearer, so it belongs in a
+cached value refreshed on `WM_SETTINGCHANGE` rather than on the key path. Five
+minutes of measurement turned a design that looked obvious into one that was
+wrong.
+
+**And then Gordan dropped auto-detection anyway, for a better reason than
+cost**: if the explicit setting has to exist regardless, the detection mostly
+adds a way for the keyboard to change under a blind reader's hands with no
+announcement -- which is the hidden mechanism section 8l already warns against
+in his own words. A stable choice the reader made beats a clever one they did
+not.
+
+**WHERE IT LANDED, and NOTHING IS BUILT:**
+
+1. **One group in Settings**, a combo choosing between the two layouts. The
+   entries name the BEHAVIOUR with the readers as examples -- "function keys,
+   works with every screen reader" against "arrow keys, NVDA or no screen
+   reader" -- because a Narrator, Dolphin or ZoomText user is nowhere in a
+   JAWS/NVDA label. **The default is the safe one**, since nobody chooses a
+   default and a wrong default under JAWS produces the fault.
+2. **A hint saying what actually goes wrong if the wrong one is picked** --
+   under JAWS, Ctrl+arrows throw focus out of the player and say-all changes the
+   volume. Concrete, so a reader recognises it when it happens to them.
+3. **The script shipped as an inert file** in `Jaws\` beside the program, per
+   §10j's rule: NBR does not write it, so it belongs with the read-only things
+   next to the exe and not in the profile. It needs writing and, more to the
+   point, TESTING on JAWS -- which only Gordan can do.
+4. **The manual carries the instruction in JAWS's own convention**: copy the
+   file to the JAWS **User** folder, reached from Start menu > JAWS > Utilities
+   > Explore My Settings. The Settings hint may point at our copy of the file;
+   it must not install anything. Telling a reader where a file is, is
+   information; a button that copies it into another vendor's product is an
+   action, and that is the line.
+
+**Post-beta. It is a new capability, not a fix.**
 
 ### Virtual timeline
 
@@ -7522,26 +7638,70 @@ to. NBR's own shorter figure is the WPM estimate, not a measurement. See §8g′
   `book.EnsureFormatDetails()`, one TagLib open per book ever, for the detailed
   format label.
 
-- **OPEN, and NOT yet located: F3 sometimes takes a couple of seconds** (Gordan,
-  2026-08-29) on a library of **sixteen** books, which is what makes it worth
-  chasing — at 1622 it would be unusable. **"Sometimes" is the clue**, and it
-  rules out everything done on every open. Measured that day, from outside the
-  running app: the scan of every `Book.ini` is **3 ms**, `DriveInfo.GetDrives()`
-  for the optical-drive menu item is **13 ms cold and 0 warm**, and
-  `AbsorbArchives` only reads file NAMES in the library root. None of them is
-  the seconds.
+- **F3 WAS THE DAISY NAVIGATION BEING PARSED AGAIN ON EVERY LIBRARY OPEN --
+  FOUND AND FIXED 2026-09-02.** `LibraryScanner` builds a full
+  `new BookData(folder)` per shelf row, and `BookData.Load()` called
+  `BuildDaisyNav()`, which does `DaisyParser.IsDaisy` -- **up to three RECURSIVE
+  walks of the book folder** -- and then, for a real DAISY, the whole parse: the
+  nav file plus **every SMIL beside it**. So opening the Library re-derived from
+  scratch something that had been worked out once at import.
 
-  What is left is what does NOT happen every time: the **first** open after
-  launch, where a Debug build JITs `LibraryForm` and the whole of `LibrarySkin`'s
-  drawing; and a book that has never had `EnsureFormatDetails`, which is one
-  synchronous TagLib open.
+  **Measured through the shipped classes on the real 16-book library, one
+  `new BookData` per book exactly as the scan does (`bin\x64\Debug\F3Probe.exe`):**
 
-  **Do not guess between them — instrument.** `UiWatchdog` already exists and
-  `LoadBooks` already leaves one breadcrumb; three or four more around the phases
-  of opening (BuildUI done, scan done, shelf built, shown) would make the next
-  slow F3 name its own phase. That is how the Ctrl+O freeze was solved, and this
-  file records four wrong diagnoses from the one time it was approached the other
-  way round.
+  | | before | after |
+  |---|---|---|
+  | whole library | **146.5 ms** | **4.3 ms** |
+  | `Distribution` (149 SMIL) | 73.7 | — |
+  | `S13304` (85 SMIL) | 68.5 | — |
+  | the other fourteen, together | under 4 | — |
+
+  **Two books were 96 % of it**, and the fourteen ordinary ones still paid the
+  folder walks.
+
+  **GORDAN ASKED THE QUESTION THAT FIXED IT**, and it is better than the answer
+  that was on the table: *"Ako se Daisy, kao i sve druge knjige parsira prilikom
+  uvoza, zasto ne dobije podatke o navigaciji i strukturi u book.ini kako to ne
+  bi morao raditi svaki sljedeci put?"* The proposal being costed at that moment
+  was a lazy `EnsureDaisyNav()` -- do it once per open instead of sixteen times,
+  which treats the symptom. DAISY was simply **the only navigation NBR did not
+  write down**: chapters live in `[Chapters]`, M4B in `[M4bNav]`, text in
+  `[TextNav]`.
+
+  **`[DaisyNav]` now holds what the navigation RESOLVED to** -- `IsDaisy`, then
+  `H<i>=level|seconds|label` and `P<i>=seconds|label`, absolute virtual-timeline
+  seconds, the label split off last so one containing `|` survives. A book with
+  no section yet parses ONCE and writes it. **`IsDaisy` is written even when
+  false**, deliberately: the section's presence is the marker, so an ordinary
+  audio book never runs those folder walks again.
+
+  **The hybrid path is untouched and had to be.** `BuildHybridNavFromText`
+  derives its nav from the sync map at the end of `Load()` and says in its own
+  comment that it is computed rather than stored, so it keeps that rule: such a
+  book stores an empty section and fills the lists as before. It costs 0.1 ms.
+
+  **`sync.map` was NOT a cost, and this file said it was for about an hour.**
+  Reading 2286 lines measures **0.2 ms**. It was written off as bulk data on its
+  size alone, before anyone timed it. Measure the thing, not its file size.
+
+  **Verified by dumping every book's loaded state twice** -- the run that
+  migrates against the run that reads back (`StateProbe.exe`): **identical across
+  all 16 books**, `IsDaisy`, `IsHybrid`, `IsTextBook`, chapters, total duration,
+  both nav lists with their first and last points, and the text nav. Both
+  hybrids keep everything (`Distribution` 148 headings + 431 pages, `S13304` 84 +
+  402).
+
+  **The cost, stated honestly:** `Book.ini` grows -- 17.5 kB for `S13304`,
+  38.7 kB for `Distribution` -- and the write goes through
+  `BeginUpdate`/`EndUpdate`, because every `IniFile.Write` puts the whole file
+  back and writing a list key by key is what cost a 387-part book 1402 ms.
+
+  **AND WHAT IS NOT MEASURED: the two seconds.** All of the above is a WARM file
+  cache -- the probe warms deliberately. 146 ms is not what Gordan heard, so the
+  first open after a launch is presumably cold I/O over those 234 SMIL files plus
+  JIT of `LibrarySkin`. That was never measured and is not claimed. The work
+  removed is the same work either way, so it should help cold more than warm, but
+  **the confirmation is Gordan pressing F3, not this table.**
 - **Waiting on Gordan's own eyes and hands** (list opened 2026-08-03). None of
   these is a suspected fault — they are things that were built, measured and
   found correct by probe, and that a measurement *cannot* confirm:

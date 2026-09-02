@@ -354,7 +354,22 @@ namespace Nemoviz_Book_Reader
             DateAdded = dt;
             LoadChapters();
             LoadBookmarks();
-            BuildDaisyNav();
+            // READ, not rebuilt. A DAISY used to be re-parsed on every load --
+            // the nav file and every SMIL beside it -- while every other kind of
+            // navigation has been stored in Book.ini since it was built: chapters
+            // in [Chapters], M4B in [M4bNav], text in [TextNav]. Measured on a
+            // 16-book library with two hybrids: 146 ms per library open, 96 % of it
+            // those two books, and paid again on every F3. Gordan asked the
+            // question that fixes it -- if it is parsed at import, why is it not
+            // written down? A book with no section yet pays the parse ONCE and
+            // writes it; after that nobody parses anything.
+            if (!LoadDaisyNav())
+            {
+                BuildDaisyNav();
+                ini.BeginUpdate();
+                try { WriteDaisyNav(); }
+                finally { ini.EndUpdate(); }
+            }
             LoadM4bNav();
             Sound.Load(ini);
             Analysis.Load(ini);
@@ -704,6 +719,68 @@ namespace Nemoviz_Book_Reader
                     M4bChapters.Add((p[1], pos));
             }
             IsM4b = M4bChapters.Count > 0;
+        }
+
+        // [DaisyNav]: what the DAISY navigation RESOLVED to -- headings and
+        // printed pages as absolute virtual-timeline seconds -- stored the way
+        // [M4bNav] and [TextNav] already are.
+        //
+        // H<i> = level|seconds|label, P<i> = seconds|label. The label is split
+        // off last, so a label containing '|' survives.
+        //
+        // IsDaisy is written even when it is FALSE, and that is the whole point:
+        // the presence of the section is what says "this has been worked out",
+        // so an ordinary audio book never again runs DaisyParser.IsDaisy -- which
+        // is up to three RECURSIVE walks of the book folder, paid by every book
+        // on the shelf whether or not it is a DAISY.
+        //
+        // A HYBRID whose nav comes from the sync map rather than from DAISY is
+        // untouched by this: it stores an empty section, and
+        // BuildHybridNavFromText still fills the lists at the end of Load(). That
+        // path costs 0.1 ms and keeps its own "computed, never stored" rule.
+        private bool LoadDaisyNav()
+        {
+            if (ini.Read("DaisyNav", "IsDaisy", "").Length == 0) return false;
+            DaisyHeadings.Clear();
+            DaisyPages.Clear();
+            IsDaisy = ini.Read("DaisyNav", "IsDaisy", "0") == "1";
+            int.TryParse(ini.Read("DaisyNav", "Count", "0"), out int nh);
+            for (int i = 0; i < nh; i++)
+            {
+                string[] q = ini.Read("DaisyNav", "H" + i, "").Split(new[] { '|' }, 3);
+                if (q.Length == 3 && int.TryParse(q[0], out int level)
+                    && double.TryParse(q[1], System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out double pos))
+                    DaisyHeadings.Add((level, q[2], pos));
+            }
+            int.TryParse(ini.Read("DaisyNav", "PageCount", "0"), out int np);
+            for (int i = 0; i < np; i++)
+            {
+                string[] q = ini.Read("DaisyNav", "P" + i, "").Split(new[] { '|' }, 2);
+                if (q.Length == 2 && double.TryParse(q[0], System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out double pos))
+                    DaisyPages.Add((0, q[1], pos));
+            }
+            return true;
+        }
+
+        /// <summary>Writes [DaisyNav]. Call inside a BeginUpdate/EndUpdate pair:
+        /// every IniFile.Write puts the whole file back on disk, which for a list
+        /// is what cost a 387-part book 1402 ms.</summary>
+        private void WriteDaisyNav()
+        {
+            ini.Write("DaisyNav", "IsDaisy", IsDaisy ? "1" : "0");
+            ini.Write("DaisyNav", "Count", DaisyHeadings.Count.ToString());
+            for (int i = 0; i < DaisyHeadings.Count; i++)
+                ini.Write("DaisyNav", "H" + i,
+                    DaisyHeadings[i].Level + "|"
+                    + DaisyHeadings[i].Position.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    + "|" + DaisyHeadings[i].Label);
+            ini.Write("DaisyNav", "PageCount", DaisyPages.Count.ToString());
+            for (int i = 0; i < DaisyPages.Count; i++)
+                ini.Write("DaisyNav", "P" + i,
+                    DaisyPages[i].Position.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    + "|" + DaisyPages[i].Label);
         }
 
         /// <summary>Sets the M4B chapter list (from M4bParser at import) so the
@@ -1454,6 +1531,7 @@ namespace Nemoviz_Book_Reader
             ini.Write("TextNav", "PageCount", TextPages.Count.ToString());
             for (int i = 0; i < TextPages.Count; i++)
                 ini.Write("TextNav", "P" + i, TextPages[i].Offset + "|" + TextPages[i].Label);
+            WriteDaisyNav();
             ini.Write("M4bNav", "Count", M4bChapters.Count.ToString());
             for (int i = 0; i < M4bChapters.Count; i++)
                 ini.Write("M4bNav", "C" + i,
