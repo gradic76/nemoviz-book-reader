@@ -7229,6 +7229,41 @@ the timer's own pause cutting it off. The audible part of the fade is the stretc
 from 100 to 10; the last 4.5 seconds of it are a plateau.
 
 
+### A WHOLE BOOK THROUGH THE MERGED RULES, MEASURED (2026-09-02)
+
+The first full run since the rulebooks were merged and split into `_common` plus
+one file per language: *Empire of Ivory*, 680 554 characters, English into
+Croatian, from Gordan's own `translation.log`.
+
+| | |
+|---|---|
+| pieces | 119 |
+| elapsed | **19:30**, 9.8 s a piece |
+| requests | **126 for 119 pieces** |
+| engines | gemini 117, openai 2 |
+| **left in the original** | **0** |
+| output length | 0.93-1.00x the source |
+| rules sent | 20 084 characters, his own edited `hr.rules` |
+
+**TIER TWO OF THE CHAIN IS CONFIRMED ON A REAL BOOK, TIER THREE STILL IS NOT.**
+His chain was `gemini x3 -> openai x3 -> azure x1`. Pieces 59 and 61 each took
+**four asks** -- three refusals from Gemini and then OpenAI -- and came back
+right, at 94.5 s and 66.0 s against a 9.8 s median. One more piece succeeded on
+a Gemini retry. So the fallback works where it has been exercised, and **Azure,
+the last resort, has still never once run in a real book**; §11's open test is
+unchanged and the way to it is still to park the second key and run a short
+book.
+
+**The narrator-gender guard declined, and said why**: *"masculine refused --
+only 7 first-person words per 100 000 of narration, so this book is not written
+in the first person"*. A guard that abstains with a number is doing its job;
+the failure mode to watch for is one that picks a gender from a thin sample and
+says nothing.
+
+**126 requests for 119 pieces is the number to compare against** if the rules
+grow again. Three of the seven extra asks are one piece being retried; the rest
+are the two that changed engine.
+
 ### WHAT IS LEFT TO TEST, as of 2026-08-16 (Gordan's own list)
 
 He worked through the whole untested list that day. **Cleared, by ear, nothing
