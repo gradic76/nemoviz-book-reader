@@ -54,7 +54,12 @@ namespace Nemoviz_Book_Reader
     {
         /// <summary>The languages a rulebook is supplied for. Embedded under
         /// Translation\ and written into the reader's folder on first run.</summary>
-        private static readonly string[] Supplied = { "hr", "sr" };
+        /// <summary>The file whose rules hold for EVERY language, sent ahead of
+        /// the language one. Named with a leading underscore so it sorts to the top
+        /// of the folder and can never collide with a language code.</summary>
+        public const string CommonCode = "_common";
+
+        private static readonly string[] Supplied = { CommonCode, "hr", "sr" };
 
         private static string folder;
         private static readonly Dictionary<string, string> cache =
@@ -101,6 +106,19 @@ namespace Nemoviz_Book_Reader
         /// <summary>The rules for a target language, or an empty string where none
         /// have been written. An empty block is not a failure -- it is every
         /// language except the ones somebody has sat down and done.</summary>
+        /// <summary>What is sent for a target language: the rules that hold for
+        /// every language, then that language's own, in that order.
+        ///
+        /// <para><b>Two files rather than one</b> (Gordan, 2026-09-02). Written as
+        /// one, every language repeated the same ninety lines about fidelity and
+        /// register, and writing rules for a new language meant writing a book. Now
+        /// the neutral half is written once and a language file carries only what is
+        /// true of that language -- Croatian went from 205 lines to 77.</para>
+        ///
+        /// <para>The order matters for the same reason the prompt is layered at all:
+        /// caching pays for a stable prefix, and the common half is the most stable
+        /// thing in the whole prompt -- identical for every book in every
+        /// language.</para></summary>
         public static string For(string targetLang)
         {
             string code = Normalize(targetLang);
@@ -108,11 +126,33 @@ namespace Nemoviz_Book_Reader
             string hit;
             if (cache.TryGetValue(code, out hit)) return hit;
             string text = Read(PathFor(code));
+            if (code != CommonCode)
+            {
+                string common = Read(PathFor(CommonCode));
+                if (common.Length > 0)
+                    text = text.Length > 0 ? common + Environment.NewLine + Environment.NewLine + text : common;
+            }
             cache[code] = text;
             return text;
         }
 
-        public static bool Has(string targetLang) { return For(targetLang).Length > 0; }
+        /// <summary>What ONE file holds, without the common rules joined to it.
+        /// The dialog shows a file; For() builds a prompt. They are different
+        /// questions and conflating them would make every language appear to
+        /// carry the common text as its own.</summary>
+        public static string OwnRules(string targetLang)
+        {
+            return Read(PathFor(targetLang));
+        }
+
+        /// <summary>Whether this LANGUAGE has rules of its own. Deliberately not
+        /// "does For() return anything" -- the common file makes that true of all
+        /// 138, and the dialog orders the list by this.</summary>
+        public static bool Has(string targetLang)
+        {
+            string code = Normalize(targetLang);
+            return code.Length > 0 && code != CommonCode && Read(PathFor(code)).Length > 0;
+        }
 
         /// <summary>Forgets what has been read, so the next ask goes to disk.
         /// Called when a translation starts and whenever the dialog changes
@@ -137,6 +177,7 @@ namespace Nemoviz_Book_Reader
                         // same test the loader uses to keep a code inside the folder.
                         string code = Path.GetFileNameWithoutExtension(file);
                         if (Normalize(code) != code.ToLowerInvariant()) continue;
+                        if (code == CommonCode) continue;
                         codes.Add(code);
                     }
             }
@@ -269,9 +310,14 @@ namespace Nemoviz_Book_Reader
 
                 if (!File.Exists(path))
                 {
-                    // FIRST RUN ONLY. After that a missing rulebook is one the
-                    // reader deleted, and putting it back would undo that silently.
-                    if (settings != null && settings.RulesSeeded) continue;
+                    // PER FILE, NOT PER INSTALL. A rulebook is missing for one of
+                    // two reasons: we have never written it on this machine, or the
+                    // reader deleted it. The fingerprint tells them apart -- we only
+                    // have one for a file we wrote. A single "already seeded" flag
+                    // got this wrong the moment a THIRD supplied file appeared:
+                    // _common.rules would never have reached anybody who already had
+                    // NBR, because their flag was set the day before it existed.
+                    if (settings != null && settings.GetRulesStamp(code).Length > 0) continue;
                     try
                     {
                         File.WriteAllText(path, supplied, new UTF8Encoding(false));
@@ -351,6 +397,7 @@ namespace Nemoviz_Book_Reader
         {
             if (string.IsNullOrEmpty(targetLang)) return "";
             string code = targetLang.Trim().ToLowerInvariant();
+            if (code == CommonCode) return code;   // not a language, but a file
             int dash = code.IndexOfAny(new[] { '-', '_' });
             if (dash > 0) code = code.Substring(0, dash);
             // A language code cannot contain a path separator; refusing one here

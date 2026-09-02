@@ -1,0 +1,208 @@
+;-----------------------------------------------------------------------------
+; Nemoviz Book Reader -- translation rules for: EVERY language
+; NBR-Rules-Version: 1
+;
+; THIS FILE IS YOURS. It lives in
+;
+;     %APPDATA%\Nemoviz Book Reader\Translation\_common.rules
+;
+; and nowhere else, so it survives an update and an uninstall. Edit it and the
+; next book you translate uses it -- nothing to rebuild, no need to restart.
+;
+; WHEN NBR IS UPDATED a newer version of this file may appear. You will be told
+; about it, and your own file is never overwritten: the new one is put beside
+; it. Look through what changed and combine it with your own rules if you want.
+;
+; WHAT IS IN HERE AND WHAT IS NOT. This file holds what is true of translating
+; ANY book into ANY language. Everything that is true of ONE language -- its
+; norm, its names, which of its forms are archaic, its quotation marks -- goes
+; in that language's own file, <code>.rules. Both are sent, this one first.
+;
+; It is in English on purpose. A rulebook for one language is written in that
+; language, because it is instruction for a machine about to write it; this one
+; is for all of them at once, and English is the language the rest of the
+; instruction NBR builds around it is already in.
+;
+; NOT EVERYTHING NBR SENDS IS HERE. The part the program's own checks depend on
+; -- return only the translation, keep the paragraph count, plain text with no
+; Markdown -- stays in the program, because a book edited into breaking one of
+; those is rejected by NBR itself rather than read badly. What is here is
+; judgement, and judgement is yours to change.
+;
+; TWO COMMENT CHARACTERS, both ignored:
+;     ;   a note, like this one
+;     #   a rule PARKED -- not in force. Delete the '#' and it is live again.
+;
+; Written by:               Mila Kuran, 2026, whose Croatian and Serbian
+;                           rulebooks this is the language-neutral half of
+; Verified and modified by:
+;-----------------------------------------------------------------------------
+
+THE GOAL
+
+The translation must carry over the meaning, the tone, the atmosphere, the emotion, the characterisation, the narrative voice and the style of the source, and must read as though it had been written in the target language rather than translated into it.
+
+Accuracy comes before making anything prettier. Sounding natural comes before copying the structure of the source.
+
+Do not add, do not leave out, do not explain, do not change what the source says.
+
+Do not make what is implicit explicit merely for clarity. Where the source hints, implies or deliberately leaves something unsaid, keep the same degree of implicitness whenever the target language allows it.
+
+Do not "improve" the author. Where the source is deliberately plain, colloquial, blunt, repetitive, terse, sentimental, funny, odd, clumsy or otherwise marked, keep that effect.
+
+Where these pull against each other, this is the order:
+1. accuracy of meaning, information and fact;
+2. characterisation, tone, narrative voice and the stylistic intent of the source;
+3. naturalness and correctness in the target language;
+4. continuity with what has already been translated;
+5. the structure and format of the source.
+
+A GRAMMATICAL FORM IS NOT TRANSFERABLE BY ITS NAME
+
+Never translate a grammatical category into the category of the same name. The same tense, mood, aspect or construction can be ordinary in one language and archaic, regional, bookish or comic in another, and copying it across by name is how a translation ends up sounding like a costume drama or a joke.
+
+Translate by what the form DOES in the source, and choose whatever does that same job in the target language AT THE SAME STYLISTIC LEVEL. What is the neutral, unmarked way to narrate the past in the source must come out as the neutral, unmarked way to narrate the past in the target. What is marked in the source must come out marked in the target -- not necessarily by the same means.
+
+This applies to tense and aspect above all, and equally to mood, voice, evidentiality, honorifics, definiteness and the ways a language can leave a subject out.
+
+Where the source has a category the target language does not have at all, do not invent a construction for it and do not spell it out in words the author did not use. Carry as much of its effect as the target language can carry by ordinary means, and let the rest go.
+
+NATURAL PROSE IN THE TARGET LANGUAGE
+
+Use the standard grammar, spelling, syntax and natural word order of the target language.
+
+Do not mirror the syntax, word order, collocations or grammatical constructions of the source.
+
+Recast a sentence freely where that is what it takes to sound natural, but without changing meaning, emphasis, rhythm or tone.
+
+Avoid the repetition of pronouns and subjects that the source language may require and the target language does not.
+
+Do not repeat a character's name where the target language would more naturally leave the subject out and it is perfectly clear who is meant. But do not remove repetition that has a stylistic, emotional, characterising or rhythmic function in the source.
+
+Do not replace words with synonyms merely for variety. Repeating a word is not in itself a fault. Use a synonym or a different construction only where it makes the target text more natural while meaning, tone and intent stay the same.
+
+Do not introduce a meaning more precise, stronger, weaker or more concrete than the source has.
+
+Do not keep a construction of the source merely because it is grammatically possible in the target language, if a native speaker would naturally put the same thought differently.
+
+DIALOGUE
+
+Dialogue must sound like real speech in the target language.
+
+Keep each character's age, character, education, background where it is stylistically relevant, mood and manner of speaking, and the relationship between them.
+
+Keep track of how characters address one another where the target language distinguishes formal and familiar address, and stay consistent.
+
+Do not make dialogue more formal, more literary, more correct or more polished than it is in the source.
+
+Translate colloquial speech as natural colloquial speech in the target language, without slang the source does not have.
+
+Do not turn neutral conversational language in the source into regionally marked speech in the target. Introduce dialect or local speech only where the source gives a clear reason for it and where it can be done without inventing a geographical or social origin the source does not give the character.
+
+Where a character speaks ungrammatically, in fragments, hesitantly or in some other characteristic way, do not correct it if it is deliberate and matters to who they are.
+
+Swearing, humour, irony, sarcasm, tenderness, roughness, teasing, threat, awkwardness and other registers must come across through an equivalent of the same strength in the target language.
+
+Do not strengthen and do not soften an expression without reason.
+
+Do not translate the source's tags, fillers, reactions and short conversational formulas literally where that would sound unnatural. Carry over their function, intensity, spontaneity and character.
+
+THE NARRATIVE VOICE
+
+Keep the particular qualities of the narrative voice throughout.
+
+Mind the degree of formality, the emotional distance, the humour, irony, cynicism, tenderness, roughness, the simplicity or complexity of expression, and the narrator's characteristic choice of words.
+
+Do not make the narrator sound like the characters.
+
+Where the narrator has a recognisable rhythm, a way of noticing things, a way of commenting on events, or a limited vocabulary, keep it.
+
+Do not make the narrative voice more elegant, wiser, wittier or more expressive than it is in the source.
+
+Where the narration is deliberately cold, restrained, naive, unreliable, fragmentary or subjective, do not neutralise it.
+
+IDIOM AND IMAGERY
+
+Do not translate idioms, set phrases, proverbs and fixed expressions literally where the target language has a natural equivalent that does the same work. Carry over their meaning, function, tone and force.
+
+Do not calque the collocations of the source.
+
+Where a foreign expression, name or term is normally left as it is in the target language, do not force a translation on it.
+
+Do not explain metaphors, similes and other images, and do not reduce them to their literal meaning. Keep the image and its effect wherever you can. Where the image cannot be carried over as it stands, find a natural formulation that carries the same image, function and impression.
+
+Do not turn an author's unusual but deliberate image into an ordinary expression merely because the ordinary one is more natural.
+
+AMBIGUITY AND WHAT IS LEFT UNSAID
+
+Where the source is deliberately or genuinely ambiguous, unclear or unspecific, do not remove that by choosing an interpretation.
+
+Where the target language allows it, keep the same degree of ambiguity.
+
+Where a word, pronoun, description or construction admits more than one reading, do not settle on one merely because it seems likelier, unless the source confirms it.
+
+Do not use knowledge from later in the book to make an earlier passage more definite than it was at that point.
+
+Where vagueness is a deliberate device of the storytelling, of a mystery, of humour or of characterisation, keep it.
+
+Do not clarify the relationships between characters, their motives or their emotional states where the source only suggests them.
+
+CONTINUITY, BECAUSE THE BOOK ARRIVES IN PIECES
+
+The text may be delivered in parts. Treat every new part as the continuation of the same work.
+
+Use what has already been given as context for understanding the current part, and above all for continuity of names, relationships, terminology, characterisation, narrative voice and forms of address.
+
+Respect everything that has been reliably established by the earlier text: how names are written, the grammatical gender of characters, family, romantic, professional and other relationships, nicknames, titles, how people address one another, place names, translations already settled on for recurring terms and expressions, the characteristic speech of individual characters, the particular qualities of the narrator, and facts and events that bear on the meaning of the current part.
+
+Do not change a form already established without an unambiguous reason.
+
+Where the context does not allow you to establish a gender, a relationship, the meaning of an ambiguous word, the reference of a pronoun or any other fact, do not invent one. Where you can, choose a natural formulation in the target language that does not introduce an assumption.
+
+Consistency does not mean mechanically repeating one translation in every context. Translate the same word or expression differently where its meaning or function genuinely differs there.
+
+Do not change the spelling of a name, a place name, a term or a form of address merely because another possibility would also be acceptable.
+
+STYLE AND RHYTHM
+
+Keep the rhythm of the source where it has a stylistic function.
+
+Do not turn short, clipped sentences into long polished ones.
+
+You may recast or split a long sentence where its original structure would be unnatural, heavy or unclear in the target language, but without losing the relationships, the rhythm or the information in it.
+
+Do not merge separate lines of dialogue.
+
+Do not turn a plain style into a "finer", richer or more ornate one.
+
+Do not introduce archaisms, bureaucratic expressions, over-bookish constructions or unusually choice words where the tone of the source does not call for them.
+
+Where the source deliberately uses brevity, repetition, fragmentation, parallelism or an unusual structure, keep its effect as far as the target language allows.
+
+Do not raise the emotional temperature of a scene by adding stronger words than the source has.
+
+Do not lower it by replacing a concrete or forceful expression with a blander one.
+
+Do not smooth away deliberate roughness, awkwardness, monotony or clumsiness in the source.
+
+BEFORE YOU RETURN THE TRANSLATION
+
+Read it as a piece of writing in the target language in its own right.
+
+Quietly correct: calques from the source; unnatural collocations; syntax that does not sound native; word order that is not natural; unnecessary pronouns and subjects; tense and aspect carried across mechanically; wrong government of verbs, nouns and adjectives; inconsistent names, titles and terms; foreign names wrongly declined or wrongly transcribed; dialogue that is unnatural or too formal; a register that has drifted by accident; ambiguity that has been lost; information made explicit that was not; and errors of grammar, spelling and punctuation.
+
+Check that no information, sentence, part of a sentence or line of dialogue has been left out by accident.
+
+Check that nothing has been added that the source does not say or clearly imply.
+
+Check that the translation does not read like a literal translation.
+
+Check the consistency of personal names.
+
+In this final pass do not prettify the text, and do not change the meaning, the facts, the characterisation, the narrative perspective, the tone or the style of the source.
+
+THE RULE ABOVE ALL OTHERS
+
+The translation must be at once ACCURATE, NATURAL, FLUENT, CONSISTENT and FAITHFUL IN STYLE to the source.
+
+The reader should feel they are reading a book written in their own language, and never at the price of changing what the author actually wrote, implied or intended.

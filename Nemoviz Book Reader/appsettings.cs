@@ -266,7 +266,6 @@ namespace Nemoviz_Book_Reader
             Visual = ini.Read("Visual", "Use", "0") == "1";
             WarnBrailleReread = ini.Read("App", "WarnBrailleReread", "1") == "1";
             WarnSoundProcessing = ini.Read("App", "WarnSoundProcessing", "1") == "1";
-            RulesSeeded = ini.Read("App", "RulesSeeded", "0") == "1";
             VisualMode = Clamp(ReadInt("Visual", "Mode", 0), 0, 2);
             Highlight = Clamp(ReadInt("Visual", "Highlight", 1), 0, 2);
             HighlightColour = ReadingColours.Clamp(
@@ -321,11 +320,6 @@ namespace Nemoviz_Book_Reader
         /// same shape as WarnBrailleReread.</summary>
         public bool WarnSoundProcessing { get; private set; }
 
-        /// <summary>Whether the supplied rulebooks have been written into the
-        /// reader's folder. Once, not on every launch: deleting one of them is a
-        /// decision, and a launch that put it back would undo it silently.</summary>
-        public bool RulesSeeded { get; private set; }
-
 
         /// <summary>The fingerprint of the supplied rules file NBR last wrote for a
         /// language, so that "the reader has edited it" is a fact rather than a
@@ -340,13 +334,6 @@ namespace Nemoviz_Book_Reader
         {
             if (string.IsNullOrEmpty(code)) return;
             ini.Write("RulesStamp", code, fingerprint ?? "");
-        }
-
-        public void MarkRulesSeeded()
-        {
-            if (RulesSeeded) return;
-            RulesSeeded = true;
-            ini.Write("App", "RulesSeeded", "1");
         }
 
         public void SetWarnSoundProcessing(bool value)

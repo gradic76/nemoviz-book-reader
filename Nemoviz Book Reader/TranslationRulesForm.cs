@@ -90,7 +90,7 @@ namespace Nemoviz_Book_Reader
             languages.SetBounds(140, 13, 320, 24);
             languages.AccessibleName = Localization.T("Dialog.Rules.Language");
             languages.TabIndex = 0;
-            foreach (TranslationLanguages.Lang l in order) languages.Items.Add(l.DisplayName);
+            FillList();
             // NVDA says nothing when a closed DropDownList changes on the arrow
             // keys; the app-wide remedy, and a no-op under JAWS.
             NvdaController.SpeakOnChange(languages);
@@ -161,6 +161,11 @@ namespace Nemoviz_Book_Reader
         /// in the same relative place here.</summary>
         private void BuildOrder()
         {
+            // THE COMMON RULES ARE THE FIRST ROW, and they are not a language.
+            // Gordan asked where they would be reachable; here, by the same two
+            // buttons as anything else, is the answer that needs no second concept.
+            // Null stands for them, the way Settings uses "All other languages".
+            order.Add(null);
             List<TranslationLanguages.Lang> rest = new List<TranslationLanguages.Lang>();
             foreach (TranslationLanguages.Lang l in TranslationLanguages.All)
             {
@@ -170,31 +175,51 @@ namespace Nemoviz_Book_Reader
             order.AddRange(rest);
         }
 
+        private void FillList()
+        {
+            foreach (TranslationLanguages.Lang l in order)
+                languages.Items.Add(l == null ? Localization.T("Dialog.Rules.Common") : l.DisplayName);
+        }
+
+        /// <summary>The code of whatever is selected -- a language, or the common
+        /// file, which has a code of its own precisely so that everything below can
+        /// treat it as one more entry.</summary>
+        private string ChosenCode()
+        {
+            int i = languages.SelectedIndex;
+            if (i < 0 || i >= order.Count) return null;
+            return order[i] == null ? TranslationRules.CommonCode : order[i].Code;
+        }
+
+        private string ChosenName()
+        {
+            int i = languages.SelectedIndex;
+            if (i < 0 || i >= order.Count) return "";
+            return order[i] == null ? "" : order[i].Native;
+        }
+
         private int IndexOfCode(string code)
         {
             if (string.IsNullOrEmpty(code)) return -1;
             for (int i = 0; i < order.Count; i++)
-                if (string.Equals(order[i].Code, code, StringComparison.OrdinalIgnoreCase)) return i;
+                if (order[i] != null && string.Equals(order[i].Code, code, StringComparison.OrdinalIgnoreCase)) return i;
             return -1;
-        }
-
-        private TranslationLanguages.Lang Chosen()
-        {
-            int i = languages.SelectedIndex;
-            return i < 0 || i >= order.Count ? null : order[i];
         }
 
         private void ShowChosen()
         {
-            TranslationLanguages.Lang l = Chosen();
-            if (l == null) return;
+            string code = ChosenCode();
+            if (code == null) return;
             // Straight off disk every time the language is chosen: a reader who has
             // just edited the file in another program and come back here expects to
             // see what they wrote.
             TranslationRules.Reload();
-            bool exists = TranslationRules.FileExists(l.Code);
-            string text = TranslationRules.For(l.Code);
-            string file = TranslationRules.PathFor(l.Code);
+            bool exists = TranslationRules.FileExists(code);
+            // For() adds the common rules to a language; this window is showing ONE
+            // file, so it reads that file alone -- otherwise every language would
+            // display the common text as though it were its own.
+            string text = TranslationRules.OwnRules(code);
+            string file = TranslationRules.PathFor(code);
 
             if (!exists)
             {
@@ -210,9 +235,9 @@ namespace Nemoviz_Book_Reader
                 // "o tome cete biti obavijesteni" (Gordan, 2026-09-02). This window is
                 // the channel he agreed to, and it is the right one: whoever edited
                 // their rules is the person who comes back here.
-                if (TranslationRules.HasPending(l.Code))
+                if (TranslationRules.HasPending(code))
                     where.Text += Environment.NewLine + string.Format(
-                        Localization.T("Dialog.Rules.Newer"), TranslationRules.PendingPath(l.Code));
+                        Localization.T("Dialog.Rules.Newer"), TranslationRules.PendingPath(code));
             }
             body.SelectionStart = 0;
             body.SelectionLength = 0;
@@ -222,14 +247,14 @@ namespace Nemoviz_Book_Reader
 
         private void AddForChosen()
         {
-            TranslationLanguages.Lang l = Chosen();
-            if (l == null || TranslationRules.FileExists(l.Code)) return;
+            string code = ChosenCode();
+            if (code == null || TranslationRules.FileExists(code)) return;
             // The instructions inside the file are in the language the rules are
             // FOR, because that is what whoever writes them is about to write. A
             // target language NBR is not localized into falls back to the interface
             // language -- see Localization.StringFor.
-            string instructions = Localization.StringFor(l.Code, "Dialog.Rules.NewHeader");
-            if (!TranslationRules.CreateEmpty(l.Code, instructions, l.Native))
+            string instructions = Localization.StringFor(code, "Dialog.Rules.NewHeader");
+            if (!TranslationRules.CreateEmpty(code, instructions, ChosenName()))
             {
                 MessageForm.ShowInfo(this, string.Format(Localization.T("Dialog.Rules.Make"),
                                      TranslationRules.Folder), Text);
@@ -238,11 +263,10 @@ namespace Nemoviz_Book_Reader
             // The language has a file now, so it belongs at the top of the list --
             // rebuilt rather than nudged, or the order would drift from what
             // BuildOrder means by it.
-            string code = l.Code;
             order.Clear();
             languages.Items.Clear();
             BuildOrder();
-            foreach (TranslationLanguages.Lang x in order) languages.Items.Add(x.DisplayName);
+            FillList();
             int i = IndexOfCode(code);
             languages.SelectedIndex = i >= 0 ? i : 0;
             ShowChosen();
@@ -251,9 +275,9 @@ namespace Nemoviz_Book_Reader
 
         private void EditChosen()
         {
-            TranslationLanguages.Lang l = Chosen();
-            if (l == null) return;
-            string path = TranslationRules.PathFor(l.Code);
+            string code = ChosenCode();
+            if (code == null) return;
+            string path = TranslationRules.PathFor(code);
             if (path.Length == 0 || !File.Exists(path)) return;
             try { System.Diagnostics.Process.Start("notepad.exe", "\"" + path + "\""); }
             catch (Exception ex) { MessageForm.ShowInfo(this, ex.Message, Text); }
