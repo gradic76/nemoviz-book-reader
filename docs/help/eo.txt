@@ -90,21 +90,22 @@ Sekvas la markobutonoj por ŝalti kaj malŝalti la brajlan kaj la ekranan eligon
 
 Se vi ankoraŭ havas optikan legilon en via komputilo kaj eble kolekton de pli malnovaj sonaj eldonoj sur ordinaraj sonaj lumdiskoj, trankvile ŝaltu Uzi la optikan legilon. Per tio vi aktivigas la subtenon por la aparato kaj povas komenci aŭskulti viajn librojn de disko.
 
-## Speciala
+## Altnivela
 
-En ĉi tiu langeto vi elektas la lingvon, aŭ plurajn, kiuj estos uzataj por rekoni librojn el bildoj ĉe la importo. Nemoviz Book Reader uzas la ilon Microsoft OCR enkonstruitan en Windows 10 kaj 11. Nuntempe ĝi subtenas tridek kvin lingvojn, kies liston vi povas vidi premante *Aldoni lingvon*. Kiam vi elektos la dezirataĵn kaj premos Instali, la lingvoj ne instaliĝos tuj. NBR ne instalas ilin mem; ili venas tra Windows Update kaj povas bezoni iom da tempo ĝis venos ilia vico. Krome, depende de la agordoj de via sistemo, eblas ke aperos dialogo de la Kontrolo de uzantokontoj, en kiu vi devos konfirmi la instalon.
+Sur ĉi tiu langeto vi elektas unu aŭ plurajn lingvojn, kiuj estos uzataj por rekoni bildajn dokumentojn dum importado. Nemoviz Book Reader uzas enkonstruitan Microsoft OCR-ilon, disponeblan en la operaciumaj versioj Windows 10 kaj 11. Nuntempe ĝi subtenas tridek kvin lingvojn, kies liston vi povas vidi se vi premas la butonon *Aldoni lingvon*. Kiam vi elektas la deziratajn lingvojn kaj premas Instali, la lingvoj ne instalosĝos tuj. NBR ne instalas ilin rekte, sed ili estas instalataj per la servo Windows Update, kaj povas daŭri iom da tempo ĝis ili viciĝos por instalado. Ankaŭ, depende de viaj sistemaj agordoj, eblas ke aperos dialogujo de Kontrolo de uzantkonto, en kiu vi devos konfirmi la instaladon de la lingvo aŭ lingvoj.
 
-Post la instalo, importante libron el bildoj, vi povos elekti en kombinilo la lingvon, per kiu vi volas rekoni la tekston. Ankaŭ tio povas daŭri iom, laŭ la rapido de la maŝino kaj la grando de la libro, sed ĉion vi povas sekvi sur la progresa strio.
+Post instalado, kaj dum importado de bilda formato, vi povos en la kombinkesto elekti la lingvon, per kiu vi volas rekoni la tekston en la titolo, kiun vi malfermas. Ĉi tio ankaŭ povas daŭri iom da tempo, depende de la rapideco de la maŝino kaj la grandeco de la libro, sed vi povas sekvi ĉion sur la progresbreto.
 
-Krom la agordoj por la rekonado vi elektas ĉi tie ankaŭ la servojn de lingvomodeloj por la traduko. En la momento de la verkado de ĉi tiu teksto tio estas Google Gemini, DeepSeek, DeepSeek kun pli granda modelo, tri niveloj de OpenAI GPT kaj Microsoft Azure. Kiel skribite supre, ĉi tiuj servoj bezonas API-ŝlosilojn aŭ alian specon de rajtigo, kaj pli vi povas legi en la menuo Helpo, ĉe la ero Servoj kaj kontoj.
+Krom la agordoj por optika rekono, ĉi tie vi povas elekti ankaŭ LLM-servojn por tradukado. En la momento de verkado de ĉi tiu teksto, tie estas Google Gemini, DeepSeek, DeepSeek kun pli granda modelo, tri niveloj de OpenAI GPT kaj Microsoft Azure. Kiel ni skribis pli frue, por ĉi tiuj servoj vi bezonas API-ŝlosilojn aŭ aliajn specojn de aŭtorizado; pli vi povas legi en la menuo Helpo, sub la ero Servoj kaj kontoj.
+Sur la butono Tradukreguloj malfermiĝos fenestro kun instrukcioj, kiuj estas sendataj al la tradukmodeloj por ke tio, kion vi volas, estu tradukita kiel eble plej kvalite. Ekzistas aro de instrukcioj, kiu rilatas al ĉiuj lingvoj, kaj aroj de instrukcioj por subtenataj lingvoj aparte. En ĉi tiu fenestro vi povas redakti ekzistantajn kaj aldoni instrukciojn por novaj lingvoj. Dum redaktado de dosieroj kun reguloj, ili malfermiĝos en Notepad; ĉe la supro de la teksto ĉio pri redaktado kaj aldonado de reguloj estas klarigita.
 
-Krom la traduko estas ankaŭ la aldonaj nubaj voĉoj; nuntempe ni subtenas Google Cloud Chirp 3 kaj Microsoft Azure Neural. Ebligi ilin similas al tio ĉe la tradukaj servoj, kaj ankaŭ pri tio estas pli en la menuo Helpo, ĉe la ero Servoj kaj kontoj.
+Krom la ebleco de tradukado, ekzistas ankaŭ aldonaj Cloud-voĉoj; nuntempe ni subtenas Google Cloud Chirp 3 kaj Microsoft Azure Neural-voĉojn. La proceduro por ebligi ĉi tiujn voĉojn estas simila kiel por la servoj por tradukado, kaj pli pri tio estas ankaŭ en la menuo Helpo, sub la ero Servoj kaj kontoj.
 
-Ni atentigas, ke ankaŭ ĉi tiuj voĉoj estas pagataj. Google donas senpage milionon da signoj por legado, kio estas proksimume du mezaj libroj de 500 paĝoj. Microsoft donas duonon de tio, 500.000 signojn, do proksimume unu meza libro. Kiam la senpaga kvoto estas elĉerpita, via kreditkarto estas ŝarĝata, kaj la kosto de la legado estas ie inter 8,00 kaj 15,00 usonaj dolaroj por meza libro, laŭ la servo.
+Ni atentigas, ke ĉi tiuj voĉoj ankaŭ estas pagendaj; Google donas senpage unu milionon da signoj por legado, kio estas proksimume du mezaj libroj de 500 paĝoj. Microsoft donas duonon malpli, 500.000 signojn, kio estas proksimume unu meza libro. Post eluzita senpaga kvoto de signoj, via kreditkarto estas ŝargita, kaj la kosto de legado estas ie inter $8,00 kaj $15,00 por meza libro, depende de la servo.
 
-Por ke ne estu miskompreno nek hazarda nedezirata elspezo, ni limigis la agordadon de la nubaj voĉoj. En la agordoj de parolo kaj brajlo vi ne vidos ĉi tiujn voĉojn kaj ne povos fari ilin defaŭltaj; ili videblas nur en la ecoj de elektita libro, kaj ankaŭ tie nur post kiam vi ebligis ilin en la specialaj agordoj. En la ecoj de libro vi povas elekti unu el ĉi tiuj voĉoj por tiu libro, kaj ĝi validas nur por ĝi.
+Por ke ne estu miskomprenoj kaj hazarda nedezirata elspezo, ni limigis la agordadon de cloud-voĉoj. En la agordoj de parolado kaj brajlo vi ne vidos ĉi tiujn voĉojn kaj vi ne povos agordi ilin kiel defaŭltajn; ili estas videblaj nur en la ecoj de la elektita libro, sed antaŭe vi devas ebligi ilin en la altnivelaj agordoj. En la ecoj de la libro vi povas elekti unu el ĉi tiuj voĉoj kiel defaŭltan por difinita libro, kaj tio validas nur por tiu libro.
 
-Ĉar ĉe la nubaj voĉoj signoj konsumiĝas ankaŭ kiam vi retroiras, ripetas parton aŭ alimaniere trairas jam legitajn vortojn, NBR tenas provizoran memoron pri tio, kio estis eldirita, tiel ke retroiro kaj simila ne estas kalkulataj denove. Tiu sama memoro estas ankaŭ tio, kio permesas al vi post la legado eksporti la libron al mp3 kaj tiel ricevi ordinaran sonlibron.
+Konsiderante ke la signoj dum uzado de cloud-voĉoj estas eluzataj ankaŭ kiam vi rebobenas, ripetas difinitan parton de la libro aŭ alimaniere eluzas jam legitajn signojn, NBR havas ebligitan provizoran memoron (cache), kie estas konservata tio, kion vi legis, tiel ke rebobinado kaj similaj agoj ne estos traktataj kiel denova elspezo de signoj. Ĉi tiu opcio ankaŭ ebligos al vi, ke post legado de la libro vi povas fari eksporton al mp3 kaj tiel ricevi klasikan sonlibron.
 
 # Biblioteko
 
@@ -112,23 +113,24 @@ Por ke ne estu miskompreno nek hazarda nedezirata elspezo, ni limigis la agordad
 
 Ĉe ĉiu titolo en la biblioteko, per simpla premo de la klavo Tab vi povas legi ankaŭ la detalojn pri ĝi: titolon kaj aŭtoron, eldoniston kaj formon, kie vi haltis, kiun procenton de la libro vi legis, kiom da tempo restas kaj ankoraŭ ion. Kie eblas, vi ricevos ankaŭ mallongan priskribon de la libro.
 
-## Aldono de titoloj
+## Aldo de titoloj
 
-En la menuo Dosiero vi trovas du erojn: Malfermi dosieron (Stir + O) kaj Malfermi dosierujon (Stir + Maj + O). Se en la Agordoj vi ŝaltis la subtenon por la optika legilo, vi trovos ankaŭ Malfermi sonan lumdiskon. Krom tiuj estas ebleco rekoni bildolibron denove, ebleco krei sonlibron kaj ebleco traduki. Estas ankaŭ ero, kiun ne tuŝu se ne vere necese: *Malplenigi la bibliotekon*. Ĝi mem diras, kion ĝi faras, kaj post la aktivigo vi ricevos ankoraŭ averton. Se vi konfirmas ĝis la fino, via biblioteko estas forigita: ĉiuj legosignoj kaj ĉiuj legopozicioj for, kaj for ankaŭ la agordoj de lingvo kaj rapido por la libroj interne. Do prefere ĉirkaŭiru ĉi tiun eron, se vi ne estas absolute certa, ke vi volas malplenigi la bibliotekon.
+En la falmenuo Datoteka vi povas trovi du erojn: Otvori datoteku (Ctrl + O) kaj Otvori mapu (Ctrl + Shift + O). Se vi en Postavke ŝaltis subtenon por optika disko, vi trovos ankaŭ la opcion Otvori Audio CD. Krom tio, ekzistas ankaŭ opcio por ripeta optika rekono de bilda titolo, opcio por kreado de sonlibro kaj opcio por traduko. Tie estas ankaŭ ero, kiun vi ne tuŝu krom se vi nepre devas, *Isprazni knjižnicu*. Ĝi mem klarigas kion ĝi faras kaj post aktivigo vi ricevos ankoraŭ unu averton. Se vi konfirmas ĉion ĝis la fino, via biblioteko estas forviŝita, ĉiuj datumoj pri legosignoj kaj kie vi haltis estas forviŝitaj, forviŝitaj estas ankaŭ agordoj de lingvo kaj rapideco por libroj, kiujn vi havas interne. Tial prefere evitu ĉi tiun eron, se vi ne estas absolute certa, ke vi volas malplenigi la bibliotekon.
+La opcio Otvori mapu knjižnice malfermas la lokon de via kolekto en la dosieradministrilo Explorer.
 
-Per la unua ebleco vi malfermas unuopan dosieron (MP3-libron en unu dosiero, EPUB-dokumenton aŭ dosieron ncc.html por Daisy-titolo), dum malfermante dosierujon vi povas malfermi sonlibron dividitan en plurajn dosierojn en unu dosierujo. Krome, malfermante dosierujon vi povas importi ankaŭ pli grandan kvanton da diversaj dosieroj, tio estas kolekton de pluraj titoloj. Nemoviz Book Reader havas enkonstruitajn certajn regulojn pri ordigo kaj faros sian plejeblon por ordigi al vi tian dosierujon kiel eble plej bone.
+Per la unua opcio vi povas malfermi unuopan dosieron (MP3-libron en unu dosiero, EPUB-dokumenton aŭ ncc.html-dosieron por Daisy-titolo), kaj per malfermo de dosierujo vi povas malfermi sonlibron en pluraj dosieroj metitaj en unu dosierujon. Krom tio, se vi uzas malfermon de dosierujo, vi povas importi ankaŭ pli grandan kvanton de diversaj dosieroj, t.e. kolekton de pluraj titoloj. Nemoviz Book Reader havas enkonstruitajn certajn regulojn pri ordigado kaj faros ĉion eblan por ordigi kaj aranĝi tian dosierujon kiel eble plej bone.
 
-Malfermi sonan lumdiskon ekigos la ludadon de la libro de via optika legilo kaj revenigos vin al la fenestro de la ludilo. Uzi ordinaran lumdiskon ne importas la libron en la bibliotekon; ĝi nur ebligas ludi ĝin per Nemoviz Book Reader.
+Otvori Audio CD startigos reproduktadon de la libro de via optika disko kaj revenigos vin al la fenestro de la ludilo. Uzo de klasika KD ne importas la libron en la bibliotekon, ĝi nur ebligas al vi reproduktadon per Nemoviz Book Reader.
 
-Krom ordinaraj dosieroj NBR povas — malsame ol la granda plimulto de aplikaĵoj de ĉi tiu speco — malfermi ankaŭ densigitajn dosierojn, tio estas arkivojn. El la arkivaj formoj estas subtenataj .zip, .rar kaj .7z, kaj krom unupartaj eblas malfermi plurpartajn kaj pasvorte protektitajn, kondiĉe ke vi konas la pasvorton.
+Krom klasikaj dosieroj NBR povas, malkiel la granda plimulto de aplikoj de ĉi tiu tipo, malfermi ankaŭ kunpremitajn dosierojn, t.n. arkivojn. El la formatoj de arkivoj estas subtenataj .zip, .rar kaj .7z, kaj krom unu-partaj arkivoj oni povas malfermi ankaŭ plur-partajn arkivojn, same kiel arkivojn protektitajn per pasvorto, kondiĉe ke vi scias tiun pasvorton.
 
-Alivorte, de kie ajn kaj kiel ajn vi ricevas libron, en unu norma dosiero aŭ en pluraj, pakita en arkivon aŭ ne, vi povas importi ĝin en la bibliotekon sen ia ajn antaŭlaboro kaj el la loko, kie ĝi kuŝas. Nemoviz Book Reader kopias la dosierojn, kiujn vi malfermis, en la dosierujon de la biblioteko en la lokon destinitan por tio, malpakas arkivojn kaj metas ilin en la bibliotekon en ilia ordinara formo, kaj notas ĉion esencan pri la titoloj, kiujn vi importis. Viaj originalaj dosieroj restas netuŝitaj tie, kie vi tenas ilin; ĉio, kio poste okazas al la libroj, okazas al la kopioj de NBR en la dosierujo de la biblioteko.
+Alivorte, de kie ajn kaj per kia ajn maniero vi ricevas iun libron, en norma dosiero aŭ pluraj, pakita en arkivon aŭ ne, vi povas sen ajnaj antaŭpreparoj kaj de la loko, kie ĝi troviĝas, importi ĝin en la bibliotekon. Nemoviz Book Reader kopias la dosierojn, kiujn vi malfermis, en la dosierujon de la biblioteko al la por tio antaŭvidita loko, malpakas la arkivojn kaj konservas ilin en la bibliotekon en norma formo kaj registras ĉiujn esencajn datumojn pri titoloj, kiujn vi importis. Viaj fontdosieroj restas netuŝitaj en la lokoj, kie vi tenas ilin, ĉio, kio poste okazas kun la libroj, okazas sur la NBR-kopioj en la dosierujo de la biblioteko.
 
-La ebleco de ripetita OCR servas por refari la optikan rekonon de bildolibro per alia lingvo, se vi ne kontentis pri la rezulto kiam la libro estis malfermita.
+La opcio por ripeta OCR servas por ke vi ripetu la optikan rekonon de bilda titolo kun iu alia lingvo, se vi ne estas kontenta pri la rezulto de la rekono dum la malfermo de la libro.
 
-Traduki la libron malfermas dialogon, en kiu vi elektas la fontan lingvon, la lingvon al kiu vi volas traduki, la servon aŭ servojn, kiujn vi volas uzi, kaj kampon, en kiun vi povas skribi kelkajn bazajn instrukciojn pri tio, kion kaj kiel traduki.
+La opcio Prevedi knjigu malfermas dialogon, en kiu vi elektas la fontlingvon, la lingvon en kiu vi volas traduki la libron, servon aŭ servojn, kiujn vi volas uzi, kaj kampon en kiu vi povas enskribi kelkajn bazajn instrukciojn pri tio, kion kaj kiel traduki.
 
-Eksporti kiel sonlibron faras precize tion, kion diras ĝia nomo. Ĉu vi uzas unu el la instalitaj parolsinteziloj aŭ la nubajn voĉojn, vi povas el tekstolibro fari sonan kaj eksporti ĝin kien vi volas. La libro estas eksportata kiel unu sola dosiero .mp3, la valoroj samas al tiuj de la sintezilo, kiun vi uzas, kaj la kvalito de la registraĵo egalos al la kvalito de la aŭskultado vive. Antaŭ la komenco NBR petas konfirmon kaj diras, kiom la farado devus daŭri.
+La opcio Izvezi kao zvučnu knjigu faras ĝuste tion, kion ĝia nomo diras. Sendepende de tio, ĉu vi uzas iun el la instalitaj parol-sinteziloj aŭ nubajn voĉojn, vi povas el teksta libro fari sonlibron kaj eksporti ĝin al la dezirata loko. La libro estas eksportata kiel unu .mp3-dosiero, la parametroj estas egalaj al la parametroj de la TTS, kiun vi uzas, kaj la kvalito de la registraĵo estos egala al la kvalito de la viva aŭskultado. Antaŭ la komenco NBR petos vin pri konfirmo kaj diros, kiom longe la kreado devus daŭri.
 
 ## La librobreto
 
@@ -152,47 +154,48 @@ Kiam vi konatiĝis kun la enhavo kaj la funkcioj de la fenestro de la biblioteko
 
 Resume, kiam vi premas Enigi sur la titolo de libro aŭ la butonon Ŝargi, la biblioteko fermiĝas kaj vi revenas al la ĉefa fenestro de la ludilo.
 
-# La ludilo
+# Ludilo
 
-Ĉi tiu fenestro ĉiam videblas sur la ekrano de via komputilo; foje kaŝas ĝin la fenestro de la biblioteko, foje la lega surfaco, sed ĝi fakte estas la ĉefa fenestro, el kiu vi regas la libron post la ŝargo. Vi povas moviĝi en la fenestro de la ludilo per Tab kiel en ĉiu alia fenestro kaj aktivigi erojn per Enigi, sed malsame ol en aliaj fenestroj de ĉi tiu aplikaĵo kaj de aliaj aplikaĵoj, la sagoklavoj kaj la spaco estas rezervitaj por aliaj funkcioj. Do se vi venas per Tab ekzemple al la klavo de legosignoj, vi ne povos aktivigi ĝin per la spaco; nur per Enigi.
+Ĉi tiu fenestro estas ĉiam videbla sur via komputila ekrano, foje kaŝita de la biblioteka fenestro, foje de la teksta legareo, sed ĝi estas fakte la ĉefa fenestro, sur kiu vi regas la libron post ĝia ŝargo. Vi povas navigi tra la ludila fenestro per Tab kiel en ĉiu alia fenestro kaj aktivigi specifajn erojn per la klavo Enter, sed male al aliaj fenestroj en la aplikaĵo mem, kaj en aliaj aplikaĵoj, la sagoklavoj kaj la spacostango estas rezervitaj por aliaj funkcioj, do se vi atingas ekzemple la butonon por legosignoj per Tab, vi ne povos aktivigi ĝin per la spacostango, vi devas uzi nur la klavon Enter.
 
-En la taba vico de la ĉefa fenestro de la ludilo, ne nepre en ĉi tiu ordo, troviĝas la jenaj klavoj kaj funkcioj:
+En la Tab-linio, ne nepre en ĉi tiu ordo, sur la ĉefa ludila fenestro troviĝas la sekvaj butonoj kaj funkcioj:
 
-| Ludi/Paŭzi | spaco |
-| Antaŭen | Maj + dekstren |
-| Malantaŭen | Maj + maldekstren |
+| Ludado/Paŭzo | spacostango |
+| Antaŭen | Shift + dekstra sago |
+| Malantaŭen | Shift + maldekstra sago |
 | Laŭteco | F11 kaj F12 |
-| Rapido | Stir + maldekstren kaj Stir + dekstren |
-| Progreso en la libro | sagoj maldekstren kaj dekstren |
-| Saltopaŝo | Maj + sagoj supren kaj malsupren |
+| Rapido | Ctrl + maldekstra sago kaj Ctrl + dekstra sago |
+| Aŭskulta progreso | maldekstra kaj dekstra sagoklavoj |
+| Navigada paŝo | Shift + suprenaj kaj subenaj sagoklavoj |
 | Biblioteko | F3 |
 | Agordoj | F2 |
-| Ecoj | Alt + Enigi |
-| Meti legosignon | F5 |
+| Ecoj | Alt + Enter |
+| Marki | F5 |
 | Legosignoj | F6 |
 | Iri al… | F4 |
 | Helpo | F1 |
-| Dormtempigilo | F7 |
-| Informoj pri la ludado | F8 |
+| Nombrilo | F7 |
+| Informkampo | F8 |
 
-En la informa kampo vi ekscias la bazajn datenojn pri la ludado: aŭtoron, titolon, pasintan tempon, paĝon kaj iom pli, laŭ kompreneble la formo de la libro, kiun vi legas. Unu premo de F8 nur laŭtlegas tion, kion diras la informa panelo; premita dufoje, ĝi venas en la fokuson de la ekranlegilo, kaj vi povas per la sagoj trairi pli detale, kio tie staras.
+En la informkampo vi povas ekscii bazajn datumojn pri la ludado kiel aŭtoro, titolo, pasinta tempo, paĝo kaj iom pli, kompreneble, depende de la formato de la libro, kiun vi legas. Per unu premo de F8 la enhavo de la informekrano nur estos legata, kaj per duobla premo ĝi venas en la fokuson de la ekrana legilo, do vi povas per sagoklavoj pli detale legi tion, kio estas skribita tie.
+Per la klavo F10 vi povas ekscii la pasintan tempon de la titolo, kiun vi legas, kaj per rapida duobla premo de F10 vi aŭdos la restantan tempon.
 
-Ĉiuj klavoj havas sian propran kombinon, do vi atingas ilin facile sen tro multe promeni tra la fenestro, kaj regi la libron, kiun vi legas, estas pli ol simple.
+Ĉiuj butonoj havas siajn klavajn ŝparvojojn, do vi povas facile atingi ilin sen troa navigado tra la fenestro, kaj la regado mem de la libro, kiun vi legas, estas pli ol simpla.
 
-## Ludado
+## Reprodukto
 
-- Per la spaco vi ekigas kaj haltigas la ludadon.
-- Per la sagoj maldekstren kaj dekstren vi „retroiras“ po kvin sekundoj aŭ, se temas pri tekstolibro, po unu frazo antaŭen aŭ malantaŭen.
-- Per Stir + sago maldekstren aŭ dekstren vi regas la rapidon de la legado.
-- Per F11 kaj F12 vi agordas la laŭtecon, F12 levas kaj F11 mallevas. La nudaj sagoj supren kaj malsupren ĉi tie faras nenion: iam ili portis la laŭtecon, sed ekranlegilo, kiu voĉlegas la libron, senĉese petas la sekvan linion kaj la laŭteco forglitis sub ĝi, do la klavoj transiris al la funkcia vico, kie Windows Media Player tenas ilin de dudek jaroj.
-- Per Maj + supren aŭ malsupren vi elektas la saltopaŝon (titolo, ĉapitro, norma paĝo, certaj daŭroj); la elekto ŝanĝiĝas laŭ la formo kaj la strukturo de la libro.
-- Per Maj + sago maldekstren aŭ dekstren vi moviĝas laŭ la elektita saltopaŝo.
+- Per la klavo Spaco vi startigas aŭ haltigas la reprodukton.
+- Per la sagoklavoj maldekstren aŭ dekstren vi "antaŭen- aŭ malantaŭenbobenas" po kvin sekundoj aŭ, se temas pri teksta libro, po unu frazo antaŭen aŭ malantaŭen.
+- Per la klavkombino Ctrl + sagoklavoj maldekstren aŭ dekstren vi reguligas la rapidon de la reprodukto.
+- Per la klavoj F11 kaj F12 vi agordas la laŭtecon, F12 plilaŭtigas, kaj F11 plimallaŭtigas.
+- Per la klavkombino Shift + supren aŭ malsupren vi elektas la paŝon por navigado (titolo, ĉapitro, tekstokarto, difinitaj minutoj), la elekto ŝanĝiĝas depende de la formato kaj strukturo de la libro.
+- Per la klavkombino Shift + sagoklavoj maldekstren aŭ dekstren vi moviĝas laŭ la elektita navigadpaŝo.
 
-Resume: vi ekigas la elektitan libron per la spaco, kaj tenante Stir, la sagoj maldekstren kaj dekstren regas la rapidon de la legado.
+Mallonge, vi startigas la reprodukton de la elektita libro per la klavo Spaco, tenante premita la klavon Ctrl per la sagoklavoj maldekstren kaj dekstren vi reguligas la legorapidon.
 
-Se vi volas iom salti antaŭen aŭ malantaŭen, tion faras la sagoj maldekstren kaj dekstren po kvin sekundoj aŭ po unu frazo. Se vi volas pli grandajn paŝojn, premu Maj, elektu per la sagoj supren kaj malsupren la deziratan paŝon kaj — plu tenante Maj — iru antaŭen kaj malantaŭen tra la libro per la sagoj maldekstren kaj dekstren laŭ tiu paŝo. Kiam vi volas aŭdi, kiel kaj kien progresas via legado, premu F8 en iu ajn momento kaj la ekranlegilo laŭtlegos al vi la tutan enhavon de la informa panelo. Se vi volas trairi la informan kampon pli detale, dateno post dateno, premu dufoje rapide F8. Kiam vi finis, forlasu la informan kampon premante denove dufoje F8, aŭ simple per Eskapo, por ke la sagoklavoj reprenu siajn navigajn taskojn.
+Se vi volas ion mallonge antaŭen- aŭ malantaŭenbobeni, vi povas tion fari per la sagoklavoj maldekstren aŭ dekstren po kvin sekundoj aŭ po unu frazo. Se vi volas pli grandajn navigadpaŝojn, premu Shift, per la sagoklavoj supren kaj malsupren elektu la deziratan paŝon kaj, tenante plu premita Shift, per la sagoklavoj maldekstren kaj dekstren iru antaŭen kaj malantaŭen tra la libro laŭ la elektita paŝo. Kiam vi volas aŭdi kiel kaj kien vi progresas kun la legado de la libro, en iu ajn momento premu F8 kaj la ekranlegilo legos al vi la tutan enhavon de la informekrano. Se vi volas pli detale legi la informkampon, datumon post datumo, dufoje rapide premu F8. Kiam vi finis, eliru el la informkampo premante denove dufoje F8 aŭ simple Escape por ke la sagoklavoj denove ricevu siajn navigadajn ecojn. Se vi volas aŭdi la pasintan aŭ restantan tempon, premu F10 unufoje aŭ dufoje.
 
-La ideo malantaŭ ĉi tiu maniero navigi estis, ke la uzanto ne devu lerni kaj memori tutan vicon da klavkombinoj. La plej granda parto de la navigado kuŝas sur la sagoklavoj kaj, kune kun la modifiloj Maj kaj Stir, atingiĝis, ke vi ne devas promenigi la manon tra la klavaro. Metu la dekstran manon sur la sagojn, per la maldekstra premu laŭbezone modifilon, kaj jen la tuta filozofio. La pli lertaj verŝajne sukcesos uzi ankaŭ la dikfingron de la dekstra mano por premi la Stir aŭ la Maj dekstraflanke, sed la maniero de uzo restas al ĉiu propra elekto. Ĉiuj ceteraj kombinoj, escepte de Alt + Enigi por Ecoj ĉar tio estas la kutima konvencio de Windows, kuŝas sur la funkciaj klavoj, ĉio en la intereso de kiel eble plej simpla regado.
+La ideo malantaŭ ĉi tiu aliro al navigado estis, ke la uzanto ne devas lerni kaj memori tutan vicon da klavkombinoj. La plej granda parto de la navigado estas aranĝita sur la sagoklavoj kaj en kombinaĵo kun la modifaj klavoj Shift kaj Ctrl estas atingite, ke vi ne devas movi vian manon tra la klavaro. Metu la dekstran manon sur la sagoklavojn, per la maldekstra laŭbezone premu iun el la modifiloj, kaj tio estas la tuta filozofio de la navigado. La pli lertaj kaj eltrovemaj verŝajne povos uzi ankaŭ la dikfingron de la dekstra mano por premi Ctrl aŭ Shift sur la dekstra flanko de la klavaro, sed la maniero de uzo estas lasita al ĉies elekto. Ĉiuj aliaj mallongigoj, escepte de Alt + Enter por Ecoj ĉar tio estas kutima Windows-konvencio, estas metitaj sur la funkciajn klavojn, ĉio kun la celo de kiel eble plej simpla regado.
 
 ## Iri al...
 

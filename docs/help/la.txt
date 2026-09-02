@@ -95,21 +95,22 @@ Bibliotheca
 
 Haec fenestra non semper conspicitur: praeter primum cursum, cum opus est aperitur, et in ea collectionem editionum electronicarum tuarum disponis. Titulos singulos aut multos addis, deles, libros ut lectos, non lectos aut dilectos notas. Ordinem ostendendi pluribus rationibus disponere, titulos secundum statum (lectum, non lectum…) eligere et quaerere potes.
 
-## Ulteriora
+## Provectum
 
-Additio titulorum *Linguam addere* Primo documentum singulare aperis (librum MP3 in uno documento, documentum EPUB aut documentum ncc.html ad titulum Daisy), directorium autem aperiens librum sonorum in pluria documenta in uno directorio divisum aperire potes. Praeterea, directorium aperiens, maiorem copiam documentorum diversorum importare potes, id est collectionem plurium titulorum. Nemoviz Book Reader certas regulas disponendi insertas habet et quantum poterit faciet, ut tale directorium quam optime disponat.
+In hac tabula linguam unam vel plures eligis quae adhibebuntur ad recognitionem documentorum imaginum in importando. Nemoviz Book Reader utitur instrumento Microsoft OCR inserto, praesto in versionibus Windows 10 et 11 systematis operativi. In praesenti triginta quinque linguas sustinet, quarum indicem videre potes si premes clavem *Adde linguam*. Cum linguas desideratas elegeris et premes Instrue, linguae non statim installabuntur. NBR eas directe non installat, sed per servitium Windows Update installantur, ideoque tempus aliquod eis opus esse potest ut ad ordinem installationis perveniant. Etiam, secundum occasus systematis tui, fieri potest ut dialogus User Account Control appareat, in quo installationem linguae unius vel plurium confirmare debebis.
 
-Discum sonorum aperire lectionem libri de instrumento optico tuo incipiet et te ad fenestram lectoris reducet. Utendodisco compacto librum in bibliothecam non importas; tantum permittis eum per Nemoviz Book Reader legi.
+Post installationem, et in importando formati imaginis, in cista coniuncta (combo box) linguam eligere poteris qua textum in titulo quem aperis recognoscere vis. Hoc etiam breve tempus sumere potest, secundum velocitatem machinae et magnitudinem libri, sed omnia in vecte progressus (progress bar) observare potes.
 
-Praeter documenta communia NBR potest — aliter ac maxima pars applicationum huius generis — etiam documenta compressa, id est arcas, aperire. Ex formis arcarum sustinentur .zip, .rar et .7z, et praeter arcas simplices possunt aperiri arcae e pluribus partibus constantes et arcae tessera munitae, si tesseram nosti.
+Praeter occasus pro recognitione optica, hic etiam servitia LLM pro translatione eligere potes. Tempore scriptionis huius textus, adsunt Google Gemini, DeepSeek, DeepSeek cum exemplari maiore, tria gradus OpenAI GPT et Microsoft Azure. Sicut antea scripsimus, pro his servitiis claves API vel alia genera auctorizationis tibi necessaria sunt; plura legere potes in tabula Auxilium, deinde in item Servitia et rationes.
+In clave Regulae translationis fenestra aperietur cum instructionibus quae ad exemplaria translationis mittuntur, ut id quod vis quam optime vertatur. Exstat copia instructionum quae ad omnes linguas pertinet, et copiae instructionum pro linguis sustentatis singillatim. In hac fenestra regulas existentes emendare et novas addere potes. In emendando documenta cum regulis, aperientur in Notepad; in vertice textus explicatum est omne de emendando et addendo regulas.
 
-Aliis verbis: undecumque et quocumque modo librum accepisti, insimplici documento communi aut in pluribus, in arcam compactum an non, eum nullo labore ante acto ex loco, ubi iacet, in bibliothecam importare potes. Nemoviz Book Reader documenta, quae aperuisti, in directorium bibliothecae in locum eis destinatum transcribit, arcas aperit et in bibliothecam forma communi reponit, et omnia gravia de titulis importatis notat. Documenta tua originalia intacta manent, ubi ea tenes; quicquid libris postea accidit, exemplaribus NBR in directorio bibliothecae accidit.
+Praeter facultatem translationis, adsunt etiam voces nubis (Cloud voices) additae; in praesenti sustinemus Google Cloud Chirp 3 et Microsoft Azure Neural voces. Processus ad has voces activandas similis est illi pro servitiis translationis, et plura de hoc etiam in tabula Auxilium, deinde in item Servitia et rationes.
 
-Copia agnitionis repetendae ad hoc est, ut agnitionem libri ex imaginibus alia lingua iterum agas, si eo, quod aperto libro accepisti, non contentus fuisti.
+Notamus has voces etiam solvi debere; Google gratis dat decies centena milia characterum pro lectione, quod sunt circiter duo libri mediocres quingentarum paginarum. Microsoft dimidium minus dat, 500.000 characterum, quod est circiter unus liber mediocris. Post consumptam quotam gratuitam characterum, charta tua crediticia oneratur, et sumptus lectionis est alicubi inter $8,00 et $15,00 per librum mediocrem, secundum servitium.
 
-Librum vertere dialogum aperit, in quo linguam originalem eligis, linguam in quam vertere vis, officium aut officia, quibus uti vis, et campum, in quem pauca praecepta scribere potes de eo, quid et quomodo vertendum sit.
+Ne sint errores et consumptio fortuita invisa, limitavimus occasum vocum nubis. In occasibus vocis et Braille has voces non videbis et eas ut praedefinitas ponere non poteris; visibiles sunt tantum in proprietatibus libri electi, sed prius eas in occasibus provectis activare debes. In proprietatibus libri aliquam ex his vocibus ut praedefinitam pro libro determinato eligere potes, et hoc valet tantum pro illo libro.
 
-Possibilitas Ut librum sonorum exportare id ipsum facit, quod nomen dicit. Sive una ex synthesibus vocis institutis sive vocibus nubis uteris, ex libro scripto sonorum facere et, quo voles, exportare potes. Liber ut unum documentum .mp3 exportatur, numeri iidem sunt ac synthesis, qua uteris, et qualitas eadem erit ac audiendi vivi. Ante initium NBR confirmationem petit et dicit quantum factio durare debeat.
+Quoniam characteres in utendo vocibus nubis consumuntur etiam cum revolvis, repetis partem determinatam libri, vel alio modo consumis characteres iam lectos, NBR habet activatam memoriam temporalem (cache) ubi servatur id quod legisti, ita ut revolutio et similes actiones non tractabuntur ut iterata consumptio characterum. Haec optio tibi etiam permittet ut post lectionem libri exportare possis in mp3 et sic librum sonorum classicum obtinere.
 
 # Bibliotheca
 
@@ -119,21 +120,22 @@ Si nulla harum ostensionum tibi placet, librum electum ut vis nominare potes, ex
 
 ## Additio titulorum
 
-Cum in titulo substitisti, clave Tab ad locum venis, ubi sagittis sursum et deorsum copiam notitiarum de libro accipis: ubi substiteris, quantum libri lectum sit et quantum restet in centesimis,notitias de tempore, ubi liber editus et confectus est, notitias technicas de sono et cetera. Hae notitiae ex forma libri pendent et in variis libris differunt. *Per fenestram bibliothecae ulterius progrediens ad campum quaerendi venies, qui simplici ratione operatur: catenam litterarum quam scripsisti in nominibus rerum in loculamento quaerit. Si „oper“ scribis, potes invenire exempli gratia Desiderii Erasmi opera omnia, sed etiam Propertii elegiarum libros quattuor.*Post campum quaerendi capsa eligendi stat, in qua statuis, qui libri tibi ostendantur. Ex more ibi semper omnes libri sunt, sed electionem ad Legitur, Nondum lectus, Lectus et Dilecti vertere potes, et loculamentum electioni tuae se accommodabit.
+In tabula decurrens Datoteka invenire potes duo elementa: Aperire fasciculum (Ctrl + O) et Aperire indicem (Ctrl + Shift + O). Si in Optionibus subsidium pro unitate optica activasti, invenies etiam optionem Aperire Audio CD. Praeter hoc, adsunt etiam optio pro recognitione optica titulorum imaginum iteranda, optio pro libro sonoro creando, et optio pro translatione. Adest etiam elementum quod ne attingas nisi necesse est, *Vacuare bibliothecam*. Per se dicit quid agat, et post activationem accipies alteram admonitionem. Si omnia ad finem confirmaveris, bibliotheca tua deleta est, omnia data de notis librorum et ubi substitisti deleta sunt, deletae sunt etiam optiones linguae et celeritatis pro libris quos intus habes. Ideo potius hoc elementum praeteri nisi absolute certus es te velle bibliothecam vacuare.
+Optio Aperire indicem bibliothecae aperit situm collectionis tuae in Explorer fasciculorum.
 
-Ordinatio
+In prima optione aperire potes singulum fasciculum (librum MP3 in uno fasciculo, documentum EPUB vel fasciculum ncc.html pro titulo Daisy), et in aperiendo indicem aperire potes librum sonorum in pluribus fasciculis in unum indicem positum. Praeterea, si uteris aperiendo indicem, importare potes etiam maiorem copiam diversorum fasciculorum, id est collectionem plurium titulorum. Nemoviz Book Reader habet regulas quasdam de ordinando et faciet omnia ut talem indicem ordinet et disponat quam optime fieri potest.
 
-In hoc indice tantum usitata quae iam nescio quotiens vidisti. Ordinem, quo tituli apparent, eligere potes: secundum litteras, secundum diem additionis, secundum formam et secundum statum. Status significat non lectum, lectum et cetera. Quaeque harum praeterea ascendenter aut descendenter ostendi potest.
+Aperire Audio CD incipiet reproductionem libri ex unitate tua optica et reducet te ad fenestram lusoris. Usus classici CD non importat librum in bibliothecam, tantum tibi permittit reproductionem per Nemoviz Book Reader.
 
-Cum, quid fenestra bibliothecae contineat et faciat, cognoveris, tempus est librum in loculamento eligere et clave Tab ad bullam Imponere ire — aut simpliciter Enter premere dum titulus adhuc lucem habet. Liber, quem legendum elegisti, semper supra loculamentum stabit, in parte propria quae Nunc legitur vocatur. Notandum est, librum quem legis, id est librum activum in lectorem impositum, non ita deleri posse ut ceteros libros in loculamento. Librum activum ex indice contextus ut lectum notare debes ut ex Nunc legitur in Lectus transeat, et tum demum eum delere potes.
+Praeter classicos fasciculos NBR potest, dissimiliter magnae parti applicationum huius generis, aperire etiam fasciculos compressos, sic dictas archivas. Ex formis archivorum sustinentur .zip, .rar et .7z, et praeter archivas unius partis aperiri possunt etiam archivae plurium partium necnon archivae tesseris protectae, sub condicione ut illam tesseram scias.
 
-Denique, cum in titulo libri Enter aut bullam Imponere premis, bibliotheca clauditur et ad fenestram principalem lectoris redis.
+Aliis verbis, undecumque et quocumque modo accipias aliquem librum, in fasciculo normato vel pluribus, in archiva compressum vel non, potes eum sine ullis praeparationibus et ex situ in quo invenitur importare in bibliothecam. Nemoviz Book Reader copiat fasciculos quos aperuisti in indicem bibliothecae in locum ad hoc destinatum, despacit archivas et servat eas in bibliothecam in forma normata atque adnotat omnia data essentialia de titulis quos importasti. Fasciculi tui originales manent intacti in sitibus in quibus eos tenes, omne quod cum libris postea accidit, accidit in copiis NBR in indice bibliothecae.
 
-Lector
+Optio pro OCR iterato inservit ut repetas recognitionem opticam tituli imaginis cum aliqua alia lingua si non es contentus eventu recognitionis tempore aperiendi libri.
 
-Haec fenestra semper in monitorio computatri tui conspicitur; interdum eam fenestra bibliothecae tegit, interdum area legendi, sed revera fenestra principalis est, ex qua librum impositum regis. Per fenestram lectoris clave Tab ut per quamvis aliam moveri et res clave Enter excitare potes — sed aliter ac in aliis fenestris huius applicationis et aliarum, sagittae et spatium aliis muneribus destinata sunt. Itaque si clave Tab, exempli gratia, ad clavem signaculorum venis, eam spatio excitare non poteris; sola clave Enter.
+Optio Transferre librum aperit dialogum in quo eligis linguam originalem, linguam in quam vis transferre librum, servitium vel servitia quibus vis uti, necnon campum in quo potes inscribere quasdam instructiones fundamentales quid et quomodo transferre.
 
-In ordine tabulandi fenestrae principalis lectoris, non necessario hoc ordine, hae claves et munera sunt:
+Optio Exportare ut librum sonorum facit prorsus id quod nomen eius dicit. Sine respectu utrum uteris aliquo ex synthetizatoribus vocis installatis an vocibus nubis, potes ex libro textuali facere sonorum et exportare eum ad locum desideratum. Liber exportatur ut unus fasciculus .mp3, parametri sunt aequales parametris TTS quo uteris et qualitas recordationis erit aequalis qualitati auditionis vivae. Ante initium NBR te rogabit pro confirmatione et dicet quantum fabricatio durare debeat.
 
 ## Pluteus
 
@@ -159,45 +161,46 @@ Denique, cum in titulo libri Enter aut bullam Imponere premis, bibliotheca claud
 
 # Lector
 
-Signacula
+Haec fenestra semper in scrinio computatri tui apparet, interdum a fenestra bibliothecae, interdum a superficie legendi textus celatur, sed re vera est fenestra principalis in qua librum post onerationem regis. Per fenestram lectoris potes navigare per Tab sicut per quamlibet aliam fenestram et elementa quaedam per Enter movere, sed secus ac in aliis fenestris in ipsa applicatione, et in aliis applicationibus, claves sagittarum et spatium reservatae sunt aliis functionibus, ita ut si per Tab ad clavem notarum librorum perveneris, eam per spatium movere non poteris, solum clavis Enter adhibenda est.
 
-In ordine tabulandi fenestrae principalis lectoris, non necessario hoc ordine, hae claves et munera sunt:
+In linea Tab, non necessario hoc ordine, in fenestra principali lectoris sequentes claves et functiones inveniuntur:
 
-| Ad locum ire… | spatium |
-| Ante | Maiusc + dextra |
-| Retro | F7 |
-| Sonoritas | F11 et F12 |
-| Celeritas | Omnes claves suam compositionem habent, itaque eas facile attingis sine nimia per fenestram ambulatione, et librum, quem legis, regere plus quam simplex est. |
-| Lectio | sagittae sinistra et dextra |
-| Gradus saliendi | Maiusc + sagittae sursum et deorsum |
+| Reproductio/Pausa | spatium |
+| Deinceps | Shift + dextra |
+| Retro | Shift + sinistra |
+| Volumen | F11 et F12 |
+| Velocitas | Ctrl + sinistra et Ctrl + dextra |
+| Progressus auditionis | sagittae sinistra et dextra |
+| Gradus navigationis | Shift + sagittae sursum et deorsum |
 | Bibliotheca | F3 |
 | Optiones | F2 |
 | Proprietates | Alt + Enter |
-| Signaculum ponere | F5 |
-| Signacula | F6 |
-| Ad locum ire… | F4 |
+| Nota | F5 |
+| Notae | F6 |
+| Vade ad… | F4 |
 | Auxilium | F1 |
-| Horologium somni | F7 |
-| Praeterea est quadratulum, quod rogat, utrum signaculum ad initium numerationis poni velis. Utile esse potest, ut ad tempus redeas, quo nondum dormiebas, et inde facilius locum invenias, quo legere destitisti. | F8 |
+| Numerator | F7 |
+| Campus informationis | F8 |
 
-Reproductionem duo dialogi sistunt: Signacula et Horologium. Cum in eis feceris, quod voluisti, et confirmaveris, post reditum in fenestram lectoris reproductio pergit. Parametra, Bibliotheca, Ire ad et Proprietates librum canere sinunt — apud Proprietates id etiam consulto, quia ibi ea disponis quae interea audire vis.
+In campo informationis potes cognoscere notitias fundamentales de reproductione sicut auctorem, titulum, tempus elapsum, paginam et alia, utique, secundum formam libri quem legis. Uno pressu in F8 contentum scrinii cum informationibus tantum legetur, et duplici pressu in focum lectoris scrinii venit, ut per sagittas accuratius legere possis quid ibi scriptum sit.
+Clave F10 potes cognoscere tempus elapsum tituli quem legis et celeri duplici pressu in F10 audies tempus reliquum.
 
-Pauca etiam de moderamine celeritatis et sonoritatis. Sonoritas in F11 et F12 est — F12 auget, F11 minuit — gradibus quinarum centesimarum, et ad utrumque finem signum audies. Celeritas gradibus decimarum it, a 0,5x ad 3x, eodem modo in libris sonoris et in textualibus. Hoc solum differt, quod 1x in libro sonoro celeritatem ipsius phonographematis significat, in textuali autem celeritatem, qua vox electa per se loquitur. Signum audies cum celeritatem solitam transieris, in textu autem eam quae illi voci praestituta est.
+Omnes claves habent suos compendia claviaturae ut facile ad eas pervenire possis sine nimia ambulatione per fenestram, et ipsa administratio libri quem legis est plus quam simplex.
 
-## Lectio
+## Reproductio
 
-- Proprietates
-- Iam compluries dictum est: parametra et numeri singulorum librorum in proprietatibus ipsorum librorum statuuntur. Libri sonori suas proprietates habent, scripti suas, et libri proprii ut Daisy sonora + scripta utrasque, in duabus tabulis separatis fenestrae proprietatum. Proprietates ex fenestra lectoris clave Proprietates aut compositione Alt + Enter aperis, ex fenestra bibliothecae autem, cum in titulo libri stas, ex indice contextus aut item Alt + Enter.
-- Proprietates soni
-- Cum Proprietates soni aperis, primum, quod animadvertes, quadratulum Curatio soni est. Id accendere non debes si sonus libri, quem audis, tibi acceptus est — sed si non est, Curatione soni accensa fortasse sonum ad gradum audibilem perducere poteris. Quadratulo signato incipit examinatio soni libri, quae, pro celeritate machinae, inter triginta secunda et aliquot minuta durare potest. Ex virga progressus omni momento vides, quomodo res stet et quantum restet. Examinatione perfecta, NBR filtra infra dicta in statum aliquem rationi consentaneum ponet, itaque si sonus tibi convenit, omnia in Bene confirma; si putas te eum adhuc perpolire posse, ecce brevis descriptio eorum quae fieri possunt.
-- Sequuntur septem filtra quae tibi proderunt aut non, ut sonum librorum ex vetustis, malis aut utrisque recordationibus aliquantum emendes. Quisque regulus seorsum accendi et exstingui potest, itaque omnibus simul uti non debes. Curatione soni accensa, prima, quam invenis, clavis Restituere est, quae omnia filtra ad numeros principales reducit. Sequitur quadratulum Praeterire, quo accenso et exstincto statim differentiam inter originale et tuas ordinationes audis. Compositio ad praetereundum Ctrl + B est, ne semper a regulis ad praeteritionem et retro ambulare debeas.
-- Primum in ordine est Murmur tollere, quod filtrum altum vocant. Strepitus in ima parte phonographematis tollit, ab instrumentis electricis usque ad fortuitum ictum in microphonum aut mensam. Sequitur Strepitum minuere, taeniae sibilo, microphonis malis similibusque strepitibus paulo altioribus destinatum. Sibilos mitigare fragorem sonorum qualia sunt S et C minuit, qui nimis propinqua receptione aut acutis extollendis depravati sunt. Vocem aequare partes phonographematis submissiores et clariores aequare conatur. Deinde est Color soni, aequator quinque fasciarum; fasciae suis frequentiis notantur — 200, 800, 1.8k, 3.5k et 5k+ — et ultima pluteum agit, id est omnia supra se tollit aut deprimit, non unam regionem. Postremo grex Sonoritas et morae cum duobus moderaminibus: Sonoritas automata (aequatio) totum phonographema ad summum gradum sine depravatione tollit, et Strepitus in moris (porta) strepitum reliquum in intervallis inter sententias tollit.
+- Spatio incipis vel sistis reproductionem.
+- Sagittis ad sinistram vel ad dextram "revolvis" per quinque secunda vel, si de libro textuali agitur, per sententiam progrediendo vel regrediendo.
+- Compositione clavium Ctrl + sagittae ad sinistram vel ad dextram celeritatem reproductionis regis.
+- Clavibus F11 et F12 volumen disponis, F12 auget, et F11 minuit.
+- Compositione clavium Shift + sursum vel deorsum gradum navigationis eligis (titulus, capitulum, charta textus, minutae definitae), electio mutatur secundum formam et structuram libri.
+- Compositione clavium Shift + sagittae ad sinistram vel ad dextram per gradum navigationis electum moveris.
 
-Quodque filtrum quinque gradus agendi habet: minimum, levem, medium, fortem et maximum. Et repetendum est: quodque seorsum accendi et exstingui potest.
+Summatim, incipis reproductionem libri electi spatio, tenens pressam clavem Ctrl sagittis ad sinistram et ad dextram celeritatem legendi regis.
 
-Curatio soni quoque ad singulos libros memoria tenetur.
+Si vis aliquid breviter revolvere progrediendo vel regrediendo, id potes sagittis ad sinistram vel ad dextram per quinque secunda vel per unam sententiam. Si vis maiores gradus navigationis, preme Shift, sagittis sursum et deorsum elige gradum optatum et adhuc tenens Shift sagittis ad sinistram et ad dextram perge progrediendo et regrediendo per librum gradu electo. Cum vis audire quomodo et quo progrediaris cum lectione libri, quolibet momento preme F8 et lector veli leget tibi totum contentum veli informationis. Si fusius vis legere campum informationis, datum per datum, bis celeriter preme F8. Cum finiveris, exi e campo informationis premendo iterum bis F8 vel simpliciter Escape ut sagittae iterum proprietates navigationis habeant. Si vis audire tempus elapsum vel reliquum preme F10 semel vel bis.
 
-Omnino dicendum est hanc curationem soni miracula non facturam esse, neque ex mala transcriptione saeculi superioris annorum sexagesimorum vocem crystallo clariorem accepturum te esse quasi in studiis Abbey Road Londinii capta esset — sed te, ut speramus, aliquo modo ad finem libri perducet ne propter qualitatem insanias.
+Idea post hunc accessum ad navigationem erat ut usor non debeat discere et memoria tenere totam seriem compendiorum. Maxima pars navigationis disposita est in sagittis et in compositione cum clavibus modificatoribus Shift et Ctrl effectum est ut non debeas ambulare manu per claviaturae. Dextram manum pone in sagittas, sinistra manu pro necessitate premes aliquem ex modificatoribus, et haec est tota philosophia navigationis. Illi peritiores et sollertiores verisimiliter poterunt uti etiam pollice dextrae manus ut premant Ctrl vel Shift a dextra parte claviaturae, sed modus usus cuique ad electionem relictus est. Omnia alia compendia, excepta Alt + Enter pro Proprietates quia id est usitata Windows conventio, posita sunt in clavibus functionis omnia ad finem simplicissimae administrationis.
 
 ## Proprietates textus
 

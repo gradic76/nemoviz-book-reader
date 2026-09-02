@@ -92,19 +92,20 @@ Haben Sie noch ein optisches Laufwerk im Rechner und vielleicht eine Sammlung ä
 
 ## Erweitert
 
-Auf dieser Registerkarte wählen Sie die Sprache oder mehrere, die beim Import zur Erkennung von Büchern aus Bildern verwendet werden. Nemoviz Book Reader nutzt das in Windows 10 und 11 eingebaute Microsoft OCR. Derzeit unterstützt es fünfunddreißig Sprachen, deren Liste Sie sehen, wenn Sie *Eine Sprache hinzufügen* drücken. Haben Sie die gewünschten gewählt und Installieren gedrückt, werden die Sprachen nicht sofort installiert. NBR installiert sie nicht selbst; sie kommen über Windows Update und brauchen mitunter eine Weile, bis sie an der Reihe sind. Je nach Ihren Systemeinstellungen kann außerdem ein Dialog der Benutzerkontensteuerung erscheinen, in dem Sie die Installation bestätigen müssen.
+Auf dieser Registerkarte wählen Sie eine oder mehrere Sprachen aus, die für die Texterkennung von Bilddokumenten beim Import verwendet werden sollen. Nemoviz Book Reader verwendet das integrierte Microsoft OCR-Tool, das in den Betriebssystemversionen Windows 10 und 11 verfügbar ist. Derzeit werden fünfunddreißig Sprachen unterstützt, deren Liste Sie durch Drücken der Taste *Sprache hinzufügen* einsehen können. Wenn Sie die gewünschten Sprachen auswählen und auf Installieren klicken, werden die Sprachen nicht sofort installiert. Nemoviz Book Reader installiert sie nicht direkt, sondern sie werden über den Windows Update-Dienst installiert, und es kann einige Zeit dauern, bis sie an der Reihe sind. Abhängig von Ihren Systemeinstellungen kann es auch vorkommen, dass ein Dialogfeld der Benutzerkontensteuerung erscheint, in dem Sie die Installation der Sprache oder Sprachen bestätigen müssen.
 
-Nach der Installation können Sie beim Import eines Buches aus Bildern in einem Kombinationsfeld die Sprache wählen, in der der Text erkannt werden soll. Auch das kann eine Weile dauern, je nach Geschwindigkeit des Rechners und Größe des Buches, doch alles lässt sich am Fortschrittsbalken verfolgen.
+Nach der Installation können Sie beim Importieren eines Bildformats im Kombinationsfeld die Sprache auswählen, mit der Sie den Text im Titel, den Sie öffnen, erkennen möchten. Dies kann je nach Geschwindigkeit des Computers und Größe des Buches einige Zeit in Anspruch nehmen, aber Sie können alles über die Fortschrittsanzeige verfolgen.
 
-Neben den Einstellungen für die Erkennung wählen Sie hier auch die Sprachmodell-Dienste für die Übersetzung. Zum Zeitpunkt dieses Textes sind das Google Gemini, DeepSeek, DeepSeek mit einem größeren Modell, drei Stufen von OpenAI GPT und Microsoft Azure. Wie oben geschrieben, brauchen diese Dienste API-Schlüssel oder eine andere Art von Berechtigung, und mehr dazu lesen Sie im Menü Hilfe unter Dienste und Konten.
+Neben den Einstellungen für die optische Zeichenerkennung können Sie hier auch LLM-Dienste für die Übersetzung auswählen. Zum Zeitpunkt der Erstellung dieses Textes sind dies Google Gemini, DeepSeek, DeepSeek mit einem größeren Modell, drei Stufen von OpenAI GPT und Microsoft Azure. Wie bereits erwähnt, benötigen Sie für diese Dienste API-Schlüssel oder andere Arten der Autorisierung; mehr dazu können Sie im Menü Hilfe unter dem Punkt Dienste und Konten nachlesen.
+Über die Schaltfläche Übersetzungsregeln öffnet sich ein Fenster mit Anweisungen, die an die Übersetzungsmodelle gesendet werden, damit das, was Sie möchten, so hochwertig wie möglich übersetzt wird. Es gibt einen Satz von Anweisungen, der für alle Sprachen gilt, sowie Sätze von Anweisungen für die unterstützten Sprachen einzeln. In diesem Fenster können Sie bestehende Anweisungen bearbeiten und Anweisungen für neue Sprachen hinzufügen. Beim Bearbeiten der Regeldateien werden diese im Editor geöffnet; oben im Text wird alles zum Bearbeiten und Hinzufügen von Regeln erklärt.
 
-Neben der Übersetzung gibt es auch die zusätzlichen Cloud-Stimmen; derzeit unterstützen wir Google Cloud Chirp 3 und Microsoft Azure Neural. Das Freischalten dieser Stimmen läuft ähnlich wie bei den Übersetzungsdiensten, und auch dazu steht mehr im Menü Hilfe unter Dienste und Konten.
+Neben der Übersetzungsfunktion gibt es auch zusätzliche Cloud-Stimmen; derzeit unterstützen wir Google Cloud Chirp 3 und Microsoft Azure Neural-Stimmen. Das Verfahren zur Aktivierung dieser Stimmen ist ähnlich wie bei den Übersetzungsdiensten; mehr dazu finden Sie ebenfalls im Menü Hilfe unter dem Punkt Dienste und Konten.
 
-Wir weisen darauf hin, dass auch diese Stimmen bezahlt werden. Google gibt eine Million Zeichen zum Vorlesen kostenlos, das sind ungefähr zwei durchschnittliche Bücher von 500 Seiten. Microsoft gibt halb so viel, 500.000 Zeichen, ungefähr ein durchschnittliches Buch. Ist das kostenlose Kontingent aufgebraucht, wird Ihre Kreditkarte belastet, und die Kosten liegen je nach Dienst irgendwo zwischen 8,00 und 15,00 US-Dollar je durchschnittlichem Buch.
+Wir weisen darauf hin, dass diese Stimmen ebenfalls kostenpflichtig sind. Google stellt kostenlos eine Million Zeichen zum Lesen zur Verfügung, was etwa zwei durchschnittlichen Büchern mit 500 Seiten entspricht. Microsoft stellt die Hälfte zur Verfügung, 500.000 Zeichen, was etwa einem durchschnittlichen Buch entspricht. Nach Verbrauch des kostenlosen Zeichenkontingents wird Ihre Kreditkarte belastet, und die Kosten für das Lesen liegen je nach Dienst zwischen $8,00 und $15,00 pro durchschnittlichem Buch.
 
-Damit es kein Missverständnis und keine versehentlichen Ausgaben gibt, haben wir das Einrichten der Cloud-Stimmen eingeschränkt. In den Einstellungen für Sprache und Braille sehen Sie diese Stimmen nicht und können sie nicht zum Standard machen; sichtbar sind sie nur in den Eigenschaften eines gewählten Buches, und auch das erst, nachdem Sie sie in den erweiterten Einstellungen freigeschaltet haben. In den Eigenschaften eines Buches können Sie eine dieser Stimmen für dieses Buch wählen, und sie gilt allein für dieses Buch.
+Um Missverständnisse und versehentlichen unerwünschten Verbrauch zu vermeiden, haben wir die Einrichtung von Cloud-Stimmen eingeschränkt. In den Einstellungen für Sprache und Braille werden Sie diese Stimmen nicht sehen und nicht als Standard festlegen können; sie sind nur in den Eigenschaften des ausgewählten Buches sichtbar, müssen jedoch zuvor in den erweiterten Einstellungen aktiviert werden. In den Bucheigenschaften können Sie eine dieser Stimmen als Standard für ein bestimmtes Buch auswählen, was nur für dieses Buch gilt.
 
-Da Zeichen bei Cloud-Stimmen auch dann verbraucht werden, wenn Sie zurückspulen, eine Stelle wiederholen oder auf andere Weise bereits gelesene Zeichen noch einmal durchlaufen, hält NBR einen Zwischenspeicher dessen bereit, was gesprochen wurde, sodass Zurückspulen und Ähnliches nicht erneut berechnet wird. Derselbe Zwischenspeicher ist es auch, der Ihnen erlaubt, das Buch nach dem Lesen als MP3 auszugeben und so ein gewöhnliches Hörbuch zu bekommen.
+Da Zeichen bei der Verwendung von Cloud-Stimmen auch dann verbraucht werden, wenn Sie zurückspulen, einen bestimmten Teil des Buches wiederholen oder auf andere Weise bereits gelesene Zeichen erneut verbrauchen, verfügt Nemoviz Book Reader über einen temporären Speicher (Cache), in dem das Gelesene gespeichert wird, sodass Zurückspulen und ähnliche Aktionen nicht als erneuter Zeichenverbrauch behandelt werden. Diese Option ermöglicht es Ihnen auch, nach dem Lesen des Buches einen Export in MP3 durchzuführen und so ein klassisches Hörbuch zu erhalten.
 
 # Bibliothek
 
@@ -112,23 +113,24 @@ Dieses Fenster ist nicht ständig zu sehen; außer beim ersten Start öffnet es 
 
 Bei jedem Titel in der Bibliothek können Sie mit einem einfachen Druck auf die Tabulatortaste die Einzelheiten dazu lesen: Titel und Autor, Verlag und Format, wo Sie stehen geblieben sind, wie viel Prozent des Buches Sie gelesen haben, wie viel Zeit noch bleibt und einiges mehr. Wo es möglich ist, bekommen Sie auch eine kurze Beschreibung des Buches.
 
-## Titel hinzufügen
+## Hinzufügen von Titeln
 
-Im Menü Datei finden Sie zwei Einträge: Datei öffnen (Strg + O) und Ordner öffnen (Strg + Umschalt + O). Haben Sie in den Einstellungen die Unterstützung für das optische Laufwerk eingeschaltet, finden Sie auch Audio-CD öffnen. Daneben gibt es eine Möglichkeit, ein Bilderbuch erneut erkennen zu lassen, eine, um ein Hörbuch zu erzeugen, und eine zum Übersetzen. Es gibt außerdem einen Eintrag, den Sie nicht anrühren sollten, wenn es nicht wirklich notwendig ist: *Bibliothek leeren*. Er sagt von selbst, was er tut, und nach dem Aufrufen bekommen Sie noch eine Warnung. Bestätigen Sie bis zum Ende, ist Ihre Bibliothek gelöscht: alle Lesezeichen und alle Lesestellen fort, und die Sprach- und Tempoeinstellungen der Bücher darin gleich mit. Machen Sie um diesen Eintrag also lieber einen Bogen, solange Sie nicht ganz sicher sind, dass Sie die Bibliothek leeren wollen.
+Im Dropdown-Menü Datei finden Sie zwei Einträge: Datei öffnen (Ctrl + O) und Ordner öffnen (Ctrl + Shift + O). Wenn Sie in den Einstellungen die Unterstützung für optische Laufwerke aktiviert haben, finden Sie auch die Option Audio-CD öffnen. Neben diesen gibt es auch eine Option für die erneute optische Zeichenerkennung eines Bildtitels, eine Option zum Erstellen eines Hörbuchs sowie eine Übersetzungsoption. Es gibt auch einen Punkt, den Sie nicht berühren sollten, wenn es nicht unbedingt notwendig ist: *Bibliothek leeren*. Der Name sagt bereits, was er tut, und nach der Aktivierung erhalten Sie eine weitere Warnung. Wenn Sie alles bis zum Ende bestätigen, wird Ihre Bibliothek gelöscht, alle Daten zu Lesezeichen und Ihre letzte Position werden gelöscht, und auch die Sprach- und Geschwindigkeitseinstellungen für die Bücher, die Sie dort haben, werden gelöscht. Vermeiden Sie diesen Punkt daher lieber, wenn Sie nicht absolut sicher sind, dass Sie die Bibliothek leeren möchten.
+Die Option Bibliotheksordner öffnen öffnet den Speicherort Ihrer Sammlung im Datei-Explorer.
 
-Mit der ersten Möglichkeit öffnen Sie eine einzelne Datei (ein MP3-Buch in einer Datei, ein EPUB-Dokument oder eine ncc.html-Datei für einen Daisy-Titel), mit dem Öffnen eines Ordners ein Hörbuch, das über mehrere Dateien in einem Ordner verteilt ist. Darüber hinaus können Sie beim Öffnen eines Ordners auch eine größere Menge verschiedener Dateien einlesen, also eine Sammlung mehrerer Titel. Nemoviz Book Reader hat Regeln für das Sortieren eingebaut und wird sein Bestes tun, einen solchen Ordner so gut wie irgend möglich zu ordnen.
+Mit der ersten Option können Sie eine einzelne Datei öffnen (ein MP3-Buch in einer Datei, ein EPUB-Dokument oder eine ncc.html-Datei für einen Daisy-Titel), und mit der Option Ordner öffnen können Sie ein Hörbuch öffnen, das aus mehreren Dateien in einem Ordner besteht. Wenn Sie Ordner öffnen verwenden, können Sie außerdem eine größere Menge verschiedener Dateien importieren, d. h. eine Sammlung mehrerer Titel. Nemoviz Book Reader verfügt über integrierte Regeln für die Sortierung und wird sein Bestes tun, um einen solchen Ordner so gut wie möglich zu sortieren und anzuordnen.
 
-Audio-CD öffnen startet die Wiedergabe des Buches von Ihrem optischen Laufwerk und bringt Sie zum Player-Fenster zurück. Eine gewöhnliche CD zu verwenden führt das Buch nicht in die Bibliothek ein; es macht nur das Abspielen durch Nemoviz Book Reader möglich.
+Audio-CD öffnen startet die Wiedergabe des Buches von Ihrem optischen Laufwerk und bringt Sie zurück zum Player-Fenster. Die Verwendung einer klassischen CD importiert das Buch nicht in die Bibliothek, sondern ermöglicht Ihnen lediglich die Wiedergabe über Nemoviz Book Reader.
 
-Neben gewöhnlichen Dateien kann NBR — anders als die große Mehrheit der Anwendungen dieser Art — auch komprimierte Dateien öffnen, also Archive. Von den Archivformaten werden .zip, .rar und .7z unterstützt, und außer einteiligen lassen sich auch mehrteilige und passwortgeschützte Archive öffnen, sofern Sie das Passwort kennen.
+Neben klassischen Dateien kann NBR, im Gegensatz zu der großen Mehrheit der Anwendungen dieses Typs, auch komprimierte Dateien, sogenannte Archive, öffnen. Unterstützte Archivformate sind .zip, .rar und .7z. Neben einteiligen Archiven können auch mehrteilige Archive sowie passwortgeschützte Archive geöffnet werden, sofern Sie das Passwort kennen.
 
-Mit anderen Worten: Woher und auf welchem Weg auch immer Sie ein Buch bekommen, in einer Standarddatei oder mehreren, in ein Archiv gepackt oder nicht — Sie können es ohne jede Vorarbeit von dem Ort, an dem es liegt, in die Bibliothek einlesen. Nemoviz Book Reader kopiert die geöffneten Dateien an die dafür vorgesehene Stelle im Bibliotheksordner, packt Archive aus und legt sie in der Bibliothek in ihrer üblichen Form ab und hält alles Wesentliche über die eingelesenen Titel fest. Ihre ursprünglichen Dateien bleiben unberührt an ihrem Platz; alles, was mit den Büchern später geschieht, geschieht an NBRs Kopien im Bibliotheksordner.
+Mit anderen Worten: Woher und auf welche Weise Sie auch immer ein Buch erhalten, ob in einer Standarddatei oder mehreren, in einem Archiv verpackt oder nicht, Sie können es ohne Vorarbeiten und von seinem aktuellen Speicherort aus in die Bibliothek importieren. Nemoviz Book Reader kopiert die von Ihnen geöffneten Dateien in den Bibliotheksordner an den dafür vorgesehenen Speicherort, entpackt Archive und speichert sie in der Bibliothek in Standardform und zeichnet alle wichtigen Daten zu den importierten Titeln auf. Ihre Originaldateien bleiben an den Speicherorten, an denen Sie sie aufbewahren, unberührt; alles, was später mit den Büchern geschieht, geschieht mit den NBR-Kopien im Bibliotheksordner.
 
-Der Eintrag für die wiederholte Erkennung ist dafür da, die Texterkennung eines Bilderbuches in einer anderen Sprache noch einmal laufen zu lassen, wenn Sie mit dem Ergebnis beim Öffnen des Buches nicht zufrieden waren.
+Die Option für erneute OCR dient dazu, die optische Zeichenerkennung eines Bildtitels mit einer anderen Sprache zu wiederholen, wenn Sie mit dem Erkennungsergebnis beim Öffnen des Buches nicht zufrieden sind.
 
-Buch übersetzen öffnet einen Dialog, in dem Sie die Ausgangssprache wählen, die Sprache, in die übersetzt werden soll, den Dienst oder die Dienste, die Sie verwenden möchten, und ein Feld, in das Sie ein paar grundlegende Hinweise schreiben können, was und wie übersetzt werden soll.
+Die Option Buch übersetzen öffnet ein Dialogfeld, in dem Sie die Ausgangssprache, die Zielsprache, in die Sie das Buch übersetzen möchten, den oder die zu verwendenden Dienste sowie ein Feld auswählen, in das Sie einige grundlegende Anweisungen dazu eingeben können, was und wie übersetzt werden soll.
 
-Die Option *Als Hörbuch exportieren* tut genau das, was der Name sagt. Ob Sie einen der installierten Sprachsynthesizer oder die Cloud-Stimmen verwenden — Sie können aus einem Textbuch ein Hörbuch machen und es an einen Ort Ihrer Wahl ausgeben. Das Buch wird als eine einzige .mp3-Datei ausgegeben, die Werte entsprechen denen der von Ihnen verwendeten Sprachausgabe, und die Aufnahmequalität entspricht der beim Zuhören. Vorher fragt NBR nach einer Bestätigung und sagt, wie lange die Herstellung dauern dürfte.
+Die Option Als Hörbuch exportieren tut genau das, was ihr Name sagt. Unabhängig davon, ob Sie einen der installierten Sprachsynthesizer oder Cloud-Stimmen verwenden, können Sie aus einem Textbuch ein Hörbuch erstellen und es an den gewünschten Speicherort exportieren. Das Buch wird als eine .mp3-Datei exportiert, die Parameter entsprechen den Parametern des verwendeten TTS und die Aufnahmequalität entspricht der Qualität beim Live-Hören. Vor dem Start fragt Sie NBR um Bestätigung und gibt an, wie lange die Erstellung voraussichtlich dauern wird.
 
 ## Das Bücherregal
 
@@ -152,47 +154,48 @@ Haben Sie sich mit Inhalt und Funktionen des Bibliotheksfensters vertraut gemach
 
 Kurzum: Drücken Sie auf dem Buchtitel die Eingabetaste oder die Schaltfläche Laden, schließt sich die Bibliothek und Sie sind zurück im Hauptfenster des Players.
 
-# Der Player
+# Player
 
-Dieses Fenster ist auf dem Bildschirm Ihres Rechners immer sichtbar; mal verdeckt es das Bibliotheksfenster, mal die Lesefläche, doch es ist in Wahrheit das Hauptfenster, von dem aus Sie ein geladenes Buch steuern. Sie können sich im Player-Fenster mit der Tabulatortaste bewegen wie in jedem anderen Fenster und Einträge mit der Eingabetaste auslösen — doch anders als in anderen Fenstern dieser Anwendung und in anderen Anwendungen sind die Pfeiltasten und die Leertaste für andere Aufgaben belegt. Kommen Sie also mit Tab etwa auf die Lesezeichen-Taste, lässt sie sich nicht mit der Leertaste auslösen; ausschließlich mit der Eingabetaste.
+Dieses Fenster ist immer auf Ihrem Computerbildschirm sichtbar, manchmal wird es vom Bibliotheksfenster verdeckt, manchmal auch von der Textlesefläche, aber es ist eigentlich das Hauptfenster, in dem Sie das Buch nach dem Laden steuern. Sie können sich im Player-Fenster wie in jedem anderen Fenster mit Tab bewegen und bestimmte Elemente mit der Enter-Taste aktivieren, aber im Gegensatz zu anderen Fenstern in der Anwendung selbst und in anderen Anwendungen sind die Pfeiltasten und die Leertaste für andere Funktionen reserviert. Wenn Sie also z. B. mit Tab zur Taste für Lesezeichen gelangen, können Sie diese nicht mit der Leertaste aktivieren, sondern müssen ausschließlich die Enter-Taste verwenden.
 
-Im Tabulatorlauf des Player-Hauptfensters liegen die folgenden Tasten und Funktionen, nicht unbedingt in dieser Reihenfolge:
+In der Tab-Reihenfolge, nicht unbedingt in dieser Reihenfolge, befinden sich im Hauptfenster des Players die folgenden Tasten und Funktionen:
 
 | Wiedergabe/Pause | Leertaste |
-| Vorwärts | Umschalt + Rechts |
-| Zurück | Umschalt + Links |
+| Vorwärts | Shift + rechts |
+| Zurück | Shift + links |
 | Lautstärke | F11 und F12 |
-| Tempo | Strg + Links und Strg + Rechts |
-| Fortschritt im Buch | Pfeile links und rechts |
-| Navigationsschritt | Umschalt + Pfeile auf und ab |
+| Geschwindigkeit | Ctrl + links und Ctrl + rechts |
+| Wiedergabefortschritt | Pfeiltasten links und rechts |
+| Navigationsschritt | Shift + Pfeiltasten oben und unten |
 | Bibliothek | F3 |
 | Einstellungen | F2 |
 | Eigenschaften | Alt + Enter |
 | Markieren | F5 |
 | Lesezeichen | F6 |
-| Gehe zu … | F4 |
+| Gehe zu… | F4 |
 | Hilfe | F1 |
-| Einschlaftimer | F7 |
-| Wiedergabeinformationen | F8 |
+| Zähler | F7 |
+| Informationsfeld | F8 |
 
-Im Informationsfeld erfahren Sie die Grunddaten zur Wiedergabe — Autor, Titel, vergangene Zeit, Seite und ein wenig mehr, je nach Format des Buches, das Sie lesen. Ein Druck auf F8 liest den Inhalt der Informationsanzeige nur vor; zweimal gedrückt, kommt sie in den Fokus des Screenreaders, sodass Sie mit den Pfeiltasten genauer durchgehen können, was dort steht.
+Im Informationsfeld können Sie grundlegende Informationen zur Wiedergabe abrufen, wie Autor, Titel, verstrichene Zeit, Seite und einiges mehr, natürlich abhängig vom Format des Buches, das Sie lesen. Durch einmaliges Drücken von F8 wird der Inhalt des Informationsbildschirms nur vorgelesen, und durch zweimaliges Drücken gelangt er in den Fokus des Screenreaders, sodass Sie mit den Pfeiltasten detaillierter lesen können, was dort steht.
+Mit der Taste F10 können Sie die verstrichene Zeit des Titels erfahren, den Sie gerade lesen, und durch schnelles zweimaliges Drücken von F10 hören Sie die verbleibende Zeit.
 
-Alle Tasten haben ihr eigenes Kürzel, sodass Sie sie leicht erreichen, ohne allzu viel im Fenster umherzugehen, und das Steuern des Buches, das Sie lesen, ist mehr als einfach.
+Alle Tasten haben ihre eigenen Tastenkombinationen, sodass Sie sie leicht erreichen können, ohne zu viel im Fenster navigieren zu müssen, und die Steuerung des Buches, das Sie lesen, ist mehr als einfach.
 
 ## Wiedergabe
 
-- Mit der Leertaste starten und stoppen Sie die Wiedergabe.
-- Mit den Pfeilen links und rechts „spulen“ Sie um fünf Sekunden oder, bei einem Textbuch, um einen Satz vor oder zurück.
-- Mit Strg + Links oder Rechts regeln Sie das Lesetempo.
-- Mit F11 und F12 stellen Sie die Lautstärke, F12 hebt und F11 senkt. Die bloßen Pfeile auf und ab tun hier nichts: früher trugen sie die Lautstärke, aber ein Screenreader, der das Buch vorliest, fragt immer weiter nach der nächsten Zeile, und die Lautstärke rutschte darunter weg — also zogen die Tasten in die Funktionsreihe, wo der Windows Media Player sie seit zwanzig Jahren hat.
-- Mit Umschalt + Auf oder Ab wählen Sie den Navigationsschritt (Überschrift, Kapitel, Normseite, bestimmte Zeitspannen); die Auswahl ändert sich mit Format und Aufbau des Buches.
-- Mit Umschalt + Links oder Rechts bewegen Sie sich um den gewählten Navigationsschritt.
+- Mit der Leertaste starten oder pausieren Sie die Wiedergabe.
+- Mit den Pfeiltasten links oder rechts „spulen“ Sie fünf Sekunden vor oder zurück, oder bei einem Textbuch satzweise vor oder zurück.
+- Mit der Tastenkombination Ctrl + Pfeiltasten links oder rechts regeln Sie die Wiedergabegeschwindigkeit.
+- Mit den Tasten F11 und F12 stellen Sie die Lautstärke ein; F12 erhöht sie, F11 verringert sie.
+- Mit der Tastenkombination Shift + Pfeiltaste oben oder unten wählen Sie den Navigationsschritt aus (Titel, Kapitel, Textkarte, bestimmte Zeitintervalle); die Auswahl ändert sich je nach Format und Struktur des Buches.
+- Mit der Tastenkombination Shift + Pfeiltasten links oder rechts bewegen Sie sich in dem gewählten Navigationsschritt.
 
-Kurz gesagt: Sie starten das gewählte Buch mit der Leertaste, und mit gedrückter Strg-Taste regeln die Pfeile links und rechts das Lesetempo.
+Kurz gesagt: Starten Sie die Wiedergabe des ausgewählten Buches mit der Leertaste und regeln Sie die Lesegeschwindigkeit, indem Sie Ctrl gedrückt halten und die Pfeiltasten links oder rechts betätigen.
 
-Wollen Sie ein wenig vor- oder zurückspringen, geht das mit den Pfeilen links und rechts um fünf Sekunden oder um einen Satz. Wollen Sie größere Schritte, drücken Sie Umschalt, wählen mit den Pfeilen auf und ab den gewünschten Schritt und gehen — weiter mit gedrückter Umschalttaste — mit den Pfeilen links und rechts um den gewählten Schritt vor und zurück durch das Buch. Wollen Sie hören, wie und wohin Ihr Lesen vorankommt, drücken Sie jederzeit F8, und der Screenreader liest Ihnen den ganzen Inhalt der Informationsanzeige vor. Wollen Sie das Informationsfeld genauer durchgehen, Angabe für Angabe, drücken Sie zweimal rasch F8. Sind Sie fertig, verlassen Sie das Informationsfeld, indem Sie erneut zweimal F8 drücken, oder einfach mit Escape, damit die Pfeiltasten ihre Navigationsaufgaben zurückbekommen.
+Wenn Sie kurz vor- oder zurückspulen möchten, können Sie dies mit den Pfeiltasten links oder rechts um fünf Sekunden oder einen Satz tun. Wenn Sie größere Navigationsschritte wünschen, drücken Sie Shift, wählen Sie mit den Pfeiltasten oben und unten den gewünschten Schritt aus und bewegen Sie sich bei weiterhin gedrückter Shift-Taste mit den Pfeiltasten links und rechts durch das Buch. Wenn Sie hören möchten, wie und wohin Sie beim Lesen des Buches vorankommen, drücken Sie jederzeit F8, und der Screenreader liest Ihnen den gesamten Inhalt des Informationsbildschirms vor. Wenn Sie das Informationsfeld detaillierter, Element für Element, lesen möchten, drücken Sie zweimal schnell F8. Wenn Sie fertig sind, verlassen Sie das Informationsfeld, indem Sie erneut zweimal F8 drücken oder einfach Escape, damit die Pfeiltasten wieder ihre Navigationsfunktion erhalten. Wenn Sie die verstrichene oder verbleibende Zeit hören möchten, drücken Sie einmal oder zweimal F10.
 
-Der Gedanke hinter diesem Zugang zur Navigation war, dass die Benutzerin oder der Benutzer nicht eine ganze Reihe von Kürzeln lernen und behalten muss. Der größte Teil der Navigation liegt auf den Pfeiltasten, und zusammen mit den Umschalt- und Strg-Tasten ist erreicht, dass Sie die Hand nicht über die Tastatur wandern lassen müssen. Legen Sie die rechte Hand auf die Pfeile, drücken Sie bei Bedarf mit der linken einen Modifikator, und das ist die ganze Philosophie. Die Geschickteren werden vermutlich auch den Daumen der rechten Hand nutzen können, um Strg oder Umschalt auf der rechten Seite der Tastatur zu drücken, doch die Art der Nutzung bleibt jedem selbst überlassen. Alle übrigen Kürzel liegen, mit Ausnahme von Alt + Enter für Eigenschaften, weil das die übliche Windows-Konvention ist, auf den Funktionstasten, alles im Sinne einer möglichst einfachen Bedienung.
+Die Idee hinter diesem Navigationsansatz war, dass der Benutzer nicht eine ganze Reihe von Tastenkombinationen lernen und sich merken muss. Der größte Teil der Navigation ist auf die Pfeiltasten gelegt, und in Kombination mit den Modifikatortasten Shift und Ctrl wurde erreicht, dass Sie Ihre Hand nicht über die Tastatur bewegen müssen. Legen Sie die rechte Hand auf die Pfeiltasten, drücken Sie bei Bedarf mit der linken Hand einen der Modifikatoren, und das ist die gesamte Philosophie der Navigation. Geschicktere Benutzer können wahrscheinlich auch den Daumen der rechten Hand benutzen, um Ctrl oder Shift auf der rechten Seite der Tastatur zu drücken, aber die Art der Verwendung bleibt jedem selbst überlassen. Alle anderen Tastenkombinationen, mit Ausnahme von Alt + Enter für Eigenschaften, da dies eine übliche Windows-Konvention ist, wurden auf die Funktionstasten gelegt, um die Bedienung so einfach wie möglich zu gestalten.
 
 ## Gehe zu ...
 

@@ -92,19 +92,20 @@ Si aún tiene una unidad óptica en su ordenador y quizá una colección de edic
 
 ## Avanzado
 
-En esta pestaña elige el idioma, o varios, que se usarán para reconocer los libros hechos de imágenes al importarlos. Nemoviz Book Reader usa la herramienta Microsoft OCR incorporada en Windows 10 y 11. Actualmente admite treinta y cinco idiomas, cuya lista puede ver si pulsa *Añadir un idioma*. Cuando elija los que quiera y pulse Instalar, los idiomas no se instalarán de inmediato. NBR no los instala él mismo: llegan a través de Windows Update y pueden tardar un tiempo en llegarles el turno. Además, según los ajustes de su sistema, es posible que aparezca un diálogo de Control de cuentas de usuario en el que tendrá que confirmar la instalación.
+En esta pestaña selecciona uno o varios idiomas que se utilizarán para el reconocimiento de documentos de imagen al importarlos. Nemoviz Book Reader utiliza la herramienta OCR de Microsoft integrada, disponible en las versiones de Windows 10 y 11 del sistema operativo. Actualmente admite treinta y cinco idiomas, cuya lista puede ver si presiona el botón *Agregar idioma*. Cuando seleccione los idiomas deseados y presione Instalar, los idiomas no se instalarán de inmediato. Nemoviz Book Reader no los instala directamente, sino que se instalan a través del servicio de Windows Update y puede llevar algún tiempo hasta que llegue su turno de instalación. Además, dependiendo de la configuración de su sistema, es posible que aparezca un cuadro de diálogo de Control de cuentas de usuario en el que deberá confirmar la instalación de uno o varios idiomas.
 
-Una vez instalados, al importar un libro hecho de imágenes podrá elegir en un cuadro combinado el idioma con el que quiere reconocer el texto. Esto también puede llevar un rato, según la velocidad de la máquina y el tamaño del libro, pero todo puede seguirlo en la barra de progreso.
+Después de la instalación, y al importar un formato de imagen, podrá seleccionar en el cuadro combinado el idioma con el que desea reconocer el texto en el título que está abriendo. Esto también puede llevar un poco de tiempo, dependiendo de la velocidad de la máquina y el tamaño del libro, pero puede seguir todo en la barra de progreso.
 
-Además de los ajustes de reconocimiento, aquí elige también los servicios de modelos de lenguaje para la traducción. En el momento de escribir esto son Google Gemini, DeepSeek, DeepSeek con un modelo mayor, tres niveles de OpenAI GPT y Microsoft Azure. Como se ha escrito arriba, estos servicios necesitan claves de API u otra forma de autorización, y puede leer más en el menú Ayuda, en Servicios y cuentas.
+Además de la configuración para el reconocimiento óptico, aquí también puede elegir servicios LLM para la traducción. En el momento de escribir este texto, están Google Gemini, DeepSeek, DeepSeek con un modelo más grande, tres niveles de OpenAI GPT y Microsoft Azure. Como escribimos anteriormente, para estos servicios necesita claves API u otros tipos de autorización; puede leer más en el menú Ayuda, en el elemento Servicios y cuentas.
+En el botón Reglas de traducción se abrirá una ventana con las instrucciones que se envían a los modelos de traducción para que lo que desea se traduzca con la mayor calidad posible. Existe un conjunto de instrucciones que se aplica a todos los idiomas y conjuntos de instrucciones para los idiomas admitidos individualmente. En esta ventana puede editar las existentes y agregar instrucciones para nuevos idiomas. Al editar los archivos con reglas, se abrirán en el Bloc de notas; en la parte superior del texto se explica todo sobre la edición y adición de reglas.
 
-Además de la traducción están también las voces en la nube; de momento admitimos Google Cloud Chirp 3 y Microsoft Azure Neural. Habilitarlas se parece a lo de los servicios de traducción, y también sobre eso hay más en el menú Ayuda, en Servicios y cuentas.
+Además de la posibilidad de traducción, también hay voces en la nube adicionales; actualmente admitimos las voces Google Cloud Chirp 3 y Microsoft Azure Neural. El procedimiento para habilitar estas voces es similar al de los servicios de traducción y hay más información al respecto en el menú Ayuda, en el elemento Servicios y cuentas.
 
-Advertimos que estas voces también se pagan. Google da gratis un millón de caracteres de lectura, que son unos dos libros medianos de 500 páginas. Microsoft da la mitad, 500.000 caracteres, o sea, más o menos un libro mediano. Agotada la cuota gratuita se carga a su tarjeta de crédito, y el coste de la lectura anda entre 8,00 y 15,00 dólares por libro mediano, según el servicio.
+Tenga en cuenta que estas voces también son de pago; Google ofrece un millón de caracteres de lectura de forma gratuita, lo que equivale aproximadamente a dos libros promedio de 500 páginas. Microsoft ofrece la mitad, 500.000 caracteres, lo que equivale aproximadamente a un libro promedio. Una vez agotada la cuota gratuita de caracteres, se cargará a su tarjeta de crédito, y el costo de lectura oscila entre $8,00 y $15,00 por libro promedio, dependiendo del servicio.
 
-Para que no haya malentendidos ni gastos indeseados por descuido, hemos limitado cómo se ponen las voces en la nube. En los ajustes de voz y braille no verá estas voces y no podrá fijarlas como predeterminadas; solo son visibles en las propiedades de un libro concreto, y aun así después de haberlas habilitado en los ajustes avanzados. En las propiedades de un libro puede elegir una de estas voces para ese libro, y vale solo para él.
+Para evitar malentendidos y un consumo accidental no deseado, hemos limitado la configuración de las voces en la nube. En la configuración de voz y braille no verá estas voces y no podrá establecerlas como predeterminadas; solo son visibles en las propiedades del libro seleccionado, pero primero debe habilitarlas en la configuración avanzada. En las propiedades del libro puede seleccionar una de estas voces como predeterminada para un libro específico, y esto solo se aplica a ese libro.
 
-Como con las voces en la nube se gastan caracteres incluso cuando rebobina, repite un pasaje o vuelve de otro modo sobre palabras ya leídas, NBR guarda en memoria intermedia lo que se ha leído, de manera que rebobinar y cosas parecidas no se cobren otra vez. Esa misma memoria es la que le permite, tras leer el libro, exportarlo a mp3 y obtener así un audiolibro corriente.
+Dado que los caracteres se consumen al usar voces en la nube incluso cuando rebobina, repite una parte específica del libro o consume de otra manera caracteres ya leídos, Nemoviz Book Reader tiene habilitada una memoria temporal (caché) donde se guarda lo que ha leído, de modo que el rebobinado y acciones similares no se tratarán como un nuevo consumo de caracteres. Esta opción también le permitirá, después de leer el libro, realizar una exportación a mp3 y así obtener un audiolibro clásico.
 
 # Biblioteca
 
@@ -112,23 +113,24 @@ Esta ventana no se ve todo el tiempo: salvo en el primer arranque se abre cuando
 
 Junto a cada título de la biblioteca, con solo pulsar Tab puede leer también sus detalles: título y autor, editorial y formato, dónde se quedó, qué porcentaje del libro lleva leído, cuánto tiempo le queda y alguna cosa más. Cuando es posible, obtendrá también una breve descripción del libro.
 
-## Añadir títulos
+## Agregar títulos
 
-En el menú Archivo encontrará dos elementos: Abrir archivo (Ctrl + O) y Abrir carpeta (Ctrl + Mayús + O). Si en los Ajustes activó el soporte para la unidad óptica, encontrará también Abrir CD de audio. Además hay una opción para volver a reconocer un libro de imágenes, otra para crear un audiolibro y otra para traducir. Hay también un elemento que conviene no tocar salvo que sea imprescindible: *Vaciar la biblioteca*. Dice por sí solo lo que hace, y al activarlo recibirá todavía una advertencia. Si confirma hasta el final, su biblioteca queda borrada: todos los marcadores y todas las posiciones de lectura borrados, y borrados también los ajustes de idioma y velocidad de los libros que hubiera dentro. Así que mejor rodee este elemento si no está absolutamente seguro de querer vaciar la biblioteca.
+En el menú desplegable Archivo puede encontrar dos elementos: Abrir archivo (Ctrl + O) y Abrir carpeta (Ctrl + Shift + O). Si ha activado la compatibilidad con la unidad óptica en Configuración, también encontrará la opción Abrir CD de audio. Además de esto, también hay una opción para el reconocimiento óptico repetido de un título con imágenes, una opción para crear un audiolibro y una opción para traducir. También hay un elemento que no debe tocar a menos que sea estrictamente necesario: *Vaciar biblioteca*. Su nombre indica lo que hace y, tras activarlo, recibirá una advertencia adicional. Si confirma hasta el final, su biblioteca se borrará, todos los datos sobre los marcadores y la posición de lectura se eliminarán, y también se borrarán los ajustes de idioma y velocidad de los libros que tenga dentro. Por lo tanto, es mejor evitar este elemento a menos que esté absolutamente seguro de que desea vaciar la biblioteca.
+La opción Abrir carpeta de la biblioteca abre la ubicación de su colección en el Explorador de archivos.
 
-Con la primera opción abre un archivo suelto (un libro MP3 en un archivo, un documento EPUB o un archivo ncc.html para un título Daisy), y al abrir una carpeta puede abrir un audiolibro repartido en varios archivos dentro de una carpeta. Además, abriendo una carpeta puede importar una cantidad mayor de archivos distintos, es decir, una colección de varios títulos. Nemoviz Book Reader lleva incorporadas ciertas reglas de clasificación y hará todo lo posible por ordenarle esa carpeta lo mejor que quepa.
+En la primera opción puede abrir un archivo individual (un libro MP3 en un solo archivo, un documento EPUB o un archivo ncc.html para un título Daisy), y al abrir una carpeta puede abrir un audiolibro que consta de varios archivos ubicados en una sola carpeta. Además, si utiliza la apertura de carpetas, también puede importar una mayor cantidad de archivos diferentes, es decir, una colección de varios títulos. Nemoviz Book Reader tiene integradas ciertas reglas de clasificación y hará todo lo posible para clasificar y organizar dicha carpeta de la mejor manera posible.
 
-Abrir CD de audio pondrá en marcha la reproducción del libro desde su unidad óptica y le devolverá a la ventana del reproductor. Usar un CD corriente no importa el libro a la biblioteca; solo le permite reproducirlo a través de Nemoviz Book Reader.
+Abrir CD de audio iniciará la reproducción del libro desde su unidad óptica y lo devolverá a la ventana del reproductor. El uso de un CD clásico no importa el libro a la biblioteca, solo le permite reproducirlo a través de Nemoviz Book Reader.
 
-Además de los archivos corrientes, NBR puede —a diferencia de la gran mayoría de aplicaciones de este tipo— abrir archivos comprimidos, esto es, archivadores. De los formatos se admiten .zip, .rar y .7z, y además de los de un solo volumen pueden abrirse los de varios y los protegidos con contraseña, siempre que la sepa.
+Además de los archivos clásicos, NBR puede, a diferencia de la gran mayoría de las aplicaciones de este tipo, abrir archivos comprimidos, los llamados archivos. De los formatos de archivo, se admiten .zip, .rar y .7z, y además de los archivos de una sola parte, también se pueden abrir archivos de varias partes, así como archivos protegidos por contraseña, siempre que conozca dicha contraseña.
 
-Dicho de otro modo: de donde sea y como sea que consiga un libro, en un archivo estándar o en varios, empaquetado o no, puede importarlo a la biblioteca sin preparativo alguno y desde el sitio donde esté. Nemoviz Book Reader copia los archivos que ha abierto a la carpeta de la biblioteca, en el lugar previsto para ello, descomprime los archivadores y los guarda en la biblioteca en su forma normal, y anota todo lo esencial sobre los títulos importados. Sus archivos originales quedan intactos donde usted los guarda; todo lo que les pase después a los libros les pasa a las copias de NBR en la carpeta de la biblioteca.
+En otras palabras, desde donde sea y de la forma en que obtenga un libro, en un archivo estándar o en varios, comprimido en un archivo o no, puede importarlo a la biblioteca sin ningún paso previo y desde la ubicación en la que se encuentre. Nemoviz Book Reader copia los archivos que ha abierto a la carpeta de la biblioteca en la ubicación designada, descomprime los archivos y los guarda en la biblioteca en formato estándar, y registra todos los datos importantes sobre los títulos que ha importado. Sus archivos originales permanecen intactos en las ubicaciones donde los guarda; todo lo que sucede con los libros después ocurre en las copias de NBR en la carpeta de la biblioteca.
 
-La opción de repetir el OCR sirve para volver a hacer el reconocimiento óptico de un libro de imágenes en otro idioma, si no quedó satisfecho con el resultado al abrirlo.
+La opción de OCR repetido sirve para repetir el reconocimiento óptico de un título con imágenes con otro idioma si no está satisfecho con el resultado del reconocimiento al abrir el libro.
 
-Traducir el libro abre un diálogo donde elige el idioma de origen, el idioma al que quiere traducir, el servicio o los servicios que quiere usar, y un campo donde puede escribir unas instrucciones básicas sobre qué traducir y cómo.
+La opción Traducir libro abre un cuadro de diálogo en el que selecciona el idioma de origen, el idioma al que desea traducir el libro, el servicio o servicios que desea utilizar y un campo en el que puede escribir algunas instrucciones básicas sobre qué y cómo traducir.
 
-Exportar como audiolibro hace exactamente lo que dice su nombre. Use uno de los sintetizadores de voz instalados o las voces en la nube, puede convertir un libro de texto en uno de audio y exportarlo adonde quiera. El libro se exporta como un único archivo .mp3, los valores son los mismos del TTS que esté usando y la calidad de la grabación será igual a la de escucharlo en directo. Antes de empezar, NBR le pide confirmación y le dice cuánto debería durar la elaboración.
+La opción Exportar como audiolibro hace exactamente lo que dice su nombre. Independientemente de si utiliza uno de los sintetizadores de voz instalados o voces en la nube, puede convertir un libro de texto en un audiolibro y exportarlo a la ubicación deseada. El libro se exporta como un archivo .mp3, los parámetros son iguales a los parámetros del TTS que utiliza y la calidad de la grabación será igual a la calidad de la escucha en vivo. Antes de comenzar, NBR le pedirá confirmación y le dirá cuánto tiempo debería durar la creación.
 
 ## La estantería
 
@@ -152,47 +154,48 @@ Cuando se haya familiarizado con el contenido y las funciones de la ventana de l
 
 En resumen: cuando pulse Intro sobre el título de un libro o el botón Cargar, la biblioteca se cierra y vuelve a la ventana principal del reproductor.
 
-# El reproductor
+# Reproductor
 
-Esta ventana está siempre visible en la pantalla de su ordenador; a veces la tapa la ventana de la biblioteca, a veces la superficie de lectura, pero en realidad es la ventana principal desde la que maneja el libro una vez cargado. Puede moverse por la ventana del reproductor con Tab como por cualquier otra ventana y activar elementos con Intro, pero a diferencia de otras ventanas de esta aplicación y de otras aplicaciones, las flechas y la barra espaciadora están reservadas para otras funciones. Así que si llega con Tab, por ejemplo, a la tecla de marcadores, no podrá activarla con la barra espaciadora: hay que usar Intro sin falta.
+Esta ventana siempre está visible en la pantalla de su equipo; a veces la oculta la ventana de la biblioteca, a veces la oculta el área de lectura de texto, pero en realidad es la ventana principal en la que controla el libro después de cargarlo. Puede desplazarse por la ventana del reproductor con Tab al igual que en cualquier otra ventana y activar elementos específicos con la tecla Enter, pero a diferencia de otras ventanas en la aplicación, y en otras aplicaciones, las teclas de flecha y la barra espaciadora están reservadas para otras funciones, por lo que si llega con Tab, por ejemplo, al botón de marcadores, no podrá activarlo con la barra espaciadora, debe utilizar exclusivamente la tecla Enter.
 
-En el recorrido de tabulación de la ventana principal del reproductor, no necesariamente en este orden, están las siguientes teclas y funciones:
+En la línea de Tab, no necesariamente en este orden, en la ventana principal del reproductor se encuentran los siguientes botones y funciones:
 
 | Reproducir/Pausa | barra espaciadora |
-| Adelante | Mayús + derecha |
-| Atrás | Mayús + izquierda |
+| Adelantar | Shift + flecha derecha |
+| Retroceder | Shift + flecha izquierda |
 | Volumen | F11 y F12 |
-| Velocidad | Ctrl + izquierda y Ctrl + derecha |
-| Avance en el libro | flechas izquierda y derecha |
-| Paso de avance | Mayús + flechas arriba y abajo |
+| Velocidad | Ctrl + flecha izquierda y Ctrl + flecha derecha |
+| Progreso de reproducción | flechas izquierda y derecha |
+| Paso de navegación | Shift + flechas arriba y abajo |
 | Biblioteca | F3 |
-| Ajustes | F2 |
-| Propiedades | Alt + Intro |
-| Marcador | F5 |
+| Configuración | F2 |
+| Propiedades | Alt + Enter |
+| Marcar | F5 |
 | Marcadores | F6 |
 | Ir a… | F4 |
 | Ayuda | F1 |
-| Temporizador | F7 |
-| Información de reproducción | F8 |
+| Contador | F7 |
+| Campo de información | F8 |
 
-En el campo de información puede conocer los datos básicos de la reproducción: autor, título, tiempo transcurrido, página y algo más, según, claro, el formato del libro que esté leyendo. Una pulsación de F8 simplemente lee lo que dice el panel de información; con dos pulsaciones entra en el foco del lector de pantalla y puede recorrerlo con detalle usando las flechas.
+En el campo de información puede conocer datos básicos sobre la reproducción como el autor, el título, el tiempo transcurrido, la página y algo más, por supuesto, dependiendo del formato del libro que esté leyendo. Con una pulsación de F8, el contenido de la pantalla de información solo se leerá, y con una doble pulsación, el lector de pantalla se enfocará en él, por lo que puede leer con más detalle lo que dice allí usando las flechas.
+Con la tecla F10 puede conocer el tiempo transcurrido del título que está leyendo y con una doble pulsación rápida de F10 escuchará el tiempo restante.
 
-Todas las teclas tienen su atajo, de modo que llega a ellas fácilmente sin pasearse demasiado por la ventana, y manejar el libro que está leyendo es de lo más sencillo.
+Todas las teclas tienen sus propios atajos de teclado para que pueda acceder a ellas fácilmente sin desplazarse demasiado por la ventana, y el manejo del libro que está leyendo es más que sencillo.
 
 ## Reproducción
 
-- Con la barra espaciadora inicia y detiene la reproducción.
-- Con las flechas izquierda y derecha «rebobina» de cinco en cinco segundos o, si es un libro de texto, una frase adelante o atrás.
-- Con Ctrl + flecha izquierda o derecha regula la velocidad de lectura.
-- Con F11 y F12 ajusta el volumen, F12 sube y F11 baja. Las flechas arriba y abajo por sí solas no hacen nada aquí: antes llevaban el volumen, pero un lector de pantalla que lee el libro en voz alta sigue pidiendo la línea siguiente y el volumen se iba solo, así que las teclas se mudaron a la fila de función, donde el Reproductor de Windows Media las tiene desde hace veinte años.
-- Con Mayús + arriba o abajo elige el paso de avance (encabezado, capítulo, página estándar, ciertos tiempos); la elección cambia según el formato y la estructura del libro.
-- Con Mayús + flecha izquierda o derecha se mueve por el paso de avance elegido.
+- Con la tecla Espacio inicia o detiene la reproducción.
+- Con las flechas izquierda o derecha "rebobina" cinco segundos o, si se trata de un libro de texto, avanza o retrocede una oración.
+- Con la combinación de teclas Ctrl + flechas izquierda o derecha regula la velocidad de reproducción.
+- Con las teclas F11 y F12 ajusta el volumen; F12 lo sube y F11 lo baja.
+- Con la combinación de teclas Shift + arriba o abajo selecciona el paso de navegación (título, capítulo, página de texto, intervalos de tiempo específicos); la selección cambia según el formato y la estructura del libro.
+- Con la combinación de teclas Shift + flechas izquierda o derecha se desplaza según el paso de navegación seleccionado.
 
-En resumen: pone en marcha el libro elegido con la barra espaciadora y, manteniendo Ctrl, con las flechas izquierda y derecha regula la velocidad de lectura.
+En resumen, inicie la reproducción del libro seleccionado con la tecla Espacio; manteniendo presionada la tecla Ctrl, regule la velocidad de lectura con las flechas izquierda y derecha.
 
-Si quiere saltar un poco adelante o atrás, puede hacerlo con las flechas izquierda y derecha de cinco en cinco segundos o de una frase en una frase. Si quiere pasos de avance mayores, pulse Mayús, elija con las flechas arriba y abajo el paso que quiera y, sin soltar Mayús, vaya adelante y atrás por el libro con las flechas izquierda y derecha según ese paso. Cuando quiera oír cómo y hacia dónde avanza en la lectura, pulse F8 en cualquier momento y el lector de pantalla le leerá todo el contenido del panel de información. Si quiere recorrer el campo de información con más detalle, dato por dato, pulse F8 dos veces seguidas. Cuando acabe, salga del campo de información pulsando otra vez F8 dos veces, o simplemente Escape, para que las flechas recuperen sus funciones de navegación.
+Si desea avanzar o retroceder brevemente, puede hacerlo con las flechas izquierda o derecha en intervalos de cinco segundos o una oración. Si desea pasos de navegación más grandes, presione Shift, seleccione el paso deseado con las flechas arriba y abajo y, manteniendo presionado Shift, muévase hacia adelante o hacia atrás en el libro con las flechas izquierda y derecha según el paso seleccionado. Cuando desee escuchar cómo y hacia dónde avanza en la lectura del libro, presione F8 en cualquier momento y el lector de pantalla leerá todo el contenido de la pantalla de información. Si desea leer el campo de información con más detalle, dato por dato, presione F8 dos veces rápidamente. Cuando termine, salga del campo de información presionando nuevamente F8 dos veces o simplemente Escape para que las teclas de flecha recuperen sus propiedades de navegación. Si desea escuchar el tiempo transcurrido o restante, presione F10 una o dos veces.
 
-La idea detrás de este modo de navegar era que el usuario no tuviera que aprender y recordar toda una serie de atajos. La mayor parte de la navegación está dispuesta en las flechas y, combinada con las teclas modificadoras Mayús y Ctrl, se ha conseguido que no tenga que pasear la mano por el teclado. Ponga la mano derecha en las flechas, pulse con la izquierda el modificador que haga falta y esa es toda la filosofía de la navegación. Los más hábiles podrán probablemente usar el pulgar de la mano derecha para pulsar el Ctrl o el Mayús del lado derecho, pero el modo de usarlo queda a elección de cada cual. Todos los demás atajos, con la excepción de Alt + Intro para Propiedades porque es la convención habitual de Windows, están en las teclas de función, todo ello para que el manejo sea lo más sencillo posible.
+La idea detrás de este enfoque de navegación fue que el usuario no tuviera que aprender y memorizar una larga serie de atajos. La mayor parte de la navegación está organizada en las teclas de flecha y, en combinación con las teclas modificadoras Shift y Ctrl, se logra que no tenga que mover la mano por todo el teclado. Coloque la mano derecha sobre las flechas y, con la izquierda, presione alguno de los modificadores según sea necesario; esa es toda la filosofía de navegación. Los usuarios más hábiles probablemente podrán usar el pulgar de la mano derecha para presionar Ctrl o Shift en el lado derecho del teclado, pero el método de uso queda a elección de cada uno. Todos los demás atajos, con la excepción de Alt + Enter para Propiedades, ya que es una convención habitual de Windows, se han asignado a las teclas de función con el objetivo de lograr un manejo lo más sencillo posible.
 
 ## Ir a...
 
