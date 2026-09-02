@@ -440,6 +440,36 @@ F11/F12 for volume and Ctrl+Left/Right for speed stay. **The one modifier
 nobody has tried is Alt**; that is a minute's work with the probe if the
 question ever comes back, and nothing more should be spent on it otherwise.
 
+#### TWO THINGS WOULD FIX IT, AND BOTH ARE REFUSED FOR THE SAME REASON
+
+Gordan asked for these to be written down (2026-09-02) so that neither comes
+back as a fresh idea. They work. That is not the objection.
+
+**1. Deaden the main window -- a flat drawn panel with no real controls, the
+way Winamp and PotPlayer are.** This was established by the very test that
+first found the say-all fault, long before today's. With no focusable controls
+and no caret for a reader to track, there is nothing in NBR for say-all to
+drive, and the injected arrows stop.
+
+**It would work, and it is the exact opposite of what this program is.**
+Section 2 is built on the other choice: real controls, real accessible names
+carrying the shortcuts, a real tab order, a group box whose name is announced
+on the way in. Section 10b already faced this and settled it for the LOOK --
+"every control stays a real control and is only repainted", because a drawn
+GroupBox loses the name a reader announces and a drawn ComboBox loses
+type-ahead. Today's finding is the same decision seen from the INPUT side. A
+player that a screen reader cannot read, in exchange for arrow keys, is not a
+trade this project can make.
+
+**2. A JAWS script.** Refused above, on the founding policy: NBR works with any
+screen reader and with none.
+
+**So the cost is known and it is accepted.** Volume lives on F11/F12 and speed
+on Ctrl+Left/Right, not because nothing else is possible, but because
+everything else is bought with the accessibility the whole program exists for.
+Anyone reopening this should start by re-reading this paragraph rather than the
+keyboard code.
+
 ### Virtual timeline
 
 A book is many files but presents as one continuous timeline.
