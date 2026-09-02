@@ -360,6 +360,14 @@ namespace Nemoviz_Book_Reader
             // TranslationRules. Pointed at the folder here so nothing else has to
             // know where it is.
             TranslationRules.Initialize(appSettings.RulesPath);
+            // The two we supply are written into that folder the FIRST time only
+            // -- see TranslationRules.SeedSupplied. A launch that put a deleted
+            // one back would undo the reader's decision without saying so.
+            if (!appSettings.RulesSeeded)
+            {
+                TranslationRules.SeedSupplied();
+                appSettings.MarkRulesSeeded();
+            }
             BuildUI();
             InitializeMpv();
             tones.SetDevice(appSettings.AudioDevice);

@@ -126,6 +126,34 @@ namespace Nemoviz_Book_Reader
             return FallbackCode;
         }
 
+        /// <summary>One string as ANOTHER language would say it, without switching
+        /// the interface to that language.
+        ///
+        /// <para>Written for the rules dialog: a reader adding rules for Polish is
+        /// about to write Polish, so the instructions inside the file they are
+        /// given should be in Polish -- Gordan's wording, "zaglavlje s uputama na
+        /// tom jeziku". Rules can be written for any of 138 target languages while
+        /// NBR is localized into 21, so a language we have no file for falls back
+        /// to the interface language rather than to nothing.</para></summary>
+        public static string StringFor(string code, string key)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(code) && !string.IsNullOrEmpty(langFolder))
+                {
+                    string path = Path.Combine(langFolder, code + ".lang");
+                    if (File.Exists(path))
+                    {
+                        var d = LoadLangFile(path);
+                        string v;
+                        if (d.TryGetValue(key, out v) && v.Length > 0) return v;
+                    }
+                }
+            }
+            catch { }
+            return T(key);
+        }
+
         /// <summary>
         /// Switches the active language. If the requested code has no matching
         /// .lang file, falls back to English strings.

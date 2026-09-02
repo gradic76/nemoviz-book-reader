@@ -7,14 +7,31 @@ using System.Windows.Forms;
 namespace Nemoviz_Book_Reader
 {
     /// <summary>What NBR tells a translation service about the language it is
-    /// writing -- on screen, where a reader can read it.
+    /// writing -- on screen, where a reader can read it, and now where they can
+    /// make one.
     ///
     /// <para><b>Why it exists</b> (Gordan, 2026-09-01): "Korisnik fakticki ne zna
     /// sto player salje servisu." The rules were compiled into the program until
-    /// that day and could not be inspected at all. They are files now, and this
-    /// window is the other half of the same answer: the file is on disk for
-    /// editing, and its text is here for reading, without going to look for
-    /// it.</para>
+    /// that day and could not be inspected at all.</para>
+    ///
+    /// <para><b>ADD and EDIT, and one folder behind them</b> (Gordan, 2026-09-02).
+    /// The first version shipped a copy of each rulebook beside the program and
+    /// read the reader's copy in preference to it; he threw the precedence out.
+    /// Rules now live in the reader's own folder and nowhere else, which leaves
+    /// exactly two things this window has to be able to do: make a file for a
+    /// language that has none, and open the one that exists.</para>
+    ///
+    /// <para><b>EDIT opens Notepad by name, not the shell.</b> A .rules file has no
+    /// registered handler, so ShellExecute would put up Windows' "How do you want
+    /// to open this file?" chooser -- which for a reader who cannot see it is a
+    /// dead end in the middle of a task. Notepad is on every Windows there is and
+    /// is the most screen-reader-friendly editor on the machine.</para>
+    ///
+    /// <para><b>THREE states, not two, and the middle one is why Add is worth
+    /// having.</b> A file holding nothing but its own header sends no rules -- so
+    /// "there are no rules for this language" and "there is no file for this
+    /// language" would read identically, and a reader who had just pressed Add
+    /// would be told that nothing had happened.</para>
     ///
     /// <para><b>No tick boxes, and that was decided rather than skipped.</b> The
     /// obvious next step is a checkbox per rule, and three things argue against it
@@ -27,25 +44,25 @@ namespace Nemoviz_Book_Reader
     /// And two hundred check boxes is a poor thing to walk through with a screen
     /// reader, where the same text as one field is a single say-all. Gordan's
     /// answer when the three were put to him: "Bez kvacica, barem do daljnjega,
-    /// treba vidjeti imaju li uopce smisla."</para>
+    /// treba vidjeti imaju li uopce smisla." A '#' in front of a line does the same
+    /// job inside the file, for whoever wants it.</para>
     ///
     /// <para><b>Shape</b>, and it follows <see cref="ServicesForm"/> deliberately,
     /// because a reader who has met that window has met this one: a chooser, a
-    /// read-only TABBABLE field with the whole text, and a line saying where it
-    /// came from. The field is never a Label -- a reader driven by Tab never
+    /// read-only TABBABLE field with the whole text, and a line saying which file
+    /// it came from. The field is never a Label -- a reader driven by Tab never
     /// visits one, and here the text is the entire point of the window.</para>
     ///
-    /// <para><b>Languages that HAVE rules come first.</b> The list is every
-    /// language NBR can translate into, as Gordan asked, and today two of a
-    /// hundred and thirty-eight have rules. Ordinary order would mean arrowing
-    /// past a hundred entries to reach the only two with anything to show, which
-    /// is worse with a screen reader than with eyes.</para></summary>
+    /// <para><b>Languages that HAVE a rules file come first.</b> The list is every
+    /// language NBR can translate into, as Gordan asked. Ordinary order would mean
+    /// arrowing past a hundred entries to reach the only ones with anything to
+    /// show, which is worse with a screen reader than with eyes.</para></summary>
     internal sealed class TranslationRulesForm : Form
     {
         private readonly List<TranslationLanguages.Lang> order = new List<TranslationLanguages.Lang>();
         private readonly ComboBox languages;
         private readonly TextBox body, where;
-        private readonly Button close;
+        private readonly Button add, edit, close;
 
         public TranslationRulesForm(string preferCode)
         {
@@ -56,14 +73,10 @@ namespace Nemoviz_Book_Reader
             MaximizeBox = false;
             ClientSize = new Size(660, 500);
 
-            // MAKE THE FOLDER BEFORE NAMING IT. Every line this window prints
-            // about a reader's own copy points at a folder that UserData.File
-            // only ever COMBINED a path for -- so the instruction was "copy it
-            // into <path>" for a path Explorer answers "not found" to. Someone
-            // opening this window is exactly the person who might write a rules
-            // file, and an empty folder costs nothing next to the ini and the
-            // dictionaries already there.
-            try { Directory.CreateDirectory(TranslationRules.UserFolder); } catch { }
+            // Make the folder before naming it: every line this window prints about
+            // a rules file points at it, and Explorer answers "not found" for a
+            // folder nobody has created.
+            try { Directory.CreateDirectory(TranslationRules.Folder); } catch { }
 
             BuildOrder();
 
@@ -94,36 +107,46 @@ namespace Nemoviz_Book_Reader
             body.SetBounds(14, 48, 632, 356);
             body.TabIndex = 1;
 
-            // WHERE IT CAME FROM, and how to have your own. A field rather than a
-            // label for the same reason as the body: Tab has to be able to reach
-            // it, because for a reader who wants to change the rules this line is
-            // the instruction.
+            // WHICH FILE, AND WHERE. A field rather than a label for the same reason
+            // as the body: Tab has to reach it, because for a reader who wants to
+            // change the rules this line is the instruction. No scrollbar -- two
+            // lines is the most it holds and both fit in the 40 it is given.
             where = new TextBox();
             where.Multiline = true;
             where.ReadOnly = true;
             where.TabStop = true;
-            // NO SCROLLBAR. It had one, and the screenshot showed what that looks
-            // like: a dead scrollbar with two arrows and no thumb, beside a
-            // message that fits on one line. Two lines is the most this ever
-            // holds and both fit in the 40 it is given, so the bar was never
-            // going to be used -- and with a screen reader it is one more object
-            // between the reader and the next control.
             where.BorderStyle = BorderStyle.None;
             where.BackColor = SystemColors.Control;
             where.SetBounds(14, 414, 632, 40);
             where.TabIndex = 2;
 
+            add = new Button();
+            add.Text = Localization.T("Dialog.Rules.Add");
+            add.AccessibleName = add.Text;
+            add.SetBounds(14, 462, 130, 30);
+            add.TabIndex = 3;
+            add.Click += (s, e) => AddForChosen();
+
+            edit = new Button();
+            edit.Text = Localization.T("Dialog.Rules.Edit");
+            edit.AccessibleName = edit.Text;
+            edit.SetBounds(154, 462, 130, 30);
+            edit.TabIndex = 4;
+            edit.Click += (s, e) => EditChosen();
+
             close = new Button();
             close.Text = Localization.T("Btn.Close");
             close.AccessibleName = close.Text;
             close.SetBounds(546, 462, 100, 30);
-            close.TabIndex = 3;
+            close.TabIndex = 5;
             close.DialogResult = DialogResult.Cancel;
 
             Controls.Add(lbl);
             Controls.Add(languages);
             Controls.Add(body);
             Controls.Add(where);
+            Controls.Add(add);
+            Controls.Add(edit);
             Controls.Add(close);
             CancelButton = close;
 
@@ -132,16 +155,16 @@ namespace Nemoviz_Book_Reader
             Shown += (s, e) => { try { languages.Focus(); } catch { } };
         }
 
-        /// <summary>Every target language, the ones with rules first. Within each
-        /// half the order of <see cref="TranslationLanguages.All"/> is kept, so a
-        /// reader who knows where a language sits in the translate dialog finds it
+        /// <summary>Every target language, the ones with a rules file first. Within
+        /// each half the order of <see cref="TranslationLanguages.All"/> is kept, so
+        /// a reader who knows where a language sits in the translate dialog finds it
         /// in the same relative place here.</summary>
         private void BuildOrder()
         {
             List<TranslationLanguages.Lang> rest = new List<TranslationLanguages.Lang>();
             foreach (TranslationLanguages.Lang l in TranslationLanguages.All)
             {
-                if (TranslationRules.Has(l.Code)) order.Add(l);
+                if (TranslationRules.FileExists(l.Code)) order.Add(l);
                 else rest.Add(l);
             }
             order.AddRange(rest);
@@ -155,48 +178,79 @@ namespace Nemoviz_Book_Reader
             return -1;
         }
 
-        private void ShowChosen()
+        private TranslationLanguages.Lang Chosen()
         {
             int i = languages.SelectedIndex;
-            if (i < 0 || i >= order.Count) return;
-            string code = order[i].Code;
-            // Straight off disk every time the language is chosen: a reader who
-            // has just edited their copy in another program and come back here
-            // expects to see what they wrote.
-            TranslationRules.Reload();
-            string text = TranslationRules.For(code);
-            string file = TranslationRules.PathFor(code);
-
-            if (text.Length == 0)
-            {
-                body.Text = Localization.T("Dialog.Rules.None");
-                // Caret to the top here as well as below: a screen reader that
-                // reads from the caret should start at the first word of the
-                // message, not after its full stop.
-                body.SelectionStart = 0;
-                body.SelectionLength = 0;
-                where.Text = string.Format(Localization.T("Dialog.Rules.Make"),
-                                           TranslationRules.UserFolder, ShortCode(code) + ".rules");
-                return;
-            }
-            // The box wants CRLF; a file written on another machine may not have it.
-            body.Text = text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
-            body.SelectionStart = 0;
-            body.SelectionLength = 0;
-            bool mine = !string.IsNullOrEmpty(file)
-                        && !string.IsNullOrEmpty(TranslationRules.UserFolder)
-                        && file.StartsWith(TranslationRules.UserFolder, StringComparison.OrdinalIgnoreCase);
-            where.Text = string.Format(Localization.T(mine ? "Dialog.Rules.FromYours" : "Dialog.Rules.From"),
-                                       file, TranslationRules.UserFolder);
+            return i < 0 || i >= order.Count ? null : order[i];
         }
 
-        /// <summary>sr-Cyrl and sr-Latn both read sr.rules, so the file a reader
-        /// would make for them is sr.rules too. The same cut as the loader's.</summary>
-        private static string ShortCode(string code)
+        private void ShowChosen()
         {
-            if (string.IsNullOrEmpty(code)) return "";
-            int dash = code.IndexOfAny(new[] { '-', '_' });
-            return dash > 0 ? code.Substring(0, dash).ToLowerInvariant() : code.ToLowerInvariant();
+            TranslationLanguages.Lang l = Chosen();
+            if (l == null) return;
+            // Straight off disk every time the language is chosen: a reader who has
+            // just edited the file in another program and come back here expects to
+            // see what they wrote.
+            TranslationRules.Reload();
+            bool exists = TranslationRules.FileExists(l.Code);
+            string text = TranslationRules.For(l.Code);
+            string file = TranslationRules.PathFor(l.Code);
+
+            if (!exists)
+            {
+                body.Text = Localization.T("Dialog.Rules.None");
+                where.Text = string.Format(Localization.T("Dialog.Rules.Make"), TranslationRules.Folder);
+            }
+            else
+            {
+                body.Text = text.Length == 0
+                    ? Localization.T("Dialog.Rules.Empty")
+                    : text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+                where.Text = string.Format(Localization.T("Dialog.Rules.File"), file);
+            }
+            body.SelectionStart = 0;
+            body.SelectionLength = 0;
+            add.Enabled = !exists;
+            edit.Enabled = exists;
+        }
+
+        private void AddForChosen()
+        {
+            TranslationLanguages.Lang l = Chosen();
+            if (l == null || TranslationRules.FileExists(l.Code)) return;
+            // The instructions inside the file are in the language the rules are
+            // FOR, because that is what whoever writes them is about to write. A
+            // target language NBR is not localized into falls back to the interface
+            // language -- see Localization.StringFor.
+            string instructions = Localization.StringFor(l.Code, "Dialog.Rules.NewHeader");
+            if (!TranslationRules.CreateEmpty(l.Code, instructions, l.Native))
+            {
+                MessageForm.ShowInfo(this, string.Format(Localization.T("Dialog.Rules.Make"),
+                                     TranslationRules.Folder), Text);
+                return;
+            }
+            // The language has a file now, so it belongs at the top of the list --
+            // rebuilt rather than nudged, or the order would drift from what
+            // BuildOrder means by it.
+            string code = l.Code;
+            order.Clear();
+            languages.Items.Clear();
+            BuildOrder();
+            foreach (TranslationLanguages.Lang x in order) languages.Items.Add(x.DisplayName);
+            int i = IndexOfCode(code);
+            languages.SelectedIndex = i >= 0 ? i : 0;
+            ShowChosen();
+            try { edit.Focus(); } catch { }
+        }
+
+        private void EditChosen()
+        {
+            TranslationLanguages.Lang l = Chosen();
+            if (l == null) return;
+            string path = TranslationRules.PathFor(l.Code);
+            if (path.Length == 0 || !File.Exists(path)) return;
+            try { System.Diagnostics.Process.Start("notepad.exe", "\"" + path + "\""); }
+            catch (Exception ex) { MessageForm.ShowInfo(this, ex.Message, Text); }
         }
     }
 }

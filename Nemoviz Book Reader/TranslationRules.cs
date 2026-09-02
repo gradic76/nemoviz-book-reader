@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Nemoviz_Book_Reader
 {
-    /// <summary>How a particular target language wants to be written — the layer
+    /// <summary>How a particular target language wants to be written -- the layer
     /// between the rules that hold for every language and the facts that hold for
     /// one book.
     ///
@@ -14,29 +15,29 @@ namespace Nemoviz_Book_Reader
     /// languages, so they cannot say anything about cases, aspect or the dropping
     /// of pronouns. The book facts change with every book. What sits between is
     /// stable for a whole language and reusable across every book translated into
-    /// it — which is also what makes it worth putting SECOND in the prompt: prompt
+    /// it -- which is also what makes it worth putting SECOND in the prompt: prompt
     /// caching pays for a stable prefix, and these two layers are identical for
     /// every Croatian book NBR will ever translate.</para>
     ///
-    /// <para><b>Shipped as a file, one per language, in the Translation
-    /// folder</b> -- Gordan's call, 2026-09-01: rules a reader cannot see are
-    /// rules a reader cannot judge, and he wanted them editable without a
-    /// rebuild, by him and by whoever writes the next language.
+    /// <para><b>ONE FOLDER, AND IT IS THE READER'S OWN</b> (Gordan, 2026-09-02).
+    /// The first version shipped a copy beside the program and read the reader's
+    /// copy in preference to it. He threw that out, and he is right: two files of
+    /// the same name in two places, with a rule about which wins, is complication
+    /// that buys nothing. *"Ako jezik postoji datoteka je tamo, ako ne postoji,
+    /// nema je."* So rules live in %APPDATA%\Nemoviz Book Reader\Translation and
+    /// nowhere else -- which is also where they survive an update and an
+    /// uninstall, the thing the program's own folder cannot do.</para>
     ///
-    /// <para>The objection this replaces was real and is answered rather than
-    /// dropped. A file CAN go missing from an install, and a translator that
-    /// silently loses its rules produces work that looks finished. So nothing
-    /// here is silent: the file actually used, and its size, are written into
-    /// translation.log for every book, and the same thing is on show in the
-    /// rules dialog. An absent file is now a visible fact rather than an
-    /// invisible one -- which is more than the compiled-in version offered,
-    /// since that one could not be inspected at all.</para>
+    /// <para><b>The two we supply are EMBEDDED, not shipped as files</b>, and
+    /// written into that folder once. Embedded rather than copied so that there is
+    /// never a second .rules on disk to wonder about; once rather than on every
+    /// launch so that deleting one is a decision that sticks.</para>
     ///
-    /// <para><b>The Croatian text is Mila Kuran's</b>, used with her
-    /// agreement and kept in her words, with two changes he approved:</para>
+    /// <para><b>The Croatian and Serbian text is Mila Kuran's</b>, used with her
+    /// agreement and kept in her words, with two changes Gordan approved:</para>
     ///
     /// <para><b>1. Names.</b> Hers said to keep foreign names in their original
-    /// form, which is right and incomplete — it is the wording that failed here
+    /// form, which is right and incomplete -- it is the wording that failed here
     /// once already. A model obeying it literally will not DECLINE the name, and
     /// Croatian then pads around the hole: "u programu Tobi" where a translator
     /// writes "u Tobiju". Keeping a name and inflecting it are different things, so
@@ -51,8 +52,10 @@ namespace Nemoviz_Book_Reader
     /// braille, so nothing is lost.</para></summary>
     internal static class TranslationRules
     {
-        // Set once at startup, exactly as Localization is; the fallback keeps a
-        // probe or a test harness working without one.
+        /// <summary>The languages a rulebook is supplied for. Embedded under
+        /// Translation\ and written into the reader's folder on first run.</summary>
+        private static readonly string[] Supplied = { "hr", "sr" };
+
         private static string folder;
         private static readonly Dictionary<string, string> cache =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -63,47 +66,36 @@ namespace Nemoviz_Book_Reader
             cache.Clear();
         }
 
+        /// <summary>Where every .rules file lives. There is no second location and
+        /// therefore no question about which one wins.</summary>
         public static string Folder
         {
             get
             {
                 if (!string.IsNullOrEmpty(folder)) return folder;
-                try { return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Translation"); }
-                catch { return "Translation"; }
+                try { return UserData.File("Translation"); } catch { return "Translation"; }
             }
         }
 
-        /// <summary>Where a reader's OWN rules live, which is the whole point of
-        /// the rules being files.
-        ///
-        /// <para>The shipped folder sits beside the program, and a program
-        /// installed where Windows programs belong cannot be written to -- the
-        /// same wall that moved the settings and the service keys out in August.
-        /// A reader editing the rules there would need elevation to save, and the
-        /// next installer would overwrite the result. So their copy goes in their
-        /// own folder and WINS, and the shipped file stays untouched underneath as
-        /// the reference and the way back: delete your copy and the default
-        /// returns.</para></summary>
-        public static string UserFolder
-        {
-            get { try { return UserData.File("Translation"); } catch { return ""; } }
-        }
-
-        /// <summary>The file a language's rules are actually read from -- the
-        /// reader's own if they have made one, otherwise the shipped one. Public
-        /// so the dialog and the log can name the file that was really used, which
-        /// is the only honest way to show it.</summary>
+        /// <summary>The file a language's rules are read from, whether or not it
+        /// exists. Public so the dialog and the log can name it.</summary>
         public static string PathFor(string targetLang)
         {
             string code = Normalize(targetLang);
             if (code.Length == 0) return "";
-            try
-            {
-                string mine = Path.Combine(UserFolder, code + ".rules");
-                if (File.Exists(mine)) return mine;
-                return Path.Combine(Folder, code + ".rules");
-            }
+            try { return Path.Combine(Folder, code + ".rules"); }
             catch { return ""; }
+        }
+
+        /// <summary>Whether a rules FILE exists for this language -- which is not
+        /// the same question as whether it has any rules in it. A file holding only
+        /// its header is a language somebody has started and not finished, and the
+        /// dialog must be able to tell that from a language nobody has touched.
+        /// </summary>
+        public static bool FileExists(string targetLang)
+        {
+            try { string p = PathFor(targetLang); return p.Length > 0 && File.Exists(p); }
+            catch { return false; }
         }
 
         /// <summary>The rules for a target language, or an empty string where none
@@ -123,35 +115,87 @@ namespace Nemoviz_Book_Reader
         public static bool Has(string targetLang) { return For(targetLang).Length > 0; }
 
         /// <summary>Forgets what has been read, so the next ask goes to disk.
-        /// Called when a translation starts: a reader who has just edited their
-        /// rules expects the next book to use them, and telling them to restart
-        /// NBR for it would be a poor answer to a file they were invited to
-        /// edit.</summary>
+        /// Called when a translation starts and whenever the dialog changes
+        /// language: a reader who has just edited their rules expects the next book
+        /// to use them, and telling them to restart NBR for it would be a poor
+        /// answer to a file they were invited to edit.</summary>
         public static void Reload() { cache.Clear(); }
 
-        /// <summary>Every language code that has a rules file, sorted. This is
-        /// what the dialog's language list is built from -- it lists what is
-        /// actually on disk rather than a list kept in step by hand.</summary>
+        /// <summary>Every language code that has a rules file, sorted. This is what
+        /// the dialog's language list is ordered by -- what is actually on disk
+        /// rather than a list kept in step by hand.</summary>
         public static List<string> AvailableLanguages()
         {
             List<string> codes = new List<string>();
-            foreach (string where in new[] { Folder, UserFolder })
+            try
             {
-                try
-                {
-                    if (string.IsNullOrEmpty(where) || !Directory.Exists(where)) continue;
-                    foreach (string file in Directory.GetFiles(where, "*.rules"))
-                    {
-                        string code = Path.GetFileNameWithoutExtension(file);
-                        // A reader's own file for a language we ship is the SAME
-                        // language, not a second entry in the list.
-                        if (!codes.Contains(code, StringComparer.OrdinalIgnoreCase)) codes.Add(code);
-                    }
-                }
-                catch { }
+                if (Directory.Exists(Folder))
+                    foreach (string file in Directory.GetFiles(Folder, "*.rules"))
+                        codes.Add(Path.GetFileNameWithoutExtension(file));
             }
+            catch { }
             codes.Sort(StringComparer.OrdinalIgnoreCase);
             return codes;
+        }
+
+        /// <summary>Writes the supplied rulebooks into the reader's folder, for any
+        /// that are not there. Call ONCE -- AppSettings.RulesSeeded remembers that
+        /// it happened -- so that deleting one of them is a decision that stays
+        /// made rather than being undone by the next launch.</summary>
+        public static int SeedSupplied()
+        {
+            int written = 0;
+            try
+            {
+                Directory.CreateDirectory(Folder);
+                Assembly asm = Assembly.GetExecutingAssembly();
+                string prefix = typeof(TranslationRules).Namespace + ".Translation.";
+                foreach (string code in Supplied)
+                {
+                    string path = Path.Combine(Folder, code + ".rules");
+                    if (File.Exists(path)) continue;
+                    using (Stream s = asm.GetManifestResourceStream(prefix + code + ".rules"))
+                    {
+                        if (s == null) continue;
+                        using (var r = new StreamReader(s, new UTF8Encoding(false)))
+                            File.WriteAllText(path, r.ReadToEnd(), new UTF8Encoding(false));
+                    }
+                    written++;
+                }
+            }
+            catch { }
+            if (written > 0) cache.Clear();
+            return written;
+        }
+
+        /// <summary>Creates an empty rules file for a language, carrying nothing but
+        /// its own instructions. The prose comes from the language files so it can
+        /// be read by whoever is about to write the rules; the comment character and
+        /// the layout are added here, because they are the FILE's business and not a
+        /// translator's.</summary>
+        public static bool CreateEmpty(string targetLang, string instructions, string languageName)
+        {
+            string path = PathFor(targetLang);
+            if (path.Length == 0 || File.Exists(path)) return false;
+            try
+            {
+                Directory.CreateDirectory(Folder);
+                string bar = ";" + new string('-', 76);
+                var sb = new StringBuilder();
+                sb.AppendLine(bar);
+                sb.AppendLine("; Nemoviz Book Reader -- translation rules for: "
+                              + Normalize(targetLang)
+                              + (string.IsNullOrEmpty(languageName) ? "" : "  (" + languageName + ")"));
+                sb.AppendLine(";");
+                foreach (string line in (instructions ?? "").Replace("\r\n", "\n").Split('\n'))
+                    sb.AppendLine(line.Length == 0 ? ";" : "; " + line);
+                sb.AppendLine(bar);
+                sb.AppendLine();
+                File.WriteAllText(path, sb.ToString(), new UTF8Encoding(false));
+                cache.Clear();
+                return true;
+            }
+            catch { return false; }
         }
 
         // sr-Cyrl and sr-Latn both read sr.rules: ONE Serbian, in Latin, and that

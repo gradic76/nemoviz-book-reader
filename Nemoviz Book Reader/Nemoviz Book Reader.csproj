@@ -369,12 +369,8 @@
     <Content Include="Help\grc\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Translation\hr.rules">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translation\sr.rules">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="Translation\hr.rules" />
+    <EmbeddedResource Include="Translation\sr.rules" />
     <Content Include="Lang\cs.lang">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

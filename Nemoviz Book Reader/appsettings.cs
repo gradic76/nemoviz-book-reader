@@ -17,11 +17,13 @@ namespace Nemoviz_Book_Reader
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "NBR Library");
         private static readonly string DefaultLangPath =
             Path.Combine(AppFolder, "Lang");
-        // Beside Lang, and settable the same way: a reader who writes
-        // rules for a language NBR has none for needs somewhere to put them,
-        // and somewhere they survive an upgrade.
-        private static readonly string DefaultRulesPath =
-            Path.Combine(AppFolder, "Translation");
+        // IN THE READER'S FOLDER, and there is no second place (Gordan,
+        // 2026-09-02). Rules beside the program could not be written to without
+        // elevation and were overwritten by the next installer; a copy in each
+        // place needed a rule about which one wins, and that rule is the
+        // complication he threw out. One folder, and it survives an update and an
+        // uninstall because it is the reader's rather than ours.
+        private static string DefaultRulesPath { get { return UserData.File("Translation"); } }
 
         private IniFile ini;
 
@@ -264,6 +266,7 @@ namespace Nemoviz_Book_Reader
             Visual = ini.Read("Visual", "Use", "0") == "1";
             WarnBrailleReread = ini.Read("App", "WarnBrailleReread", "1") == "1";
             WarnSoundProcessing = ini.Read("App", "WarnSoundProcessing", "1") == "1";
+            RulesSeeded = ini.Read("App", "RulesSeeded", "0") == "1";
             VisualMode = Clamp(ReadInt("Visual", "Mode", 0), 0, 2);
             Highlight = Clamp(ReadInt("Visual", "Highlight", 1), 0, 2);
             HighlightColour = ReadingColours.Clamp(
@@ -317,6 +320,18 @@ namespace Nemoviz_Book_Reader
         /// next time it is switched on. On until the reader ticks it away — the
         /// same shape as WarnBrailleReread.</summary>
         public bool WarnSoundProcessing { get; private set; }
+
+        /// <summary>Whether the supplied rulebooks have been written into the
+        /// reader's folder. Once, not on every launch: deleting one of them is a
+        /// decision, and a launch that put it back would undo it silently.</summary>
+        public bool RulesSeeded { get; private set; }
+
+        public void MarkRulesSeeded()
+        {
+            if (RulesSeeded) return;
+            RulesSeeded = true;
+            ini.Write("App", "RulesSeeded", "1");
+        }
 
         public void SetWarnSoundProcessing(bool value)
         {
