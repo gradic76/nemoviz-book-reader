@@ -1,0 +1,262 @@
+; Manual för Nemoviz Book Reader.
+; Maskinöversatt från docs/help/hr.txt, som är Gordans original.
+
+TITLE: Nemoviz Book Reader
+LANG: sv
+TOC: Innehållsförteckning
+BETA: Detta ingår inte i den första betaversionen. Kontroller och ändringar som återstår kräver mer tid än vad denna version har, så denna funktion kommer tillbaka i en av de kommande utgåvorna.
+
+Välkommen till Nemoviz Book Reader, en spelare för e-böcker i mer än fyrtiofem format och med tre utgångar.
+
+# Systemkrav
+
+## Minimikrav
+
+- CPU dual core 1,5 GHz, 2 GB RAM, 100 MB för lagring + utrymme för bibliotek,
+- MS Windows 7 SP1 64-bit eller senare, .NET Framework 4.8 (på Windows 7 måste det installeras separat). På denna konfiguration kan du tyvärr inte använda OCR och One Core-röster, båda är endast tillgängliga från Windows 10.
+
+## Rekommenderade krav
+
+- CPU quad core 2,0 GHz, 8 GB RAM, 100 MB utrymme på SSD + utrymme för bibliotek,
+- MS Windows 10 64-bit 22H2 eller senare, .NET Framework 4.8 är inbyggt.
+
+# Allmänt
+
+Nemoviz Book Reader gör det möjligt för dig att läsa ljud- och textbaserade elektroniska dokument på det sätt som passar dig bäst. Följande format stöds:
+
+Ljudformat: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au och .voc.
+
+Textformat: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw och .azw3.
+
+Specialformat: Daisy 2.02 audio, Daisy 3 audio, Daisy 2.02 text, Daisy 3 text, Daisy 2.02 audio + text, Daisy 3 audio + text och epub 3 text + audio.
+
+Punktskriftsformat: .brf, .brl, .bra, .dxb och .i55.
+
+Alla ovanstående format kan öppnas direkt från arkivfilerna .7z, .rar och .zip. Vi har stöd för att öppna arkiv i flera delar samt lösenordsskyddade arkiv, förutsatt att du har lösenordet.
+
+Det är även möjligt att öppna bildformat – format där sidorna består av bilder av text snarare än redigerbar text, såsom skannade .pdf-filer eller .epub-filer med sidbilder. Det går även att öppna standardbilder som .bmp, .jpg, .tif osv. Om du råkar ha en bok med sådana numrerade bilder kan du öppna även dessa i Nemoviz Book Reader. Texten från bilderna känns automatiskt igen via Microsoft OCR och inom en kort stund får du en läsbar titel i din bokhylla.
+
+Varning! Alla nämnda format och deras varianter kan läsas in i Nemoviz Book Reader om de inte är skyddade med Digital Rights Management-licens. NBR kan inte öppna DRM-skyddade titlar, så om du har sådana kan du spela upp dem via en avsedd hårdvaru- eller mjukvaruspelare. För mer information, kontakta den part från vilken du har anskaffat titlarna.
+
+Alla filformat från listan ovan kan spelas upp med ljud, visas visuellt och även läsas med punktskrift om du har nödvändig utrustning. Allt du behöver är en Windows-kompatibel dator, en bildskärm och, om möjligt, en installerad punktskriftsskärm konfigurerad med din skärmläsare.
+
+Utöver allt ovan nämnt ger NBR dig även möjlighet till maskinöversättning av böcker med hjälp av olika AI LLM-tjänster. Vissa har gratis kvoter, andra kräver betalning, men det är så dessa tjänster fungerar. Nemoviz Book Reader för Windows är helt gratis att använda, men externa tjänster ligger utanför vårt ansvar. Vi kopplar dig genom applikationen till externa tjänster och ger dig möjligheten att utföra översättningsprocessen via spelaren, men registrering hos tjänsterna, inställning av betalningsmetoder och allt annat ligger på dig. När du har gjort allt detta måste du hämta en API-nyckel från tjänstens webbplats, klistra in den i spelarens inställningar på den avsedda platsen, så tar vi över därifrån.
+
+Nemoviz Book Reader är testad och bekräftat kompatibel med skärmläsarna Jaws for Windows och NVDA, men den bör fungera utan problem även med andra. Tillgänglighet är grunden som denna applikation är byggd på, så det bör inte uppstå några problem om du använder en annan skärmläsare.
+
+Alla kortkommandon är inbyggda i själva applikationen och kan användas även utan en skärmläsare. Skärmläsaren är endast till för att ge feedback om vad som händer i spelaren och, om du använder punktskrift, för att överföra textinnehåll till punktskriftsskärmen. För allt annat kan du använda spelaren utan skärmläsare.
+
+Vid import av punktskriftsformaten i listan ovan är det viktigt att veta att NBR använder LibLouis-teknik med tillhörande tabeller. Vi kan inte garantera att allt fungerar korrekt för varje språk, vi kan inte göra rättelser i tabellerna för varje bok separat, mycket beror på hur böckerna är skapade och producerade. Om resultatet du får vid import till biblioteket inte är bra, kan du i bokens egenskaper ändra punktskriftstabellen om det finns flera tillgängliga för det språket. Om det fungerar är det utmärkt, om inte så beklagar vi. Det beror inte bara på spelaren, utan även på bokproducenterna och författarna till punktskriftstabellerna.
+
+# Första start
+
+Vid första start kommer Nemoviz Book Reader att kontrollera om du vill behålla eller ändra sökvägen till mappen för ditt framtida bibliotek. Tänk på att standardplatsen är inom Windows användarmapp, som vanligtvis finns på C-partitionen och som med tiden kan fyllas upp och ta utrymme på systemdisken. Om du flyttar den till en annan partition eller disk kommer inget väsentligt att ändras, och du kan vara säker på att systemet inte får slut på nödvändigt utrymme för att fungera. Genom att ha biblioteket på en annan disk eller partition säkerställer du också att din boksamling förblir säker om systemet skulle krascha.
+
+Därefter öppnas ett av programmets två fönster, nämligen biblioteksfönstret som öppnas nu, vid start efter installationen och varje gång det inte finns någon inläst bok eller biblioteket är tomt. Den här gången kan vi stänga det eftersom det vore bra att gå igenom inställningarna efter installationen och justera vad som behövs där.
+
+# Inställningar
+
+Detta fönster består av flera flikar, nedan hittar du en översikt över var och en av dem. Det som kanske skiljer det från andra inställningsfönster är att du vid de flesta alternativ som du kan ställa in där har en liten hjälpknapp som öppnar en ytterligare dialogruta med en beskrivning av den funktionen. Du får hjälp vid varje steg, och dokumentet du läser just nu behöver inte vara på 250 sidor.
+
+## Allmänt
+
+Det första objektet vi ställer in här är språk. Om programmet har det språk som ditt system använder, kommer språket redan att vara valt och gränssnittet kommer att vara på det språket. Om inte, kommer NBR att visas på engelska. Om du inte gillar det heller, öppna språklistan och välj ett annat språk.
+
+Det andra alternativet är val av bibliotekets plats. Det har vi redan gått igenom efter den första starten. Om du inte bestämde dig då, är nu det perfekta tillfället.
+
+Härnäst följer två kryssrutor för att aktivera eller inaktivera multimediefunktioner på tangentbordet om du har sådana. De gäller även för knappar på hörlurar. Det första objektet är om de ska aktiveras eller inte, det andra objektet är om de ska fungera globalt eller bara när NBR är i fokus.
+
+Sedan en kryssruta där du väljer om metadata från filerna ska användas i biblioteket eller om författarnamn och utgåvor ska visas från mapp- eller filnamnet.
+
+Härnäst följer kryssrutan *Sök automatiskt efter nyare versioner*. När den är aktiverad frågar NBR en gång om dagen om en nyare utgåva har publicerats och meddelar dig endast om så är fallet; den skickar ingenting om dig eller dina böcker. Om du inaktiverar den kommer NBR inte att ansluta till nätverket på egen hand, och du kan fortfarande begära en kontroll när du vill — i biblioteket, i menyn Hjälp, via objektet *Sök efter nyare versioner*.
+
+Och slutligen, val av utseende för hur Nemoviz Book Reader ska visas. Två alternativ erbjuds. *Systemfärger* ger dig spelaren i ett klassiskt utseende och den färgpalett du använder i systemet; det är också vad du får om du har högkontrast aktiverat, eftersom NBR då inte ritar något eget utan låter ditt schema styra allt. *NBR-design* ger en vy av spelaren i en något modernare utgåva. Om du inte har valt, bestämmer NBR själv: högkontrast får Systemfärger, allt annat NBR-design.
+
+## Tal och punktskrift
+
+Det första alternativet är en serie kontroller för val av språk och röst för textböcker. Vi väljer språk och sedan röst för det språket. Vi ställer in volym, hastighet och tonhöjd och bekräftar med knappen Verkställ. Vi väljer ytterligare ett språk, röst och andra parametrar och trycker på Verkställ igen. På så sätt väljer vi standardröst för ett visst språk, och varje ny bok som öppnas får, när språket den är skriven på fastställs, den röst vi har valt som standard.
+
+Kanske ett lite dolt alternativ, men vi hade ingen bättre idé. I kombinationsrutan för röstval är det sista alternativet *Lägg till nya språk*. Genom att aktivera detta alternativ öppnas ett fönster där du kan välja en eller flera Microsoft One Core-röster och efter bekräftelse installera dem via Windows Update-tjänsten. Det kan, precis som vid tillägg av språk för OCR, ta längre eller kortare tid beroende på belastningen på uppdateringsservrarna. Det är möjligt att du, beroende på dina administrativa inställningar, får en UAC-dialogruta som du måste bekräfta.
+
+Naturligtvis kan alla nämnda parametrar ställas in annorlunda, och det för varje bok för sig, men det görs i bokens egenskaper; här ställer vi in generella parametrar.
+
+Nästa alternativ är Uttalsordbok som du säkert redan har sett. Du har möjlighet att korrigera uttal globalt, per språk och per röst, och för alla tre valen hittar du standardalternativ för denna typ av ordbok.
+
+Härnäst följer kryssrutor för att aktivera och inaktivera punktskrifts- och visuell visning. Var och en av dem, när den är aktiverad, erbjuder vissa ytterligare inställningar som du hittar hjälp för på plats. I denna betaversion är dessa två rutor gråmarkerade och har en notering om att de inte är aktiverade; de kommer tillbaka i en av de kommande utgåvorna.
+
+## Enheter
+
+Här väljer du det ljudkort som du vill lyssna på böcker genom. Om du bara har ett behöver du inte ändra något eftersom det inte finns något annat val. I anslutning till detta finns en kryssruta för att förhindra att ljudkortet går i viloläge. Om du märker att uppspelningen av böcker hackar, särskilt vid textformat, som om meningar eller stycken låter avklippta i början av ett eller två ord, se till att aktivera detta alternativ.
+
+Om du fortfarande har en optisk enhet på din dator, och kanske en samling äldre ljudutgåvor i klassiskt CD-ljudformat, kan du fritt aktivera alternativet Använd optisk enhet. Detta aktiverar stöd för enheten och du kan börja lyssna på böcker på CD-skivor.
+
+## Avancerat
+
+På den här fliken väljer du ett eller flera språk som ska användas för att känna igen bilddokument vid import. Nemoviz Book Reader använder det inbyggda Microsoft OCR-verktyget som finns i Windows 10 och 11. För närvarande stöds trettiofem språk, vars lista du kan se om du trycker på knappen *Lägg till språk*. När du har valt önskade språk och trycker på Installera installeras språken inte omedelbart. NBR installerar dem inte direkt, utan de installeras via Windows Update, och det kan ta en viss tid innan de står på tur för installation. Beroende på dina systeminställningar är det också möjligt att en dialogruta för Kontroll av användarkonto visas där du måste bekräfta installationen av ett eller flera språk.
+
+Efter installationen, och vid import av ett bildformat, kommer du i kombinationsrutan att kunna välja det språk som du vill använda för att känna igen texten i den titel du öppnar. Detta kan också ta en kort stund, beroende på datorns hastighet och bokens storlek, men du kan följa allt på förloppsindikatorn.
+
+Utöver inställningar för optisk teckenigenkänning kan du här även välja LLM-tjänster för översättning. När denna text skrevs fanns Google Gemini, DeepSeek, DeepSeek med en större modell, tre nivåer av OpenAI GPT och Microsoft Azure. Som vi tidigare skrivit kräver dessa tjänster API-nycklar eller andra typer av auktorisering; du kan läsa mer om detta i menyn Hjälp under punkten Tjänster och konton.
+På knappen Översättningsregler öppnas ett fönster med instruktioner som skickas till översättningsmodellerna för att det du vill översätta ska bli så bra som möjligt. Det finns en uppsättning instruktioner som gäller för alla språk och uppsättningar instruktioner för enskilda språk som stöds. I detta fönster kan du redigera befintliga och lägga till instruktioner för nya språk. När du redigerar filer med regler öppnas de i Anteckningar; högst upp i texten förklaras allt om att redigera och lägga till regler.
+
+Utöver översättningsmöjligheter finns även ytterligare molnröster; för närvarande stöder vi Google Cloud Chirp 3 och Microsoft Azure Neural-röster. Proceduren för att aktivera dessa röster liknar den för översättningstjänster, och mer om detta finns också i menyn Hjälp under punkten Tjänster och konton.
+
+Vi vill påpeka att dessa röster också kostar pengar. Google ger en miljon tecken gratis för läsning, vilket motsvarar ungefär två genomsnittliga böcker på 500 sidor. Microsoft ger hälften så mycket, 500 000 tecken, vilket motsvarar ungefär en genomsnittlig bok. När den kostnadsfria kvoten av tecken är förbrukad debiteras ditt kreditkort, och kostnaden för läsning ligger någonstans mellan $8,00 och $15,00 per genomsnittlig bok, beroende på tjänst.
+
+För att undvika missförstånd och oavsiktlig förbrukning har vi begränsat inställningen av molnröster. I inställningarna för tal och punktskrift kommer du inte att se dessa röster och du kommer inte att kunna ställa in dem som standard; de är endast synliga i egenskaperna för den valda boken, men du måste först aktivera dem i de avancerade inställningarna. I bokens egenskaper kan du välja en av dessa röster som standard för en specifik bok, och det gäller endast för den boken.
+
+Eftersom tecken vid användning av molnröster förbrukas även när du spolar, repeterar en viss del av boken eller på annat sätt förbrukar redan lästa tecken, har NBR ett temporärt minne (cache) där det du har läst sparas, så att spolning och liknande åtgärder inte räknas som förnyad förbrukning av tecken. Detta alternativ gör det också möjligt för dig att efter att ha läst boken exportera den till mp3 och därmed få en klassisk ljudbok.
+
+# Bibliotek
+
+Detta fönster visas inte hela tiden; förutom vid första uppstarten öppnas det bara vid behov, och i det organiserar du din samling av elektroniska publikationer. Du lägger till enstaka eller flera böcker, tar bort, markerar böcker som lästa, olästa eller favoriter. Du kan sortera visningsordningen efter flera kriterier, du kan filtrera titlar efter status (läst, oläst...) och du kan även söka.
+
+Vid varje titel i biblioteket kan du genom att enkelt trycka på Tab-tangenten läsa detaljer om den titeln. Titel och författare, utgivare och format, var du slutade, hur stor procentandel av boken du har läst, hur mycket tid du har kvar samt viss annan information. Om möjligt får du även en kort beskrivning av boken.
+
+## Lägga till titlar
+
+I rullistan Arkiv hittar du två alternativ: Öppna fil (Ctrl + O) och Öppna mapp (Ctrl + Shift + O). Om du har aktiverat stöd för optisk enhet i Inställningar hittar du även alternativet Öppna Audio CD. Utöver detta finns det även alternativ för förnyad optisk teckenigenkänning av bildbaserade titlar, alternativ för att skapa en ljudbok samt ett alternativ för översättning. Det finns också ett alternativ som du bör undvika om du inte absolut måste, *Töm biblioteket*. Namnet beskriver vad det gör och efter aktivering får du ytterligare en varning. Om du bekräftar hela vägen kommer ditt bibliotek att raderas, all information om bokmärken och var du slutade läsa raderas, och språk- och hastighetsinställningar för böckerna du har där inne raderas också. Undvik därför detta alternativ om du inte är helt säker på att du vill tömma biblioteket.
+Alternativet Öppna biblioteksmapp öppnar platsen för din samling i Utforskaren.
+
+Med det första alternativet kan du öppna en enskild fil (MP3-bok i en fil, EPUB-dokument eller ncc.html-fil för en Daisy-titel), och genom att öppna en mapp kan du öppna en ljudbok som består av flera filer placerade i en mapp. Dessutom, om du använder öppna mapp, kan du även importera en större mängd olika filer, det vill säga en samling med flera titlar. Nemoviz Book Reader har inbyggda regler för sortering och kommer att göra sitt bästa för att sortera och ordna en sådan mapp så bra som möjligt.
+
+Öppna Audio CD startar uppspelning av boken från din optiska enhet och tar dig tillbaka till spelarfönstret. Att använda en vanlig CD importerar inte boken till biblioteket, det möjliggör bara uppspelning via Nemoviz Book Reader.
+
+Utöver vanliga filer kan NBR, till skillnad från de allra flesta program av denna typ, även öppna komprimerade filer, så kallade arkiv. Bland arkivformaten stöds .zip, .rar och .7z, och förutom arkiv i en del kan även arkiv i flera delar öppnas, liksom lösenordsskyddade arkiv, förutsatt att du känner till lösenordet.
+
+Med andra ord, varifrån och på vilket sätt du än får en bok, i en standardfil eller flera, packad i ett arkiv eller inte, kan du importera den till biblioteket utan några förberedelser och från den plats där den finns. Nemoviz Book Reader kopierar filerna du har öppnat till biblioteksmappen på den avsedda platsen, packar upp arkiven och sparar dem i biblioteket i standardformat samt sparar all viktig information om titlarna du har importerat. Dina ursprungliga filer förblir intakta på de platser där du förvarar dem; allt som händer med böckerna senare sker på NBR-kopiorna i biblioteksmappen.
+
+Alternativet för förnyad OCR används för att upprepa optisk teckenigenkänning av en bildbaserad titel med ett annat språk om du inte är nöjd med resultatet av igenkänningen när boken öppnades.
+
+Alternativet Översätt bok öppnar en dialogruta där du väljer källspråk, språket du vill översätta boken till, tjänsten eller tjänsterna du vill använda samt ett fält där du kan skriva in grundläggande instruktioner om vad och hur som ska översättas.
+
+Alternativet Exportera som ljudbok gör precis vad namnet antyder. Oavsett om du använder någon av de installerade talsynteserna eller molnröster kan du göra om en textbok till en ljudbok och exportera den till önskad plats. Boken exporteras som en .mp3-fil, parametrarna är desamma som för den TTS du använder och ljudkvaliteten kommer att vara densamma som vid live-lyssning. Innan start kommer NBR att be om bekräftelse och berätta hur lång tid skapandet förväntas ta.
+
+## Bokhylla
+
+När du rör dig med pil upp eller pil ned på bokhyllan, vilket är namnet på den del av biblioteksfönstret där listan över dina titlar finns, kommer du att höra titlarna du har i biblioteket. Hur dokumentets titel uttalas beror på flera saker. Vid import försöker NBR extrahera författarnamn, titel och annan information från den så kallade metadata i filen som innehåller boken. Om denna information inte finns kommer NBR att namnge boken efter mappens eller filens namn.
+
+Om du inte gillar någon av dessa visningar kan du i snabbmenyn för boktiteln, eller enklare med F2, namnge den valda boken som du vill. Vid namngivning hittar du två separata fält för författarnamn och titel, och när du har skrivit in dem, bekräfta inmatningen med bekräftelseknappen eller tryck helt enkelt på Enter.
+
+Utöver grundläggande information om boken, såsom författarnamn och titel, kommer du när du rör dig med pilarna i listan även att kunna höra bokens status: *Läser just nu*, *Påbörjad*, *Läst* och *Oläst*. Om du har markerat en titel som favorit kommer du även att höra det. I snabbmenyn, där det tidigare nämnda alternativet för att byta namn finns, kan du även hitta alternativen Markera som läst, Markera som oläst, Markera som favorit, Radera och Egenskaper, men mer om det senare.
+
+När du har stannat på en titel kan du med Tab-tangenten gå till en del där du med upp- och nedåtpilarna kan få en mängd information om boken, med fokus på var du slutade, hur mycket av boken som har lästs och hur mycket som återstår i procent och tid, var boken har getts ut och producerats, tekniska data om ljudspåret, etc. Dessa uppgifter beror på vilket format boken har och kommer att variera från titel till titel.
+
+När du rör dig vidare genom biblioteksfönstret kommer du till ett sökfält som fungerar enligt en enkel princip: det söker efter den teckensträng du skrivit in bland namnen på objekten i bokhyllan. Om du skriver "ana" kommer den garanterat att hitta författare med namnet Ana, men den kommer också att hitta 7000 dagar i Sibirien.
+
+Efter sökfältet finns en kombinationsruta för filter där du kan bestämma vilka böcker som ska visas. Som standard visas alltid alla böcker, men du kan ändra filtret till Läser, Oläst, Läst och Favorit, och vyn i bokhyllan anpassas efter ditt val.
+
+## Sortering
+
+I den här menyn finns bara de vanliga sakerna som du säkert har sett hur många gånger som helst. Du kan välja i vilken ordning titlarna i biblioteket visas, så vi har alfabetiskt, efter tilläggsdatum, efter format och efter status. Status betyder oläst, läst, etc. Varje val kan dessutom visas i stigande eller fallande ordning.
+
+När du har bekantat dig med innehållet och funktionerna i biblioteksfönstret är det dags att välja en bok i bokhyllan och navigera med Tab till knappen Läs in, eller helt enkelt trycka på Enter medan du fortfarande har fokus på titeln. Boken du har valt att läsa kommer alltid att ligga ovanför bokhyllan i en separat sektion som heter Läser just nu. Det bör noteras att boken du läser, det vill säga den aktiva boken som är inläst i spelaren, inte kan raderas på samma sätt som andra böcker i hyllan. Du måste markera den aktiva boken som läst via snabbmenyn för att den ska flyttas från läget Läser just nu till läget Läst, och först då kan du radera den.
+
+I huvudsak, när du trycker på Enter på en boktitel eller på knappen Läs in, stängs biblioteket och du återgår till spelarens huvudfönster.
+
+# Spelare
+
+Detta fönster är alltid synligt på din datorskärm; ibland döljs det av biblioteksfönstret, ibland av ytan för textläsning, men det är i själva verket huvudfönstret där du hanterar boken efter att den har lästs in. Du kan navigera i spelarfönstret med Tab precis som i alla andra fönster och aktivera vissa objekt med Enter, men till skillnad från andra fönster i själva applikationen, och i andra applikationer, är pil- och mellanslagstangenterna reserverade för andra funktioner. Så om du med Tab kommer till exempelvis knappen för bokmärken, kommer du inte att kunna aktivera den med mellanslag; du måste uteslutande använda Enter-tangenten.
+
+I Tab-ordningen, inte nödvändigtvis i denna ordning, finns följande knappar och funktioner i spelarens huvudfönster:
+
+| Spela upp/Paus | mellanslag |
+| Framåt | Shift + höger |
+| Bakåt | Shift + vänster |
+| Volym | F11 och F12 |
+| Hastighet | Ctrl + vänster och Ctrl + höger |
+| Uppspelningsförlopp | vänster- och högerpil |
+| Navigeringssteg | Shift + upp- och nedpil |
+| Bibliotek | F3 |
+| Inställningar | F2 |
+| Egenskaper | Alt + Enter |
+| Markera | F5 |
+| Bokmärken | F6 |
+| Gå till… | F4 |
+| Hjälp | F1 |
+| Räknare | F7 |
+| Informationsfält | F8 |
+
+I informationsfältet kan du få grundläggande information om uppspelningen, såsom författare, titel, förfluten tid, sida och en del annat, naturligtvis beroende på formatet på boken du läser. Med ett tryck på F8 läses innehållet på informationsskärmen bara upp, och med ett dubbeltryck hamnar det i skärmläsarens fokus, så att du med pilarna kan läsa mer detaljerat vad som står där.
+Med F10-tangenten kan du ta reda på den förflutna tiden för titeln du läser, och med ett snabbt dubbeltryck på F10 hör du återstående tid.
+
+Alla knappar har sina egna kortkommandon så att du enkelt kan nå dem utan att behöva navigera för mycket i fönstret, och själva hanteringen av boken du läser är mer än enkel.
+
+## Uppspelning
+
+- Med mellanslag startar eller stoppar du uppspelningen.
+- Med vänster- eller högerpil "spolar" du fem sekunder eller, om det rör sig om en textbok, en mening framåt eller bakåt.
+- Med tangentkombinationen Ctrl + vänster- eller högerpil reglerar du uppspelningshastigheten.
+- Med tangenterna F11 och F12 ställer du in volymen; F12 höjer och F11 sänker.
+- Med tangentkombinationen Shift + upp- eller nedpil väljer du navigeringssteg (titel, kapitel, textkort, specifika minuter); valet ändras beroende på bokens format och struktur.
+- Med tangentkombinationen Shift + vänster- eller högerpil rör du dig med det valda navigeringssteget.
+
+Kort sagt, du startar uppspelningen av den valda boken med mellanslag, och genom att hålla ned Ctrl-tangenten och använda vänster- och högerpil reglerar du läshastigheten.
+
+Om du vill spola framåt eller bakåt en kort stund kan du använda vänster eller höger piltangent för att hoppa fem sekunder eller en mening i taget. Om du vill göra större navigeringssteg, tryck på Shift, välj önskat steg med upp- och nedpilarna och fortsätt sedan hålla in Shift medan du använder vänster och höger piltangent för att navigera framåt och bakåt i boken med det valda steget. När du vill höra hur och vart du navigerar i boken kan du när som helst trycka på F8, så läser skärmläsaren upp hela innehållet i informationsfönstret. Om du vill läsa informationsfältet mer detaljerat, post för post, tryck snabbt på F8 två gånger. När du är klar lämnar du informationsfältet genom att trycka på F8 två gånger igen eller helt enkelt trycka på Escape så att piltangenterna återfår sin navigeringsfunktion. Om du vill höra förfluten eller återstående tid, tryck på F10 en eller två gånger.
+
+Tanken bakom detta navigeringssätt var att användaren inte ska behöva lära sig och komma ihåg en hel rad kortkommandon. Större delen av navigeringen är placerad på piltangenterna, och i kombination med modifieringstangenterna Shift och Ctrl slipper du flytta handen över hela tangentbordet. Placera höger hand på piltangenterna och använd vänster hand för att trycka på en av modifieringstangenterna vid behov – det är hela filosofin bakom navigeringen. De mer skickliga och händiga kan säkert använda höger tumme för att trycka på Ctrl eller Shift på höger sida av tangentbordet, men användningssättet är upp till var och en. Alla andra kortkommandon, med undantag för Alt + Enter för Egenskaper eftersom det är en vanlig Windows-konvention, är placerade på funktionstangenterna för att göra hanteringen så enkel som möjligt.
+
+## Gå till...
+
+Denna kontroll, som namnet antyder, används för att hoppa till en viss del av boken med bara några få tryck eller klick. För ostrukturerade format som vanlig text, de flesta ljudformat i en enda fil eller dåligt formaterade strukturerade böcker kan den inte aktiveras, vilket bekräftas av en ljudsignal. För böcker med en någorlunda bra struktur kan du hoppa till kapitel, underkapitel och andra strukturella delar av boken. Naturligtvis beror allt på hur tillverkarna har lagt upp strukturen i själva boken. Utöver detta har dialogrutan även en särskild grupp för att hoppa till en sida, om boken har sådana. Efter öppning visas först en lista över de tidigare nämnda delarna; med ett tryck på Tab kommer du till sidhopp, om sådana finns. I fältet som visas står sidnumret du befinner dig på redan inskrivet. Skriv in önskat sidnummer och tryck på Enter för att hoppa.
+
+## Bokmärken
+
+Två knappar som kommer i par – Markera för att placera ett bokmärke och Bokmärken där du kan hantera dina sparade bokmärken. När du placerar ett bokmärke hör du en kort ljudsignal så att du är säker på att det har sparats. I bokmärkshanteringen kan du navigera mellan dem med piltangenterna och hoppa till bokmärkets position genom att trycka på Enter. Dessutom kan du radera de du inte behöver. För ljudböcker visas än så länge bara tiden, och för textböcker även början på meningen där du placerade bokmärket. Om du inte har några bokmärken kan knappen Bokmärken inte aktiveras, vilket även indikeras av en ljudsignal.
+
+## Timer
+
+En klassisk insomningstimer, inget märkvärdigt. Du väljer tid; 15, 30, 45 och 60 minuter erbjuds som alternativ. Nästa alternativ är valfri tid, där 90 minuter är förvalt, men du kan ändra detta till vilket värde du vill. Därefter följer ett val för vad som ska hända när nedräkningen är slut, där alternativen är: Stoppa uppspelning, Stoppa och stäng programmet samt Stoppa och stäng av datorn.
+
+Dessutom finns en kryssruta som frågar om du vill placera ett bokmärke vid nedräkningens början. Det kan vara användbart för att återvända till tiden innan du somnade och därifrån lättare hitta stället där du slutade läsa.
+
+Nedräkningen startar genom att trycka på knappen *Starta*, dialogrutan stängs och istället för namnet Timer syns en aktiv klocka i spelarfönstret. Om du aktiverar alternativet Timer igen avbryts nedräkningen och du kan välja en ny tid i dialogrutan eller avbryta allt med den avsedda knappen.
+
+Uppspelningen stoppas av två dialogrutor: Bokmärken och Timer. När du har gjort vad du ville i dem och bekräftat genom att återgå till spelarfönstret, fortsätter uppspelningen. Inställningar, Bibliotek, Gå till och Egenskaper låter boken spela vidare — vid Egenskaper är detta avsiktligt, eftersom du där justerar saker du vill höra medan du gör det.
+
+Några ord även om kontrollerna för hastighet och volym. Volymen styrs med tangenterna F11 och F12 — F12 höjer, F11 sänker — i steg om 5%, och när du når slutet hör du en ljudsignal. Hastigheten ändras i steg om 0,1x, från 0,5x till 3x, och det gäller likadant för ljudböcker och textböcker. Skillnaden är bara att 1x för en ljudbok betyder inspelningens hastighet, och för en textbok den hastighet som den valda rösten talar med som standard. Du hör en ljudsignal när du passerar normal hastighet, eller för text när du passerar den hastighet som är förinställd för den rösten.
+
+Det viktigaste för dig som användare är att Nemoviz Book Reader kommer ihåg precis allt som rör uppspelningen av de böcker du lyssnar på. Den kommer ihåg position, volym, hastighet för ljudböcker samt typ, hastighet, språk och tonhöjd för TTS för textböcker. Den kommer även ihåg ljudbehandlingsparametrar för ljudböcker samt inställningar för punktskrift och visuell visning för textböcker. Med andra ord sparas allt du har ställt in enligt dina önskemål och behov för varje bok för sig.
+
+# Egenskaper
+
+Som nämnts flera gånger tidigare bestäms inställningar och parametrar för varje bok i bokens egenskaper. Ljudböcker har sina egenskaper, textböcker sina, och specialböcker som Daisy audio + text har båda, på två separata flikar i egenskapsfönstret. Du öppnar egenskaper från spelarfönstret med knappen Egenskaper eller kortkommandot Alt + Enter, från biblioteksfönstret när du står på en boktitel via snabbmenyn, eller även där med kortkommandot Alt + Enter.
+
+## Ljudegenskaper
+
+När du öppnar Ljudegenskaper kommer du först att märka kryssrutan Ljudbehandling. Du behöver inte aktivera den om ljudet i boken du lyssnar på är acceptabelt, men om det inte är det kan du genom att aktivera Ljudbehandling kanske få ljudet till en lyssningsbar nivå. Genom att markera kryssrutan påbörjas analysen av bokens ljudspår, vilket beroende på datorns hastighet kan ta mellan trettio sekunder och några minuter. Via förloppsindikatorn ser du hela tiden status och hur mycket som återstår. När analysen är klar kommer NBR att ställa in nedanstående filter till ett optimalt läge. Om ljudet passar dig bekräftar du bara med OK; om du tycker att det kan finnas mer att justera, följer här en kort beskrivning av vad som kan göras.
+
+Det finns sju filter som kan hjälpa dig att förbättra ljudet i ljudböcker med gamla och/eller dåliga inspelningar. Varje kontroll kan aktiveras eller inaktiveras separat så att du inte behöver använda alla samtidigt. När du aktiverar Ljudbehandling hittar du först knappen Återställ, som återställer alla filter till standardinställningarna. Därefter följer kryssrutan Förbikoppla, genom att aktivera och inaktivera den hör du omedelbart skillnaden mellan originalet och dina inställningar. Kortkommandot för förbikoppling är Ctrl + B så att du inte behöver gå fram och tillbaka mellan kontrollerna och förbikopplingen.
+
+Först i raden är *Ta bort muller*, så kallat Hi Pass. Det tar bort brus i det låga spektrumet, från elektriska apparater till oavsiktliga stötar mot mikrofonen eller bordet. Därefter följer *Brusreducering*, avsett för bandbrus, dåliga mikrofoner och liknande brus i ett något högre frekvensspektrum. *Dämpa väsande* minskar skarpa ljud från bokstäver som C, S, Š och liknande som förvrängts på inspelningen på grund av för nära mikrofonplacering eller framhävda höga toner. *Utjämna tal* försöker jämna ut tystare och högre delar av inspelningen. Sedan finns *Ton*, en fembandsutjämnare; banden är markerade med sina frekvenser — 200, 800, 1.8k, 3.5k och 5k+ — där det sista är en hylla, vilket innebär att den höjer eller sänker allt ovanför sig, inte bara ett område. Slutligen finns gruppen *Volym och pauser* med två kontroller: *Automatisk volym* (normalisering) höjer den totala inspelningen till maximal nivå utan distorsion, och *Brus i pauser* (gate) tar bort kvarvarande brus i mellanrummen mellan meningar.
+
+Varje filter har fem nivåer av verkan: minimal, svag, medel, stark och maximal. Det bör också upprepas att varje filter kan aktiveras eller inaktiveras individuellt.
+
+Ljudbehandling sparas också för varje bok för sig.
+
+Det är viktigt att notera att denna ljudbehandling inte kommer att göra underverk, och du kommer inte att få ett kristallklart tal från en dålig inspelning från sextiotalet som om den vore inspelad i Abbey Road-studiorna i London, men förhoppningsvis hjälper det dig att ta dig igenom boken utan att bli galen av den dåliga kvaliteten.
+
+## Textegenskaper
+
+På samma sätt som i talinställningarna har du här val av språk, röst, hastighet, volym och tonhöjd för den valda boken. I Inställningar väljer du standard för allt, här ställer du in för en specifik titel. Om du undrar varför, är det enklaste exemplet om din standardröst i inställningarna är manlig, men du vill läsa en roman skriven ur ett kvinnligt perspektiv med en kvinnlig röst; då ändrar du det i textegenskaperna specifikt för den boken. Alla andra böcker på det språket kommer fortfarande att öppnas med den manliga rösten som standard tills du ändrar det. Du kan också läsa lättare litteratur utan problem i 1,5x hastighet, men svårare material som kräver eftertanke kanske du föredrar att sänka till 1x eller långsammare.
+
+Här finns ingen uttalsordbok, följt av inställningar för punktskrift och visuella inställningar. Om du aktiverar visuell visning får du välja hur texten ska visas på din skärm. Om du bara vill läsa med punktskrift eller visuellt utan tal, välj det alternativet i röstlistan. I denna betaversion är punktskrifts- och visuell utmatning gråmarkerade och har en notering om att de inte är aktiverade.
+
+Nemoviz Book Reader har ingen utmatningstabell för punktskrift och kommer inte heller att ha det. Det som visas på punktskriftsraden översätts av skärmläsaren med hjälp av tabellen i dess egna inställningar, och det är den enda korrekta platsen för det valet — två tabeller för samma rad skulle bara kunna leda till konflikter. Den enda punktskriftstabellen i Nemoviz Book Reader är *indatatabellen*: den som används för att läsa in .brf-filer vid import, och den ändrar du i gruppen Punktskriftskälla, som endast visas för böcker som kommer från en sådan fil. Den gruppen fungerar även i denna beta.
+
+## Inställningar för visuell presentation {beta}
+
+Beroende på valet i Inställningar eller Egenskaper kommer du på skärmen att se en mindre ram ovanpå spelarens yta där texten ändras likt undertexter i utländska filmer eller serier. Om du väljer ett av de andra två alternativen blir ramen större och texten rullar över skärmen likt eftertexter eller ändras ram för ram. I dessa två vyer visas den upplästa raden i en annan färg.
+
+Längst ner i ramen kan du ändra typsnitt, storlek och vissa andra visningsparametrar, och du har även grundläggande knappar för att styra uppspelningen. Alla kortkommandon fungerar även i denna ram.
+
+Om du har valt att använda punktskrift visas den lilla ramen som beskrevs först, eftersom punktskrift inte kan fungera utan att texten visas och skickas till skärmläsaren. Om du bara väljer visuell presentation har du ett val av visningstyp. I båda fallen visas presentationen när uppspelningen startar. Om du inte har valt något av dessa alternativ och bara vill lyssna, men är nyfiken på hur detta ser ut, kan du alltid slå på och av visningen från spelarfönstret med F9.
+
+Det var ungefär allt när det gäller hjälpdokumentet. Mer detaljerade förklaringar hittar du vid kontrollerna där det behövs, via den lilla knappen med ett frågetecken eller F1 i den fokuserade gruppen. Tack för att du har haft tålamod och läst till slutet av texten. Som ett litet tecken på uppskattning har du nu möjlighet att läsa om två dolda funktioner.
+
+# För de mest uthålliga
+
+Den första funktionen är ett alternativt sätt att lägga till en eller flera titlar i biblioteket. Istället för att använda de beskrivna dialogrutorna Öppna fil och Öppna mapp, kopierar du helt enkelt önskat innehåll till biblioteksmappen via Windows eller File Explorer. Vid nästa start kommer Nemoviz Book Reader att uppdatera biblioteket och visa de nya titlarna. Om programmet redan körs, tryck bara på knappen Uppdatera i biblioteksfönstret.
+
+Den andra dolda funktionen är navigeringsrelaterad. Utöver allt som beskrivits ovan kan du navigera i boken du läser med kortkommandona Ctrl + 1 till Ctrl + 9, vilka placerar dig på 10, 20 och upp till 90 % av boken.

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nemoviz Book Reader</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: Georgia, "Times New Roman", serif; font-size: 1.1em;
+         line-height: 1.6; max-width: 42em; margin: 2em auto; padding: 0 1.5em; }
+  h1 { font-size: 1.5em; margin-top: 2em; }
+  h2 { font-size: 1.2em; margin-top: 1.6em; }
+  p, li { margin: 0.8em 0; }
+  nav ul { list-style: none; padding-left: 1em; }
+  nav > ul { padding-left: 0; }
+  nav li { margin: 0.3em 0; }
+  table.keys { border-collapse: collapse; margin: 1em 0; }
+  table.keys th, table.keys td { text-align: left; vertical-align: top;
+         padding: 0.3em 1.2em 0.3em 0; font-weight: normal; }
+  table.keys th { white-space: nowrap; font-family: inherit; }
+  .beta { border-left: 4px solid currentColor; padding-left: 0.8em;
+          font-style: italic; opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<h1>Nemoviz Book Reader</h1>
+
+<nav aria-label="Kazalo">
+<h2>Kazalo</h2>
+<ul>
+<li><a href="#s1">Sistemske zahteve</a><ul>
+<li><a href="#s2">Minimalne zahteve</a></li>
+<li><a href="#s3">Optimalne zahteve</a></li>
+</ul></li>
+<li><a href="#s4">Splošno</a></li>
+<li><a href="#s5">Prvi zagon</a></li>
+<li><a href="#s6">Nastavitve</a><ul>
+<li><a href="#s7">Splošno</a></li>
+<li><a href="#s8">Govor in brajica</a></li>
+<li><a href="#s9">Naprave</a></li>
+<li><a href="#s10">Napredno</a></li>
+</ul></li>
+<li><a href="#s11">Knjižnica</a><ul>
+<li><a href="#s12">Dodajanje naslovov</a></li>
+<li><a href="#s13">Polica za knjige</a></li>
+<li><a href="#s14">Razvrščanje</a></li>
+</ul></li>
+<li><a href="#s15">Predvajalnik</a><ul>
+<li><a href="#s16">Predvajanje</a></li>
+<li><a href="#s17">Pojdi na...</a></li>
+<li><a href="#s18">Zaznamki</a></li>
+<li><a href="#s19">Časovnik</a></li>
+</ul></li>
+<li><a href="#s20">Lastnosti</a><ul>
+<li><a href="#s21">Lastnosti zvoka</a></li>
+<li><a href="#s22">Lastnosti besedila</a></li>
+<li><a href="#s23">Nastavitve vizualnega prikaza</a></li>
+</ul></li>
+<li><a href="#s24">Za najbolj vztrajne</a></li>
+</ul>
+</nav>
+
+<p>Dobrodošli v Nemoviz Book Reader, predvajalnik elektronskih knjig v več kot petinštiridesetih formatih in na treh izhodih.</p>
+<h1 id="s1">Sistemske zahteve</h1>
+<h2 id="s2">Minimalne zahteve</h2>
+<ul>
+<li>CPU dual core 1,5 GHz, 2 GB RAM-a, 100 MB za shranjevanje + prostor za knjižnico,</li>
+<li>MS Windows 7 SP1 64-bit ali novejši, .NET Framework 4.8 (v sistemu Windows 7 ga je treba namestiti ločeno). Na tej konfiguraciji žal ne boste mogli uporabljati OCR in One Core glasov, oboje je na voljo šele od Windows 10.</li>
+</ul>
+<h2 id="s3">Optimalne zahteve</h2>
+<ul>
+<li>CPU quad core 2,0 GHz, 8 GB RAM-a, 100 MB prostora na SSD-ju + prostor za knjižnico,</li>
+<li>MS Windows 10 64-bit 22H2 ali novejši, .NET Framework 4.8 je vgrajen.</li>
+</ul>
+<h1 id="s4">Splošno</h1>
+<p>Nemoviz Book Reader vam omogoča branje zvočnih in besedilnih elektronskih dokumentov na način, ki vam najbolj ustreza. Podprti formati, ki jih lahko predvajate, so:</p>
+<p>Zvočni formati: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au in .voc.</p>
+<p>Besedilni formati: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw in .azw3.</p>
+<p>Posebni formati: Daisy 2.02 audio, Daisy 3 audio, Daisy 2.02 text, Daisy 3 text, Daisy 2.02 audio + text, Daisy 3 audio + text in epub 3 text + audio.</p>
+<p>Brajevi formati: .brf, .brl, .bra, .dxb in .i55.</p>
+<p>Vse navedene formate lahko neposredno odprete tudi iz arhivov .7z, .rar in .zip. Podpiramo odpiranje večdelnih arhivov kot tudi arhivov, zaščitenih z geslom, seveda, če ga poznate.</p>
+<p>Mogoče je odpirati tudi slikovne formate – tiste formate, v katerih so slike besedila in ne pravo besedilo, kot je skeniran .pdf ali .epub s slikami strani. Prav tako je mogoče odpirati standardne slike, kot so .bmp, .jpg, .tif itd., zato če imate slučajno knjigo s takšnimi, urejeno oštevilčenimi slikami, lahko tudi to odprete skozi Nemoviz Book Reader. Besedilo s slik bo samodejno prepoznano skozi Microsoft OCR in v kratkem času boste dobili razumno čitljiv naslov na vaši knjižni polici.</p>
+<p>Opozorilo! Vsi navedeni formati in njihove različice se lahko naložijo v Nemoviz Book Reader, če niso zaščiteni z licenco Digital Rights Management. NBR ne more odpreti DRM Protected naslovov, zato če imate takšne, jih lahko predvajate skozi za to predviden strojni ali programski predvajalnik. Za več podrobnosti se obrnite na tistega, od katerega ste pridobili te naslove.</p>
+<p>Vse datotečne oblike s zgornjega seznama lahko predvajate zvočno, vizualno in celo berete v brajici, če imate za to potrebno opremo. Vse, kar potrebujete, je z Windows združljiv računalnik, monitor in po možnosti nameščena brajeva vrstica, konfigurirana z vašim bralnikom zaslona.</p>
+<p>Poleg vsega doslej navedenega vam NBR omogoča tudi strojno prevajanje knjig z uporabo različnih AI LLM servisov. Nekateri imajo brezplačne kvote, nekatere je treba plačati, vendar je to način, kako ti servisi delujejo. Nemoviz Book Reader za Windows je v celoti brezplačen za uporabo, vendar zunanji servisi niso v naši pristojnosti. Mi vas skozi aplikacijo povežemo z zunanjimi servisi in vam damo možnost, da se proces prevajanja besedila opravi skozi predvajalnik, vendar je registracija na servise, nastavitev načina plačila in vse ostalo na vas. Ko vse to opravite, morate na straneh servisov, ki jih uporabljate, pridobiti API ključ, ga prilepiti v nastavitve predvajalnika na za to predvideno mesto in mi potem prevzamemo od tam.</p>
+<p>Nemoviz Book Reader je testiran in preverjeno združljiv z bralnikoma zaslona Jaws for Windows in NVDA, vendar bi moral delovati brez kakršnih koli težav tudi z drugimi. Dostopnost je temelj, na katerem je ta aplikacija zgrajena, zato ne bi smelo biti težav, če uporabljate kakšen drug bralnik.</p>
+<p>Vse tipkovniške bližnjice so vgrajene v samo aplikacijo in se lahko uporabljajo tudi brez prisotnosti bralnika zaslona. Bralnik zaslona je tu le zato, da poda povratno informacijo o tem, kaj se trenutno dogaja v samem predvajalniku in da, če uporabljate brajico, prenaša besedilno vsebino na brajevo vrstico. Za vse ostalo lahko predvajalnik uporabljate tudi brez bralnika zaslona.</p>
+<p>Pri uvozu brajevih formatov, navedenih na zgornjem seznamu, je pomembno vedeti, da NBR uporablja tehnologijo LibLouis s pripadajočimi tabelami. Ne moremo jamčiti, da bo vse delovalo, kot mora, prav za vsak jezik, ne moremo delati popravkov tabel za vsako knjigo posebej, veliko je odvisno od izdelave in produkcije samih knjig. Če rezultat, ki ga dobite z uvozom v knjižnico, ni dober, lahko v lastnostih knjige spremenite brajevo tabelo, če jih je za ta jezik na voljo več. Če uspe, odlično, če ne uspe, nam je žal. Ni vse odvisno od predvajalnika, nekaj odgovornosti je tudi na proizvajalcih knjig in avtorjih brajevih tabel.</p>
+<h1 id="s5">Prvi zagon</h1>
+<p>Pri prvem zagonu bo Nemoviz Book Reader preveril, ali želite obdržati ali spremeniti pot do mape za vašo prihodnjo knjižnico. Imejte v mislih, da je privzeta lokacija znotraj uporabniške mape Windows, ki se običajno nahaja na particiji C in se lahko sčasoma precej napolni ter zasede prostor na sistemskem disku. Če jo preusmerite na drugo particijo ali disk, se ne bo nič bistvenega spremenilo, vi pa boste bolj varni, da sistemu ne bo zmanjkalo nujno potrebnega prostora za delovanje. Prav tako s hrambo knjižnice na drugem disku ali particiji zagotovite, da v primeru sesutja sistema vaša zbirka knjig ostane na varnem.</p>
+<p>Nato se odpre eno od dveh oken aplikacije, in sicer okno knjižnice, ki se odpre zdaj, ob zagonu po namestitvi in vsakič, ko ni naložene knjige ali je knjižnica prazna. Tokrat ga lahko zapremo, saj bi bilo dobro po namestitvi najprej pregledati nastavitve in tam urediti, kar je treba.</p>
+<h1 id="s6">Nastavitve</h1>
+<p>To okno je sestavljeno iz več zavihkov, spodaj boste našli pregled vsakega od njih. Kar ga morda razlikuje od drugih oken z nastavitvami, je to, da imate ob večini možnosti, ki jih tam lahko nastavite, majhen gumb za pomoč, ki odpre dodatno pogovorno okno z opisom te funkcije. Pomoč dobite na vsakem koraku, dokument, ki ga pravkar berete, pa ne potrebuje 250 strani.</p>
+<h2 id="s7">Splošno</h2>
+<p>Prva postavka, ki jo tukaj nastavljamo, je jezik. Če ima aplikacija jezik, v katerem je vaš sistem, bo jezik že izbran in vmesnik bo v tem jeziku. Če ga nima, se bo NBR prikazal v angleščini. Če vam tudi to ni všeč, odprite seznam jezikov in izberite drug jezik.</p>
+<p>Druga možnost je izbira lokacije knjižnice. To smo že obdelali po prvem zagonu. Če se takrat še niste odločili, je zdaj idealna priložnost.</p>
+<p>Sledita dva potrditvena polja za vklop ali izklop multimedijskih funkcij na tipkovnici, če jih imate. Veljajo tudi za tipke na slušalkah. Prva postavka je vklop ali izklop, druga postavka pa, ali naj delujejo globalno ali samo, ko je NBR v fokusu.</p>
+<p>Nato potrditveno polje, s katerim izberete, ali se bodo v knjižnici uporabljali metapodatki iz datotek ali pa se bodo imena avtorjev in izdaj prikazala iz imena mape ali datoteke.</p>
+<p>Sledi potrditveno polje <strong>Samodejno preveri, ali obstaja novejša različica</strong>. Ko je vklopljeno, NBR enkrat dnevno vpraša, ali je objavljena novejša izdaja, in vas obvesti le, če je; o vas in vaših knjigah ne pošilja ničesar. Če ga izklopite, NBR sam od sebe ne bo dostopal do omrežja, preverjanje pa lahko še vedno zahtevate, kadar koli želite — v knjižnici, v meniju Pomoč, s postavko <strong>Preveri, ali obstaja novejša različica</strong>.</p>
+<p>In na koncu izbira videza, v katerem se vam bo prikazoval Nemoviz Book Reader. Ponujeni sta dve možnosti. <strong>Sistemske barve</strong> vam dajo predvajalnik v klasičnem videzu in barvni paleti, ki jo uporabljate v sistemu; to je hkrati tudi tisto, kar boste dobili, če imate vklopljen visok kontrast, saj NBR takrat ne riše ničesar svojega, ampak pusti, da se prikaže vaša shema. <strong>NBR dizajn</strong> nudi prikaz predvajalnika v nekoliko modernejši izdaji. Če niste izbirali, se NBR odloči sam: visok kontrast dobi Sistemske barve, vse ostalo NBR dizajn.</p>
+<h2 id="s8">Govor in brajica</h2>
+<p>Prva možnost je niz kontrol za izbiro jezika in glasu za besedilne knjige. Izberemo jezik in nato glas za ta jezik. Nastavimo glasnost, hitrost in višino ter potrdimo z gumbom Uporabi. Izberemo še kakšen jezik, glas in druge parametre ter ponovno pritisnemo Uporabi. Na ta način izberemo privzeti glas za določen jezik in vsaka nova knjiga, ki se odpre, ob določitvi jezika, v katerem je napisana, privzeto dobi glas, ki smo ga izbrali.</p>
+<p>Morda nekoliko skrita možnost, a nismo imeli boljše ideje. V kombiniranem polju za izbiro glasu je zadnja možnost <strong>Dodaj nove jezike</strong>. Z aktiviranjem te možnosti se bo odprlo okno, v katerem lahko izberete enega ali več glasov Microsoft One Core in jih po potrditvi namestite prek storitve Windows Update. Lahko, tako kot v primeru dodajanja jezika za OCR, traja dlje ali krajše, odvisno od zasedenosti strežnikov za posodobitve. Možno je, da boste, odvisno od svojih skrbniških nastavitev, dobili tudi pogovorno okno UAC, ki ga morate potrditi.</p>
+<p>Seveda se lahko vsi navedeni parametri nastavijo drugače, in sicer za vsako knjigo posebej, vendar se to dela v lastnostih te knjige, tukaj nastavljamo splošne parametre.</p>
+<p>Naslednja možnost je Slovar izgovorjave, kakršnega ste zagotovo že videli. Imate možnost popravka izgovorjave globalno, po jeziku in po glasu, za vse tri izbire pa boste našli standardne možnosti za to vrsto slovarja.</p>
+<p>Sledijo potrditvena polja za vklop in izklop brajičnega in vizualnega prikaza, vsako od njih, ko je vklopljeno, ponuja določene dodatne nastavitve, za katere boste pomoč našli na licu mesta. V tej različici {beta} sta ti dve polji zasivljeni in vsebujeta opombo, da nista vključeni; vrneta se v eni od naslednjih izdaj.</p>
+<h2 id="s9">Naprave</h2>
+<p>Ovdje izbirate zvočno kartico, preko katere želite poslušati knjige. Če imate samo eno, vam ni treba ničesar spreminjati, saj izbire niti ni. V nadaljevanju je tudi potrditveno polje za preprečevanje preklopa zvočne kartice v stanje pripravljenosti. Če pri predvajanju knjig, zlasti pri besedilnih formatih, opazite zatikanje, kot da bi pri stavkih ali odstavkih manjkala prva beseda ali dve, obvezno vključite to možnost.</p>
+<p>Če imate v svojem računalniku še vedno optični pogon in morda zbirko starejših zvočnih izdaj v klasičnem CD audio formatu, lahko vključite možnost Uporabi optični pogon. S tem aktivirate podporo za napravo in lahko začnete poslušati knjige na CD-jih.</p>
+<h2 id="s10">Napredno</h2>
+<p>Na tem zavihku izbirate jezik ali več jezikov, ki se bodo uporabljali za prepoznavanje slikovnih dokumentov pri uvozu. Nemoviz Book Reader uporablja vgrajeno orodje Microsoft OCR, ki je na voljo v operacijskih sistemih Windows 10 in 11. Trenutno podpira petintrideset jezikov, katerih seznam lahko vidite, če pritisnete gumb <strong>Dodaj jezik</strong>. Ko izberete želene jezike in pritisnete Namesti, se jeziki ne bodo namestili takoj. NBR jih ne namesti neposredno, temveč se namestijo prek storitve Windows Update, zato lahko traja nekaj časa, preden pridejo na vrsto za namestitev. Prav tako se lahko glede na nastavitve vašega sistema prikaže pogovorno okno Nadzor uporabniškega računa, v katerem boste morali potrditi namestitev jezika ali več jezikov.</p>
+<p>Po namestitvi boste pri uvozu slikovnega formata v kombiniranem polju lahko izbrali jezik, s katerim želite prepoznati besedilo v naslovu, ki ga odpirate. To lahko traja nekaj časa, odvisno od hitrosti stroja in velikosti knjige, vendar lahko vse spremljate v vrstici napredka.</p>
+<p>Poleg nastavitev za optično prepoznavanje lahko tukaj izbirate tudi LLM storitve za prevajanje. V trenutku pisanja tega besedila so na voljo Google Gemini, DeepSeek, DeepSeek z večjim modelom, tri ravni OpenAI GPT in Microsoft Azure. Kot smo zapisali prej, za te storitve potrebujete API ključe ali druge vrste avtorizacije; več o tem lahko preberete v meniju Pomoč pod postavko Storitve in računi.</p>
+<p>Na gumbu Pravila prevajanja se bo odprlo okno z navodili, ki se pošljejo modelom za prevajanje, da bi bil prevod čim bolj kakovosten. Obstaja nabor navodil, ki se nanaša na vse jezike, ter nabori navodil za posamezne podprte jezike. V tem oknu lahko urejate obstoječa in dodajate navodila za nove jezike. Pri urejanju datotek s pravili se bo odprl Beležnica, na vrhu besedila pa je razloženo vse glede urejanja in dodajanja pravil.</p>
+<p>Poleg možnosti prevajanja so na voljo še dodatni Cloud glasovi; trenutno podpiramo Google Cloud Chirp 3 in Microsoft Azure Neural glasove. Postopek za omogočanje teh glasov je podoben kot pri storitvah za prevajanje, več o tem pa je prav tako v meniju Pomoč pod postavko Storitve in računi.</p>
+<p>Opozarjamo, da so ti glasovi plačljivi; Google brezplačno nudi milijon znakov za branje, kar sta približno dve povprečni knjigi s 500 stranmi. Microsoft nudi polovico manj, 500.000 znakov, kar je približno ena povprečna knjiga. Po porabljeni brezplačni kvoti znakov se bremeni vaša kreditna kartica, strošek branja pa je nekje med 8,00 $ in 15,00 $ na povprečno knjigo, odvisno od storitve.</p>
+<p>Da ne bi prišlo do nesporazumov in nenamerne neželene porabe, smo omejili nastavljanje cloud glasov. V nastavitvah govora in brajice teh glasov ne boste videli in jih ne boste mogli nastaviti kot privzete; vidni so samo v lastnostih izbrane knjige, vendar jih morate predhodno omogočiti v naprednih nastavitvah. V lastnostih knjige lahko izberete enega od teh glasov kot privzetega za določeno knjigo, kar velja samo za to knjigo.</p>
+<p>Ker se znaki pri uporabi cloud glasov porabljajo tudi, ko previjate, ponavljate določen del knjige ali na drug način porabljate že prebrane znake, ima NBR omogočen predpomnilnik (cache), kjer se shrani tisto, kar ste prebrali, tako da se previjanje in podobna dejanja ne bodo štela kot ponovna poraba znakov. Ta možnost vam bo prav tako omogočila, da lahko po branju knjige naredite izvoz v mp3 in s tem dobite klasično zvočno knjigo.</p>
+<h1 id="s11">Knjižnica</h1>
+<p>To okno ni stalno vidno; razen ob prvem zagonu se odpre le po potrebi in v njem organizirate svojo zbirko elektronskih publikacij. Dodajate posamično ali skupinsko, brišete, označujete knjige kot prebrane, neprebrane ali priljubljene. Razvrščate lahko vrstni red prikaza po več kriterijih, filtrirate naslove po statusu (prebrano, neprebrano...) in tudi iščete.</p>
+<p>Ob vsakem naslovu v knjižnici lahko s preprostim pritiskom na tipko Tab preberete tudi podrobnosti o tem naslovu. Naslov in avtorja, založnika in format, kje ste končali, kolikšen odstotek knjige ste prebrali, koliko časa vam je še ostalo ter še nekatere druge informacije. Če je mogoče, boste dobili tudi kratek opis knjige.</p>
+<h2 id="s12">Dodajanje naslovov</h2>
+<p>V spustnem meniju Datoteka lahko najdete dve postavki: Odpri datoteko (Ctrl + O) in Odpri mapo (Ctrl + Shift + O). Če ste v Nastavitvah vključili podporo za optični pogon, boste našli tudi možnost Odpri Audio CD. Poleg tega sta tu še možnost za ponovno optično prepoznavanje slikovnega naslova, možnost za ustvarjanje zvočne knjige ter možnost za prevajanje. Tu je tudi postavka, ki se je ne dotikajte, če res ni treba, <strong>Izprazni knjižnico</strong>. Že sama po sebi pove, kaj počne, in po aktiviranju boste prejeli še eno opozorilo. Če potrdite vse do konca, je vaša knjižnica izbrisana, vsi podatki o knjižnih zaznamkih in kje ste ostali so izbrisani, izbrisane so tudi nastavitve jezika in hitrosti za knjige, ki jih imate v njej. Zato raje zaobidite to postavko, če niste popolnoma prepričani, da želite izprazniti knjižnico.</p>
+<p>Možnost Odpri mapo knjižnice odpre lokacijo vaše zbirke v Raziskovalcu datotek.</p>
+<p>Pri prvi možnosti lahko odprete posamezno datoteko (MP3 knjigo v eni datoteki, EPUB dokument ali ncc.html datoteko za Daisy naslov), pri odpiranju mape pa lahko odprete zvočno knjigo v več datotekah, shranjenih v eni mapi. Poleg tega lahko, če uporabljate odpiranje mape, uvozite tudi večjo količino različnih datotek, tj. zbirko več naslovov. Nemoviz Book Reader ima vgrajena določena pravila glede razvrščanja in bo dal vse od sebe, da vam takšno mapo razvrsti in posloži, kolikor je najbolje mogoče.</p>
+<p>Odpri Audio CD bo zagnal predvajanje knjige z vašega optičnega pogona in vas vrnil v okno predvajalnika. Uporaba klasičnega CD-ja ne uvozi knjige v knjižnico, samo omogoča vam predvajanje skozi Nemoviz Book Reader.</p>
+<p>Poleg klasičnih datotek lahko NBR, za razliko od velike večine aplikacij te vrste, odpira tudi stisnjene datoteke, t.i. arhive. Od formatov arhivov so podprti .zip, .rar in .7z, poleg enodelnih arhivov pa se lahko odprejo tudi večdelni arhivi kot tudi arhivi, zaščiteni z geslom, pod pogojem, da poznate to geslo.</p>
+<p>Z drugimi besedami, od koderkoli in na kakršenkoli način da dobite neko knjigo, v standardni datoteki ali več njih, zapakirano v arhiv ali ne, jo lahko brez kakršnihkoli predpriprav in z lokacije, na kateri se nahaja, uvozite v knjižnico. Nemoviz Book Reader kopira datoteke, ki ste jih odprli, v mapo knjižnice na za to predvideno lokacijo, razpakira arhive in jih shrani v knjižnico v standardni obliki ter zabeleži vse bistvene podatke o naslovih, ki ste jih uvozili. Vaše izvorne datoteke ostanejo nedotaknjene na lokacijah, na katerih jih hranite, vse, kar se s knjigami kasneje dogaja, se dogaja na NBR kopijah v mapi knjižnice.</p>
+<p>Možnost za ponovljeni OCR služi temu, da ponovite optično prepoznavanje slikovnega naslova z nekim drugim jezikom, če niste zadovoljni z rezultatom prepoznavanja ob odpiranju knjige.</p>
+<p>Možnost Prevedi knjigo odpre pogovorno okno, v katerem izbirate izvorni jezik, jezik, v katerega želite prevesti knjigo, servis ali servise, ki jih želite uporabiti, ter polje, v katerega lahko vpišete nekaj osnovnih navodil, kaj in kako prevajati.</p>
+<p>Možnost Izvozi kot zvočno knjigo naredi točno to, kar ji ime pove. Ne glede na to, ali uporabljate katerega od nameščenih sintetizatorjev govora ali glasove v oblaku, lahko iz besedilne knjige naredite zvočno in jo izvozite na želeno lokacijo. Knjiga se izvozi kot ena .mp3 datoteka, parametri so enaki parametrom TTS-a, ki ga uporabljate, in kakovost zapisa bo enaka kakovosti poslušanja v živo. Pred začetkom vas bo NBR vprašal za potrditev in povedal, koliko naj bi izdelava trajala.</p>
+<h2 id="s13">Polica za knjige</h2>
+<p>Medtem ko se na polici za knjige, kot se imenuje del okna knjižnice, v katerem se nahaja seznam vaših naslovov, premikate s puščicami gor ali dol, boste slišali naslove, ki jih imate v knjižnici. Kako se bo naslov dokumenta izgovoril, je odvisno od več stvari. NBR ob uvozu poskuša izvleči ime avtorja, naziv dela in še nekatere podatke iz t.i. metapodatkov datoteke, ki vsebuje knjigo. Če ti podatki ne obstajajo, bo NBR knjigo imenoval glede na naziv mape ali datoteke.</p>
+<p>Če vam ni všeč nobeden od teh prikazov, lahko v kontekstnem meniju naziva knjige ali preprosteje s tipko F2 izbrano knjigo imenujete po želji. Pri imenovanju boste našli dve ločeni polji za ime avtorja in naziv dela, in ko ju vpišete, potrdite vnos na tipki za potrditev ali preprosto pritisnite Enter.</p>
+<p>Poleg osnovnih podatkov o knjigi, kot sta ime avtorja in naziv dela, boste s premikanjem s puščicami po tem seznamu lahko slišali tudi status knjige: <strong>Trenutno berem</strong>, <strong>V branju</strong>, <strong>Prebrano</strong> in <strong>Neprebrano</strong>. Če ste naslov označili kot priljubljen, boste slišali tudi to. V kontekstnem meniju, kjer se nahaja že omenjena postavka za preimenovanje, lahko še najdete postavke Označi kot prebrano, Označi kot neprebrano, Označi kot priljubljeno, Izbriši in Lastnosti, vendar o tem nekoliko kasneje.</p>
+<p>Ko se ustavite na nekem naslovu, lahko s tipko Tab pridete do dela, kjer lahko s puščicami gor in dol dobite vrsto informacij o knjigi s poudarkom na tem, kje ste končali, koliko knjige je prebrane in koliko je še ostalo v odstotkih, časovno, kje je bila knjiga izdana in proizvedena, tehnične podatke o zvočnem zapisu itd… Ti podatki so odvisni od formata, v katerem je knjiga, in se bodo razlikovali od naslova do naslova.</p>
+<p>Če se premikate naprej po oknu knjižnice, boste prišli do iskalnega polja, ki deluje po preprostem principu, da išče niz znakov, ki ste jih vpisali, v imenih elementov na knjižni polici. Če vpišete „ana“, bo zagotovo našlo avtorice z imenom Ana, vendar bo našlo tudi 7000 dni v Sibiriji.</p>
+<p>Za iskalnim poljem je še kombinirano polje filtra, v katerem lahko določite, katere knjige se vam bodo prikazovale. Privzeto so tam vedno vse knjige, vendar lahko filter preklopite na V branju, Neprebrano, Prebrano in Priljubljeno, prikaz na knjižni polici pa se bo uskladil z vašo izbiro.</p>
+<h2 id="s14">Razvrščanje</h2>
+<p>V tem meniju so le običajne stvari, ki ste jih do sedaj že neštetokrat videli. Izberete lahko vrstni red, po katerem se naslovi v knjižnici prikazujejo, tako imamo abecedno, po datumu dodajanja, po formatu in po statusu. Status pomeni neprebrano, prebrano itd. Vsako od teh izbir lahko dodatno prikažete naraščajoče ali padajoče.</p>
+<p>Ko ste se seznanili z vsebino in funkcijami okna knjižnice, je čas, da izberete knjigo na polici in se s tipko Tab sprehodite do gumba Naloži ali preprosto, še medtem ko ste osredotočeni na naslov, pritisnete Enter. Knjiga, ki ste jo izbrali za branje, bo vedno nad knjižno polico v ločenem razdelku Trenutno berem. Treba je omeniti, da knjige, ki jo berete, torej aktivne knjige, naložene v predvajalnik, ne morete izbrisati tako kot ostalih knjig na polici. Aktivno knjigo morate prek kontekstnega menija označiti kot prebrano, da se iz načina Trenutno berem premakne v način Prebrano in šele takrat jo lahko izbrišete.</p>
+<p>Skratka, ko pritisnete Enter na naslovu knjige ali tipko Naloži, se knjižnica zapre in vrnete se v glavno okno predvajalnika.</p>
+<h1 id="s15">Predvajalnik</h1>
+<p>To okno je vedno vidno na zaslonu vašega računalnika, včasih ga skrije okno knjižnice, včasih ga skrije tudi površina za branje besedila, vendar je dejansko glavno okno, na katerem upravljate knjigo po nalaganju. Po oknu predvajalnika se lahko premikate s tipko Tab kot po vsakem drugem oknu in določene elemente aktivirate s tipko Enter, vendar so za razliko od drugih oken v sami aplikaciji, pa tudi v drugih aplikacijah, tipke s puščicami in preslednica rezervirane za druge funkcije, tako da če s tipko Tab pridete npr. do gumba za zaznamke, ga ne boste mogli aktivirati s preslednico, izključno se mora uporabiti tipka Enter.</p>
+<p>V vrstici Tab, ne nujno v tem vrstnem redu, se v glavnem oknu predvajalnika nahajajo naslednji gumbi in funkcije:</p>
+<table class="keys">
+<tr><th>Predvajanje/Premor</th><td>preslednica</td></tr>
+<tr><th>Naprej</th><td>Shift + desno</td></tr>
+<tr><th>Nazaj</th><td>Shift + levo</td></tr>
+<tr><th>Glasnost</th><td>F11 in F12</td></tr>
+<tr><th>Hitrost</th><td>Ctrl + levo in Ctrl + desno</td></tr>
+<tr><th>Napredek poslušanja</th><td>puščici levo in desno</td></tr>
+<tr><th>Korak navigacije</th><td>Shift + puščici gor in dol</td></tr>
+<tr><th>Knjižnica</th><td>F3</td></tr>
+<tr><th>Nastavitve</th><td>F2</td></tr>
+<tr><th>Lastnosti</th><td>Alt + Enter</td></tr>
+<tr><th>Označi</th><td>F5</td></tr>
+<tr><th>Zaznamki</th><td>F6</td></tr>
+<tr><th>Pojdi na…</th><td>F4</td></tr>
+<tr><th>Pomoč</th><td>F1</td></tr>
+<tr><th>Števec</th><td>F7</td></tr>
+<tr><th>Informacijsko polje</th><td>F8</td></tr>
+</table>
+<p>V informacijskem polju lahko izveste osnovne podatke o predvajanju, kot so avtor, naslov, pretečen čas, stran in še kaj, seveda odvisno od formata knjige, ki jo berete. Z enim pritiskom na F8 se vsebina zaslona z informacijami samo prebere, z dvojnim pritiskom pa pride v fokus bralnika zaslona, tako da lahko s puščicami podrobneje preberete, kaj tam piše.</p>
+<p>S tipko F10 lahko izveste pretečen čas naslova, ki ga berete, s hitrim dvojnim pritiskom na F10 pa boste slišali preostali čas.</p>
+<p>Vse tipke imajo svoje tipkovne bližnjice, tako da lahko enostavno pridete do njih, ne da bi preveč hodili po oknu, samo upravljanje knjige, ki jo berete, pa je več kot preprosto.</p>
+<h2 id="s16">Predvajanje</h2>
+<ul>
+<li>S preslednico zaženete ali ustavite predvajanje.</li>
+<li>S puščicama levo ali desno „previjate“ po pet sekund ali, če gre za besedilno knjigo, po stavek naprej ali nazaj.</li>
+<li>S kombinacijo tipk Ctrl + puščici levo ali desno uravnavate hitrost predvajanja.</li>
+<li>S tipkama F11 in F12 nastavljate glasnost, F12 zviša, F11 pa zniža.</li>
+<li>S kombinacijo tipk Shift + gor ali dol izbirate korak za navigacijo (naslov, poglavje, kartica besedila, določena minutaža), izbira se spreminja glede na format in strukturo knjige.</li>
+<li>S kombinacijo tipk Shift + puščici levo ali desno se premikate po izbranem koraku navigacije.</li>
+</ul>
+<p>Skratka, zaženete predvajanje izbrane knjige s preslednico, medtem ko držite pritisnjeno tipko Ctrl, s puščicama levo in desno uravnavate hitrost branja.</p>
+<p>Če želite nekaj na hitro previti naprej ali nazaj, lahko to storite s puščicami levo ali desno po pet sekund ali po en stavek. Če želite večje navigacijske korake, pritisnite Shift, s puščicami gor in dol izberite želeni korak ter med držanjem tipke Shift s puščicami levo in desno pojdite naprej in nazaj po knjigi z izbranim korakom. Ko želite slišati, kako in kam napredujete z branjem knjige, v katerem koli trenutku pritisnite F8 in bralnik zaslona vam bo prebral celotno vsebino informacijskega zaslona. Če želite podrobneje prebrati informacijsko polje, podatek za podatkom, dvakrat hitro pritisnite F8. Ko končate, zapustite informacijsko polje s ponovnim dvakratnim pritiskom na F8 ali preprosto s tipko Escape, da bodo tipke s puščicami ponovno dobile navigacijske lastnosti. Če želite slišati pretečen ali preostali čas, pritisnite F10 enkrat ali dvakrat.</p>
+<p>Ideja za tem pristopom k navigaciji je bila, da se uporabniku ni treba učiti in pomniti celotne vrste bližnjic. Večji del navigacije je razporejen na tipke s puščicami in v kombinaciji z modifikacijskimi tipkami Shift in Ctrl je doseženo, da vam ni treba premikati roke po tipkovnici. Desno roko položite na puščice, z levo po potrebi pritisnete katero od modifikacijskih tipk, in to je vsa filozofija navigacije. Tisti bolj vešči in spretni bodo verjetno lahko izkoristili tudi palec desne roke za pritisk na Ctrl ali Shift na desni strani tipkovnice, vendar je način uporabe prepuščen vsakomur posebej. Vse ostale bližnjice, z izjemo Alt + Enter za Lastnosti, ker je to običajna Windows konvencija, so nastavljene na funkcijske tipke, vse z namenom čim enostavnejšega upravljanja.</p>
+<h2 id="s17">Pojdi na...</h2>
+<p>Ta kontrolnik, kot že samo ime pove, služi temu, da z nekaj pritiski ali kliki skočite na določen del v knjigi. Pri nestrukturiranih formatih, kot so navadno besedilo, večina zvočnih formatov v eni datoteki ali slabo formatirane strukturirane knjige, ga ni mogoče aktivirati, kar se potrdi tudi z zvočnim signalom. Pri knjigah z vsaj približno spodobno strukturo boste lahko preskakovali na poglavja, podpoglavja in druge strukturne segmente knjige. Seveda je vse odvisno od tega, kako so proizvajalci postavili strukturo v samo knjigo. Poleg navedenega ima to pogovorno okno tudi posebno skupino za skok na stran, če jo knjiga ima. Po odprtju je najprej seznam prej navedenih delov, z enim pritiskom na Tab boste prišli na skok na stran, če te obstajajo. V polju, ki se bo prikazalo, je že vpisan številka strani, na kateri ste trenutno. Vpišite želeno številko strani in pritisnite Enter za skok.</p>
+<h2 id="s18">Zaznamki</h2>
+<p>Dve tipki, ki prideta v paru – Označi za postavitev zaznamka in Zaznamki, kjer lahko upravljate postavljene zaznamke. Pri postavljanju zaznamka boste slišali tudi kratek zvočni signal, tako da ste prepričani, da je postavljen. Pri upravljanju zaznamkov se lahko premikate s puščicami po njih in s pritiskom na Enter skočite na položaj zaznamka. Poleg tega lahko brišete tiste, ki jih ne potrebujete. Za zvočne knjige je zaenkrat prikazan le čas, pri besedilnih knjigah pa tudi začetek stavka, kjer ste postavili zaznamek. Če nimate postavljenih zaznamkov, tipke Zaznamki ni mogoče aktivirati, kar vam bo sporočil tudi zvočni signal.</p>
+<h2 id="s19">Časovnik</h2>
+<p>Klasični časovnik za spanje, nič zapletenega. Izberete čas, na voljo so 15, 30, 45 in 60 min kot možnosti, naslednja možnost je po želji in privzeto je 90 min, vendar lahko to spremenite na katero koli vrednost želite. Sledi izbira, kaj se zgodi po izteku odštevanja, kjer je ponujeno: Ustavi predvajanje, Ustavi in zapri aplikacijo ter Ustavi in izklopi računalnik.</p>
+<p>Poleg tega je tu še potrditveno polje, ki vas vpraša, ali želite postaviti zaznamek ob začetku odštevanja. Lahko je koristno, da se vrnete na čas, ko še niste spali, in od tam lažje najdete mesto, kjer ste prenehali z branjem.</p>
+<p>Odštevanje se začne s pritiskom na tipko <strong>Zaženi</strong>, pogovorno okno se zapre, namesto naziva Časovnik se na oknu predvajalnika zdaj vidi aktiven števec. Če ponovno aktivirate možnost Časovnik, se odštevanje prekliče in v pogovornem oknu lahko izberete nov čas ali vse prekličete na za to predvideni tipki.</p>
+<p>Predvajanje zaustavljata dve pogovorni okni: Zaznamki in Časovnik. Ko v njih naredite, kar ste želeli, in potrdite z vrnitvijo v okno predvajalnika, se predvajanje nadaljuje. Nastavitve, Knjižnica, Pojdi na in Lastnosti pustijo knjigo, da se predvaja naprej — pri Lastnostih je to tudi namerno, saj tam nastavljate stvari, ki jih želite slišati, medtem ko to počnete.</p>
+<p>Nekaj besed še o kontrolnikih za hitrost in glasnost. Glasnost je na tipkah F11 in F12 — F12 poveča, F11 zmanjša — v korakih po 5 %, in ko pridete do konca, slišite zvočni signal. Hitrost se spreminja v korakih po 0,1x, od 0,5x do 3x, in to enako za zvočne kot za besedilne knjige. Razlika je le v tem, da 1x pri zvočni knjigi pomeni hitrost posnetka, pri besedilni pa hitrost, s katero izbrani glas govori sam po sebi. Zvočni signal boste slišali, ko boste prešli preko normalne hitrosti oziroma pri besedilu preko tiste, ki je za ta glas privzeto določena.</p>
+<p>Ono, kar je za vas kot uporabnika najpomembnejše, je, da si Nemoviz Book Reader zapomni prav vse v zvezi s predvajanjem knjig, ki jih poslušate. Zapomni si položaj, glasnost, hitrost za zvočne knjige ter vrsto, hitrost, jezik in višino glasu TTS za besedilne knjige, zapomni si parametre obdelave zvoka za zvočne knjige ter parametre brajevega in vizualnega prikaza za besedilne. Z drugimi besedami, zapomni si vse, kar ste nastavili po svojih željah in potrebah za vsako knjigo posebej.</p>
+<h1 id="s20">Lastnosti</h1>
+<p>Že večkrat je bilo rečeno, da se nastavitve in parametri za vsako knjigo posebej določijo v lastnostih knjige. Zvočne knjige imajo svoje lastnosti, besedilne svoje, posebne knjige, kot je Daisy audio + text, pa imajo oboje, na dveh ločenih zavihkih v oknu lastnosti. Lastnosti iz okna predvajalnika zaženete s tipko Lastnosti ali s kombinacijo tipk Alt + Enter, iz okna knjižnice, ko ste na naslovu knjige, iz kontekstnega menija ali prav tako s kombinacijo tipk Alt + Enter.</p>
+<h2 id="s21">Lastnosti zvoka</h2>
+<p>Ko odprete Lastnosti zvoka, boste najprej opazili potrditveno polje Obdelava zvoka. Ni ga treba vključiti, če vam je zvok knjige, ki jo poslušate, sprejemljiv, če pa vendarle ni, boste z vključitvijo Obdelave zvoka morda uspeli zvok pripeljati na poslušljivo raven. Z označitvijo potrditvenega polja se začne analiza zvočnega zapisa knjige in lahko, odvisno od hitrosti stroja, traja med trideset sekund in nekaj minut. Po vrstici napredka v vsakem trenutku vidite, kakšno je stanje in koliko ga je še ostalo. Ko je analiza končana, bo NBR nastavil spodaj navedene filtre v neko optimalno stanje, zato če vam zvok ustreza, samo potrdite vse z OK, če mislite, da ga lahko še dodelate, pa je tukaj še kratek opis, kaj vse je mogoče narediti.</p>
+<p>Sledi sedem filtrov, ki vam bodo pomagali ali ne, da nekoliko izboljšate zvok zvočnih knjig na starih in/ali slabih posnetkih. Vsak nadzor se lahko posebej vključi ali izključi, tako da jih ni treba uporabljati vseh hkrati. Ko vključite Obdelavo zvoka, boste najprej našli tipko Ponastavi, ki vse filtre vrne na privzete nastavitve. Sledi potrditveno polje Premosti, s katerim z vključitvijo in izključitvijo trenutno slišite razliko med izvirnikom in vašimi nastavitvami. Kombinacija tipk za premostitev je Ctrl + B, tako da se vam ni treba nenehno vračati od nadzora do premostitve in nazaj.</p>
+<p>Prvi v vrsti je <strong>Odstrani bobnenje</strong>, t.i. Hi Pass. Odstranjuje šume v nizkem spektru posnetka, od električnih naprav do naključnega udarca po mikrofonu ali mizi. Sledi <strong>Zmanjšanje šuma</strong>, predvideno za šum traku, slabih mikrofonov in podobne šume v nekoliko višjem spektru frekvenc. <strong>Ublaži sikanje</strong> zmanjšuje prasketanje glasov, kot so C, S, Š in podobni, ki so se popačili na posnetku zaradi preblizu snemanja ali poudarjenih visokih tonov. <strong>Izenači govor</strong> poskuša izenačiti tišje in glasnejše dele posnetka. Nato je tu <strong>Ton</strong>, petpasovni izenačevalnik; pasovi so označeni s svojimi frekvencami — 200, 800, 1.8k, 3.5k in 5k+ — zadnji pa je polica, kar pomeni, da dvigne ali spusti vse nad seboj, ne samo enega območja. Na koncu je skupina <strong>Glasnost in premori</strong> z dvema nadzoroma: <strong>Samodejna glasnost</strong> (normalizacija) dvigne celoten posnetek do maksimalne ravni brez popačenja, a <strong>Šum v premorih</strong> (gate) odstrani preostale šume v presledkih med stavki.</p>
+<p>Vsak filter ima pet ravni delovanja, minimalno, blago, srednje, močno in maksimalno. Prav tako velja ponoviti, da se vsak lahko posamezno vključi ali izključi.</p>
+<p>Obdelava zvoka se prav tako zapomni za vsako knjigo posebej.</p>
+<p>Obvezno je treba omeniti, da ta obdelava zvoka ne bo delala čudežev in ne boste s slabega presnetka iz šestdesetih let prejšnjega stoletja dobili kristalno čistega in jasnega govora, kot da bi bilo snemano v studiih Abbey Road v Londonu, vendar vas bo, upajmo, nekako pripeljala do konca knjige, ne da bi znoreli zaradi slabe kakovosti.</p>
+<h2 id="s22">Lastnosti besedila</h2>
+<p>Podobno kot v nastavitvah za govor imate tukaj izbiro jezika, glasu, hitrosti, glasnosti in višine za izbrano knjigo. V Nastavitvah izbirate privzeto za vse, tukaj nastavljate za konkreten naslov. Če se sprašujete zakaj, je najpreprostejši primer, če je vaš privzeti glas v nastavitvah moški, vi pa bi roman, pisan iz ženske perspektive, brali z ženskim glasom, to v lastnostih besedila spremenite konkretno za to knjigo. Vse ostale knjige v tem jeziku se bodo še naprej privzeto odpirale z moškim glasom, dokler in če tega ne spremenite. Prav tako lahko neko lahko čtivo brez težav berete pri 1,5x, a nekaj težjega, o čemer morate sproti tudi razmišljati, boste morda raje vrnili na 1x ali počasneje.</p>
+<p>Tukaj slovarja izgovorjave ni, sledijo nastavitve za brajico in vizualne nastavitve. Če aktivirate vizualni prikaz, dobite izbiro, na kakšen način se bo besedilo prikazovalo na vašem zaslonu. Če želite samo brati v brajici ali vizualno brez govora, na seznamu glasov izberite to možnost. V tej različici {beta} sta brajev in vizualni izhod zasivljena in vsebujeta opombo, da nista vključena.</p>
+<p>Nemoviz Book Reader nima izhodne brajeve tabele in je ne bo imel. Tisto, kar je na brajevi vrstici, prevaja bralnik zaslona s tabelo iz lastnih nastavitev in to je edino pravilno mesto za to izbiro — dve tabeli nad eno vrstico bi se lahko le razhajali. Edina brajeva tabela v Nemoviz Book Reader je <strong>vhodna</strong>: tista, s katero je bila prebrana datoteka .brf pri uvozu, in njo spreminjate v skupini Brajev izvirnik, ki se pojavi samo pri knjigi, ki je prišla iz takšne datoteke. Ta skupina deluje tudi v tej različici {beta}.</p>
+<h2 id="s23">Nastavitve vizualnega prikaza</h2>
+<p class="beta">To ni vključeno v prvo beto. Preverjanja in spremembe, ki ostajajo, zahtevajo več časa, kot ga ima ta različica, zato se ta možnost vrača v eni od naslednjih izdaj.</p>
+<p>Odvisno od izbire v Nastavitvah ali Lastnostih boste na zaslonu videli manjši okvir čez površino predvajalnika, v katerem se bo besedilo spreminjalo kot podnapisi pri tujih filmih ali serijah. Če izberete eno od drugih dveh možnosti, bo okvir večji, besedilo pa bo drselo po zaslonu kot odjavna špica ali pa se bo spreminjalo okvir za okvirjem. V teh dveh prikazih je izgovorjena vrstica prikazana v drugačni barvi.</p>
+<p>Na dnu okvirja lahko spreminjate pisavo, velikost in še nekatere parametre prikaza, na voljo pa imate tudi osnovne tipke za upravljanje predvajanja. Vsi tipkovni bližnjice delujejo tudi v tem okvirju.</p>
+<p>Če ste izbrali uporabo brajice, se bo pojavil majhen okvir, ki je bil prvi opisan, saj brajica ne more delovati brez prikaza besedila, ki se prenaša v bralnik zaslona. Če izberete samo vizualni prikaz, imate izbiro vrste prikaza. V obeh primerih se bo prikaz pojavil po začetku predvajanja. Če niste izbrali nobene od teh možnosti in želite samo poslušati, če pa ste radovedni, kako to izgleda, lahko vedno iz okna predvajalnika vklopite in izklopite prikaz s tipko F9.</p>
+<p>In to je približno vse, kar se tiče dokumenta s pomočjo. Podrobnejša pojasnila boste našli ob kontrolnikih tam, kjer je potrebno, majhna tipka z znakom vprašaja ali F1 v fokusirani skupini. Hvala, ker ste bili potrpežljivi in prišli do konca besedila. Kot majhen znak pozornosti zaradi tega imate zdaj priložnost prebrati dve skriti funkciji.</p>
+<h1 id="s24">Za najbolj vztrajne</h1>
+<p>Prva funkcija je alternativno dodajanje enega ali več naslovov v knjižnico. Namesto skozi opisana pogovorna okna Odpri datoteko in Odpri mapo preprosto prek Windows ali File Explorer kopirajte želeno vsebino v mapo knjižnice. Ob naslednjem zagonu bo Nemoviz Book Reader osvežil knjižnico in prikazal nove naslove. Če je že zagnan, samo v oknu knjižnice pritisnite tipko Osveži.</p>
+<p>Druga skrita funkcija je navigacijska. Poleg vsega zgoraj opisanega se lahko po knjigi, ki jo berete, premikate tudi s tipkovnimi bližnjicami od Ctrl + 1 do Ctrl + 9, ki vas postavijo na 10, 20 pa vse do 90 % knjige.</p>
+
+</body>
+</html>

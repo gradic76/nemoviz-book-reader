@@ -256,28 +256,59 @@ static class TranslateHelp
     {
         string lang = LanguageName(code);
         Console.WriteLine(code + "  (" + lang + ")  cijeli prirucnik");
-        var outLines = new List<string>(hr.Lines);
+        // THE CROATIAN HEADER IS NOT TRANSLATED, IT IS REPLACED. hr.txt opens
+        // with a comment block saying where it came from and that the docx is
+        // Gordan's original -- none of which is true of a translation, and the
+        // languages translated by hand carry two lines instead (see it.txt).
+        // Translating it faithfully produced a Czech file announcing itself as
+        // "the manual, Croatian" and claiming the docx as its source. The
+        // stand-in goes in BEFORE the chunking, so the model renders the right
+        // sentence rather than a good translation of the wrong one. Plain ASCII
+        // because it is only ever INPUT -- what comes back carries the target
+        // language's own spelling.
+        var srcLines = new List<string>(hr.Lines);
+        int firstReal = 0;
+        while (firstReal < srcLines.Count &&
+               (srcLines[firstReal].StartsWith(";") || srcLines[firstReal].Trim().Length == 0))
+            firstReal++;
+        srcLines.RemoveRange(0, firstReal);
+        srcLines.InsertRange(0, new[] {
+            "; Prirucnik za Nemoviz Book Reader.",
+            "; Strojno preveden iz docs/help/hr.txt, koji je Gordanov izvornik.",
+            "" });
+        var outLines = new List<string>(srcLines);
 
-        // Section by section, so one refusal costs one section and not the book.
+        // CHUNKED BY SIZE, NOT BY SECTION, and the change is measured. A section
+        // is a handful of short lines, and at about 27 s a request the manual's
+        // twenty-five sections cost twenty minutes a language -- nearly all of it
+        // round trips rather than generation, since the sections are small and the
+        // latency is not. Grouping to ~5000 characters, the size the book
+        // translator settled on, makes it seven requests instead of twenty-five.
+        // Section boundaries are not respected here because the numbering protocol
+        // does not care where a line came from; `sync` still works section by
+        // section, where the unit is the thing being replaced.
+        const int MaxChars = 5000;
+        var all = new List<int>();
+        for (int i = 0; i < srcLines.Count; i++)
+            if (srcLines[i].Trim().Length > 0) all.Add(i);
+
         int done = 0;
-        for (int n = 0; n <= hr.HeadingAt.Count; n++)
+        for (int i = 0; i < all.Count; )
         {
-            int from, to;
-            if (n == 0) { from = 0; to = hr.HeadingAt.Count > 0 ? hr.HeadingAt[0] : hr.Lines.Count; }
-            else hr.Range(n, out from, out to);
-
             var src = new Dictionary<int, string>();
-            for (int i = from; i < to; i++)
-                if (hr.Lines[i].Trim().Length > 0) src[i] = hr.Lines[i];
-            if (src.Count == 0) continue;
-
+            int chars = 0;
+            while (i < all.Count && (src.Count == 0 || chars + srcLines[all[i]].Length <= MaxChars))
+            {
+                src[all[i]] = srcLines[all[i]];
+                chars += srcLines[all[i]].Length;
+                i++;
+            }
             var got = Chunk(lang, src);
             foreach (var k in got.Keys) outLines[k] = got[k];
             done += src.Count;
-            Console.Write("\r      " + done + " redaka");
+            Console.Write("\r      " + done + " / " + all.Count + " redaka");
         }
         Console.WriteLine();
-
         // LANG: names the file, so it is set here rather than trusted to the model.
         for (int i = 0; i < outLines.Count; i++)
             if (outLines[i].StartsWith("LANG:")) outLines[i] = "LANG: " + code;

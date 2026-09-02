@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nemoviz Book Reader</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: Georgia, "Times New Roman", serif; font-size: 1.1em;
+         line-height: 1.6; max-width: 42em; margin: 2em auto; padding: 0 1.5em; }
+  h1 { font-size: 1.5em; margin-top: 2em; }
+  h2 { font-size: 1.2em; margin-top: 1.6em; }
+  p, li { margin: 0.8em 0; }
+  nav ul { list-style: none; padding-left: 1em; }
+  nav > ul { padding-left: 0; }
+  nav li { margin: 0.3em 0; }
+  table.keys { border-collapse: collapse; margin: 1em 0; }
+  table.keys th, table.keys td { text-align: left; vertical-align: top;
+         padding: 0.3em 1.2em 0.3em 0; font-weight: normal; }
+  table.keys th { white-space: nowrap; font-family: inherit; }
+  .beta { border-left: 4px solid currentColor; padding-left: 0.8em;
+          font-style: italic; opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<h1>Nemoviz Book Reader</h1>
+
+<nav aria-label="Obsah">
+<h2>Obsah</h2>
+<ul>
+<li><a href="#s1">Systémové požadavky</a><ul>
+<li><a href="#s2">Minimální požadavky</a></li>
+<li><a href="#s3">Optimální požadavky</a></li>
+</ul></li>
+<li><a href="#s4">Obecné</a></li>
+<li><a href="#s5">První spuštění</a></li>
+<li><a href="#s6">Nastavení</a><ul>
+<li><a href="#s7">Obecné</a></li>
+<li><a href="#s8">Řeč a braillské písmo</a></li>
+<li><a href="#s9">Zařízení</a></li>
+<li><a href="#s10">Pokročilé</a></li>
+</ul></li>
+<li><a href="#s11">Knihovna</a><ul>
+<li><a href="#s12">Přidávání titulů</a></li>
+<li><a href="#s13">Police na knihy</a></li>
+<li><a href="#s14">Řazení</a></li>
+</ul></li>
+<li><a href="#s15">Přehrávač</a><ul>
+<li><a href="#s16">Přehrávání</a></li>
+<li><a href="#s17">Jdi na...</a></li>
+<li><a href="#s18">Záložky</a></li>
+<li><a href="#s19">Časovač</a></li>
+</ul></li>
+<li><a href="#s20">Vlastnosti</a><ul>
+<li><a href="#s21">Vlastnosti zvuku</a></li>
+<li><a href="#s22">Vlastnosti textu</a></li>
+<li><a href="#s23">Nastavení vizuálního zobrazení</a></li>
+</ul></li>
+<li><a href="#s24">Pro nejvytrvalejší</a></li>
+</ul>
+</nav>
+
+<p>Vítejte v Nemoviz Book Reader, přehrávači elektronických knih ve více než čtyřiceti pěti formátech a se třemi výstupy.</p>
+<h1 id="s1">Systémové požadavky</h1>
+<h2 id="s2">Minimální požadavky</h2>
+<ul>
+<li>CPU dual core 1,5 GHz, 2 GB RAM, 100 MB pro úložiště + prostor pro knihovnu,</li>
+<li>MS Windows 7 SP1 64-bit nebo vyšší, .NET Framework 4.8 (na Windows 7 je třeba jej nainstalovat samostatně). Na této konfiguraci bohužel nebudete moci používat OCR a One Core hlasy, obojí je dostupné až od Windows 10.</li>
+</ul>
+<h2 id="s3">Optimální požadavky</h2>
+<ul>
+<li>CPU quad core 2,0 GHz, 8 GB RAM, 100 MB prostoru na SSD + prostor pro knihovnu,</li>
+<li>MS Windows 10 64-bit 22H2 nebo vyšší, .NET Framework 4.8 je vestavěn.</li>
+</ul>
+<h1 id="s4">Obecné</h1>
+<p>Nemoviz Book Reader vám umožňuje číst zvukové a textové elektronické dokumenty způsobem, který vám nejvíce vyhovuje. Podporované formáty, které můžete přehrávat, jsou:</p>
+<p>Zvukové formáty: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au a .voc.</p>
+<p>Textové formáty: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw a .azw3.</p>
+<p>Speciální formáty: Daisy 2.02 audio, Daisy 3 audio, Daisy 2.02 text, Daisy 3 text, Daisy 2.02 audio + text, Daisy 3 audio + text a epub 3 text + audio.</p>
+<p>Braillské formáty: .brf, .brl, .bra, .dxb a .i55.</p>
+<p>Všechny uvedené formáty můžete přímo otevírat i z archivů .7z, .rar a .zip. Podporujeme otevírání vícedílných archivů i archivů chráněných heslem, samozřejmě pokud jej znáte.</p>
+<p>Je možné otevírat i obrazové formáty – ty formáty, ve kterých jsou obrázky textu, a ne skutečný text, jako např. skenované .pdf nebo .epub s obrázky stránek. Také je možné otevírat standardní obrázky jako .bmp, .jpg, .tif atd., takže pokud máte náhodou knihu s takovými, řádně číslovanými obrázky, můžete i to otevřít přes Nemoviz Book Reader. Text z obrázků se automaticky rozpozná přes Microsoft OCR a během krátké doby získáte rozumně čitelný název ve vaší knihovně.</p>
+<p>Upozornění! Všechny uvedené formáty a jejich variace lze načíst do Nemoviz Book Reader, pokud nejsou chráněny licencí Digital Rights Management. NBR nemůže otevřít DRM Protected tituly, takže pokud takové máte, můžete je přehrávat přes k tomu určený hardwarový nebo softwarový přehrávač. Pro více podrobností se obraťte na toho, od koho jste tyto tituly získali.</p>
+<p>Všechny souborové formáty z horního seznamu můžete přehrávat zvukově, vizuálně a dokonce číst i v Braillově písmu, pokud k tomu máte potřebné vybavení. Vše, co potřebujete, je počítač kompatibilní s Windows, monitor a pokud možno nainstalovaný braillský řádek nakonfigurovaný s vaším odečítačem obrazovky.</p>
+<p>Vedle všeho dosud uvedeného vám NBR umožňuje i strojový překlad knih za použití různých AI LLM služeb. Některé mají bezplatné kvóty, některé se musí platit, ale to je způsob, jakým tyto služby fungují. Nemoviz Book Reader pro Windows je zcela zdarma k použití, ale externí služby nejsou v naší kompetenci. My vás přes aplikaci propojíme s externími službami a dáváme možnost, aby se proces překladu textu provedl přes přehrávač, ale registrace ke službám, nastavení způsobu placení a vše ostatní je na vás. Poté, co vše uděláte, je nutné, abyste na stránkách služeb, které používáte, získali API klíč, vložili jej do nastavení přehrávače na k tomu určené místo a my pak přebíráme odtud.</p>
+<p>Nemoviz Book Reader je testován a ověřen jako kompatibilní s odečítači obrazovky Jaws for Windows a NVDA, ale měl by fungovat bez jakýchkoliv problémů i s ostatními. Přístupnost je základ, na kterém je tato aplikace postavena, a neměly by nastat problémy, pokud používáte jiný odečítač.</p>
+<p>Všechny klávesové zkratky jsou vestavěny do samotné aplikace a lze je používat i bez přítomnosti odečítače obrazovky. Odečítač obrazovky je zde pouze proto, aby poskytl zpětnou vazbu o tom, co se právě děje v samotném přehrávači, a aby, pokud používáte Braillovo písmo, přenášel textový obsah na braillský řádek. Pro vše ostatní můžete přehrávač používat i bez odečítače obrazovky.</p>
+<p>Při importu braillských formátů uvedených v horním seznamu je důležité vědět, že NBR používá technologii LibLouis s příslušnými tabulkami. Nemůžeme zaručit, že vše bude fungovat správně pro každý jazyk, nemůžeme provádět opravy tabulek pro každou knihu zvlášť, mnoho závisí na tvorbě a produkci samotných knih. Pokud výsledek, který získáte importem do knihovny, není dobrý, ve vlastnostech knihy můžete změnit braillskou tabulku, pokud je jich pro daný jazyk dostupných více. Pokud se to podaří, skvělé, pokud ne, je nám to líto. Není to vše jen na přehrávači, určitou odpovědnost mají i výrobci knih a autoři braillských tabulek.</p>
+<h1 id="s5">První spuštění</h1>
+<p>Při prvním spuštění Nemoviz Book Reader zkontroluje, zda chcete zachovat nebo změnit cestu ke složce pro vaši budoucí knihovnu. Mějte na paměti, že výchozí umístění je uvnitř uživatelské složky Windows, která se obvykle nachází na disku C a která se časem může zaplnit a zabírat místo na systémovém disku. Pokud ji přesměrujete na jiný oddíl nebo disk, nic podstatného se nezmění a vy budete mít jistotu, že systému nedojde nezbytné místo pro práci. Také tím, že knihovnu uchováváte na jiném disku nebo oddílu, zajistíte, že v případě selhání systému zůstane vaše sbírka knih v bezpečí.</p>
+<p>Poté se otevře jedno ze dvou oken aplikace, a to okno knihovny, které se otevírá nyní, po spuštění po instalaci a pokaždé, když není načtena žádná kniha nebo je knihovna prázdná. Tentokrát ho můžeme zavřít, protože by bylo dobré po instalaci nejprve projít nastavení a tam upravit, co je třeba.</p>
+<h1 id="s6">Nastavení</h1>
+<p>Toto okno se skládá z několika karet, níže naleznete přehled každé z nich. To, co ho možná odlišuje od jiných oken nastavení, je, že u většiny voleb, které tam můžete nastavit, máte malé tlačítko nápovědy, které otevírá další dialog s popisem dané funkce. Získáváte pomoc na každém kroku a dokument, který právě čtete, nemusí mít 250 stran.</p>
+<h2 id="s7">Obecné</h2>
+<p>První položka, kterou zde nastavujeme, je jazyk. Pokud aplikace obsahuje jazyk, ve kterém máte systém, bude jazyk již vybrán a rozhraní bude v tomto jazyce. Pokud ne, NBR se zobrazí v angličtině. Pokud se vám ani to nelíbí, otevřete seznam jazyků a vyberte jiný jazyk.</p>
+<p>Druhou možností je výběr umístění knihovny. To jsme již prošli po prvním spuštění. Pokud jste se tehdy ještě nerozhodli, nyní je ideální příležitost.</p>
+<p>Následují dvě zaškrtávací políčka pro zapnutí nebo vypnutí multimediálních funkcí na klávesnici, pokud je máte. Platí i pro tlačítka na sluchátkách. První položka je zapnout nebo ne, druhá položka určuje, zda budou fungovat globálně, nebo pouze když je NBR v fokusu.</p>
+<p>Dále zaškrtávací políčko, kterým volíte, zda se v Knihovně budou používat metadata ze souborů, nebo zda se jména autorů a vydání zobrazí z názvu složky či souboru.</p>
+<p>Následuje zaškrtávací políčko <strong>Automaticky kontrolovat aktualizace</strong>. Když je zapnuto, NBR se jednou denně zeptá, zda bylo vydáno novější vydání, a ohlásí se vám pouze tehdy, pokud ano; o vás ani o vašich knihách neodesílá nic. Pokud ho vypnete, NBR se sám od sebe nebude připojovat k síti a kontrolu můžete i nadále vyžádat kdykoli chcete — v Knihovně, v nabídce Nápověda, položkou <strong>Zkontrolovat aktualizace</strong>.</p>
+<p>A nakonec výběr vzhledu, ve kterém se vám bude zobrazovat Nemoviz Book Reader. Nabízeny jsou dvě možnosti. <strong>Systémové barvy</strong> vám dají přehrávač v klasickém vzhledu a paletě barev, kterou používáte v systému; to je zároveň to, co dostanete, pokud máte zapnutý vysoký kontrast, protože NBR tehdy nevykresluje nic vlastního, ale nechá vaši schéma projít celé. <strong>Design NBR</strong> dává zobrazení přehrávače v trochu modernějším vydání. Pokud jste nevybírali, NBR rozhoduje sám: vysoký kontrast dostane Systémové barvy, vše ostatní Design NBR.</p>
+<h2 id="s8">Řeč a braillské písmo</h2>
+<p>První možností je řada ovládacích prvků pro výběr jazyka a hlasu pro textové knihy. Vybíráme jazyk a poté hlas pro daný jazyk. Nastavíme hlasitost, rychlost a výšku a potvrdíme tlačítkem Použít. Vybereme další jazyk, hlas a další parametry a znovu stiskneme Použít. Tímto způsobem vybíráme výchozí hlas pro určitý jazyk a každá nová kniha, která se otevře při určování jazyka, ve kterém je napsána, automaticky získá i hlas, který jsme vybrali.</p>
+<p>Možná trochu skrytá možnost, ale neměli jsme lepší nápad. V rozbalovacím seznamu pro výběr hlasu je poslední možností <strong>Přidat nové jazyky</strong>. Aktivací této možnosti se otevře okno, ve kterém můžete vybrat jeden nebo více hlasů Microsoft One Core a po potvrzení je nainstalovat prostřednictvím služby Windows Update. Může to, stejně jako v případě přidávání jazyků pro OCR, trvat déle nebo kratší dobu, v závislosti na vytížení serverů pro aktualizace. Je možné, že v závislosti na vašem administrativním nastavení dostanete i dialog UAC, který musíte potvrdit.</p>
+<p>Samozřejmě, všechny uvedené parametry lze nastavit jinak, a to pro každou knihu zvlášť, ale to se provádí ve vlastnostech dané knihy, zde nastavujeme obecné parametry.</p>
+<p>Další možností je Slovník výslovnosti, jaký jste jistě již viděli. Máte možnost korekce výslovnosti globálně, podle jazyka a podle hlasu, a pro všechny tři volby najdete standardní možnosti pro tento typ slovníku.</p>
+<p>Následují zaškrtávací políčka pro zapnutí a vypnutí braillského a vizuálního zobrazení, každé z nich, když je zapnuto, nabízí určité dodatečné nastavení, pro které naleznete nápovědu na místě. V této beta verzi jsou tato dvě políčka zašedlá a nesou poznámku, že nejsou zapnuta; vrátí se v jednom z příštích vydání.</p>
+<h2 id="s9">Zařízení</h2>
+<p>Zde vybíráte zvukovou kartu, přes kterou chcete knihy poslouchat. Pokud máte pouze jednu, nemusíte nic měnit, protože ani není z čeho vybírat. Dále se zde nachází zaškrtávací políčko pro zabránění přechodu zvukové karty do režimu spánku. Pokud při přehrávání knih, a zejména u textových formátů, zaznamenáte sekání, jako by věty nebo odstavce zněly uříznutě o první slovo nebo dvě, tuto možnost bezpodmínečně zapněte.</p>
+<p>Pokud stále máte optickou mechaniku ve svém počítači a možná i sbírku starších zvukových vydání v klasickém formátu CD audio, můžete klidně zapnout možnost Použít optickou mechaniku. Tím aktivujete podporu zařízení a můžete začít poslouchat knihy na CD.</p>
+<h2 id="s10">Pokročilé</h2>
+<p>Na této kartě vybíráte jazyk nebo více jazyků, které se budou používat pro rozpoznávání obrazových dokumentů při importu. Nemoviz Book Reader používá vestavěný nástroj Microsoft OCR, dostupný ve verzích operačního systému Windows 10 a 11. Aktuálně podporuje třicet pět jazyků, jejichž seznam můžete vidět, pokud stisknete tlačítko <strong>Přidat jazyk</strong>. Když vyberete požadované jazyky a stisknete Instalovat, jazyky se nenainstalují okamžitě. NBR je neinstaluje přímo, ale instalují se přes službu Windows Update a může trvat určitou dobu, než na ně přijde řada. Také v závislosti na nastavení vašeho systému je možné, že se vám zobrazí dialog Řízení uživatelských účtů, ve kterém budete muset potvrdit instalaci jazyka nebo více jazyků.</p>
+<p>Po instalaci, a při importu obrazového formátu, budete moci v kombinovaném poli vybrat jazyk, kterým chcete rozpoznat text v titulu, který otevíráte. Toto také může trvat kratší dobu, v závislosti na rychlosti stroje a velikosti knihy, ale vše můžete sledovat na ukazateli průběhu.</p>
+<p>Kromě nastavení pro optické rozpoznávání zde můžete vybírat i LLM služby pro překlad. V okamžiku psaní tohoto textu jsou zde Google Gemini, DeepSeek, DeepSeek s větším modelem, tři úrovně OpenAI GPT a Microsoft Azure. Jak jsme dříve napsali, pro tyto služby potřebujete API klíče nebo jiné druhy autorizace, více si můžete přečíst v nabídce Nápověda a poté v položce Služby a účty.</p>
+<p>Na tlačítku Pravidla překladu se otevře okno s pokyny, které se posílají modelům pro překlad, aby se to, co chcete, přeložilo co nejkvalitněji. Existuje sada pokynů, která se vztahuje na všechny jazyky, a sady pokynů pro podporované jazyky jednotlivě. V tomto okně můžete upravovat stávající a přidávat pokyny pro nové jazyky. Při úpravě souborů s pravidly se otevřou v Poznámkovém bloku, v horní části textu je vysvětleno vše ohledně úpravy a přidávání pravidel.</p>
+<p>Kromě možnosti překladu jsou zde ještě další Cloudové hlasy, aktuálně podporujeme Google Cloud Chirp 3 a Microsoft Azure Neural hlasy. Postup pro povolení těchto hlasů je podobný jako u služeb pro překlad a více o tom je také v nabídce Nápověda a poté v položce Služby a účty.</p>
+<p>Upozorňujeme, že tyto hlasy jsou také placené, Google poskytuje zdarma milion znaků pro čtení, což jsou přibližně dvě průměrné knihy o 500 stranách. Microsoft poskytuje polovinu, 500 000 znaků, což je přibližně jedna průměrná kniha. Po vyčerpání bezplatné kvóty znaků je účtována vaše kreditní karta a náklad na čtení je někde mezi $8,00 a $15,00 za průměrnou knihu, v závislosti na službě.</p>
+<p>Aby nedošlo k nedorozumění a náhodné nechtěné útratě, omezili jsme nastavování cloudových hlasů. V nastavení řeči a braillského řádku tyto hlasy neuvidíte a nebudete je moci nastavit jako výchozí, jsou viditelné pouze ve vlastnostech vybrané knihy, ale předtím je musíte povolit v pokročilém nastavení. Ve vlastnostech knihy můžete vybrat některý z těchto hlasů jako výchozí pro určitou knihu, a to platí pouze pro tuto knihu.</p>
+<p>Vzhledem k tomu, že znaky se při používání cloudových hlasů spotřebovávají i když přetáčíte, opakujete určitou část knihy nebo jiným způsobem spotřebováváte již přečtené znaky, NBR má povolenou dočasnou paměť (cache), kde se ukládá to, co jste přečetli, takže přetáčení a podobné akce nebudou brány jako opětovné spotřebovávání znaků. Tato možnost vám také umožní, abyste po přečtení knihy mohli provést export do mp3 a tím získali klasickou zvukovou knihu.</p>
+<h1 id="s11">Knihovna</h1>
+<p>Toto okno není vidět neustále, kromě prvního spuštění se otevírá pouze podle potřeby a v něm organizujete svou sbírku elektronických publikací. Přidáváte jednotlivě nebo hromadně, mažete, označujete knihy jako přečtené, nepřečtené nebo oblíbené. Můžete třídit pořadí zobrazení podle několika kritérií, můžete filtrovat tituly podle stavu (přečteno, nepřečteno…), a můžete i vyhledávat.</p>
+<p>U každého titulu v knihovně jednoduchým stisknutím klávesy Tab můžete přečíst i podrobnosti o tomto titulu. Název a autora, vydavatele a formát, kde jste skončili, kolik procent knihy jste přečetli, kolik vám časově ještě zbývá a další informace. Pokud je to možné, získáte i krátký popis knihy.</p>
+<h2 id="s12">Přidávání titulů</h2>
+<p>V rozevírací nabídce Soubor najdete dvě položky: Otevřít soubor (Ctrl + O) a Otevřít složku (Ctrl + Shift + O). Pokud jste v Nastavení zapnuli podporu optické mechaniky, najdete zde také možnost Otevřít Audio CD. Kromě toho jsou zde také možnosti pro opětovné optické rozpoznávání obrázkového titulu, možnost vytvoření zvukové knihy a možnost překladu. Je zde také položka, na kterou raději nesahejte, pokud opravdu nemusíte: <strong>Vyprázdnit knihovnu</strong>. Název sám o sobě vypovídá, co dělá, a po aktivaci dostanete ještě jedno varování. Pokud vše potvrdíte až do konce, vaše knihovna bude smazána, všechna data o záložkách a o tom, kde jste skončili, budou smazána, smazáno bude i nastavení jazyka a rychlosti pro knihy, které v ní máte. Proto se této položce raději vyhněte, pokud si nejste naprosto jisti, že chcete knihovnu vyprázdnit.</p>
+<p>Možnost Otevřít složku knihovny otevře umístění vaší sbírky v Průzkumníku souborů.</p>
+<p>V první možnosti můžete otevřít jednotlivý soubor (MP3 knihu v jednom souboru, EPUB dokument nebo ncc.html soubor pro Daisy titul), a při otevření složky můžete otevřít zvukovou knihu umístěnou v několika souborech v jedné složce. Kromě toho, pokud použijete otevření složky, můžete importovat i větší množství různých souborů, tj. sbírku více titulů. Nemoviz Book Reader má zabudovaná určitá pravidla pro třídění a udělá vše pro to, aby vám takovou složku roztřídil a uspořádal co nejlépe.</p>
+<p>Otevřít Audio CD spustí přehrávání knihy z vaší optické mechaniky a vrátí vás do okna přehrávače. Použití klasického CD neimportuje knihu do knihovny, pouze vám umožní přehrávání přes Nemoviz Book Reader.</p>
+<p>Kromě klasických souborů může NBR, na rozdíl od velké většiny aplikací tohoto typu, otevírat i komprimované soubory, tzv. archivy. Z formátů archivů jsou podporovány .zip, .rar a .7z, a kromě jednodílných archivů lze otevřít i vícedílné archivy, stejně jako archivy chráněné heslem, za předpokladu, že toto heslo znáte.</p>
+<p>Jinými slovy, odkudkoli a jakýmkoli způsobem knihu získáte, ve standardním souboru nebo více souborech, zabalenou v archivu nebo ne, můžete ji bez jakýchkoli předběžných kroků a z umístění, kde se nachází, importovat do knihovny. Nemoviz Book Reader zkopíruje soubory, které jste otevřeli, do složky knihovny na k tomu určené místo, rozbalí archivy a uloží je do knihovny ve standardním formátu a zaznamená všechny důležité údaje o titulech, které jste importovali. Vaše původní soubory zůstávají nedotčeny v umístěních, kde je držíte, vše, co se s knihami později děje, se děje na kopiích NBR ve složce knihovny.</p>
+<p>Možnost pro opakované OCR slouží k zopakování optického rozpoznávání obrázkového titulu s jiným jazykem, pokud nejste spokojeni s výsledkem rozpoznávání při otevírání knihy.</p>
+<p>Možnost Přeložit knihu otevře dialog, ve kterém vybíráte zdrojový jazyk, jazyk, do kterého chcete knihu přeložit, službu nebo služby, které chcete použít, a pole, do kterého můžete napsat některé základní pokyny, co a jak překládat.</p>
+<p>Možnost Exportovat jako zvukovou knihu dělá přesně to, co říká její název. Bez ohledu na to, zda používáte některý z nainstalovaných syntetizátorů řeči nebo cloudové hlasy, můžete z textové knihy vytvořit zvukovou a exportovat ji na požadované místo. Kniha se exportuje jako jeden .mp3 soubor, parametry jsou stejné jako parametry TTS, který používáte, a kvalita záznamu bude stejná jako kvalita živého poslechu. Před začátkem se vás NBR zeptá na potvrzení a řekne, jak dlouho by tvorba měla trvat.</p>
+<h2 id="s13">Police na knihy</h2>
+<p>Zatímco se na polici na knihy, jak se nazývá část okna knihovny, ve které se nachází seznam vašich titulů, pohybujete šipkami nahoru nebo dolů, uslyšíte tituly, které máte v knihovně. Jak bude název dokumentu vysloven, závisí na několika věcech. NBR se při importu pokouší vytáhnout jméno autora, název díla a další údaje z tzv. metadat souboru, který obsahuje knihu. Pokud tyto údaje neexistují, NBR knihu pojmenuje podle názvu složky nebo souboru.</p>
+<p>Pokud se vám nelíbí žádné z těchto zobrazení, v kontextové nabídce názvu knihy nebo jednodušeji klávesou F2 můžete vybranou knihu pojmenovat podle přání. Při pojmenovávání najdete dvě oddělená pole pro jméno autora a název díla, a když je vyplníte, potvrďte zadání tlačítkem pro potvrzení nebo jednoduše stiskněte Enter.</p>
+<p>Kromě základních údajů o knize, jako je jméno autora a název díla, se při pohybu šipkami po tomto seznamu budete moci dozvědět i stav knihy: <strong>Právě čtu</strong>, <strong>Rozečteno</strong>, <strong>Přečteno</strong> a <strong>Nepřečteno</strong>. Pokud jste titul označili jako oblíbený, uslyšíte i to. V kontextové nabídce, kde se nachází již zmíněná položka pro přejmenování, můžete ještě najít položky Označit jako přečtené, Označit jako nepřečtené, Označit jako oblíbené, Smazat a Vlastnosti, ale o tom až později.</p>
+<p>Poté, co se zastavíte na nějakém titulu, můžete klávesou Tab přejít na část, ve které můžete pomocí šipek nahoru a dolů získat spoustu informací o knize se zaměřením na to, kde jste skončili, kolik procent knihy je přečteno a kolik zbývá, časové údaje, kde byla kniha vydána a vyrobena, technické údaje o zvukovém záznamu atd… Tyto údaje závisí na formátu, ve kterém je kniha, a budou se lišit titul od titulu.</p>
+<p>Při dalším pohybu oknem knihovny se dostanete k vyhledávacímu poli, které funguje na jednoduchém principu, že hledá řetězec znaků, který jste napsali, v názvech položek na poličce s knihami. Pokud napíšete „ana“, určitě najde autorky se jménem Ana, ale najde i 7000 dní na Sibiři.</p>
+<p>Po vyhledávacím poli následuje také kombinované pole filtru, ve kterém můžete určit, které knihy se vám budou zobrazovat. Ve výchozím nastavení jsou zde vždy všechny knihy, ale filtr můžete přepnout na Čtené, Nepřečtené, Přečtené a Oblíbené a zobrazení na poličce s knihami se přizpůsobí vašemu výběru.</p>
+<h2 id="s14">Řazení</h2>
+<p>V této nabídce jsou jen obvyklé věci, které jste už kdoví kolikrát viděli. Můžete vybrat pořadí, ve kterém se tituly v knihovně zobrazují, takže máme abecedně, podle data přidání, podle formátu a podle stavu. Stav znamená nepřečtené, přečtené atd. Každý tento výběr můžete dodatečně zobrazit vzestupně nebo sestupně.</p>
+<p>Když jste se seznámili s obsahem a funkcemi okna knihovny, je čas vybrat nějakou knihu na poličce a projít se pomocí Tab na tlačítko Načíst nebo jednoduše, ještě když jste zaměřeni na titul, stiskněte Enter. Kniha, kterou jste vybrali ke čtení, bude vždy nad poličkou s knihami ve vyčleněné sekci Právě čtu. Je třeba poznamenat, že knihu, kterou čtete, tj. aktivní knihu načtenou v přehrávači, nemůžete smazat stejně jako ostatní knihy na poličce. Aktivní knihu musíte přes kontextovou nabídku označit jako přečtenou, aby se z režimu Právě čtu přepnula do režimu Přečtené, a teprve poté ji můžete smazat.</p>
+<p>V zásadě platí, že když stisknete Enter na titulu knihy nebo tlačítko Načíst, knihovna se zavře a vrátíte se do hlavního okna přehrávače.</p>
+<h1 id="s15">Přehrávač</h1>
+<p>Toto okno je vždy viditelné na obrazovce vašeho počítače, někdy ho skryje okno knihovny, někdy ho skryje i plocha pro čtení textu, ale je to ve skutečnosti hlavní okno, na kterém ovládáte knihu po načtení. Po okně přehrávače se můžete pohybovat pomocí Tab jako po každém jiném okně a určité položky aktivovat klávesou Enter, ale na rozdíl od jiných oken v samotné aplikaci, a i v jiných aplikacích, jsou klávesy šipek a mezerník rezervovány pro jiné funkce, takže pokud pomocí Tab dojdete např. k tlačítku pro záložky, nebudete ho moci aktivovat mezerníkem, výhradně se musí použít klávesa Enter.</p>
+<p>V řadě Tab, ne nutně v tomto pořadí, se na hlavním okně přehrávače nacházejí následující tlačítka a funkce:</p>
+<table class="keys">
+<tr><th>Přehrávání/Pozastavení</th><td>mezerník</td></tr>
+<tr><th>Dopředu</th><td>Shift + vpravo</td></tr>
+<tr><th>Dozadu</th><td>Shift + vlevo</td></tr>
+<tr><th>Hlasitost</th><td>F11 a F12</td></tr>
+<tr><th>Rychlost</th><td>Ctrl + vlevo a Ctrl + vpravo</td></tr>
+<tr><th>Průběh poslechu</th><td>šipky vlevo a vpravo</td></tr>
+<tr><th>Krok navigace</th><td>Shift + šipky nahoru a dolů</td></tr>
+<tr><th>Knihovna</th><td>F3</td></tr>
+<tr><th>Nastavení</th><td>F2</td></tr>
+<tr><th>Vlastnosti</th><td>Alt + Enter</td></tr>
+<tr><th>Označit</th><td>F5</td></tr>
+<tr><th>Záložky</th><td>F6</td></tr>
+<tr><th>Jít na…</th><td>F4</td></tr>
+<tr><th>Nápověda</th><td>F1</td></tr>
+<tr><th>Počítadlo</th><td>F7</td></tr>
+<tr><th>Informační pole</th><td>F8</td></tr>
+</table>
+<p>V informačním poli se můžete dozvědět základní údaje o přehrávání, jako je autor, název, uplynulý čas, strana a ještě něco navíc, samozřejmě v závislosti na formátu knihy, kterou čtete. Jedním stisknutím F8 se obsah obrazovky s informacemi pouze přečte a dvojitým stisknutím se dostane do fokusu čtečky obrazovky, takže si můžete pomocí šipek podrobněji přečíst, co je tam napsáno.</p>
+<p>Klávesou F10 se můžete dozvědět uplynulý čas titulu, který čtete, a rychlým dvojitým stisknutím F10 uslyšíte zbývající čas.</p>
+<p>Všechna tlačítka mají své klávesové zkratky, takže se k nim snadno dostanete, aniž byste příliš chodili po okně, a samotné ovládání knihy, kterou čtete, je více než jednoduché.</p>
+<h2 id="s16">Přehrávání</h2>
+<ul>
+<li>Mezerníkem spouštíte nebo zastavujete přehrávání.</li>
+<li>Šipkami vlevo nebo vpravo „přetáčíte“ o pět sekund nebo, pokud se jedná o textovou knihu, o větu dopředu nebo dozadu.</li>
+<li>Kombinací kláves Ctrl + šipky vlevo nebo vpravo regulujete rychlost přehrávání.</li>
+<li>Klávesami F11 a F12 nastavujete hlasitost, F12 zvyšuje a F11 snižuje.</li>
+<li>Kombinací kláves Shift + nahoru nebo dolů vybíráte krok pro navigaci (titul, kapitola, karta textu, určité minutáže), výběr se mění v závislosti na formátu a struktuře knihy.</li>
+<li>Kombinací kláves Shift + šipky vlevo nebo vpravo se pohybujete zvoleným krokem navigace.</li>
+</ul>
+<p>Zkrátka, spustíte přehrávání vybrané knihy mezerníkem, držením klávesy Ctrl a šipkami vlevo a vpravo regulujete rychlost čtení.</p>
+<p>Pokud chcete něco krátce přetočit vpřed nebo vzad, můžete to udělat šipkami vlevo nebo vpravo po pěti sekundách nebo po jedné větě. Pokud chcete větší navigační kroky, stiskněte Shift, šipkami nahoru a dolů vyberte požadovaný krok a stále držíc Shift šipkami vlevo a vpravo se pohybujte vpřed a vzad po knize zvoleným krokem. Když chcete slyšet, jak a kam postupujete se čtením knihy, v libovolném okamžiku stiskněte F8 a čteč obrazovky vám přečte celý obsah informačního panelu. Pokud si chcete přečíst informační pole podrobněji, údaj po údaji, dvakrát rychle stiskněte F8. Až budete hotovi, opusťte informační pole opětovným dvojitým stisknutím F8 nebo jednoduše Escape, aby klávesy se šipkami opět získaly navigační vlastnosti. Pokud chcete slyšet uplynulý nebo zbývající čas, stiskněte F10 jednou nebo dvakrát.</p>
+<p>Ideou tohoto přístupu k navigaci bylo, aby se uživatel nemusel učit a pamatovat si celou řadu zkratek. Většina navigace je uspořádána na klávesy se šipkami a v kombinaci s modifikačními klávesami Shift a Ctrl je dosaženo toho, že nemusíte šmátrat rukou po klávesnici. Pravou ruku položte na šipky, levou podle potřeby stisknete některý z modifikátorů, a to je celá filozofie navigace. Ti zručnější a vynalézavější pravděpodobně dokážou využít i palec pravé ruky k stisknutí Ctrl nebo Shift na pravé straně klávesnice, ale způsob použití je ponechán na volbě každého. Všechny ostatní zkratky, s výjimkou Alt + Enter pro Vlastnosti, protože to je obvyklá konvence Windows, jsou nastaveny na funkční klávesy, vše s cílem co nejjednoduššího ovládání.</p>
+<h2 id="s17">Jdi na...</h2>
+<p>Tento ovládací prvek, jak už sám název napovídá, slouží k tomu, abyste pár stisknutími nebo kliknutími skočili na určitou část v knize. U nestrukturovaných formátů, jako je prostý text, většina zvukových formátů v jednom souboru nebo špatně formátované strukturované knihy, jej nelze aktivovat, což je potvrzeno i zvukovým signálem. U knih s alespoň trochu slušnou strukturou budete moci přeskakovat na kapitoly, podkapitoly a další strukturní segmenty knihy. Samozřejmě vše závisí na tom, jak výrobci nastavili strukturu v samotné knize. Kromě uvedeného má tento dialog i speciální skupinu pro skok na stránku, pokud ji kniha obsahuje. Po otevření je jako první seznam výše uvedených částí, jedním stisknutím Tab se dostanete na skok na stránku, pokud existují. V poli, které se zobrazí, je již zapsáno číslo stránky, na které se právě nacházíte. Napište požadované číslo stránky a stiskněte Enter pro skok.</p>
+<h2 id="s18">Záložky</h2>
+<p>Dvě klávesy, které přicházejí v páru – Označit pro nastavení záložky a Záložky, kde můžete spravovat nastavené záložky. Při nastavování záložky uslyšíte i krátký zvukový signál, takže máte jistotu, že byla nastavena. Ve správě záložek se můžete pohybovat šipkami a stisknutím Enter skočit na pozici záložky. Kromě toho můžete mazat ty, které nepotřebujete. U zvukových knih je zatím zobrazen pouze čas, a u textových knih i začátek věty, kde jste záložku nastavili. Pokud nemáte nastavené žádné záložky, klávesu Záložky nelze aktivovat, což vám oznámí i zvukový signál.</p>
+<h2 id="s19">Časovač</h2>
+<p>Klasický časovač vypnutí, nic složitého. Vyberete čas, nabízí se 15, 30, 45 a 60 min jako možnosti, další možností je vlastní čas a výchozí hodnota je 90 min, ale to můžete změnit na jakoukoli hodnotu chcete. Následuje výběr toho, co se stane po uplynutí odpočítávání, kde je nabízeno: Zastavit přehrávání, Zastavit a zavřít aplikaci a Zastavit a vypnout počítač.</p>
+<p>Kromě toho je zde i zaškrtávací políčko, které se vás ptá, zda chcete nastavit záložku na začátek odpočítávání. Může být užitečné, abyste se vrátili do doby, kdy jste ještě nespali, a odtud snáze našli místo, kde jste přestali číst.</p>
+<p>Odpočítávání začíná stisknutím tlačítka <strong>Spustit</strong>, dialog se zavře, místo názvu Časovač se na okně přehrávače nyní vidí aktivní odpočet. Pokud znovu aktivujete možnost Časovač, odpočítávání se zruší a v dialogu můžete vybrat nový čas nebo vše zrušit na k tomu určeném tlačítku.</p>
+<p>Přehrávání zastavují dva dialogy: Záložky a Časovač. Když v nich uděláte, co jste chtěli, a potvrdíte návratem do okna přehrávače, přehrávání pokračuje. Nastavení, Knihovna, Jdi na a Vlastnosti nechávají knihu hrát dál — u Vlastností je to i záměrně, protože tam nastavujete věci, které chcete slyšet, zatímco to děláte.</p>
+<p>Několik slov i o ovládání rychlosti a hlasitosti. Hlasitost je na klávesách F11 a F12 — F12 zvyšuje, F11 snižuje — v krocích po 5 %, a když dojdete na konec, uslyšíte zvukový signál. Rychlost se pohybuje v krocích po 0,1x, od 0,5x do 3x, a to stejně pro zvukové i pro textové knihy. Rozdíl je pouze v tom, že 1x u zvukové knihy znamená rychlost nahrávky, a u textové rychlost, kterou zvolený hlas mluví sám o sobě. Zvukový signál uslyšíte, když přejdete přes normální rychlost, respektive u textu přes tu, která je pro daný hlas nastavena jako výchozí.</p>
+<p>Pro vás jako uživatele je nejdůležitější, že Nemoviz Book Reader si pamatuje naprosto vše, co se týká přehrávání knih, které posloucháte. Ukládá se pozice, hlasitost, rychlost u zvukových knih a typ, rychlost, jazyk a výška hlasu TTS u textových knih, ukládají se parametry zpracování zvuku pro zvukové knihy a také parametry braillského a vizuálního zobrazení pro textové knihy. Jinými slovy, ukládá se vše, co jste si nastavili podle svých přání a potřeb pro každou knihu zvlášť.</p>
+<h1 id="s20">Vlastnosti</h1>
+<p>Již bylo několikrát řečeno, že nastavení a parametry pro každou knihu zvlášť se určují ve vlastnostech knihy. Zvukové knihy mají své vlastnosti, textové své a speciální knihy jako Daisy audio + text mají obojí, na dvou samostatných kartách v okně vlastností. Vlastnosti z okna přehrávače spustíte tlačítkem Vlastnosti nebo zkratkou Alt + Enter, z okna knihovny, když jste na názvu knihy, z kontextové nabídky, nebo také zkratkou Alt + Enter.</p>
+<h2 id="s21">Vlastnosti zvuku</h2>
+<p>Když otevřete Vlastnosti zvuku, jako první si všimnete zaškrtávacího políčka Zpracování zvuku. Nemusíte ho zapínat, pokud je pro vás zvuk knihy, kterou posloucháte, přijatelný, ale pokud přesto není, zapnutím Zpracování zvuku se vám možná podaří dovést zvuk na poslechelnou úroveň. Zaškrtnutím políčka začne analýza zvukového záznamu knihy a může, v závislosti na rychlosti stroje, trvat mezi třiceti sekundami a několika minutami. Podle ukazatele průběhu v každém okamžiku vidíte, v jakém je stavu a kolik ještě zbývá. Když je analýza hotová, NBR nastaví níže uvedené filtry do optimálního stavu, takže pokud vám zvuk vyhovuje, jen vše potvrďte tlačítkem OK, pokud si myslíte, že ho ještě můžete doladit, zde je krátký popis toho, co vše lze udělat.</p>
+<p>Následuje sedm filtrů, které vám pomohou nebo nepomohou poněkud vylepšit zvuk audioknih na starých a/nebo špatných nahrávkách. Každé ovládání lze samostatně zapnout nebo vypnout, takže je nemusíte používat všechny najednou. Když zapnete Zpracování zvuku, jako první najdete tlačítko Zrušit, které vrací všechny filtry na výchozí nastavení. Následuje zaškrtávací políčko Přemostit, jehož zapnutím a vypnutím okamžitě uslyšíte rozdíl mezi originálem a vaším nastavením. Zkratka pro přemostění je Ctrl + B, takže se nemusíte neustále vracet od ovládacích prvků k přemostění a zpět.</p>
+<p>První v řadě je <strong>Odstranit dunění</strong>, tzv. Hi Pass. Odstraňuje šumy v nízkém spektru nahrávky, od elektrických zařízení až po náhodné bouchnutí do mikrofonu nebo stolu. Následuje <strong>Snížení šumu</strong>, určené pro šum pásky, špatných mikrofonů a podobné šumy ve vyšším spektru frekvencí. <strong>Ztlumit sykavky</strong> snižuje praskání hlásek jako C, S, Š a podobných, které se na nahrávce zkreslily kvůli příliš blízkému nahrávání nebo zdůrazněným vysokým tónům. <strong>Sjednotit řeč</strong> se pokouší vyrovnat tišší a hlasitější části nahrávky. Dále je zde <strong>Tón</strong>, pětipásmový ekvalizér; pásma jsou označena svými frekvencemi — 200, 800, 1.8k, 3.5k a 5k+ — a poslední je police, což znamená, že zesiluje nebo zeslabuje vše nad sebou, nejen jednu oblast. Na konci je skupina <strong>Hlasitost a pauzy</strong> se dvěma ovládacími prvky: <strong>Automatická hlasitost</strong> (normalizace) zvedne celkovou nahrávku na maximální úroveň bez zkreslení a <strong>Šum v pauzách</strong> (gate) odstraňuje zbývající šumy v mezerách mezi větami.</p>
+<p>Každý filtr má pět úrovní působení, minimální, mírnou, střední, silnou a maximální. Také je třeba zopakovat, že každý lze jednotlivě zapnout nebo vypnout.</p>
+<p>Zpracování zvuku se také ukládá pro každou knihu zvlášť.</p>
+<p>Je nutné podotknout, že toto zpracování zvuku nedělá zázraky a ze špatné nahrávky ze šedesátých let minulého století nedostanete křišťálově čistou a jasnou řeč, jako by byla nahrána ve studiích Abbey Road v Londýně, ale doufejme, že vás to nějak dovede až do konce knihy, aniž byste se zbláznili ze špatné kvality.</p>
+<h2 id="s22">Vlastnosti textu</h2>
+<p>Podobně jako v nastavení řeči zde máte výběr jazyka, hlasu, rychlosti, hlasitosti a výšky hlasu pro vybranou knihu. V Nastavení volíte výchozí hodnoty pro vše, zde nastavujete pro konkrétní titul. Pokud se ptáte proč, nejjednodušším příkladem je, pokud je váš výchozí hlas v nastavení mužský, a vy byste chtěli román psaný z ženské perspektivy číst ženským hlasem, to ve vlastnostech textu změníte konkrétně pro tuto knihu. Všechny ostatní knihy v tomto jazyce se budou nadále otevírat výchozím mužským hlasem, dokud to nezměníte. Také nějaké lehké čtení můžete bez problémů číst rychlostí 1,5x, ale u něčeho těžšího, o čem musíte průběžně přemýšlet, se možná raději vrátíte na 1x nebo pomaleji.</p>
+<p>Zde slovník výslovnosti není, následuje nastavení pro braillské písmo a vizuální nastavení. Pokud aktivujete vizuální zobrazení, získáte výběr, jakým způsobem se bude text zobrazovat na vaší obrazovce. Pokud chcete číst pouze v braillu nebo vizuálně bez řeči, v seznamu hlasů vyberte tuto možnost. V této verzi {beta} jsou braillský a vizuální výstup zašedlé a obsahují poznámku, že nejsou zahrnuty.</p>
+<p>Nemoviz Book Reader nemá výstupní braillskou tabulku a ani ji mít nebude. To, co je na braillském řádku, překládá odečítač obrazovky pomocí tabulky ze svého vlastního nastavení, a to je jediné správné místo pro tuto volbu — dvě tabulky nad jedním řádkem by se mohly pouze rozcházet. Jediná braillská tabulka v Nemoviz Book Reader je <strong>vstupní</strong>: ta, kterou byl načten soubor .brf při importu, a tu měníte ve skupině Braillský originál, která se zobrazí pouze u knihy, která z takového souboru pochází. Tato skupina funguje i v této verzi {beta}.</p>
+<h2 id="s23">Nastavení vizuálního zobrazení</h2>
+<p class="beta">Toto není zahrnuto v první beta verzi. Kontroly a úpravy, které zbývají, vyžadují více času, než kolik má tato verze k dispozici, takže se tato možnost vrací v jednom z příštích vydání.</p>
+<p>V závislosti na výběru v Nastavení nebo Vlastnostech uvidíte na obrazovce menší rámeček přes plochu přehrávače, ve kterém se bude text měnit podobně jako titulky u cizojazyčných filmů nebo seriálů. Pokud vyberete jednu ze zbývajících dvou možností, rámeček bude větší a text bude po obrazovce klouzat jako závěrečné titulky, nebo se bude měnit rámeček po rámečku. V těchto dvou zobrazeních se mluvený řádek zobrazuje jinou barvou.</p>
+<p>V dolní části rámečku můžete měnit písmo, velikost a některé další parametry zobrazení a máte zde i základní tlačítka pro ovládání přehrávání. Všechny klávesové zkratky fungují i v tomto rámečku.</p>
+<p>Pokud jste zvolili použití braillského písma, objeví se malý rámeček, který byl popsán jako první, protože braillské písmo nemůže fungovat bez zobrazení textu, který se přenáší do odečítače obrazovky. Pokud vyberete pouze vizuální zobrazení, máte na výběr typ zobrazení. V obou případech se zobrazení objeví po spuštění přehrávání. Pokud jste nevybrali žádnou z těchto možností a chcete pouze poslouchat, nebo pokud jste zvědaví, jak to vypadá, můžete zobrazení vždy zapnout a vypnout z okna přehrávače klávesou F9.</p>
+<p>A to je zhruba vše, co se týká dokumentu nápovědy. Podrobnější vysvětlení najdete u ovládacích prvků tam, kde je to potřeba, pod malým tlačítkem se znakem otazníku nebo klávesou F1 ve fokusu dané skupiny. Děkujeme, že jste byli trpěliví a došli až na konec textu. Jako malou pozornost za to nyní máte příležitost přečíst si dvě skryté funkce.</p>
+<h1 id="s24">Pro nejvytrvalejší</h1>
+<p>První funkcí je alternativní přidání jednoho nebo více titulů do knihovny. Místo popsaných dialogů Otevřít soubor a Otevřít složku jednoduše přes Windows nebo File Explorer zkopírujte požadovaný obsah do složky knihovny. Při příštím spuštění Nemoviz Book Reader knihovnu aktualizuje a zobrazí nové tituly. Pokud je již spuštěn, stačí v okně knihovny stisknout klávesu Aktualizovat.</p>
+<p>Druhá skrytá funkce je navigační. Kromě všeho výše popsaného se v knize, kterou čtete, můžete pohybovat i klávesovými zkratkami od Ctrl + 1 do Ctrl + 9, které vás umístí na 10, 20 až 90 % knihy.</p>
+
+</body>
+</html>

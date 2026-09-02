@@ -1,0 +1,262 @@
+; Nemoviz Book Reader -käyttöopas.
+; Koneellisesti käännetty tiedostosta docs/help/hr.txt, joka on Gordanin alkuperäisteksti.
+
+TITLE: Nemoviz Book Reader
+LANG: fi
+TOC: Sisällysluettelo
+BETA: Tätä ei ole sisällytetty ensimmäiseen beta-versioon. Jäljellä olevat tarkistukset ja muutokset vaativat enemmän aikaa kuin tässä versiossa on käytettävissä, joten tämä ominaisuus palautetaan jossakin seuraavista julkaisuista.
+
+Tervetuloa Nemoviz Book Reader -ohjelmaan, joka on yli neljänkymmenenviiden eri tiedostomuodon äänikirja- ja e-kirjasoitin kolmella eri ulostulotavalla.
+
+# Järjestelmävaatimukset
+
+## Vähimmäisvaatimukset
+
+- CPU dual core 1,5 GHz, 2 Gt RAM-muistia, 100 Mt tallennustilaa + tilaa kirjastolle,
+- MS Windows 7 SP1 64-bit tai uudempi, .NET Framework 4.8 (Windows 7:ssä se on asennettava erikseen). Tällä kokoonpanolla et valitettavasti voi käyttää OCR-toimintoa tai One Core -ääniä, sillä molemmat ovat käytettävissä vasta Windows 10 -versiosta alkaen.
+
+## Suositellut vaatimukset
+
+- CPU quad core 2,0 GHz, 8 Gt RAM-muistia, 100 Mt SSD-tilaa + tilaa kirjastolle,
+- MS Windows 10 64-bit 22H2 tai uudempi, .NET Framework 4.8 on sisäänrakennettu.
+
+# Yleistä
+
+Nemoviz Book Reader mahdollistaa ääni- ja tekstimuotoisten sähköisten asiakirjojen lukemisen sinulle parhaiten sopivalla tavalla. Tuetut tiedostomuodot, joita voit toistaa, ovat:
+
+Äänimuodot: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au ja .voc.
+
+Tekstimuodot: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw ja .azw3.
+
+Erikoismuodot: Daisy 2.02 audio, Daisy 3 audio, Daisy 2.02 text, Daisy 3 text, Daisy 2.02 audio + text, Daisy 3 audio + text ja epub 3 text + audio.
+
+Pistekirjoitusmuodot: .brf, .brl, .bra, .dxb ja .i55.
+
+Kaikki mainitut tiedostomuodot voit avata suoraan myös .7z-, .rar- ja .zip-arkistoista. Tuemme moniosaisten arkistojen avaamista sekä salasanalla suojattuja arkistoja, mikäli tiedät salasanan.
+
+On mahdollista avata myös kuvamuotoja – niitä muotoja, joissa on tekstikuvia eikä varsinaista tekstiä, kuten skannattu .pdf tai .epub, joka sisältää sivukuvia. Lisäksi on mahdollista avata tavallisia kuvia, kuten .bmp, .jpg, .tif jne., joten jos sinulla on sattumalta kirja, jossa on tällaisia asianmukaisesti numeroituja kuvia, voit avata ne Nemoviz Book Readerin kautta. Kuvissa oleva teksti tunnistetaan automaattisesti Microsoft OCR -toiminnon avulla, ja lyhyen ajan kuluttua saat kirjahyllyysi kohtuullisen luettavan nimikkeen.
+
+Varoitus! Kaikki mainitut tiedostomuodot ja niiden muunnelmat voidaan ladata Nemoviz Book Readeriin, jos niitä ei ole suojattu Digital Rights Management -lisenssillä. NBR ei voi avata DRM-suojattuja nimikkeitä, joten jos sinulla on sellaisia, voit toistaa niitä siihen tarkoitetulla laitteisto- tai ohjelmistosoittimella. Lisätietoja saat taholta, jolta olet hankkinut kyseiset nimikkeet.
+
+Kaikkia yllä olevan listan tiedostomuotoja voit toistaa äänenä, visuaalisesti ja jopa lukea pistekirjoituksena, mikäli sinulla on siihen tarvittavat laitteet. Tarvitset vain Windows-yhteensopivan tietokoneen, näytön ja mahdollisuuksien mukaan asennetun pistenäytön, joka on määritetty ruudunlukuohjelmasi kanssa.
+
+Kaiken edellä mainitun lisäksi NBR mahdollistaa kirjojen koneellisen kääntämisen käyttämällä erilaisia AI LLM -palveluita. Joillakin on ilmaiskiintiöitä, toisista on maksettava, mutta näin nämä palvelut toimivat. Nemoviz Book Reader Windowsille on täysin ilmainen käyttää, mutta ulkoiset palvelut eivät ole meidän hallinnassamme. Yhdistämme sinut sovelluksen kautta ulkoisiin palveluihin ja annamme mahdollisuuden suorittaa tekstin kääntämisprosessi soittimen kautta, mutta rekisteröityminen palveluihin, maksutapojen asettaminen ja kaikki muu on sinun vastuullasi. Kun olet tehnyt kaiken tämän, sinun on haettava API-avain käyttämiesi palveluiden sivuilta, liitettävä se soittimen asetuksiin sille varattuun paikkaan, ja me hoidamme loput.
+
+Nemoviz Book Reader on testattu ja todettu yhteensopivaksi Jaws for Windows- ja NVDA-ruudunlukuohjelmien kanssa, mutta sen pitäisi toimia ongelmitta myös muiden kanssa. Saavutettavuus on perusta, jolle tämä sovellus on rakennettu, eikä ongelmia pitäisi ilmetä, jos käytät jotain muuta ruudunlukuohjelmaa.
+
+Kaikki pikanäppäimet on sisäänrakennettu itse sovellukseen, ja niitä voi käyttää myös ilman ruudunlukuohjelmaa. Ruudunlukuohjelma on olemassa vain antamassa palautetta siitä, mitä soittimessa tapahtuu, ja siirtämässä tekstisisältöä pistenäytölle, jos käytät sellaista. Kaikkea muuta soittimen toimintaa voit käyttää myös ilman ruudunlukuohjelmaa.
+
+Pistekirjoitusmuotoja tuotaessa on tärkeää tietää, että NBR käyttää LibLouis-teknologiaa ja siihen kuuluvia taulukoita. Emme voi taata, että kaikki toimii täydellisesti jokaisen kielen kohdalla, emmekä voi tehdä korjauksia taulukoihin jokaiselle kirjalle erikseen; paljon riippuu itse kirjojen valmistuksesta ja tuotannosta. Jos kirjastoon tuonnin tulos ei ole hyvä, voit muuttaa kirjan ominaisuuksista pistekirjoitustaulukkoa, jos kyseiselle kielelle on saatavilla useampia. Jos se onnistuu, hienoa; jos ei, olemme pahoillamme. Kaikki ei ole kiinni soittimesta, vaan osa vastuusta on myös kirjojen valmistajilla ja pistekirjoitustaulukoiden tekijöillä.
+
+# Ensimmäinen käynnistys
+
+Kun käynnistät Nemoviz Book Reader -sovelluksen ensimmäisen kerran, se tarkistaa, haluatko säilyttää vai muuttaa kirjastosi kansion sijaintia. Huomaa, että oletussijainti on Windowsin käyttäjäkansiossa, joka sijaitsee yleensä C-asemalla. Tämä kansio voi ajan myötä täyttyä ja viedä tilaa järjestelmälevyltä. Jos siirrät sen toiselle osiolle tai levylle, mikään ei muutu olennaisesti, mutta varmistat, ettei järjestelmäsi tila lopu kesken. Lisäksi kirjaston pitäminen toisella levyllä tai osiolla varmistaa, että kirjakokoelmasi pysyy turvassa, jos järjestelmä rikkoutuu.
+
+Tämän jälkeen avautuu yksi sovelluksen kahdesta ikkunasta, eli kirjastoikkuna. Se avautuu nyt asennuksen jälkeisessä käynnistyksessä ja aina, kun ladattua kirjaa ei ole tai kirjasto on tyhjä. Tällä kertaa voimme sulkea sen, sillä asennuksen jälkeen on hyvä käydä ensin läpi asetukset ja tehdä tarvittavat määritykset.
+
+# Asetukset
+
+Tämä ikkuna koostuu useista välilehdistä, ja alta löydät katsauksen jokaiseen niistä. Se, mikä ehkä erottaa tämän muista asetusikkunoista, on se, että useimpien asetusten vieressä on pieni ohjepainike, joka avaa lisäikkunan kyseisen toiminnon kuvauksella. Saat apua jokaisessa vaiheessa, eikä lukemasi asiakirja tarvitse olla 250-sivuinen.
+
+## Yleiset
+
+Ensimmäinen täällä määritettävä kohta on kieli. Jos sovelluksessa on järjestelmäsi kieli, se valitaan automaattisesti ja käyttöliittymä on kyseisellä kielellä. Jos ei, NBR näytetään englanniksi. Jos tämäkään ei miellytä, avaa kieliluettelo ja valitse jokin muu kieli.
+
+Toinen vaihtoehto on kirjaston sijainnin valinta. Kävimme tämän jo läpi ensimmäisen käynnistyksen yhteydessä. Jos et silloin vielä päättänyt, nyt on ihanteellinen tilaisuus.
+
+Seuraavana on kaksi valintaruutua näppäimistön multimediatoimintojen ottamiseksi käyttöön tai poistamiseksi käytöstä, jos sellaiset löytyvät. Ne koskevat myös kuulokkeiden painikkeita. Ensimmäinen kohta on käyttöönotto, toinen kohta määrittää, toimivatko ne maailmanlaajuisesti vai vain silloin, kun NBR on kohdistettuna.
+
+Seuraavaksi on valintaruutu, jolla valitaan, käytetäänkö kirjastossa tiedostojen metatietoja vai näytetäänkö tekijöiden ja julkaisujen nimet kansion tai tiedoston nimen perusteella.
+
+Seuraavana on valintaruutu *Tarkista päivitykset automaattisesti*. Kun se on käytössä, NBR kysyy kerran päivässä, onko uudempi versio julkaistu, ja ilmoittaa sinulle vain, jos on; se ei lähetä mitään tietoja sinusta tai kirjoistasi. Jos poistat sen käytöstä, NBR ei ota yhteyttä verkkoon itsestään, ja voit silti pyytää tarkistusta milloin tahansa – kirjastossa, Ohje-valikosta kohdasta *Tarkista päivitykset*.
+
+Ja lopuksi valitaan ulkoasu, jolla Nemoviz Book Reader näytetään. Tarjolla on kaksi vaihtoehtoa. *Järjestelmän värit* antaa soittimelle klassisen ulkoasun ja väripaletin, jota käytät järjestelmässäsi; tämä on myös se, mitä saat, jos korkea kontrasti on käytössä, sillä NBR ei silloin piirrä mitään omaa, vaan antaa järjestelmäsi teeman näkyä. *NBR-malli* antaa soittimelle hieman modernimman ulkoasun. Jos et ole valinnut, NBR päättää itse: korkea kontrasti saa Järjestelmän värit, kaikki muu NBR-mallin.
+
+## Puhe ja pistekirjoitus
+
+Ensimmäinen vaihtoehto on sarja säätimiä tekstikirjojen kielen ja äänen valintaan. Valitsemme kielen ja sitten äänen kyseiselle kielelle. Asetamme äänenvoimakkuuden, nopeuden ja korkeuden ja vahvistamme painamalla Käytä-painiketta. Valitsemme vielä toisen kielen, äänen ja muut parametrit ja painamme uudelleen Käytä. Näin valitsemme oletusäänen tietylle kielelle, ja jokainen uusi kirja, joka avataan kielen määrittämisen yhteydessä, saa oletuksena valitsemamme äänen.
+
+Ehkä hieman piilotettu vaihtoehto, mutta meillä ei ollut parempaa ideaa. Äänenvalinnan yhdistelmäruudussa viimeinen vaihtoehto on *Lisää uusia kieliä*. Tämän vaihtoehdon aktivoiminen avaa ikkunan, jossa voit valita yhden tai useamman Microsoft One Core -äänen ja asentaa ne vahvistuksen jälkeen Windows Update -palvelun kautta. Tämä voi, kuten OCR-kielten lisäämisessä, kestää kauemmin tai lyhyemmän aikaa riippuen päivityspalvelinten kuormituksesta. On mahdollista, että hallinnollisista asetuksistasi riippuen saat UAC-valintaikkunan, joka sinun on vahvistettava.
+
+Tietenkin kaikki mainitut parametrit voidaan asettaa toisin, ja vieläpä jokaiselle kirjalle erikseen, mutta se tehdään kyseisen kirjan ominaisuuksissa; tässä asetamme yleiset parametrit.
+
+Seuraava vaihtoehto on ääntämissanakirja, jonka olet varmasti jo nähnyt. Sinulla on mahdollisuus korjata ääntämistä maailmanlaajuisesti, kielen ja äänen mukaan, ja kaikille kolmelle valinnalle löydät tämän tyyppiselle sanakirjalle tyypilliset asetukset.
+
+Seuraavana on valintaruudut pistekirjoitus- ja visuaalisen näytön kytkemiseksi päälle ja pois päältä. Kun kukin niistä on päällä, se tarjoaa tiettyjä lisäasetuksia, joihin löydät ohjeet paikan päällä. Tässä beta-versiossa nämä kaksi ruutua ovat harmaana ja niissä on huomautus, että niitä ei ole otettu käyttöön; ne palaavat jossakin seuraavista julkaisuista.
+
+## Laitteet
+
+Tässä valitset äänikortin, jonka kautta haluat kuunnella kirjoja. Jos sinulla on vain yksi, sinun ei tarvitse muuttaa mitään, koska valinnanvaraa ei ole. Sen alapuolella on valintaruutu, jolla estetään äänikortin siirtyminen lepotilaan. Jos huomaat toistossa pätkimistä, erityisesti tekstimuotoisten kirjojen kohdalla, tai jos lauseiden tai kappaleiden ensimmäiset sanat kuulostavat katkeavan, ota tämä toiminto ehdottomasti käyttöön.
+
+Jos tietokoneessasi on vielä optinen asema ja mahdollisesti kokoelma vanhempia äänikirjoja perinteisessä CD-audio-muodossa, voit vapaasti ottaa käyttöön vaihtoehdon Käytä optista asemaa. Tällöin aktivoit laitetuen ja voit alkaa kuunnella kirjoja CD-levyiltä.
+
+## Lisäasetukset
+
+Tällä välilehdellä valitset kielen tai kielet, joita käytetään kuvatiedostojen tekstintunnistukseen tuonnin yhteydessä. Nemoviz Book Reader käyttää sisäänrakennettua Microsoft OCR -työkalua, joka on saatavilla Windows 10- ja 11-käyttöjärjestelmissä. Se tukee tällä hetkellä 35 kieltä, joiden luettelon näet painamalla *Lisää kieli* -painiketta. Kun valitset haluamasi kielet ja painat Asenna, kieliä ei asenneta välittömästi. NBR ei asenna niitä suoraan, vaan ne asennetaan Windows Update -palvelun kautta, ja niiden asentuminen voi viedä jonkin aikaa. Lisäksi järjestelmäasetuksistasi riippuen saattaa avautua Käyttäjätilien valvonta -ikkuna, jossa sinun on vahvistettava kielen tai kielten asennus.
+
+Asennuksen jälkeen, kun tuot kuvamuotoisen tiedoston, voit valita yhdistelmäruudusta kielen, jolla haluat tunnistaa avattavan kirjan tekstin. Tämä voi myös kestää hetken, riippuen koneen nopeudesta ja kirjan koosta, mutta voit seurata edistymistä edistymispalkista.
+
+Optisen tekstintunnistuksen asetusten lisäksi voit valita täältä LLM-palvelut kääntämistä varten. Tätä tekstiä kirjoitettaessa vaihtoehtoina ovat Google Gemini, DeepSeek, DeepSeek suuremmalla mallilla, kolme OpenAI GPT -tasoa sekä Microsoft Azure. Kuten aiemmin kirjoitimme, nämä palvelut vaativat API-avaimet tai muunlaisen valtuutuksen; voit lukea lisää Ohje-valikon kohdasta Palvelut ja tilit.
+Käännössäännöt-painike avaa ikkunan, jossa on ohjeet käännösmalleille, jotta haluamasi sisältö kääntyisi mahdollisimman laadukkaasti. On olemassa ohjejoukko, joka koskee kaikkia kieliä, sekä erilliset ohjejoukot tuetuille kielille. Tässä ikkunassa voit muokata olemassa olevia ja lisätä ohjeita uusille kielille. Kun muokkaat sääntötiedostoja, ne avautuvat Muistio-ohjelmassa, ja tekstin yläosassa on selitetty kaikki sääntöjen muokkaamiseen ja lisäämiseen liittyvä.
+
+Kääntämismahdollisuuden lisäksi käytettävissä on myös muita pilvipohjaisia ääniä; tällä hetkellä tuemme Google Cloud Chirp 3- ja Microsoft Azure Neural -ääniä. Näiden äänien käyttöönotto on samankaltainen kuin käännöspalveluiden, ja siitä on kerrottu lisää Ohje-valikon kohdassa Palvelut ja tilit.
+
+Huomaathan, että nämä äänet ovat maksullisia. Google tarjoaa ilmaiseksi miljoona merkkiä lukemista varten, mikä vastaa noin kahta 500-sivuista keskivertokirjaa. Microsoft tarjoaa puolet vähemmän, 500 000 merkkiä, mikä vastaa noin yhtä keskivertokirjaa. Kun ilmainen merkkikiintiö on käytetty, luottokorttiasi veloitetaan, ja lukemisen hinta on noin 8,00–15,00 dollaria per keskivertokirja palvelusta riippuen.
+
+Väärinkäsitysten ja tahattomien kulujen välttämiseksi olemme rajoittaneet pilviäänten asetuksia. Puheen ja pistekirjoituksen asetuksissa et näe näitä ääniä etkä voi asettaa niitä oletusääniksi; ne näkyvät vain valitun kirjan ominaisuuksissa, mutta ne on ensin otettava käyttöön lisäasetuksista. Kirjan ominaisuuksissa voit valita jonkin näistä äänistä kyseisen kirjan oletusääneksi, ja tämä valinta koskee vain kyseistä kirjaa.
+
+Koska pilviääniä käytettäessä merkkejä kuluu myös silloin, kun kelaat, toistat tiettyä kirjan kohtaa tai muulla tavoin kulutat jo luettuja merkkejä, NBR:ssä on välimuisti (cache), johon luettu sisältö tallennetaan. Näin kelaus ja vastaavat toiminnot eivät kuluta merkkejä uudelleen. Tämä vaihtoehto mahdollistaa myös sen, että kirjan lukemisen jälkeen voit viedä sen MP3-muotoon ja saada siten perinteisen äänikirjan.
+
+# Kirjasto
+
+Tämä ikkuna ei ole jatkuvasti näkyvissä; ensimmäisen käynnistyksen jälkeen se avautuu vain tarvittaessa, ja siellä hallinnoit sähköisten julkaisujen kokoelmaasi. Voit lisätä kirjoja yksitellen tai ryhmissä, poistaa niitä sekä merkitä kirjoja luetuiksi, lukemattomiksi tai suosikeiksi. Voit järjestää näkymän useiden kriteerien perusteella, suodattaa nimikkeitä tilan mukaan (luettu, lukematon...) ja tehdä hakuja.
+
+Jokaisen kirjaston nimikkeen kohdalla voit painamalla Tab-näppäintä lukea tiedot kyseisestä teoksesta: nimi, kirjailija, julkaisija ja tiedostomuoto, missä kohtaa olet, kuinka monta prosenttia kirjasta olet lukenut, kuinka paljon aikaa on jäljellä sekä muita tietoja. Jos mahdollista, saat myös lyhyen kuvauksen kirjasta.
+
+## Nimikkeiden lisääminen
+
+Tiedosto-pudotusvalikosta löydät kaksi kohtaa: Avaa tiedosto (Ctrl + O) ja Avaa kansio (Ctrl + Shift + O). Jos olet ottanut käyttöön optisen aseman tuen Asetuksissa, löydät myös vaihtoehdon Avaa Audio CD. Tämän lisäksi on olemassa vaihtoehto kuvapohjaisen teoksen uudelleentunnistukselle, vaihtoehto äänikirjan luomiselle sekä käännösvaihtoehto. Valikossa on myös kohta, jota ei kannata koskea, ellei se ole välttämätöntä: *Tyhjennä kirjasto*. Se kertoo nimensä mukaisesti, mitä se tekee, ja aktivoinnin jälkeen saat vielä yhden varoituksen. Jos vahvistat kaiken loppuun asti, kirjastosi tyhjennetään, kaikki tiedot kirjanmerkeistä ja lukemisen jatkamiskohdista poistetaan, ja myös kirjojen kieli- ja nopeusasetukset poistetaan. Siksi kannattaa välttää tätä kohtaa, ellet ole täysin varma, että haluat tyhjentää kirjaston.
+Vaihtoehto Avaa kirjastokansio avaa kokoelmasi sijainnin Resurssienhallinnassa.
+
+Ensimmäisellä vaihtoehdolla voit avata yksittäisen tiedoston (MP3-kirja yhtenä tiedostona, EPUB-asiakirja tai ncc.html-tiedosto Daisy-teokselle), ja kansion avaamisella voit avata äänikirjan, joka on jaettu useaan tiedostoon yhdessä kansiossa. Lisäksi, jos käytät kansion avaamista, voit tuoda myös suuremman määrän eri tiedostoja eli usean teoksen kokoelman. Nemoviz Book Reader sisältää sisäänrakennettuja sääntöjä lajittelua varten ja tekee parhaansa lajitellakseen ja järjestääkseen tällaisen kansion mahdollisimman hyvin.
+
+Avaa Audio CD käynnistää kirjan toiston optiselta asemaltasi ja palauttaa sinut soittimen ikkunaan. Perinteisen CD-levyn käyttö ei tuo kirjaa kirjastoon, se mahdollistaa vain toiston Nemoviz Book Readerin kautta.
+
+Perinteisten tiedostojen lisäksi NBR voi, toisin kuin suurin osa tämän tyyppisistä sovelluksista, avata myös pakattuja tiedostoja eli arkistoja. Tuettuja arkistomuotoja ovat .zip, .rar ja .7z, ja yksiosaisten arkistojen lisäksi voidaan avata myös moniosaisia arkistoja sekä salasanalla suojattuja arkistoja, edellyttäen että tiedät kyseisen salasanan.
+
+Toisin sanoen, mistä tahansa ja millä tahansa tavalla saatkin kirjan, joko vakiotiedostona tai useampana, pakattuna arkistoon tai ei, voit tuoda sen kirjastoon ilman esivalmisteluja suoraan sen nykyisestä sijainnista. Nemoviz Book Reader kopioi avaamasi tiedostot kirjaston kansioon sille varattuun paikkaan, purkaa arkistot ja tallentaa ne kirjastoon vakiomuodossa sekä tallentaa kaikki olennaiset tiedot tuomistasi teoksista. Alkuperäiset tiedostosi pysyvät muuttumattomina sijainneissaan, ja kaikki kirjojen myöhemmät toiminnot tapahtuvat NBR-kopioille kirjaston kansiossa.
+
+Uudelleen-OCR-vaihtoehto on tarkoitettu kuvapohjaisen teoksen optisen tunnistuksen toistamiseen toisella kielellä, jos et ole tyytyväinen tunnistustulokseen kirjaa avattaessa.
+
+Käännä kirja -vaihtoehto avaa valintaikkunan, jossa valitset lähdekielen, kielen jolle haluat kirjan kääntää, käytettävän palvelun tai palvelut sekä kentän, johon voit kirjoittaa perusohjeita siitä, mitä ja miten kääntää.
+
+Vie äänikirjana -vaihtoehto tekee juuri sen, mitä sen nimi sanoo. Riippumatta siitä, käytätkö jotakin asennetuista puhesyntetisaattoreista vai pilviääniä, voit muuttaa tekstikirjan äänikirjaksi ja viedä sen haluamaasi sijaintiin. Kirja viedään yhtenä .mp3-tiedostona, parametrit ovat samat kuin käyttämäsi TTS-moottorin, ja tallenteen laatu vastaa suoran kuuntelun laatua. Ennen aloitusta NBR pyytää vahvistusta ja kertoo, kuinka kauan luominen kestää.
+
+## Kirjahylly
+
+Kun liikut kirjahyllyssä, eli kirjastoikkunan osassa jossa teosluettelosi sijaitsee, nuolinäppäimillä ylös tai alas, kuulet kirjastossasi olevat teokset. Se, miten asiakirjan nimi lausutaan, riippuu useasta asiasta. NBR yrittää tuonnin yhteydessä poimia kirjailijan nimen, teoksen nimen ja muita tietoja kirjan sisältävän tiedoston metatiedoista. Jos näitä tietoja ei ole, NBR nimeää kirjan kansion tai tiedoston nimen mukaan.
+
+Jos mikään näistä näkymistä ei miellytä, voit nimetä valitun kirjan haluamallasi tavalla kirjan nimen kohdalla avautuvasta kontekstivalikosta tai yksinkertaisemmin painamalla F2. Nimeämisen yhteydessä löydät kaksi erillistä kenttää kirjailijan nimelle ja teoksen nimelle, ja kun olet kirjoittanut ne, vahvista syöttö vahvistuspainikkeella tai paina yksinkertaisesti Enter.
+
+Perustietojen, kuten kirjailijan nimen ja teoksen nimen lisäksi, voit nuolinäppäimillä luettelossa liikkuessasi kuulla myös kirjan tilan: *Luettavana*, *Kesken*, *Luettu* ja *Lukematon*. Jos olet merkinnyt teoksen suosikiksi, kuulet myös sen. Kontekstivalikosta, josta löytyy jo mainittu nimeämistoiminto, löydät myös kohdat Merkitse luetuksi, Merkitse lukemattomaksi, Merkitse suosikiksi, Poista ja Ominaisuudet, mutta niistä lisää myöhemmin.
+
+Kun olet pysähtynyt jonkin nimikkeen kohdalle, voit siirtyä Tab-näppäimellä osioon, jossa voit ylä- ja alanuolilla saada runsaasti tietoa kirjasta. Tiedot keskittyvät siihen, mihin olet jäänyt, kuinka monta prosenttia kirjasta on luettu ja kuinka paljon on jäljellä, aikaan, missä kirja on julkaistu ja tuotettu, äänitteen teknisiin tietoihin jne. Nämä tiedot riippuvat kirjan muodosta ja vaihtelevat nimikkeittäin.
+
+Kun liikut edelleen kirjaston ikkunassa, tulet hakukenttään, joka toimii yksinkertaisella periaatteella: se etsii kirjoittamasi merkkijonon kirjahyllyn nimikkeistä. Jos kirjoitat ”ana”, se löytää varmasti kirjailijoita, joiden nimi on Ana, mutta se löytää myös teoksen 7000 päivää Siperiassa.
+
+Hakukentän jälkeen on suodatinyhdistelmäruutu, jossa voit määrittää, mitkä kirjat näytetään. Oletusarvoisesti näkyvissä ovat aina kaikki kirjat, mutta voit vaihtaa suodattimen asetuksiin Luettavana, Lukematon, Luettu ja Suosikki, jolloin kirjahyllyn näkymä päivittyy valintasi mukaan.
+
+## Lajittelu
+
+Tässä valikossa on vain tavallisia asioita, jotka olet nähnyt jo lukemattomia kertoja. Voit valita järjestyksen, jossa nimikkeet näkyvät kirjastossa: aakkosjärjestys, lisäyspäivämäärä, muoto ja tila. Tila tarkoittaa lukematon, luettu jne. Jokaisen valinnan voi näyttää nousevassa tai laskevassa järjestyksessä.
+
+Kun olet tutustunut kirjastoikkunan sisältöön ja toimintoihin, on aika valita kirja hyllystä ja siirtyä Tab-näppäimellä Lataa-painikkeeseen tai painaa Enter-näppäintä ollessasi nimikkeen kohdalla. Valitsemasi kirja on aina kirjahyllyn yläpuolella erillisessä osiossa Parhaillaan luettavana. On huomioitava, että parhaillaan luettavaa eli aktiivista, soittimeen ladattua kirjaa ei voi poistaa samalla tavalla kuin muita hyllyn kirjoja. Aktiivinen kirja on merkittävä kontekstivalikon kautta luetuksi, jotta se siirtyy Parhaillaan luettavana -tilasta Luettu-tilaan, ja vasta sitten voit poistaa sen.
+
+Yleisesti ottaen, kun painat Enter-näppäintä kirjan nimikkeen kohdalla tai Lataa-painiketta, kirjasto sulkeutuu ja palaat soittimen pääikkunaan.
+
+# Soitin
+
+Tämä ikkuna on aina näkyvissä tietokoneesi näytöllä. Joskus kirjastoikkuna tai tekstinlukunäkymä peittää sen, mutta se on varsinainen pääikkuna, josta hallitset kirjaa lataamisen jälkeen. Voit liikkua soittimen ikkunassa Tab-näppäimellä kuten missä tahansa muussa ikkunassa ja aktivoida tiettyjä kohteita Enter-näppäimellä. Toisin kuin muissa sovelluksen ikkunoissa tai muissa sovelluksissa, nuolinäppäimet ja välilyönti on varattu muille toiminnoille. Jos siis siirryt Tab-näppäimellä esimerkiksi kirjanmerkkipainikkeeseen, et voi aktivoida sitä välilyönnillä, vaan on käytettävä ainoastaan Enter-näppäintä.
+
+Tab-järjestyksessä, ei välttämättä tässä järjestyksessä, soittimen pääikkunassa on seuraavat painikkeet ja toiminnot:
+
+| Toisto/Tauko | välilyönti |
+| Eteenpäin | Shift + oikea |
+| Taaksepäin | Shift + vasen |
+| Äänenvoimakkuus | F11 ja F12 |
+| Nopeus | Ctrl + vasen ja Ctrl + oikea |
+| Kuuntelun edistyminen | vasen ja oikea nuoli |
+| Navigointiaskel | Shift + ylä- ja alanuoli |
+| Kirjasto | F3 |
+| Asetukset | F2 |
+| Ominaisuudet | Alt + Enter |
+| Merkitse | F5 |
+| Kirjanmerkit | F6 |
+| Siirry kohtaan… | F4 |
+| Ohje | F1 |
+| Laskuri | F7 |
+| Tietokenttä | F8 |
+
+Tietokentästä saat perustietoja toistosta, kuten kirjailijan, nimikkeen, kuluneen ajan, sivun ja muuta, riippuen tietenkin luettavan kirjan muodosta. Yhdellä F8-näppäimen painalluksella tietoruudun sisältö luetaan ääneen, ja kaksoispainalluksella se siirtyy ruudunlukuohjelman fokukseen, jolloin voit lukea nuolinäppäimillä tarkemmin, mitä siinä lukee.
+F10-näppäimellä saat tietää luettavan nimikkeen kuluneen ajan, ja nopealla kaksoispainalluksella F10-näppäintä kuulet jäljellä olevan ajan.
+
+Kaikilla painikkeilla on omat pikanäppäimensä, joten pääset niihin helposti ilman, että joudut liikkumaan liikaa ikkunassa, ja itse luettavan kirjan hallinta on enemmän kuin yksinkertaista.
+
+## Toisto
+
+- Välilyönnillä käynnistät tai pysäytät toiston.
+- Vasemmalla tai oikealla nuolella ”kelaat” viisi sekuntia tai, jos kyseessä on tekstikirja, lauseen eteen- tai taaksepäin.
+- Näppäinyhdistelmällä Ctrl + vasen tai oikea nuoli säädät toistonopeutta.
+- F11- ja F12-näppäimillä säädät äänenvoimakkuutta; F12 nostaa ja F11 laskee.
+- Näppäinyhdistelmällä Shift + ylä- tai alanuoli valitset navigointiaskeleen (nimike, luku, tekstikortti, tietyt minuuttimäärät); valinta muuttuu kirjan muodosta ja rakenteesta riippuen.
+- Näppäinyhdistelmällä Shift + vasen tai oikea nuoli liikut valitulla navigointiaskeleella.
+
+Lyhyesti sanottuna: käynnistä valitun kirjan toisto välilyönnillä ja säädä lukunopeutta pitämällä Ctrl-näppäintä painettuna ja käyttämällä vasenta ja oikeaa nuolta.
+
+Jos haluat kelata lyhyesti eteen- tai taaksepäin, voit tehdä sen vasemmalla ja oikealla nuolinäppäimellä viiden sekunnin tai yhden lauseen verran. Jos haluat käyttää suurempia navigointiaskelia, paina Shift, valitse haluamasi askel ylä- ja alanuolinäppäimillä ja siirry kirjassa eteen- tai taaksepäin valitulla askeleella pitämällä Shift pohjassa ja käyttämällä vasenta ja oikeaa nuolinäppäintä. Kun haluat kuulla, miten ja mihin suuntaan etenet kirjassa, paina milloin tahansa F8, niin ruudunlukuohjelma lukee koko tietoruudun sisällön. Jos haluat lukea tietokentän tarkemmin, kohta kohdalta, paina F8 kahdesti nopeasti. Kun olet valmis, poistu tietokentästä painamalla uudelleen kahdesti F8 tai yksinkertaisesti Escape, jotta nuolinäppäimet palautuvat navigointitilaan. Jos haluat kuulla kuluneen tai jäljellä olevan ajan, paina F10 kerran tai kahdesti.
+
+Tämän navigointitavan ideana oli, ettei käyttäjän tarvitse opetella ja muistaa suurta määrää pikanäppäimiä. Suurin osa navigoinnista on asetettu nuolinäppäimiin, ja yhdistämällä ne Shift- ja Ctrl-muuntonäppäimiin on saavutettu tilanne, jossa kättä ei tarvitse liikuttaa ympäri näppäimistöä. Aseta oikea käsi nuolinäppäimille, paina vasemmalla tarvittaessa jotakin muuntonäppäintä, ja siinä on koko navigoinnin filosofia. Taitavammat ja näppärämmät käyttäjät voivat todennäköisesti käyttää oikean käden peukaloa Ctrl- tai Shift-näppäimen painamiseen näppäimistön oikealta puolelta, mutta käyttötapa on jätetty jokaisen omaan valintaan. Kaikki muut pikanäppäimet, lukuun ottamatta Alt + Enter -yhdistelmää Ominaisuudet-toiminnolle, joka on yleinen Windows-käytäntö, on asetettu toimintonäppäimiin mahdollisimman yksinkertaisen hallinnan vuoksi.
+
+## Siirry kohtaan...
+
+Tämä hallintatoiminto, kuten nimikin kertoo, on tarkoitettu tiettyyn kohtaan kirjassa hyppäämiseen muutamalla painalluksella tai napsautuksella. Rakenteettomissa muodoissa, kuten tavallisessa tekstissä, useimmissa yhden tiedoston äänimuodoissa tai huonosti muotoilluissa rakenteellisissa kirjoissa, sitä ei voi aktivoida, mistä ilmoitetaan äänimerkillä. Kirjoissa, joissa on edes kohtuullinen rakenne, voit siirtyä lukuihin, alalukuihin ja muihin kirjan rakenteellisiin osiin. Tietenkin kaikki riippuu siitä, miten valmistajat ovat rakenteen kirjaan asettaneet. Edellä mainitun lisäksi tässä valintaikkunassa on erityinen ryhmä sivulle hyppäämistä varten, jos kirjassa on sivuja. Avaamisen jälkeen näkyvissä on ensin luettelo edellä mainituista osista; yhdellä Tab-näppäimen painalluksella siirryt sivulle hyppäämiseen, jos niitä on. Kentässä, joka tulee näkyviin, on jo valmiina sen sivun numero, jolla olet tällä hetkellä. Kirjoita haluamasi sivunumero ja paina Enter hypätäksesi kyseiselle sivulle.
+
+## Kirjanmerkit
+
+Kaksi parina tulevaa painiketta – Aseta kirjanmerkki ja Kirjanmerkit, jossa voit hallita asetettuja kirjanmerkkejä. Kun asetat kirjanmerkin, kuulet lyhyen äänimerkin, joten tiedät sen olevan asetettu. Kirjanmerkkien hallinnassa voit liikkua niiden välillä nuolinäppäimillä ja hypätä kirjanmerkin kohtaan painamalla Enter. Lisäksi voit poistaa tarpeettomia kirjanmerkkejä. Äänikirjojen kohdalla näkyvissä on toistaiseksi vain aika, ja tekstikirjojen kohdalla myös sen lauseen alku, johon olet kirjanmerkin asettanut. Jos sinulla ei ole asetettuja kirjanmerkkejä, Kirjanmerkit-painiketta ei voi aktivoida, mistä ilmoitetaan äänimerkillä.
+
+## Ajastin
+
+Klassinen uniajastin, ei mitään monimutkaista. Valitset ajan; tarjolla on 15, 30, 45 ja 60 minuuttia, seuraava vaihtoehto on vapaavalintainen, ja oletusarvona on 90 minuuttia, mutta voit muuttaa sen miksi tahansa haluamaksesi arvoksi. Seuraavaksi valitaan, mitä tapahtuu ajastimen päätyttyä: tarjolla on Pysäytä toisto, Pysäytä ja sulje sovellus sekä Pysäytä ja sammuta tietokone.
+
+Lisäksi on valintaruutu, joka kysyy, haluatko asettaa kirjanmerkin ajastimen alkamishetkeen. Tästä voi olla hyötyä, jotta voit palata aikaan ennen nukahtamista ja löytää sieltä helpommin kohdan, johon lukeminen jäi.
+
+Ajastin käynnistyy painamalla *Käynnistä*-painiketta, valintaikkuna sulkeutuu, ja soittimen ikkunassa näkyy Ajastin-nimen sijasta aktiivinen laskuri. Jos aktivoit Ajastin-toiminnon uudelleen, ajastin peruuntuu ja voit valita valintaikkunassa uuden ajan tai peruuttaa kaiken sitä varten tarkoitetulla painikkeella.
+
+Toiston pysäyttävät kaksi valintaikkunaa: Kirjanmerkit ja Ajastin. Kun olet tehnyt niissä haluamasi toiminnot ja vahvistanut paluun soittimen ikkunaan, toisto jatkuu. Asetukset, Kirjasto, Siirry kohtaan ja Ominaisuudet antavat kirjan soida edelleen — Ominaisuudet-kohdassa tämä on tarkoituksellista, koska siellä säädät asioita, joita haluat kuulla samalla kun teet muutoksia.
+
+Muutama sana myös nopeuden ja äänenvoimakkuuden säätimistä. Äänenvoimakkuus on F11- ja F12-näppäimissä — F12 nostaa, F11 laskee — 5 %:n askelin, ja kun saavut loppuun, kuulet äänimerkin. Nopeus muuttuu 0,1x-askelin, välillä 0,5x–3x, ja tämä koskee samalla tavalla sekä ääni- että tekstikirjoja. Erona on vain se, että 1x äänikirjan kohdalla tarkoittaa tallenteen nopeutta ja tekstikirjan kohdalla nopeutta, jolla valittu ääni puhuu luonnostaan. Kuulet äänimerkin, kun ylität normaalin nopeuden tai tekstin kohdalla kyseiselle äänelle määritetyn nopeuden.
+
+Käyttäjän kannalta tärkeintä on, että Nemoviz Book Reader muistaa aivan kaiken kuuntelemiisi kirjoihin liittyvän. Ohjelma muistaa kohdan, äänenvoimakkuuden ja nopeuden äänikirjoille sekä TTS-äänen tyypin, nopeuden, kielen ja korkeuden tekstikirjoille. Se muistaa myös äänikirjojen äänenkäsittelyn parametrit sekä tekstikirjojen pistekirjoitus- ja visuaalisen näytön asetukset. Toisin sanoen se muistaa kaiken, mitä olet asettanut toiveidesi ja tarpeidesi mukaan jokaiselle kirjalle erikseen.
+
+# Ominaisuudet
+
+Kuten on jo useaan kertaan mainittu, kunkin kirjan asetukset ja parametrit määritetään kirjan ominaisuuksissa. Äänikirjoilla on omat ominaisuutensa, tekstikirjoilla omansa, ja erikoiskirjoilla, kuten Daisy audio + text, on molemmat kahdella erillisellä välilehdellä ominaisuusikkunassa. Voit avata ominaisuusikkunan soittimesta Ominaisuudet-painikkeella tai pikanäppäimellä Alt + Enter, tai kirjastoikkunassa kirjan otsikon kohdalla kontekstivalikosta tai pikanäppäimellä Alt + Enter.
+
+## Ääniominaisuudet
+
+Kun avaat Ääniominaisuudet, huomaat ensimmäisenä valintaruudun Äänenkäsittely. Sinun ei tarvitse ottaa sitä käyttöön, jos kuuntelemasi kirjan ääni on hyväksyttävä, mutta jos se ei ole, Äänenkäsittelyn avulla voit ehkä saada äänen kuunneltavalle tasolle. Valintaruudun merkitseminen aloittaa kirjan ääniraidan analysoinnin, mikä voi kestää koneen nopeudesta riippuen 30 sekunnista muutamaan minuuttiin. Edistymispalkista näet milloin tahansa tilanteen ja jäljellä olevan ajan. Kun analyysi on valmis, NBR asettaa alla olevat suodattimet optimaaliseen tilaan. Jos ääni on mielestäsi hyvä, vahvista valinta OK-painikkeella. Jos haluat vielä hienosäätää sitä, tässä on lyhyt kuvaus siitä, mitä voit tehdä.
+
+Seuraavana on seitsemän suodatinta, jotka auttavat parantamaan äänikirjojen ääntä vanhoissa ja/tai huonolaatuisissa tallenteissa. Jokainen säädin voidaan kytkeä erikseen päälle tai pois päältä, joten niitä ei tarvitse käyttää kaikkia kerralla. Kun kytket Äänenkäsittelyn päälle, löydät ensin Peruuta-painikkeen, joka palauttaa kaikki suodattimet oletusasetuksiin. Seuraavana on valintaruutu Ohita, jonka avulla voit heti kuulla eron alkuperäisen ja muokkaamasi äänen välillä. Ohituksen pikanäppäin on Ctrl + B, joten sinun ei tarvitse jatkuvasti siirtyä säätimien ja ohituksen välillä.
+
+Ensimmäisenä on *Poista jyrinä* (ns. Hi Pass). Se poistaa matalien taajuuksien kohinaa, kuten sähkölaitteiden hurinaa tai mikrofonin tai pöydän kolahduksia. Seuraavana on *Kohinanvaimennus*, joka on tarkoitettu nauhakohinalle, huonoille mikrofoneille ja vastaaville korkeampien taajuuksien kohinoille. *Pehmennä suhinaa* vähentää C-, S- ja Š-äänteiden säröä, joka johtuu liian läheltä äänittämisestä tai korostuneista korkeista äänistä. *Tasaa puhe* yrittää tasoittaa tallenteen hiljaisempia ja kovempia kohtia. Sitten on *Äänensävy*, viisialueinen taajuuskorjain; alueet on merkitty taajuuksillaan — 200, 800, 1.8k, 3.5k ja 5k+ — joista viimeinen on hyllysuodatin, mikä tarkoittaa, että se nostaa tai laskee kaikkea sen yläpuolella olevaa, ei vain yhtä aluetta. Lopuksi on *Äänenvoimakkuus ja tauot* -ryhmä, jossa on kaksi säädintä: *Automaattinen äänenvoimakkuus* (normalisointi) nostaa tallenteen kokonaistason maksimitasolle ilman säröä, ja *Taukojen kohina* (gate) poistaa jäljellä olevan kohinan lauseiden välisistä tauoista.
+
+Jokaisella suodattimella on viisi tasoa: minimaalinen, kevyt, keskitaso, voimakas ja maksimaalinen. On myös syytä toistaa, että jokainen voidaan kytkeä erikseen päälle tai pois päältä.
+
+Äänenkäsittely tallennetaan myös jokaiselle kirjalle erikseen.
+
+On tärkeää huomauttaa, että tämä äänenkäsittely ei tee ihmeitä, etkä saa 1960-luvun huonosta tallenteesta kristallinkirkasta puhetta kuin Abbey Road -studioilla äänitettynä, mutta toivottavasti se auttaa sinua pääsemään kirjan loppuun ilman, että huono äänenlaatu ajaa sinut hulluksi.
+
+## Tekstiasetukset
+
+Samoin kuin puheasetuksissa, tässä voit valita kielen, äänen, nopeuden, äänenvoimakkuuden ja korkeuden valitulle kirjalle. Asetuksissa valitset oletukset kaikille, tässä määrität ne tietylle teokselle. Jos mietit miksi, yksinkertaisin esimerkki on, jos oletusäänesi on miesääni, mutta haluat lukea naisnäkökulmasta kirjoitetun romaanin naisäänellä, voit muuttaa sen tekstiasetuksissa kyseiselle kirjalle. Kaikki muut saman kielen kirjat avautuvat edelleen oletusarvoisesti miesäänellä, ellet muuta sitä. Voit myös lukea helppoa tekstiä 1,5x nopeudella, mutta vaikeampaa tekstiä, jota joudut pohtimaan lukiessasi, haluat ehkä lukea 1x nopeudella tai hitaammin.
+
+Täällä ei ole ääntämissanakirjaa, vaan seuraavana ovat pistekirjoitus- ja visuaaliset asetukset. Jos aktivoit visuaalisen näytön, voit valita, miten teksti näytetään näytölläsi. Jos haluat lukea vain pistekirjoituksella tai visuaalisesti ilman puhetta, valitse kyseinen vaihtoehto äänilistasta. Tässä {beta}-versiossa pistekirjoitus- ja visuaalinen tuloste ovat harmaana ja niissä on huomautus, että niitä ei ole otettu käyttöön.
+
+Nemoviz Book Readerilla ei ole ulostulopistetaulukkoa, eikä sellaista tule. Ruudunlukuohjelma kääntää pistekirjoitusrivillä näkyvän tekstin omien asetustensa mukaisella taulukolla, ja se on ainoa oikea paikka kyseiselle valinnalle – kaksi taulukkoa samalla rivillä voisivat vain aiheuttaa ristiriitoja. Ainoa Nemoviz Book Readerin pistekirjoitustaulukko on *syöttötaulukko*: se, jolla .brf-tiedosto on luettu tuonnin yhteydessä. Voit muuttaa sitä Pistekirjoituksen lähde -ryhmässä, joka näkyy vain silloin, kun kyseessä on tällaisesta tiedostosta peräisin oleva kirja. Tämä ryhmä toimii myös tässä {beta}-versiossa.
+
+## Visuaalisen näkymän asetukset {beta}
+
+Asetuksista tai Ominaisuuksista tekemäsi valinnan mukaan näet soittimen päällä pienen kehyksen, jossa teksti vaihtuu kuin tekstitys ulkomaisissa elokuvissa tai sarjoissa. Jos valitset jonkin muista kahdesta vaihtoehdosta, kehys on suurempi ja teksti joko liukuu näytöllä kuin lopputekstit tai vaihtuu kehys kehykseltä. Näissä kahdessa näkymässä luettava rivi näytetään eri värillä.
+
+Kehyksen alareunassa voit muuttaa fonttia, kokoa ja muita näyttöparametreja, ja käytettävissäsi ovat myös toiston perushallintapainikkeet. Kaikki pikanäppäimet toimivat myös tässä kehyksessä.
+
+Jos olet valinnut pistekirjoituksen käytön, näkyviin tulee ensimmäisenä kuvattu pieni kehys, koska pistekirjoitus ei voi toimia ilman ruudunlukuohjelmaan välitettävää tekstinäyttöä. Jos valitset vain visuaalisen näkymän, voit valita näkymän tyypin. Molemmissa tapauksissa näkymä ilmestyy toiston käynnistämisen jälkeen. Jos et ole valinnut kumpaakaan näistä vaihtoehdoista ja haluat vain kuunnella, mutta olet utelias näkemään miltä tämä näyttää, voit aina kytkeä näkymän päälle ja pois soittimen ikkunassa F9-näppäimellä.
+
+Tässä on suunnilleen kaikki, mitä ohjedokumenttiin tulee. Tarkemmat selitykset löydät tarvittaessa säätimien yhteydestä pienen kysymysmerkkipainikkeen tai F1-näppäimen avulla kohdistetussa ryhmässä. Kiitos kärsivällisyydestäsi ja tekstin loppuun asti lukemisesta. Pienenä huomionosoituksena sinulla on nyt mahdollisuus lukea kaksi piilotettua toimintoa.
+
+# Sitkeimmille
+
+Ensimmäinen toiminto on vaihtoehtoinen tapa lisätä yksi tai useampi nimike kirjastoon. Sen sijaan, että käyttäisit kuvattuja Avaa tiedosto ja Avaa kansio -valintaikkunoita, kopioi haluamasi sisältö Windows tai File Explorer -ohjelmalla kirjastokansioon. Seuraavan käynnistyksen yhteydessä Nemoviz Book Reader päivittää kirjaston ja näyttää uudet nimikkeet. Jos ohjelma on jo käynnissä, paina kirjastoikkunassa Päivitä-painiketta.
+
+Toinen piilotettu toiminto on navigointiin liittyvä. Kaiken edellä kuvatun lisäksi voit liikkua lukemassasi kirjassa pikanäppäimillä Ctrl + 1 – Ctrl + 9, jotka siirtävät sinut 10, 20 ja aina 90 prosenttiin kirjasta asti.
