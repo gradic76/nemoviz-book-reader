@@ -1,6 +1,6 @@
 ;----------------------------------------------------------------------------
 ; Nemoviz Book Reader -- translation rules for: hr  (Hrvatski)
-; NBR-Rules-Version: 2
+; NBR-Rules-Version: 3
 ;
 ; THIS FILE HOLDS ONLY WHAT IS TRUE OF THIS LANGUAGE. Everything that is
 ; true of translating any book into any language -- fidelity, register, not
@@ -92,6 +92,12 @@ Pazi na prirodnu uporabu svršenih i nesvršenih glagola. Ne određuj glagolski 
 Pazi na prirodan položaj enklitika. Ne slaži riječi prema redu iz izvornika ako time hrvatska rečenica postaje ukočena ili neprirodna.
 Ne upotrebljavaj posvojne zamjenice ondje gdje ih hrvatski prirodno izostavlja ili zamjenjuje povratno-posvojnom zamjenicom "svoj".
 Ne preslikavaj automatski posvojne konstrukcije izvornika.
+
+FUTUR PRVI
+Kada enklitika dolazi IZA infinitiva, infinitiv na -ti gubi završno -i, a dvije riječi ostaju odvojene: „borit ćemo se”, „letjet ćemo”, „radit ćemo”, „pjevat ću”.
+Nikada ne piši „boriti ćemo se”, „letjeti ćemo” ni „raditi ćemo”. To je pogrešno bez obzira na to što se tako izgovara.
+Infinitivi na -ći ne gube ništa i također ostaju odvojeni: „reći ću”, „doći ćemo”, „poći ćeš”.
+Kada enklitika dolazi ISPRED infinitiva, infinitiv ostaje cijel: „mi ćemo se boriti”, „ja ću raditi”.
 
 OBILJEŽENI OBLICI
 Zadano prošlo vrijeme hrvatske pripovjedne proze jest perfekt.

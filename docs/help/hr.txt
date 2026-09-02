@@ -103,7 +103,8 @@ Na ovoj kartici birate jezik ili više njih koji će se koristiti za prepoznavan
 
 Nakon instalacije, a prilikom uvoza slikovnog formata, moći ćete u kombiniranom okviru odabrati jezik kojim želite prepoznati tekst u naslovu koji otvarate. Ovo također može potrajati neko kraće vrijeme, ovisno o brzini stroja i veličini knjige, no sve možete pratiti na traci napretka.
 
-Osim postavki za optičko prepoznavanje ovdje možete birati i LLM servise za prevođenje. U trenutku pisanja ovog teksta tu su Google Gemini, DeepSeek, DeepSeek s većim modelom, tri razine OpenAI GPT-a i Microsoft Azure. Kako smo ranije napisali, za ove servise potrebni su vam API ključevi ili neke druge vrste autorizacije za spajanje na ove servise, a više možete pročitati u izborniku Pomoć pa na stavci Usluge i računi.
+Osim postavki za optičko prepoznavanje ovdje možete birati i LLM servise za prevođenje. U trenutku pisanja ovog teksta tu su Google Gemini, DeepSeek, DeepSeek s većim modelom, tri razine OpenAI GPT-a i Microsoft Azure. Kako smo ranije napisali, za ove servise potrebni su vam API ključevi ili neke druge vrste autorizacije, više možete pročitati u izborniku Pomoć pa na stavci Usluge i računi.
+Na tipki Pravila prevođenja otvorit će se prozor s uputama koje se šalju modelima za prevođenje kako bi se ono što želite što kvalitetnije prevelo. Postoji skup uputa koji se odnosi na sve jezike te skupovi uputa za podržane jezike pojedinačno. Na ovom prozoru možete uređivati postojeće i dodavati upute za nove jezike. Prilikom uređivanja datoteka s pravilima otvorit će se u Bloku za pisanje, na vrhu teksta objašnjeno je sve oko uređivanja i dodavanja pravila.
 
 Osim mogućnosti prevođenja tu su još i dodatni Cloud glasovi, trenutno podržavamo Google Cloud Chirp 3 i Microsoft Azure Neural glasove. Postupak za omogućavanje ovih glasova je sličan kao i za usluge za prevođenje i više o tome je također u izborniku Pomoć pa stavci Usluge i računi.
 
@@ -122,6 +123,7 @@ Uz svaki naslov u knjižnici jednostavnim pritiskom na Tab tipku možete pročit
 ## Dodavanje naslova
 
 U padajućem izborniku Datoteka možete pronaći dvije stavke: Otvori datoteku (Ctrl + O) i Otvori mapu (Ctrl + Shift + O). Ako ste u Postavkama uključili podršku za optički pogon, pronaći ćete i opciju Otvori Audio CD. Osim ovog tu su također i opcija za ponovno optičko prepoznavanje slikovnog naslova, opcija za stvaranje zvučne knjige te opcija za prijevod. Tu je i stavka koju nemojte dirati ako baš ne morate, *Isprazni knjižnicu*. Sama po sebi govori što radi i nakon aktiviranja dobit ćete još jedno upozorenje. Ako potvrdite sve do kraja, vaša je knjižnica obrisana, svi podaci o knjižnim oznakama i gdje ste stali su obrisani, obrisane su i postavke jezika i brzine za knjige koje imate unutra. Zato radije zaobiđite ovu stavku ukoliko niste apsolutno sigurni da želite isprazniti knjižnicu.
+Opcija Otvori mapu knjižnice otvara lokaciju vaše zbirke u Exploreru za datoteke.
 
 Na prvoj opciji možete otvoriti pojedinačnu datoteku (MP3 knjigu u jednoj datoteci, EPUB dokument ili ncc.html datoteku za Daisy naslov), a na otvaranju mape možete otvoriti zvučnu knjigu u nekoliko datoteka smještenu u jednu mapu. Osim toga, ako koristite otvaranje mape, možete uvesti i veću količinu različitih datoteka tj. zbirku od više naslova. Nemoviz Book Reader ima ugrađena određena pravila oko razvrstavanja i dat će sve od sebe da vam takvu mapu razvrsta i posloži koliko je najbolje moguće.
 
@@ -147,7 +149,7 @@ Osim osnovnih podataka o knjizi poput imena autora i naziva djela krećući se s
 
 Nakon što ste zastali na nekom naslovu, tipkom Tab možete doći na dio u kojem možete strelicama gore i dolje dobiti pregršt informacija o knjizi s fokusom na to gdje ste stali, koliko knjige je pročitano i preostalo u postotku, vremenski, gdje je knjiga izdana i proizvedena, tehničke podatke o zvučnom zapisu itd… Ovi podaci ovise o formatu u kojem je knjiga i razlikovat će se od naslova do naslova.
 
-Kretajući se dalje prozorom knjižnice, doći ćete do polja za pretragu koje funkcionira po jednostavnom principu da traži niz znakova koje ste upisali u nazivima stavki na polici za knjige. Ako upišete „ana“, pronaći će zasigurno autorice s imenom Ana, ali će pronaći i 7000 dana u Sibiru.
+Krečući se dalje prozorom knjižnice, doći ćete do polja za pretragu koje funkcionira po jednostavnom principu da traži niz znakova koje ste upisali u nazivima stavki na polici za knjige. Ako upišete „ana“, pronaći će zasigurno autorice s imenom Ana, ali će pronaći i 7000 dana u Sibiru.
 
 Nakon polja za pretragu tu je i filter kombinirani okvir u kojem možete odrediti koje će vam se knjige prikazivati. Po zadanim postavkama tu su uvijek sve knjige, no možete filter prebaciti na U čitanju, Nepročitano, Pročitano i Omiljeno, a prikaz na polici za knjige uskladit će se s vašim izborom.
 
@@ -183,6 +185,7 @@ U Tab liniji, ne nužno ovim redoslijedom, na glavnom prozoru playera nalaze se 
 | Informacijsko polje | F8 |
 
 U informacijskom polju možete saznati osnovne podatke o reprodukciji poput autora, naslova, proteklog vremena, stranice i još ponešto, naravno, ovisno o formatu knjige koju čitate. Jednim pritiskom na F8 sadržaj zaslona s informacijama samo će se pročitati, a dvostrukim pritiskom dolazi u fokus čitača ekrana, pa možete strelicama detaljnije pročitati što tamo piše.
+Tipkom F10 možete saznati proteklo vrijeme naslova koji čitate a brzim dvostrukim pritiskom na F10 čut ćete preostalo vrijeme.
 
 Sve tipke imaju svoje tipkovne prečace tako da lako možete do njih bez da previše šetate po prozoru, a samo upravljanje knjigom koju čitate je više nego jednostavno.
 
@@ -191,19 +194,19 @@ Sve tipke imaju svoje tipkovne prečace tako da lako možete do njih bez da prev
 - Razmaknicom pokrećete ili zaustavljate reprodukciju.
 - Strelicama lijevo ili desno „premotavate“ po pet sekundi ili, ako se radi o tekstualnoj knjizi, po rečenicu unaprijed ili unatrag.
 - Kombinacijom tipki Ctrl + strelice lijevo ili desno regulirate brzinu reprodukcije.
-- Tipkama F11 i F12 postavljate glasnoću, F12 diže, a F11 spušta. Gole strelice gore i dolje ovdje ne rade ništa: nekad su nosile glasnoću, ali čitač ekrana koji čita knjigu naglas neprestano traži sljedeći redak i glasnoća bi mu odlazila ispod ruke, pa su se tipke preselile na funkcijski red, gdje ih Windows Media Player drži već dvadeset godina.
+- Tipkama F11 i F12 postavljate glasnoću, F12 diže, a F11 spušta.
 - Kombinacijom tipki Shift + gore ili dolje birate korak za navigaciju (naslov, poglavlje, kartica teksta, određene minutaže), izbor se mijenja ovisno o formatu i strukturi knjige.
 - Kombinacijom tipki Shift + strelice lijevo ili desno krećete se odabranim korakom navigacije.
 
 Ukratko, pokrenete reprodukciju odabrane knjige razmaknicom, držeći pritisnutu tipku Ctrl strelicama lijevo i desno regulirate brzinu čitanja.
 
-Ako želite nešto kratko premotati unaprijed ili unatrag, to možete strelicama lijevo ili desno po pet sekundi ili po jednu rečenicu. Ako želite veće navigacijske korake, pritisnite Shift, strelicama gore i dolje odaberite željeni korak te i dalje držeći Shift strelicama lijevo i desno idite naprijed i natrag po knjizi odabranim korakom. Kada želite čuti kako i prema kamo napredujete s čitanjem knjige, u bilo kojem trenutku pritisnite F8 i čitač ekrana pročitat će vam cijeli sadržaj informacijskog zaslona. Ukoliko detaljnije želite pročitati informacijsko polje, podatak po podatak, dvaput brzo pritisnite F8. Kad ste gotovi, izađite iz informacijskog polja pritiskajući ponovo dvaput F8 ili jednostavno Escape kako bi tipke sa strelicama ponovo dobile navigacijska svojstva.
+Ako želite nešto kratko premotati unaprijed ili unatrag, to možete strelicama lijevo ili desno po pet sekundi ili po jednu rečenicu. Ako želite veće navigacijske korake, pritisnite Shift, strelicama gore i dolje odaberite željeni korak te i dalje držeći Shift strelicama lijevo i desno idite naprijed i natrag po knjizi odabranim korakom. Kada želite čuti kako i prema kamo napredujete s čitanjem knjige, u bilo kojem trenutku pritisnite F8 i čitač ekrana pročitat će vam cijeli sadržaj informacijskog zaslona. Ukoliko detaljnije želite pročitati informacijsko polje, podatak po podatak, dvaput brzo pritisnite F8. Kad ste gotovi, izađite iz informacijskog polja pritiskajući ponovo dvaput F8 ili jednostavno Escape kako bi tipke sa strelicama ponovo dobile navigacijska svojstva. Ako želite čuti proteklo ili preostalo vrijeme pritisnite F10 jednom ili dvaput.
 
 Ideja iza ovog pristupa navigaciji bila je da korisnik ne mora učiti i pamtiti cijeli niz prečaca. Najveći dio navigacije posložen je na tipke sa strelicama i u kombinaciji s modifikacijskim tipkama Shift i Ctrl postignuto je da ne morate šetati rukom po tipkovnici. Desnu ruku postavite na strelice, lijevom po potrebi pritisnete neki od modifikatora, i to je cijela filozofija navigacije. Oni vještiji i snalažljiviji vjerojatno će moći iskoristiti i palac desne ruke da pritisnu Ctrl ili Shift s desne strane tipkovnice, no način upotrebe ostavljen je svakome na izbor. Sve ostale kratice, s iznimkom Alt + Enter za Svojstva jer je to uobičajena Windows konvencija, postavljene su na funkcijske tipke sve u cilju što jednostavnijeg upravljanja.
 
 ## Idi na...
 
-Ova kontrola, kao što joj i samo ime navodi, služi da u par pritisaka ili klikova skočite na određeni dio u knjizi. Kod nestrukturiranih formata kao što su običan tekst, većina zvučnih formata u jednoj datoteci ili loše formatirane strukturirane knjige ne može se aktivirati, što se potvrđuje i zvučnim signalom. Kod knjiga s iole pristojnom strukturom moći ćete preskakati na poglavlja, potpoglavlja i druge strukturne segmente knjige. Naravno, sve ovisi o tome kako su proizvođači postavili strukturu u samu knjigu.
+Ova kontrola, kao što joj i samo ime navodi, služi da u par pritisaka ili klikova skočite na određeni dio u knjizi. Kod nestrukturiranih formata kao što su običan tekst, većina zvučnih formata u jednoj datoteci ili loše formatirane strukturirane knjige ne može se aktivirati, što se potvrđuje i zvučnim signalom. Kod knjiga s iole pristojnom strukturom moći ćete preskakati na poglavlja, potpoglavlja i druge strukturne segmente knjige. Naravno, sve ovisi o tome kako su proizvođači postavili strukturu u samu knjigu. Osim navedenog ovaj dijalog ima i posebnu grupu za skok na stranicu, ukoliko je knjiga ima. Nakon otvaranja prvo je popis maloprije navedenih dijelova, jednim pritiskom na tab doći ćete na skok na stranicu, ako ih ima. U polju koje će se prikazati već je upisan broj stranice na kojoj ste trenutno. Upišite željeni broj stranice i pritisnite Enter za skok.
 
 ## Knjižne oznake
 

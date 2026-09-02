@@ -1,6 +1,6 @@
 ;----------------------------------------------------------------------------
 ; Nemoviz Book Reader -- translation rules for: sr  (Srpski)
-; NBR-Rules-Version: 2
+; NBR-Rules-Version: 3
 ;
 ; THIS FILE HOLDS ONLY WHAT IS TRUE OF THIS LANGUAGE. Everything that is
 ; true of translating any book into any language -- fidelity, register, not
@@ -70,6 +70,12 @@ Primera radi, engleski Present Perfect, Past Perfect i progresivne oblike preved
 Participne, gerundske i infinitivne konstrukcije preoblikuj u prirodnu srpsku sintaksu kada bi njihovo doslovno preslikavanje zvučalo neprirodno.
 Pasiv preoblikuj u aktiv kada je aktiv u srpskom prirodniji, ali samo ako se time ne menjaju fokus, perspektiva, značenje ili stilski efekat rečenice.
 Pazi na prirodnu upotrebu svršenih i nesvršenih glagola. Ne određuj glagolski vid prema gramatičkom obliku glagola u izvorniku, već prema značenju, toku radnje i kontekstu.
+
+FUTUR PRVI
+Kada enklitika dolazi IZA infinitiva, infinitiv na -ti i enklitika pišu se SASTAVLJENO, onako kako se i izgovaraju: „borićemo se”, „letećemo”, „radićemo”, „pevaću”.
+Nikada ne piši „boriti ćemo se” ni „borit ćemo se”. Prvo je pogrešno, a drugo je hrvatski oblik.
+Infinitivi na -ći ostaju odvojeni: „reći ću”, „doći ćemo”, „poći ćeš”.
+Kada enklitika dolazi ISPRED infinitiva, infinitiv ostaje ceo: „mi ćemo se boriti”, „ja ću raditi”.
 
 OBELEŽENI OBLICI
 Zadano prošlo vreme srpske pripovedne proze jeste perfekat.
