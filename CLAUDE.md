@@ -4194,14 +4194,28 @@ after the probe. **None of it has been seen or felt.** Two things need a person:
 Gordan's reason for moving them is one sentence and it decides the whole shape:
 *"Korisnik faktički ne zna što player šalje servisu."*
 
-- **A reader's own copy WINS.** `%APPDATA%\Nemoviz Book Reader\Translation\<code>.rules`
-  is read before the shipped one beside the exe; delete it and the default
-  returns. This is not a convenience -- the shipped folder is under Program
-  Files in a real install, so editing it needs elevation AND the next installer
-  overwrites it. "Users can adjust the rules themselves" did not actually work
-  until the override existed. Same wall as 10j.
-- **A language NBR ships nothing for works the same way**: a new `<code>.rules`
-  in the user folder is found, listed and used, with no change to the program.
+- **ONE folder, and it is the reader's** (Gordan, 2026-09-02):
+  `%APPDATA%\Nemoviz Book Reader\Translation\<code>.rules`, and nowhere else.
+  *"Ako jezik postoji datoteka je tamo, ako ne postoji, nema je."* The first
+  version shipped a copy beside the program and read the reader's in preference
+  to it; he threw the precedence out, and he was right -- two files of one name
+  in two places, plus a rule about which wins, bought nothing. The folder is also
+  the only one that survives an update and an uninstall.
+- **The two supplied rulebooks are EMBEDDED in the exe** and written into that
+  folder ONCE, remembered by `[App] RulesSeeded`. Embedded so there is never a
+  second `.rules` on disk to wonder about; once, so that deleting one is a
+  decision that stays made.
+- **Add and Edit, in the dialog.** Add makes an empty file carrying only its own
+  instructions, **in the language the rules are FOR** -- `Localization.StringFor`
+  reads one key out of another language file without switching the interface, and
+  a target NBR is not localized into falls back to the interface language. Edit
+  opens **Notepad by name**: a `.rules` has no registered handler, so
+  ShellExecute would raise Windows' "How do you want to open this file?" chooser,
+  which is a dead end for a reader who cannot see it.
+- **THREE states, not two.** A file holding only its header sends no rules, so
+  "no rules for this language" and "no file for this language" would read
+  identically, and a reader who had just pressed Add would be told nothing had
+  happened.
 - **Two comment characters, both dropped before sending.** `;` heads the file's
   own notes, as in a .lang. `#` marks a rule PARKED -- in force once, or shipped
   with the document and taken out on purpose, kept where it can be found.
