@@ -149,7 +149,7 @@ Osim osnovnih podataka o knjizi poput imena autora i naziva djela krećući se s
 
 Nakon što ste zastali na nekom naslovu, tipkom Tab možete doći na dio u kojem možete strelicama gore i dolje dobiti pregršt informacija o knjizi s fokusom na to gdje ste stali, koliko knjige je pročitano i preostalo u postotku, vremenski, gdje je knjiga izdana i proizvedena, tehničke podatke o zvučnom zapisu itd… Ovi podaci ovise o formatu u kojem je knjiga i razlikovat će se od naslova do naslova.
 
-Krečući se dalje prozorom knjižnice, doći ćete do polja za pretragu koje funkcionira po jednostavnom principu da traži niz znakova koje ste upisali u nazivima stavki na polici za knjige. Ako upišete „ana“, pronaći će zasigurno autorice s imenom Ana, ali će pronaći i 7000 dana u Sibiru.
+Krećući se dalje prozorom knjižnice, doći ćete do polja za pretragu koje funkcionira po jednostavnom principu da traži niz znakova koje ste upisali u nazivima stavki na polici za knjige. Ako upišete „ana“, pronaći će zasigurno autorice s imenom Ana, ali će pronaći i 7000 dana u Sibiru.
 
 Nakon polja za pretragu tu je i filter kombinirani okvir u kojem možete odrediti koje će vam se knjige prikazivati. Po zadanim postavkama tu su uvijek sve knjige, no možete filter prebaciti na U čitanju, Nepročitano, Pročitano i Omiljeno, a prikaz na polici za knjige uskladit će se s vašim izborom.
 
