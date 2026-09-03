@@ -225,6 +225,7 @@ Dialog.WhatsNew
 Report.
 Dialog.About
 Dialog.Rules.
+Dialog.LibraryLocation.
 Update.
 Hint.Button
 

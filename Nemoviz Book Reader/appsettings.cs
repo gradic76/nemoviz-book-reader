@@ -28,6 +28,20 @@ namespace Nemoviz_Book_Reader
         private IniFile ini;
 
         public string LibraryPath { get; private set; }
+
+        /// <summary>False until somebody has actually CHOSEN a library folder, and
+        /// the marker is the KEY'S ABSENCE rather than its value -- a reader who
+        /// deliberately keeps the default must not be asked a second time. Same
+        /// shape as <see cref="LanguageCode"/> defaulting to empty rather than
+        /// "en": "not chosen" and "chose the default" are different states, and
+        /// only the first is a question.</summary>
+        public bool LibraryPathChosen { get; private set; }
+
+        /// <summary>Whether the first-run question has been PUT, which is not the
+        /// same as answered. Declining it must change nothing about the location
+        /// -- so no Path is written, the default goes on applying, and this is
+        /// what stops the question coming back every launch.</summary>
+        public bool LibraryLocationAsked { get; private set; }
         public string LastOpenedBookPath { get; private set; }
         /// <summary>Folder last picked in the "Open folder" import dialog, so
         /// it reopens there instead of at some default each time.</summary>
@@ -201,7 +215,10 @@ namespace Nemoviz_Book_Reader
         public AppSettings()
         {
             ini = new IniFile(SettingsPath);
-            LibraryPath = ini.Read("Library", "Path", DefaultLibraryPath);
+            string chosenLibrary = ini.Read("Library", "Path", "");
+            LibraryPathChosen = chosenLibrary.Length > 0;
+            LibraryPath = LibraryPathChosen ? chosenLibrary : DefaultLibraryPath;
+            LibraryLocationAsked = ini.Read("Library", "AskedLocation", "0") == "1";
             LastOpenedBookPath = ini.Read("Library", "LastBook", "");
             LastImportFolder = ini.Read("Library", "LastImportFolder", "");
             LastImportFileFolder = ini.Read("Library", "LastImportFileFolder", "");
@@ -613,7 +630,17 @@ namespace Nemoviz_Book_Reader
         public void SetLibraryPath(string newPath)
         {
             LibraryPath = newPath;
+            LibraryPathChosen = true;
             ini.Write("Library", "Path", newPath);
+        }
+
+        /// <summary>Records that the first-run question was asked. Written whatever
+        /// the answer was, so "the first time it starts" is true of the question
+        /// rather than of the answer.</summary>
+        public void SetLibraryLocationAsked()
+        {
+            LibraryLocationAsked = true;
+            ini.Write("Library", "AskedLocation", "1");
         }
 
         public void SetLastOpenedBook(string folderPath)

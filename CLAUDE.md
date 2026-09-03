@@ -6826,6 +6826,27 @@ pt-PT, 126 230 characters. It plays, and the text follows the narrator.
 
 ## 10i. Beta 1 is out — the repo, the installer, the release (2026-08-23)
 
+> ### THE INSTALLER IS A BETA THING. NOTHING MAY DEPEND ON IT.
+>
+> Gordan, 2026-09-03, and he asked for it written down because I keep
+> forgetting -- *"zaboravljamo jednu stvar konstantno"*: *"installer se radi
+> samo za betu... a sluzbena verzija ide kroz Store tako da njoj ni ne mozemo
+> napraviti taj korak prilikom instalacije."*
+>
+> **The official release goes through the Store, where there is no installer
+> of ours to put a step into.** So anything that must be asked of EVERY reader
+> has to be asked by the PROGRAM, on first run; the installer may at most
+> repeat it. The occasion was the library-location question -- I had begun
+> building a page into the Inno wizard, between the program folder and the
+> shortcuts, and he stopped it.
+>
+> It also explains something already true of the manual: **the installation is
+> deliberately NOT described there**, because the manual is read after
+> installing and most readers will never have seen this installer at all.
+>
+> **The test before designing anything into `nbr.iss`: would a Store reader
+> get it?** If not, it belongs in the app.
+
 **`github.com/gradic76/nemoviz-book-reader`, PUBLIC**, at Gordan's word. That is
 what GPL v3 asks once a binary is distributed, and it is also what makes
 Releases reachable at all — a private repo's releases are not public, so the
@@ -6933,6 +6954,65 @@ profile, removing them would delete somebody's work from a place Windows treats
 as theirs. Checked rather than assumed that nothing else is left behind:
 `SignalTones` and `SapiWavPlayer` both use `Path.GetTempPath()`, and the speech
 cache is inside the book.
+
+---
+
+### THE FIRST-RUN LIBRARY QUESTION -- promised since the manual was written, built 2026-09-03
+
+`LibraryLocationForm.cs`. Gordan reported that it does not happen and that
+somebody else had not seen it either. **It had never been built.** The manual
+has carried the promise all along, in his own Croatian: *"Pri prvom pokretanju
+Nemoviz Book Reader provjerit ce zelite li zadrzati ili promijeniti putanju mape
+za vasu buducu knjiznicu."* So this is MISSING behaviour, not a new capability
+-- the freeze in 10 does not bite.
+
+**Nothing asked, anywhere.** The whole app holds two `FolderBrowserDialog`s --
+Settings > Browse and Library > Add folder -- and neither opens by itself;
+`LibraryPath` simply read `ini.Read("Library", "Path", DefaultLibraryPath)` and
+carried on. The installer asked nothing either.
+
+**IT IS IN THE APP ONLY, and that is the standing rule**, not a preference: the
+official release goes through the Store, so an installer step would reach beta
+readers and nobody else. See 10i.
+
+**The marker is the KEY'S ABSENCE**, `[Library] Path`, the same shape as
+`LanguageCode` defaulting to empty rather than "en" -- so a reader who
+deliberately keeps the default is not asked twice. **`[Library] AskedLocation`
+is separate and records that the question was PUT**, whatever the answer, which
+is what makes declining cost nothing: no `Path` is written, the default goes on
+applying, and "nothing changes" is literally true rather than nearly true.
+
+**Three buttons, Gordan's shape**: *Browse* picks a folder and only STAGES it,
+*Change* applies it and closes, Escape and *Cancel* leave everything alone.
+**Change is disabled until a folder has been picked** -- and being disabled it
+is out of the tab order, so a reader meets it exactly when it has become real.
+The message follows the picker rather than staying on the old path, or the
+dialog would be describing a choice already replaced.
+
+**The text says the books are the reader's to move, because they are.**
+`AppSettings.SetLibraryPath` writes the new path and **moves nothing**, so
+changing the location later leaves the whole collection behind in the old
+folder. That is also the argument for asking at all: the first run is the one
+moment when the choice is free, since there is nothing there yet.
+
+**Verified by probe against his real `Settings.ini`** (`bin\x64\Debug\LibProbe.exe`):
+`LibraryPathChosen False`, `LibraryLocationAsked False`, so it fires -- because
+in all these months nobody ever chose, and his library has been sitting on C:
+the whole time. A guard that returns early looks exactly like a feature that was
+never built, which is what this item already turned out to be once.
+
+**Open, and Gordan asked about it: moving the books for them.** Deferred, not
+refused. At the first run there is nothing to move, so it is really a question
+for a LATER change in Settings, and the safe shape is known -- same volume is an
+instant `Directory.Move`, a different volume is a copy with progress, verified,
+and the source deleted only once everything has arrived, never while a book is
+loaded. It is the highest-stakes thing NBR could do, the text already tells the
+reader to do it in Explorer, and nothing is broken without it.
+
+**Open, and small: the five keys exist in `en` and `hr` only.** The other
+nineteen fall back to English until a translation pass. The Croatian is
+**Gordan's own dictated wording** and the English is the translation of it, not
+the other way round.
 
 ---
 
@@ -7301,14 +7381,16 @@ Croatian, from Gordan's own `translation.log`.
 | output length | 0.93-1.00x the source |
 | rules sent | 20 084 characters, his own edited `hr.rules` |
 
-**TIER TWO OF THE CHAIN IS CONFIRMED ON A REAL BOOK, TIER THREE STILL IS NOT.**
-His chain was `gemini x3 -> openai x3 -> azure x1`. Pieces 59 and 61 each took
-**four asks** -- three refusals from Gemini and then OpenAI -- and came back
-right, at 94.5 s and 66.0 s against a 9.8 s median. One more piece succeeded on
-a Gemini retry. So the fallback works where it has been exercised, and **Azure,
-the last resort, has still never once run in a real book**; §11's open test is
-unchanged and the way to it is still to park the second key and run a short
-book.
+**THE FALLBACK CHAIN IS CONFIRMED.** His chain was
+`gemini x3 -> openai x3 -> azure x1`. Pieces 59 and 61 each took **four asks**
+-- three refusals from Gemini and then OpenAI -- and came back right, at 94.5 s
+and 66.0 s against a 9.8 s median. One more piece succeeded on a Gemini retry.
+
+**Azure did not run in THIS book, and this entry said on the day it was written
+that the last resort had therefore never been exercised. That was wrong.**
+Gordan settled the Azure test earlier, with *Second Strike*, and said so the
+next day: *"Azure test je rijesen jos sa Second Strike, to vise ne mora biti
+otvoreno."* So all three tiers are confirmed and §11's open item is closed.
 
 **The narrator-gender guard declined, and said why**: *"masculine refused --
 only 7 first-person words per 100 000 of narration, so this book is not written
@@ -7337,10 +7419,10 @@ nothing new to test — no new samples.
    book being open, its being voice-aware, the info box tab-stop leak, the
    32-bit host's stand-down, and the export's corrected time estimate and
    wording. See §8g′.
-2. **The translator**, untouched since 2026-08-15: the heartbeat during long
-   silences, the **Azure last-resort marker that has never once appeared in a
-   real book** (the test is to park the DeepSeek key and run a short book), and
-   the widow/orphan seams at chunk and chapter boundaries.
+2. **The translator**: the heartbeat during long silences, and the
+   widow/orphan seams at chunk and chapter boundaries. **The Azure last resort
+   is DONE** -- Gordan settled it with *Second Strike* and confirmed it
+   2026-09-03, so it comes off this list.
 
 **Verified in passing and worth not re-deriving:** the exported audiobook was
 walked frame by frame — one Xing header, claiming exactly what the frames add up

@@ -372,7 +372,40 @@ namespace Nemoviz_Book_Reader
             this.KeyPreview = true;
             this.KeyDown += Form1_KeyDown;
 
+            AskWhereTheLibraryGoes();
             DecideStartupView();
+        }
+
+        /// <summary>The first-run library-location question. The manual has
+        /// promised it since it was written and it had never been built -- see
+        /// <see cref="LibraryLocationForm"/> for why it is worth asking and why
+        /// the first run is the only cheap moment.
+        ///
+        /// <para><b>Before DecideStartupView, and it cannot wait for OnShown</b>
+        /// the way the update check does: by then the Library window may already
+        /// be open, looking at the folder the reader is being asked to replace.</para>
+        ///
+        /// <para><b>It belongs to the PROGRAM and not to the installer</b>
+        /// (Gordan, 2026-09-03): the official release goes through the Store,
+        /// where there is no installer of ours to put a step into, so anything
+        /// every reader must be asked has to be asked here.</para></summary>
+        private void AskWhereTheLibraryGoes()
+        {
+            try
+            {
+                if (appSettings.LibraryPathChosen || appSettings.LibraryLocationAsked) return;
+                string chosen = LibraryLocationForm.Ask(appSettings.LibraryPath);
+                // Recorded whatever the answer was. Declining writes no Path, so
+                // the default goes on applying and nothing about the location has
+                // changed -- which is exactly what Cancel promises.
+                appSettings.SetLibraryLocationAsked();
+                if (!string.IsNullOrEmpty(chosen))
+                {
+                    appSettings.SetLibraryPath(chosen);
+                    appSettings.EnsureLibraryExists();
+                }
+            }
+            catch { }
         }
 
         // ──────────────────────────────────────────────
