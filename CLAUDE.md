@@ -6968,7 +6968,7 @@ shadow.
 sees** -- `Settings.ini`, `nbr-services.dat`, `CloudUsage.ini`, the two voice
 catalogues, `Dictionaries\` and `Translation\`, i.e. the whole middle row of the
 table above. **The way to the truth is a UNC path**, which is not redirected:
-`//localhost/cUsers/gorda/AppData/Roaming/Nemoviz Book Reader/Settings.ini`.
+`//localhost/c$/Users/gorda/AppData/Roaming/Nemoviz Book Reader/Settings.ini`.
 
 **NOT shadowed, verified rather than assumed:** the library. A `Book.ini` under
 `C:\Users\gorda\NBR Library` reads byte for byte identical direct and over UNC,
