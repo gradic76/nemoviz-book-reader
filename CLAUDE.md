@@ -174,12 +174,15 @@ These are Gordan's standing preferences. Honor them unless he says otherwise.
   files on disk** (that is the point of Code), but never hand back a fragment
   and ask Gordan to splice it manually. Either edit the file directly or
   provide the whole file.
-- **English is the only language file until the app is feature-complete.**
-  `en.lang` is the single source of truth for all user-visible strings
-  (button text, accessible names, tooltips, dialog messages, announcements).
-  A Croatian `hr.lang` will be produced as a *translation pass at the end*,
-  not maintained in parallel now. When you add a user-visible string, add its
-  key to `en.lang`; do not hardcode strings in the C#.
+- **`en.lang` is the SOURCE, and twenty-one languages ship from it.** It holds
+  every user-visible string — button text, accessible names, tooltips, dialog
+  messages, announcements — and nothing is hardcoded in the C#.
+  **This rule used to end "English is the only language file until the app is
+  feature-complete", and that stopped being true in June.** Eleven shipped with
+  beta 1 and ten more followed on 2026-09-02 (8n); the manual followed them the
+  day after (8n again). A new key still goes into `en.lang` first, and the other
+  twenty fall back to English until a pass — which is the ordinary state of
+  things now, not a temporary one.
 - **A NEW USER-VISIBLE STRING GOES INTO TWO FILES, in the same commit as the
   feature** (Gordan, 2026-08-22, assigning it to me by name): its key and
   English text in **`Lang/en.lang`**, and its key PREFIX in
@@ -276,9 +279,11 @@ The player's bottom panel is a 3-column × 4-row proportional grid inside a
 
 - **Tab order is column-major**: A (app) → B (playback) → C (book tools).
 - Above the grid sits the top panel with the read-only info box (`tbInfo`).
-- Placeholder "coming soon" dialogs still exist for: Settings, Properties,
-  Help. Set Bookmark and Manage Bookmarks are implemented (Session 9, see
-  section 8).
+- **STALE UNTIL 2026-09-03: there are no placeholder dialogs.** Settings (8b),
+  Properties (8d, 10b) and the manual in twenty-one languages (8n) have all been
+  real for months. The only survivor of "coming soon" is
+  `Dialog.Help.ComingSoon`, which `HintSystem.OpenManual` shows when the manual
+  PAGE for a language is missing from disk -- a fallback, not a placeholder.
 
 ---
 
@@ -1266,9 +1271,11 @@ diagnosis: through `BookData` the durations come with the `MpvDuration` fallback
 the probe did not have, so those were mis-measured audio lengths and not
 alignment at all.
 
-**Still open:** nothing *consumes* the map yet — the player does not show or
-follow the text of a hybrid, and Properties still needs the two-tab page (§10b),
-which is now unblocked.
+~~**Still open:** nothing consumes the map yet.~~ **DONE, and this line was
+stale for a month.** The reading window follows a hybrid through the map — §8l
+for the one-position model and §10h for the two chunk bugs that were measured
+and fixed in it — and Properties' two-tab page was built the same week (§10b),
+verified on a real hybrid.
 
 ---
 
@@ -1310,9 +1317,11 @@ linear amplitudes (threshold/makeup/limit via `10^(dB/20)`).
 
 `SoundAnalysis.cs` — `SoundAnalyser` measures, `SoundAdvisor` maps the numbers
 onto the six stages, `BookData.Analysis` keeps them in `Book.ini`
-`[SoundAnalysis]`. Committed `da2efa8`. **Not yet wired to the UI**: the hook on
-Properties' master switch, the `en.lang` keys, and keeping the dialog responsive
-for the ~1.6 s are still to do.
+`[SoundAnalysis]`. Committed `da2efa8`. ~~**Not yet wired to the UI.**~~ **WIRED,
+and this line was stale.** `PropertiesForm.AnalyseIfNeeded` runs it from the
+master switch, and the ~1.6 s turned out to be 20.6 s for twenty segments, which
+is why it has a progress window of its own — `AnalysisProgressForm`, with a
+measured estimate, spoken quarters and a Cancel. See §10b.
 
 **It runs when the reader switches sound processing ON.** Gordan, 2026-08-07:
 *"Ako Sound processing ne treba tj. čitatelj je zadovoljan zvukom ne rade se
@@ -2337,7 +2346,14 @@ place did *besides* the obvious has to be counted first.
 
 **Still Gordan's to run by eye and ear**, as every layout change here is.
 
-### Cloud voices — where they live, settled with Gordan 2026-08-15 (spec, not yet built)
+### Cloud voices — where they live, settled with Gordan 2026-08-15 (SPEC, AND SINCE BUILT)
+
+> **The heading said "not yet built" until 2026-09-03 and had been wrong for
+> weeks.** `CloudVoices`, `CloudSpeechBackend`, `AzureVoices` and
+> `GoogleCloudVoices` all ship; Azure was heard working end to end on 2026-08-17
+> and the character counter followed on 2026-08-23. What is below is the design
+> and the reasoning, which still hold — read it as the record of a decision, not
+> as a plan.
 
 Chirp 3 HD passed by ear (see memory). The whole difficulty was never the
 synthesis but **where 30 voices that speak 53 languages can go without wrecking
@@ -3064,8 +3080,9 @@ Two smaller ones from the same hunt, both worth knowing:
 > which was deliberately given room (§ the comment in `EqBand`) so it would not
 > read as a different band. So 3 + 2 needs the visible captions shortened —
 > `"5 kHz+"` is the conventional shelf notation — with the full wording kept in
-> `AccessibleName`, which is where a reader gets it anyway. **Not built: that is
-> a caption change and Gordan's call.**
+> `AccessibleName`, which is where a reader gets it anyway. ~~**Not built.**~~
+> **BUILT** — `PropertiesForm.ShortBandLabel`, in the 3 + 2 pass immediately
+> below, which Gordan called the same day.
 
 ### The tab order is the same in every theme (Gordan, 2026-08-16)
 
@@ -4663,8 +4680,11 @@ change lose their review.
 > the buttons, and the whole of Open file / Open folder including the grouping
 > rules. **Both Help items are wired** (2026-08-03, "da ne ostaju repovi"):
 > `Help`/F1 opens `Help\index.html`, a page that says the manual is coming, and
-> `About NBR` opens the window it will be, empty and saying so. What is missing
-> in both is the TEXT, not the plumbing — writing it changes no code. The rules themselves, with the measurements behind every one of them,
+> `About NBR` opens the window it will be, empty and saying so. ~~What is missing
+> in both is the TEXT.~~ **BOTH HAVE THEIR TEXT SINCE 2026-09-03** and this line
+> was stale: the manual exists in all twenty-one languages (8n) and
+> `Dialog.About.Text` is real prose. `Dialog.Help.ComingSoon` survives only as
+> the fallback when a language's manual PAGE is missing from disk. The rules themselves, with the measurements behind every one of them,
 > are in **`docs/Open file i Open folder.txt`** — read that before changing any
 > of this, because most of what looks like an obvious improvement was already
 > tried against a real disk of 1622 books and found to be wrong.
@@ -5973,9 +5993,11 @@ leave the second outcome nowhere to return to. (Mechanically the Library is
 closed but not yet disposed, since `BtnLibrary_Click`'s `using` cannot run while
 the dialog blocks further down the same stack — but the effect is the wanted one.)
 
-**Related, and already implied by this section's 960-wide shell:** the Library is
-to be resized so that while open it **completely covers the player**, as
-Properties does. Not done.
+~~**Related:** the Library is to be resized so that it completely covers the
+player. Not done.~~ **DONE, and the line was stale.** `LibrarySkin` builds
+through `DialogSkin.Shell(f, DialogSkin.H)` at `DialogSkin.W`, which is the same
+960-wide casing Properties and Settings use — so it covers the player by
+construction rather than by a number of its own.
 
 **Still wearing plain Windows chrome:** `NoVoiceForm`, `SpeechDictionaryForm`,
 `DictRuleForm`, `TextHelpForm`, the rename prompt. `DialogSkin` now covers
@@ -6334,7 +6356,10 @@ scanned before it is committed.** The probe is trivial to redo — read the DLL 
 ASCII and count `x264 - core`, `videolan.org/x264`, `libx264`, `libdvdnav`,
 `dvd://`, `cdda://`.
 
-**Audio-only build — prepared, not yet built (`tools/mpv-build/`).** Gordan's
+**Audio-only build — BUILT AND SHIPPED (`tools/mpv-build/`).** ~~prepared, not
+yet built~~ — the vendored `libmpv-2.dll` measures **30.2 MB** on disk today,
+which is the audio-only artifact; §10e′ has the seven CI runs, the verification
+and the ear test. Everything below is the preparation that led to it. Gordan's
 call (2026-07-30): cut to audio, **no image or video decoding at all** — the
 Library shows format icons, not cover art, so an M4B's cover (a real MP4 video
 track, §8f) is deliberately given up.
@@ -6365,10 +6390,10 @@ looked like** — worth saying because the installer maths was based on the smal
 number. libplacebo can at least be built with Vulkan, OpenGL, D3D11, shaderc and
 glslang all off, which is where the big saving is.
 
-**Not done:** the build itself. It means forking the winbuild CI (a local mingw
-toolchain is a much larger lift for the same artifact), and `gh` is not installed
-on this machine. `tools/mpv-build/` holds the enable-list, the decoder oracle the
-new build must match, and both verification harnesses.
+~~**Not done:** the build itself.~~ **Done — see §10e′.** The fork is
+`gradic76/mpv-winbuild`, it took seven CI runs, and `tools/mpv-build/` still
+holds the enable-list, the decoder oracle the build had to match, and both
+verification harnesses.
 
 **The visual reading display must NOT go through mpv** (researched 2026-07-30),
 which is what makes an audio-only build free. mpv's OSD renders **pixels**, and
@@ -7144,10 +7169,11 @@ and the source deleted only once everything has arrived, never while a book is
 loaded. It is the highest-stakes thing NBR could do, the text already tells the
 reader to do it in Explorer, and nothing is broken without it.
 
-**Open, and small: the five keys exist in `en` and `hr` only.** The other
-nineteen fall back to English until a translation pass. The Croatian is
-**Gordan's own dictated wording** and the English is the translation of it, not
-the other way round.
+**Open, and small: FIFTEEN keys exist in `en` and `hr` only** — five for this
+dialog and ten for the player's context menu. The other nineteen languages fall
+back to English until a translation pass, which wants a tool of its own beside
+`translate-help`. The Croatian in both sets is **Gordan's own dictated wording**
+and the English is the translation of it, not the other way round.
 
 ---
 
