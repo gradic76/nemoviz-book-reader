@@ -553,10 +553,45 @@ namespace Nemoviz_Book_Reader
 
         private static MenuItem Item(string key, string accel, EventHandler act)
         {
-            var mi = new MenuItem(Localization.T(key)
+            var mi = new MenuItem(MenuLabel(key)
                                   + (string.IsNullOrEmpty(accel) ? "" : "\t" + accel));
             mi.Click += act;
             return mi;
+        }
+
+        /// <summary>The longer of the two names a command has.
+        ///
+        /// <para>The panel legends are cut to fit a 108-unit key (section 8k) and the
+        /// full wording lives in the ACCESSIBLE NAME, which by convention is
+        /// "Name, Shortcut". A menu has room, so it takes the fuller form —
+        /// Gordan asked for it after hearing "Oznake" where the reader had always
+        /// said "Knjizne oznake".</para>
+        ///
+        /// <para><b>Measured before it was written, because the guess was too
+        /// small.</b> It is not only the bookmarks: Manage bookmarks is cut in
+        /// nine languages, the sleep timer in six, Set bookmark in the three
+        /// BCMS ones, and Latin cuts Go To to "Ad...". And the comma convention
+        /// holds in ALL twenty-one, so the long form can be derived rather than
+        /// written again — this costs no new string in any language.</para>
+        ///
+        /// <para><b>The ellipsis is kept when the panel has one</b>, because in a
+        /// menu three dots mean "this opens a dialog" and that is worth more than
+        /// the two characters. So "Idi na..." stays as it is, while Latin gets
+        /// "Ad locum ire...", which has both.</para>
+        ///
+        /// <para>Falls through untouched for every key with no accessible twin —
+        /// Localization.T hands back the raw key when it has nothing, which is
+        /// what tells the two apart.</para></summary>
+        private static string MenuLabel(string key)
+        {
+            string panel = Localization.T(key);
+            string acc = Localization.T(key + ".Accessible");
+            if (acc == key + ".Accessible") return panel;      // no twin
+            int comma = acc.LastIndexOf(",");
+            string full = comma > 0 ? acc.Substring(0, comma).TrimEnd() : acc;
+            string label = full.Length > panel.Length ? full : panel;
+            if (panel.EndsWith("...") && !label.EndsWith("...")) label += "...";
+            return label;
         }
 
         private static MenuItem Sub(string key, params MenuItem[] items)
