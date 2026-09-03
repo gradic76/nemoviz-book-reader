@@ -6949,6 +6949,35 @@ PROBE's folder. The same trap made one harness report the braille tables living
 in the scratchpad, and an earlier one report every language falling back to
 English.
 
+### TWO VIEWS OF `%APPDATA%`, and the machine sees the wrong one (2026-09-03)
+
+**Anything run through Claude's Bash tool -- or launched from a Run button --
+lives inside the Claude desktop app's MSIX container, where
+`%APPDATA%\Nemoviz Book Reader` is redirected** into
+`…\AppData\Local\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\…` and reads
+come back from that copy-on-write shadow. NBR started from Gordan's own shortcut
+is outside the container and reads the real file.
+
+**Measured: the same path, two files.** 336 bytes for a probe, 1345 for the
+running player; the player's carried `Path=` and `AskedLocation=1`, and a `find`
+over all of `C:\Users\gorda` and `D:\Player` could not locate ANY file
+containing `AskedLocation`, because every path it looked through resolved to the
+shadow.
+
+**So a probe that reads or writes `%APPDATA%` is not measuring what the program
+sees** -- `Settings.ini`, `nbr-services.dat`, `CloudUsage.ini`, the two voice
+catalogues, `Dictionaries\` and `Translation\`, i.e. the whole middle row of the
+table above. **The way to the truth is a UNC path**, which is not redirected:
+`//localhost/cUsers/gorda/AppData/Roaming/Nemoviz Book Reader/Settings.ini`.
+
+**NOT shadowed, verified rather than assumed:** the library. A `Book.ini` under
+`C:\Users\gorda\NBR Library` reads byte for byte identical direct and over UNC,
+so `[DaisyNav]`, `sync.map` and everything inside a book folder is real. Program
+Files and `D:\Player` are fine too.
+
+**It bites exactly where this project works**: I check by machine, he tests by
+hand, and those are the two views.
+
 **The uninstaller now deletes nothing of the reader's.** With the files in the
 profile, removing them would delete somebody's work from a place Windows treats
 as theirs. Checked rather than assumed that nothing else is left behind:
@@ -6995,11 +7024,25 @@ changing the location later leaves the whole collection behind in the old
 folder. That is also the argument for asking at all: the first run is the one
 moment when the choice is free, since there is nothing there yet.
 
-**Verified by probe against his real `Settings.ini`** (`bin\x64\Debug\LibProbe.exe`):
-`LibraryPathChosen False`, `LibraryLocationAsked False`, so it fires -- because
-in all these months nobody ever chose, and his library has been sitting on C:
-the whole time. A guard that returns early looks exactly like a feature that was
-never built, which is what this item already turned out to be once.
+**THE FIRST VERSION NEVER FIRED, and both halves of why are worth keeping.**
+
+**The guard asked the wrong question.** It gated on `LibraryPathChosen` -- has a
+path ever been STORED -- and his real `Settings.ini` does carry
+`Path=C:\Users\gorda\NBR Library`, which IS the default. A stored value equal to
+the default answers nothing: he has never moved the library and had never been
+asked. The dialog's own words are *"your library is currently at X, we recommend
+another disk"*, so the condition has to be about WHERE IT IS. It is
+`LibraryPathIsDefault` plus `AskedLocation` now, and it fired first time.
+
+**And the probe that said it WOULD fire was reading a different file** -- see the
+two views of `%APPDATA%` in 10j. It reported `LibraryPathChosen False` off a
+stale shadow while the running app read `True` off the real one, so an hour went
+into re-reading correct code. **A probe and the program disagreeing about a file
+is not a puzzle about the code.**
+
+**Confirmed working by Gordan**: the dialog appeared, he declined, it has not
+come back -- and the real file now carries `AskedLocation=1`, read over UNC
+because the direct path cannot see it.
 
 **Open, and Gordan asked about it: moving the books for them.** Deferred, not
 refused. At the first run there is nothing to move, so it is really a question

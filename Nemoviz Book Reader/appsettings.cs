@@ -42,6 +42,30 @@ namespace Nemoviz_Book_Reader
         /// -- so no Path is written, the default goes on applying, and this is
         /// what stops the question coming back every launch.</summary>
         public bool LibraryLocationAsked { get; private set; }
+
+        /// <summary>Whether the library is still where NBR would put it with
+        /// nobody having decided anything.
+        ///
+        /// <para><b>This is the question the first-run dialog actually asks</b>,
+        /// and asking the other one cost an afternoon: I gated it on "has a path
+        /// ever been STORED", which a stale key equal to the default answers
+        /// "yes" while the reader has plainly never moved anything. The dialog's
+        /// own words are "your library is currently at X, we recommend another
+        /// disk" -- so the condition has to be about WHERE IT IS, not about
+        /// whether a key exists.</para></summary>
+        public bool LibraryPathIsDefault
+        {
+            get
+            {
+                try
+                {
+                    return string.Equals(LibraryPath.TrimEnd(Path.DirectorySeparatorChar),
+                                         DefaultLibraryPath.TrimEnd(Path.DirectorySeparatorChar),
+                                         StringComparison.OrdinalIgnoreCase);
+                }
+                catch { return false; }
+            }
+        }
         public string LastOpenedBookPath { get; private set; }
         /// <summary>Folder last picked in the "Open folder" import dialog, so
         /// it reopens there instead of at some default each time.</summary>

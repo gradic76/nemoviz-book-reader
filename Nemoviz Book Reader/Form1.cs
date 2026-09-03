@@ -393,17 +393,50 @@ namespace Nemoviz_Book_Reader
         {
             try
             {
-                if (appSettings.LibraryPathChosen || appSettings.LibraryLocationAsked) return;
+                // ASKED ONCE, AND ONLY WHILE THE LIBRARY IS STILL WHERE WE PUT
+                // IT. A reader who has already moved it has answered the
+                // question by doing it, and a stored path equal to the default
+                // answers nothing at all -- which is what made the first version
+                // silently never fire.
+                if (appSettings.LibraryLocationAsked) return;
+                if (!appSettings.LibraryPathIsDefault) return;
+                FirstRunNote("asking, library is at " + appSettings.LibraryPath);
                 string chosen = LibraryLocationForm.Ask(appSettings.LibraryPath);
                 // Recorded whatever the answer was. Declining writes no Path, so
                 // the default goes on applying and nothing about the location has
                 // changed -- which is exactly what Cancel promises.
                 appSettings.SetLibraryLocationAsked();
+                FirstRunNote(string.IsNullOrEmpty(chosen) ? "declined" : "chose " + chosen);
                 if (!string.IsNullOrEmpty(chosen))
                 {
                     appSettings.SetLibraryPath(chosen);
                     appSettings.EnsureLibraryExists();
                 }
+            }
+            catch (Exception ex) { FirstRunNote("FAILED: " + ex.GetType().Name + " " + ex.Message); }
+        }
+
+        /// <summary>One line into %TEMP%\NBR-firstrun.log, and it earns its place.
+        ///
+        /// <para>This method's catch used to be EMPTY, which is the pattern this
+        /// project keeps recording as a fault in other people's code and then
+        /// writing again: a guard that returns early and a swallowed exception
+        /// look exactly alike from outside, and both look exactly like a feature
+        /// that was never built -- which this one really was until today. When
+        /// Gordan reported no dialog there was nothing anywhere to say which of
+        /// the three had happened.</para>
+        ///
+        /// <para>It writes once per launch and only until the question has been
+        /// answered, so it cannot grow; and it goes where DiagnosticReport
+        /// already collects, so a reader's report carries it without being
+        /// asked.</para></summary>
+        private static void FirstRunNote(string what)
+        {
+            try
+            {
+                System.IO.File.AppendAllText(
+                    System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NBR-firstrun.log"),
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + what + Environment.NewLine);
             }
             catch { }
         }
