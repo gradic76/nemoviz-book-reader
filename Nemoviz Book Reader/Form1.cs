@@ -371,6 +371,7 @@ namespace Nemoviz_Book_Reader
             tones.SetDevice(appSettings.AudioDevice);
             this.KeyPreview = true;
             this.KeyDown += Form1_KeyDown;
+            this.MouseUp += Player_MouseUp;
 
             AskWhereTheLibraryGoes();
             DecideStartupView();
@@ -439,6 +440,126 @@ namespace Nemoviz_Book_Reader
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + what + Environment.NewLine);
             }
             catch { }
+        }
+
+        // ──────────────────────────────────────────────
+        // The context menu
+        // ──────────────────────────────────────────────
+        /// <summary>The player's context menu — Applications key, Shift+F10, or a
+        /// right-click.
+        ///
+        /// <para><b>Why it exists</b> (Gordan, 2026-09-03): so the things that
+        /// live in the Library's menus can be done WITHOUT going to the Library
+        /// first, and since it is there anyway, the player's own commands go on it
+        /// too. He was clear about its limits before it was built — he would not
+        /// use it himself after three months of shortcuts, and its value is for
+        /// what the panel does not carry, and for a reader who has not had three
+        /// months. Whether a new reader reaches for it is, in his words, an
+        /// unknown of the third kind.</para>
+        ///
+        /// <para><b>A real <c>ContextMenu</c>, never a <c>ContextMenuStrip</c></b>,
+        /// and section 10c already paid for that lesson in the Library: a ToolStrip is
+        /// not a menu and is announced as a drop-down list with nothing selected,
+        /// while an HMENU is announced as a menu, opens with its first item
+        /// highlighted, and takes first-letter navigation.</para>
+        ///
+        /// <para><b>It needs no new strings.</b> Every label already exists in all
+        /// twenty-one languages, because every item is something that already has
+        /// a button or a menu entry somewhere else. The shortcut rides in the
+        /// label after a tab, so the menu also TEACHES the keys — which is most of
+        /// what it is for.</para>
+        ///
+        /// <para><b>Nothing is greyed out when no book is loaded.</b> The panel
+        /// answers an impossible command with the "no go" beep and an
+        /// announcement; the menu calls the very same handlers, so it answers the
+        /// same way. Disabling would have been a second behaviour for one act, and
+        /// section 8k's rule is that two surfaces onto the same command behave
+        /// alike.</para>
+        ///
+        /// <para><b>Clear library is deliberately NOT here.</b> It is the one
+        /// destructive command in the program, it sits behind two confirmations in
+        /// the Library, and this menu is one careless right-click away at any
+        /// moment.</para>
+        ///
+        /// <para><b>Not here yet, and not for want of wanting:</b> Open audio CD,
+        /// Export as an audiobook and Translate the book. All three are fifty-line
+        /// flows living inside <c>LibraryForm</c> — progress dialogs, rip folders,
+        /// a voice and a spoken list — so putting them here means lifting them
+        /// somewhere both windows can call, not adding a line.</para></summary>
+        private void ShowPlayerMenu(Point atClient)
+        {
+            var m = new ContextMenu();
+            Action<string, string, EventHandler> add = (key, accel, act) =>
+            {
+                var mi = new MenuItem(Localization.T(key)
+                                      + (string.IsNullOrEmpty(accel) ? "" : "\t" + accel));
+                mi.Click += act;
+                m.MenuItems.Add(mi);
+            };
+            Action sep = () => m.MenuItems.Add(new MenuItem("-"));
+
+            add("Menu.File.OpenFile", "Ctrl+O", (s, e) => OpenIntoLibrary(LibraryForm.StartWith.OpenFile));
+            add("Menu.File.OpenFolder", "Ctrl+Shift+O", (s, e) => OpenIntoLibrary(LibraryForm.StartWith.OpenFolder));
+            add("Menu.File.OpenLibraryFolder", null, (s, e) => OpenLibraryFolder());
+            sep();
+            add("Btn.Library", "F3", (s, e) => BtnLibrary_Click(null, EventArgs.Empty));
+            add("Btn.Properties", "Alt+Enter", (s, e) => BtnProperties_Click(null, EventArgs.Empty));
+            add("Btn.GoTo", "F4", (s, e) => BtnGoTo_Click(null, EventArgs.Empty));
+            add("Btn.SetBookmark", "F5", (s, e) => BtnSetBookmark_Click(null, EventArgs.Empty));
+            add("Btn.ManageBookmarks", "F6", (s, e) => BtnManageBookmarks_Click(null, EventArgs.Empty));
+            add("Btn.Timer", "F7", (s, e) => BtnTimer_Click(null, EventArgs.Empty));
+            add("Btn.Settings", "F2", (s, e) => BtnSettings_Click(null, EventArgs.Empty));
+            sep();
+            add("Menu.Help.Help", "F1", (s, e) => HintSystem.OpenManual(this));
+            add("Menu.Help.WhatsNew", null, (s, e) => HintSystem.ShowWhatsNew(this));
+            add("Menu.Help.Services", null, (s, e) => { using (var d = new ServicesForm()) d.ShowDialog(this); });
+            add("Menu.Help.Update", null, (s, e) => HintSystem.CheckForUpdate(this));
+            add("Menu.Help.Report", null, (s, e) => HintSystem.ExportReport(this));
+            add("Menu.Help.About", null, (s, e) => HintSystem.ShowAbout(this));
+            sep();
+            add("Menu.File.Exit", null, (s, e) => Close());
+
+            m.Show(this, atClient);
+        }
+
+        /// <summary>Where a keyboard-opened menu appears. Under the focused
+        /// control if there is one, so a sighted reader's eye is already there —
+        /// but the read-only fields are PARKED BELOW the client area (section 8k),
+        /// so a point outside the window is rejected rather than trusted.</summary>
+        private Point PlayerMenuPoint()
+        {
+            try
+            {
+                Control c = ActiveControl;
+                if (c != null && c.Parent != null)
+                {
+                    Point p = PointToClient(c.Parent.PointToScreen(new Point(c.Left + 8, c.Bottom)));
+                    if (ClientRectangle.Contains(p)) return p;
+                }
+            }
+            catch { }
+            return new Point(24, 24);
+        }
+
+        private void Player_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right) ShowPlayerMenu(e.Location);
+        }
+
+        /// <summary>Opens the library in File Explorer. The Library window has its
+        /// own copy of this three-line action; when that window is next opened up
+        /// for another reason, the two should become one.</summary>
+        private void OpenLibraryFolder()
+        {
+            try
+            {
+                appSettings.EnsureLibraryExists();
+                System.Diagnostics.Process.Start("explorer.exe", "\"" + appSettings.LibraryPath + "\"");
+            }
+            catch (Exception ex)
+            {
+                MessageForm.ShowInfo(this, ex.Message, Localization.T("Menu.File.OpenLibraryFolder"));
+            }
         }
 
         // ──────────────────────────────────────────────
@@ -1515,6 +1636,14 @@ namespace Nemoviz_Book_Reader
                 // no properties — it plays once and is gone. Opening it "as
                 // though from the shelf" is the same act with a home to come
                 // back to.
+                // The two standard ways to a context menu. F10 ALONE is not one of
+                // them here -- it is "how far into the book am I" (section 6) --
+                // and Shift+F10 does not collide with it.
+                case Keys.Apps:
+                case Keys.Shift | Keys.F10:
+                    ShowPlayerMenu(PlayerMenuPoint());
+                    return true;
+
                 case Keys.Control | Keys.O:
                     OpenIntoLibrary(LibraryForm.StartWith.OpenFile);
                     return true;

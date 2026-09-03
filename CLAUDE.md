@@ -586,6 +586,98 @@ not.
 
 **Post-beta. It is a new capability, not a fix.**
 
+#### THREE WAYS TO A PLAYER WITHOUT CONTROLS — decided 2026-09-03
+
+Gordan brought two ideas the day after the keyboard thread above, and they turn
+out to be one idea at three depths: a **context menu** on the player, a **flat
+panel** with no accessible controls, and an **invisible look** with no window at
+all, driven from a tray icon the way NVDA is.
+
+**The chain he saw:** if a context menu carries everything, the controls on the
+panel may not be needed; and if the controls are not needed, the window may not
+be needed either. Winamp and PotPlayer are the precedent for the middle step and
+blind readers use both.
+
+**DECIDED: the menu now, the flat panel after the first official release, the
+tray last — alongside the Explorer context-menu item, which he rates the same
+order of difficulty.**
+
+##### Why the flat panel stopped being the thing this file refused
+
+The JAWS section above refuses it, and the refusal still stands **as a
+replacement**: *"a player a screen reader cannot read, in exchange for arrow
+keys, is not a trade this project can make."* **As a LOOK it is not that trade** —
+the reader chooses it and the accessible one stays the default, which is exactly
+the shape of the keyboard-layout combo already decided.
+
+And half of it is already built: the new look **draws** a panel and parks the
+real fields below the client area so they still speak. Flattening does not mean
+"stop drawing", it means **remove the focusable controls** — which is precisely
+what leaves say-all nothing to drive.
+
+**What survives, and it is more than it looks.** Volume, speed and position are
+already reported by focus-free announcement (UIA plus the NVDA client), F10 gives
+the position, F8 the whole block; the reading surface is a separate window, so
+braille is untouched. The panel's controls are not the state channel — they are
+the DISCOVERY surface and the mouse target.
+
+**What dies:** exploring by Tab, where every control announces its own name and
+key; and F8 twice, which puts focus INTO the info box to walk it with the arrows
+— that needs a real control and would have to become a dialog.
+
+**And it must be a THIRD LOOK, not a mode of the existing one**, because of
+section 8k's rule in his own words: *"Kako se ponaša skin, tako se ponaša i
+classic."* Flat in one look and controls in the other is exactly the drift that
+rule forbids.
+
+##### Why the invisible look lost, and it was his own measurement that did it
+
+**NBR's whole keyboard model hangs on the window.** F1–F10, the space bar and the
+arrows all go through `ProcessCmdKey` on Form1 and work only while the window has
+focus. No window, no keys — unless everything becomes a global hotkey, which
+takes them from every other application. NVDA gets away with it because NVDA IS
+the input layer; a media player cannot claim the space bar system-wide.
+
+The way out looked like the media keys, which already have a global mode
+(section 8b). **Gordan killed it with a fact from his own desk:** he has six, and
+only three reach NBR — the two volume keys drive the sound card rather than the
+player, which has its own volume. Some keyboards have more, some none at all. So
+the whole look would rest on hardware that varies from machine to machine, and
+*"svesti novi look na par tipaka i sve ostalo kroz kontekstni izbornik
+obesmišljava eleganciju u radu."*
+
+##### What he said about the menu before it was built, and it is the honest part
+
+*"Ja, koji sam navikao na shortcute jer ovo već radim skoro tri mjeseca, ne bih
+prelazio na izbornik osim ako mi ne bi zatrebala stavka koja ne postoji na
+panelu."* The menu is for what the panel does not carry — and for a reader who
+has not had three months, **which he explicitly refuses to guess at**: *"kako bi
+bilo novom korisniku... je nepoznato pitanje treće vrste."* Worth keeping,
+because it is the right way to hold an untested belief about somebody else.
+
+##### The menu as built
+
+`Form1.ShowPlayerMenu` — Applications key, Shift+F10, or a right-click. A real
+`ContextMenu`, never a `ContextMenuStrip`, for the reason 10c already paid for.
+**It needed no new strings**: every label already exists in all twenty-one
+languages, because every item already has a button or a menu entry elsewhere. The
+shortcut rides in the label after a tab, so the menu also teaches the keys.
+
+**Nothing is greyed out with no book loaded** — the panel answers an impossible
+command with the "no go" beep, the menu calls the same handlers, so it answers
+the same way. Two surfaces onto one command behave alike.
+
+**Clear library is deliberately absent.** It is the one destructive command in
+the program, it sits behind two confirmations in the Library, and this menu is
+one careless right-click away at any moment.
+
+**Not on it yet:** Open audio CD, Export as an audiobook, Translate the book.
+All three are fifty-line flows inside `LibraryForm` — progress dialogs, rip
+folders, a voice and a spoken list — so putting them here means lifting them
+somewhere both windows can call. **And `OpenLibraryFolder` is duplicated** three
+lines' worth for the same reason; when the Library is next opened up, those
+should become one.
+
 ### Virtual timeline
 
 A book is many files but presents as one continuous timeline.
