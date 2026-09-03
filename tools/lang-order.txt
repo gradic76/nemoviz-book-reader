@@ -75,6 +75,9 @@ Library.Filter
 Library.Details
 Library.Btn.
 Menu.File
+Menu.Playback
+Menu.Book
+Menu.Options
 Menu.Sort
 Menu.Help
 Shelf.

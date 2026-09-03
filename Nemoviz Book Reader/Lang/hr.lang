@@ -163,6 +163,16 @@ Menu.File.OpenLibraryFolder=Otvori mapu knjižnice
 Menu.File.Exit=Izlaz
 Menu.File.ExportAudio=Izvezi kao zvučnu knjigu...
 Menu.File.Translate=Prevedi knjigu...
+Menu.Playback=Reprodukcija
+Menu.Playback.PlayPause=Reprodukcija / Pauza
+Menu.Playback.Forward=Naprijed
+Menu.Playback.Back=Natrag
+Menu.Playback.VolumeUp=Povećaj glasnoću
+Menu.Playback.VolumeDown=Smanji glasnoću
+Menu.Playback.SpeedUp=Povećaj brzinu
+Menu.Playback.SpeedDown=Smanji brzinu
+Menu.Book=Knjiga
+Menu.Options=Mogućnosti
 Menu.Sort=Poredaj
 Menu.Sort.Alphabetically=Abecedno
 Menu.Sort.DateAdded=Datum dodavanja
@@ -813,3 +823,12 @@ Cloud.Quota.Warning=Ova knjiga ima {0} znakova.\n\nOd ovomjesečnih besplatnih {
 Dialog.Error.Title=Greška
 Dialog.Error.General=Greška: {0}
 Dialog.DontShowAgain=Ne prikazuj više
+
+; ---- NOT YET TRANSLATED
+; 
+; These are new since this file was last translated, and they
+; still read as the English does. Translate them here; the next
+; run of the tool files each one into the section named above it.
+
+; belongs in: HELP AND ABOUT
+Dialog.WhatsNew.Text=BETA 2\n\nCombo boxes no longer say "blank" before each item under JAWS. It happened in every drop-down list, in every window, and only in the NBR look.\n\nCtrl+1 to Ctrl+9, which jump to a tenth of the book, now work in every kind of book. Until now they moved only audiobooks: in text, braille, EPUB, PDF and every other book read aloud by a voice, they did nothing at all.\n\nThe reading speed field now says which keys change it, the way every button on the panel says which key presses it.\n\nBETA 1\n\nThe first public release.

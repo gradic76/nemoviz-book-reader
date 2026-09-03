@@ -489,37 +489,94 @@ namespace Nemoviz_Book_Reader
         private void ShowPlayerMenu(Point atClient)
         {
             var m = new ContextMenu();
-            Action<string, string, EventHandler> add = (key, accel, act) =>
-            {
-                var mi = new MenuItem(Localization.T(key)
-                                      + (string.IsNullOrEmpty(accel) ? "" : "\t" + accel));
-                mi.Click += act;
-                m.MenuItems.Add(mi);
-            };
-            Action sep = () => m.MenuItems.Add(new MenuItem("-"));
 
-            add("Menu.File.OpenFile", "Ctrl+O", (s, e) => OpenIntoLibrary(LibraryForm.StartWith.OpenFile));
-            add("Menu.File.OpenFolder", "Ctrl+Shift+O", (s, e) => OpenIntoLibrary(LibraryForm.StartWith.OpenFolder));
-            add("Menu.File.OpenLibraryFolder", null, (s, e) => OpenLibraryFolder());
-            sep();
-            add("Btn.Library", "F3", (s, e) => BtnLibrary_Click(null, EventArgs.Empty));
-            add("Btn.Properties", "Alt+Enter", (s, e) => BtnProperties_Click(null, EventArgs.Empty));
-            add("Btn.GoTo", "F4", (s, e) => BtnGoTo_Click(null, EventArgs.Empty));
-            add("Btn.SetBookmark", "F5", (s, e) => BtnSetBookmark_Click(null, EventArgs.Empty));
-            add("Btn.ManageBookmarks", "F6", (s, e) => BtnManageBookmarks_Click(null, EventArgs.Empty));
-            add("Btn.Timer", "F7", (s, e) => BtnTimer_Click(null, EventArgs.Empty));
-            add("Btn.Settings", "F2", (s, e) => BtnSettings_Click(null, EventArgs.Empty));
-            sep();
-            add("Menu.Help.Help", "F1", (s, e) => HintSystem.OpenManual(this));
-            add("Menu.Help.WhatsNew", null, (s, e) => HintSystem.ShowWhatsNew(this));
-            add("Menu.Help.Services", null, (s, e) => { using (var d = new ServicesForm()) d.ShowDialog(this); });
-            add("Menu.Help.Update", null, (s, e) => HintSystem.CheckForUpdate(this));
-            add("Menu.Help.Report", null, (s, e) => HintSystem.ExportReport(this));
-            add("Menu.Help.About", null, (s, e) => HintSystem.ShowAbout(this));
-            sep();
-            add("Menu.File.Exit", null, (s, e) => Close());
+            m.MenuItems.Add(Sub("Menu.Playback",
+                Item("Menu.Playback.PlayPause", "Space", (s, e) => BtnPlayPause_Click(null, EventArgs.Empty)),
+                Item("Menu.Playback.Forward", "Shift+Right", (s, e) => BtnForward_Click(null, EventArgs.Empty)),
+                Item("Menu.Playback.Back", "Shift+Left", (s, e) => BtnBack_Click(null, EventArgs.Empty)),
+                Item("Menu.Playback.VolumeUp", "F12", (s, e) => ChangeVolume(5)),
+                Item("Menu.Playback.VolumeDown", "F11", (s, e) => ChangeVolume(-5)),
+                Item("Menu.Playback.SpeedUp", "Ctrl+Right", (s, e) => ChangeSpeed(10)),
+                Item("Menu.Playback.SpeedDown", "Ctrl+Left", (s, e) => ChangeSpeed(-10))));
+
+            var file = Sub("Menu.File",
+                Item("Menu.File.OpenFile", "Ctrl+O", (s, e) => OpenIntoLibrary(LibraryForm.StartWith.OpenFile)),
+                Item("Menu.File.OpenFolder", "Ctrl+Shift+O", (s, e) => OpenIntoLibrary(LibraryForm.StartWith.OpenFolder)));
+            // The Library states this rule for the same command and it is followed
+            // rather than re-decided: DIMMED when an optical drive is there and the
+            // reader has switched the feature off, GONE when there is no drive.
+            if (OpticalDrive.AnyDrive())
+            {
+                var cd = Item("Menu.File.OpenAudioCd", null, (s, e) => OpenIntoLibrary(LibraryForm.StartWith.OpenCd));
+                cd.Enabled = appSettings != null && appSettings.UseOpticalDrive;
+                file.MenuItems.Add(cd);
+            }
+            m.MenuItems.Add(file);
+
+            bool read = currentBook != null && currentBook.PercentListened >= 100;
+            var fav = Item("Context.Favorite", null, (s, e) => ToggleFavourite());
+            // A CHECK MARK, because there is no "remove from favourites" string and
+            // inventing one would be a new phrase in twenty-one languages to say
+            // what a tick already says. Windows menus express a toggle this way and
+            // readers announce it.
+            fav.Checked = currentBook != null && currentBook.Favorite;
+            m.MenuItems.Add(Sub("Menu.Book",
+                Item(read ? "Context.MarkUnread" : "Context.MarkRead", null,
+                     (s, e) => OpenIntoLibrary(LibraryForm.StartWith.MarkRead)),
+                fav,
+                Item("Context.Translate", null, (s, e) => OpenIntoLibrary(LibraryForm.StartWith.Translate)),
+                Item("Menu.File.ExportAudio", null, (s, e) => OpenIntoLibrary(LibraryForm.StartWith.Export)),
+                Item("Btn.Properties", "Alt+Enter", (s, e) => BtnProperties_Click(null, EventArgs.Empty))));
+
+            m.MenuItems.Add(Sub("Menu.Options",
+                Item("Btn.Settings", "F2", (s, e) => BtnSettings_Click(null, EventArgs.Empty)),
+                Item("Btn.Library", "F3", (s, e) => BtnLibrary_Click(null, EventArgs.Empty)),
+                Item("Menu.File.OpenLibraryFolder", null, (s, e) => OpenLibraryFolder()),
+                Item("Btn.GoTo", "F4", (s, e) => BtnGoTo_Click(null, EventArgs.Empty)),
+                Item("Btn.SetBookmark", "F5", (s, e) => BtnSetBookmark_Click(null, EventArgs.Empty)),
+                Item("Btn.ManageBookmarks", "F6", (s, e) => BtnManageBookmarks_Click(null, EventArgs.Empty)),
+                Item("Btn.Timer", "F7", (s, e) => BtnTimer_Click(null, EventArgs.Empty))));
+
+            m.MenuItems.Add(Sub("Menu.Help",
+                Item("Menu.Help.Help", "F1", (s, e) => HintSystem.OpenManual(this)),
+                Item("Menu.Help.WhatsNew", null, (s, e) => HintSystem.ShowWhatsNew(this)),
+                Item("Menu.Help.Services", null, (s, e) => { using (var d = new ServicesForm()) d.ShowDialog(this); }),
+                Item("Menu.Help.Update", null, (s, e) => HintSystem.CheckForUpdate(this)),
+                Item("Menu.Help.Report", null, (s, e) => HintSystem.ExportReport(this)),
+                Item("Menu.Help.About", null, (s, e) => HintSystem.ShowAbout(this))));
+
+            m.MenuItems.Add(new MenuItem("-"));
+            m.MenuItems.Add(Item("Menu.File.Exit", "Alt+F4", (s, e) => Close()));
 
             m.Show(this, atClient);
+        }
+
+        private static MenuItem Item(string key, string accel, EventHandler act)
+        {
+            var mi = new MenuItem(Localization.T(key)
+                                  + (string.IsNullOrEmpty(accel) ? "" : "\t" + accel));
+            mi.Click += act;
+            return mi;
+        }
+
+        private static MenuItem Sub(string key, params MenuItem[] items)
+        {
+            var mi = new MenuItem(Localization.T(key));
+            mi.MenuItems.AddRange(items);
+            return mi;
+        }
+
+        /// <summary>Favourite is the one book command done HERE rather than routed
+        /// through the Library: it is a flag and a save, with no consequence to
+        /// speak of. Mark as read is routed, because on the ACTIVE book the
+        /// Library UNLOADS it -- the player empties and the shelf opens, which is
+        /// what finishing a book already does, and reproducing that here would be
+        /// a second copy of a behaviour rather than the same one.</summary>
+        private void ToggleFavourite()
+        {
+            if (currentBook == null) { tones.Play(300, 150); return; }
+            currentBook.Favorite = !currentBook.Favorite;
+            currentBook.Save();
         }
 
         /// <summary>Where a keyboard-opened menu appears. Under the focused

@@ -165,7 +165,16 @@ namespace Nemoviz_Book_Reader
         /// job. Nothing about importing is reimplemented, so archives, DRM,
         /// progress and the notice at the end all behave exactly as they do when
         /// the shelf is used directly, because they ARE that.</para></summary>
-        public enum StartWith { Nothing, OpenFile, OpenFolder }
+        /// <summary>What the window should do the moment it is up.
+        ///
+        /// <para>The last four exist so the PLAYER can offer commands that live
+        /// here without any of their flows being lifted out: opening the library
+        /// with an action pending is a mechanism this file already had for Ctrl+O,
+        /// and its reasoning covers them too -- "the same act with a home to come
+        /// back to". Translate, Export and MarkRead all run through
+        /// <c>GetSelectedBook</c>, so see the dispatch below for why the selection
+        /// has to be made deliberately.</para></summary>
+        public enum StartWith { Nothing, OpenFile, OpenFolder, OpenCd, Translate, Export, MarkRead }
         public StartWith StartAction { get; set; }
 
         protected override void OnShown(EventArgs e)
@@ -207,8 +216,26 @@ namespace Nemoviz_Book_Reader
             StartAction = StartWith.Nothing;          // once, not on every Shown
             BeginInvoke((Action)(() =>
             {
-                if (what == StartWith.OpenFile) MenuFileOpenFile_Click(null, EventArgs.Empty);
-                else MenuFileOpenFolder_Click(null, EventArgs.Empty);
+                switch (what)
+                {
+                    case StartWith.OpenFile: MenuFileOpenFile_Click(null, EventArgs.Empty); break;
+                    case StartWith.OpenFolder: MenuFileOpenFolder_Click(null, EventArgs.Empty); break;
+                    case StartWith.OpenCd: MenuFileOpenCd_Click(null, EventArgs.Empty); break;
+                    default:
+                        // THE THREE THAT ACT ON A BOOK. This window opens standing
+                        // on Now reading with nothing CHOSEN -- the File Explorer
+                        // rule, a few lines above -- and all three handlers go
+                        // through GetSelectedBook. So the book the player asked
+                        // about is chosen here, deliberately and once, rather than
+                        // the rule being weakened for everybody.
+                        if (listNowReading == null || listNowReading.Items.Count == 0) break;
+                        listNowReading.Focus();
+                        listNowReading.Items[0].Selected = true;
+                        if (what == StartWith.Translate) TranslateSelectedBook();
+                        else if (what == StartWith.Export) ExportSelectedBook();
+                        else if (what == StartWith.MarkRead) MarkSelected(true);
+                        break;
+                }
             }));
         }
 
