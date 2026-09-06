@@ -50,13 +50,22 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>How many times this stop is asked before the chain moves on.
         ///
-        /// <para>Three for a language model, because a refusal is a throw of the
-        /// dice — measured on seven passages a novel had been refused over, four of
-        /// the seven went through within four asks, and what does not clear in four
-        /// never clears, being systematic rather than moody. <b>One for Azure</b>,
-        /// which has nobody in it to refuse: a failure there is the network, and the
-        /// transport already retries that itself.</para></summary>
-        public int Attempts = 3;
+        /// <para><b>TWO since 2026-09-07, Gordan's call</b>, down from three. The
+        /// measurement that set it at three still stands and is worth keeping: on
+        /// seven passages a novel had been refused over, four of the seven went
+        /// through within four asks, and what does not clear in four never clears,
+        /// being systematic rather than moody. What changed is the cost of the
+        /// third ask. A whole book measured 2026-09-02 spent <b>126 requests on 119
+        /// pieces</b>, and the two passages that really needed help were not saved
+        /// by a third Gemini attempt at all — they were saved by CHANGING ENGINE,
+        /// at 94.5 s and 66.0 s against a 9.8 s median. A refusal that is
+        /// systematic to one model is exactly what the next stop exists for, so the
+        /// third throw of the dice mostly buys a wait.</para>
+        ///
+        /// <para><b>One for Azure</b>, which has nobody in it to refuse: a failure
+        /// there is the network, and the transport already retries that
+        /// itself.</para></summary>
+        public int Attempts = 2;
 
 
         /// <summary>True for OpenAI's reasoning-era models, whose chat endpoint is
@@ -124,11 +133,13 @@ namespace Nemoviz_Book_Reader
     internal static class TranslationEngines
     {
         public const string Gemini = "gemini";
+        public const string GeminiFlash = "gemini-flash";
         public const string DeepSeek = "deepseek";
         public const string DeepSeekPro = "deepseek-pro";
         public const string OpenAi = "openai";
         public const string OpenAiSol = "openai-sol";
         public const string OpenAiLuna = "openai-luna";
+        public const string OpenAiAstra = "openai-astra";
         public const string Azure = "azure";
 
         /// <summary>Azure keeps a second value beside its key: the region a
@@ -151,6 +162,33 @@ namespace Nemoviz_Book_Reader
                 Kind = EngineKind.Gemini,
                 Endpoint = "https://generativelanguage.googleapis.com/v1beta/models/",
                 Model = "gemini-3.1-flash-lite"
+            },
+            // THE FULL FLASH IS ITS OWN STOP, on the same account and the same key
+            // — the shape DeepSeekPro already set, and for the same reason: it is
+            // the dearer model of a family the reader has already paid to reach, so
+            // it costs no second signup and appears in no key dialog of its own.
+            //
+            // Added 2026-09-07, when the three services' own model lists were asked
+            // rather than a documentation page. Google had moved seven releases past
+            // what NBR was calling for: 3.1-flash-lite is still served, but 3.5,
+            // 3.6, 3.7 and 3.8 Flash have arrived behind it.
+            //
+            // <para><b>3.1-flash-lite REMAINS the default and was deliberately not
+            // swapped.</b> Every number this project has for translation — $0.23 a
+            // book, a sixth of a novel refused, 119 pieces in 19:30 — was measured
+            // on it. Replacing the model under a reader whose habits are calibrated
+            // on it would change the cost, the speed and the refusal rate at once,
+            // with nothing said. So the newer one is OFFERED, and whether it is
+            // better here is a thing to hear rather than to assume from a version
+            // number.</para>
+            new TranslationEngine
+            {
+                Id = GeminiFlash,
+                NameKey = "Settings.Translate.Engine.GeminiFlash",
+                Kind = EngineKind.Gemini,
+                Endpoint = "https://generativelanguage.googleapis.com/v1beta/models/",
+                Model = "gemini-3.8-flash",
+                KeyId = Gemini
             },
             new TranslationEngine
             {
@@ -231,6 +269,38 @@ namespace Nemoviz_Book_Reader
                 Kind = EngineKind.OpenAiCompatible,
                 Endpoint = "https://api.openai.com/v1/chat/completions",
                 Model = "gpt-5.6-sol",
+                ReasoningDialect = true,
+                KeyId = OpenAi
+            },
+            // GPT-6 ASTRA — the new generation, added 2026-09-07 because Gordan saw
+            // it appear and asked for it. It is a fourth stop on the same account
+            // and the same key, not a replacement for the three above: Terra, Luna
+            // and Sol are a price ladder within one generation, and Astra is the
+            // next generation, which is a different question.
+            //
+            // <para><b>It was CALLED before it was added, not read off a list.</b>
+            // A model that a service lists is not a model that answers: the same
+            // listing carries embeddings, video and music models that would 400 on
+            // this endpoint. Asked for one real sentence through exactly this
+            // dialect it returned "Stari svjetioničar promatrao je kako se oluja
+            // približava" in 3.0 s, against 1.4 s for Terra as a control.</para>
+            //
+            // <para><b>The reasoning dialect is right for it</b>, and that too was
+            // measured rather than inherited: the reply's own
+            // <c>completion_tokens_details</c> reported 27 reasoning tokens where
+            // Terra reported 0, and <c>max_completion_tokens</c> was accepted
+            // without complaint.</para>
+            //
+            // <para>Unmeasured, and honestly so: whether it translates a BOOK
+            // better than Terra, and what it costs. One sentence says it works, not
+            // that it is worth choosing.</para>
+            new TranslationEngine
+            {
+                Id = OpenAiAstra,
+                NameKey = "Settings.Translate.Engine.OpenAiAstra",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.openai.com/v1/chat/completions",
+                Model = "gpt-6-astra",
                 ReasoningDialect = true,
                 KeyId = OpenAi
             },

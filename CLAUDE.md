@@ -7169,8 +7169,9 @@ and the source deleted only once everything has arrived, never while a book is
 loaded. It is the highest-stakes thing NBR could do, the text already tells the
 reader to do it in Explorer, and nothing is broken without it.
 
-**Open, and small: FIFTEEN keys exist in `en` and `hr` only** — five for this
-dialog and ten for the player's context menu. The other nineteen languages fall
+**Open, and small: SEVENTEEN keys exist in `en` and `hr` only** — five for this
+dialog, ten for the player's context menu, and two for the translation models
+added 2026-09-07. The other nineteen languages fall
 back to English until a translation pass, which wants a tool of its own beside
 `translate-help`. The Croatian in both sets is **Gordan's own dictated wording**
 and the English is the translation of it, not the other way round.
@@ -7543,7 +7544,9 @@ Croatian, from Gordan's own `translation.log`.
 | rules sent | 20 084 characters, his own edited `hr.rules` |
 
 **THE FALLBACK CHAIN IS CONFIRMED.** His chain was
-`gemini x3 -> openai x3 -> azure x1`. Pieces 59 and 61 each took **four asks**
+`gemini x3 -> openai x3 -> azure x1` — **the x3 is what this run measured and
+not what NBR does now**: retries went to two on 2026-09-07, partly on the
+strength of this very book. See the entry below. Pieces 59 and 61 each took **four asks**
 -- three refusals from Gemini and then OpenAI -- and came back right, at 94.5 s
 and 66.0 s against a 9.8 s median. One more piece succeeded on a Gemini retry.
 
@@ -7562,6 +7565,79 @@ says nothing.
 **126 requests for 119 pieces is the number to compare against** if the rules
 grow again. Three of the seven extra asks are one piece being retried; the rest
 are the two that changed engine.
+
+### THE THREE SERVICES' OWN MODEL LISTS, ASKED RATHER THAN READ (2026-09-07)
+
+Gordan saw a new OpenAI model called Astra and asked for it, plus the same
+check for Gemini and DeepSeek. **The three services were asked directly** --
+`tools/model-list.cs`, one GET against each service's own `/models` with the
+reader's stored key -- because a documentation page is somebody's summary and
+lags, while the list endpoint is what the key can really call.
+
+| | offered to this account | what NBR was calling |
+|---|---|---|
+| OpenAI | **125 ids**, incl. `gpt-6-astra` | gpt-5.6 terra / luna / sol |
+| Gemini | **54**, up to `gemini-3.8-flash` | gemini-3.1-flash-lite |
+| DeepSeek | **3** | deepseek-v4-flash, -pro |
+
+- **DeepSeek has nothing new.** Its three are the two NBR already offers plus
+  `deepseek-v4-flash-vision-exp`, an experimental VISION variant, which is not
+  a translation model. Nothing to add, and this is the useful kind of negative:
+  it means the DeepSeek entries are current rather than merely old.
+- **OpenAI's Astra is real and is now a fourth stop** -- `gpt-6-astra`, a new
+  GENERATION beside the 5.6 price ladder rather than a replacement for it.
+- **Gemini had moved seven releases past us.** 3.1-flash-lite is still served,
+  with 3.5, 3.6, 3.7 and 3.8 Flash behind it. `gemini-3.8-flash` is offered as
+  its own stop, the shape `deepseek-pro` already set: same account, same key, no
+  second signup and no key dialog of its own.
+
+**BOTH WERE CALLED BEFORE BEING ADDED, WITH CONTROLS.** A listing carries
+embeddings, video and music models that would refuse this endpoint, so the list
+proves availability and nothing else. Each candidate was asked for one real
+sentence through exactly the dialect `Translator.cs` sends:
+
+| | | |
+|---|---|---|
+| `gpt-6-astra` | 3.0 s | *Stari svjetioničar promatrao je kako se oluja približava.* |
+| `gpt-5.6-terra` (control) | 1.4 s | *...kako se približava oluja.* |
+| `gemini-3.8-flash` | 3.1 s | *...kako se oluja približava.* |
+| `gemini-3.1-flash-lite` (control) | 1.3 s | *...kako dolazi oluja.* |
+
+All four correct Croatian. Astra's reply reported **27 reasoning tokens** where
+Terra reported 0, which is what confirms `ReasoningDialect = true` for it rather
+than inheriting the flag by family resemblance.
+
+**THE DEFAULTS WERE DELIBERATELY NOT SWAPPED.** Every number this project has
+for translation -- $0.23 a book, a sixth of a novel refused, 119 pieces in
+19:30 -- was measured on `gemini-3.1-flash-lite`. Replacing the model under a
+reader whose habits are calibrated on it would move the cost, the speed and the
+refusal rate at once with nothing said, which is §8l's hidden-mechanism
+objection in another costume. The newer models are OFFERED; whether either is
+better for a BOOK is a thing to hear, and one sentence does not say it.
+
+**Nobody's existing chain changes, by construction.** `TranslateBookForm` builds
+the chain from four combos the reader fills out of `Configured()`, so a new
+entry is a new choice and never a new step in somebody's stored chain.
+`TranslationEngines.Chain`'s own order array was left untouched.
+
+### RETRIES ARE TWO, NOT THREE (Gordan, 2026-09-07)
+
+`TranslationEngine.Attempts` 3 -> 2; **Azure stays at 1**, which is a deliberate
+override and not an oversight -- there is nobody in it to refuse, so a failure
+there is the network and the transport already retries that itself.
+
+**The measurement that set it at three still stands** and is kept in the field's
+own doc comment: of seven passages a novel had been refused over, four went
+through within four asks, and what does not clear in four never clears. What
+changed is what the third ask is worth. The whole book of 2026-09-02 spent **126
+requests on 119 pieces**, and the two passages that genuinely needed help were
+not rescued by a third Gemini attempt -- they were rescued by **changing
+engine**, at 94.5 s and 66.0 s against a 9.8 s median. A refusal that is
+systematic to one model is precisely what the next stop exists for.
+
+**The number to compare against next time is 126 for 119.** If it rises after
+this, the rules grew; if it falls toward 119, the third ask was indeed buying
+mostly wait.
 
 ### WHAT IS LEFT TO TEST, as of 2026-08-16 (Gordan's own list)
 
