@@ -77,11 +77,39 @@ namespace Nemoviz_Book_Reader
                 // than a joined paragraph. And the translated book gets its own
                 // offsets at import, so nothing downstream breaks.
                 //
-                // Only a real loss is serious: several paragraphs gone, or a
-                // quarter of them, which is a passage that was skipped rather than
-                // a blank line that went missing.
+                // Only a real loss is serious: a quarter of them gone, which is a
+                // passage that was skipped rather than a blank line that went
+                // missing.
+                //
+                // SERIOUS IS A SHARE, NOT A COUNT (2026-09-07). The flat "three or
+                // more" that stood here was measured against a real book and found
+                // to be sitting ON the noise floor rather than above it. Victory of
+                // Eagles, 109 pieces, English into Croatian: of the 107
+                // translations this check ACCEPTED, 40 had lost one paragraph and
+                // 50 had lost two — so losing one or two is not the exception, it
+                // is what a model normally does, and the modal case is two. Three
+                // is one step further along the same ordinary distribution.
+                //
+                // What it cost: 20 pieces rejected, every one of them for this and
+                // not one for anything a service said. Nineteen were bought again
+                // from a dearer engine at 79.8 s against Gemini's 7.6 s median, and
+                // TWO were left in English in the finished book because both
+                // engines "failed" the same way. 27 of the run's 41 minutes went on
+                // re-buying work that was already good.
+                //
+                // Measured as a SHARE the same 20 rejections run 10 % to 21 % of
+                // the piece — every one of them under a quarter, and the two that
+                // were abandoned were 12.5 % and 10 %. So the quarter rule that was
+                // already here, alone, would have accepted all twenty and finished
+                // the book.
+                //
+                // Why the share is the right question: merging paragraphs costs no
+                // TEXT, only blank lines, while a skipped passage costs both — and
+                // the length check below already owns that second half at 0.55. The
+                // count arm survives only for a piece too short to have a share
+                // worth speaking of, where a quarter would be one paragraph.
                 int lost = want - got;
-                bool serious = lost >= 3 || (want >= 8 && lost * 4 >= want);
+                bool serious = want >= 8 ? lost * 4 >= want : lost >= 3;
                 Add(found, serious ? CheckSeverity.Suspect : CheckSeverity.Note, "paragraphs",
                     string.Format(CultureInfo.InvariantCulture, "{0} in, {1} back", want, got), chunk.Index);
             }

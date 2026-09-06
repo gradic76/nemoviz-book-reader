@@ -7620,6 +7620,120 @@ the chain from four combos the reader fills out of `Configured()`, so a new
 entry is a new choice and never a new step in somebody's stored chain.
 `TranslationEngines.Chain`'s own order array was left untouched.
 
+### THE PARAGRAPH CHECK WAS REJECTING GOOD WORK — measured, and fixed (2026-09-07)
+
+*Victory of Eagles*, 109 pieces, English into Croatian. Gordan's report was that
+two segments came back untranslated. **Not one service refused anything in the
+whole book.** Of 21 failures, 20 were OUR OWN paragraph check and one was a
+Gemini 503.
+
+**What the check does:** it counts blank-line blocks in and out, and calls the
+answer serious when several are missing. The threshold was `lost >= 3`.
+
+**Where that threshold really sat, read off the 107 translations the run
+ACCEPTED** (`tools/translation-loss.cs`, which reads the book's own
+`translation.cache`):
+
+| paragraphs lost by an accepted translation | pieces |
+|---|---|
+| 0 | 16 |
+| 1 | 40 |
+| **2** | **50** |
+| 3 or more | 0, by construction |
+
+**Losing one or two is not the exception, it is what a model normally does, and
+the modal case is two.** Three is one step further along the same ordinary
+distribution — so the bar was standing ON the noise floor. Same shape as the
+6 dB step edge in 8d: a book that sits on a boundary flips forever, however well
+it is measured.
+
+**And the models are right to merge.** The source breaks single speeches across
+a paragraph break — `"I am not cold," she said,` / `"and I am warmer; so you
+needn't quarrel."` — so a translator re-joins what is one sentence. Measured,
+the pieces that failed carry more of those mid-sentence continuations than the
+ones that passed, though not enough to be the whole story: dialogue-heavy pages
+simply have many short blocks to merge.
+
+**What it cost:** 19 pieces bought again from a dearer engine at **79.8 s**
+against Gemini's **7.6 s** median, two abandoned at 120 s and 155 s, and **27 of
+the run's 41 minutes** spent re-buying work that was already good. 182 requests
+for 109 pieces, against 126 for 119 on the previous book — so that comparison
+number is not a constant, it is a function of how dialogue-heavy the book is.
+
+**THE FIX IS A SHARE, NOT A COUNT.** `serious = want >= 8 ? lost * 4 >= want :
+lost >= 3` — the quarter rule that was already in the second arm, alone, with
+the flat count kept only for a piece too short to have a share worth speaking
+of. Measured as a share the 20 rejections run **10 % to 21 %**, every one under
+a quarter. Replayed through the shipped rule: **all 20 now pass, and a piece of
+29 losing 8 (28 %) still fires**, as does a short piece of 5 losing 3.
+
+**Why the share is the right question:** merging paragraphs costs no TEXT, only
+blank lines; a skipped passage costs both — and the length check below already
+owns that half at 0.55 of the source.
+
+**The book was completed by hand rather than re-run**, since a re-run would have
+paid for all 109 pieces again. `tools/finish-translation.cs` translates the
+named pieces through the app's OWN system prompt, glossary and rulebook, and
+`tools/splice-translation.cs` puts them back. Both were needed, and each taught
+something:
+
+- **The rulebook had to be CHECKED, not assumed.** It lives in `%APPDATA%`,
+  which is shadowed for anything run out of the container (10j), so a probe can
+  read an empty file and send the passage with no rules at all — a difference
+  nobody would hear as a fault, only as a passage that reads oddly. The run's own
+  log says it used 20 084 characters; the tool refuses to send unless it reads
+  the same number.
+- **The output book has MIXED line endings, and that is not a defect.** The model
+  returns `
+` inside a piece and `TranslationJob.Tidy` appends
+  `Environment.NewLine` twice at the end of each, so the CRLFs mark the piece
+  boundaries and nothing else. Splitting on CRLF gives **297 blocks for a 600 kB
+  book**, which is what made the first splice find nothing.
+- **The job's own `Tidy` has to be run over the repair.** The book uses straight
+  quotes throughout (5093 of them, none of any other kind) because Tidy converts
+  them on write-out; a model hands back curly ones, and one piece duly did.
+- **Safe because nothing held offsets into it**: the translated book carries no
+  `[TextNav]`, `TextChars=0` and `TextPosition=0`, checked before writing.
+
+Verified after: every one of seven distinctive English phrases gone, `" the "`
+down from 4982 in the source to **1** — "About the Author", which is back matter
+and deliberately not translated — and `" and "`, `" said "`, `" with "`,
+`" that "` all zero.
+
+### GLUED PARAGRAPHS: THE NAIVE RULE WOULD HAVE WRECKED THE LIBRARY (2026-09-07)
+
+Gordan: *"neki paragrafi spajaju tako da se tocka zalijepi izmedu zadnjeg i prvog
+znaka bez razmaka i u tome je slucaju TTS-ovi citaju"* — and he is right, it
+happens. `TextCleaner.GluedParagraphs` repairs it.
+
+**But his own formulation, taken literally, is the trap.** "A mark with a letter
+hard against it on both sides" finds **245 places across the 16 books here, and
+almost every one is correct text**: `D.C.`, `F.R.S.`, `O.K.`, `U.S.S.`, `M.A.`,
+`G.I.`, `P.S.`, `L.A.`, `A.M.` — **132 in one book alone**. An abbreviation puts
+one or two letters in front of the mark and a sentence does not, so the rule
+demands a REAL word: four letters or more.
+
+**And the joined side must start with a CAPITAL.** Allowing lower case looks like
+the same fault and is not — measured, it is URLs and e-mail addresses and
+nothing else (`www.delreybooks.com`, `lccn.loc.gov`, `naominovik.com`,
+`nakladafragment@gmail.com`), in **eleven of the sixteen books**, i.e. on every
+copyright page there is. A space after each of those dots breaks the address.
+
+So constrained it fires **7 times in 9.6 million characters and all seven are
+real** — six in an EPUB whose drop caps and small caps run into the next
+paragraph (`SAID.Temeraire`, `BLED,"Wellesley`), one in another import. Verified
+through the shipped `TextCleaner.Clean` over the whole library: **zero books had
+an abbreviation or a URL changed.**
+
+**It is in `TextCleaner` and not in the translator**, because that runs once on
+every book of every format — a translated one included, since the output of a
+job carries `TextCleaned=0` and is cleaned on first load like any other.
+
+**One more fault this turned up and did NOT fix:** *Isčezli svet* carries 76
+stray full stops INSIDE words — `magnetiza.m`, `zati.m`, `crteži.ma`. That is
+scan damage in one book, a different thing from a paragraph join, and no rule
+here touches it.
+
 ### RETRIES ARE TWO, NOT THREE (Gordan, 2026-09-07)
 
 `TranslationEngine.Attempts` 3 -> 2; **Azure stays at 1**, which is a deliberate

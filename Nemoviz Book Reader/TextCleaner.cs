@@ -136,6 +136,40 @@ namespace Nemoviz_Book_Reader
             return wrap / 2 < 10 ? 10 : wrap / 2;
         }
 
+        /// <summary>Two paragraphs welded together with the punctuation trapped
+        /// between them and no space — <c>SAID.Temeraire</c>, <c>BLED,"Wellesley</c>
+        /// — which a speech engine reads as one word and a braille reader meets as
+        /// one too. Gordan reported hearing it, 2026-09-07.
+        ///
+        /// <para><b>THE NAIVE RULE WOULD HAVE WRECKED THE LIBRARY, and only a
+        /// measurement showed it.</b> "A mark with a letter hard against it on both
+        /// sides" finds 245 places across the 16 books here, and almost every one is
+        /// correct text: <c>D.C.</c>, <c>F.R.S.</c>, <c>O.K.</c>, <c>U.S.S.</c>,
+        /// <c>M.A.</c>, <c>G.I.</c>, <c>P.S.</c> — 132 in one book alone. An
+        /// abbreviation puts one or two letters in front of the mark and a sentence
+        /// does not, so the word has to be a REAL word: four letters or more.</para>
+        ///
+        /// <para><b>And the joined side must start with a CAPITAL</b> (or a quote,
+        /// then a capital). Allowing lower case looks like the same fault and is
+        /// not: measured, it is URLs and e-mail addresses, nothing else —
+        /// <c>www.delreybooks.com</c>, <c>lccn.loc.gov</c>, <c>naominovik.com</c>,
+        /// <c>nakladafragment@gmail.com</c> — in eleven of the sixteen books, i.e.
+        /// on every copyright page there is. A space after each dot would break
+        /// every one of them.</para>
+        ///
+        /// <para>So constrained, it fires <b>7 times in 9.6 million characters and
+        /// all seven are real</b>: six in an EPUB whose drop caps and small caps run
+        /// into the next paragraph, one in another import. Zero false positives.
+        /// Known and accepted risk it cannot tell apart: prose naming a file, as in
+        /// "Slika.JPG" — none occurs in this library.</para>
+        ///
+        /// <para>It is here rather than in the translator because <b>this runs once
+        /// on every book of every format</b>, a translated one included: the output
+        /// of a job carries <c>TextCleaned=0</c>, so it is cleaned on first
+        /// load like any other.</para></summary>
+        private static readonly Regex GluedParagraphs = new Regex(
+            @"(\p{L}{4,}[.!?,;:][""'”’]?)([""'“‘]?\p{Lu})", RegexOptions.Compiled);
+
         private static readonly Regex SpacedDash = new Regex(@" [-–—] ", RegexOptions.Compiled);
         private static readonly Regex TrailingSpace = new Regex(@"[ \t]+\n", RegexOptions.Compiled);
         private static readonly Regex MultiSpace = new Regex(@"[ \t]{2,}", RegexOptions.Compiled);
@@ -341,6 +375,9 @@ namespace Nemoviz_Book_Reader
             t = SpacedDash.Replace(t, ", ");
             t = TrailingSpace.Replace(t, "\n");
             t = MultiSpace.Replace(t, " ");
+            // After MultiSpace, or the space this puts in could be collapsed with
+            // one already beside it; before BlankRuns, which does not touch spaces.
+            t = GluedParagraphs.Replace(t, "$1 $2");
             t = BlankRuns.Replace(t, "\n\n"); // many blank lines → one
             return trimEnds ? t.Trim() : t;
         }
