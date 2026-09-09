@@ -101,6 +101,11 @@ namespace Nemoviz_Book_Reader
             cancel.AccessibleName = cancel.Text;
             cancel.Click += (s, e) => Give();
             CancelButton = cancel;
+            // ...and the DialogResult straight back off it, or the click closes
+            // this window while the worker runs on. AnalysisProgressForm carries
+            // the measurement: OnFormClosing cannot catch that path, because it
+            // arrives as CloseReason.None rather than UserClosing.
+            cancel.DialogResult = DialogResult.None;
 
             Controls.Add(status);
             Controls.Add(bar);

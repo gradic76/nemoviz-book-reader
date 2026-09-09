@@ -64,6 +64,14 @@ namespace Nemoviz_Book_Reader
         private bool sortAscending = true;
 
         private AppSettings appSettings;
+
+        /// <summary>Set only while a BULK import is running, and it means two
+        /// things at once: this thread is a worker, and there is already a bar on
+        /// screen. <see cref="ImportFileCore"/> reads it to report an archive's
+        /// unpacking into that bar rather than opening a second modal window from
+        /// a background thread. Null on every other path, so the single-file
+        /// import behaves exactly as it always did.</summary>
+        private ImportProgressForm bulk;
         private string activeBookFolderPath;
 
         // Set when the user marks the currently-playing book as read; the owner
@@ -2952,15 +2960,31 @@ namespace Nemoviz_Book_Reader
                     // archive itself is left untouched (it usually lives outside
                     // the library).
                     int pwAttempts = 0;
-                    // Extract on a background thread behind a progress dialog so
-                    // the window stays responsive; surface the outcome through the
-                    // same OperationCanceledException / Exception paths as before.
-                    using (ExtractProgressForm prog = new ExtractProgressForm(filePath, destFolder,
-                        owner => ArchivePasswordPrompt.Show(owner, sourceName, pwAttempts++ > 0)))
+                    if (bulk != null)
                     {
-                        prog.ShowDialog(this);
-                        if (prog.Cancelled) throw new OperationCanceledException();
-                        if (prog.Error != null) throw prog.Error;
+                        // ALREADY on a worker, under the bulk import's own dialog.
+                        // Showing a second modal window from here would be a
+                        // ShowDialog on a background thread with a cross-thread
+                        // owner; the extraction is done in place instead and its
+                        // progress reported into the bar that is already up. The
+                        // password prompt still goes to the UI thread, which is
+                        // what ImportProgressForm.AskPassword is for.
+                        LibraryScanner.ExtractArchive(filePath, destFolder,
+                            () => bulk.AskPassword(sourceName, pwAttempts++ > 0),
+                            (done, howMany) => bulk.Extract(sourceName, done, howMany));
+                    }
+                    else
+                    {
+                        // Extract on a background thread behind a progress dialog so
+                        // the window stays responsive; surface the outcome through the
+                        // same OperationCanceledException / Exception paths as before.
+                        using (ExtractProgressForm prog = new ExtractProgressForm(filePath, destFolder,
+                            owner => ArchivePasswordPrompt.Show(owner, sourceName, pwAttempts++ > 0)))
+                        {
+                            prog.ShowDialog(this);
+                            if (prog.Cancelled) throw new OperationCanceledException();
+                            if (prog.Error != null) throw prog.Error;
+                        }
                     }
                     // Name the book after the folder closest to the files (the
                     // wrapper the archive packed everything into), not the
@@ -3410,44 +3434,89 @@ namespace Nemoviz_Book_Reader
                 // anyone read it, while "book 137 of 604" says both where it got
                 // to and how far it had to go.
                 int at = 0;   // `total` is already in scope from the confirmation above
+                bool stopped = false;
 
-                // Archives and single files, each its own book, through the same
-                // path Open file uses. Entry points only — the volumes behind
-                // them are pulled in by SharpCompress from the first part.
-                foreach (string f in plan.Archives)
-                { NoteBook(++at, total, f); if (ImportOne(f, skipped)) imported++; }
-                foreach (string f in plan.TextFiles)
-                { NoteBook(++at, total, f); if (ImportOne(f, skipped)) imported++; }
-                foreach (string f in plan.AudioOrphans)
-                { NoteBook(++at, total, f); if (ImportOne(f, skipped)) imported++; }
-
-                // A DAISY book comes in whole, with its navigation. Found at
-                // every level now, not only on the folder that was picked.
-                foreach (string d in plan.Daisy)
+                // THE WHOLE LOOP RUNS OFF THE UI THREAD, behind one bar.
+                //
+                // It used to run right here, and for a library's worth of books
+                // that is 80 to 160 seconds in which no message is pumped -- the
+                // window says "not responding" and the watchdog reports the UI
+                // thread RUNNING at 88 % of a core in five different places, none
+                // of them stuck. §8a had already put the EXTRACTION behind a
+                // dialog; everything after it -- the per-book parsing, the text
+                // cleaning, liblouis, the rescan -- had neither progress nor a
+                // thread.
+                //
+                // `bulk` is what tells ImportFileCore it is already on a worker,
+                // so it reports into this bar instead of opening a second modal
+                // window from a background thread.
+                //
+                // The crumbs stay: the watchdog log is still the only account of
+                // a stall that gets past all of this.
+                using (var ui = new ImportProgressForm(total, prog =>
                 {
-                    NoteBook(++at, total, d);
-                    string why;
-                    if (ImportDaisyFolder(d, true, out why) == DaisyImport.Imported) imported++;
-                    else skipped.Add(System.IO.Path.GetFileName(d) +
-                                     (string.IsNullOrEmpty(why) ? "" : " — " + why));
-                }
+                    // Archives and single files, each its own book, through the same
+                    // path Open file uses. Entry points only — the volumes behind
+                    // them are pulled in by SharpCompress from the first part.
+                    foreach (string f in plan.Archives)
+                    {
+                        if (prog.StopRequested) { stopped = true; return; }
+                        NoteBook(++at, total, f); prog.Book(at, f);
+                        if (ImportOne(f, skipped)) imported++;
+                    }
+                    foreach (string f in plan.TextFiles)
+                    {
+                        if (prog.StopRequested) { stopped = true; return; }
+                        NoteBook(++at, total, f); prog.Book(at, f);
+                        if (ImportOne(f, skipped)) imported++;
+                    }
+                    foreach (string f in plan.AudioOrphans)
+                    {
+                        if (prog.StopRequested) { stopped = true; return; }
+                        NoteBook(++at, total, f); prog.Book(at, f);
+                        if (ImportOne(f, skipped)) imported++;
+                    }
 
-                // A folder of audio is one book: its own files.
-                foreach (string bookFolder in plan.AudioFolders)
-                {
-                    NoteBook(++at, total, bookFolder);
-                    if (CopyAudioInto(BookFolderFor(bookFolder), new[] { bookFolder })) imported++;
-                }
+                    // A DAISY book comes in whole, with its navigation. Found at
+                    // every level now, not only on the folder that was picked.
+                    foreach (string d in plan.Daisy)
+                    {
+                        if (prog.StopRequested) { stopped = true; return; }
+                        NoteBook(++at, total, d); prog.Book(at, d);
+                        string why;
+                        if (ImportDaisyFolder(d, true, out why) == DaisyImport.Imported) imported++;
+                        else skipped.Add(System.IO.Path.GetFileName(d) +
+                                         (string.IsNullOrEmpty(why) ? "" : " — " + why));
+                    }
 
-                // A book split across discs is ALSO one book — every disc's files
-                // into a single folder, named after the folder that holds them.
-                foreach (string[] discs in plan.DiscSets)
+                    // A folder of audio is one book: its own files.
+                    foreach (string bookFolder in plan.AudioFolders)
+                    {
+                        if (prog.StopRequested) { stopped = true; return; }
+                        NoteBook(++at, total, bookFolder); prog.Book(at, bookFolder);
+                        if (CopyAudioInto(BookFolderFor(bookFolder), new[] { bookFolder })) imported++;
+                    }
+
+                    // A book split across discs is ALSO one book — every disc's files
+                    // into a single folder, named after the folder that holds them.
+                    foreach (string[] discs in plan.DiscSets)
+                    {
+                        if (prog.StopRequested) { stopped = true; return; }
+                        string parent = System.IO.Path.GetDirectoryName(discs[0]);
+                        NoteBook(++at, total, parent); prog.Book(at, parent);
+                        if (CopyAudioInto(BookFolderFor(parent), discs)) imported++;
+                    }
+                }))
                 {
-                    string parent = System.IO.Path.GetDirectoryName(discs[0]);
-                    NoteBook(++at, total, parent);
-                    if (CopyAudioInto(BookFolderFor(parent), discs)) imported++;
+                    bulk = ui;
+                    try { ui.ShowDialog(this); }
+                    finally { bulk = null; }
+                    // An error inside the worker is the caller's to report, exactly
+                    // as it was when this ran inline.
+                    if (ui.Error != null) throw ui.Error;
                 }
-                UiWatchdog.Note("library: import finished, " + imported + " of " + total);
+                UiWatchdog.Note("library: import finished, " + imported + " of " + total
+                                + (stopped ? ", stopped by the reader" : ""));
 
                 LoadBooks();
                 string msg = Localization.T("Dialog.ImportFolderSuccess.Message", imported);
@@ -3912,6 +3981,7 @@ namespace Nemoviz_Book_Reader
         private readonly ProgressBar bar;
         private readonly Label status;
         private volatile bool stop;
+        private bool finished;
 
         public CdRipProgressForm(string drive, List<OpticalDrive.Track> tracks, string destFolder)
         {
@@ -3957,6 +4027,11 @@ namespace Nemoviz_Book_Reader
             Controls.Add(bar);
             Controls.Add(cancel);
             CancelButton = cancel;
+            // ...and the DialogResult straight back off it, or the click closes
+            // this window while the worker runs on. AnalysisProgressForm carries
+            // the measurement: OnFormClosing cannot catch that path, because it
+            // arrives as CloseReason.None rather than UserClosing.
+            cancel.DialogResult = DialogResult.None;
         }
 
         protected override void OnShown(EventArgs e)
@@ -3987,9 +4062,23 @@ namespace Nemoviz_Book_Reader
                 catch (Exception ex) { Error = ex; }
                 finally
                 {
-                    try { BeginInvoke(new Action(() => { DialogResult = DialogResult.OK; Close(); })); } catch { }
+                    try { BeginInvoke(new Action(() => { finished = true; DialogResult = DialogResult.OK; Close(); })); } catch { }
                 }
             });
+        }
+
+        /// <summary>The close box means Cancel, and like Cancel it waits for the
+        /// worker: a track half written into the library is worse than one not
+        /// ripped at all.</summary>
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (!finished && e.CloseReason == CloseReason.UserClosing)
+            {
+                stop = true;
+                e.Cancel = true;
+                return;
+            }
+            base.OnFormClosing(e);
         }
 
         private void Report(int done, int current)

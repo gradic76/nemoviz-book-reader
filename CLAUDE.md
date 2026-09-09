@@ -943,11 +943,15 @@ were).
   `ExtractArchive`/`TryExtract` take an `Action<int,int> progress`; the password
   prompt is marshalled back to the UI thread. Outcome flows back via
   `Error`/`Cancelled` into the existing import error handling. (The post-extract
-  steps — ResolveBookFolder, chapter/duration build, LoadBooks rescan — still run
-  on the UI thread; seconds, not minutes.) Still open (offered, not yet done):
+  steps — ResolveBookFolder, chapter/duration build, LoadBooks rescan — run on the
+  UI thread for a SINGLE Add File, and there they really are seconds. **For a bulk
+  import they were not**: §11 measured a library's worth at 80–160 seconds of
+  blocked UI, and since 2026-09-09 the whole loop runs on a worker behind
+  `ImportProgressForm`.) Still open (offered, not yet done):
   uncompressed-size / free-disk cap (zip-bomb); append-only library refresh
   instead of full rescan; clearer messages for an unsupported codec (7z PPMd) or
-  a header-encrypted 7z; spoken progress for screen-reader users.
+  a header-encrypted 7z. **Spoken progress is DONE** — the quarters, in both the
+  extraction dialog's successor and the bulk one.
 - **Password**: `ReaderOptions.Password`. `ExtractArchive` tries with no
   password first; if that hits a crypto/"password"/"encrypt" error
   (`IsPasswordError`), it calls the `passwordProvider` (the UI shows
@@ -7962,7 +7966,7 @@ to. NBR's own shorter figure is the WPM estimate, not a measurement. See §8g′
   `NewMessageBox` beside an input wants an explicit `Shown` focus. Worth auditing
   the rename prompt and `ConfirmOnceForm` on the same grounds.
 
-- **OPEN: a bulk folder import blocks the UI for a minute or more, and it is not
+- **A bulk folder import blocked the UI for a minute or more, and it was not
   a hang** (2026-08-10). Gordan imported the whole of Test naslovi into an empty
   library and the app went "not responding" after an archive password prompt.
   `UiWatchdog` caught five samples of the same stall and they are in **five
@@ -7980,13 +7984,41 @@ to. NBR's own shorter figure is the WPM estimate, not a measurement. See §8g′
   per-book parsing, text cleaning, liblouis, the rescan — has neither progress
   nor a background thread.
 
-  **Not fixed, and deliberately not fixed on the spot**: it is a real change to
-  the Library, which §9 nails down except for faults found in use — this is one,
-  but it is a piece of work rather than a patch. The shape it wants is the whole
-  bulk import behind the progress dialog that already exists, reporting book by
-  book. **Cheap thing worth doing first either way: a breadcrumb per book in
-  `ImportOne`,** so the next capture of this says which title it was on instead
-  of stopping at "rebuilding the shelf".
+  **FIXED 2026-09-09 — `ImportProgressForm`, with the whole loop behind it.**
+  Gordan named it as the next job. `LibraryForm.ImportFolder`'s six loops now run
+  inside `using (var ui = new ImportProgressForm(total, prog => …))`, the body on
+  `Background.Run`, each loop guarded by `prog.StopRequested` and reporting
+  `NoteBook(++at, total, x); prog.Book(at, x)` as it goes — so the breadcrumb this
+  entry asked for as the cheap thing to do first is in as well, and the next hang
+  capture names the title instead of stopping at "rebuilding the shelf".
+  `LoadBooks()` and the result messages stay on the UI thread, where they belong,
+  and `ui.Error` is rethrown on the way out so the existing error handling is
+  untouched.
+
+  **Every accessibility decision is `AnalysisProgressForm`'s, re-used rather than
+  re-derived** — status line a read-only TABBABLE TextBox, focus starting on
+  Cancel, the opening line and then the QUARTERS spoken and nothing else. That
+  last one is not a smaller version of Analysis's choice but a much larger one:
+  analysis has twenty segments to speak, and a bulk import can have six hundred
+  books.
+
+  **The stop flag is read BETWEEN books, never inside one.** A book half copied
+  into the library is worse than one not imported at all, and the cancelling line
+  says the ones already in are kept.
+
+  **The archive branch keeps its own dialog alone and gives it up in company.**
+  `ImportFileCore` reports through the bulk dialog when one is running
+  (`bulk != null`) and opens `ExtractProgressForm` otherwise, so a single Add File
+  is unchanged and a bulk run does not stack a second window per archive. The
+  password prompt is marshalled to the UI thread by `AskPassword`.
+
+  **Verified by driving the real shipped class**, not a copy of its logic: work
+  off the UI thread (ui 1, worker 3), focus starting on `Button "Cancel"`, the bar
+  advancing, the status line read-only and tabbable, and Cancel giving `cancelled
+  True`, `error none`, 5 books of 8 — the loop reporting that it stopped BETWEEN
+  books, and the window staying up 195 ms, one book, after the click. **The first
+  version failed both halves of that last sentence**, and the cause was not in
+  this form at all — see the CancelButton entry below.
 
   **AND IT LEFT SIX NON-BOOKS ON THE SHELF, found 2026-08-17.** The library held
   `base_library`, `portable.bouncycastle.1.8.9` and `sharpziplib.1.3.3`, each
@@ -8009,6 +8041,69 @@ to. NBR's own shorter figure is the WPM estimate, not a measurement. See §8g′
     becomes a book. `OcrImport.IsEmptyTextBook` catches the same shape one layer
     later, for a scanned PDF that yields nothing; there is no equivalent at
     import. Not built — recorded so the next bulk import does not re-teach it.
+
+### `CancelButton` MADE SIX PROGRESS DIALOGS CLOSE ON CANCEL — the one thing every one of them promises not to do (2026-09-09)
+
+Every worker-owned progress dialog in NBR carries the same sentence in its own
+summary — *"Cancel does not close the window; the worker does, when it notices
+between books"* — because closing on the keypress leaves a book half copied with
+the reader back on the shelf. **All six were closing on the keypress.**
+
+**`Form.CancelButton` is not only an Escape binding: assigning it STAMPS
+`DialogResult.Cancel` onto the button**, and a button carrying a `DialogResult`
+closes a modal dialog the moment it is clicked. So `CancelButton = cancel` — one
+line, written for Escape — quietly handed the button the power the summary above
+says it must not have.
+
+**And the guard meant to catch this could not.** Four of the six override
+`OnFormClosing` and refuse to close while the worker runs, but they ask for
+`e.CloseReason == CloseReason.UserClosing`. Measured: the DialogResult path
+arrives as **`CloseReason.None`**, so the guard never fired. It is not a wrong
+guard — it is the right guard for the close box, asked about the wrong door.
+
+| dialog | what a click really did |
+|---|---|
+| `AnalysisProgressForm` | back to Properties, decode still running |
+| `ImportProgressForm` | back to the shelf mid-import |
+| `OcrProgressForm` | back with pages still being recognised |
+| `SpeechExportForm` | back with the export still writing |
+| `TranslationProgressForm` | back with the book still being translated |
+| `CdRipProgressForm` | back with tracks still being written into the library |
+
+**The fix is one line per dialog — take the DialogResult back off**,
+`cancel.DialogResult = DialogResult.None;`, immediately after the assignment.
+Measured, that keeps everything the assignment was made for: **the click AND
+Escape each reach `Give()` exactly once**, and the window stays up until the
+worker closes it. `ImportProgressForm` and `CdRipProgressForm`, the two with no
+close-box guard at all, gained one.
+
+**How it stayed hidden, and the method note is the valuable part.** The harness
+driving `ImportProgressForm` had been reporting `stoppedEarly False` and a stale
+status line, and I read that as the harness's own bookkeeping being unreliable.
+It was not. `ShowDialog` really was returning while the worker ran on, so every
+value read after it was read too early — the harness was reporting the truth
+about a broken dialog. **A probe and the thing it measures disagreeing is not
+automatically the probe's fault**, which is §10j's `%APPDATA%` lesson seen from
+the other side, where the probe genuinely was the one that was wrong. What tells
+them apart is a control: here, two throwaway forms differing in one line.
+
+### AND THE CANCELLING LINE NEVER REACHED THE SCREEN — the focus echo guard, firing at the one moment it should not
+
+Found in the same run, and this one is `ImportProgressForm`'s alone. `Give()`
+does `cancel.Enabled = false`, and **disabling the focused control makes WinForms
+move focus** — onto the status line, the next tab stop. §2's focus echo guard
+then does exactly what it is built to do and REFUSES to write, so the one line
+saying the import is stopping was suppressed at the very moment it was raised.
+Measured: after the click `status.Focused` is `True` and the line still read
+*"Book 5 of 8. Book 5.epub"*.
+
+**The four siblings were right and mine was not** — they set `statusText` and
+call `PushStatus()`, which writes unconditionally; only this one went through the
+guarded `Set()`. **The guard yields here on purpose**: it exists so a line does
+not change under a reader's cursor unbidden, and this line is the direct answer
+to the button they have just pressed. The screen reader always heard it — `Say()`
+needs no focus — so this was a silent failure of the SCREEN only, which is the
+half nobody here can see.
 
 - ~~**OPEN BUG: the player freezes on Ctrl+O in the Library**~~ **— SOLVED
   2026-08-10, and it was never NBR's.** Gordan found it: a **virtual optical

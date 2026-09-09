@@ -289,6 +289,14 @@ Extract.Progress.Title=Ἄνοιξις
 Extract.Progress.Preparing=Παρασκευάζεται…
 Extract.Progress.Determinate=Ἀνοίγεται… {0} / {1} δέλτοι
 Extract.Progress.Indeterminate=Ἀνοίγεται… {0} δέλτοι
+Import.Progress.Title=Εἰσαγωγή βιβλίων
+Import.Progress.Starting=Προετοιμασία εἰσαγωγῆς…
+Import.Progress.Working=Βιβλίον {0} ἐκ {1}. {2}
+Import.Progress.Unpacking=Ἀποσυσκευασία {0}, {1} ἐκ {2} ἀρχείων.
+Import.Progress.UnpackingCount=Ἀποσυσκευασία {0}, {1} ἀρχεῖα.
+Import.Progress.Quarter={0} τοῖς ἑκατόν. {1} ἐκ {2} βιβλίων.
+Import.Progress.Cancel=Ἀκύρωσις
+Import.Progress.Cancelling=Διακοπή μετὰ τὸ παρὸν βιβλίον. Τὰ ἤδη εἰσαχθέντα διατηροῦνται.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Μετάβασις

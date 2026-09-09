@@ -289,6 +289,14 @@ Extract.Progress.Title=Aperitio
 Extract.Progress.Preparing=Paratur…
 Extract.Progress.Determinate=Aperitur… {0} / {1} documenta
 Extract.Progress.Indeterminate=Aperitur… {0} documenta
+Import.Progress.Title=Libri importantur
+Import.Progress.Starting=Importatio paratur…
+Import.Progress.Working=Liber {0} ex {1}. {2}
+Import.Progress.Unpacking=Explicatur {0}, {1} ex {2} fasciculis.
+Import.Progress.UnpackingCount=Explicatur {0}, {1} fasciculi.
+Import.Progress.Quarter={0} centesimae absolutae. {1} ex {2} libris.
+Import.Progress.Cancel=Abstine
+Import.Progress.Cancelling=Post hunc librum desinitur. Omnia iam importata servantur.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Ad locum ire

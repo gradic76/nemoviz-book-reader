@@ -113,6 +113,19 @@ namespace Nemoviz_Book_Reader
             cancel.AccessibleName = cancel.Text;
             cancel.Click += (s, e) => Give();
             CancelButton = cancel;
+            // AND THEN TAKE THE DialogResult BACK OFF, WHICH IS WHY THESE TWO
+            // LINES STAND TOGETHER. Assigning CancelButton STAMPS
+            // DialogResult.Cancel onto the button, and a button carrying a
+            // DialogResult closes a modal dialog the moment it is clicked -- so
+            // Cancel was closing this window and handing the reader back to
+            // Properties while the decode carried on, which is the one thing the
+            // summary above says it must not do.
+            //
+            // OnFormClosing could not catch it: measured, that path arrives as
+            // CloseReason.None, not UserClosing, so the guard down there never
+            // saw it. With the DialogResult back at None the click and Escape
+            // both reach Give() and nothing closes until the worker closes it.
+            cancel.DialogResult = DialogResult.None;
 
             Controls.Add(status);
             Controls.Add(bar);

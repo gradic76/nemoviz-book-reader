@@ -280,6 +280,14 @@ Extract.Progress.Title=Розпакування
 Extract.Progress.Preparing=Підготовка…
 Extract.Progress.Determinate=Розпакування… {0} / {1} файлів
 Extract.Progress.Indeterminate=Розпакування… {0} файлів
+Import.Progress.Title=Імпорт книг
+Import.Progress.Starting=Підготовка до імпорту…
+Import.Progress.Working=Книга {0} з {1}. {2}
+Import.Progress.Unpacking=Розпакування {0}, {1} з {2} файлів.
+Import.Progress.UnpackingCount=Розпакування {0}, {1} файлів.
+Import.Progress.Quarter=Виконано {0} відсотків. {1} з {2} книг.
+Import.Progress.Cancel=Скасувати
+Import.Progress.Cancelling=Зупинка після цієї книги. Усе вже імпортоване буде збережено.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Перейти

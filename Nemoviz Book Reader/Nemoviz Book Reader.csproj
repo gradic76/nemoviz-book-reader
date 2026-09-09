@@ -257,6 +257,7 @@
     <Compile Include="LanguageDetector.cs" />
     <Compile Include="LanguagePacks.cs" />
     <Compile Include="LibraryLocationForm.cs" />
+    <Compile Include="ImportProgressForm.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="UpdateCheck.cs" />
     <Compile Include="UserData.cs" />

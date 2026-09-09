@@ -106,6 +106,7 @@ Dialog.ClearLibrary
 Dialog.DrmProtected
 Dialog.ArchivePassword
 Extract.
+Import.
 
 = GO TO
 Dialog.GoTo

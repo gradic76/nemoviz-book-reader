@@ -280,6 +280,14 @@ Extract.Progress.Title=Pakker ut
 Extract.Progress.Preparing=Forbereder…
 Extract.Progress.Determinate=Pakker ut… {0} / {1} filer
 Extract.Progress.Indeterminate=Pakker ut… {0} filer
+Import.Progress.Title=Importerer bøker
+Import.Progress.Starting=Forbereder importen…
+Import.Progress.Working=Bok {0} av {1}. {2}
+Import.Progress.Unpacking=Pakker ut {0}, {1} av {2} filer.
+Import.Progress.UnpackingCount=Pakker ut {0}, {1} filer.
+Import.Progress.Quarter={0} prosent fullført. {1} av {2} bøker.
+Import.Progress.Cancel=Avbryt
+Import.Progress.Cancelling=Stopper etter denne boken. Alt som er importert så langt beholdes.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Gå til

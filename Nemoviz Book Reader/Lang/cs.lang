@@ -280,6 +280,14 @@ Extract.Progress.Title=Rozbalování
 Extract.Progress.Preparing=Příprava…
 Extract.Progress.Determinate=Rozbalování… {0} / {1} souborů
 Extract.Progress.Indeterminate=Rozbalování… {0} souborů
+Import.Progress.Title=Import knih
+Import.Progress.Starting=Příprava importu…
+Import.Progress.Working=Kniha {0} z {1}. {2}
+Import.Progress.Unpacking=Rozbalování {0}, {1} z {2} souborů.
+Import.Progress.UnpackingCount=Rozbalování {0}, {1} souborů.
+Import.Progress.Quarter=Hotovo {0} procent. {1} z {2} knih.
+Import.Progress.Cancel=Zrušit
+Import.Progress.Cancelling=Zastavování po této knize. Vše dosud importované bude zachováno.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Přejít na

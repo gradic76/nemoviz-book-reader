@@ -280,6 +280,14 @@ Extract.Progress.Title=Estrazione
 Extract.Progress.Preparing=Preparazione…
 Extract.Progress.Determinate=Estrazione… {0} / {1} file
 Extract.Progress.Indeterminate=Estrazione… {0} file
+Import.Progress.Title=Importazione libri
+Import.Progress.Starting=Preparazione dell'importazione…
+Import.Progress.Working=Libro {0} di {1}. {2}
+Import.Progress.Unpacking=Estrazione di {0}, {1} di {2} file.
+Import.Progress.UnpackingCount=Estrazione di {0}, {1} file.
+Import.Progress.Quarter={0} percento completato. {1} di {2} libri.
+Import.Progress.Cancel=Annulla
+Import.Progress.Cancelling=Arresto dopo questo libro. Tutto ciò che è stato importato finora verrà conservato.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Vai a

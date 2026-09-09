@@ -280,6 +280,14 @@ Extract.Progress.Title=Malpakado
 Extract.Progress.Preparing=Preparado…
 Extract.Progress.Determinate=Malpakado… {0} / {1} dosieroj
 Extract.Progress.Indeterminate=Malpakado… {0} dosieroj
+Import.Progress.Title=Importado de libroj
+Import.Progress.Starting=Preparante la importadon…
+Import.Progress.Working=Libro {0} el {1}. {2}
+Import.Progress.Unpacking=Malpakante {0}, {1} el {2} dosieroj.
+Import.Progress.UnpackingCount=Malpakante {0}, {1} dosieroj.
+Import.Progress.Quarter={0} elcentoj pretaj. {1} el {2} libroj.
+Import.Progress.Cancel=Nuligi
+Import.Progress.Cancelling=Ĉesigante post ĉi tiu libro. Ĉio importita ĝis nun estas konservita.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Iri al

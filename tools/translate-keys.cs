@@ -305,13 +305,11 @@ class TranslateKeys
         req.Headers["x-goog-api-key"] = apiKey;   // a header, so it cannot come back in an error URL
         req.Timeout = 180000;
         byte[] body = Encoding.UTF8.GetBytes(sb.ToString());
+        pendingBody = body;             // kept so a retry can build the same request
         req.ContentLength = body.Length;
         using (var s = req.GetRequestStream()) s.Write(body, 0, body.Length);
 
-        string json;
-        using (var resp = (HttpWebResponse)req.GetResponse())
-        using (var r = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
-            json = r.ReadToEnd();
+        string json = Fetch(req);
 
         var ser = new System.Web.Script.Serialization.JavaScriptSerializer();
         ser.MaxJsonLength = int.MaxValue;
@@ -323,6 +321,49 @@ class TranslateKeys
         var content = c0["content"] as Dictionary<string, object>;
         var parts = content["parts"] as object[];
         return (string)((Dictionary<string, object>)parts[0])["text"];
+    }
+
+    // A 429 or a 503 is the service being busy, not an answer about the text --
+    // and a whole language failed on one of each during the run of 2026-09-09
+    // (Slovenian on a 503, Serbian Cyrillic on a 429), which then has to be
+    // noticed and re-run by hand. Three tries, backing off; anything else, and a
+    // third failure, is reported as it always was.
+    static string Fetch(HttpWebRequest req)
+    {
+        for (int attempt = 0; ; attempt++)
+        {
+            try
+            {
+                using (var resp = (HttpWebResponse)req.GetResponse())
+                using (var r = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+                    return r.ReadToEnd();
+            }
+            catch (WebException ex)
+            {
+                var resp = ex.Response as HttpWebResponse;
+                int code = resp == null ? 0 : (int)resp.StatusCode;
+                bool busy = code == 429 || code == 500 || code == 502 || code == 503 || code == 504;
+                if (!busy || attempt >= 2) throw;
+                Console.WriteLine("   " + code + ", cekam " + (attempt + 1) * 5 + " s");
+                System.Threading.Thread.Sleep((attempt + 1) * 5000);
+                req = Clone(req);   // a WebRequest cannot be sent twice
+            }
+        }
+    }
+
+    // The body has already been written, so a retry needs a fresh request built
+    // the same way. Kept beside Fetch so the two cannot drift.
+    static byte[] pendingBody;
+    static HttpWebRequest Clone(HttpWebRequest old)
+    {
+        var req = (HttpWebRequest)WebRequest.Create(old.RequestUri);
+        req.Method = "POST";
+        req.ContentType = "application/json";
+        req.Headers["x-goog-api-key"] = apiKey;
+        req.Timeout = old.Timeout;
+        req.ContentLength = pendingBody.Length;
+        using (var s = req.GetRequestStream()) s.Write(pendingBody, 0, pendingBody.Length);
+        return req;
     }
 
     static string JsonStr(string s)

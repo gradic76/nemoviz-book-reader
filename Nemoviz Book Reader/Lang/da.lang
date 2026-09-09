@@ -280,6 +280,14 @@ Extract.Progress.Title=Udpakker
 Extract.Progress.Preparing=Forbereder…
 Extract.Progress.Determinate=Udpakker… {0} / {1} filer
 Extract.Progress.Indeterminate=Udpakker… {0} filer
+Import.Progress.Title=Importerer bøger
+Import.Progress.Starting=Forbereder import…
+Import.Progress.Working=Bog {0} af {1}. {2}
+Import.Progress.Unpacking=Udpakker {0}, {1} af {2} filer.
+Import.Progress.UnpackingCount=Udpakker {0}, {1} filer.
+Import.Progress.Quarter={0} procent fuldført. {1} af {2} bøger.
+Import.Progress.Cancel=Annuller
+Import.Progress.Cancelling=Stopper efter denne bog. Alt hidtil importeret bevares.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Gå til

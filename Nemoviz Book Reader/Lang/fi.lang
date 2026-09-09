@@ -280,6 +280,14 @@ Extract.Progress.Title=Puretaan
 Extract.Progress.Preparing=Valmistellaan…
 Extract.Progress.Determinate=Puretaan… {0} / {1} tiedostoa
 Extract.Progress.Indeterminate=Puretaan… {0} tiedostoa
+Import.Progress.Title=Kirjojen tuonti
+Import.Progress.Starting=Valmistellaan tuontia…
+Import.Progress.Working=Kirja {0}/{1}. {2}
+Import.Progress.Unpacking=Puretaan {0}, {1}/{2} tiedostoa.
+Import.Progress.UnpackingCount=Puretaan {0}, {1} tiedostoa.
+Import.Progress.Quarter={0} prosenttia valmiina. {1}/{2} kirjaa.
+Import.Progress.Cancel=Peruuta
+Import.Progress.Cancelling=Pysäytetään tämän kirjan jälkeen. Tähän asti tuodut tiedot säilytetään.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Siirry

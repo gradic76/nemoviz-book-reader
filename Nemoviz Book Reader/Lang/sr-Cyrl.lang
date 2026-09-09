@@ -280,6 +280,14 @@ Extract.Progress.Title=Распакујем
 Extract.Progress.Preparing=Припремам…
 Extract.Progress.Determinate=Распакујем… {0} / {1} датотека
 Extract.Progress.Indeterminate=Распакујем… {0} датотека
+Import.Progress.Title=Увоз књига
+Import.Progress.Starting=Припрема увоза…
+Import.Progress.Working=Књига {0} од {1}. {2}
+Import.Progress.Unpacking=Распакивање {0}, {1} од {2} датотека.
+Import.Progress.UnpackingCount=Распакивање {0}, {1} датотека.
+Import.Progress.Quarter={0} процената завршено. {1} од {2} књига.
+Import.Progress.Cancel=Откажи
+Import.Progress.Cancelling=Заустављање након ове књиге. Све до сада увезено је сачувано.
 
 ; ---- GO TO
 Dialog.GoTo.Title=Иди на
