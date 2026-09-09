@@ -4705,8 +4705,16 @@ change lose their review.
 > settle it — the manual opens in the system browser and he had just reported
 > that being slow on some machines, this page is read on EVERY update, and prose
 > in the language files falls back to English by itself instead of needing eleven
-> HTML files regenerated per release. Written per release, newest first, as prose
-> for a reader rather than as the commit log.
+> HTML files regenerated per release. Written per release, newest first.
+>
+> **IT IS A SHORT LIST, NOT PROSE — Gordan rewrote it that way on 2026-09-09 and
+> asked for the style to stand: *"poprilično skraćena pa ubuduće drži takav
+> stil."*** One line per change, no explanation of what was wrong before, and a
+> closing *"...I puno posla ispod haube..."* for everything not worth a line. My
+> version had been a paragraph per item explaining the old behaviour; his is a
+> third the length and reads aloud far better, which is what a page a reader
+> hears on every update needs. **Do not turn it back into prose**, and do not
+> write an entry for a fix nobody outside would notice.
 >
 > **Export report** — `HintSystem.ExportReport` + `DiagnosticReport.cs`, and it is
 > a **beta item** (`Beta.DiagnosticReport`), at his word. It creates no log: the
@@ -7588,6 +7596,16 @@ choices in it are worth keeping:
   shipped file does not, so "everything English has" would push two strings into
   twenty files with no business holding them. Croatian has exactly the shipped
   set; the VALUES still come from English, which is the source.
+  **AND THE COST OF THAT CHOICE, found 2026-09-09: the tool can never repair
+  CROATIAN.** It translates English into every language except its own template,
+  so Croatian is the one file it cannot touch — and it is the file Gordan reads.
+  `Dialog.WhatsNew.Text` sat half English there for a week while all twenty other
+  languages were clean, and every file-level check passed, because the key was
+  present and well formed in all 21. **After a bulk pass, read the Croatian.**
+  **It only ADDS what is missing, too** (`Fill`), so re-translating a key whose
+  text has CHANGED means deleting that key from the target files first and then
+  running it. And leave `sr-Cyrl` out of the run — it is derived from `sr` by
+  `tools/sr-cyrillic.pl`, never translated, or the two Serbians drift.
 - **An empty English value is nothing to translate**, guarded explicitly — 8n
   records that `Hint.Settings.Cloud` being deliberately empty cost 25 keys per
   language on 2026-09-02, because the harness demanded a value back for it.
