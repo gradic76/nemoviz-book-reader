@@ -192,6 +192,19 @@ F10 tells you how far into the title you are reading, and a quick double press o
 
 Every key has its own shortcut, so you can reach it easily without walking around the window too much, and controlling the book you are reading is simplicity itself.
 
+## Context menu
+
+Everything the player has to offer can also be found in the context menu, so you can access every function without memorizing shortcuts. You open it with the Applications key, the Shift + F10 combination, or a right mouse click. Items are organized into submenus, and each one displays its shortcut, so the menu also serves as a reminder of the keys.
+
+- Playback: play and pause, forward and backward, volume and speed.
+- File: open file, open folder, and, if you have an optical drive, open audio CD.
+- Book: mark as read, favorite mark, translate, export to audiobook, and properties.
+- Options: settings, library, open library folder, go to, bookmarks, and counter.
+- Help: manual, news, services and accounts, check for updates, export report, and about.
+- Exit closes the program, same as Alt + F4.
+
+The menu calls the exact same functions as the keys on the panel, so it behaves the same way. If an action is not possible at that moment, for example because a book is not loaded, you will hear a short beep instead of the item being grayed out. The only thing not in the menu is deleting the entire library, because it is the only irreversible action in the program and remains where it was, in the library and behind two confirmations.
+
 ## Playback
 
 - The space bar starts and stops playback.

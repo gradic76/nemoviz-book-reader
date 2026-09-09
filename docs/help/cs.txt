@@ -182,6 +182,19 @@ Klávesou F10 se můžete dozvědět uplynulý čas titulu, který čtete, a ryc
 
 Všechna tlačítka mají své klávesové zkratky, takže se k nim snadno dostanete, aniž byste příliš chodili po okně, a samotné ovládání knihy, kterou čtete, je více než jednoduché.
 
+## Kontextová nabídka
+
+Vše, co přehrávač nabízí, najdete také v kontextové nabídce, takže ke každé funkci se dostanete i bez nutnosti pamatovat si klávesové zkratky. Otevírá se klávesou Applications, kombinací Shift + F10 nebo pravým tlačítkem myši. Položky jsou rozděleny do podnabídek a u každé je uvedena i její zkratka, takže nabídka zároveň slouží jako připomínka kláves.
+
+- Přehrávání: spuštění a pozastavení, vpřed a vzad, hlasitost a rychlost.
+- Soubor: otevření souboru, otevření složky a, pokud máte optickou mechaniku, otevření audio CD.
+- Kniha: označení přečteného, značka oblíbené položky, překlad, export do zvukové knihy a vlastnosti.
+- Možnosti: nastavení, knihovna, otevření složky knihovny, jdi na, záložky a čítač.
+- Nápověda: příručka, novinky, služby a účty, kontrola aktualizací, export hlášení a informace o programu.
+- Konec zavře program, totéž co Alt + F4.
+
+Nabídka vyvolává úplně stejné funkce jako tlačítka na panelu, a proto se i stejně chová. Pokud nějaká akce v danou chvíli není možná, například proto, že kniha není načtena, uslyšíte krátký zvukový signál namísto toho, aby byla položka zašedlá. Jediné, co v nabídce není, je smazání celé knihovny, protože je to jediná nevratná akce v programu a zůstává tam, kde byla, v knihovně a za dvěma potvrzeními.
+
 ## Přehrávání
 
 - Mezerníkem spouštíte nebo zastavujete přehrávání.

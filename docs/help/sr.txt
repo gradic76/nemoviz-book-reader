@@ -183,6 +183,19 @@ Tasterom F10 možete saznati proteklo vreme naslova koji čitate, a brzim dvostr
 
 Svi tasteri imaju svoje tastaturne prečice tako da lako možete do njih bez da previše šetate po prozoru, a samo upravljanje knjigom koju čitate je više nego jednostavno.
 
+## Kontekstni meni
+
+Sve što player može da ponudi nalazi se i u kontekstnom meniju, pa do svake funkcije možete i bez pamćenja prečica. Otvarate ga tasterom Applications, kombinacijom Shift + F10 ili desnim klikom miša. Stavke su razvrstane u podmenije, a uz svaku piše i njena prečica, tako da meni ujedno služi i kao podsetnik na tastere.
+
+- Reprodukcija: pokretanje i pauza, napred i nazad, jačina zvuka i brzina.
+- Datoteka: otvaranje datoteke, otvaranje fascikle i, ako imate optički uređaj, otvaranje audio CD-a.
+- Knjiga: obeležavanje pročitanog, oznaka favorita, prevođenje, izvoz u zvučnu knjigu i svojstva.
+- Mogućnosti: postavke, biblioteka, otvaranje fascikle biblioteke, idi na, knjižne oznake i brojač.
+- Pomoć: priručnik, novosti, servisi i nalozi, provera nadogradnje, izvoz izveštaja i podaci o programu.
+- Izlaz zatvara program, isto što i Alt + F4.
+
+Meni poziva potpuno iste funkcije kao i tasteri na panelu pa se i ponaša jednako. Ako neka radnja u tom trenutku nije moguća, na primer zato što knjiga nije učitana, čućete kratki zvučni signal umesto da stavka bude zasivljena. Jedino čega u meniju nema jeste brisanje cele biblioteke, jer je to jedina nepovratna radnja u programu i ostaje tamo gde je i bila, u biblioteci i iza dve potvrde.
+
 ## Reprodukcija
 
 - Razmaknicom pokrećete ili zaustavljate reprodukciju.

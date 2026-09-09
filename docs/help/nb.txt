@@ -182,6 +182,19 @@ Med F10 kan du finne ut medgått tid for tittelen du leser, og med et raskt dobb
 
 Alle knapper har sine egne hurtigtaster, slik at du enkelt kan nå dem uten å navigere for mye i vinduet, og selve styringen av boken du leser er mer enn enkel.
 
+## Kontekstmeny
+
+Alt Nemoviz Book Reader kan tilby finnes også i kontekstmenyen, slik at du kan nå alle funksjoner uten å huske snarveier. Du åpner den med Applications-tasten, tastekombinasjonen Shift + F10 eller ved å høyreklikke med musen. Elementene er sortert i undermenyer, og ved siden av hver står snarveien, slik at menyen også fungerer som en påminnelse om tastene.
+
+- Avspilling: start og pause, fremover og bakover, volum og hastighet.
+- Fil: åpne fil, åpne mappe og, hvis du har en optisk stasjon, åpne lyd-CD.
+- Bok: markere som lest, favorittmerke, oversettelse, eksportere til lydbok og egenskaper.
+- Alternativer: innstillinger, bibliotek, åpne bibliotekmappe, gå til, bokmerker og teller.
+- Hjelp: brukerveiledning, nyheter, tjenester og kontoer, se etter oppdateringer, eksportere rapport og om programmet.
+- Avslutt lukker programmet, det samme som Alt + F4.
+
+Menyen kaller opp nøyaktig de samme funksjonene som tastene på panelet, og oppfører seg derfor likt. Hvis en handling ikke er mulig i øyeblikket, for eksempel fordi en bok ikke er lastet inn, vil du høre et kort lydsignal i stedet for at elementet er nedtonet. Det eneste som ikke finnes i menyen er sletting av hele biblioteket, ettersom dette er den eneste irreversible handlingen i programmet, og den forblir der den var, i biblioteket og bak to bekreftelser.
+
 ## Avspilling
 
 - Med mellomromstasten starter eller stopper du avspillingen.

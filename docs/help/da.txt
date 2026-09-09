@@ -182,6 +182,19 @@ Med F10-tasten kan du finde ud af den forløbne tid for den titel, du læser, og
 
 Alle knapper har deres egne tastaturgenveje, så du nemt kan få adgang til dem uden at skulle navigere for meget rundt i vinduet, og selve styringen af den bog, du læser, er mere end enkel.
 
+## Kontekstmenu
+
+Alt hvad afspilleren kan tilbyde, findes også i kontekstmenuen, så du kan få adgang til alle funktioner uden at skulle huske genvejstaster. Du åbner den med tasten Applications, tastekombinationen Shift + F10 eller ved at højreklikke med musen. Elementerne er sorteret i undermenuer, og ud for hver står dens genvejstast, så menuen også fungerer som en huskeliste for tasterne.
+
+- Afspilning: start og pause, frem og tilbage, lydstyrke og hastighed.
+- Fil: åbn fil, åbn mappe og, hvis du har et optisk drev, åbn lyd-CD.
+- Bog: markering af læst indhold, favoritmarkering, oversættelse, eksport til lydbog og egenskaber.
+- Indstillinger: indstillinger, bibliotek, åbn biblioteksmappe, gå til, bogmærker og tæller.
+- Hjælp: manual, nyheder, tjenester og konti, søg efter opdateringer, eksportér rapport og om programmet.
+- Afslut lukker programmet, det samme som Alt + F4.
+
+Menuen kalder præcis de samme funktioner som tasterne på panelet og opfører sig derfor på samme måde. Hvis en handling ikke er mulig i det givne øjeblik, for eksempel fordi en bog ikke er indlæst, vil du høre et kort lydsignal i stedet for at menupunktet er nedtonet. Det eneste, der ikke findes i menuen, er sletning af hele biblioteket, da det er den eneste irreversible handling i programmet, og den forbliver, hvor den var, i biblioteket og bag to bekræftelser.
+
 ## Afspilning
 
 - Med mellemrumstasten starter eller stopper du afspilningen.

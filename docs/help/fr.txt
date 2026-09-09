@@ -182,6 +182,19 @@ Avec la touche F10, vous pouvez connaître le temps écoulé du titre que vous l
 
 Toutes les touches ont leurs propres raccourcis clavier afin que vous puissiez y accéder facilement sans trop naviguer dans la fenêtre, et la gestion du livre que vous lisez est plus que simple.
 
+## Menu contextuel
+
+Tout ce que le lecteur peut offrir se trouve également dans le menu contextuel, vous pouvez donc accéder à chaque fonction sans avoir à mémoriser les raccourcis. Vous l'ouvrez avec la touche Applications, la combinaison Shift + F10 ou un clic droit de la souris. Les éléments sont classés dans des sous-menus, et chaque élément affiche son raccourci, de sorte que le menu sert également de rappel des touches.
+
+- Lecture : lecture et pause, avance et retour, volume et vitesse.
+- Fichier : ouvrir un fichier, ouvrir un dossier et, si vous avez un lecteur optique, ouvrir un CD audio.
+- Livre : marquer comme lu, ajouter aux favoris, traduire, exporter en livre audio et propriétés.
+- Options : paramètres, bibliothèque, ouvrir le dossier de la bibliothèque, aller à, signets et compteur.
+- Aide : manuel, nouveautés, services et comptes, vérifier les mises à jour, exporter le rapport et à propos du programme.
+- Quitter ferme le programme, identique à Alt + F4.
+
+Le menu appelle exactement les mêmes fonctions que les touches du panneau et se comporte donc de la même manière. Si une action n'est pas possible à ce moment-là, par exemple parce qu'aucun livre n'est chargé, vous entendrez un court signal sonore au lieu que l'élément soit grisé. La seule chose qui ne figure pas dans le menu est la suppression de toute la bibliothèque, car il s'agit de la seule action irréversible du programme et elle reste là où elle était, dans la bibliothèque et après deux confirmations.
+
 ## Lecture
 
 - La barre d'espace permet de lancer ou d'arrêter la lecture.

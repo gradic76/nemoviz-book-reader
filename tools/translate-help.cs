@@ -12,6 +12,7 @@ using System.Text;
 //
 //   translate-help.exe full <code> [<code> ...]
 //   translate-help.exe sync <code> [<code> ...] [--sections 10,12,15]
+//   translate-help.exe add <n> <code> [<code> ...]
 //   translate-help.exe check
 //
 // WHY A TOOL AND NOT A SESSION SCRIPT. The ten interface languages of
@@ -365,6 +366,58 @@ static class TranslateHelp
         Console.WriteLine("      -> docs/help/" + code + ".txt");
     }
 
+    /// <summary>Translates ONE new section of hr and INSERTS it, rather than
+    /// replacing what is there.
+    ///
+    /// <para><b>`sync` cannot do this and that is not a defect in it.</b> Sync
+    /// aligns the two documents by section INDEX, so it refuses outright when the
+    /// counts differ -- and a section added in the middle shifts every index after
+    /// it, which is precisely when "translate the ones whose block count differs"
+    /// would rewrite the wrong half of the manual.</para>
+    ///
+    /// <para>The alternative was `full` on nineteen languages, about twenty-two
+    /// minutes and the whole manual re-generated to add six paragraphs. The manual
+    /// will keep growing until release, so the cheap path is worth having: this
+    /// costs one section's worth of translation per language.</para>
+    ///
+    /// <para><b>It refuses unless the target is EXACTLY one section short</b>, so
+    /// it cannot be pointed at a file that has drifted some other way -- there the
+    /// honest answer really is `full`.</para></summary>
+    static void Add(int n, string code, Doc hr)
+    {
+        string path = Path.Combine(root, "docs", "help", code + ".txt");
+        if (!File.Exists(path)) { Console.WriteLine(code + ": nema datoteke, treba 'full'"); return; }
+        Doc t = Doc.Read(path);
+        string lang = LanguageName(code);
+
+        if (t.HeadingAt.Count != hr.HeadingAt.Count - 1)
+        {
+            Console.WriteLine(code + ": nije tocno jedan odjeljak kraci ("
+                              + t.HeadingAt.Count + " prema " + hr.HeadingAt.Count + ") -- treba 'full'");
+            return;
+        }
+        if (n < 1 || n > hr.HeadingAt.Count)
+        { Console.WriteLine(code + ": odjeljak " + n + " ne postoji u hr"); return; }
+
+        int hf, ht; hr.Range(n, out hf, out ht);
+        var src = new Dictionary<int, string>();
+        for (int j = hf; j < ht; j++) if (hr.Lines[j].Trim().Length > 0) src[j] = hr.Lines[j];
+
+        var got = Chunk(lang, src);
+
+        var block = new List<string>();
+        for (int j = hf; j < ht; j++)
+            block.Add(hr.Lines[j].Trim().Length == 0 ? "" : got[j]);
+
+        // Where hr's section n begins is where the target's must begin too: the
+        // target still holds hr's n+1 at that index, so inserting pushes it down.
+        int put = n <= t.HeadingAt.Count ? t.HeadingAt[n - 1] : t.Lines.Count;
+        t.Lines.InsertRange(put, block);
+        t.Write(path);
+        Console.WriteLine("{0,-8} ({1}) odjeljak {2}: {3} redaka -> docs/help/{0}.txt",
+                          code, lang, n, src.Count);
+    }
+
     static void Check(Doc hr)
     {
         Console.WriteLine("odjeljci u hr: " + hr.HeadingAt.Count);
@@ -431,7 +484,15 @@ static class TranslateHelp
 
         var also = new List<int>();
         var codes = new List<string>();
-        for (int i = 1; i < args.Length; i++)
+        int addAt = 0;
+        int firstArg = 1;
+        if (mode == "add")
+        {
+            if (args.Length < 3 || !int.TryParse(args[1], out addAt))
+            { Console.WriteLine("add trazi broj odjeljka: add <n> <code> [<code>...]"); return; }
+            firstArg = 2;
+        }
+        for (int i = firstArg; i < args.Length; i++)
         {
             if (args[i] == "--sections" && i + 1 < args.Length)
             {
@@ -446,6 +507,7 @@ static class TranslateHelp
             try
             {
                 if (mode == "full") Full(code, hr);
+                else if (mode == "add") Add(addAt, code, hr);
                 else Sync(code, hr, also);
             }
             catch (Exception e)

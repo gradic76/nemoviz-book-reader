@@ -182,6 +182,19 @@ Klawiszem F10 możesz sprawdzić czas, jaki upłynął od początku czytanego ty
 
 Wszystkie przyciski mają swoje skróty klawiaturowe, dzięki czemu łatwo możesz do nich dotrzeć bez zbytniego poruszania się po oknie, a samo zarządzanie czytaną książką jest więcej niż proste.
 
+## Menu kontekstowe
+
+Wszystko, co oferuje odtwarzacz, znajduje się również w menu kontekstowym, dzięki czemu można uzyskać dostęp do każdej funkcji bez konieczności zapamiętywania skrótów klawiszowych. Otwiera się je klawiszem Applications, kombinacją Shift + F10 lub kliknięciem prawym przyciskiem myszy. Elementy są pogrupowane w podmenu, a przy każdym z nich podany jest skrót klawiszowy, dzięki czemu menu służy również jako przypomnienie klawiszy.
+
+- Odtwarzanie: start i pauza, przewijanie do przodu i do tyłu, głośność i szybkość.
+- Plik: otwieranie pliku, otwieranie folderu oraz, jeśli posiadasz napęd optyczny, otwieranie płyty audio CD.
+- Książka: oznaczanie przeczytanych, dodawanie do ulubionych, tłumaczenie, eksport do audiobooka oraz właściwości.
+- Opcje: ustawienia, biblioteka, otwieranie folderu biblioteki, przejdź do, zakładki i licznik.
+- Pomoc: podręcznik, nowości, usługi i konta, sprawdzanie aktualizacji, eksport raportu oraz informacje o programie.
+- Wyjście zamyka program, działa tak samo jak Alt + F4.
+
+Menu wywołuje dokładnie te same funkcje, co przyciski na panelu, więc zachowuje się identycznie. Jeśli jakaś czynność w danym momencie nie jest możliwa, na przykład dlatego, że książka nie została wczytana, usłyszysz krótki sygnał dźwiękowy zamiast wyszarzenia elementu. Jedyną rzeczą, której nie ma w menu, jest usuwanie całej biblioteki, ponieważ jest to jedyna nieodwracalna czynność w programie i pozostaje tam, gdzie była – w bibliotece, za dwoma potwierdzeniami.
+
 ## Odtwarzanie
 
 - Spacją uruchamiasz lub zatrzymujesz odtwarzanie.

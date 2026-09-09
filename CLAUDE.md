@@ -676,10 +676,12 @@ the same way. Two surfaces onto one command behave alike.
 the program, it sits behind two confirmations in the Library, and this menu is
 one careless right-click away at any moment.
 
-**Not on it yet:** Open audio CD, Export as an audiobook, Translate the book.
-All three are fifty-line flows inside `LibraryForm` — progress dialogs, rip
-folders, a voice and a spoken list — so putting them here means lifting them
-somewhere both windows can call. **And `OpenLibraryFolder` is duplicated** three
+~~**Not on it yet:** Open audio CD, Export as an audiobook, Translate the book.~~
+**STALE — all three ARE on it**, read off `ShowPlayerMenu` on 2026-09-09: the CD
+under Datoteka (present only when a drive is, dimmed when the reader has the
+feature off), Translate and Export under Knjiga. They reach the Library through
+`OpenIntoLibrary(StartWith.*)` rather than being lifted out of it, which is why
+the fifty-line flows below did not have to move. **And `OpenLibraryFolder` is duplicated** three
 lines' worth for the same reason; when the Library is next opened up, those
 should become one.
 
@@ -2402,9 +2404,10 @@ whether a string is valid.
 **The session flag must be reachable from two places** — `SettingsForm` and
 `PropertiesForm` each build their own catalogue through `GetVoiceCatalog()`.
 
-**Open:** the tab is called "OCR and Translate" and that name stops covering its
-contents; "Cloud" in the title would mislead the other way, since OCR is local.
-Gordan names it.
+~~**Open:** the tab is called "OCR and Translate".~~ **STALE — it has been
+called Advanced for a long time** (`Settings.Tab.Advanced`), and Gordan said so
+from memory before the code was checked: *"kartica je odavno preimenovana u
+Advanced, koliko znam."* He was right.
 
 **Phase 2 (superseded — the engine picker is gone, see the correction above):**
 Settings → Text Books was a two-combo picker — "Speech Engine" (vendor +
@@ -7169,11 +7172,10 @@ and the source deleted only once everything has arrived, never while a book is
 loaded. It is the highest-stakes thing NBR could do, the text already tells the
 reader to do it in Explorer, and nothing is broken without it.
 
-**Open, and small: SEVENTEEN keys exist in `en` and `hr` only** — five for this
-dialog, ten for the player's context menu, and two for the translation models
-added 2026-09-07. The other nineteen languages fall
-back to English until a translation pass, which wants a tool of its own beside
-`translate-help`. The Croatian in both sets is **Gordan's own dictated wording**
+~~**Open, and small: SEVENTEEN keys exist in `en` and `hr` only.**~~ **DONE
+2026-09-09** — eighteen by then, the What's new text having joined them, and all
+twenty-one languages carry them. The tool it wanted is
+**`tools/translate-keys.cs`**. The Croatian in both sets is **Gordan's own dictated wording**
 and the English is the translation of it, not the other way round.
 
 ---
@@ -7565,6 +7567,84 @@ says nothing.
 **126 requests for 119 pieces is the number to compare against** if the rules
 grow again. Three of the seven extra asks are one piece being retried; the rest
 are the two that changed engine.
+
+### TWENTY-ONE LANGUAGES AGAIN, AND THE TOOL THAT KEEPS THEM THERE (2026-09-09)
+
+Eighteen keys stood in `en` and `hr` alone — five for the first-run library
+dialog, ten for the player's context menu, two for the translation models, and
+**What's new**, which had never been translated at all: `hr.lang` carried the
+ENGLISH text, so a Croatian reader opening it read English.
+
+**`tools/translate-keys.cs` is the companion to `translate-help.cs`** and the
+thing 10j asked for. Same Gemini model, same stored key through
+`TranslationKeys`, numbered lines out and the same numbers demanded back. Two
+choices in it are worth keeping:
+
+- **The template is `hr.lang`, not `en.lang`.** English carries two keys a
+  shipped file does not, so "everything English has" would push two strings into
+  twenty files with no business holding them. Croatian has exactly the shipped
+  set; the VALUES still come from English, which is the source.
+- **An empty English value is nothing to translate**, guarded explicitly — 8n
+  records that `Hint.Settings.Cloud` being deliberately empty cost 25 keys per
+  language on 2026-09-02, because the harness demanded a value back for it.
+
+**AND THE FILE-LEVEL CHECKS ALL PASSED WHILE TWO LANGUAGES WERE BROKEN.** Every
+file came out with 747 keys, every `Dialog.WhatsNew.Text` with the same 24
+`
+`, every `{0}` in place — and Swedish read `Menu.Book=Menu.Book<TAB>Bok`
+while Latin read `Menu.Book=Liber<TAB>Liber`, the model having echoed the key,
+and in Latin's case TRANSLATED it (`Repertio.PlayPause`). The parser split on
+the FIRST tab, so the echo became the value. **Only asking the shipped
+`Localization` what a reader gets found it**, which is the rule this project
+keeps re-learning: a count is not a reading.
+
+Repaired in both files, and the tool now takes the text after the LAST tab and
+refuses a value that still holds a tab or that IS its own key.
+
+**The manual: a new section, and `add` rather than `full`.** The player's
+context menu was not in `docs/help/hr.txt` — the file predates it — so the
+Croatian was written here and the other twenty followed.
+
+**`sync` could not do it, and that is not a defect in sync.** It aligns the two
+documents by section INDEX and refuses when the counts differ; a section added
+in the MIDDLE shifts every index after it, which is exactly when "re-translate
+the ones whose block count differs" would rewrite the wrong half of a manual.
+The alternative was `full` on nineteen languages — about twenty-two minutes and
+the whole manual regenerated to add six paragraphs. **`translate-help.exe add
+<n> <code>...`** translates the one section and inserts it, and refuses unless
+the target is EXACTLY one section short. The manual will keep growing until
+release, so this pays for itself the next time.
+
+**`sr-Cyrl` is never edited, in either place.** `translate-keys` had written it
+directly; it was regenerated from `sr.lang` by `tools/sr-cyrillic.pl`, which is
+the standing rule — the two Serbians are a bijection and must say the same
+thing. The manual half is the same, `--text` from `sr.txt`. The tell that it
+mattered: the direct translation gave *Претражи* where the Latin file says *Potraži*, so the two
+had begun to differ on the first key.
+
+**Verified**: 747 keys in all twenty shipped files (748 in English, the two on
+purpose), 24 line breaks in every `Dialog.WhatsNew.Text`, `{0}` intact
+everywhere, no tab in any value, `make-help.pl` reporting "every language has
+the same shape as hr" over 25 headings, and the shipped `Localization`
+resolving all thirteen new keys in all twenty-one.
+
+### THE NOISE FLOOR IS PARKED FOR BETA 3 (Gordan, 2026-09-09)
+
+8d calls getting the p5-of-RMS noise floor into the analyser "the most valuable
+thing left here". **It is not being done now**, and the reason is bigger than
+priority: *"Postoji sansa da cemo prebaciti obradu iz The Bell umjesto ove nase
+no otom potom. Pisi za Beta 3."* If the processing is replaced wholesale then
+tuning this advisor is work thrown away, so the question waits on that decision
+rather than on effort.
+
+### NOT EVERY DIALOG HAS TO BE SKINNED (Gordan, 2026-09-09)
+
+10c lists five windows still in plain Windows chrome — `NoVoiceForm`,
+`SpeechDictionaryForm`, `DictRuleForm`, `TextHelpForm` and the rename prompt.
+**They stay as they are for now**: *"Ne treba dirati, ne moraju svi dijalozi
+biti skinned, ima vremena do sluzbenog releasea."* Note what this does NOT
+touch: 8k's rule that whatever the skin does classic does is about two LOOKS of
+one dialog, and is untouched by a dialog having no skinned look at all.
 
 ### THE THREE SERVICES' OWN MODEL LISTS, ASKED RATHER THAN READ (2026-09-07)
 

@@ -182,6 +182,19 @@ Con il tasto F10 è possibile conoscere il tempo trascorso del titolo che si sta
 
 Tutti i pulsanti hanno le proprie scorciatoie da tastiera in modo da poterli raggiungere facilmente senza spostarsi troppo nella finestra, e la gestione stessa del libro che si sta leggendo è più che semplice.
 
+## Menu contestuale
+
+Tutto ciò che il player può offrire si trova anche nel menu contestuale, quindi potete accedere a ogni funzione senza dover memorizzare le scorciatoie. Si apre con il tasto Applications, con la combinazione Shift + F10 o con il tasto destro del mouse. Le voci sono organizzate in sottomenu e accanto a ciascuna è indicata la relativa scorciatoia, così il menu funge anche da promemoria dei tasti.
+
+- Riproduzione: avvio e pausa, avanti e indietro, volume e velocità.
+- File: apertura file, apertura cartella e, se avete un lettore ottico, apertura di un CD audio.
+- Libro: contrassegnare come letto, aggiunta ai preferiti, traduzione, esportazione in audiolibro e proprietà.
+- Opzioni: impostazioni, libreria, apertura cartella libreria, vai a, segnalibri e contatore.
+- Aiuto: manuale, novità, servizi e account, verifica aggiornamenti, esportazione report e informazioni sul programma.
+- Esci chiude il programma, lo stesso che fare Alt + F4.
+
+Il menu richiama esattamente le stesse funzioni dei tasti sul pannello e si comporta allo stesso modo. Se un'azione in quel momento non è possibile, ad esempio perché il libro non è caricato, sentirete un breve segnale acustico invece di trovare la voce disattivata. L'unica cosa che non è presente nel menu è l'eliminazione dell'intera libreria, poiché è l'unica azione irreversibile nel programma e rimane dove si trovava, nella libreria e dopo due conferme.
+
 ## Riproduzione
 
 - Con la barra spaziatrice avvii o interrompi la riproduzione.

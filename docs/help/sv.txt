@@ -182,6 +182,19 @@ Med F10-tangenten kan du ta reda på den förflutna tiden för titeln du läser,
 
 Alla knappar har sina egna kortkommandon så att du enkelt kan nå dem utan att behöva navigera för mycket i fönstret, och själva hanteringen av boken du läser är mer än enkel.
 
+## Kontextmeny
+
+Allt som spelaren har att erbjuda finns även i snabbmenyn, så du kan nå varje funktion utan att behöva lära dig kortkommandon. Du öppnar den med tangenten Applications, kombinationen Shift + F10 eller genom att högerklicka med musen. Alternativen är sorterade i undermenyer, och bredvid varje alternativ står dess kortkommando, så att menyn även fungerar som en påminnelse om tangenterna.
+
+- Uppspelning: starta och pausa, framåt och bakåt, volym och hastighet.
+- Arkiv: öppna fil, öppna mapp och, om du har en optisk enhet, öppna ljud-CD.
+- Bok: markera som läst, favoriter, översättning, exportera till ljudbok och egenskaper.
+- Alternativ: inställningar, bibliotek, öppna biblioteksmapp, gå till, bokmärken och räknare.
+- Hjälp: manual, nyheter, tjänster och konton, sök efter uppdateringar, exportera rapport och om programmet.
+- Avsluta stänger programmet, samma som Alt + F4.
+
+Menyn anropar exakt samma funktioner som knapparna på panelen och fungerar därför likadant. Om en åtgärd inte är möjlig för tillfället, till exempel för att en bok inte är inläst, hör du en kort ljudsignal istället för att alternativet är gråmarkerat. Det enda som inte finns i menyn är att radera hela biblioteket, eftersom det är den enda oåterkalleliga åtgärden i programmet och den finns kvar där den var, i biblioteket och bakom två bekräftelser.
+
 ## Uppspelning
 
 - Med mellanslag startar eller stoppar du uppspelningen.

@@ -182,6 +182,19 @@ Con la tecla F10 puede conocer el tiempo transcurrido del título que está leye
 
 Todas las teclas tienen sus propios atajos de teclado para que pueda acceder a ellas fácilmente sin desplazarse demasiado por la ventana, y el manejo del libro que está leyendo es más que sencillo.
 
+## Menú contextual
+
+Todo lo que Nemoviz Book Reader puede ofrecer se encuentra también en el menú contextual, por lo que puede acceder a cada función sin necesidad de memorizar los atajos. Puede abrirlo con la tecla Applications, con la combinación Shift + F10 o con el botón derecho del ratón. Los elementos están organizados en submenús y junto a cada uno aparece su atajo, por lo que el menú también sirve como recordatorio de las teclas.
+
+- Reproducción: iniciar y pausar, avanzar y retroceder, volumen y velocidad.
+- Archivo: abrir archivo, abrir carpeta y, si tiene una unidad óptica, abrir CD de audio.
+- Libro: marcar como leído, marcar como favorito, traducir, exportar a audiolibro y propiedades.
+- Opciones: configuración, biblioteca, abrir carpeta de la biblioteca, ir a, marcadores y contador.
+- Ayuda: manual, novedades, servicios y cuentas, buscar actualizaciones, exportar informe y acerca del programa.
+- Salir cierra el programa, lo mismo que Alt + F4.
+
+El menú invoca exactamente las mismas funciones que las teclas del panel, por lo que se comporta de la misma manera. Si una acción no es posible en ese momento, por ejemplo, porque no hay un libro cargado, escuchará una señal acústica breve en lugar de que el elemento aparezca atenuado. Lo único que no está en el menú es eliminar toda la biblioteca, ya que es la única acción irreversible del programa y permanece donde estaba, en la biblioteca y tras dos confirmaciones.
+
 ## Reproducción
 
 - Con la tecla Espacio inicia o detiene la reproducción.

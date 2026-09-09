@@ -182,6 +182,19 @@ S tipko F10 lahko izveste pretečen čas naslova, ki ga berete, s hitrim dvojnim
 
 Vse tipke imajo svoje tipkovne bližnjice, tako da lahko enostavno pridete do njih, ne da bi preveč hodili po oknu, samo upravljanje knjige, ki jo berete, pa je več kot preprosto.
 
+## Kontekstni meni
+
+Vse, kar predvajalnik ponuja, se nahaja tudi v kontekstnem meniju, zato lahko do vsake funkcije dostopate brez pomnjenja bližnjic. Odprete ga s tipko Applications, s kombinacijo Shift + F10 ali z desnim klikom miške. Elementi so razvrščeni v podmenije, ob vsakem pa je zapisana tudi njegova bližnjica, tako da meni služi tudi kot opomnik za tipke.
+
+- Predvajanje: zagon in premor, naprej in nazaj, glasnost in hitrost.
+- Datoteka: odpiranje datoteke, odpiranje mape in, če imate optični pogon, odpiranje zvočnega CD-ja.
+- Knjiga: označevanje prebranega, oznaka priljubljenih, prevajanje, izvoz v zvočno knjigo in lastnosti.
+- Možnosti: nastavitve, knjižnica, odpiranje mape knjižnice, pojdi na, zaznamki in števec.
+- Pomoč: priročnik, novosti, storitve in računi, preverjanje posodobitev, izvoz poročila in podatki o programu.
+- Izhod zapre program, enako kot Alt + F4.
+
+Meni kliče popolnoma enake funkcije kot tipke na plošči, zato se tudi obnaša enako. Če neko dejanje v tistem trenutku ni mogoče, na primer zato, ker knjiga ni naložena, boste slišali kratek zvočni signal, namesto da bi bil element zasivljen. Edina stvar, ki je v meniju ni, je brisanje celotne knjižnice, saj je to edino nepovratno dejanje v programu in ostane tam, kjer je bilo, v knjižnici in za dvema potrditvama.
+
 ## Predvajanje
 
 - S preslednico zaženete ali ustavite predvajanje.

@@ -182,6 +182,19 @@ Mit der Taste F10 können Sie die verstrichene Zeit des Titels erfahren, den Sie
 
 Alle Tasten haben ihre eigenen Tastenkombinationen, sodass Sie sie leicht erreichen können, ohne zu viel im Fenster navigieren zu müssen, und die Steuerung des Buches, das Sie lesen, ist mehr als einfach.
 
+## Kontextmenü
+
+Alles, was der Player bietet, finden Sie auch im Kontextmenü, sodass Sie jede Funktion auch ohne Auswendiglernen der Tastenkombinationen erreichen können. Sie öffnen es mit der Taste Applications, der Tastenkombination Shift + F10 oder einem Rechtsklick. Die Einträge sind in Untermenüs sortiert, und neben jedem steht die entsprechende Tastenkombination, sodass das Menü gleichzeitig als Erinnerungshilfe für die Tasten dient.
+
+- Wiedergabe: Starten und Pause, vorwärts und rückwärts, Lautstärke und Geschwindigkeit.
+- Datei: Datei öffnen, Ordner öffnen und, falls Sie ein optisches Laufwerk haben, Audio-CD öffnen.
+- Buch: Gelesenes markieren, Favoriten-Lesezeichen, Übersetzung, Export als Hörbuch und Eigenschaften.
+- Optionen: Einstellungen, Bibliothek, Bibliotheksordner öffnen, Gehe zu, Lesezeichen und Zähler.
+- Hilfe: Handbuch, Neuigkeiten, Dienste und Konten, auf Updates prüfen, Bericht exportieren und Programminformationen.
+- Beenden schließt das Programm, das Gleiche wie Alt + F4.
+
+Das Menü ruft exakt dieselben Funktionen auf wie die Tasten auf dem Bedienfeld und verhält sich daher genauso. Wenn eine Aktion in diesem Moment nicht möglich ist, zum Beispiel weil kein Buch geladen ist, hören Sie ein kurzes akustisches Signal, anstatt dass der Eintrag ausgegraut wird. Das Einzige, was im Menü fehlt, ist das Löschen der gesamten Bibliothek, da dies die einzige unwiderrufliche Aktion im Programm ist und dort bleibt, wo sie war: in der Bibliothek und hinter zwei Bestätigungsabfragen.
+
 ## Wiedergabe
 
 - Mit der Leertaste starten oder pausieren Sie die Wiedergabe.

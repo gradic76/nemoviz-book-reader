@@ -47,17 +47,18 @@
 <li><a href="#s14">Sorting</a></li>
 </ul></li>
 <li><a href="#s15">The player</a><ul>
-<li><a href="#s16">Playback</a></li>
-<li><a href="#s17">Go to...</a></li>
-<li><a href="#s18">Bookmarks</a></li>
-<li><a href="#s19">The sleep timer</a></li>
+<li><a href="#s16">Context menu</a></li>
+<li><a href="#s17">Playback</a></li>
+<li><a href="#s18">Go to...</a></li>
+<li><a href="#s19">Bookmarks</a></li>
+<li><a href="#s20">The sleep timer</a></li>
 </ul></li>
-<li><a href="#s20">Properties</a><ul>
-<li><a href="#s21">Audio properties</a></li>
-<li><a href="#s22">Text properties</a></li>
-<li><a href="#s23">The on-screen display</a></li>
+<li><a href="#s21">Properties</a><ul>
+<li><a href="#s22">Audio properties</a></li>
+<li><a href="#s23">Text properties</a></li>
+<li><a href="#s24">The on-screen display</a></li>
 </ul></li>
-<li><a href="#s24">For the most persistent</a></li>
+<li><a href="#s25">For the most persistent</a></li>
 </ul>
 </nav>
 
@@ -165,7 +166,18 @@
 <p>In the information field you can find the basic facts about playback — author, title, elapsed time, page and a little more, depending of course on the format of the book you are reading. One press of F8 simply reads out what the information panel says; press it twice and it comes into the screen reader's focus, so you can go through it in detail with the arrow keys.</p>
 <p>F10 tells you how far into the title you are reading, and a quick double press of F10 tells you how much of it is left.</p>
 <p>Every key has its own shortcut, so you can reach it easily without walking around the window too much, and controlling the book you are reading is simplicity itself.</p>
-<h2 id="s16">Playback</h2>
+<h2 id="s16">Context menu</h2>
+<p>Everything the player has to offer can also be found in the context menu, so you can access every function without memorizing shortcuts. You open it with the Applications key, the Shift + F10 combination, or a right mouse click. Items are organized into submenus, and each one displays its shortcut, so the menu also serves as a reminder of the keys.</p>
+<ul>
+<li>Playback: play and pause, forward and backward, volume and speed.</li>
+<li>File: open file, open folder, and, if you have an optical drive, open audio CD.</li>
+<li>Book: mark as read, favorite mark, translate, export to audiobook, and properties.</li>
+<li>Options: settings, library, open library folder, go to, bookmarks, and counter.</li>
+<li>Help: manual, news, services and accounts, check for updates, export report, and about.</li>
+<li>Exit closes the program, same as Alt + F4.</li>
+</ul>
+<p>The menu calls the exact same functions as the keys on the panel, so it behaves the same way. If an action is not possible at that moment, for example because a book is not loaded, you will hear a short beep instead of the item being grayed out. The only thing not in the menu is deleting the entire library, because it is the only irreversible action in the program and remains where it was, in the library and behind two confirmations.</p>
+<h2 id="s17">Playback</h2>
 <ul>
 <li>The space bar starts and stops playback.</li>
 <li>The Left and Right arrows "rewind" five seconds at a time or, in a text book, one sentence forwards or backwards.</li>
@@ -177,37 +189,37 @@
 <p>In short: you start the chosen book with the space bar, and with Ctrl held down the Left and Right arrows control the reading speed.</p>
 <p>If you want to skip a little forwards or backwards, the Left and Right arrows do it five seconds or one sentence at a time. For bigger navigation steps, press Shift, choose the step you want with the Up and Down arrows, and — still holding Shift — go forwards and backwards through the book with the Left and Right arrows by the step you chose. Whenever you want to hear how and where your reading is getting to, press F8 at any moment and the screen reader will read you the whole content of the information panel. If you want to go through the information field in more detail, item by item, press F8 twice quickly. When you are done, leave the information field by pressing F8 twice again, or simply Escape, so that the arrow keys get their navigation duties back.</p>
 <p>The thinking behind this approach to navigation was that the user should not have to learn and remember a whole string of shortcuts. Most of the navigation is arranged on the arrow keys and, combined with the Shift and Ctrl modifiers, means you do not have to move your hand around the keyboard. Put your right hand on the arrows, press a modifier with your left when you need one, and that is the whole philosophy of it. Those who are defter will probably manage to use the thumb of the right hand for the Ctrl or Shift on the right-hand side, but how you use it is left to each person. All the other shortcuts, with the exception of Alt + Enter for Properties because that is the usual Windows convention, are on the function keys, all in the interest of keeping the controls as simple as possible.</p>
-<h2 id="s17">Go to...</h2>
+<h2 id="s18">Go to...</h2>
 <p>This control, as its name says, is for jumping to a particular part of the book in a couple of presses or clicks. With unstructured formats such as plain text, most audio formats in a single file, or badly formatted structured books, it cannot be activated — and a sound confirms that. With books of even halfway decent structure you will be able to skip to chapters, subchapters and other structural parts of the book. All of it, naturally, depends on what the producers put into the book and how.</p>
-<h2 id="s18">Bookmarks</h2>
+<h2 id="s19">Bookmarks</h2>
 <p>Two keys that come as a pair — Bookmark for setting one, and Bookmarks where you manage the ones already set. When a bookmark is set you hear a short sound, so you can be sure it is there. In managing bookmarks you move through them with the arrows and jump to a bookmark's position with Enter. You can also delete the ones you do not need. For audio books only the time is shown for now; for text books, the start of the sentence where you put the bookmark. If you have no bookmarks set, the Bookmarks key cannot be activated, and a sound will tell you so.</p>
-<h2 id="s19">The sleep timer</h2>
+<h2 id="s20">The sleep timer</h2>
 <p>An ordinary sleep timer, nothing clever. You choose a length — 15, 30, 45 and 60 minutes are offered — and the next option is your own, set to 90 minutes but changeable to whatever value you like. Then comes the choice of what happens when the countdown ends: Stop playback, Stop and close the application, and Stop and shut down the computer.</p>
 <p>Besides that there is a check box asking whether you want a bookmark set when the countdown begins. It can be useful for getting back to the time before you fell asleep and finding your place more easily from there.</p>
 <p>The countdown starts when you press <strong>Start</strong>; the dialog closes, and instead of the word Timer the player window now shows a running clock. Activate the timer again and the countdown is cancelled, and in the dialog you can choose a new time or cancel everything on the button meant for it.</p>
 <p>Two dialogs stop playback: Bookmarks and the Sleep timer. When you have done what you came to do in them and confirm your way back to the player window, playback resumes. Settings, Library, Go To and Properties let the book play on — with Properties that is deliberate, because there you are setting things you want to hear while you do it.</p>
 <p>A few words about the speed and volume controls. Volume is on F11 and F12 — F12 up, F11 down — in steps of 5%, and you hear a sound when you reach either end. Speed goes in steps of 0.1x, from 0.5x to 3x, and the same way for audio books and text books alike. The only difference is what 1x means: for an audio book it is the speed of the recording, and for a text book the speed at which the chosen voice speaks of its own accord. You hear the sound when you cross the normal speed, or in a text book the speed set for that voice.</p>
 <p>What matters most to you as a user is that Nemoviz Book Reader remembers absolutely everything about the playback of the books you listen to. It remembers the position, the volume and the speed for audio, and the kind, speed, language and pitch of the TTS for text books; it remembers the sound-processing parameters for audio books and the braille and on-screen parameters for text ones. In other words, everything you set to your own liking and needs is remembered for each book separately.</p>
-<h1 id="s20">Properties</h1>
+<h1 id="s21">Properties</h1>
 <p>It has been said several times: the settings and parameters for each individual book are decided in that book's properties. Audio books have their own properties, text books theirs, and special books such as Daisy audio + text have both, on two separate tabs of the properties window. You open properties from the player window with the Properties key or the Alt + Enter shortcut, and from the library window, while on a book's title, from the context menu or again with Alt + Enter.</p>
-<h2 id="s21">Audio properties</h2>
+<h2 id="s22">Audio properties</h2>
 <p>When you open the audio properties, the first thing you notice is the Sound processing check box. You do not have to switch it on if the sound of the book you are listening to is acceptable — but if it is not, switching Sound processing on may bring the sound up to a listenable level. Ticking the box starts an analysis of the book's recording, which can take between thirty seconds and a few minutes depending on the speed of the machine. The progress bar shows you at every moment how it stands and how much is left. When the analysis is done, NBR will set the filters listed below to some optimal state, so if the sound suits you just confirm everything with OK; if you think you can improve on it, here is a short description of what can be done.</p>
 <p>There follow seven filters which may or may not help you improve the sound of audiobooks made from old recordings, bad ones, or both. Each control can be switched on or off separately, so you do not have to use them all at once. When you switch Sound processing on, the first thing you find is the Reset key, which returns all the filters to their default settings. Then a Bypass check box, switching which on and off lets you hear immediately the difference between the original and your adjustments. The shortcut for bypassing is Ctrl + B, so you do not have to keep travelling from the controls to the bypass and back.</p>
 <p>First in the row is <strong>Remove rumble</strong>, the high pass. It takes out noise in the low end of the recording, from electrical equipment to an accidental knock on the microphone or the table. Then <strong>Noise reduction</strong>, meant for tape hiss, poor microphones and similar noise a little higher up the spectrum. <strong>Soften sibilance</strong> reduces the spitting of sounds like S and SH which were distorted on the recording by being recorded too close or by the highs being pushed up. <strong>Even out speech</strong> tries to bring the quiet and loud parts of the recording closer together. Then there is <strong>Tone</strong>, a five-band equalizer; the bands are labelled with their own frequencies — 200, 800, 1.8k, 3.5k and 5k+ — and the last one is a shelf, which means it lifts or drops everything above it rather than one region. Finally the <strong>Loudness and pauses</strong> group, with two controls: <strong>Automatic loudness</strong> (the normalization) lifts the whole recording to the highest level it can reach without distortion, and <strong>Noise in pauses</strong> (the gate) removes what noise is left in the gaps between sentences.</p>
 <p>Every filter has five levels of action: minimal, light, medium, strong and maximum. And it is worth repeating that each can be switched on or off individually.</p>
 <p>Sound processing is also remembered for each book separately.</p>
 <p>It must be said that this sound processing will not work miracles, and a bad dub from the nineteen-sixties will not come out as crystal-clear speech recorded at Abbey Road in London — but it will, we hope, get you somewhere near the end of the book without going mad at the quality.</p>
-<h2 id="s22">Text properties</h2>
+<h2 id="s23">Text properties</h2>
 <p>Much as in the speech settings, here you have the choice of language, voice, speed, volume and pitch for the selected book. In Settings you choose the default for everything; here you set it for one particular title. If you wonder why, the simplest example is that your default voice in Settings is a male one but you would rather read a novel written from a woman's perspective in a female voice — you change that in the text properties for that book alone. Every other book in that language will still open with the male voice by default until and unless you change it. Equally, some light reading you can happily take at 1.5x, but something heavier that you have to think about along the way you might rather bring back to 1x or slower.</p>
 <p>There is no pronunciation dictionary here; what follows are the braille and on-screen settings. Switch the on-screen display on and you get a choice of how the text is shown on your screen. If you want to read only in braille or only on screen with no speech, choose that option in the list of voices. In this beta the braille and on-screen outputs are greyed out and carry a note saying so.</p>
 <p>NBR has no output braille table and will not have one. What stands on your braille display is translated by your screen reader, with the table from its own settings, and that is the only right place for the choice — two tables over one display could only ever disagree. The one braille table in NBR is the <strong>input</strong> table: the one a .brf file was read with when it was imported. You change it in the Braille source group, which appears only for a book that came from such a file. That group works in this beta too.</p>
-<h2 id="s23">The on-screen display</h2>
+<h2 id="s24">The on-screen display</h2>
 <p class="beta">This is not included in the first beta. The testing and rework still needed take more time than this release has, so it comes back in one of the next ones.</p>
 <p>Depending on your choice in Settings or Properties, you will see on screen a smaller frame over the player's face in which the text changes like the subtitles on a foreign film or series. Choose either of the other two options and the frame will be larger, with the text either sliding across the screen like the closing credits or changing a frame at a time. In those two displays the line being spoken is shown in a different colour.</p>
 <p>At the bottom of the frame you can change the font, the size and a few other display parameters, and there are basic keys for controlling playback. All the keyboard shortcuts work in this frame too.</p>
 <p>If you chose to use braille, the small frame described first will appear, because braille cannot work without the display of the text that is carried to the screen reader. If you choose the on-screen display alone, you have the choice of the kind of display. In both cases the display appears once playback starts. If you chose neither of these options and only want to listen, but are curious how this looks, you can always switch the display on and off from the player window with F9.</p>
 <p>And that is roughly it as far as the help document goes. Fuller explanations are beside the controls wherever they are needed — the small key with a question mark, or F1 in the focused group. Thank you for being patient and reaching the end of the text. As a small token for it, you now get to read about two hidden functions.</p>
-<h1 id="s24">For the most persistent</h1>
+<h1 id="s25">For the most persistent</h1>
 <p>The first is an alternative way of adding one or more titles to the library. Instead of the Open file and Open folder dialogs described above, simply copy the content you want into the library folder through Windows or File Explorer. The next time it starts, Nemoviz Book Reader will refresh the library and show the new titles. If it is already running, just press the Refresh key in the library window.</p>
 <p>The second hidden function is a navigational one. On top of everything described above, you can move through the book you are reading with the shortcuts Ctrl + 1 to Ctrl + 9, which put you at 10, 20 and so on up to 90% of the book.</p>
 

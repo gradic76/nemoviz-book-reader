@@ -182,6 +182,19 @@ Klávesom F10 môžete zistiť uplynutý čas titulu, ktorý čítate, a rýchly
 
 Všetky tlačidlá majú svoje klávesové skratky, takže sa k nim ľahko dostanete bez toho, aby ste príliš chodili po okne, a samotné ovládanie knihy, ktorú čítate, je viac než jednoduché.
 
+## Kontextová ponuka
+
+Všetko, čo player ponúka, sa nachádza aj v kontextovej ponuke, takže ku každej funkcii sa dostanete aj bez zapamätania klávesových skratiek. Otvárate ju klávesom Applications, kombináciou Shift + F10 alebo pravým kliknutím myši. Položky sú rozdelené do podponúk a pri každej je uvedená aj jej klávesová skratka, takže ponuka zároveň slúži ako pripomienka klávesov.
+
+- Prehrávanie: spustenie a pozastavenie, dopredu a dozadu, hlasitosť a rýchlosť.
+- Súbor: otvorenie súboru, otvorenie priečinka a, ak máte optickú mechaniku, otvorenie audio CD.
+- Kniha: označenie prečítaného, značka obľúbených, preklad, export do zvukovej knihy a vlastnosti.
+- Možnosti: nastavenia, knižnica, otvorenie priečinka knižnice, prejsť na, záložky a počítadlo.
+- Pomocník: príručka, novinky, služby a účty, kontrola aktualizácií, export hlásenia a informácie o programe.
+- Ukončiť zatvorí program, rovnako ako Alt + F4.
+
+Ponuka vyvoláva úplne rovnaké funkcie ako klávesy na paneli, takže sa aj rovnako správa. Ak nejaká akcia v danom momente nie je možná, napríklad preto, že kniha nie je načítaná, budete počuť krátky zvukový signál namiesto toho, aby bola položka neaktívna. Jediné, čo v ponuke nie je, je vymazanie celej knižnice, pretože je to jediná nevratná akcia v programe a zostáva tam, kde aj bola, v knižnici a za dvoma potvrdeniami.
+
 ## Prehrávanie
 
 - Medzerníkom spúšťate alebo zastavujete prehrávanie.

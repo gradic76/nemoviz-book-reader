@@ -182,6 +182,19 @@ F10-näppäimellä saat tietää luettavan nimikkeen kuluneen ajan, ja nopealla 
 
 Kaikilla painikkeilla on omat pikanäppäimensä, joten pääset niihin helposti ilman, että joudut liikkumaan liikaa ikkunassa, ja itse luettavan kirjan hallinta on enemmän kuin yksinkertaista.
 
+## Kontekstivalikko
+
+Kaikki, mitä soitin voi tarjota, löytyy myös kontekstivalikosta, joten pääset jokaiseen toimintoon ilman pikanäppäinten muistamistakin. Avaat sen Applications-näppäimellä, näppäinyhdistelmällä Shift + F10 tai hiiren kakkospainikkeella. Kohdat on jaoteltu alivalikoihin, ja jokaisen kohdalla lukee myös sen pikanäppäin, joten valikko toimii samalla muistilistana näppäimistä.
+
+- Toisto: käynnistys ja tauko, eteenpäin ja taaksepäin, äänenvoimakkuus ja nopeus.
+- Tiedosto: tiedoston avaaminen, kansion avaaminen ja, jos käytössäsi on optinen asema, audio-CD-levyn avaaminen.
+- Kirja: luetun merkitseminen, suosikkimerkintä, kääntäminen, vienti äänikirjaksi ja ominaisuudet.
+- Asetukset: asetukset, kirjasto, kirjastokansion avaaminen, siirry, kirjanmerkit ja laskuri.
+- Ohje: käyttöopas, uutiset, palvelut ja tilit, päivitysten tarkistus, raportin vienti ja tietoja ohjelmasta.
+- Poistu sulkee ohjelman, sama kuin Alt + F4.
+
+Valikko kutsuu täsmälleen samoja toimintoja kuin paneelin näppäimet, joten se toimii samalla tavalla. Jos jokin toiminto ei ole sillä hetkellä mahdollinen, esimerkiksi siksi, että kirjaa ei ole ladattu, kuulet lyhyen äänimerkin sen sijaan, että kohta olisi harmaana. Ainoa asia, jota valikossa ei ole, on koko kirjaston poistaminen, sillä se on ohjelman ainoa peruuttamaton toiminto ja se pysyy siellä missä se on ollutkin, kirjastossa ja kahden vahvistuksen takana.
+
 ## Toisto
 
 - Välilyönnillä käynnistät tai pysäytät toiston.

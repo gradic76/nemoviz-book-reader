@@ -187,6 +187,19 @@ Clave F10 potes cognoscere tempus elapsum tituli quem legis et celeri duplici pr
 
 Omnes claves habent suos compendia claviaturae ut facile ad eas pervenire possis sine nimia ambulatione per fenestram, et ipsa administratio libri quem legis est plus quam simplex.
 
+## Menu contextuale
+
+Omnia quae lector offerre potest etiam in menu contextuali inveniuntur, itaque ad unamquamque functionem pervenire potes sine memoria clavium brevium. Illud aperis clavi Applications, combinatione Shift + F10 aut dextro clic muris. Elementa in sub-menus digesta sunt, et iuxta unumquodque scripta est eius clavis brevis, ita ut menu simul inserviat tamquam commonitorium clavium.
+
+- Reproductio: initium et pausa, progredi et regredi, volumen et celeritas.
+- Fasciculus: apertio fasciculi, apertio folder et, si unitatem opticam habes, apertio CD audio.
+- Liber: notatio lecti, nota favoritorum, translatio, exportatio in librum sonorum et proprietates.
+- Facultates: occasus, bibliotheca, apertio folder bibliothecae, vade ad, notae librorum et numeratrum.
+- Auxilium: manuale, nuntii, servitia et rationes, verificatio renovationis, exportatio relationis et data de programmate.
+- Exitus claudit programma, idem quod Alt + F4.
+
+Menu easdem prorsus functiones vocat ac claves in tabula, ergo et se eodem modo gerit. Si aliqua actio eo momento fieri non potest, exempli gratia quia liber non est onustus, audies breve signum sonorum loco ut elementum sit cinereum. Unum quod in menu non est, est deletio totius bibliothecae, quia haec est sola actio irrevocabilis in programmate et manet ubi erat, in bibliotheca et post duas confirmationes.
+
 ## Reproductio
 
 - Spatio incipis vel sistis reproductionem.

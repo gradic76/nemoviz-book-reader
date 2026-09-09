@@ -189,6 +189,19 @@ Tipkom F10 možete saznati proteklo vrijeme naslova koji čitate a brzim dvostru
 
 Sve tipke imaju svoje tipkovne prečace tako da lako možete do njih bez da previše šetate po prozoru, a samo upravljanje knjigom koju čitate je više nego jednostavno.
 
+## Kontekstni izbornik
+
+Sve što player može ponuditi nalazi se i u kontekstnom izborniku, pa do svake funkcije možete i bez pamćenja prečaca. Otvarate ga tipkom Applications, kombinacijom Shift + F10 ili desnim klikom miša. Stavke su razvrstane u podizbornike, a uz svaku piše i njezin prečac, tako da izbornik ujedno služi i kao podsjetnik na tipke.
+
+- Reprodukcija: pokretanje i pauza, naprijed i natrag, glasnoća i brzina.
+- Datoteka: otvaranje datoteke, otvaranje mape i, ako imate optički pogon, otvaranje audio CD-a.
+- Knjiga: označavanje pročitanog, oznaka favorita, prevođenje, izvoz u zvučnu knjigu i svojstva.
+- Mogućnosti: postavke, knjižnica, otvaranje mape knjižnice, idi na, knjižne oznake i brojač.
+- Pomoć: priručnik, novosti, servisi i računi, provjera nadogradnje, izvoz izvještaja i podaci o programu.
+- Izlaz zatvara program, isto što i Alt + F4.
+
+Izbornik poziva potpuno iste funkcije kao i tipke na panelu pa se i ponaša jednako. Ako neka radnja u tom trenutku nije moguća, primjerice zato što knjiga nije učitana, čut ćete kratki zvučni signal umjesto da stavka bude zasivljena. Jedino čega u izborniku nema jest brisanje cijele knjižnice, jer je to jedina nepovratna radnja u programu i ostaje tamo gdje je i bila, u knjižnici i iza dvije potvrde.
+
 ## Reprodukcija
 
 - Razmaknicom pokrećete ili zaustavljate reprodukciju.

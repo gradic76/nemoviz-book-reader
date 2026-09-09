@@ -182,6 +182,19 @@ Per la klavo F10 vi povas ekscii la pasintan tempon de la titolo, kiun vi legas,
 
 Ĉiuj butonoj havas siajn klavajn ŝparvojojn, do vi povas facile atingi ilin sen troa navigado tra la fenestro, kaj la regado mem de la libro, kiun vi legas, estas pli ol simpla.
 
+## Kunteksta menuo
+
+Ĉio, kion la ludilo povas oferti, troviĝas ankaŭ en la kunteksta menuo, do vi povas atingi ĉiun funkcion sen memori klavkombinojn. Vi malfermas ĝin per la klavo Applications, per la klavkombino Shift + F10 aŭ per dekstra musklako. La eroj estas ordigitaj en submenuojn, kaj apud ĉiu estas skribita ĝia klavkombino, do la menuo samtempe servas kiel memorigilo pri la klavoj.
+
+- Reproduktado: startigo kaj paŭzo, antaŭen kaj malantaŭen, laŭteco kaj rapideco.
+- Dosiero: malfermo de dosiero, malfermo de dosierujo kaj, se vi havas optikan diskilon, malfermo de aŭdio-KD.
+- Libro: markado de legitaĵo, legosigno de favoritoj, tradukado, eksporto al sonlibro kaj ecoj.
+- Ebloj: agordoj, biblioteko, malfermo de biblioteka dosierujo, iru al, legosignoj kaj nombrilo.
+- Helpo: manlibro, novaĵoj, servoj kaj kontoj, kontrolado de ĝisdatigo, eksporto de raporto kaj informoj pri la programo.
+- Eliro fermas la programon, same kiel Alt + F4.
+
+La menuo vokas tute samajn funkciojn kiel la klavoj sur la panelo, do ĝi kondutas same. Se iu ago en tiu momento ne eblas, ekzemple ĉar libro ne estas ŝargita, vi aŭdos mallongan sonan signalon anstataŭ ke la ero estu grizigita. La sola afero, kiu ne troviĝas en la menuo, estas forigo de la tuta biblioteko, ĉar tio estas la sola nerevokebla ago en la programo kaj ĝi restas tie, kie ĝi estis, en la biblioteko kaj post du konfirmoj.
+
 ## Reprodukto
 
 - Per la klavo Spaco vi startigas aŭ haltigas la reprodukton.
