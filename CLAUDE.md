@@ -1069,12 +1069,24 @@ discards.
   switches in Settings: **Library → Help → Check for update** is the thing you
   DO, **Settings → General → Updates** is the rule you set. On by default,
   because for a beta somebody who does not know a fix exists cannot ask for it.
-  - **It runs once a DAY, not once a launch** (`[App] LastUpdateCheck`, written
-    when the check STARTS so a machine with no network does not retry on every
-    start), from `Form1.OnShown` rather than the Library — someone resuming a
-    book never opens the Library, and they are exactly the reader a fix has to
+  - **It runs at most ONCE AN HOUR, not once a launch** (`[App] LastUpdateCheck`,
+    written when the check STARTS so a machine with no network does not retry on
+    every start), from `Form1.OnShown` rather than the Library — someone resuming
+    a book never opens the Library, and they are exactly the reader a fix has to
     reach. Off the UI thread: §11 has a bulk import that blocked the window for
     a minute and a file dialog that blocked it on a network read.
+  - **It was once a calendar DAY until 2026-09-10**, and Gordan met both faults
+    in that rule himself. It missed a release published the same day: Beta 2 went
+    out, he opened the installed Beta 1 an hour later and was told nothing,
+    because the day's check had run before the release existed. And a calendar
+    day is not twenty-four hours — a check at 00:10 blocked the whole of that day
+    while one at 23:50 blocked twenty minutes. **The original reasoning survives
+    rather than being overturned**: it is still not once a launch, because NBR is
+    opened and closed all day and a check per book would be rude to a service
+    giving this away. An hour makes twenty books one request, against a ceiling
+    of 60 anonymous requests an hour per IP measured off `X-RateLimit-Limit`.
+    The stored value is a full timestamp now; the old date-only form still parses,
+    as its midnight, so an upgrading reader is simply due.
   - **The automatic one speaks only when there is something newer.** A reader who
     did not ask has no use for "checked, all well" and less for "the check
     failed", so a manual check reports all three outcomes and the automatic one

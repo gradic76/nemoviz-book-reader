@@ -150,32 +150,54 @@ namespace Nemoviz_Book_Reader
         }
 
         // ── How often the automatic check runs ────────────────────────────────
-
         /// <summary>Whether the automatic check should run now: it is switched on,
-        /// and it has not already run today.
+        /// and the last one was at least <see cref="MinimumGap"/> ago.
         ///
-        /// <para>Once a day and not once a launch, because NBR is a program people
-        /// open and close all day — a check on every start would be a request per
-        /// book, which is rude to a service giving this away and pointless besides,
-        /// since releases do not appear by the hour.</para></summary>
+        /// <para><b>An HOUR, not a calendar day</b> (Gordan, 2026-09-10:
+        /// "namjesti provjeru barem na svaki sat"). The old rule had two faults he
+        /// met in person. It missed a release published the same day — Beta 2 went
+        /// out, he opened the installed Beta 1 an hour later and was told nothing,
+        /// because that day's check had already run before the release existed.
+        /// And a CALENDAR day is not twenty-four hours: a check at 00:10 blocked
+        /// the whole of that day while one at 23:50 blocked twenty minutes, so the
+        /// rule was uneven as well as slow.</para>
+        ///
+        /// <para><b>The original reasoning is kept, not overturned.</b> It is still
+        /// not once a launch: NBR is a program people open and close all day, and a
+        /// check per book would be rude to a service giving this away. An hour
+        /// keeps that — twenty books in an hour is one request. And the ceiling is
+        /// measured rather than guessed: GitHub allows 60 anonymous requests an
+        /// hour per IP, read off X-RateLimit-Limit, so this uses a sixtieth of
+        /// it.</para></summary>
+        public static readonly TimeSpan MinimumGap = TimeSpan.FromHours(1);
+
         public static bool DueNow(AppSettings s)
         {
             if (s == null || !s.AutoCheckUpdates) return false;
             DateTime last = s.LastUpdateCheck;
-            // A stored date in the future means the clock has been put back since;
+            // A stored time in the future means the clock has been put back since;
             // treat it as due rather than as a reason never to check again.
-            return last.Date != DateTime.Today || last > DateTime.Now;
+            return last > DateTime.Now || DateTime.Now - last >= MinimumGap;
         }
 
-        public static string Today
+        /// <summary>Now, as it is written into Settings.ini. A full timestamp since
+        /// 2026-09-10 — the date alone cannot express an hourly rule.</summary>
+        public static string Stamp
         {
-            get { return DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); }
+            get { return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture); }
         }
 
-        public static DateTime ParseDay(string s)
+        /// <summary>Reads back what <see cref="Stamp"/> wrote, and ALSO the
+        /// date-only form written before the hourly rule — an upgrading reader has
+        /// one of those in their file, and it must not read as "never checked" nor
+        /// throw. A bare date parses as its midnight, which is over an hour ago on
+        /// any launch that matters, so the first check after an upgrade simply
+        /// happens.</summary>
+        public static DateTime ParseWhen(string s)
         {
+            string[] forms = { "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd" };
             DateTime d;
-            return DateTime.TryParseExact(s ?? "", "yyyy-MM-dd", CultureInfo.InvariantCulture,
+            return DateTime.TryParseExact(s ?? "", forms, CultureInfo.InvariantCulture,
                                           DateTimeStyles.None, out d) ? d : DateTime.MinValue;
         }
 

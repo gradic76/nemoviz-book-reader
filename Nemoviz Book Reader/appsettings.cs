@@ -260,7 +260,7 @@ namespace Nemoviz_Book_Reader
             // (see UpdateCheck), and the switch beside it in Settings is there
             // for anyone who would rather NBR did not reach the network at all.
             AutoCheckUpdates = ini.Read("App", "AutoCheckUpdates", "1") == "1";
-            LastUpdateCheck = UpdateCheck.ParseDay(ini.Read("App", "LastUpdateCheck", ""));
+            LastUpdateCheck = UpdateCheck.ParseWhen(ini.Read("App", "LastUpdateCheck", ""));
             UseMetadata = ini.Read("Import", "UseMetadata", "1") == "1";
             TtsVoice = ini.Read("TextToSpeech", "Voice", "");
             // Speed is the percentage, Wpm the words-per-minute scale it replaced
@@ -704,7 +704,7 @@ namespace Nemoviz_Book_Reader
         public void NoteUpdateCheck()
         {
             LastUpdateCheck = DateTime.Now;
-            ini.Write("App", "LastUpdateCheck", UpdateCheck.Today);
+            ini.Write("App", "LastUpdateCheck", UpdateCheck.Stamp);
         }
 
         public void SetUseMetadata(bool value)
