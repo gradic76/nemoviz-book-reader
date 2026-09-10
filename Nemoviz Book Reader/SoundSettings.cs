@@ -26,6 +26,38 @@ namespace Nemoviz_Book_Reader
         // De-esser intensity (0..1), five levels.
         public static readonly double[] DeesserIntensity = { 0.15, 0.30, 0.45, 0.60, 0.80 };
 
+        /// <summary><b>Clicks and crackle — `adeclick`, from The Bell.</b> The
+        /// threshold in Bell's own tuning, at NBR's five levels rather than its
+        /// ten: Bell halved the step of an original five-value table to get
+        /// 2,00 … 4,25, and its odd steps ARE these five. So this is his table,
+        /// not one invented here.
+        ///
+        /// <para><b>Its place in the chain is not measured</b>, and Bell says so
+        /// in as many words. It sits first among the repairs, before the highpass,
+        /// which is where Bell puts it.</para></summary>
+        public static readonly double[] DeclickThreshold = { 2.0, 2.5, 3.0, 3.5, 4.0 };
+
+        /// <summary><b>A room ringing on one band — `adynamicequalizer`, from The
+        /// Bell.</b> The level moves the THRESHOLD, not the frequency: which band
+        /// rings is a property of the room and has to be measured, while how
+        /// eagerly to act on it is taste. The number FALLS as the level rises,
+        /// because a lower threshold acts sooner — so the control still means
+        /// "more" as it goes up, like every other one here.
+        ///
+        /// <para>Swept by Bell 2026-08-27 against a 200 Hz burst 13,3 dB above the
+        /// quiet level: 0,2 leaves 2,4 dB of collateral and takes 6 dB off the
+        /// peak; 0,1 takes 12 dB off and costs 6 dB of collateral. Every value is
+        /// a trade and the range spans the useful part.</para>
+        ///
+        /// <para><b>200 Hz is OUR figure, not a guess.</b> Bell's own note calls
+        /// the frequency uncalibrated for a studio and says it comes from NBR's
+        /// measurement of other people's recordings — which is exactly the corpus
+        /// this player reads, so here it is the measured value rather than a
+        /// borrowed one. See 8d: the bad recordings' excess sits at 160–250 Hz,
+        /// and nothing in the chain reached it before the lowest bell moved to
+        /// 200.</para></summary>
+        public static readonly double[] RoomEqThreshold = { 0.30, 0.25, 0.20, 0.15, 0.10 };
+
         // Compressor presets (threshold dB, ratio n:1, makeup dB, attack ms, release ms).
         public static readonly (int Threshold, double Ratio, int Makeup, int Attack, int Release)[] Compressor =
         {
@@ -186,6 +218,14 @@ namespace Nemoviz_Book_Reader
         public bool HighpassEnabled;
         public int HighpassLevel;       // 0..2
 
+        // FROM THE BELL, 2026-09-10. Both default OFF, exactly as they do there,
+        // so nothing changes for a reader who does not go looking for them.
+        public bool DeclickEnabled;
+        public int DeclickLevel;        // 0..4
+
+        public bool RoomEqEnabled;
+        public int RoomEqLevel;         // 0..4
+
         public bool DenoiseEnabled;
         public int DenoiseLevel;        // 0..4
 
@@ -267,6 +307,12 @@ namespace Nemoviz_Book_Reader
             HighpassEnabled = ReadBool(ini, "HighpassEnabled", HighpassEnabled);
             HighpassLevel = ClampLevel(ReadInt(ini, "HighpassLevel", HighpassLevel), HighpassHz.Length);
 
+            DeclickEnabled = ReadBool(ini, "DeclickEnabled", DeclickEnabled);
+            DeclickLevel = ClampLevel(ReadInt(ini, "DeclickLevel", DeclickLevel), DeclickThreshold.Length);
+
+            RoomEqEnabled = ReadBool(ini, "RoomEqEnabled", RoomEqEnabled);
+            RoomEqLevel = ClampLevel(ReadInt(ini, "RoomEqLevel", RoomEqLevel), RoomEqThreshold.Length);
+
             DenoiseEnabled = ReadBool(ini, "DenoiseEnabled", DenoiseEnabled);
             DenoiseLevel = ClampLevel(ReadInt(ini, "DenoiseLevel", DenoiseLevel), DenoiseDb.Length);
 
@@ -295,6 +341,12 @@ namespace Nemoviz_Book_Reader
 
             WriteBool(ini, "HighpassEnabled", HighpassEnabled);
             WriteInt(ini, "HighpassLevel", HighpassLevel);
+
+            WriteBool(ini, "DeclickEnabled", DeclickEnabled);
+            WriteInt(ini, "DeclickLevel", DeclickLevel);
+
+            WriteBool(ini, "RoomEqEnabled", RoomEqEnabled);
+            WriteInt(ini, "RoomEqLevel", RoomEqLevel);
 
             WriteBool(ini, "DenoiseEnabled", DenoiseEnabled);
             WriteInt(ini, "DenoiseLevel", DenoiseLevel);
@@ -369,7 +421,13 @@ namespace Nemoviz_Book_Reader
             if (s.GainEnabled && Math.Abs(s.GainDb) >= 0.5)
                 f.Add("volume=" + s.GainDb.ToString("0.##", ic) + "dB");
 
-            if (s.HighpassEnabled)
+            // CLICKS FIRST, before the highpass -- The Bell's placement, and it
+            // says plainly that the position is not measured. Repairing a click
+            // before anything shapes the signal is the conventional order and
+            // the one to keep until somebody measures otherwise.
+            if (s.DeclickEnabled)
+                f.Add("adeclick=t=" + DeclickThreshold[ClampLevel(s.DeclickLevel, DeclickThreshold.Length)]
+                    .ToString("0.00", ic));            if (s.HighpassEnabled)
                 f.Add("highpass=f=" + HighpassHz[ClampLevel(s.HighpassLevel, HighpassHz.Length)]);
 
             if (s.DenoiseEnabled)
@@ -391,6 +449,16 @@ namespace Nemoviz_Book_Reader
                       ":release=" + c.Release.ToString(ic));
             }
 
+
+            // THE ROOM'S OWN RESONANCE, after the compressor and before the tone
+            // controls -- The Bell's place for it. It cuts a band only while that
+            // band is too loud, which is what separates it from the fixed bells
+            // below: those act whether the ring is there or not.
+            if (s.RoomEqEnabled)
+                f.Add("adynamicequalizer=dfrequency=200:dqfactor=1:tfrequency=200:tqfactor=1"
+                    + ":threshold=" + RoomEqThreshold[ClampLevel(s.RoomEqLevel, RoomEqThreshold.Length)]
+                        .ToString("0.###", ic)
+                    + ":ratio=4:range=12:mode=cutabove");
             if (s.EqEnabled)
             {
                 for (int i = 0; i < EqBandHz.Length && i < s.EqGain.Length; i++)
