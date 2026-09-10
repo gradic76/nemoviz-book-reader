@@ -1305,8 +1305,13 @@ is loaded). `PropertiesForm.cs` + `SoundSettings.cs` (settings model, persisted
 in Book.ini `[Sound]`).
 
 **Chain** (`SoundSettings.BuildAf` → mpv `af` as one `lavfi=[…]` graph, applied
-by `Form1.ApplySoundProcessing`): highpass → afftdn (denoise) → deesser →
-acompressor → EQ (bass/equalizer/treble) → speechnorm → alimiter.
+by `Form1.ApplySoundProcessing`), as it stands after 2026-09-10: volume →
+adeclick → highpass → **arnndn** (noise reduction) → deesser → acompressor →
+adynamicequalizer → EQ (equalizer/treble) → speechnorm → agate → alimiter.
+*Until then the noise reduction was `afftdn` and the two Bell stages were not
+there; the paragraphs further down that name `afftdn` were written before the
+swap and are kept as the record of why the order is what it is — the argument
+still holds, and 8d‴ says which parts of it moved.*
 Verified working against the vendored libmpv (statically-linked ffmpeg, Lavf62;
 all needed filters confirmed present by grepping the DLL). All numbers formatted
 `InvariantCulture` (ffmpeg needs `.`); friendly dB units convert to ffmpeg's
@@ -1845,6 +1850,64 @@ tune the preset values by ear; English-name review for the stage titles
 (*Even out speech* is the one Gordan has left for later). Objective
 analysis of user-supplied samples (LUFS/peak/noise-floor/spectral via a static
 ffmpeg — "option A") will guide the tuning; **I measure, Gordan judges by ear.**
+
+---
+
+### 8d‴. The noise reduction is neural now (2026-09-10)
+
+`afftdn` is out and `arnndn` is in, **as a swap, not an addition**: the same
+Properties cell, the same `DenoiseEnabled`/`DenoiseLevel` keys in `Book.ini`,
+the same place in the chain. A book that had noise reduction on at Medium
+still has it on at Medium. Nothing to translate — "Smanjenje šuma" never
+promised an algorithm — and the cell count does not move, which matters
+because 8k's grid is full at six.
+
+**What it buys**, one 3:55 recording of real noisy speech, RMS measured inside
+two pauses between sentences:
+
+| | pause at 2,3 s | pause at 5,3 s |
+|---|---|---|
+| untouched | −58,1 dB | −57,3 dB |
+| `afftdn`, Medium | −59,2 | −59,0 |
+| `arnndn`, mix 0,667 | −64,4 | −64,2 |
+
+Six to seven dB against one, at the same notch of the same control, and the
+overall RMS moves 0,4 dB, so the speech is still there.
+
+**The engine did not need a new cut to RUN it** — that assumption is what had
+held this back, and it was never tested. Our own shipped libmpv instantiates
+`arnndn` and loads the model; the filter has always been in the audio-only cut,
+since the cut keeps every `A->A` filter FFmpeg has. Proved with two negative
+controls (a filter name that does not exist, a model path that does not exist:
+both fail loudly and play nothing). What the rebuild buys is FFmpeg's
+**short-frame fix** — see 10e″.
+
+**The model path is a measured piece of escaping, not a reasoned one.** It was
+relative, which resolves against the WORKING directory; that is the program's
+folder only when Windows happens to start it that way, and "Open with" on a
+book does not. A filter that fails to build takes the whole graph with it, so
+the book would play SILENT — and noise reduction is on by default. It is now
+absolute and escaped, and the depths differ because two parsers are stacked:
+**`:` takes two backslashes, `, ; [ ] '` take three.** Two on the comma family
+fails; so does four. Tested from a foreign working directory against each
+character alone and all together, plus Croatian diacritics, spaces, %, #, &
+and parentheses. The stage is also **skipped when the model file is missing**,
+rather than emitted and failing: losing noise reduction beats losing the sound.
+
+`rnnn\sh.rnnn` ships as a project item (so it reaches the installer, which
+takes the Release folder whole) and `.gitattributes` marks `*.rnnn` binary so
+git does not rewrite its line endings.
+
+**What the older paragraphs below now mean.** The "volume goes first" argument
+named three stages taking thresholds in absolute dB — `afftdn`, `deesser`,
+`acompressor`. It is two now: `arnndn`'s control is a mix, not a level, so it
+does not care where the gain sits. `speechnorm` staying last is unchanged and
+for the same reason — a gain rider in front hands the cleaner a noise floor
+that moves, and that is as bad for a neural one as for a spectral one.
+
+**Still without cells of their own:** `adeclick` and `adynamicequalizer`,
+reachable only by hand in `Book.ini`. That is a layout decision and it is
+Gordan's — see 8k.
 
 ---
 
