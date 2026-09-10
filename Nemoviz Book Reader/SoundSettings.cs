@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 
 namespace Nemoviz_Book_Reader
 {
@@ -20,8 +21,8 @@ namespace Nemoviz_Book_Reader
         // higher cutoff removes more low end but starts thinning deep voices.
         public static readonly int[] HighpassHz = { 50, 65, 80, 100, 120 };
 
-        // Noise reduction strength (dB): Minimal / Light / Medium / Strong / Maximum.
-        public static readonly int[] DenoiseDb = { 6, 10, 14, 20, 26 };
+        // Noise reduction is `arnndn` and its table is DenoiseMix, below --
+        // it needs the long note that the one-liners here have no room for.
 
         // De-esser intensity (0..1), five levels.
         public static readonly double[] DeesserIntensity = { 0.15, 0.30, 0.45, 0.60, 0.80 };
@@ -58,29 +59,87 @@ namespace Nemoviz_Book_Reader
         /// 200.</para></summary>
         public static readonly double[] RoomEqThreshold = { 0.30, 0.25, 0.20, 0.15, 0.10 };
 
-        /// <summary><b>Neural noise reduction — `arnndn`, and it is the whole
-        /// reason The Bell's chain is worth taking.</b> Gordan judged it better
-        /// by ear than either spectral route on real material, and it is the only
-        /// cleaner Bell still offers: 588 recordings exported without a failure.
+        /// <summary><b>Noise reduction — `arnndn`, a neural cleaner, and since
+        /// 2026-09-10 the only one.</b> It replaced `afftdn` in place: same
+        /// control, same cell, same Book.ini keys, so a book that had noise
+        /// reduction on at Medium still has it on at Medium.
         ///
-        /// <para>The mix in his tuning at NBR's five levels, the same odd steps of
-        /// his ten that the other two stages take: 0,40 … 0,93.</para>
+        /// <para><b>Why the spectral one went.</b> The Bell tried both on real
+        /// recordings and kept this one; Gordan judged it better by ear, and it
+        /// is what Bell has exported 588 recordings with. Two cleaners answering
+        /// one question would have cost a Properties cell the grid does not have
+        /// (8k) to offer a choice nobody has asked to make.</para>
         ///
-        /// <para><b>It needs a PATCHED engine and a model file, and both are The
-        /// Bell's.</b> Unpatched, the last frame of a stream carries fewer than
-        /// 480 samples and rnnoise_channel reads 480 anyway — measured there at 22
-        /// freezes in 25. It also forces the graph to 48 kHz on 22 kHz material,
-        /// which is the one thing NBR has that Bell does not have to survive: a
-        /// second mpv context holding the same card awake.</para>
+        /// <para>The mix is Bell's tuning at NBR's five levels — the odd steps of
+        /// his ten, as the other two borrowed stages take: 0,40 … 0,93.</para>
+        ///
+        /// <para><b>What the engine has to be.</b> The filter itself was already
+        /// in our own cut and always has been; what it needed was FFmpeg's
+        /// short-frame fix, because the last frame of a stream is normally
+        /// shorter than 480 samples and rnnoise_channel reads 480 regardless.
+        /// Measured on the unpatched build, one file played to its natural end
+        /// 40 times: 3 died. With the fix, and with no filter at all, 40 of 40.
+        /// It also forces the graph to 48 kHz on 22 kHz material — the one risk
+        /// Bell never has to survive, since NBR holds a SECOND mpv context on the
+        /// same card. Measured with the keep-alive really playing: 1069 ms to
+        /// start against 1053 with no filters, and the keep-alive never
+        /// stopped.</para>
         ///
         /// <para>The model path is RELATIVE on purpose, which is Bell's own answer:
         /// an absolute Windows path has a colon in it and a filter argument has to
         /// escape it twice over. A relative one resolves against the working
         /// directory and needs no escaping at all.</para></summary>
-        public static readonly double[] NeuralMix = { 0.40, 0.533, 0.667, 0.80, 0.933 };
+        public static readonly double[] DenoiseMix = { 0.40, 0.533, 0.667, 0.80, 0.933 };
 
-        /// <summary>Where the rnnoise model sits, beside the program.</summary>
-        public const string NeuralModel = "rnnn/sh.rnnn";
+        /// <summary>Where the rnnoise model sits: beside the program, in
+        /// <c>rnnn</c>.</summary>
+        public static string DenoiseModelPath
+        {
+            get
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                                    "rnnn", "sh.rnnn");
+            }
+        }
+
+        /// <summary><b>A Windows path inside a filter argument, and the escaping
+        /// is MEASURED, not reasoned about.</b> It goes through two parsers —
+        /// mpv's, which owns the <c>af=lavfi=[…]</c> block, and libavfilter's
+        /// graph parser under it — and they do not want the same number of
+        /// backslashes:
+        ///
+        /// <para><c>:</c> takes TWO. <c>, ; [ ] '</c> take THREE. Tested from a
+        /// working directory that was not the program's, against paths carrying
+        /// each of those characters, one at a time and all at once, plus Croatian
+        /// diacritics, spaces, %, #, &amp; and parentheses: every one plays. Two
+        /// backslashes on the comma family fails, and so does four.</para>
+        ///
+        /// <para><b>Why not the relative path this started as.</b> "rnnn/sh.rnnn"
+        /// resolves against the WORKING directory, which is the program's folder
+        /// only when Windows happens to start it that way — "Open with" on a book
+        /// hands the player the book's folder instead. Measured: the same chain
+        /// that plays from one working directory fails entirely from another, and
+        /// a filter that fails to build takes the WHOLE graph with it. The book
+        /// then plays no sound at all, which is far worse than no noise
+        /// reduction.</para></summary>
+        internal static string EscapeForFilter(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return "";
+            string s = path.Replace(Backslash, '/');
+            var sb = new System.Text.StringBuilder(s.Length + 16);
+            foreach (char c in s)
+            {
+                int n = 0;
+                if (c == ':') n = 2;
+                else if (c == ',' || c == ';' || c == '[' || c == ']' || c == Apostrophe) n = 3;
+                sb.Append(Backslash, n);
+                sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
+        private const char Backslash = (char)92;
+        private const char Apostrophe = (char)39;
 
         // Compressor presets (threshold dB, ratio n:1, makeup dB, attack ms, release ms).
         public static readonly (int Threshold, double Ratio, int Makeup, int Attack, int Release)[] Compressor =
@@ -250,9 +309,6 @@ namespace Nemoviz_Book_Reader
         public bool RoomEqEnabled;
         public int RoomEqLevel;         // 0..4
 
-        public bool NeuralEnabled;
-        public int NeuralLevel;         // 0..4
-
         public bool DenoiseEnabled;
         public int DenoiseLevel;        // 0..4
 
@@ -340,11 +396,8 @@ namespace Nemoviz_Book_Reader
             RoomEqEnabled = ReadBool(ini, "RoomEqEnabled", RoomEqEnabled);
             RoomEqLevel = ClampLevel(ReadInt(ini, "RoomEqLevel", RoomEqLevel), RoomEqThreshold.Length);
 
-            NeuralEnabled = ReadBool(ini, "NeuralEnabled", NeuralEnabled);
-            NeuralLevel = ClampLevel(ReadInt(ini, "NeuralLevel", NeuralLevel), NeuralMix.Length);
-
             DenoiseEnabled = ReadBool(ini, "DenoiseEnabled", DenoiseEnabled);
-            DenoiseLevel = ClampLevel(ReadInt(ini, "DenoiseLevel", DenoiseLevel), DenoiseDb.Length);
+            DenoiseLevel = ClampLevel(ReadInt(ini, "DenoiseLevel", DenoiseLevel), DenoiseMix.Length);
 
             DeesserEnabled = ReadBool(ini, "DeesserEnabled", DeesserEnabled);
             DeesserLevel = ClampLevel(ReadInt(ini, "DeesserLevel", DeesserLevel), DeesserIntensity.Length);
@@ -377,9 +430,6 @@ namespace Nemoviz_Book_Reader
 
             WriteBool(ini, "RoomEqEnabled", RoomEqEnabled);
             WriteInt(ini, "RoomEqLevel", RoomEqLevel);
-
-            WriteBool(ini, "NeuralEnabled", NeuralEnabled);
-            WriteInt(ini, "NeuralLevel", NeuralLevel);
 
             WriteBool(ini, "DenoiseEnabled", DenoiseEnabled);
             WriteInt(ini, "DenoiseLevel", DenoiseLevel);
@@ -465,16 +515,16 @@ namespace Nemoviz_Book_Reader
             if (s.HighpassEnabled)
                 f.Add("highpass=f=" + HighpassHz[ClampLevel(s.HighpassLevel, HighpassHz.Length)]);
 
-            // THE NEURAL CLEANER STANDS WHERE afftdn DOES, and only one of the two
-            // should ever be on: they are two answers to one question. Both are
-            // offered while the engine is being judged; if the neural one wins,
-            // the spectral one goes the way it went in The Bell.
-            if (s.NeuralEnabled)
-                f.Add("arnndn=m=" + NeuralModel + ":mix="
-                    + NeuralMix[ClampLevel(s.NeuralLevel, NeuralMix.Length)].ToString("0.###", ic));
-
-            if (s.DenoiseEnabled)
-                f.Add("afftdn=nr=" + DenoiseDb[ClampLevel(s.DenoiseLevel, DenoiseDb.Length)]);
+            // NOISE REDUCTION, and there is one of it: the neural cleaner stands
+            // where afftdn stood. Same place in the chain, after the highpass and
+            // before the de-esser, because the question it answers has not moved.
+            // The missing-model case SKIPS the stage rather than emitting a
+            // filter that cannot build: lavfi fails the whole graph as one, so
+            // one absent file would silence the book instead of costing it its
+            // noise reduction.
+            if (s.DenoiseEnabled && File.Exists(DenoiseModelPath))
+                f.Add("arnndn=m=" + EscapeForFilter(DenoiseModelPath) + ":mix="
+                    + DenoiseMix[ClampLevel(s.DenoiseLevel, DenoiseMix.Length)].ToString("0.###", ic));
 
             if (s.DeesserEnabled)
                 f.Add("deesser=i=" + DeesserIntensity[ClampLevel(s.DeesserLevel, DeesserIntensity.Length)]

@@ -663,7 +663,7 @@ namespace Nemoviz_Book_Reader
                 SoundSettings.HighpassHz[cmbHp.SelectedIndex] + " Hz");
 
             AppendStage(sb, "Prop.Denoise.Title", chkDn.Checked,
-                "-" + SoundSettings.DenoiseDb[cmbDn.SelectedIndex] + " dB");
+                "arnndn, mix " + SoundSettings.DenoiseMix[cmbDn.SelectedIndex].ToString("0.00"));
 
             AppendStage(sb, "Prop.Deesser.Title", chkDs.Checked,
                 SoundSettings.DeesserIntensity[cmbDs.SelectedIndex].ToString("0.00"));
