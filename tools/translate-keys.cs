@@ -57,7 +57,7 @@ class TranslateKeys
       + "- Do NOT translate these: Nemoviz Book Reader, NBR, DAISY, EPUB, OpenAI, Google, Gemini, "
       + "GPT-6 Astra, Azure, DeepSeek, Applications, Shift, Ctrl, Alt, and the F-keys.\n"
       + "- A key whose English is a proper name plus a parenthetical, like "
-      + "Gemini 3.8 Flash (Google, larger model), keeps the name and translates only the words "
+      + "Gemini 3.5 Flash Lite (Google, newer), keeps the name and translates only the words "
       + "inside the brackets.";
 
     static void Main(string[] args)

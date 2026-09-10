@@ -1,6 +1,6 @@
 ;----------------------------------------------------------------------------
 ; Nemoviz Book Reader -- translation rules for: sr  (Srpski)
-; NBR-Rules-Version: 3
+; NBR-Rules-Version: 4
 ;
 ; THIS FILE HOLDS ONLY WHAT IS TRUE OF THIS LANGUAGE. Everything that is
 ; true of translating any book into any language -- fidelity, register, not
@@ -84,10 +84,20 @@ Ako je izvornik hrvatski, u kojem je aorist arhaičan i redak, ne pojačavaj ga 
 Ako izvornik ima francuski passé simple, koji je ondje neutralno književno pripovedno vreme, prevedi ga perfektom.
 
 IMENA I NAZIVI
-Lična i druga strana imena zadrži u izvornom obliku i u latinici, nemoj ih fonetski transkribovati, ali ih OBAVEZNO menjaj po padežima: "sa Tobijem", "Vonvaltova presuda", "kod Jeana" — nikada nepromenjen oblik uz opisnu konstrukciju. Ako za ime, istorijsku ličnost ili geografski naziv postoji odomaćen srpski oblik, koristi taj oblik. Jednom izabran oblik imena koristi dosledno kroz ceo tekst.
+Lična imena i prezimena transkribuj srpskom latinicom prema pravilima srpskog jezika i pouzdano utvrđenom izgovoru. Kada za ime, istorijsku ličnost ili geografski naziv postoji ustaljen srpski oblik, koristi taj oblik.
+Transkribovana imena OBAVEZNO menjaj po padežima: "sa Tobijem", "Vonvaltova presuda" — nikada nepromenjen oblik uz opisnu konstrukciju.
 Jednom izabran oblik imena, prezimena, nadimka ili naziva koristi dosledno kroz ceo tekst.
-Geografska imena, uključujući gradove, naselja, oblasti, države, reke, planine i druga mesta, koristi u ustaljenom srpskom obliku kada takav oblik postoji. Kada ustaljeni srpski oblik ne postoji, ostavi naziv u izvornom obliku.
-Izmišljena geografska imena takođe ostavi u izvornom obliku kada funkcionišu kao vlastita imena mesta, osim ako njihovo značenje ima očiglednu književnu ili semantičku funkciju koja zahteva prevod.
+Kod izmišljenih imena, nadimaka i naziva sa važnim značenjem sačuvaj njihovu književnu funkciju: transkribuj ih kada funkcionišu samo kao vlastita imena, a prevedi kada njihovo značenje nosi važnu karakterizacijsku, humorističku, simboličku ili drugu funkciju.
+Geografske nazive transkribuj ili prevedi prema standardnoj srpskoj praksi; kada ustaljen srpski oblik postoji, koristi njega.
+Izmišljena geografska imena transkribuj kada funkcionišu kao vlastita imena mesta, osim ako njihovo značenje ima očiglednu književnu ili semantičku funkciju koja zahteva prevod.
+#
+# PARKED -- THE OPPOSITE RULE, in force until 2026-09-10. Transcription and
+# keeping the original spelling cannot both hold, so this is a SWAP, not a
+# switch: put a '#' in front of the six lines above AND delete the '#' from
+# the two lines below.
+#
+# Lična i druga strana imena zadrži u izvornom obliku i u latinici, nemoj ih fonetski transkribovati, ali ih OBAVEZNO menjaj po padežima: "sa Tobijem", "Vonvaltova presuda", "kod Jeana" — nikada nepromenjen oblik uz opisnu konstrukciju. Ako za ime, istorijsku ličnost ili geografski naziv postoji odomaćen srpski oblik, koristi taj oblik. Jednom izabran oblik imena koristi dosledno kroz ceo tekst.
+# Geografska imena, uključujući gradove, naselja, oblasti, države, reke, planine i druga mesta, koristi u ustaljenom srpskom obliku kada takav oblik postoji. Kada ustaljeni srpski oblik ne postoji, ostavi naziv u izvornom obliku. Izmišljena geografska imena takođe ostavi u izvornom obliku kada funkcionišu kao vlastita imena mesta.
 Nazive ulica, institucija, organizacija, prodavnica, restorana, hotela, kompanija i sličnih objekata i ustanova po pravilu ostavi u izvornom obliku kada je takva upotreba prirodna i razumljiva u srpskom tekstu. Prevedi ili transkribuj ih samo kada postoji ustaljeni srpski naziv, kada pravopisna praksa to zahteva ili kada značenje samog naziva ima važnu funkciju u tekstu.
 Ne prevodi vlastito ime samo zato što njegovo doslovno značenje može da se prevede.
 Brendove, kompanije, proizvode, publikacije, umetnička dela i druge nazive koji se u srpskom uobičajeno koriste u originalnom obliku ostavi u tom obliku, osim kada postoji ustaljen srpski naziv ili pravopisna praksa zahteva drugačije.

@@ -133,7 +133,7 @@ namespace Nemoviz_Book_Reader
     internal static class TranslationEngines
     {
         public const string Gemini = "gemini";
-        public const string GeminiFlash = "gemini-flash";
+        public const string GeminiLite35 = "gemini-lite-35";
         public const string DeepSeek = "deepseek";
         public const string DeepSeekPro = "deepseek-pro";
         public const string OpenAi = "openai";
@@ -163,31 +163,43 @@ namespace Nemoviz_Book_Reader
                 Endpoint = "https://generativelanguage.googleapis.com/v1beta/models/",
                 Model = "gemini-3.1-flash-lite"
             },
-            // THE FULL FLASH IS ITS OWN STOP, on the same account and the same key
-            // — the shape DeepSeekPro already set, and for the same reason: it is
-            // the dearer model of a family the reader has already paid to reach, so
-            // it costs no second signup and appears in no key dialog of its own.
+            // THE SECOND FLASH-LITE IS ITS OWN STOP, on the same account and the
+            // same key — the shape DeepSeekPro already set, so it costs no second
+            // signup and appears in no key dialog of its own.
             //
-            // Added 2026-09-07, when the three services' own model lists were asked
-            // rather than a documentation page. Google had moved seven releases past
-            // what NBR was calling for: 3.1-flash-lite is still served, but 3.5,
-            // 3.6, 3.7 and 3.8 Flash have arrived behind it.
+            // <para><b>3.8 Flash STOOD HERE FOR THREE DAYS AND WAS REMOVED, and
+            // the reason is the one thing a version number cannot tell you: its
+            // free tier is TWENTY REQUESTS A DAY.</b> Gordan put two books through
+            // it on 2026-09-10 and the log says Gemini was asked four times out of
+            // 107 pieces — one success in 7.6 s, then 429s reading "You exceeded
+            // your current quota", which stood the engine down and sent 106 pieces
+            // to GPT. His own dashboard confirms it: 20 RPD, and he peaked at 22.
+            // A book needs a hundred requests, so a model with a daily allowance
+            // smaller than a book is not a book translator. It is the right choice
+            // on a paid tier and it is the wrong entry in this list.</para>
+            //
+            // <para><b>3.5-flash-lite is here in its place because the allowance is
+            // the SAME as 3.1's</b> — 15 RPM, 250K TPM, 500 RPD, read off that same
+            // dashboard. So this is a newer model at no quota risk, and the only
+            // open question is the translation itself.</para>
             //
             // <para><b>3.1-flash-lite REMAINS the default and was deliberately not
             // swapped.</b> Every number this project has for translation — $0.23 a
-            // book, a sixth of a novel refused, 119 pieces in 19:30 — was measured
-            // on it. Replacing the model under a reader whose habits are calibrated
-            // on it would change the cost, the speed and the refusal rate at once,
-            // with nothing said. So the newer one is OFFERED, and whether it is
-            // better here is a thing to hear rather than to assume from a version
-            // number.</para>
+            // book, a sixth of a novel refused, 103 pieces at 8.4 s each — was
+            // measured on it. Replacing the model under a reader whose habits are
+            // calibrated on it would change the cost, the speed and the refusal
+            // rate at once, with nothing said.</para>
+            //
+            // <para><b>And never the `-latest` alias</b>, which the account also
+            // offers. An id that moves under us is exactly how the 3.8 fault would
+            // arrive again with nothing on our side having changed.</para>
             new TranslationEngine
             {
-                Id = GeminiFlash,
-                NameKey = "Settings.Translate.Engine.GeminiFlash",
+                Id = GeminiLite35,
+                NameKey = "Settings.Translate.Engine.GeminiLite35",
                 Kind = EngineKind.Gemini,
                 Endpoint = "https://generativelanguage.googleapis.com/v1beta/models/",
-                Model = "gemini-3.8-flash",
+                Model = "gemini-3.5-flash-lite",
                 KeyId = Gemini
             },
             new TranslationEngine
@@ -227,7 +239,7 @@ namespace Nemoviz_Book_Reader
             // than taken from the conversation Gordan brought in, whose prices for
             // them contradicted themselves between two sections.</para>
             //
-            // <para><b>Terra is the one offered first, not Sol.</b> Our own
+            // <para><b>The dearest is not the default.</b> Our own
             // precedent says the dearest of a family does not automatically earn
             // its price here: Gordan compared deepseek-pro against -flash and kept
             // the cheap one, "3.1x the price for a few phrases". Luna is here for
@@ -243,15 +255,13 @@ namespace Nemoviz_Book_Reader
             // filters of its own is genuinely interesting for coverage, since
             // Gemini refuses about a sixth of a published novel; but that is a
             // measurement to make, not an assumption to ship.</para>
-            new TranslationEngine
-            {
-                Id = OpenAi,
-                NameKey = "Settings.Translate.Engine.OpenAi",
-                Kind = EngineKind.OpenAiCompatible,
-                Endpoint = "https://api.openai.com/v1/chat/completions",
-                Model = "gpt-5.6-terra",
-                ReasoningDialect = true
-            },
+            // THE FOUR ARE ORDERED CHEAPEST FIRST, and that is the whole logic of
+            // this stretch of the combo (Gordan, 2026-09-10). Per 450 000-character
+            // book, on the tokenisation measured for Croatian: Luna $0.98, Terra
+            // $2.44, Sol $4.88, and Astra about $12 — OpenAI prices it at $10 and
+            // $50 a million against Sol's $4 and $20, so two and a half times Sol.
+            // Against a MEASURED $0.23 on Gemini, even the cheapest of them is four
+            // times the price of the free tier for a habit.
             new TranslationEngine
             {
                 Id = OpenAiLuna,
@@ -261,6 +271,15 @@ namespace Nemoviz_Book_Reader
                 Model = "gpt-5.6-luna",
                 ReasoningDialect = true,
                 KeyId = OpenAi
+            },
+            new TranslationEngine
+            {
+                Id = OpenAi,
+                NameKey = "Settings.Translate.Engine.OpenAi",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.openai.com/v1/chat/completions",
+                Model = "gpt-5.6-terra",
+                ReasoningDialect = true
             },
             new TranslationEngine
             {

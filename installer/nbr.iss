@@ -1,4 +1,4 @@
-; Nemoviz Book Reader — the installer.
+﻿; Nemoviz Book Reader — the installer.
 ;
 ;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\nbr.iss
 ;
@@ -106,6 +106,40 @@ Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "it"; MessagesFile: "compiler:Languages\Italian.isl"
+
+[CustomMessages]
+; ONE MESSAGE, AND IT IS AN ACCESSIBILITY FIX rather than a translation.
+;
+; Inno's own CreateDesktopIcon carries an accelerator ampersand in EVERY
+; language -- "Create a &desktop shortcut", "Stvori prečac na ra&dnoj
+; površini" -- so our vendored Croatian was not wrong, it was following the
+; convention. But a [Tasks] description is drawn in Inno's own check-list
+; control: the drawing turns the '&' into an underline, while the string
+; handed to a screen reader keeps it. Gordan heard the character read out and
+; never got the accelerator it promises (2026-09-10).
+;
+; Overridden HERE rather than in installer\languages, so the five languages
+; Inno supplies are covered as well as the four we vendor. Losing the
+; accelerator costs nothing: by his report it was never offered anyway, and
+; the check box is reached with Tab and set with Space.
+;
+; THE FILE ALSO GAINED A UTF-8 BOM with this section, and the reason is NOT
+; the one first written here. I claimed Inno reads a BOM-less .iss as ANSI and
+; that AppPublisher's "Nemoguća vizija" had therefore been mangled all along.
+; MEASURED, THAT IS FALSE: the published beta-2 installer reports its
+; CompanyName as "Nemoguća vizija", correctly, and it was built from this file
+; without a BOM. Inno 6.7 reads UTF-8 without being told. The BOM stays because
+; it is the documented way to say so out loud and costs nothing, not because it
+; repairs anything.
+en.CreateDesktopIcon=Create a desktop shortcut
+hr.CreateDesktopIcon=Stvori prečac na radnoj površini
+sr.CreateDesktopIcon=Stvori prečac na radnoj površini
+srcyrl.CreateDesktopIcon=Створи пречац на радној површини
+eo.CreateDesktopIcon=Krei Labortablan ikonon
+de.CreateDesktopIcon=Desktop-Symbol erstellen
+ru.CreateDesktopIcon=Создать значок на Рабочем столе
+es.CreateDesktopIcon=Crear un acceso directo en el escritorio
+it.CreateDesktopIcon=Crea un'icona sul desktop
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
