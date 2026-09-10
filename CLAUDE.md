@@ -7746,12 +7746,39 @@ prompt, same rules, same chain shape, the only difference being
 `gemini-3.1-flash-lite` instead of `gemini-3.8-flash`: **70 of 103 pieces at
 8.2 s each, every one on Gemini, not a single hand-off.**
 
-**The published figure is ~20 RPD for 3.8 Flash against 500–1000 for
-Flash-Lite** — but treat that as corroboration, not as the evidence. It comes
-from a Google developer-forum thread and third-party summaries, **no Google
-staff confirmation**, and two of those sources disagree about Flash-Lite's own
-number. Google's official rate-limit page publishes no figures at all and points
-at the account's own dashboard (`https://ai.dev/rate-limit`).
+**AND THEN GORDAN PASTED HIS OWN DASHBOARD, so this is no longer a web claim.**
+`https://ai.dev/rate-limit`, peak usage against the limit over 28 days, his
+account. **The forum figure was right about 3.8 and wrong about Flash-Lite**, and
+the shape of the table is not what anyone would guess:
+
+| model | RPM | RPD |
+|---|---|---|
+| **Gemini 3.1 Flash Lite** — what NBR ships | 20 / 15 | **485 / 500** |
+| **Gemini 3.5 Flash Lite** | 0 / 15 | 0 / **500** |
+| **Gemini 3.8 Flash** | 3 / 5 | **22 / 20 — exceeded** |
+| Gemini 3, 3.5, 3.6, 3.7 Flash | 0 / 5 | 0 / **20** |
+| Gemini 2.5 Flash Lite | 0 / 10 | 0 / **20** |
+| Gemini 3.1 Pro, 2.5 Pro, 2 Flash | 0 / 0 | 0 / **0** |
+
+- **"Lite" is NOT what buys the allowance.** 2.5 Flash Lite is 20 RPD, the same
+  as every full Flash. **Only 3.1 and 3.5 Flash Lite carry 500**; every other
+  text model on this account is 20 or nothing. So a future model cannot be
+  judged by its name — read the dashboard.
+- **`gemini-3.5-flash-lite` has the SAME limits as the 3.1 NBR ships** — 15 RPM,
+  250K TPM, 500 RPD, and untouched so far. It is therefore a candidate on quota
+  grounds, and what is left to judge is the TRANSLATION, not the allowance.
+- **`22 / 20` on 3.8 Flash is the 429 in the log, seen from the other end.**
+
+**THE WARNING THAT MATTERS MORE THAN 3.8: Flash-Lite peaked at 485 of 500.** A
+big book is ~107 requests, so the daily ceiling is about four books, fewer with
+retries — and the day it is crossed, the model that works will return the same
+429 and NBR will meet it with the per-minute assumption below, burning ~433 s a
+piece before standing the engine down. **The two fixes listed there are fifteen
+requests away from being needed, not hypothetical.**
+
+The `20 / 15` on Flash-Lite's RPM says the per-MINUTE limit is already being
+exceeded routinely — and there the backoff is correct and works, which is why
+a 103-piece book still runs at 8.2 s a piece.
 
 **THE ARITHMETIC IS WHAT SETTLES IT, AND IT NEEDS NO SOURCE.** One book of 107
 pieces needs at least 107 requests. At 20 a day it cannot be translated; at ten
@@ -7788,11 +7815,15 @@ twenty-a-day ceiling and the reader meets this fault with nothing on our side
 having changed. The numbered id is the whole point.
 
 **The newest Flash-Lite the account can call is `gemini-3.5-flash-lite`** (NBR
-ships 3.1). Its free-tier allowance is **not published anywhere checkable**, and
-the lesson above applies to it too: newer is not more generous — 3.8 Flash is
-the newest Flash and has the smallest allowance of the lot. Measure before
-moving, and measure the way that matters: a real piece through the real prompt,
-then a burst to find where the 429 starts.
+ships 3.1), and the dashboard above settles its allowance: **15 RPM, 250K TPM,
+500 RPD — identical to the 3.1 we ship**, and untouched so far. So the quota
+question is answered and only the TRANSLATION is left to judge: a real piece
+through the real prompt, against 3.1 on the same text, before anything moves.
+
+The lesson still stands for whatever comes after it, though — newer is not more
+generous, and neither is "Lite": 3.8 Flash is the newest Flash and has the
+smallest allowance of the lot, while 2.5 Flash Lite carries the same 20 a day as
+a full Flash. Read the dashboard, never the name.
 
 ### THE PARAGRAPH CHECK WAS REJECTING GOOD WORK — measured, and fixed (2026-09-07)
 
