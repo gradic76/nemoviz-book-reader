@@ -301,6 +301,13 @@ namespace Nemoviz_Book_Reader
             // maximum. An earlier version read the library's own median of 65 as
             // the "leave it alone" point and so applied FULL denoise at 35 -- to
             // a recording its owner had just called acceptable.
+            //
+            // THE THRESHOLDS ARE STILL afftdn's (2026-09-10). The stage behind
+            // this control is `arnndn` now, and a level is a mix rather than a
+            // number of dB, so "how bad is the noise -> how hard to clean" still
+            // reads correctly while the SIZE of each step no longer does. The
+            // scale is left alone until it can be judged on real books by ear,
+            // which is the only way the first version of it was settled either.
             if (SoundAnalysis.Usable(a.Snr) && a.NoiseShare >= MinNoiseShare)
             {
                 s.DenoiseLevel = Pick(a.Snr, 0, new[] { 15.0, 22.0, 28.0, 34.0 }, true);
