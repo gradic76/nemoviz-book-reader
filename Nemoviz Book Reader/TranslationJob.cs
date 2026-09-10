@@ -735,6 +735,11 @@ namespace Nemoviz_Book_Reader
             // different: a refusal is worth two more chances, an empty allowance
             // is not worth one.
             var spent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            // Whether every refusal an engine gave on THIS piece was the service
+            // declining the passage. A content refusal says nothing about the next
+            // six thousand characters, so it must not push an engine toward being
+            // stood down; a spent allowance says everything, and does.
+            var aboutPassage = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
             var whyRefused = new Dictionary<TranslationEngine, string>();
 
             for (int stop = 0; stop < opt.Chain.Count; stop++)
@@ -799,6 +804,9 @@ namespace Nemoviz_Book_Reader
                         }
                         if (attempt == attempts - 1 && !refused.Contains(engine)) refused.Add(engine);
                         if (!r.Ok && r.Exhausted) spent.Add(engine.Id);
+                        bool onlyContent;
+                        if (!aboutPassage.TryGetValue(engine.Id, out onlyContent)) onlyContent = true;
+                        aboutPassage[engine.Id] = onlyContent && !r.Ok && r.Refused;
                         continue;
                     }
 
@@ -845,12 +853,20 @@ namespace Nemoviz_Book_Reader
                     // piece, has its count moved on.
                     state.Worked(engine);
                     foreach (var miss in refused)
+                    {
+                        bool passage;
+                        // A refusal about the PASSAGE is skipped entirely: it is not
+                        // evidence about the next piece, and counting it is what cost
+                        // 3.5 Flash Lite seven pieces it was never asked about.
+                        if (!spent.Contains(miss.Id)
+                            && aboutPassage.TryGetValue(miss.Id, out passage) && passage) continue;
                         if (state.Missed(miss, state.StillUp(opt.Chain), spent.Contains(miss.Id)))
                             Log(opt, string.Format(CultureInfo.InvariantCulture,
                                 spent.Contains(miss.Id)
                                     ? "  stood down   {0} — its allowance is spent, so it is not asked again in this book"
                                     : "  stood down   {0} — {1} pieces in a row it would not take",
                                 miss.DisplayName, ChainState.StandDownAfter));
+                    }
                     return new Piece
                     {
                         Text = r.Text,
@@ -868,12 +884,17 @@ namespace Nemoviz_Book_Reader
             clock.Stop();
             // Nobody took it, so every engine that was asked refused it.
             foreach (var miss in refused)
+            {
+                bool passage;
+                if (!spent.Contains(miss.Id)
+                    && aboutPassage.TryGetValue(miss.Id, out passage) && passage) continue;
                 if (state.Missed(miss, state.StillUp(opt.Chain), spent.Contains(miss.Id)))
                     Log(opt, string.Format(CultureInfo.InvariantCulture,
                         spent.Contains(miss.Id)
                             ? "  stood down   {0} — its allowance is spent, so it is not asked again in this book"
                             : "  stood down   {0} — {1} pieces in a row it would not take",
                         miss.DisplayName, ChainState.StandDownAfter));
+            }
             report.LeftInOriginal++;
             // WHICH OF THE TWO IT WAS, and they are not the same thing at all
             // (Gordan, 2026-08-21: "u logovima ne pise nista o razlogu"). An engine

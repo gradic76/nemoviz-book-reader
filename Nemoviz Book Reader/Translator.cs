@@ -426,6 +426,23 @@ namespace Nemoviz_Book_Reader
         /// 2026-09-10 one piece burned 433.9 s backing off against a ceiling of
         /// twenty requests that had already been passed.</para></summary>
         public bool Exhausted;
+
+        /// <summary><b>The service declined this PASSAGE</b>, as against anything
+        /// being wrong with the engine.
+        ///
+        /// <para>It is separate from <see cref="Exhausted"/> because the two say
+        /// opposite things about the NEXT piece. A spent allowance is a fact about
+        /// the whole day: the next piece will fail too, and standing the engine
+        /// down at once saves the wait. A content refusal is a fact about these
+        /// six thousand characters and predicts nothing at all about the next
+        /// six thousand.</para>
+        ///
+        /// <para>Measured on one book through two models, 2026-09-10: 3.5 Flash
+        /// Lite refused only two pieces more than 3.1 and ended up carrying half
+        /// as much of the book, because three of its refusals happened to fall
+        /// consecutively and the stand-down then took the last seven pieces away
+        /// from it unasked — of which 3.1 translated five.</para></summary>
+        public bool Refused;
     }
 
     /// <summary>
@@ -601,7 +618,8 @@ namespace Nemoviz_Book_Reader
                                 ?? Json.PathString(json, "choices", "0", "finish_reason");
                 return new TranslationResult { Ok = false, Status = status,
                                                Error = Localization.T("Settings.Translate.Test.Empty"),
-                                               Detail = blocked ?? finish ?? "empty" };
+                                               Detail = blocked ?? finish ?? "empty",
+                                               Refused = AboutThePassage(blocked ?? finish) };
             }
 
             // A TRUNCATED ANSWER IS NOT A GOOD ONE, and it used to pass as one.
@@ -791,6 +809,24 @@ namespace Nemoviz_Book_Reader
         /// returns false and the old behaviour stands. A wrong NO costs the
         /// backoff we already paid; a wrong YES would stand an engine down that
         /// was only busy, so the doubt is spent in the safe direction.</para></summary>
+        /// <summary>Is this the service declining the PASSAGE, rather than
+        /// something about the engine? Gemini says so in <c>promptFeedback</c> or
+        /// in a finishReason; OpenAI-compatible services say <c>content_filter</c>.
+        ///
+        /// <para>Anything unrecognised answers NO and keeps the old behaviour,
+        /// which is the safe direction: a wrong no costs the stand-down we already
+        /// had, a wrong yes would keep asking an engine that is genuinely
+        /// broken.</para></summary>
+        private static bool AboutThePassage(string why)
+        {
+            if (string.IsNullOrEmpty(why)) return false;
+            string[] marks = { "PROHIBITED_CONTENT", "SAFETY", "BLOCKLIST",
+                               "RECITATION", "content_filter" };
+            foreach (string m in marks)
+                if (why.IndexOf(m, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            return false;
+        }
+
         private static bool SpentForNow(string raw)
         {
             if (string.IsNullOrEmpty(raw)) return false;

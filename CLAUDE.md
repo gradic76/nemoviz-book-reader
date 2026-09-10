@@ -7824,6 +7824,44 @@ wrong is presenting it as an alternative to Flash-Lite for a whole book.
    answers that were merely short — two cases in seven attempts, which is too
    few to diagnose. Do not theorise further without more.
 
+
+#### And on 2026-09-10 the change was made and PROVED, on the run that had shown the fault
+
+`TranslationResult.Refused` is set at the source, where the code already reads
+`promptFeedback.blockReason` and `finishReason` — `PROHIBITED_CONTENT`,
+`SAFETY`, `BLOCKLIST`, `RECITATION`, OpenAI's `content_filter`. Anything
+unrecognised answers no and the old behaviour stands, which is the safe
+direction. `TranslationJob` then tracks, per piece, whether EVERY refusal an
+engine gave was about the passage; if so the miss is skipped rather than counted.
+A spent allowance still outranks it and still stands the engine down at once.
+
+**The first repeat proved nothing, and saying so mattered.** *Mates, Dates* on
+3.1 came back 16 pieces of 25 with 9 refusals and no stand-down — but the
+longest run of consecutive refusals was TWO, against a threshold of three, so
+the new code never ran. The old code would have given the same answer. (Worth
+keeping for a second reason: the same model on the same book refused 7 in
+Gordan's run and 9 in the repeat, so a single pass per model is weak evidence.)
+
+**The second repeat is the proof, because it used the model where the fault had
+actually appeared.** 3.5 Flash Lite, same book, fixed build:
+
+| | 3.5, old code | 3.5, fixed |
+|---|---|---|
+| refusals | 9 | **13** |
+| longest consecutive run | 3 | **4** (pieces 17-20) |
+| stood down | yes, at piece 18 | **no** |
+| pieces carried | 9 | **12** |
+| never asked | 7 | **0** |
+
+**It refused MORE and carried MORE**, which is the whole argument in one line.
+After the run of four it went on to translate pieces 21, 22, 24 and 25. On the
+old code the stand-down would have fired at 19 and those four would have gone to
+the fallback for nothing: 8 pieces instead of 12, counted off this same run's own
+data.
+
+`Translator.AboutThePassage` was tested separately against ten reasons — the five
+content ones true, and `MAX_TOKENS`, `STOP`, an unrecognised string, `""` and
+null all false, since those are about the ENGINE and must still count.
 #### Never ship a `-latest` alias
 
 The account offers `gemini-flash-lite-latest` beside the numbered models. **It
