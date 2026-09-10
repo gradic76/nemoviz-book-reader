@@ -14,8 +14,8 @@
 #define AppName "Nemoviz Book Reader"
 #define AppShort "NBR"
 #define AppVersion "1.0.0"
-#define AppRelease "Beta 2"
-#define AppTag "beta-2"        ; the git tag, and what UpdateCheck.Release must match
+#define AppRelease "Beta 3"
+#define AppTag "beta-3"        ; the git tag, and what UpdateCheck.Release must match
 
 ; THE CHANNEL, and it is the ONE line that turns this into the official build.
 ; Empty gives "Nemoviz Book Reader" everywhere; " Beta" gives the beta channel.

@@ -86,7 +86,7 @@ my @protect = (
     # leaving "onmicrosoft" bare for the transliteration, so Azure's own
     # directory name came out as "онмицрософт.com". The general form has to get
     # its chance before the narrow one.
-    qr/\.[A-Za-z][A-Za-z0-9]*\b/,
+    qr/(?<!\.)\.[A-Za-z][A-Za-z0-9]*\b/,          # .json, but NOT the i in "...i"
     qr/\b[A-Z][A-Z0-9]{1,}\b/,                       # NBR OCR API JSON MP3 CD LGPL
     qr/\bGPL\b|\bMIT\b/,
 
@@ -189,7 +189,7 @@ my @phrases = (
     'Add to balance', 'Create new secret key', 'Create new API key',
     'Text-to-Speech', 'Windows Update', 'ChatGPT Team', 'ChatGPT Business',
     'ChatGPT', 'Gmail', 'Outlook', 'Hotmail', 'OneCore', 'One Core',
-    'Flash Lite', 'nbr-translate', 'authuser', 'AIza', 'tenant', 'Global',
+    'Flash Lite', 'Flash', 'nbr-translate', 'authuser', 'AIza', 'tenant', 'Global',
     'Enable', 'Sign up', 'Top up', 'Service account name', 'API keys',
     'Create service account', 'Business', 'Team',
 );
