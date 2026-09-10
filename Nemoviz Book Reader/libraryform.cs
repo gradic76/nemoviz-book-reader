@@ -1117,14 +1117,14 @@ namespace Nemoviz_Book_Reader
         /// </summary>
         private void RebuildShelf(BookData keepSelected)
         {
-            string query = NormalizeForSearch(tbSearch.Text.Trim());
+            string[] terms = SearchTerms(tbSearch.Text);
             int filter = cbFilter.SelectedIndex;
             if (filter < 0) filter = FilterAll;
 
             var list = new List<BookData>();
             foreach (BookData b in books)
             {
-                if (query.Length > 0 && !NormalizeForSearch(b.Title).Contains(query))
+                if (terms.Length > 0 && !MatchesSearch(b, terms))
                     continue;
                 int cat = GetCategory(b);
                 bool include;
@@ -1486,6 +1486,37 @@ namespace Nemoviz_Book_Reader
         /// accents (ü→u, é→e, ...); "đ" is special-cased since it doesn't
         /// decompose to "d".
         /// </summary>
+        /// <summary>
+        /// The words to look for, each already normalized. Empty when the box is.
+        /// Splitting matters: the shelf shows "Novik, Naomi - Throne of Jade",
+        /// so a reader who types what is in front of them types the surname
+        /// first and a single Contains() would never match.
+        /// </summary>
+        private static string[] SearchTerms(string raw)
+        {
+            string q = NormalizeForSearch((raw ?? "").Trim());
+            if (q.Length == 0) return new string[0];
+            return q.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        /// <summary>
+        /// True when EVERY word of the query appears somewhere in the book's
+        /// author, title or folder name -- the three things a reader knows it
+        /// by. It searched the title alone until 2026-09-10, which meant that
+        /// typing the author printed on the row emptied the shelf; the folder
+        /// name is in because that is where a series usually lives
+        /// ("(Temeraire 3)") when no field carries it.
+        /// </summary>
+        private static bool MatchesSearch(BookData b, string[] terms)
+        {
+            string folder = string.IsNullOrEmpty(b.FolderPath)
+                          ? "" : System.IO.Path.GetFileName(b.FolderPath);
+            string hay = NormalizeForSearch(b.Author + " " + b.Title + " " + folder);
+            foreach (string term in terms)
+                if (hay.IndexOf(term, StringComparison.Ordinal) < 0) return false;
+            return true;
+        }
+
         private static string NormalizeForSearch(string s)
         {
             if (string.IsNullOrEmpty(s)) return "";
