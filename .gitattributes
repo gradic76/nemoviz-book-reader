@@ -1,0 +1,5 @@
+# The rnnoise model is data, not source. Git guesses "text" because the file
+# has no NUL byte in it, and would then rewrite its line endings on checkout --
+# harmless today (arnndn reads a CRLF copy fine; measured) but not something a
+# model file should be exposed to.
+*.rnnn -text
