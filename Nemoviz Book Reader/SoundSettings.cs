@@ -460,7 +460,9 @@ namespace Nemoviz_Book_Reader
             // the one to keep until somebody measures otherwise.
             if (s.DeclickEnabled)
                 f.Add("adeclick=t=" + DeclickThreshold[ClampLevel(s.DeclickLevel, DeclickThreshold.Length)]
-                    .ToString("0.00", ic));            if (s.HighpassEnabled)
+                    .ToString("0.00", ic));
+
+            if (s.HighpassEnabled)
                 f.Add("highpass=f=" + HighpassHz[ClampLevel(s.HighpassLevel, HighpassHz.Length)]);
 
             // THE NEURAL CLEANER STANDS WHERE afftdn DOES, and only one of the two
@@ -469,7 +471,9 @@ namespace Nemoviz_Book_Reader
             // the spectral one goes the way it went in The Bell.
             if (s.NeuralEnabled)
                 f.Add("arnndn=m=" + NeuralModel + ":mix="
-                    + NeuralMix[ClampLevel(s.NeuralLevel, NeuralMix.Length)].ToString("0.###", ic));            if (s.DenoiseEnabled)
+                    + NeuralMix[ClampLevel(s.NeuralLevel, NeuralMix.Length)].ToString("0.###", ic));
+
+            if (s.DenoiseEnabled)
                 f.Add("afftdn=nr=" + DenoiseDb[ClampLevel(s.DenoiseLevel, DenoiseDb.Length)]);
 
             if (s.DeesserEnabled)
