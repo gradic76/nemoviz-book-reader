@@ -58,6 +58,30 @@ namespace Nemoviz_Book_Reader
         /// 200.</para></summary>
         public static readonly double[] RoomEqThreshold = { 0.30, 0.25, 0.20, 0.15, 0.10 };
 
+        /// <summary><b>Neural noise reduction — `arnndn`, and it is the whole
+        /// reason The Bell's chain is worth taking.</b> Gordan judged it better
+        /// by ear than either spectral route on real material, and it is the only
+        /// cleaner Bell still offers: 588 recordings exported without a failure.
+        ///
+        /// <para>The mix in his tuning at NBR's five levels, the same odd steps of
+        /// his ten that the other two stages take: 0,40 … 0,93.</para>
+        ///
+        /// <para><b>It needs a PATCHED engine and a model file, and both are The
+        /// Bell's.</b> Unpatched, the last frame of a stream carries fewer than
+        /// 480 samples and rnnoise_channel reads 480 anyway — measured there at 22
+        /// freezes in 25. It also forces the graph to 48 kHz on 22 kHz material,
+        /// which is the one thing NBR has that Bell does not have to survive: a
+        /// second mpv context holding the same card awake.</para>
+        ///
+        /// <para>The model path is RELATIVE on purpose, which is Bell's own answer:
+        /// an absolute Windows path has a colon in it and a filter argument has to
+        /// escape it twice over. A relative one resolves against the working
+        /// directory and needs no escaping at all.</para></summary>
+        public static readonly double[] NeuralMix = { 0.40, 0.533, 0.667, 0.80, 0.933 };
+
+        /// <summary>Where the rnnoise model sits, beside the program.</summary>
+        public const string NeuralModel = "rnnn/sh.rnnn";
+
         // Compressor presets (threshold dB, ratio n:1, makeup dB, attack ms, release ms).
         public static readonly (int Threshold, double Ratio, int Makeup, int Attack, int Release)[] Compressor =
         {
@@ -226,6 +250,9 @@ namespace Nemoviz_Book_Reader
         public bool RoomEqEnabled;
         public int RoomEqLevel;         // 0..4
 
+        public bool NeuralEnabled;
+        public int NeuralLevel;         // 0..4
+
         public bool DenoiseEnabled;
         public int DenoiseLevel;        // 0..4
 
@@ -313,6 +340,9 @@ namespace Nemoviz_Book_Reader
             RoomEqEnabled = ReadBool(ini, "RoomEqEnabled", RoomEqEnabled);
             RoomEqLevel = ClampLevel(ReadInt(ini, "RoomEqLevel", RoomEqLevel), RoomEqThreshold.Length);
 
+            NeuralEnabled = ReadBool(ini, "NeuralEnabled", NeuralEnabled);
+            NeuralLevel = ClampLevel(ReadInt(ini, "NeuralLevel", NeuralLevel), NeuralMix.Length);
+
             DenoiseEnabled = ReadBool(ini, "DenoiseEnabled", DenoiseEnabled);
             DenoiseLevel = ClampLevel(ReadInt(ini, "DenoiseLevel", DenoiseLevel), DenoiseDb.Length);
 
@@ -347,6 +377,9 @@ namespace Nemoviz_Book_Reader
 
             WriteBool(ini, "RoomEqEnabled", RoomEqEnabled);
             WriteInt(ini, "RoomEqLevel", RoomEqLevel);
+
+            WriteBool(ini, "NeuralEnabled", NeuralEnabled);
+            WriteInt(ini, "NeuralLevel", NeuralLevel);
 
             WriteBool(ini, "DenoiseEnabled", DenoiseEnabled);
             WriteInt(ini, "DenoiseLevel", DenoiseLevel);
@@ -430,7 +463,13 @@ namespace Nemoviz_Book_Reader
                     .ToString("0.00", ic));            if (s.HighpassEnabled)
                 f.Add("highpass=f=" + HighpassHz[ClampLevel(s.HighpassLevel, HighpassHz.Length)]);
 
-            if (s.DenoiseEnabled)
+            // THE NEURAL CLEANER STANDS WHERE afftdn DOES, and only one of the two
+            // should ever be on: they are two answers to one question. Both are
+            // offered while the engine is being judged; if the neural one wins,
+            // the spectral one goes the way it went in The Bell.
+            if (s.NeuralEnabled)
+                f.Add("arnndn=m=" + NeuralModel + ":mix="
+                    + NeuralMix[ClampLevel(s.NeuralLevel, NeuralMix.Length)].ToString("0.###", ic));            if (s.DenoiseEnabled)
                 f.Add("afftdn=nr=" + DenoiseDb[ClampLevel(s.DenoiseLevel, DenoiseDb.Length)]);
 
             if (s.DeesserEnabled)
