@@ -525,7 +525,6 @@ Settings.Translate.State.None={0}, nulla clavis
 Settings.Translate.Engine.Gemini=Gemini 3.1 Flash Lite (Google)
 Settings.Translate.Engine.GeminiLite35=Gemini 3.5 Flash Lite (Google, recentior)
 Settings.Translate.Engine.DeepSeek=DeepSeek
-Settings.Translate.Engine.DeepSeekPro=DeepSeek (exemplar maius)
 Settings.Translate.Engine.OpenAi=GPT-5.6 Terra (OpenAI)
 Settings.Translate.Engine.OpenAiLuna=GPT-5.6 Luna (OpenAI, vilissima)
 Settings.Translate.Engine.OpenAiSol=GPT-5.6 Sol (OpenAI, carissima seriei 5.6)

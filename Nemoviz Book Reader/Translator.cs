@@ -135,6 +135,39 @@ namespace Nemoviz_Book_Reader
         public const string Gemini = "gemini";
         public const string GeminiLite35 = "gemini-lite-35";
         public const string DeepSeek = "deepseek";
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
+        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
+        // but there is no entry for it -- see the DeepSeek engine above. Bring
+        // the entry back when V4.1 Pro exists.
         public const string DeepSeekPro = "deepseek-pro";
         public const string OpenAi = "openai";
         public const string OpenAiSol = "openai-sol";
@@ -164,7 +197,7 @@ namespace Nemoviz_Book_Reader
                 Model = "gemini-3.1-flash-lite"
             },
             // THE SECOND FLASH-LITE IS ITS OWN STOP, on the same account and the
-            // same key — the shape DeepSeekPro already set, so it costs no second
+            // same key — the shape the second DeepSeek stop used to set, so it costs no
             // signup and appears in no key dialog of its own.
             //
             // <para><b>3.8 Flash STOOD HERE FOR THREE DAYS AND WAS REMOVED, and
@@ -202,32 +235,44 @@ namespace Nemoviz_Book_Reader
                 Model = "gemini-3.5-flash-lite",
                 KeyId = Gemini
             },
+            // ONE DEEPSEEK, AND THE MODEL ID IS THE ONE THE SERVICE ACTUALLY
+            // OFFERS. It was `deepseek-v4-flash` until 2026-09-10, and by then
+            // that id no longer existed -- asking the service's own /models list
+            // returned `deepseek-flash` and `deepseek-v4-pro` and nothing else,
+            // so the cheap stop had quietly become a dead call for anyone who
+            // chose it. The same trap as the Gemini survey: read the LIST, never
+            // a documentation page or our own memory of one.
+            //
+            // <para><b>The Pro entry is gone with it, and not because it was
+            // bad.</b> DeepSeek's own pricing page: "From 12:00 Beijing Time on
+            // September 14, 2026, and until V4.1 Pro is released in the future,
+            // requests to `deepseek-v4-pro` will all be routed to V4.1 Flash and
+            // billed at the V4.1 Flash price." So from that date the two entries
+            // are the same model at the same price, and a combo that offers one
+            // thing twice costs a reader arrowing through it real time while
+            // telling them nothing. Bring it back when V4.1 Pro exists.</para>
+            //
+            // <para>What it measured before that is worth keeping: on a French
+            // chapter (2026-08-15) the Pro model held the narrator's gender and
+            // the formal register as cleanly as Gemini, where the cheap one
+            // slipped once on gender.</para>
+            //
+            // <para><b>Nothing here needs a cheaper-mode switch.</b> Context
+            // caching is "enabled by default for all users, allowing them to
+            // benefit without needing to modify their code", and the off-peak
+            // half-price is decided by the clock -- peak is 01:00-04:00 and
+            // 06:00-10:00 UTC, Monday to Friday, everything else including the
+            // whole weekend is half. Measured on our own token ratios, a
+            // 600 000-character book costs about $0.24 off-peak, which is
+            // Gemini's measured price without Gemini's ceiling of ~4 books a
+            // day.</para>
             new TranslationEngine
             {
                 Id = DeepSeek,
                 NameKey = "Settings.Translate.Engine.DeepSeek",
                 Kind = EngineKind.OpenAiCompatible,
                 Endpoint = "https://api.deepseek.com/chat/completions",
-                Model = "deepseek-v4-flash"
-            },
-            // THE DEARER MODEL IS ITS OWN STOP, not a different service. It shares
-            // DeepSeek's account and key, so it costs the reader no second signup
-            // and appears in no key dialog of its own.
-            //
-            // Why it earns a place: measured on a French chapter (2026-08-15) it
-            // held the narrator's gender and the formal register as cleanly as
-            // Gemini, where the cheap model slipped once on gender. It is also
-            // several times the price, which is exactly why it stands AFTER the
-            // cheap one — it is asked only for the passages that have already
-            // defeated two attempts at a third of the cost.
-            new TranslationEngine
-            {
-                Id = DeepSeekPro,
-                NameKey = "Settings.Translate.Engine.DeepSeekPro",
-                Kind = EngineKind.OpenAiCompatible,
-                Endpoint = "https://api.deepseek.com/chat/completions",
-                Model = "deepseek-v4-pro",
-                KeyId = DeepSeek
+                Model = "deepseek-flash"
             },
             // OPENAI, THREE TIERS ON ONE ACCOUNT AND ONE KEY (added 2026-08-20 so
             // it can be judged by ear against Gemini, under the same conditions and
@@ -369,7 +414,7 @@ namespace Nemoviz_Book_Reader
             // The preference order among the rest: cheapest capable first, the
             // dearer model of the same family after it, and the one that cannot
             // refuse at the very end.
-            string[] order = { Gemini, DeepSeek, DeepSeekPro, Azure };
+            string[] order = { Gemini, GeminiLite35, DeepSeek, Azure };
             var chain = new List<TranslationEngine>();
             if (primary != null && primary.HasKey) chain.Add(primary);
             foreach (string id in order)
