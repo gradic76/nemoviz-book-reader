@@ -470,8 +470,15 @@ namespace Nemoviz_Book_Reader
             }
 
             /// <summary>Records a piece this engine would not take. Returns true
-            /// the moment it is stood down, so the caller can say so once.</summary>
-            public bool Missed(TranslationEngine e, int enginesStillUp)
+            /// the moment it is stood down, so the caller can say so once.
+            ///
+            /// <para><c>atOnce</c> is for an engine that has said its DAILY
+            /// allowance is gone. Three strikes is right for a refusal, which is
+            /// about the passage and may not happen again on the next one; it is
+            /// wrong for an empty allowance, which is about the whole day. Waiting
+            /// for two more is two more pieces at the full backoff — measured
+            /// 2026-09-10, 433.9 s for one of them.</para></summary>
+            public bool Missed(TranslationEngine e, int enginesStillUp, bool atOnce)
             {
                 if (e == null || down.Contains(e.Id)) return false;
                 // Never the last one standing. A chain with nothing left in it
@@ -481,7 +488,7 @@ namespace Nemoviz_Book_Reader
                 int n;
                 misses.TryGetValue(e.Id, out n);
                 misses[e.Id] = ++n;
-                if (n < StandDownAfter) return false;
+                if (!atOnce && n < StandDownAfter) return false;
                 down.Add(e.Id);
                 return true;
             }
@@ -723,6 +730,11 @@ namespace Nemoviz_Book_Reader
             var clock = System.Diagnostics.Stopwatch.StartNew();
             int asks = 0;
             var refused = new List<TranslationEngine>();
+            // Engines that said their DAILY allowance is gone, as against having
+            // refused this one passage. Kept apart because the remedy is
+            // different: a refusal is worth two more chances, an empty allowance
+            // is not worth one.
+            var spent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var whyRefused = new Dictionary<TranslationEngine, string>();
 
             for (int stop = 0; stop < opt.Chain.Count; stop++)
@@ -786,6 +798,7 @@ namespace Nemoviz_Book_Reader
                             if (said.Length > 0) whyRefused[engine] = said;
                         }
                         if (attempt == attempts - 1 && !refused.Contains(engine)) refused.Add(engine);
+                        if (!r.Ok && r.Exhausted) spent.Add(engine.Id);
                         continue;
                     }
 
@@ -832,9 +845,11 @@ namespace Nemoviz_Book_Reader
                     // piece, has its count moved on.
                     state.Worked(engine);
                     foreach (var miss in refused)
-                        if (state.Missed(miss, state.StillUp(opt.Chain)))
+                        if (state.Missed(miss, state.StillUp(opt.Chain), spent.Contains(miss.Id)))
                             Log(opt, string.Format(CultureInfo.InvariantCulture,
-                                "  stood down   {0} — {1} pieces in a row it would not take",
+                                spent.Contains(miss.Id)
+                                    ? "  stood down   {0} — its allowance is spent, so it is not asked again in this book"
+                                    : "  stood down   {0} — {1} pieces in a row it would not take",
                                 miss.DisplayName, ChainState.StandDownAfter));
                     return new Piece
                     {
@@ -853,9 +868,11 @@ namespace Nemoviz_Book_Reader
             clock.Stop();
             // Nobody took it, so every engine that was asked refused it.
             foreach (var miss in refused)
-                if (state.Missed(miss, state.StillUp(opt.Chain)))
+                if (state.Missed(miss, state.StillUp(opt.Chain), spent.Contains(miss.Id)))
                     Log(opt, string.Format(CultureInfo.InvariantCulture,
-                        "  stood down   {0} — {1} pieces in a row it would not take",
+                        spent.Contains(miss.Id)
+                            ? "  stood down   {0} — its allowance is spent, so it is not asked again in this book"
+                            : "  stood down   {0} — {1} pieces in a row it would not take",
                         miss.DisplayName, ChainState.StandDownAfter));
             report.LeftInOriginal++;
             // WHICH OF THE TWO IT WAS, and they are not the same thing at all

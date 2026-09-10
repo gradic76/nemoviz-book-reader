@@ -393,6 +393,20 @@ namespace Nemoviz_Book_Reader
         public string Error;
         public string Detail;
         public int Status;
+
+        /// <summary><b>This engine will not answer again in this JOB</b>, as
+        /// against having refused one passage. Set when a 429 says the DAILY
+        /// allowance is gone rather than the per-minute one.
+        ///
+        /// <para>The two are not the same refusal and must not be met the same
+        /// way. A per-minute limit is cleared by waiting and the backoff above
+        /// is exactly right for it — measured, Gordan's Flash-Lite peaks at 20
+        /// requests a minute against a limit of 15 and still finishes a
+        /// 103-piece book at 8.4 s a piece. A DAILY limit is cleared by
+        /// tomorrow, so every wait inside a job is spent for nothing: on
+        /// 2026-09-10 one piece burned 433.9 s backing off against a ceiling of
+        /// twenty requests that had already been passed.</para></summary>
+        public bool Exhausted;
     }
 
     /// <summary>
@@ -490,10 +504,25 @@ namespace Nemoviz_Book_Reader
             int status = 0;
             string transport = null;
             int[] waits = { 2000, 6000, 20000, 45000 };
+
+            // A DAILY ALLOWANCE IS NOT A BUSY SERVICE, and until 2026-09-10 this
+            // loop could not tell them apart -- the comment above says "these
+            // limits are per minute", which is true of the case it was written
+            // for and false of this one. Gemini 3.8 Flash gives twenty requests
+            // A DAY on the free tier; a book needs a hundred. So the whole
+            // schedule below ran against a wall that no amount of waiting moves.
+            //
+            // Read out of the BODY rather than the status, on the same principle
+            // the non-2xx branch below already follows. Google names the quota it
+            // refused on, and the id carries the period: PerDay against
+            // PerMinute. A long retryDelay says the same thing from the other
+            // side -- being told to wait ten minutes is being told not to wait.
+            bool spent = false;
             for (int attempt = 0; ; attempt++)
             {
                 transport = Post(url, headers, body, out raw, out status);
                 bool worthRetrying = transport != null || status == 429 || status == 408 || status >= 500;
+                if (status == 429 && SpentForNow(raw)) { spent = true; worthRetrying = false; }
                 if (!worthRetrying || attempt >= waits.Length) break;
 
                 int wait = waits[attempt];
@@ -529,7 +558,7 @@ namespace Nemoviz_Book_Reader
                              ?? Truncate(raw, 400);
                 return new TranslationResult { Ok = false, Status = status,
                                                Error = Localization.T("Settings.Translate.Test.Refused", status),
-                                               Detail = msg };
+                                               Detail = msg, Exhausted = spent };
             }
 
             string text;
@@ -720,6 +749,46 @@ namespace Nemoviz_Book_Reader
                 if (s == null) return "";
                 using (StreamReader r = new StreamReader(s, Encoding.UTF8)) return r.ReadToEnd();
             }
+        }
+
+        /// <summary>Does this 429 mean the allowance is gone for the DAY, rather
+        /// than the service being busy this minute?
+        ///
+        /// <para><b>The quota id is the honest signal</b>, because Google names
+        /// the limit it refused on and the name carries the period —
+        /// <c>...RequestsPerDayPerProjectPerModel-FreeTier</c> against
+        /// <c>...PerMinute...</c>. It is looked for in the RAW body rather than
+        /// down a path, because the details array is not in a fixed order: the
+        /// retryDelay reader just above already has to try index 2 and then 0.
+        /// A substring cannot be fooled by the order and cannot throw.</para>
+        ///
+        /// <para><b>A long retryDelay is the second signal</b> and it stands on
+        /// its own: being told to come back in ten minutes is being told that
+        /// waiting inside this job is not the remedy. Two minutes is the line —
+        /// comfortably above a per-minute limit's own delay, which is at most
+        /// sixty seconds plus change, and far below a daily one.</para>
+        ///
+        /// <para>Both are absent on a body we do not recognise, and then this
+        /// returns false and the old behaviour stands. A wrong NO costs the
+        /// backoff we already paid; a wrong YES would stand an engine down that
+        /// was only busy, so the doubt is spent in the safe direction.</para></summary>
+        private static bool SpentForNow(string raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return false;
+            if (raw.IndexOf("PerDay", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+
+            object err = Json.Parse(raw);
+            for (int i = 0; i < 6; i++)
+            {
+                string told = Json.PathString(err, "error", "details",
+                                              i.ToString(CultureInfo.InvariantCulture), "retryDelay");
+                if (string.IsNullOrEmpty(told) || !told.EndsWith("s", StringComparison.Ordinal)) continue;
+                double secs;
+                if (double.TryParse(told.Substring(0, told.Length - 1),
+                                    NumberStyles.Float, CultureInfo.InvariantCulture, out secs)
+                    && secs > 120) return true;
+            }
+            return false;
         }
 
         private static string Truncate(string s, int n)

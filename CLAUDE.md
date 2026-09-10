@@ -7790,16 +7790,34 @@ whatever else it is good at.
 choice for somebody on a paid tier, and the entry costs nothing; what would be
 wrong is presenting it as an alternative to Flash-Lite for a whole book.
 
-#### Two things this exposed in our own code — NOT FIXED, listed
+#### Two things this exposed in our own code — the first is now FIXED
 
-1. **Our 429 handling assumes the limit is per MINUTE.** The comment in
-   `Translator.cs` says so outright: *"these limits are per minute, so waiting is
-   what actually clears them"*, and the backoff is 2 + 6 + 20 + 45 s. Against a
-   DAILY quota no amount of waiting inside a job clears anything — measured,
-   piece 4 spent **433.9 s** doing it. Google's own message distinguishes the two
-   ("You exceeded your current quota" plus a docs link, against a per-minute
-   refusal which carries `retryDelay`), so it can be read and the engine stood
-   down at once instead of after three slow failures.
+1. ~~**Our 429 handling assumes the limit is per MINUTE.**~~ **FIXED the same
+   day.** The comment said so outright — *"these limits are per minute, so
+   waiting is what actually clears them"* — and against a DAILY quota no amount
+   of waiting inside a job clears anything: measured, one piece spent **433.9 s**
+   on it. Two changes, and they are one idea seen from both ends:
+   - `Translator.SpentForNow` reads the BODY, on the principle the non-2xx branch
+     already followed. **Google names the quota it refused on and the id carries
+     the period** — `...RequestsPerDayPerProjectPerModel-FreeTier` against
+     `...PerMinute...` — so it is a substring test against the raw body rather
+     than a path, because the details array is not in a fixed order (the
+     retryDelay reader beside it already has to try index 2 and then 0). A
+     `retryDelay` over 120 s says the same from the other side. Anything
+     unrecognised returns false and the old behaviour stands: a wrong NO costs
+     the backoff we were paying anyway, a wrong YES would stand down an engine
+     that was only busy, so the doubt is spent in the safe direction.
+   - `TranslationResult.Exhausted` carries it up, and `ChainState.Missed` takes
+     an `atOnce` so a spent allowance goes down on the FIRST miss instead of the
+     third. The log says which it was.
+   **Measured through the shipped classes, not a copy**: eight real Google bodies
+   through `SpentForNow` — the per-DAY one true, the per-MINUTE and
+   tokens-per-minute ones **false**, a 600 s retryDelay true, and an HTML error
+   page, an empty body and a null all false. Then `ChainState` itself: spent goes
+   down on the first miss, an ordinary refusal still needs three, a success still
+   clears the count, and — the one that would quietly break a book — **an engine
+   with a spent allowance is still NOT stood down when it is the last one
+   standing.**
 2. **The two short answers are still unexplained**, and truncation is ruled OUT:
    a reply cut off at the output ceiling is already caught and reported as
    `MAX_TOKENS`, and that is not what the log says. So they were complete
