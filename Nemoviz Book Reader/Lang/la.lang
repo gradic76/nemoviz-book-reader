@@ -803,6 +803,7 @@ Services.Steps.OpenAi=1. Aperi platform.openai.com in navigatro tuo. Haec est pl
 Dialog.Help.ComingSoon=Auxilium – mox veniet.
 Dialog.Help.Title=Auxilium
 Dialog.WhatsNew.Title=Quae nova sunt
+Dialog.WhatsNew.Text=Alpha\n\nInspectio novorum nunc singulis horis fit, non semel in die.\n\nBeta 3\n\nOptio GPT Flex: dimidio pretio, et tardior.\nGemini 3.8 Flash remotum, Gemini 3.5 Flash Lite (Google, recentius) additum.\nUnum DeepSeek remotum, officium id non iam praebet.\n...et multa opera sub cucullo...\n\nBeta 2\n\nLocalizationes ab 11 ad 21 auctae.\nElectio loci bibliothecae in primo cursu.\nMenu contextus in fenestra lusoris.\nApertio celerior fenestrae bibliothecae.\nExemplaria translationis AI promota. OpenAI nunc est GPT-6 Astra, et Gemini AI est 3.8 Flash.\nInstructiones nunc scribi possunt pro omni lingua in quam NBR vertit. Croatica et Serbica suas iam habent.\nNuntium "vacuum" in cistis coniunctis sub JAWS correctum.\nCtrl + 1-9 nunc operantur cum quilibet forma libri luditur.\nTempus elapsum et reliquum nuntiatur per F10. Una pressio elapsum, duae pressio reliquum.\nClaves mutationis celeritatis nunc notatae iuxta moderatorem celeritatis in fenestra lusoris.\n...et multa opera sub cucullo...\n\nBeta 1\n\nPrima editio publica.
 Report.Filter=Documenta textus (*.txt)|*.txt|Omnia documenta (*.*)|*.*
 Report.Done=Relatio servata est in:\n\n{0}\n\n{1} kB. Eam epistulae tuae adiunge.
 Report.Failed=Relatio scribi non potuit. Fortasse directorium tantum legi licet, aut in disco spatium deest.
@@ -842,5 +843,4 @@ Cloud.Quota.Warning=Hic liber {0} litteras habet.\n\nEx {2} litteris gratuitis, 
 Dialog.Error.Title=Error
 Dialog.Error.General=Error: {0}
 Dialog.DontShowAgain=Hoc ne iterum ostendas
-Dialog.WhatsNew.Text=Beta 3\n\nOptio GPT Flex: dimidio pretio, et tardior.\nGemini 3.8 Flash remotum, Gemini 3.5 Flash Lite (Google, recentius) additum.\nUnum DeepSeek remotum, officium id non iam praebet.\n...et multa opera sub cucullo...\n\nBeta 2\n\nLocalizationes ab 11 ad 21 auctae.\nElectio loci bibliothecae in primo cursu.\nMenu contextus in fenestra lusoris.\nApertio celerior fenestrae bibliothecae.\nExemplaria translationis AI promota. OpenAI nunc est GPT-6 Astra, et Gemini AI est 3.8 Flash.\nInstructiones nunc scribi possunt pro omni lingua in quam NBR vertit. Croatica et Serbica suas iam habent.\nNuntium "vacuum" in cistis coniunctis sub JAWS correctum.\nCtrl + 1-9 nunc operantur cum quilibet forma libri luditur.\nTempus elapsum et reliquum nuntiatur per F10. Una pressio elapsum, duae pressio reliquum.\nClaves mutationis celeritatis nunc notatae iuxta moderatorem celeritatis in fenestra lusoris.\n...et multa opera sub cucullo...\n\nBeta 1\n\nPrima editio publica.
 
