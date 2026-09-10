@@ -720,6 +720,7 @@ Translate.Ask.To=Oversett til:
 Translate.Ask.Model=Modell {0}:
 Translate.Ask.Model.None=— ingen, avslutt kjeden her —
 Translate.Ask.ChainNote=Hvis en passasje blir avvist, prøver NBR igjen og forsøker deretter dine andre tjenester etter tur. Alt som ingen av dem vil godta, blir stående på bokens opprinnelige språk.
+Translate.Ask.Flex=GPT Flex (billigere og tregere)
 Translate.Ask.NoEngine=Ingen tjeneste har en nøkkel ennå
 Translate.Ask.Standing=Din stående merknad gjelder også for denne boken: {0}
 Translate.Ask.Inherit=Fortsett en serie ved å bruke ordlisten fra:

@@ -720,6 +720,7 @@ Translate.Ask.To=Traduki al:
 Translate.Ask.Model=Modelo {0}:
 Translate.Ask.Model.None=— neniu, la ĉeno finiĝas ĉi tie —
 Translate.Ask.ChainNote=Se fragmento estas rifuzita, NBR provas ĝin denove kaj poste vice provas viajn aliajn servojn. Kion neniu el ili akceptas, restas en la lingvo, en kiu la libro alvenis.
+Translate.Ask.Flex=GPT Flex (pli malmultekosta kaj pli malrapida)
 Translate.Ask.NoEngine=Neniu servo ankoraŭ havas ŝlosilon
 Translate.Ask.Standing=Via daŭra noto validas ankaŭ por ĉi tiu libro: {0}
 Translate.Ask.Inherit=Daŭrigi serion, uzante la glosaron de:

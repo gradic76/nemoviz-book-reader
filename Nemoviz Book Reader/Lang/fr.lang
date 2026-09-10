@@ -720,6 +720,7 @@ Translate.Ask.To=Traduire en :
 Translate.Ask.Model=Modèle {0} :
 Translate.Ask.Model.None=— aucun, terminer la chaîne ici —
 Translate.Ask.ChainNote=Si un passage est refusé, NBR réessaie, puis tente vos autres services à tour de rôle. Tout ce qu'aucun d'entre eux n'accepte est laissé dans la langue d'origine du livre.
+Translate.Ask.Flex=GPT Flex (plus économique et plus lent)
 Translate.Ask.NoEngine=Aucun service ne dispose encore de clé
 Translate.Ask.Standing=Votre note permanente est également appliquée à ce livre : {0}
 Translate.Ask.Inherit=Continuer une série, en utilisant le glossaire de :

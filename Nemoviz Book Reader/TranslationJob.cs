@@ -183,6 +183,18 @@ namespace Nemoviz_Book_Reader
             public List<TranslationEngine> Chain = new List<TranslationEngine>();
             public string SourceLang = "en";
             public string TargetLang = "hr";
+
+            /// <summary><b>Ask OpenAI for the cheaper, slower tier</b> — half the
+            /// price, synchronous, and slower per piece. Ignored by every engine
+            /// that does not offer it, which is all of them except the four GPTs:
+            /// Gemini's and DeepSeek's discounts are automatic and there is
+            /// nothing to ask for.
+            ///
+            /// <para>Per JOB rather than a stored preference, because it is a
+            /// decision about THIS book. A hundred-piece book on Astra runs about
+            /// an hour and a half; on flex it may be three. Sometimes that is the
+            /// right trade and sometimes it is not.</para></summary>
+            public bool Flex;
             public string ReaderNotes;
             public string CachePath;                // null = do not cache
             public int MaxChars = TextChunker.DefaultMaxChars;
@@ -753,7 +765,8 @@ namespace Nemoviz_Book_Reader
                 {
                     asks++;
                     TranslationResult r = Translator.Send(engine, null, system, user,
-                                                          opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang);
+                                                          opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang,
+                                                          null, opt.Flex);
                     List<TranslationIssue> issues = r.Ok
                         ? TranslationChecks.Chunk(c, r.Text, opt.TargetLang)
                         : new List<TranslationIssue>();

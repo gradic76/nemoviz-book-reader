@@ -720,6 +720,7 @@ Translate.Ask.To=Перекласти на:
 Translate.Ask.Model=Модель {0}:
 Translate.Ask.Model.None=— немає, завершити ланцюжок тут —
 Translate.Ask.ChainNote=Якщо уривок відхилено, NBR спробує ще раз, а потім по черзі спробує інші ваші сервіси. Усе, що не прийме жоден із них, залишиться мовою оригіналу книги.
+Translate.Ask.Flex=GPT Flex (дешевше та повільніше)
 Translate.Ask.NoEngine=Жоден сервіс ще не має ключа
 Translate.Ask.Standing=Ваша постійна примітка застосовується і до цієї книги: {0}
 Translate.Ask.Inherit=Продовжити серію, використовуючи глосарій:

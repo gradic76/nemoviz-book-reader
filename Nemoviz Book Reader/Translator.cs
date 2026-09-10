@@ -89,6 +89,26 @@ namespace Nemoviz_Book_Reader
         /// translation and nothing more, so a real run may come in above it. That
         /// is a number to take from the first book rather than from arithmetic.</para></summary>
         public bool ReasoningDialect;
+
+        /// <summary><b>The service offers a cheaper, slower tier for the same
+        /// model.</b> OpenAI calls it flex: <c>service_tier: "flex"</c>, priced at
+        /// the Batch API rate — half — and synchronous, so it is a mode of the
+        /// same request rather than a different kind of job.
+        ///
+        /// <para>It is set on the OpenAI stops and nowhere else, and the emptiness
+        /// elsewhere is the finding rather than an omission. Gemini's caching and
+        /// DeepSeek's are automatic — DeepSeek's documentation: "enabled by default
+        /// for all users, allowing them to benefit without needing to modify their
+        /// code" — and DeepSeek's half-price window is decided by the clock. Azure
+        /// bills a flat rate per character. There is nothing on any of them to
+        /// switch on, which is why the reader's control names GPT rather than
+        /// promising something general.</para>
+        ///
+        /// <para><b>BATCH is deliberately not this.</b> It is half price too and it
+        /// is asynchronous, with a target of 24 hours: no progress bar, state to
+        /// persist, and the book arriving tomorrow. That is a different feature,
+        /// not a mode, and it must not be folded into this switch.</para></summary>
+        public bool FlexTier;
         /// <summary>True for the stop that translates without being able to be told
         /// anything — see <see cref="EngineKind.AzureTranslator"/>. A passage
         /// rescued here is MARKED IN THE BOOK, because the two faults it makes are
@@ -315,6 +335,7 @@ namespace Nemoviz_Book_Reader
                 Endpoint = "https://api.openai.com/v1/chat/completions",
                 Model = "gpt-5.6-luna",
                 ReasoningDialect = true,
+                FlexTier = true,
                 KeyId = OpenAi
             },
             new TranslationEngine
@@ -324,7 +345,8 @@ namespace Nemoviz_Book_Reader
                 Kind = EngineKind.OpenAiCompatible,
                 Endpoint = "https://api.openai.com/v1/chat/completions",
                 Model = "gpt-5.6-terra",
-                ReasoningDialect = true
+                ReasoningDialect = true,
+                FlexTier = true
             },
             new TranslationEngine
             {
@@ -334,6 +356,7 @@ namespace Nemoviz_Book_Reader
                 Endpoint = "https://api.openai.com/v1/chat/completions",
                 Model = "gpt-5.6-sol",
                 ReasoningDialect = true,
+                FlexTier = true,
                 KeyId = OpenAi
             },
             // GPT-6 ASTRA — the new generation, added 2026-09-07 because Gordan saw
@@ -366,6 +389,7 @@ namespace Nemoviz_Book_Reader
                 Endpoint = "https://api.openai.com/v1/chat/completions",
                 Model = "gpt-6-astra",
                 ReasoningDialect = true,
+                FlexTier = true,
                 KeyId = OpenAi
             },
             // Deferred once, and then a measurement brought it back: Gemini
@@ -529,7 +553,7 @@ namespace Nemoviz_Book_Reader
         public static TranslationResult Send(TranslationEngine engine, string key,
                                              string system, string user, int maxTokens,
                                              string sourceLang = null, string targetLang = null,
-                                             string azureRegion = null)
+                                             string azureRegion = null, bool flex = false)
         {
             if (engine == null) return Fail("Settings.Translate.Test.NoEngine");
             // KeyName, not Id: two stops can share one account, so the dearer
@@ -570,7 +594,8 @@ namespace Nemoviz_Book_Reader
             {
                 url = engine.Endpoint;
                 headers["Authorization"] = "Bearer " + key;
-                body = OpenAiBody(engine.Model, system, user, maxTokens, engine.ReasoningDialect);
+                body = OpenAiBody(engine.Model, system, user, maxTokens, engine.ReasoningDialect,
+                                  flex && engine.FlexTier);
             }
 
             // A RATE LIMIT AND A HICCUP ARE NORMAL STATES OVER A BOOK, NOT FAULTS.
@@ -741,10 +766,16 @@ namespace Nemoviz_Book_Reader
             return sb.ToString();
         }
 
-        private static string OpenAiBody(string model, string system, string user, int maxTokens, bool reasoning)
+        private static string OpenAiBody(string model, string system, string user, int maxTokens, bool reasoning, bool flex)
         {
             var sb = new StringBuilder();
             sb.Append("{\"model\":").Append(Json.Str(model)).Append(',');
+            // THE CHEAPER, SLOWER TIER, when the reader asked for it. Half the
+            // price, synchronous, and the only cost that reaches us is patience --
+            // plus a 429 Resource Unavailable when capacity is short, which the
+            // service does NOT charge for and which our retry already treats as
+            // the transient thing it is (no PerDay marker, no long retryDelay).
+            if (flex) sb.Append("\"service_tier\":\"flex\",");
             sb.Append("\"messages\":[");
             sb.Append("{\"role\":\"system\",\"content\":").Append(Json.Str(system)).Append("},");
             sb.Append("{\"role\":\"user\",\"content\":").Append(Json.Str(user)).Append("}],");

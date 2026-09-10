@@ -729,6 +729,7 @@ Translate.Ask.To=Vertere in:
 Translate.Ask.Model=Exemplar {0}:
 Translate.Ask.Model.None=— nullum, catena hic desinit —
 Translate.Ask.ChainNote=Si pars recusatur, NBR eam iterum temptat et deinde per ordinem cetera officia tua adit. Quod nullum eorum accipit, in lingua, qua liber venit, manet.
+Translate.Ask.Flex=GPT Flex (vilius et tardius)
 Translate.Ask.NoEngine=Nullum officium adhuc clavem habet
 Translate.Ask.Standing=Nota tua perpetua ad hunc quoque librum pertinet: {0}
 Translate.Ask.Inherit=Seriem continuare, glossario huius libri utens:

@@ -720,6 +720,7 @@ Translate.Ask.To=Käännä kielelle:
 Translate.Ask.Model=Malli {0}:
 Translate.Ask.Model.None=— ei mitään, päätä ketju tähän —
 Translate.Ask.ChainNote=Jos tekstijakso hylätään, NBR yrittää sitä uudelleen ja kokeilee sitten muita palveluitasi vuorotellen. Kaikki, mitä mikään palvelu ei hyväksy, jätetään kirjan alkuperäiselle kielelle.
+Translate.Ask.Flex=GPT Flex (halvempi ja hitaampi)
 Translate.Ask.NoEngine=Millään palvelulla ei ole vielä avainta
 Translate.Ask.Standing=Pysyvä huomautuksesi koskee myös tätä kirjaa: {0}
 Translate.Ask.Inherit=Jatka sarjaa käyttäen sanastoa:

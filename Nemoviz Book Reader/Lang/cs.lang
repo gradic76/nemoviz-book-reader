@@ -720,6 +720,7 @@ Translate.Ask.To=Přeložit do:
 Translate.Ask.Model=Model {0}:
 Translate.Ask.Model.None=— žádný, zde řetězec ukončit —
 Translate.Ask.ChainNote=Pokud je pasáž odmítnuta, NBR to zkusí znovu a poté postupně vyzkouší vaše další služby. Cokoli, co žádná z nich nepřijme, zůstane v původním jazyce knihy.
+Translate.Ask.Flex=GPT Flex (levnější a pomalejší)
 Translate.Ask.NoEngine=Žádná služba zatím nemá klíč
 Translate.Ask.Standing=Vaše trvalá poznámka se vztahuje i na tuto knihu: {0}
 Translate.Ask.Inherit=Pokračovat v sérii s použitím glosáře z:

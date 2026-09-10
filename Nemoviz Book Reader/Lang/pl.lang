@@ -720,6 +720,7 @@ Translate.Ask.To=Przetłumacz na:
 Translate.Ask.Model=Model {0}:
 Translate.Ask.Model.None=— brak, zakończ łańcuch w tym miejscu —
 Translate.Ask.ChainNote=Jeśli fragment zostanie odrzucony, NBR spróbuje ponownie, a następnie kolejno wypróbuje inne Twoje usługi. Wszystko, czego nie przyjmie żadna z nich, pozostanie w języku oryginału książki.
+Translate.Ask.Flex=GPT Flex (tańszy i wolniejszy)
 Translate.Ask.NoEngine=Żadna usługa nie posiada jeszcze klucza
 Translate.Ask.Standing=Twoja stała notatka ma zastosowanie również do tej książki: {0}
 Translate.Ask.Inherit=Kontynuuj serię, używając glosariusza:

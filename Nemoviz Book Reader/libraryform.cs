@@ -2698,7 +2698,8 @@ namespace Nemoviz_Book_Reader
                     // So a chapter does not begin three sentences before the end
                     // of a piece — see TextChunker. These are already in cleaned
                     // text coordinates, the same ones the chunking works in.
-                    ChapterStarts = ChapterOffsets(book)
+                    ChapterStarts = ChapterOffsets(book),
+                    Flex = ask.Flex
                 };
 
                 using (var work = new TranslationProgressForm(text, options))

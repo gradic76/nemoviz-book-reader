@@ -720,6 +720,7 @@ Translate.Ask.To=Prevedi na:
 Translate.Ask.Model=Model {0}:
 Translate.Ask.Model.None=— nijedan, ovde se lanac završava —
 Translate.Ask.ChainNote=Ako neki odlomak bude odbijen, NBR ga pokuša ponovo pa onda redom isproba vaše ostale servise. Što nijedan ne prihvati ostaje na jeziku na kojem je knjiga i došla.
+Translate.Ask.Flex=GPT Flex (jeftinije i sporije)
 Translate.Ask.NoEngine=Nijedan servis još nema ključ
 Translate.Ask.Standing=Vaša stalna napomena primenjuje se i na ovu knjigu: {0}
 Translate.Ask.Inherit=Nastavi serijal, koristeći glosar knjige:

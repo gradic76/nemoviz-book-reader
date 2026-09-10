@@ -78,6 +78,13 @@ namespace Nemoviz_Book_Reader
         private readonly List<string> langCodes = new List<string>();
         private readonly List<TranslationEngine> engines;
         private ComboBox cmbInherit;
+        private CheckBox chkFlex;
+        private int flexRowY;
+        // Whether the box was ON OFFER, kept as a fact of its own rather than
+        // read back off Visible. A closed form's controls are all invisible, and
+        // Flex is read AFTER ShowDialog returns -- so gating on Visible made the
+        // answer always false. Found by driving the real dialog, 2026-09-10.
+        private bool flexOffered;
         private readonly List<string> inheritPaths = new List<string>();
         private readonly List<KeyValuePair<string, string>> glossaries;
 
@@ -147,6 +154,31 @@ namespace Nemoviz_Book_Reader
             Controls.Add(chainNote);
             y += 40;
 
+            // GPT FLEX, and it is here only while a GPT is chosen (Gordan,
+            // 2026-09-10: "možda bi ta kućica trebala da se pojavi samo ako je
+            // odabran neki od GPT-ova"). It names GPT rather than promising
+            // something general because it IS specific: Gemini's and DeepSeek's
+            // discounts are automatic and there is nothing on them to switch.
+            //
+            // Visible AND TabStop move together, the pattern the hint boxes
+            // already use, so when it is not offered it is not a silent stop in
+            // the ring either. It sits directly after the note that explains the
+            // chain, which is the first place a reader arrives after choosing the
+            // engines it is about.
+            chkFlex = new CheckBox
+            {
+                Text = Localization.T("Translate.Ask.Flex"),
+                Location = new Point(12, y),
+                Size = new Size(476, 24),
+                TabIndex = 10,
+                Visible = false,
+                TabStop = false
+            };
+            chkFlex.AccessibleName = chkFlex.Text;
+            Controls.Add(chkFlex);
+            flexRowY = y;
+            y += 28;
+
             // THE STANDING NOTE IS SHOWN, NOT MERELY APPLIED. A rule that acts on
             // every book while being visible nowhere is the invisible dependency
             // this project keeps refusing: the reader would see a spelling or a
@@ -163,7 +195,7 @@ namespace Nemoviz_Book_Reader
                     BackColor = SystemColors.Control,
                     Location = new Point(12, y),
                     Size = new Size(476, 30),
-                    TabIndex = 8,
+                    TabIndex = 11,
                     Text = Localization.T("Translate.Ask.Standing", standing.Replace("\r\n", " ").Replace("\n", " "))
                 };
                 std.AccessibleName = std.Text;
@@ -199,7 +231,7 @@ namespace Nemoviz_Book_Reader
                     DropDownStyle = ComboBoxStyle.DropDownList,
                     Location = new Point(196, y),
                     Size = new Size(292, 24),
-                    TabIndex = 10
+                    TabIndex = 12
                 };
                 cmbInherit.AccessibleName = Localization.T("Translate.Ask.Inherit");
                 cmbInherit.Items.Add(Localization.T("Translate.Ask.Inherit.None"));
@@ -230,7 +262,7 @@ namespace Nemoviz_Book_Reader
             tbNotes.ScrollBars = ScrollBars.Vertical;
             tbNotes.Location = new Point(12, y);
             tbNotes.Size = new Size(476, 56);
-            tbNotes.TabIndex = 11;
+            tbNotes.TabIndex = 13;
             tbNotes.AccessibleName = Localization.T("Translate.Ask.Notes");
             Controls.Add(tbNotes);
             y += 66;
@@ -240,7 +272,7 @@ namespace Nemoviz_Book_Reader
                 Text = Localization.T("Translate.Ask.Start"),
                 Location = new Point(278, y),
                 Size = new Size(100, 30),
-                TabIndex = 12,
+                TabIndex = 14,
                 DialogResult = DialogResult.OK
             };
             var cancel = new Button
@@ -248,7 +280,7 @@ namespace Nemoviz_Book_Reader
                 Text = Localization.T("Btn.Cancel"),
                 Location = new Point(388, y),
                 Size = new Size(100, 30),
-                TabIndex = 13,
+                TabIndex = 15,
                 DialogResult = DialogResult.Cancel
             };
             // Explicit, as everywhere else in the app. A Button falls back to its
@@ -322,6 +354,33 @@ namespace Nemoviz_Book_Reader
         /// <summary>Refills every box from <paramref name="from"/> down, leaving out
         /// whatever the boxes above have taken. Keeps a box's own choice if it is
         /// still available, so changing box 1 does not silently rearrange box 3.</summary>
+
+        /// <summary>Shows the flex box only while a GPT is in the chain, and
+        /// takes it out of the tab ring when it is not offered — Visible and
+        /// TabStop together, so a reader never lands on a stop that decides
+        /// nothing.
+        ///
+        /// <para>Unticking it when it disappears is deliberate: a reader who
+        /// swaps a GPT out for Gemini has not asked for a cheaper tier on
+        /// anything, and a hidden tick that survives is precisely the invisible
+        /// state this project keeps refusing.</para></summary>
+        private void UpdateFlexRow()
+        {
+            if (chkFlex == null) return;
+            bool any = false;
+            foreach (var e in Chain) if (e != null && e.FlexTier) { any = true; break; }
+            if (!any && chkFlex.Checked) chkFlex.Checked = false;
+            chkFlex.Visible = any;
+            chkFlex.TabStop = any;
+            flexOffered = any;
+        }
+
+        /// <summary>Whether the reader asked for the cheaper, slower OpenAI tier.
+        /// False whenever the box is not on offer, so a stale tick cannot leak.</summary>
+        public bool Flex
+        {
+            get { return chkFlex != null && flexOffered && chkFlex.Checked; }
+        }
         private void RefillChain(int from)
         {
             if (refilling) return;
@@ -362,6 +421,7 @@ namespace Nemoviz_Book_Reader
                 }
             }
             finally { refilling = false; }
+            UpdateFlexRow();
         }
 
         private TranslationEngine Chosen(int slot)

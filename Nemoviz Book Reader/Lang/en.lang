@@ -716,6 +716,7 @@ Translate.Ask.To=Translate into:
 Translate.Ask.Model=Model {0}:
 Translate.Ask.Model.None=— none, end the chain here —
 Translate.Ask.ChainNote=If a passage is refused, NBR tries it again and then tries your other services in turn. Anything none of them will take is left in the language the book came in.
+Translate.Ask.Flex=GPT Flex (cheaper and slower)
 Translate.Ask.NoEngine=No service has a key yet
 Translate.Ask.Standing=Your standing note is applied to this book as well: {0}
 Translate.Ask.Inherit=Continue a series, using the glossary of:
