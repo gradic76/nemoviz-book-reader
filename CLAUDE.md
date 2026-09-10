@@ -7722,6 +7722,78 @@ the chain from four combos the reader fills out of `Configured()`, so a new
 entry is a new choice and never a new step in somebody's stored chain.
 `TranslationEngines.Chain`'s own order array was left untouched.
 
+### AND GEMINI 3.8 FLASH IS UNUSABLE FOR A BOOK — its free tier is ~20 requests A DAY (2026-09-10)
+
+Two days after it was added, Gordan translated two books with it and *"praktički
+sve mi je palo na GPT"*. **The engine was not the problem and neither was the
+implementation. The free-tier ALLOWANCE is.**
+
+**What the logs actually say**, and the count is the whole finding — Gemini was
+asked **4 times out of 107 pieces** on *Tongues of Serpents*:
+
+| piece | outcome |
+|---|---|
+| 1 | answered, but 5 paragraphs of 48 and 17 % of the length |
+| 2 | **succeeded, 7.6 s** |
+| 3, 4, 5 | **429 — "You exceeded your current quota"** |
+
+Three in a row stood the engine down, so the remaining **102 pieces were never
+offered to it**. That is why it reads as "everything fell to GPT": 106 of 107
+pieces went to Astra without Gemini being asked once.
+
+**The control ran the next morning and is decisive.** *Crucible of Gold*, same
+prompt, same rules, same chain shape, the only difference being
+`gemini-3.1-flash-lite` instead of `gemini-3.8-flash`: **70 of 103 pieces at
+8.2 s each, every one on Gemini, not a single hand-off.**
+
+**The published figure is ~20 RPD for 3.8 Flash against 500–1000 for
+Flash-Lite** — but treat that as corroboration, not as the evidence. It comes
+from a Google developer-forum thread and third-party summaries, **no Google
+staff confirmation**, and two of those sources disagree about Flash-Lite's own
+number. Google's official rate-limit page publishes no figures at all and points
+at the account's own dashboard (`https://ai.dev/rate-limit`).
+
+**THE ARITHMETIC IS WHAT SETTLES IT, AND IT NEEDS NO SOURCE.** One book of 107
+pieces needs at least 107 requests. At 20 a day it cannot be translated; at ten
+times that it still cannot. So this is not a threshold to tune or a bug to fix —
+**a model with a daily allowance smaller than a book is not a book translator**,
+whatever else it is good at.
+
+**It stays in the combo and it stays off the default chain.** It is the right
+choice for somebody on a paid tier, and the entry costs nothing; what would be
+wrong is presenting it as an alternative to Flash-Lite for a whole book.
+
+#### Two things this exposed in our own code — NOT FIXED, listed
+
+1. **Our 429 handling assumes the limit is per MINUTE.** The comment in
+   `Translator.cs` says so outright: *"these limits are per minute, so waiting is
+   what actually clears them"*, and the backoff is 2 + 6 + 20 + 45 s. Against a
+   DAILY quota no amount of waiting inside a job clears anything — measured,
+   piece 4 spent **433.9 s** doing it. Google's own message distinguishes the two
+   ("You exceeded your current quota" plus a docs link, against a per-minute
+   refusal which carries `retryDelay`), so it can be read and the engine stood
+   down at once instead of after three slow failures.
+2. **The two short answers are still unexplained**, and truncation is ruled OUT:
+   a reply cut off at the output ceiling is already caught and reported as
+   `MAX_TOKENS`, and that is not what the log says. So they were complete
+   answers that were merely short — two cases in seven attempts, which is too
+   few to diagnose. Do not theorise further without more.
+
+#### Never ship a `-latest` alias
+
+The account offers `gemini-flash-lite-latest` beside the numbered models. **It
+must not become a shipped default.** An alias that moves is exactly the hidden
+mechanism §8l objects to: one day it silently resolves to a model with a
+twenty-a-day ceiling and the reader meets this fault with nothing on our side
+having changed. The numbered id is the whole point.
+
+**The newest Flash-Lite the account can call is `gemini-3.5-flash-lite`** (NBR
+ships 3.1). Its free-tier allowance is **not published anywhere checkable**, and
+the lesson above applies to it too: newer is not more generous — 3.8 Flash is
+the newest Flash and has the smallest allowance of the lot. Measure before
+moving, and measure the way that matters: a real piece through the real prompt,
+then a burst to find where the 429 starts.
+
 ### THE PARAGRAPH CHECK WAS REJECTING GOOD WORK — measured, and fixed (2026-09-07)
 
 *Victory of Eagles*, 109 pieces, English into Croatian. Gordan's report was that
