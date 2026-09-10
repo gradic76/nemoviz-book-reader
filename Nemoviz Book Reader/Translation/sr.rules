@@ -75,7 +75,7 @@ FUTUR PRVI
 Kada enklitika dolazi IZA infinitiva, infinitiv na -ti i enklitika pišu se SASTAVLJENO, onako kako se i izgovaraju: „borićemo se”, „letećemo”, „radićemo”, „pevaću”.
 Nikada ne piši „boriti ćemo se” ni „borit ćemo se”. Prvo je pogrešno, a drugo je hrvatski oblik.
 Infinitivi na -ći ostaju odvojeni: „reći ću”, „doći ćemo”, „poći ćeš”.
-Kada enklitika dolazi ISPRED infinitiva, infinitiv ostaje ceo: „mi ćemo se boriti”, „ja ću raditi”.
+Kada enklitika dolazi ISPRED glagola, srpski po pravilu koristi konstrukciju „da” + prezent: „mi ćemo da se borimo”, „ja ću da radim”, „ja ću da pevam”. Infinitiv u toj poziciji nije pogrešan, ali je u srpskom osetno ređi i zvuči hrvatski, pa ga koristi samo kada ritam rečenice to zaista traži.
 
 OBELEŽENI OBLICI
 Zadano prošlo vreme srpske pripovedne proze jeste perfekat.
@@ -84,6 +84,7 @@ Ako je izvornik hrvatski, u kojem je aorist arhaičan i redak, ne pojačavaj ga 
 Ako izvornik ima francuski passé simple, koji je ondje neutralno književno pripovedno vreme, prevedi ga perfektom.
 
 IMENA I NAZIVI
+TRANSKRIPCIJA IMENA JE ZADANO PRAVILO srpskog prevoda i sprovodi se po srpskom pravopisu i gramatici. To nije opcija koju treba uključiti: tako se na srpskom piše. Isključivanje je izbor čitaoca i opisano je na kraju ovog odeljka.
 Lična imena i prezimena transkribuj srpskom latinicom prema pravilima srpskog jezika i pouzdano utvrđenom izgovoru. Kada za ime, istorijsku ličnost ili geografski naziv postoji ustaljen srpski oblik, koristi taj oblik.
 Transkribovana imena OBAVEZNO menjaj po padežima: "sa Tobijem", "Vonvaltova presuda" — nikada nepromenjen oblik uz opisnu konstrukciju.
 Jednom izabran oblik imena, prezimena, nadimka ili naziva koristi dosledno kroz ceo tekst.
@@ -91,11 +92,12 @@ Kod izmišljenih imena, nadimaka i naziva sa važnim značenjem sačuvaj njihovu
 Geografske nazive transkribuj ili prevedi prema standardnoj srpskoj praksi; kada ustaljen srpski oblik postoji, koristi njega.
 Izmišljena geografska imena transkribuj kada funkcionišu kao vlastita imena mesta, osim ako njihovo značenje ima očiglednu književnu ili semantičku funkciju koja zahteva prevod.
 #
-# PARKED -- THE OPPOSITE RULE, in force until 2026-09-10. Transcription and
-# keeping the original spelling cannot both hold, so this is a SWAP, not a
-# switch: put a '#' in front of the six lines above AND delete the '#' from
+# THE OPT-OUT, AND IT IS NOT THE DEFAULT. Transcription above is how Serbian
+# is written and is what this file does unless you say otherwise; keeping the
+# original spelling was in force until 2026-09-10 and is kept here for anyone
+# who wants it back. The two cannot both hold, so this is a SWAP, not a
+# switch: put a '#' in front of the seven lines above AND delete the '#' from
 # the two lines below.
-#
 # Lična i druga strana imena zadrži u izvornom obliku i u latinici, nemoj ih fonetski transkribovati, ali ih OBAVEZNO menjaj po padežima: "sa Tobijem", "Vonvaltova presuda", "kod Jeana" — nikada nepromenjen oblik uz opisnu konstrukciju. Ako za ime, istorijsku ličnost ili geografski naziv postoji odomaćen srpski oblik, koristi taj oblik. Jednom izabran oblik imena koristi dosledno kroz ceo tekst.
 # Geografska imena, uključujući gradove, naselja, oblasti, države, reke, planine i druga mesta, koristi u ustaljenom srpskom obliku kada takav oblik postoji. Kada ustaljeni srpski oblik ne postoji, ostavi naziv u izvornom obliku. Izmišljena geografska imena takođe ostavi u izvornom obliku kada funkcionišu kao vlastita imena mesta.
 Nazive ulica, institucija, organizacija, prodavnica, restorana, hotela, kompanija i sličnih objekata i ustanova po pravilu ostavi u izvornom obliku kada je takva upotreba prirodna i razumljiva u srpskom tekstu. Prevedi ili transkribuj ih samo kada postoji ustaljeni srpski naziv, kada pravopisna praksa to zahteva ili kada značenje samog naziva ima važnu funkciju u tekstu.

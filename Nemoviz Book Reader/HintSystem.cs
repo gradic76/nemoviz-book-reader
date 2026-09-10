@@ -342,7 +342,13 @@ namespace Nemoviz_Book_Reader
                             Localization.T("Update.Available", r.Latest),
                             Localization.T("Update.Title")))
                     {
-                        try { System.Diagnostics.Process.Start(UpdateCheck.ReleasesPage); }
+                        // STARTS THE DOWNLOAD, rather than opening the releases page for
+                        // the reader to hunt through -- Gordan, 2026-09-10, after
+                        // meeting it himself: GitHub is a repository, not a
+                        // destination for these readers. The page is still what
+                        // the FALLBACK shows, because if the browser could not be
+                        // started then a link to read is the only thing left.
+                        try { System.Diagnostics.Process.Start(UpdateCheck.DownloadUrl); }
                         catch { MessageForm.ShowInfo(owner, UpdateCheck.ReleasesPage,
                                                      Localization.T("Update.Title")); }
                     }

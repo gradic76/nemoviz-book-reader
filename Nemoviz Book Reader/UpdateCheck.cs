@@ -57,6 +57,34 @@ namespace Nemoviz_Book_Reader
             get { return "https://github.com/" + Repo + "/releases/latest"; }
         }
 
+        /// <summary>The installer itself, so a confirmation starts the DOWNLOAD
+        /// rather than opening a page for the reader to hunt through.
+        ///
+        /// <para><b>The objection recorded above has expired</b>, and it is worth
+        /// saying why rather than simply deleting it. It said a direct link
+        /// "would be a promise about its name" — true when the asset carried the
+        /// release tag in its filename. It does not any more: the asset is the
+        /// CONSTANT <c>NBRsetup.exe</c>, deliberately, so the download link on the
+        /// site survives every beta, and the release checklist already treats that
+        /// name as load-bearing. So this link is exactly as stable as the page.</para>
+        ///
+        /// <para>Gordan asked for it after meeting the friction himself
+        /// (2026-09-10): the page dropped him among release notes, assets and
+        /// source archives, and he had to find the installer and start it by hand.
+        /// <b>GitHub is a repository, not a destination for these readers.</b></para>
+        ///
+        /// <para><c>/releases/latest/download/</c> resolves through the same rule
+        /// as <see cref="ReleasesPage"/> — which is the rule that makes ticking
+        /// "pre-release" fatal, since that endpoint would then find nothing.</para></summary>
+        public static string DownloadUrl
+        {
+            get { return "https://github.com/" + Repo + "/releases/latest/download/" + Asset; }
+        }
+
+        /// <summary>The installer's filename, and it must never change: the stable
+        /// download link is built from it, and so is the one on the site.</summary>
+        public const string Asset = "NBRsetup.exe";
+
         public enum Outcome
         {
             /// <summary>The check could not be made at all.</summary>
