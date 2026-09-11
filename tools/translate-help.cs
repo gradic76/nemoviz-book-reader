@@ -137,9 +137,101 @@ static class TranslateHelp
         "marker {beta}; the value on the TITLE: and LANG: lines. Keep *emphasis* markers where " +
         "they are. A key combination keeps its keys and translates only the words between them.";
 
+    // ── the glossary, and why the manual needs one ────────────────────────
+    //
+    // THE MANUAL MUST CALL A CONTROL WHAT THE INTERFACE CALLS IT. Without this
+    // the model renames them every time a section is re-translated, and it is
+    // invisible: the prose reads perfectly and sends the reader looking for a
+    // control that is not there. Measured 2026-09-11, re-translating one
+    // section that had not moved since the names were set -- "Even out speech"
+    // came back as "Equalize speech" in English, and its like in every other
+    // language. Twenty manuals, one pass.
+    //
+    // It is built per SECTION and mechanically: every value in hr.lang that
+    // actually occurs in the Croatian being translated, paired with the same
+    // key read out of the target language own .lang. Nothing is curated by
+    // hand, so a control added later is covered the day its key exists.
+    static string glossary = "";
+
+    static void BuildGlossary(string code, IEnumerable<string> sourceLines)
+    {
+        glossary = "";
+        string langDir = Path.Combine(root, "Nemoviz Book Reader", "Lang");
+        string hrPath = Path.Combine(langDir, "hr.lang");
+        string toPath = Path.Combine(langDir, code + ".lang");
+        if (!File.Exists(hrPath) || !File.Exists(toPath)) return;
+
+        var from = ReadLang(hrPath);
+        var to = ReadLang(toPath);
+        string text = string.Join("\n", sourceLines);
+
+        var pairs = new List<KeyValuePair<string, string>>();
+        foreach (var kv in from)
+        {
+            string src = kv.Value;
+            if (src.Length < 3 || src.Length > 48) continue;   // "Ton" is a control name
+            if (src.IndexOf(Convert.ToChar(123)) >= 0) continue;   // a format placeholder
+            if (!char.IsUpper(src[0])) continue;                   // control names are capitalised
+            if (!WholeWord(text, src)) continue;
+            string dst;
+            if (!to.TryGetValue(kv.Key, out dst) || dst.Length == 0 || dst == src) continue;
+            pairs.Add(new KeyValuePair<string, string>(src, dst));
+        }
+        if (pairs.Count == 0) return;
+
+        // Longest first, so a name that contains a shorter one is listed before it.
+        pairs.Sort((a, b) => b.Key.Length.CompareTo(a.Key.Length));
+        var seen = new HashSet<string>();
+        var sb = new StringBuilder();
+        foreach (var p in pairs)
+        {
+            if (!seen.Add(p.Key)) continue;
+            sb.Append("  ").Append(p.Key).Append("  ->  ").Append(p.Value).Append("\n");
+            if (seen.Count >= 60) break;
+        }
+        glossary = sb.ToString();
+    }
+
+    /// <summary>Does the name stand as a word of its own in the text? A plain
+    /// substring test is not enough once short names are allowed in: "Ton" is a
+    /// control here, and it is also the first three letters of a dozen ordinary
+    /// Croatian words.</summary>
+    static bool WholeWord(string text, string word)
+    {
+        int at = 0;
+        while ((at = text.IndexOf(word, at, StringComparison.Ordinal)) >= 0)
+        {
+            bool leftOk = at == 0 || !char.IsLetter(text[at - 1]);
+            int end = at + word.Length;
+            bool rightOk = end >= text.Length || !char.IsLetter(text[end]);
+            if (leftOk && rightOk) return true;
+            at = end;
+        }
+        return false;
+    }
+
+    static Dictionary<string, string> ReadLang(string path)
+    {
+        var d = new Dictionary<string, string>();
+        foreach (string line in File.ReadAllLines(path, new UTF8Encoding(false)))
+        {
+            if (line.Length == 0 || line[0] == Convert.ToChar(35) || line[0] == Convert.ToChar(59)) continue;
+            int eq = line.IndexOf(Convert.ToChar(61));
+            if (eq <= 0) continue;
+            d[line.Substring(0, eq)] = line.Substring(eq + 1);
+        }
+        return d;
+    }
+
     static string Translate(string lang, List<string> numbered)
     {
         string system = System1.Replace("{LANG}", lang);
+        if (glossary.Length > 0)
+            system += "\n\nTHE INTERFACE ALREADY HAS NAMES FOR ITS CONTROLS in " + lang
+                    + ", and the manual has to use them exactly or the reader is sent "
+                    + "looking for a control that does not exist. Where the Croatian uses "
+                    + "a name on the left, your translation MUST use the name on the "
+                    + "right, verbatim, including its capitalisation:\n\n" + glossary;
         string user = string.Join("\n", numbered);
 
         var sb = new StringBuilder();
@@ -304,6 +396,7 @@ static class TranslateHelp
                 chars += srcLines[all[i]].Length;
                 i++;
             }
+            BuildGlossary(code, src.Values);
             var got = Chunk(lang, src);
             foreach (var k in got.Keys) outLines[k] = got[k];
             done += src.Count;
@@ -350,6 +443,7 @@ static class TranslateHelp
             var src = new Dictionary<int, string>();
             for (int j = hf; j < ht; j++) if (hr.Lines[j].Trim().Length > 0) src[j] = hr.Lines[j];
 
+            BuildGlossary(code, src.Values);
             var got = Chunk(lang, src);
 
             var block = new List<string>();
@@ -403,6 +497,7 @@ static class TranslateHelp
         var src = new Dictionary<int, string>();
         for (int j = hf; j < ht; j++) if (hr.Lines[j].Trim().Length > 0) src[j] = hr.Lines[j];
 
+        BuildGlossary(code, src.Values);
         var got = Chunk(lang, src);
 
         var block = new List<string>();
