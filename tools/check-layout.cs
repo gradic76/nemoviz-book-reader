@@ -98,9 +98,15 @@ class Fits
 
     static void Walk(Control parent, int depth)
     {
+        // A HIDDEN CONTROL CANNOT COLLIDE WITH ANYTHING. Properties keeps its
+        // TabControl alive but invisible once the skin has emptied it onto the
+        // form (8k: one layout pass), so every control that moved was being
+        // reported as overlapping the husk it came out of -- ten findings on a
+        // dialog with nothing wrong with it, which is how a checker stops being
+        // read.
         var kids = new List<Control>();
         foreach (Control c in parent.Controls)
-            if (c.Width > 0 && c.Height > 0) kids.Add(c);
+            if (c.Visible && c.Width > 0 && c.Height > 0) kids.Add(c);
         if (kids.Count == 0) return;
 
         Size box = parent is Form ? ((Form)parent).ClientSize : parent.ClientSize;

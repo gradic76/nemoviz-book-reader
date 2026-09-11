@@ -132,10 +132,14 @@ Prop.Off
 Prop.UseSoundProcessing
 Prop.SoundProcessing
 Prop.Stage.
+Prop.Repairs.
+Prop.Declick.
 Prop.Highpass.
 Prop.Denoise.
 Prop.Deesser.
+Prop.Dynamics.
 Prop.Compressor.
+Prop.RoomEq.
 Prop.Eq.
 Prop.Loudness.
 Prop.Normalize.

@@ -73,10 +73,12 @@ namespace Nemoviz_Book_Reader
         // Each stage's enable checkbox with the parameter controls it gates.
         private List<(CheckBox Enable, Control[] Parms)> stages;
 
+        private CheckBox chkDc; private ComboBox cmbDc;
         private CheckBox chkHp; private ComboBox cmbHp;
         private CheckBox chkDn; private ComboBox cmbDn;
         private CheckBox chkDs; private ComboBox cmbDs;
         private CheckBox chkCmp; private ComboBox cmbCmp;
+        private CheckBox chkRe; private ComboBox cmbRe;
         /// <summary>One spin box per band of SoundSettings.EqBandHz. Built from
         /// that array rather than named one by one, so moving a band or adding
         /// one is a change in the data and nowhere else.</summary>
@@ -215,9 +217,28 @@ namespace Nemoviz_Book_Reader
             // cells rather than a number written down beside them.
             int y1 = 8, y2 = 126, y3 = 244;
 
-            GroupBox gHp = StageBox("Prop.Highpass.Title", xB, y1, 2);
-            chkHp = StageEnable(gHp); chkHp.Checked = s.HighpassEnabled;
-            cmbHp = LevelCombo(gHp, L5, s.HighpassLevel);
+            // TWO REPAIRS IN ONE CELL, and the order inside it is the chain's:
+            // adeclick acts before the highpass, so it is drawn above it. That is
+            // Gordan's own rule from the loudness cell below - the dialog is a
+            // picture of the signal path, and a stage that acts first cannot be
+            // shown second. They belong together for the same reason that pair
+            // does: both repair damage in the recording before anything shapes
+            // it, and a reader who reaches for one has the other in the same box.
+            //
+            // The height is the tall one from the outset. These coordinates are
+            // scaffolding - PropertiesSkin.Apply lays every cell out again, for
+            // BOTH looks (8k: one layout pass), at 308 x 166 - but a cell built
+            // at 112 would clip its second stage for as long as it existed, and
+            // there is no reason to build something that has to be rescued.
+            GroupBox gHp = StageBox("Prop.Repairs.Title", xB, y1, 2, EqCellH);
+            chkDc = StageEnable(gHp, "Prop.Declick.Title");
+            chkDc.Checked = s.DeclickEnabled;
+            cmbDc = LevelCombo(gHp, L5, s.DeclickLevel, 46, "Prop.Declick.Title");
+            chkHp = StageEnable(gHp, "Prop.Highpass.Title", 78);
+            chkHp.Checked = s.HighpassEnabled;
+            chkHp.TabIndex = 2;
+            cmbHp = LevelCombo(gHp, L5, s.HighpassLevel, 102, "Prop.Highpass.Title");
+            cmbHp.TabIndex = 3;
 
             GroupBox gDn = StageBox("Prop.Denoise.Title", xC, y1, 3);
             chkDn = StageEnable(gDn); chkDn.Checked = s.DenoiseEnabled;
@@ -227,9 +248,21 @@ namespace Nemoviz_Book_Reader
             chkDs = StageEnable(gDs); chkDs.Checked = s.DeesserEnabled;
             cmbDs = LevelCombo(gDs, L5, s.DeesserLevel);
 
-            GroupBox gCmp = StageBox("Prop.Compressor.Title", xC, y2, 5);
-            chkCmp = StageEnable(gCmp); chkCmp.Checked = s.CompressorEnabled;
-            cmbCmp = LevelCombo(gCmp, L5, s.CompressorLevel);
+            // THE DYNAMIC EQ SHARES THE COMPRESSOR*S CELL, and this is the
+            // clearest of the pairings: a dynamic equalizer IS a compressor on
+            // one band. Both act only on what is too loud - one across the whole
+            // signal, one at 200 Hz where a room rings - and they follow each
+            // other in the chain, so the cell reads in order top to bottom like
+            // every other one.
+            GroupBox gCmp = StageBox("Prop.Dynamics.Title", xC, y2, 5, EqCellH);
+            chkCmp = StageEnable(gCmp, "Prop.Compressor.Title");
+            chkCmp.Checked = s.CompressorEnabled;
+            cmbCmp = LevelCombo(gCmp, L5, s.CompressorLevel, 46, "Prop.Compressor.Title");
+            chkRe = StageEnable(gCmp, "Prop.RoomEq.Title", 78);
+            chkRe.Checked = s.RoomEqEnabled;
+            chkRe.TabIndex = 2;
+            cmbRe = LevelCombo(gCmp, L5, s.RoomEqLevel, 102, "Prop.RoomEq.Title");
+            cmbRe.TabIndex = 3;
 
             GroupBox gEq = StageBox("Prop.Eq.Title", xB, y3, 6, EqCellH);
             chkEq = StageEnable(gEq); chkEq.Checked = s.EqEnabled;
@@ -281,22 +314,22 @@ namespace Nemoviz_Book_Reader
             GroupBox gNrm = StageBox("Prop.Loudness.Title", xC, y3, 7, EqCellH);
             chkNrm = StageEnable(gNrm, "Prop.Normalize.Title");
             chkNrm.Checked = s.NormalizeEnabled;
-            cmbNrm = LevelCombo(gNrm, L5, s.NormalizeLevel);
+            cmbNrm = LevelCombo(gNrm, L5, s.NormalizeLevel, 46, "Prop.Normalize.Title");
             chkGate = StageEnable(gNrm, "Prop.Gate.Title", 78);
             chkGate.Checked = s.GateEnabled;
             chkGate.TabIndex = 2;
-            cmbGate = LevelCombo(gNrm, L5, s.GateLevel, 102);
+            cmbGate = LevelCombo(gNrm, L5, s.GateLevel, 102, "Prop.Gate.Title");
             cmbGate.TabIndex = 3;
-            cmbGate.AccessibleName = Localization.T("Prop.Gate.Title") + " — " +
-                                     Localization.T("Prop.Stage.Level");
 
             stageCells = new[] { gHp, gDn, gDs, gCmp, gEq, gNrm };
             stages = new List<(CheckBox, Control[])>
             {
+                (chkDc, new Control[] { cmbDc }),
                 (chkHp, new Control[] { cmbHp }),
                 (chkDn, new Control[] { cmbDn }),
                 (chkDs, new Control[] { cmbDs }),
                 (chkCmp, new Control[] { cmbCmp }),
+                (chkRe, new Control[] { cmbRe }),
                 (chkEq, numEq),
                 (chkNrm, new Control[] { cmbNrm }),
                 (chkGate, new Control[] { cmbGate }),
@@ -387,7 +420,8 @@ namespace Nemoviz_Book_Reader
             };
             foreach (var st in stages)
                 st.Enable.CheckedChanged += (s2, e) => { UpdateEnabledStates(); OnAnyChange(); };
-            WireCombo(cmbHp); WireCombo(cmbDn); WireCombo(cmbDs); WireCombo(cmbCmp);
+            WireCombo(cmbDc); WireCombo(cmbHp); WireCombo(cmbDn); WireCombo(cmbDs);
+            WireCombo(cmbCmp); WireCombo(cmbRe);
             WireCombo(cmbNrm);
             WireCombo(cmbGate);
             foreach (NumericUpDown n in numEq) n.ValueChanged += (s2, e) => OnAnyChange();
@@ -495,13 +529,21 @@ namespace Nemoviz_Book_Reader
             return c;
         }
 
-        private ComboBox LevelCombo(GroupBox g, string[] itemKeys, int selected, int y = 46)
+        /// <param name="nameKey">Whose level this is, for a cell holding more
+        /// than one stage. Without it the box takes the GROUP name, which in a
+        /// two-stage cell names neither of them: both boxes in the loudness cell
+        /// announced the group and a reader could not tell which one they had
+        /// landed on. The switches had carried their own names since that cell
+        /// was built; the boxes under them had not.</param>
+        private ComboBox LevelCombo(GroupBox g, string[] itemKeys, int selected, int y = 46,
+                                    string nameKey = null)
         {
             ComboBox cb = new ComboBox();
             cb.DropDownStyle = ComboBoxStyle.DropDownList;
             cb.Location = new Point(10, y);
             cb.Size = new Size(CellW - 24, 24);
-            cb.AccessibleName = g.Text + " — " + Localization.T("Prop.Stage.Level");
+            cb.AccessibleName = (nameKey == null ? g.Text : Localization.T(nameKey))
+                                + " — " + Localization.T("Prop.Stage.Level");
             cb.TabIndex = 1;
             foreach (string k in itemKeys) cb.Items.Add(Localization.T(k));
             cb.SelectedIndex = Clamp(selected, 0, itemKeys.Length - 1);
@@ -659,6 +701,9 @@ namespace Nemoviz_Book_Reader
                 sb.AppendLine(Localization.T("Prop.Info.Bypassed"));
             sb.AppendLine();
 
+            AppendStage(sb, "Prop.Declick.Title", chkDc.Checked,
+                "adeclick, t " + SoundSettings.DeclickThreshold[cmbDc.SelectedIndex].ToString("0.0"));
+
             AppendStage(sb, "Prop.Highpass.Title", chkHp.Checked,
                 SoundSettings.HighpassHz[cmbHp.SelectedIndex] + " Hz");
 
@@ -672,6 +717,10 @@ namespace Nemoviz_Book_Reader
             AppendStage(sb, "Prop.Compressor.Title", chkCmp.Checked,
                 c.Ratio.ToString("0.#") + ":1, thr " + c.Threshold + " dB, +" + c.Makeup +
                 " dB, " + c.Attack + "/" + c.Release + " ms");
+
+            AppendStage(sb, "Prop.RoomEq.Title", chkRe.Checked,
+                "adynamicequalizer, 200 Hz, thr " +
+                SoundSettings.RoomEqThreshold[cmbRe.SelectedIndex].ToString("0.00"));
 
             AppendStage(sb, "Prop.Eq.Title", chkEq.Checked,
                 EqReadout());
@@ -711,10 +760,12 @@ namespace Nemoviz_Book_Reader
         {
             suppressAnnounce = true;
 
+            chkDc.Checked = d.DeclickEnabled; cmbDc.SelectedIndex = d.DeclickLevel;
             chkHp.Checked = d.HighpassEnabled; cmbHp.SelectedIndex = d.HighpassLevel;
             chkDn.Checked = d.DenoiseEnabled; cmbDn.SelectedIndex = d.DenoiseLevel;
             chkDs.Checked = d.DeesserEnabled; cmbDs.SelectedIndex = d.DeesserLevel;
             chkCmp.Checked = d.CompressorEnabled; cmbCmp.SelectedIndex = d.CompressorLevel;
+            chkRe.Checked = d.RoomEqEnabled; cmbRe.SelectedIndex = d.RoomEqLevel;
             chkEq.Checked = d.EqEnabled;
             for (int i = 0; i < numEq.Length; i++)
                 numEq[i].Value = i < d.EqGain.Length
@@ -752,6 +803,15 @@ namespace Nemoviz_Book_Reader
         {
             s.Enabled = chkMaster.Checked;
 
+            // BOTH OF THESE HAVE TO BE WRITTEN, for the reason the gain records
+            // at the foot of this method: FillSettings starts from a FRESH
+            // SoundSettings, so a stage it does not write reverts to the default,
+            // and these two default to off. Forgetting one would not read as a
+            // bug in the dialog - it would read as a stage that switches itself
+            // off whenever the book is saved.
+            s.DeclickEnabled = chkDc.Checked;
+            s.DeclickLevel = cmbDc.SelectedIndex;
+
             s.HighpassEnabled = chkHp.Checked;
             s.HighpassLevel = cmbHp.SelectedIndex;
 
@@ -763,6 +823,9 @@ namespace Nemoviz_Book_Reader
 
             s.CompressorEnabled = chkCmp.Checked;
             s.CompressorLevel = cmbCmp.SelectedIndex;
+
+            s.RoomEqEnabled = chkRe.Checked;
+            s.RoomEqLevel = cmbRe.SelectedIndex;
 
             s.EqEnabled = chkEq.Checked;
             for (int i = 0; i < numEq.Length && i < s.EqGain.Length; i++)

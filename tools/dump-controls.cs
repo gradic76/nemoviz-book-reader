@@ -15,7 +15,7 @@ using System.Windows.Forms;
 class Dump
 {
     static Assembly nbr;
-    static TextWriter w;
+    static StreamWriter w;
 
     [STAThread]
     static int Main(string[] a)
@@ -24,6 +24,7 @@ class Dump
         Type U = nbr.GetType("Nemoviz_Book_Reader.UiTheme");
         U.GetMethod("Select", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[] { a[1] });
         w = new StreamWriter(a[2]);
+        w.AutoFlush = true;   // a dialog that will not build must not take the dump with it
         w.WriteLine("theme " + U.GetProperty("Current", BindingFlags.Public | BindingFlags.Static)
                                  .GetValue(null).GetType().Name);
 
@@ -40,7 +41,7 @@ class Dump
         L.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static).Invoke(null,
             new object[] { A.GetProperty("LangPath").GetValue(app), "en" });
 
-        Show("Settings", (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.SettingsForm"),
+        Show("Settings", () => (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.SettingsForm"),
             new object[] { app, null, null }));
 
         Type B = nbr.GetType("Nemoviz_Book_Reader.BookData");
@@ -55,22 +56,35 @@ class Dump
             Type pt = ci.GetParameters()[i].ParameterType;
             args[i] = pt == A ? app : (pt.IsValueType ? Activator.CreateInstance(pt) : null);
         }
-        Show("Properties", (Form)ci.Invoke(args));
+        Show("Properties", () => (Form)ci.Invoke(args));
 
-        Show("GoTo", (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.GoToForm"),
+        Show("GoTo", () => (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.GoToForm"),
             new object[] { new string[] { "Prvo poglavlje", "Drugo poglavlje", "Trece" }, 0, true, false }));
-        Show("Bookmarks", (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.ManageBookmarksForm"),
+        Show("Bookmarks", () => (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.ManageBookmarksForm"),
             new object[] { new List<double> { 10.0, 200.0 }, null }));
-        Show("SleepTimer", (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.SleepTimerForm")));
-        Show("Library", (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.LibraryForm"),
+        Show("SleepTimer", () => (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.SleepTimerForm")));
+        Show("Library", () => (Form)Activator.CreateInstance(nbr.GetType("Nemoviz_Book_Reader.LibraryForm"),
             new object[] { app, null, null }));
 
         w.Close();
         return 0;
     }
 
-    static void Show(string what, Form f)
+    /// <summary>Builds and dumps one dialog, and SURVIVES one that will not
+    /// build: these constructors are the app's, they change, and a dump that
+    /// dies on the fourth dialog silently loses the fifth. GoToForm's
+    /// signature had moved and cost exactly that.</summary>
+    static void Show(string what, Func<Form> make)
     {
+        Form f;
+        try { f = make(); }
+        catch (Exception e)
+        {
+            w.WriteLine();
+            w.WriteLine("== " + what + " COULD NOT BE BUILT: " +
+                        (e.InnerException ?? e).Message);
+            return;
+        }
         f.StartPosition = FormStartPosition.Manual;
         f.Location = new Point(-4000, -4000);
         // Every tab page must be SELECTED once or it reports what it was built
