@@ -6405,6 +6405,80 @@ Rollback is one file: the 93.6 MB build is in git.
 
 ---
 
+## 10e″. The second cut: the arnndn fix, and four runs to get it (2026-09-11)
+
+31.7 MB → 29.2 MB, same fork, same audio-only cut, one thing added: FFmpeg's
+**short-frame fix for `arnndn`**, which is the whole reason for the rebuild.
+The filter itself was always in the cut — see 8d‴ — so nothing was gained
+here except that the end of a track no longer reads past its own buffer.
+
+**THIS BUILD REPORTS SUCCESS WHILE PRODUCING NOTHING.** Three runs in a row
+"succeeded" and shipped no engine, and the lesson is worth more than the
+engine: `ninja mpv` stops at the first failed package, the workflow's own
+`git am … || git am --abort` swallows every patch that no longer applies, and
+the artifact upload is conditional on a file existing — so a dead build is a
+green tick with one `64_logs` beside it. **Read the logs, never the tick.**
+The tell is one directory listing: a package that really built leaves
+`configure` and `build` logs in its stamp folder, and `ffmpeg-prefix` held a
+`download` log and nothing else.
+
+| run | died on | why |
+|---|---|---|
+| 1 | libvpl | (undiagnosed at the time; I blamed my own stale-cache theory) |
+| 2 | libvpl | Intel's hardware VIDEO runtime, in ffmpeg's DEPENDS for no reason |
+| 3 | curl | its three fork patches no longer apply, and they fail silently |
+| 4 | — | engine produced, verified, installed |
+
+**What went into the fork** (`gradic76/mpv-winbuild`):
+
+- `0100` — the arnndn patch itself, plus a `PATCH_COMMAND` on ffmpeg, which
+  had none. Numbered after `0099` because `0099` carries `UPDATE_COMMAND` as
+  context and that is the line this anchors to.
+- `0101` — fifteen video libraries out of **ffmpeg's** DEPENDS.
+- `0102` — `-Dlibcurl` off and **mpv's** DEPENDS down to nine.
+
+The principle behind the last two is the one this build keeps teaching: a
+package that is built only to be ignored is not free — it is a chance to lose
+a whole run to somebody else's stale patch. This cut disables 64 of mpv's 68
+options and enables ten external libraries in ffmpeg, all audio; everything
+else was being compiled so it could be switched off.
+
+**THE CRASH COUNT IS NOT AN ORACLE.** The fault is a read past a short buffer
+and whether it kills the process depends on what happens to sit after it: the
+same unpatched engine and the same file gave 3 deaths in 40, then 1 in 40,
+then **0 in 80**. A clean run proves nothing, exactly as The Bell's own note
+says.
+
+**What IS an oracle:** write the filter's output to a wav through `ao=pcm` and
+compare runs of the same file. Unpatched, they differ, and the difference
+begins **1920 bytes from the end — one 480-sample frame, exactly** — with
+saturated values, which is the garbage at the end of a recording Bell
+described. Six runs gave three different tails. Patched, all six are
+byte-identical.
+
+**Verified, on the DLL the build installs:**
+
+- decoder list **identical** to the engine it replaces, name for name;
+- 40 audio filters tried one at a time, **identical** results old and new —
+  35 build, and the 5 that do not (`sofalizer`, `rubberband`, `ladspa`, `lv2`,
+  `flite`) did not build on the old engine either, because their
+  `--enable-lib…` was never in our configure line. So the DEPENDS trim cost
+  nothing, and that is measured rather than argued;
+- the tail oracle above, six of six;
+- 80 plays to the natural end, none died;
+- eight filter graphs built and **torn down**, arnndn+speechnorm among them —
+  the pair that still hangs ffmpeg's export path is clean in the live graph;
+- the card held by a SECOND mpv context (the keep-alive) while a filtered one
+  starts: 66 ms to first position, and the keep-alive never stopped;
+- through **NBR's own bindings**, not just the raw C API: `MpvDuration` reads
+  235,13 / 235,15 / 19999,81 s, the same three as before;
+- and the player starts on it.
+
+Rollback is one file and it is in git (`efba58f`), with a copy outside git in
+`D:\Player\_backup libmpv pre-arnndn 2026-09-10`.
+
+---
+
 ## 10e. libmpv is an LGPL build now — keep it that way (2026-07-30)
 
 **The vendored libmpv was a GPL build, and that was a real problem for a closed
