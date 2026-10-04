@@ -7817,6 +7817,65 @@ biti skinned, ima vremena do sluzbenog releasea."* Note what this does NOT
 touch: 8k's rule that whatever the skin does classic does is about two LOOKS of
 one dialog, and is untouched by a dialog having no skinned look at all.
 
+### ASKED AGAIN, FOUR WEEKS ON (2026-10-04)
+
+`tools/model-list.cs` against all three services with Gordan's own keys.
+**Nothing we ship has gone away** -- both Flash-Lites, all four GPTs and
+DeepSeek Flash answer to the list. Two things changed.
+
+**DeepSeek offers exactly two models, and the second is `deepseek-v4-pro`.**
+The Pro entry came out on 2026-09-10 because the service had stopped offering
+one; it is back, and the entry with it. The note left behind said "bring it
+back when V4.1 Pro exists" and that is NOT what returned: the id serves **V4
+Pro 0813**, the generation BEFORE Flash's V4.1. So it is the dearer and older
+of the two -- $0.66/$1.98 a million off-peak against Flash's $0.15/$0.60.
+
+**It was called, not read off a list**, which is this section's own rule: one
+chapter of a real novel, 109 s against Flash-Lite's 30-40, and measured on the
+two axes that matter for Croatian it is WORSE than the free Flash-Lite --
+
+| one chapter, with the book's glossary | aorist | perfekt | coined forms | invented adjectives |
+|---|---|---|---|---|
+| Gemini 3.1 Flash Lite | 24 | 42 | 15 | **1** |
+| DeepSeek V4 Pro | 38 | 28 | 22 | 4 |
+| Gemini 3.5 Flash Lite | 73 | 0 | 18 | 4 |
+
+So it is in the combo because the reader may want it, not because anything
+recommends it. It honours the glossary well ("redu Dreor", "na tācnu").
+
+**The GPT-6 family prices the whole 5.6 ladder out.** Per million, in/out:
+
+| | 5.6 | 6 |
+|---|---|---|
+| Luna | $0.20 / $1.20 | **$0.10 / $0.50** |
+| Sol | $4.00 / $20.00 | **$2.00 / $10.00** (6 Sol and 6.1 Sol alike) |
+| Terra | $2.00 / $12.00 | -- |
+
+Newer generation, lower price, every rung. `gpt-6-luna`, `gpt-6-sol` and
+`gpt-6.1-sol` are in, ordered by price as this stretch of the combo requires:
+6 Luna, 5.6 Luna, 6 Sol, 6.1 Sol, Terra, 5.6 Sol, Astra.
+
+> **NONE OF THE THREE HAS BEEN CALLED**, and that breaks the rule above. The
+> OpenAI account has no credit, and Gordan said so when he asked for them. What
+> is unverified: that each id answers on this endpoint, and that the reasoning
+> dialect is right for it -- Astra needed it and Terra did not, and these are
+> set like Astra because they are the same generation, which is an inference.
+> **One chapter through each the moment there is credit**, and only then is
+> there an argument for retiring three 5.6 entries.
+
+**AND THE EMPTY ACCOUNT TAUGHT US SOMETHING.** A piece of 754 characters cost
+**150 seconds and two asks** before being left in the original: "no credits
+remaining" arrives as a retryable status, so every wait ran its course against
+a condition that cannot change while the job lasts. Over a 111-piece book that
+is four and a half hours of waiting to produce nothing.
+
+`Translator.OutOfFunds` now reads it out of the BODY, as `SpentForNow` already
+does for an exhausted allowance, and stands the engine down at once:
+**150 s -> 0.6 s** for the same refusal. It matches what the services say in
+words -- `insufficient_quota`, "no credits remaining", DeepSeek's "Insufficient
+Balance" -- and deliberately not a plain rate limit, which is worth waiting
+for.
+
 ### THE THREE SERVICES' OWN MODEL LISTS, ASKED RATHER THAN READ (2026-09-07)
 
 Gordan saw a new OpenAI model called Astra and asked for it, plus the same

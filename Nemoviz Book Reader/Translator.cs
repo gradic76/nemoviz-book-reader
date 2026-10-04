@@ -163,6 +163,9 @@ namespace Nemoviz_Book_Reader
         public const string OpenAiSol = "openai-sol";
         public const string OpenAiLuna = "openai-luna";
         public const string OpenAiAstra = "openai-astra";
+        public const string OpenAiLuna6 = "openai-luna-6";
+        public const string OpenAiSol6 = "openai-sol-6";
+        public const string OpenAiSol61 = "openai-sol-61";
         public const string Azure = "azure";
 
         /// <summary>Azure keeps a second value beside its key: the region a
@@ -264,6 +267,37 @@ namespace Nemoviz_Book_Reader
                 Endpoint = "https://api.deepseek.com/chat/completions",
                 Model = "deepseek-flash"
             },
+            // DEEPSEEK PRO IS BACK (2026-10-04). It went out on 2026-09-10 because
+            // the service had stopped offering a Pro tier at all and the entry was
+            // calling an id that answered nothing. Asked again today through the
+            // service's own /models with Gordan's key, DeepSeek offers exactly two
+            // models and this is the second of them.
+            //
+            // <para>The note left behind said "bring the entry back when V4.1 Pro
+            // exists", and that is NOT what came back: the id serves V4 Pro 0813,
+            // the previous generation, where Flash is V4.1. So this is the dearer
+            // and OLDER of the two, which is an odd pair but it is what the service
+            // has. Whether it translates better than Flash is a measurement, and
+            // one worth making on a chapter before it is used on a book.</para>
+            //
+            // <para><b>It shares the Flash key</b> — one account, one credential,
+            // which is why KeyId is set: without it KeyName would fall back to this
+            // entry's own id and the engine would report that it has no key.</para>
+            //
+            // <para>$0.66 and $1.98 a million off-peak against Flash's $0.15 and
+            // $0.60 — four times, and both halve outside 01:00-04:00 and
+            // 06:00-10:00 UTC on weekdays. Not in the fallback chain, for the same
+            // reason the GPTs are not: an automatic stop spends money nobody asked
+            // it to spend.</para>
+            new TranslationEngine
+            {
+                Id = DeepSeekPro,
+                NameKey = "Settings.Translate.Engine.DeepSeekPro",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.deepseek.com/chat/completions",
+                Model = "deepseek-v4-pro",
+                KeyId = DeepSeek
+            },
             // OPENAI, THREE TIERS ON ONE ACCOUNT AND ONE KEY (added 2026-08-20 so
             // it can be judged by ear against Gemini, under the same conditions and
             // through the same pipe).
@@ -297,6 +331,41 @@ namespace Nemoviz_Book_Reader
             // $50 a million against Sol's $4 and $20, so two and a half times Sol.
             // Against a MEASURED $0.23 on Gemini, even the cheapest of them is four
             // times the price of the free tier for a habit.
+            // THE GPT-6 FAMILY, ADDED 2026-10-04 AND NOT ONE OF THEM HAS BEEN
+            // CALLED. Gordan asked for them and said in the same breath that the
+            // OpenAI account has no funds just now, so the rule this file set for
+            // itself when Astra went in — "it was CALLED before it was added, not
+            // read off a list" — could not be honoured. Everything below is read
+            // off the service's own /models and off its pricing page. What is NOT
+            // known: whether each id answers on this endpoint, and whether the
+            // reasoning dialect is right for it. Astra needed that dialect and
+            // Terra did not; these are set the same way as Astra because they are
+            // the same generation, which is an inference and not a measurement.
+            // ONE CHAPTER THROUGH EACH, the moment there is credit.
+            //
+            // <para><b>They price the whole 5.6 ladder out.</b> Per million, input
+            // and output: 6 Luna $0.10/$0.50 against 5.6 Luna's $0.20/$1.20; 6 Sol
+            // and 6.1 Sol both $2/$10 against Terra's $2/$12 and 5.6 Sol's $4/$20.
+            // Newer generation, lower price, every rung. The 5.6 entries stay for
+            // now only because nothing has proved the new ones answer — once one
+            // chapter has gone through each, three of them have no argument left.
+            // That removal is Gordan's call, not a tidy-up to do quietly.</para>
+            //
+            // <para>Ordered cheapest first, which is the rule this stretch of the
+            // combo already follows, so the new rungs slot in by price rather than
+            // by arrival: 6 Luna, 5.6 Luna, 6 Sol, 6.1 Sol, Terra, 5.6 Sol,
+            // Astra.</para>
+            new TranslationEngine
+            {
+                Id = OpenAiLuna6,
+                NameKey = "Settings.Translate.Engine.OpenAiLuna6",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.openai.com/v1/chat/completions",
+                Model = "gpt-6-luna",
+                ReasoningDialect = true,
+                FlexTier = true,
+                KeyId = OpenAi
+            },
             new TranslationEngine
             {
                 Id = OpenAiLuna,
@@ -304,6 +373,35 @@ namespace Nemoviz_Book_Reader
                 Kind = EngineKind.OpenAiCompatible,
                 Endpoint = "https://api.openai.com/v1/chat/completions",
                 Model = "gpt-5.6-luna",
+                ReasoningDialect = true,
+                FlexTier = true,
+                KeyId = OpenAi
+            },
+            // 6 SOL AND 6.1 SOL COST THE SAME, $2 and $10 a million, and the
+            // service describes them differently: 6 Sol "built to power complex
+            // coding and agentic workflows", 6.1 Sol "near-Astra performance for
+            // complex work at a lower cost". For translating a novel the second
+            // description is the relevant one, so 6.1 sits after 6 at the same
+            // price rather than being left out — at equal cost there is no reason
+            // to choose for the reader.
+            new TranslationEngine
+            {
+                Id = OpenAiSol6,
+                NameKey = "Settings.Translate.Engine.OpenAiSol6",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.openai.com/v1/chat/completions",
+                Model = "gpt-6-sol",
+                ReasoningDialect = true,
+                FlexTier = true,
+                KeyId = OpenAi
+            },
+            new TranslationEngine
+            {
+                Id = OpenAiSol61,
+                NameKey = "Settings.Translate.Engine.OpenAiSol61",
+                Kind = EngineKind.OpenAiCompatible,
+                Endpoint = "https://api.openai.com/v1/chat/completions",
+                Model = "gpt-6.1-sol",
                 ReasoningDialect = true,
                 FlexTier = true,
                 KeyId = OpenAi
@@ -599,6 +697,10 @@ namespace Nemoviz_Book_Reader
                 transport = Post(url, headers, body, out raw, out status);
                 bool worthRetrying = transport != null || status == 429 || status == 408 || status >= 500;
                 if (status == 429 && SpentForNow(raw)) { spent = true; worthRetrying = false; }
+                // An empty ACCOUNT is as final as an empty allowance, and no status
+                // is required to believe it: whatever the service returns, there is
+                // nothing to come back to within this job.
+                if (OutOfFunds(raw)) { spent = true; worthRetrying = false; }
                 if (!worthRetrying || attempt >= waits.Length) break;
 
                 int wait = waits[attempt];
@@ -870,6 +972,41 @@ namespace Nemoviz_Book_Reader
                                "RECITATION", "content_filter" };
             foreach (string m in marks)
                 if (why.IndexOf(m, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            return false;
+        }
+
+        /// <summary>An account with nothing left in it, which is not a rate limit
+        /// however the service dresses it up.
+        ///
+        /// <para><b>Measured 2026-10-04 and it is why this exists.</b> Gordan's
+        /// OpenAI account had run out of credit, and one piece of 754 characters
+        /// cost <b>150 seconds and two asks</b> before being left in the original:
+        /// the reply arrives as a retryable status, so the waits ran their course
+        /// against a condition that cannot change while the job lasts. Over a
+        /// 111-piece book that is four and a half hours of waiting to produce
+        /// nothing.</para>
+        ///
+        /// <para>Read out of the BODY and not the status, for the same reason
+        /// <see cref="SpentForNow"/> is: a service says what it refused on in
+        /// words, and the status it chooses for saying so is its own business.
+        /// OpenAI sends "insufficient_quota" and "You have no credits remaining",
+        /// DeepSeek "Insufficient Balance".</para>
+        ///
+        /// <para>Deliberately NOT matching a plain rate limit. "Rate limit
+        /// exceeded" and a short retryDelay mean wait and try again, which is work
+        /// worth doing; these phrases mean the key is dead until somebody pays,
+        /// which is not.</para></summary>
+        private static bool OutOfFunds(string raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return false;
+            string[] marks =
+            {
+                "insufficient_quota", "no credits remaining", "exceeded your current quota",
+                "billing_hard_limit_reached", "Insufficient Balance", "account_deactivated",
+                "quota_exceeded", "payment required"
+            };
+            foreach (string m in marks)
+                if (raw.IndexOf(m, StringComparison.OrdinalIgnoreCase) >= 0) return true;
             return false;
         }
 
