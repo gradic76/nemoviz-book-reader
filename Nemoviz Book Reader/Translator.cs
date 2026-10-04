@@ -158,36 +158,6 @@ namespace Nemoviz_Book_Reader
         // DeepSeekPro: the id is kept so a stored chain naming it still parses,
         // but there is no entry for it -- see the DeepSeek engine above. Bring
         // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
-        // DeepSeekPro: the id is kept so a stored chain naming it still parses,
-        // but there is no entry for it -- see the DeepSeek engine above. Bring
-        // the entry back when V4.1 Pro exists.
         public const string DeepSeekPro = "deepseek-pro";
         public const string OpenAi = "openai";
         public const string OpenAiSol = "openai-sol";
