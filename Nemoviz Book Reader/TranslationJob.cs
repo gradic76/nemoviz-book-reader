@@ -344,8 +344,14 @@ namespace Nemoviz_Book_Reader
                     : "none for " + opt.TargetLang + " -- looked in "
                       + TranslationRules.PathFor(opt.TargetLang)));
             }
-            var cache = TranslationCache.Open(opt.CachePath);
+            // THE PROMPT FIRST, because the cache is keyed on it now. A cache made
+            // under other rules or another glossary holds what those instructions
+            // produced, and handing that back is how a correction came to cost
+            // nothing and change nothing.
             string system = BuildSystemPrompt(opt.SourceLang, opt.TargetLang, opt.ReaderNotes, bible);
+            var cache = TranslationCache.Open(opt.CachePath, system);
+            if (cache.Dropped)
+                Log(opt, "cache         dropped -- it was made under different instructions");
 
             var pieces = new List<Piece>(chunks.Count);
             foreach (TextChunk c in chunks)
@@ -1293,15 +1299,45 @@ namespace Nemoviz_Book_Reader
         private readonly Dictionary<string, string> map = new Dictionary<string, string>(StringComparer.Ordinal);
         private bool dirty;
 
+        /// <summary>A short fingerprint of the system prompt the entries were
+        /// made under. Written as the file's first line and compared on open: a
+        /// cache made under different rules or a different glossary is not a
+        /// cache, it is a record of what the old instructions produced.</summary>
+        private const string StampTag = "#prompt ";
+        private string stamp = "";
+
         private TranslationCache(string path) { this.path = path; }
 
-        public static TranslationCache Open(string path)
+        public static TranslationCache Open(string path) { return Open(path, null); }
+
+        /// <summary><b>A corrected glossary used to change nothing</b>, and the
+        /// comment above said so without doing anything about it: the key is the
+        /// source offset and a hash of the source text, so every piece came back
+        /// from the cache carrying what the OLD prompt had produced. The reader had
+        /// to know to delete the file, and nothing told them.
+        ///
+        /// <para>So the prompt is fingerprinted into the file. Same prompt, the
+        /// whole cache still counts -- which is what it is for. Different prompt,
+        /// it is dropped and the log says it was dropped. An older file has no
+        /// fingerprint at all and is therefore dropped once, which is right: what
+        /// it holds was made under instructions nobody can name any more.</para></summary>
+        public static TranslationCache Open(string path, string systemPrompt)
         {
             var c = new TranslationCache(path);
+            c.stamp = Fingerprint(systemPrompt);
             if (string.IsNullOrEmpty(path) || !File.Exists(path)) return c;
             try
             {
                 string all = File.ReadAllText(path, Encoding.UTF8);
+                int firstNl = all.IndexOf('\n');
+                string head = firstNl > 0 ? all.Substring(0, firstNl) : "";
+                if (head.StartsWith(StampTag, StringComparison.Ordinal))
+                {
+                    c.Dropped = head.Substring(StampTag.Length).Trim() != c.stamp;
+                    all = all.Substring(firstNl + 1);
+                }
+                else c.Dropped = true;          // written before the fingerprint existed
+                if (c.Dropped) return c;
                 foreach (string rec in all.Split(new[] { Sep + "\n" }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     int nl = rec.IndexOf('\n');
@@ -1313,6 +1349,21 @@ namespace Nemoviz_Book_Reader
             }
             catch { }
             return c;
+        }
+
+        /// <summary>True when a cache file was there and did not match the prompt,
+        /// so the job can say so rather than silently re-buying the whole book.</summary>
+        public bool Dropped;
+
+        private static string Fingerprint(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "none";
+            unchecked
+            {
+                ulong h = 14695981039346656037;
+                foreach (char ch in s) { h ^= ch; h *= 1099511628211; }
+                return h.ToString("x16", System.Globalization.CultureInfo.InvariantCulture);
+            }
         }
 
         private static string Key(int start, string source)
@@ -1349,6 +1400,7 @@ namespace Nemoviz_Book_Reader
             try
             {
                 var sb = new StringBuilder();
+                sb.Append(StampTag).Append(stamp).Append('\n');
                 foreach (var kv in map)
                     sb.Append(kv.Key).Append('\n').Append(kv.Value).Append(Sep).Append('\n');
                 File.WriteAllText(path, sb.ToString(), new UTF8Encoding(false));

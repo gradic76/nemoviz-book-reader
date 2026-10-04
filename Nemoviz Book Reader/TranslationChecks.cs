@@ -244,9 +244,84 @@ namespace Nemoviz_Book_Reader
                 Add(found, CheckSeverity.Note, "quotes", "more than one style used: " + sb);
             }
 
+            // 9. A STRETCH THAT CAME BACK WITHOUT ITS DIACRITICS. Gordan remembered
+            //    this from an old translation and the evidence was long deleted, but
+            //    the gap was still there: such a passage is the same LENGTH as a
+            //    good one (s for š is one character for one character), has the same
+            //    paragraph count, is not the source echoed back, and the language
+            //    detector still calls it Croatian. Every check in this file passed
+            //    it.
+            //
+            //    Measured rather than guessed, over 132 real translated pieces from
+            //    two books: 19.3 diacritics per 1000 letters at the lowest, 30.5 at
+            //    the median. A window at a quarter of the BOOK's own median is far
+            //    below anything a genuine passage does.
+            //
+            //    The book's own median is the yardstick, which means no list of
+            //    which languages use diacritics: English simply has a median of
+            //    nought and the check stands down by itself.
+            foreach (string w in ThinDiacriticStretches(translated))
+                Add(found, CheckSeverity.Suspect, "diacritics", w);
             return found;
         }
 
+        /// <summary>Windows of the translation whose diacritic density has collapsed
+        /// against the rest of it. One line per RUN of such windows, so a single
+        /// stripped passage is reported once and not forty times.</summary>
+        private static List<string> ThinDiacriticStretches(string s)
+        {
+            var found = new List<string>();
+            const int Window = 3000;                  // letters, about half a piece
+
+            var marks = new List<bool>();
+            var at = new List<int>();
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (!char.IsLetter(s[i])) continue;
+                at.Add(i);
+                marks.Add(HasDiacritic(s[i]));
+            }
+            if (marks.Count < Window * 2) return found;
+
+            var rate = new List<double>();
+            for (int i = 0; i + Window <= marks.Count; i += Window)
+            {
+                int run = 0;
+                for (int j = i; j < i + Window; j++) if (marks[j]) run++;
+                rate.Add(1000.0 * run / Window);
+            }
+            var sorted = new List<double>(rate);
+            sorted.Sort();
+            double median = sorted[sorted.Count / 2];
+            if (median < 5) return found;             // a language that does not use them
+
+            double floor = median / 4;
+            int from = -1;
+            for (int i = 0; i <= rate.Count; i++)
+            {
+                bool thin = i < rate.Count && rate[i] < floor;
+                if (thin && from < 0) from = i;
+                else if (!thin && from >= 0)
+                {
+                    found.Add(string.Format(CultureInfo.InvariantCulture,
+                        "{0:N0} letters from character {1:N0} carry almost none: {2:F1} per 1000 against the book's {3:F1}",
+                        (i - from) * Window, at[from * Window], rate[from], median));
+                    from = -1;
+                }
+            }
+            return found;
+        }
+
+        /// <summary>A Latin letter carrying a mark, as the languages NBR translates
+        /// into write them. Deliberately a list and not a Unicode category test: a
+        /// category test counts Greek and Cyrillic letters, which carry no mark, and
+        /// the median would stop meaning anything for those languages.</summary>
+        private static bool HasDiacritic(char c)
+        {
+            return "čćžšđČĆŽŠĐáéíóúýÁÉÍÓÚÝàèìòùÀÈÌÒÙâêîôûÂÊÎÔÛäëïöüÄËÏÖÜãñõÃÑÕåÅçÇ"
+                   .IndexOf(c) >= 0
+                || "ąęłńśźżĄĘŁŃŚŹŻěřůťňďĚŘŮŤŇĎőűŐŰășțĂȘȚėųįōūēīğışĞİŞ".IndexOf(c) >= 0;
+        }
         // ---- the small machinery ----------------------------------------------
 
         private static void Add(List<TranslationIssue> list, CheckSeverity sev, string kind, string detail, int chunk = -1)
@@ -626,11 +701,30 @@ namespace Nemoviz_Book_Reader
             Bump(d, "„“", CountChar(s, '„'));   // „ “
             Bump(d, "«»", CountChar(s, '«'));   // « »
             Bump(d, "“”", CountChar(s, '”'));   // “ ”
+            // THE DASH IS A STYLE TOO, and leaving it out is how 377 lines of it
+            // went unreported. Measured 2026-10-04 on a whole book from Gemini
+            // 3.5 Flash Lite: it switched to the continental dash in 16 separate
+            // stretches, each about the length of one translated piece, and every
+            // other check passed the book. Counting only quotation MARKS cannot
+            // see a convention that uses none.
+            Bump(d, "dash", CountLinesStartingWithDash(s));
             // A style used once or twice is a quotation inside a quotation, not a
             // second convention; only a real second style is worth reporting.
             var big = new Dictionary<string, int>(StringComparer.Ordinal);
             foreach (var kv in d) if (kv.Value >= 6) big[kv.Key] = kv.Value;
             return big;
+        }
+
+        private static int CountLinesStartingWithDash(string s)
+        {
+            int n = 0;
+            foreach (string line in s.Split('\n'))
+            {
+                string t = line.TrimStart();
+                if (t.Length >= 2 && (t[0] == '\u2013' || t[0] == '\u2014')
+                    && (t[1] == ' ' || t[1] == '\u00A0')) n++;
+            }
+            return n;
         }
 
         private static void Bump(Dictionary<string, int> d, string k, int n) { if (n > 0) d[k] = n; }
