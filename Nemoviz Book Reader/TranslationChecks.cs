@@ -423,26 +423,54 @@ namespace Nemoviz_Book_Reader
         {
             string worst = null;
             int most = 0;
-            foreach (var kv in Sentences(translated))
+            foreach (var kv in Sentences(translated, 25))
                 if (kv.Value > most) { most = kv.Value; worst = kv.Key; }
             if (most < 3) return null;
 
+            // THE SOURCE IS COUNTED WITH A LOWER FLOOR THAN THE TRANSLATION, and
+            // that asymmetry is the fix rather than the fault (2026-10-29).
+            //
+            // Gordan: a piece of Capture or Kill came back marked "repetition" on
+            // a translation that was correct. The author writes "Irene shook her
+            // head." four times, and the chunker put them in one piece. In
+            // Croatian that is "Irene je odmahnula glavom" -- TWENTY-FIVE
+            // characters, exactly at the floor, so the translation side counted it
+            // four times. The English is TWENTY, under the floor, so the source
+            // side counted it NOT AT ALL and `allowed` came out 1. Three faithful
+            // repetitions of a sentence the author wrote four times were read as a
+            // model looping.
+            //
+            // It is not that Croatian runs long: measured over eleven finished
+            // en->hr books in this library the whole-book ratio is 0.96 to 0.98.
+            // It is that a SINGLE sentence varies either side of that, and a floor
+            // applied to both languages cuts at a different place in each. Fifteen
+            // leaves room for an expansion of two thirds before the same thing can
+            // happen again.
             int allowed = 0;
-            foreach (var kv in Sentences(source)) if (kv.Value > allowed) allowed = kv.Value;
+            foreach (var kv in Sentences(source, 15)) if (kv.Value > allowed) allowed = kv.Value;
             return most > allowed ? worst : null;
         }
 
         /// <summary>Every sentence of 25 characters or more, and how often it
         /// occurs. Split the same way on both sides so the two counts mean the
         /// same thing.</summary>
-        private static Dictionary<string, int> Sentences(string s)
+        private static Dictionary<string, int> Sentences(string s, int floor)
         {
             var seen = new Dictionary<string, int>(StringComparer.Ordinal);
             if (string.IsNullOrEmpty(s)) return seen;
             foreach (string raw in s.Split(new[] { '.', '!', '?', '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 string t = raw.Trim();
-                if (t.Length < 25) continue;
+                if (t.Length < floor) continue;
+                // A SENTENCE STARTS WITH A CAPITAL; what this split leaves behind
+                // does not. Dialogue is written "...," Rapp said. so cutting on the
+                // full stop yields the orphan  " Rapp said  -- 52 times in one
+                // book, 23 for Irene, 19 for Coleman. Those are not sentences and
+                // counting them puts a number in `allowed` that has nothing to do
+                // with anything the model did. Every frequent orphan in that book
+                // begins with a quotation mark, and every real sentence with a
+                // capital, so the first character separates them on both sides.
+                if (!char.IsUpper(t[0])) continue;
                 int n;
                 seen.TryGetValue(t, out n);
                 seen[t] = n + 1;
