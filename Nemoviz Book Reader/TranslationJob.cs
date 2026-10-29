@@ -762,6 +762,11 @@ namespace Nemoviz_Book_Reader
                                           Options opt, TranslationReport report, ChainState state)
         {
             TranslationResult last = null;
+            // WHICH SERVICE, so the summary can say "Gemini refused it" rather
+            // than "the service refused it" (Gordan, 2026-10-29). The KEY name,
+            // not the engine's: one account answers for every model behind it, and
+            // a reader deciding what to do next thinks in services.
+            string lastKey = "";
             List<TranslationIssue> lastIssues = null;
             var clock = System.Diagnostics.Stopwatch.StartNew();
             int asks = 0;
@@ -794,7 +799,7 @@ namespace Nemoviz_Book_Reader
                     List<TranslationIssue> issues = r.Ok
                         ? TranslationChecks.Chunk(c, r.Text, opt.TargetLang)
                         : new List<TranslationIssue>();
-                    last = r; lastIssues = issues;
+                    last = r; lastIssues = issues; lastKey = engine.KeyName;
 
                     if (!r.Ok || HasSuspect(issues))
                     {
@@ -866,6 +871,7 @@ namespace Nemoviz_Book_Reader
                         // recorded only the tally "later engine 1". That is the
                         // same gap he found this morning for a piece left in the
                         // original, one layer up -- and the same answer.
+                        string whoRefused;
                         string handedWhy = engine.DisplayName + " took it. "
                                    + WhyEarlierStopsFailed(opt, stop, whyRefused, last, lastIssues);
                         Log(opt, "  handed on   piece " + (c.Index + 1) + " -- " + handedWhy);
@@ -874,7 +880,8 @@ namespace Nemoviz_Book_Reader
                             Severity = CheckSeverity.Note,
                             Kind = engine.LastResort ? "last resort" : "later engine",
                             Detail = handedWhy,
-                            Reason = WhyInOneWord(opt, stop, spent, aboutPassage, lastIssues, state),
+                            Reason = WhyInOneWord(opt, stop, spent, aboutPassage, lastIssues, state, out whoRefused),
+                            Who = whoRefused,
                             ChunkIndex = c.Index
                         });
                     }
@@ -957,6 +964,7 @@ namespace Nemoviz_Book_Reader
                        : last.Ok ? (FirstSuspect(lastIssues).Length > 0
                                         ? "check:" + FirstSuspect(lastIssues) : "error")
                        : "error",
+                Who = lastKey,
                 ChunkIndex = c.Index
             });
             return new Piece { Text = null, Asks = asks, Ms = clock.ElapsedMilliseconds, Why = why };
@@ -1214,16 +1222,20 @@ namespace Nemoviz_Book_Reader
         /// content" and the reader acts differently on each.</para></summary>
         private static string WhyInOneWord(Options opt, int stop, HashSet<string> spent,
                                            Dictionary<string, bool> aboutPassage,
-                                           List<TranslationIssue> lastIssues, ChainState state)
+                                           List<TranslationIssue> lastIssues, ChainState state,
+                                           out string who)
         {
+            who = "";
             for (int i = 0; i < stop && i < opt.Chain.Count; i++)
             {
-                if (spent.Contains(opt.Chain[i].Id) || state.IsDry(opt.Chain[i])) return "quota";
+                if (spent.Contains(opt.Chain[i].Id) || state.IsDry(opt.Chain[i]))
+                { who = opt.Chain[i].KeyName; return "quota"; }
             }
             for (int i = 0; i < stop && i < opt.Chain.Count; i++)
             {
                 bool passage;
-                if (aboutPassage.TryGetValue(opt.Chain[i].Id, out passage) && passage) return "content";
+                if (aboutPassage.TryGetValue(opt.Chain[i].Id, out passage) && passage)
+                { who = opt.Chain[i].KeyName; return "content"; }
             }
             // No suspect finding means no check rejected it, so there is nothing
             // to name and "error" is the honest word.

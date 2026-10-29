@@ -30,6 +30,13 @@ namespace Nemoviz_Book_Reader
         /// <c>check:</c> followed by the check's own Kind.</para></summary>
         public string Reason;
 
+        /// <summary>Which SERVICE it was about, as its key name — gemini, openai,
+        /// deepseek, azure. Empty where no service is to blame, as when our own
+        /// check rejected a good answer. The key name and not the engine label:
+        /// one account answers for every model behind it, and a reader deciding
+        /// what to do next thinks in services.</summary>
+        public string Who;
+
         public override string ToString()
         {
             return (ChunkIndex >= 0 ? "chunk " + ChunkIndex + ": " : "") + Kind + " — " + Detail;

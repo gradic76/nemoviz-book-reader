@@ -37,8 +37,11 @@ namespace Nemoviz_Book_Reader
                 sb.AppendLine(Localization.T("Translate.Took", took));
             sb.AppendLine();
 
-            var content = new SortedSet<int>();
-            var quota = new SortedSet<int>();
+            // Grouped by WHO as well as why, because "Gemini refused it" and
+            // "OpenAI refused it" are two different pieces of news and a reader
+            // acts on them differently (Gordan, 2026-10-29). One line per service.
+            var content = new Dictionary<string, SortedSet<int>>(StringComparer.Ordinal);
+            var quota = new Dictionary<string, SortedSet<int>>(StringComparer.Ordinal);
             var moved = new SortedSet<int>();
             var left = new SortedSet<int>();
             var byCheck = new Dictionary<string, SortedSet<int>>(StringComparer.Ordinal);
@@ -54,15 +57,11 @@ namespace Nemoviz_Book_Reader
                 if (abandoned) left.Add(n); else moved.Add(n);
 
                 string why = i.Reason ?? "";
-                if (why == "content") content.Add(n);
-                else if (why == "quota") quota.Add(n);
+                string who = i.Who ?? "";
+                if (why == "content") Put(content, who, n);
+                else if (why == "quota") Put(quota, who, n);
                 else if (why.StartsWith("check:", StringComparison.Ordinal))
-                {
-                    string kind = why.Substring(6);
-                    SortedSet<int> set;
-                    if (!byCheck.TryGetValue(kind, out set)) byCheck[kind] = set = new SortedSet<int>();
-                    set.Add(n);
-                }
+                    Put(byCheck, why.Substring(6), n);
             }
 
             // TWO SUBTRACTIONS, AND BOTH ARE ABOUT NOT CONTRADICTING OURSELVES.
@@ -74,20 +73,22 @@ namespace Nemoviz_Book_Reader
             // original language" about the same number.
             //
             // And the plain "handed on" line is for segments with no better
-            // explanation. A segment already named as refused for its content, or
-            // as returned by a check, has had its reason given; repeating it under
-            // a vaguer heading is noise. That leaves exactly the line Gordan wrote
+            // explanation. A segment already named as refused by a service, or as
+            // returned by a check, has had its reason given; repeating it under a
+            // vaguer heading is noise. That leaves exactly the line Gordan wrote
             // in his example — one bare number, the piece that simply moved.
-            quota.IntersectWith(moved);
-            moved.ExceptWith(quota);
-            moved.ExceptWith(content);
+            foreach (var kv in quota) kv.Value.IntersectWith(moved);
+            foreach (var kv in quota) moved.ExceptWith(kv.Value);
+            foreach (var kv in content) moved.ExceptWith(kv.Value);
             foreach (var kv in byCheck) moved.ExceptWith(kv.Value);
 
-            Line(sb, content, "Translate.Sum.Content");
+            foreach (var kv in content)
+                Line(sb, kv.Value, "Translate.Sum.Content", ServiceName(kv.Key));
             foreach (var kv in byCheck)
                 Line(sb, kv.Value, "Translate.Sum.Check", CheckName(kv.Key));
             Line(sb, moved, "Translate.Sum.Moved");
-            Line(sb, quota, "Translate.Sum.Quota");
+            foreach (var kv in quota)
+                Line(sb, kv.Value, "Translate.Sum.Quota", ServiceName(kv.Key));
             Line(sb, left, "Translate.Sum.Left");
 
             if (content.Count == 0 && quota.Count == 0 && moved.Count == 0
@@ -95,6 +96,26 @@ namespace Nemoviz_Book_Reader
                 sb.AppendLine(Localization.T("Translate.Sum.Clean"));
 
             return sb.ToString().TrimEnd();
+        }
+
+        private static void Put(Dictionary<string, SortedSet<int>> d, string key, int n)
+        {
+            SortedSet<int> set;
+            if (!d.TryGetValue(key, out set)) d[key] = set = new SortedSet<int>();
+            set.Add(n);
+        }
+
+        /// <summary>The service in one word — Gemini, OpenAI, DeepSeek, Azure.
+        /// Not the engine's label: "GPT-6 Luna (OpenAI, cheapest)" is the right
+        /// thing in a combo box and the wrong thing in a sentence, and a reader
+        /// out of credit needs to know WHICH ACCOUNT, which is the same for every
+        /// model behind it. An unknown key says itself rather than nothing.</summary>
+        private static string ServiceName(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return "";
+            string k = "Translate.Sum.Service." + key;
+            string name = Localization.T(k);
+            return name == k ? key : name;
         }
 
         private static void Line(StringBuilder sb, SortedSet<int> set, string key, string extra = null)
