@@ -954,8 +954,8 @@ namespace Nemoviz_Book_Reader
                 Reason = last == null ? "none"
                        : last.Exhausted ? "quota"
                        : last.Refused ? "content"
-                       : last.Ok ? (lastIssues != null && lastIssues.Count > 0
-                                        ? "check:" + lastIssues[0].Kind : "check")
+                       : last.Ok ? (FirstSuspect(lastIssues).Length > 0
+                                        ? "check:" + FirstSuspect(lastIssues) : "error")
                        : "error",
                 ChunkIndex = c.Index
             });
@@ -1225,8 +1225,33 @@ namespace Nemoviz_Book_Reader
                 bool passage;
                 if (aboutPassage.TryGetValue(opt.Chain[i].Id, out passage) && passage) return "content";
             }
-            if (lastIssues != null && lastIssues.Count > 0) return "check:" + lastIssues[0].Kind;
-            return "error";
+            // No suspect finding means no check rejected it, so there is nothing
+            // to name and "error" is the honest word.
+            string suspect = FirstSuspect(lastIssues);
+            return suspect.Length > 0 ? "check:" + suspect : "error";
+        }
+
+        /// <summary>The kind of the first SUSPECT finding, which is the one that
+        /// actually rejected the answer.
+        ///
+        /// <para>Taking <c>issues[0]</c> was wrong and would have been wrong
+        /// often. Chunk() reports in a fixed order with paragraphs first, and
+        /// losing one or two paragraphs is a NOTE -- its own comment says that is
+        /// what a model normally does, 90 of 107 accepted pieces on one measured
+        /// book. So a piece thrown out for repetition that had also merged a
+        /// paragraph would have told the reader "returned for a lost paragraph",
+        /// naming the one finding that did not reject it.</para>
+        ///
+        /// <para>Only Suspect rejects -- see HasSuspect -- so only Suspect may
+        /// name the reason. With no suspect finding at all there is nothing to
+        /// name and the caller falls back to "error".</para></summary>
+        private static string FirstSuspect(List<TranslationIssue> issues)
+        {
+            if (issues != null)
+                foreach (var i in issues)
+                    if (i.Severity == CheckSeverity.Suspect && !string.IsNullOrEmpty(i.Kind))
+                        return i.Kind;
+            return "";
         }
 
         private static string WhyEarlierStopsFailed(Options opt, int reached,
