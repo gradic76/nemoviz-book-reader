@@ -171,6 +171,7 @@
     <Compile Include="TextChunker.cs" />
     <Compile Include="TranslationBible.cs" />
     <Compile Include="TranslationChecks.cs" />
+    <Compile Include="TranslationSummary.cs" />
     <Compile Include="TranslationJob.cs" />
     <Compile Include="TranslationLanguages.cs" />
     <Compile Include="TranslationRules.cs" />

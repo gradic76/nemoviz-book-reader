@@ -455,6 +455,8 @@ namespace Nemoviz_Book_Reader
 
             private readonly Dictionary<string, int> misses =
                 new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            private readonly HashSet<string> dry =
+                new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             private readonly HashSet<string> down =
                 new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             private readonly string primaryId;
@@ -508,7 +510,23 @@ namespace Nemoviz_Book_Reader
                 misses[e.Id] = ++n;
                 if (!atOnce && n < StandDownAfter) return false;
                 down.Add(e.Id);
+                // WHY it went down, not only that it did. An engine stood down for
+                // a spent allowance explains every piece after it, and those
+                // pieces never ask it again -- so without remembering this, the
+                // second piece onwards had no reason to give and said "error"
+                // where the truth was "that account is out". Gordan wrote the
+                // sentence himself: "Segmenti nn I DALJE odbijeni zbog potrosene
+                // kvote". The "i dalje" is this set.
+                if (atOnce) dry.Add(e.Id);
                 return true;
+            }
+
+            /// <summary>Stood down because its allowance was spent, as against
+            /// three misses in a row. The remedy a reader would reach for is a
+            /// different one, so the summary says which it was.</summary>
+            public bool IsDry(TranslationEngine e)
+            {
+                return e != null && dry.Contains(e.Id);
             }
 
             public int StillUp(List<TranslationEngine> chain)
@@ -856,6 +874,7 @@ namespace Nemoviz_Book_Reader
                             Severity = CheckSeverity.Note,
                             Kind = engine.LastResort ? "last resort" : "later engine",
                             Detail = handedWhy,
+                            Reason = WhyInOneWord(opt, stop, spent, aboutPassage, lastIssues, state),
                             ChunkIndex = c.Index
                         });
                     }
@@ -932,6 +951,12 @@ namespace Nemoviz_Book_Reader
                 Severity = CheckSeverity.Suspect,
                 Kind = "left in the original",
                 Detail = why,
+                Reason = last == null ? "none"
+                       : last.Exhausted ? "quota"
+                       : last.Refused ? "content"
+                       : last.Ok ? (lastIssues != null && lastIssues.Count > 0
+                                        ? "check:" + lastIssues[0].Kind : "check")
+                       : "error",
                 ChunkIndex = c.Index
             });
             return new Piece { Text = null, Asks = asks, Ms = clock.ElapsedMilliseconds, Why = why };
@@ -1177,6 +1202,33 @@ namespace Nemoviz_Book_Reader
         /// failing every piece of two different books because its account had run
         /// out of prepaid credit, and the report's silence let that pass as the
         /// model declining to translate a published book.</para></summary>
+        /// <summary>Why the earlier stops did not take this piece, in one stable
+        /// word, so a summary can group pieces that failed the same way.
+        ///
+        /// <para>The order is the order a reader would want to hear it in. A spent
+        /// allowance is a fact about the ACCOUNT and it explains every piece after
+        /// it, so it is said first. A content refusal is a fact about the PASSAGE
+        /// and is the next most useful. Our own check rejecting a good answer
+        /// comes last of the three and names itself, because "returned for
+        /// repetition" is a different sentence from "refused as disallowed
+        /// content" and the reader acts differently on each.</para></summary>
+        private static string WhyInOneWord(Options opt, int stop, HashSet<string> spent,
+                                           Dictionary<string, bool> aboutPassage,
+                                           List<TranslationIssue> lastIssues, ChainState state)
+        {
+            for (int i = 0; i < stop && i < opt.Chain.Count; i++)
+            {
+                if (spent.Contains(opt.Chain[i].Id) || state.IsDry(opt.Chain[i])) return "quota";
+            }
+            for (int i = 0; i < stop && i < opt.Chain.Count; i++)
+            {
+                bool passage;
+                if (aboutPassage.TryGetValue(opt.Chain[i].Id, out passage) && passage) return "content";
+            }
+            if (lastIssues != null && lastIssues.Count > 0) return "check:" + lastIssues[0].Kind;
+            return "error";
+        }
+
         private static string WhyEarlierStopsFailed(Options opt, int reached,
                                                     Dictionary<TranslationEngine, string> why,
                                                     TranslationResult last,

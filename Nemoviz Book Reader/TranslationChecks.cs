@@ -20,6 +20,16 @@ namespace Nemoviz_Book_Reader
         public string Detail;
         public int ChunkIndex = -1;
 
+        /// <summary>WHY, in one stable word, for the summary a reader sees.
+        ///
+        /// <para><c>Detail</c> is prose and always has been — good for a log and
+        /// useless for grouping, because "Segments 45, 76 and 101 were refused as
+        /// disallowed content" cannot be assembled from sentences that each name a
+        /// different engine. This says only which KIND of thing happened:
+        /// <c>content</c>, <c>quota</c>, <c>error</c>, <c>none</c>, or
+        /// <c>check:</c> followed by the check's own Kind.</para></summary>
+        public string Reason;
+
         public override string ToString()
         {
             return (ChunkIndex >= 0 ? "chunk " + ChunkIndex + ": " : "") + Kind + " — " + Detail;

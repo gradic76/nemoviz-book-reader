@@ -2758,12 +2758,24 @@ namespace Nemoviz_Book_Reader
             string took = report.Elapsed.TotalSeconds < 90
                 ? Localization.T("Translate.Progress.Seconds", (int)report.Elapsed.TotalSeconds)
                 : Localization.T("Translate.Progress.Minutes", (int)Math.Round(report.Elapsed.TotalMinutes));
-            MessageForm.ShowInfo(this,
-                (report.LeftInOriginal > 0
-                    ? Localization.T("Translate.DoneLeft", report.Chunks, report.LeftInOriginal)
-                    : Localization.T("Translate.Done", report.Chunks))
-                + " " + Localization.T("Translate.Took", took),
-                Localization.T("Translate.Ask.Title"));
+            // A READABLE FIELD RATHER THAN A MESSAGE BOX, and that is not a
+            // reversal of the rule MessageForm.ShowInfo records (Gordan,
+            // 2026-10-29). His rule was about WHAT IS BEING SAID: a notice you
+            // hear once and dismiss belongs in a real message box, because there
+            // is nothing to study. This is the opposite case. It names segments
+            // by number and says what became of each group, which is something a
+            // reader goes back over, copies out, and acts on — so it goes in the
+            // same read-only, tabbable field as What's new and About, which a
+            // screen reader walks line by line.
+            //
+            // The LOG IS UNCHANGED and stays the place the analysis is read out
+            // of. Two audiences, two texts: engines, asks and milliseconds for
+            // one, and "Segments 45, 76 and 101 were refused as disallowed
+            // content" for the other.
+            using (var done = new TextHelpForm(Localization.T("Translate.Ask.Title"),
+                                               TranslationSummary.For(report, report.Chunks, took),
+                                               true))
+                done.ShowDialog(this);
         }
 
         /// <summary>The standing note and the book's own, in that order.</summary>
