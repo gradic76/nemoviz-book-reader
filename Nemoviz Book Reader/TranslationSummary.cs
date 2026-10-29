@@ -20,6 +20,17 @@ namespace Nemoviz_Book_Reader
     /// sentences nobody asked for and bend the Croatian out of shape to fit a
     /// grammar of its own.</para>
     ///
+    /// <para><b>A refusal names the service that RESCUED it, in the same
+    /// sentence.</b> Gordan, 2026-10-30, of a run where Gemini refused one piece
+    /// and DeepSeek took it: the box said only that it had been refused, and he
+    /// had to work out from "116 of 116" and a zero at the foot of the log that
+    /// it had been translated after all. The chain exists because it recovers;
+    /// reporting the refusal alone describes the opposite of what happened. So
+    /// every reason has two forms — with a successor and without — and the
+    /// grouping is by (why, who refused, who took it), because "Gemini refused
+    /// it and DeepSeek translated it" and "Gemini refused it and nobody did" are
+    /// not the same news.</para>
+    ///
     /// <para><b>Singular and plural are separate keys.</b> Croatian agrees the
     /// participle with the subject — "segment odbijen", "segmenti odbijeni" — so a
     /// template with one form is wrong half the time. Cheap to carry, impossible
@@ -39,10 +50,12 @@ namespace Nemoviz_Book_Reader
 
             // Grouped by WHO as well as why, because "Gemini refused it" and
             // "OpenAI refused it" are two different pieces of news and a reader
-            // acts on them differently (Gordan, 2026-10-29). One line per service.
+            // acts on them differently (Gordan, 2026-10-29). One line per service,
+            // and since 2026-10-30 per (service, rescuer) pair — see the note above.
             var content = new Dictionary<string, SortedSet<int>>(StringComparer.Ordinal);
             var quota = new Dictionary<string, SortedSet<int>>(StringComparer.Ordinal);
-            var moved = new SortedSet<int>();
+            var moved = new Dictionary<string, SortedSet<int>>(StringComparer.Ordinal);
+            var movedAll = new SortedSet<int>();          // the same pieces, flat, for the subtractions
             var left = new SortedSet<int>();
             var byCheck = new Dictionary<string, SortedSet<int>>(StringComparer.Ordinal);
 
@@ -54,14 +67,17 @@ namespace Nemoviz_Book_Reader
                 bool abandoned = i.Kind == "left in the original";
                 if (!fellThrough && !abandoned) continue;
 
-                if (abandoned) left.Add(n); else moved.Add(n);
+                // A piece nobody took has no rescuer, and that is what tells the
+                // two forms of every sentence apart.
+                string rescuer = abandoned ? "" : (i.Took ?? "");
+                if (abandoned) left.Add(n); else { Put(moved, rescuer, n); movedAll.Add(n); }
 
                 string why = i.Reason ?? "";
                 string who = i.Who ?? "";
-                if (why == "content") Put(content, who, n);
-                else if (why == "quota") Put(quota, who, n);
+                if (why == "content") Put(content, Pair(who, rescuer), n);
+                else if (why == "quota") Put(quota, Pair(who, rescuer), n);
                 else if (why.StartsWith("check:", StringComparison.Ordinal))
-                    Put(byCheck, why.Substring(6), n);
+                    Put(byCheck, Pair(why.Substring(6), rescuer), n);
             }
 
             // TWO SUBTRACTIONS, AND BOTH ARE ABOUT NOT CONTRADICTING OURSELVES.
@@ -77,18 +93,22 @@ namespace Nemoviz_Book_Reader
             // returned by a check, has had its reason given; repeating it under a
             // vaguer heading is noise. That leaves exactly the line Gordan wrote
             // in his example — one bare number, the piece that simply moved.
-            foreach (var kv in quota) kv.Value.IntersectWith(moved);
-            foreach (var kv in quota) moved.ExceptWith(kv.Value);
-            foreach (var kv in content) moved.ExceptWith(kv.Value);
-            foreach (var kv in byCheck) moved.ExceptWith(kv.Value);
+            foreach (var kv in quota) kv.Value.IntersectWith(movedAll);
+            foreach (var kv in quota) Explained(moved, kv.Value);
+            foreach (var kv in content) Explained(moved, kv.Value);
+            foreach (var kv in byCheck) Explained(moved, kv.Value);
 
             foreach (var kv in content)
-                Line(sb, kv.Value, "Translate.Sum.Content", ServiceName(kv.Key));
+                Reasoned(sb, kv, "Translate.Sum.Content", ServiceName(First(kv.Key)));
             foreach (var kv in byCheck)
-                Line(sb, kv.Value, "Translate.Sum.Check", CheckName(kv.Key));
-            Line(sb, moved, "Translate.Sum.Moved");
+                Reasoned(sb, kv, "Translate.Sum.Check", CheckName(First(kv.Key)));
+            foreach (var kv in moved)
+            {
+                if (kv.Key.Length > 0) Line(sb, kv.Value, "Translate.Sum.Moved.To", ServiceName(kv.Key));
+                else Line(sb, kv.Value, "Translate.Sum.Moved");
+            }
             foreach (var kv in quota)
-                Line(sb, kv.Value, "Translate.Sum.Quota", ServiceName(kv.Key));
+                Reasoned(sb, kv, "Translate.Sum.Quota", ServiceName(First(kv.Key)));
             Line(sb, left, "Translate.Sum.Left");
 
             if (content.Count == 0 && quota.Count == 0 && moved.Count == 0
@@ -105,6 +125,43 @@ namespace Nemoviz_Book_Reader
             set.Add(n);
         }
 
+        /// <summary>A subject and the service that rescued the piece, as one key.
+        /// A newline, because neither half can contain one and a service key could
+        /// otherwise be mistaken for part of a check's name.</summary>
+        private static string Pair(string subject, string took) { return subject + "\n" + took; }
+
+        private static string First(string pair)
+        {
+            int i = pair.IndexOf('\n');
+            return i < 0 ? pair : pair.Substring(0, i);
+        }
+
+        private static string Second(string pair)
+        {
+            int i = pair.IndexOf('\n');
+            return i < 0 ? "" : pair.Substring(i + 1);
+        }
+
+        /// <summary>These pieces have had their reason given, so they come off the
+        /// bare "handed on" line — see the two subtractions above.</summary>
+        private static void Explained(Dictionary<string, SortedSet<int>> moved, SortedSet<int> named)
+        {
+            foreach (var kv in moved) kv.Value.ExceptWith(named);
+        }
+
+        /// <summary>One line for a group that has a reason, in whichever of the two
+        /// forms fits: naming the service that took the piece on, or not, because
+        /// nobody did.</summary>
+        private static void Reasoned(StringBuilder sb, KeyValuePair<string, SortedSet<int>> group,
+                                     string key, string subject)
+        {
+            string took = Second(group.Key);
+            if (took.Length > 0)
+                Line(sb, group.Value, key + ".Next", subject, ServiceName(took));
+            else
+                Line(sb, group.Value, key, subject);
+        }
+
         /// <summary>The service in one word — Gemini, OpenAI, DeepSeek, Azure.
         /// Not the engine's label: "GPT-6 Luna (OpenAI, cheapest)" is the right
         /// thing in a combo box and the wrong thing in a sentence, and a reader
@@ -118,13 +175,14 @@ namespace Nemoviz_Book_Reader
             return name == k ? key : name;
         }
 
-        private static void Line(StringBuilder sb, SortedSet<int> set, string key, string extra = null)
+        private static void Line(StringBuilder sb, SortedSet<int> set, string key, params string[] extra)
         {
             if (set.Count == 0) return;
             string k = key + (set.Count == 1 ? ".One" : ".Many");
-            sb.AppendLine(extra == null
-                ? Localization.T(k, Numbers(set))
-                : Localization.T(k, Numbers(set), extra));
+            var args = new object[1 + (extra == null ? 0 : extra.Length)];
+            args[0] = Numbers(set);
+            for (int i = 1; i < args.Length; i++) args[i] = extra[i - 1];
+            sb.AppendLine(Localization.T(k, args));
         }
 
         /// <summary>"45, 76 and 101" — the last joined by the target language's own

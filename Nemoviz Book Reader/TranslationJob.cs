@@ -882,6 +882,10 @@ namespace Nemoviz_Book_Reader
                             Detail = handedWhy,
                             Reason = WhyInOneWord(opt, stop, spent, aboutPassage, lastIssues, state, out whoRefused),
                             Who = whoRefused,
+                            // This is the engine that ANSWERED, which is the half the
+                            // summary was missing: the log says "DeepSeek Flash took
+                            // it" and the box said only that Gemini had refused.
+                            Took = engine.KeyName,
                             ChunkIndex = c.Index
                         });
                     }

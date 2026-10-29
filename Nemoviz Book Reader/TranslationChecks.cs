@@ -37,6 +37,18 @@ namespace Nemoviz_Book_Reader
         /// what to do next thinks in services.</summary>
         public string Who;
 
+        /// <summary>Which service RESCUED the piece, as its key name. Empty when
+        /// nobody did, which is what tells the summary apart: the same refusal
+        /// reads "and DeepSeek translated it" or "and it stayed in the original",
+        /// and those are different news.
+        ///
+        /// <para>Gordan, 2026-10-30, of a run where Gemini refused one piece and
+        /// DeepSeek quietly took it: the box named the refusal and stopped, so he
+        /// had to deduce the rescue from "116 of 116" and a zero at the bottom of
+        /// the log. The chain's whole point is that it recovers; a summary that
+        /// reports only the failure describes the opposite of what happened.</para></summary>
+        public string Took;
+
         public override string ToString()
         {
             return (ChunkIndex >= 0 ? "chunk " + ChunkIndex + ": " : "") + Kind + " — " + Detail;
