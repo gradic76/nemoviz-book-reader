@@ -135,7 +135,14 @@ static class TranslateHelp
         "Do NOT translate: the product name Nemoviz Book Reader; key names such as F1, F8, F11, " +
         "Ctrl, Shift, Alt, Enter, Tab, Escape, Insert; file extensions and file names; the " +
         "marker {beta}; the value on the TITLE: and LANG: lines. Keep *emphasis* markers where " +
-        "they are. A key combination keeps its keys and translates only the words between them.";
+        "they are. A key combination keeps its keys and translates only the words between them.\n\n" +
+        // PRODUCT NAMES ARE NAMES, and the model will render them if not told.
+        // Found 2026-10-30: the Serbian manual came back calling the engine
+        // "Google prevodilac", which is a correct translation of the words and
+        // the wrong name for a thing the reader has to recognise in a dialog.
+        "These are PRODUCT NAMES and are written exactly as they stand, never translated: " +
+        "Google, Google Translate, Google Cloud, Chirp 3, Gemini, OpenAI, GPT, DeepSeek, " +
+        "Microsoft, Windows, Narrator, DAISY, EPUB, OCR, API.";
 
     // ── the glossary, and why the manual needs one ────────────────────────
     //

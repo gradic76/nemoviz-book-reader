@@ -1,280 +1,275 @@
-; Libellus de Nemoviz Book Reader — Latine.
-;
-; NOTA: MULTA HIC VOCABULA FICTA SUNT. Lingua Latina verbum probatum non habet
-; pro charta sonora, pro voce nubis, pro clave API, pro MP3. Ubi lingua defecit,
-; vocabula hic facta sunt potius quam inventa, sicut in Lang/la.lang. Ubi verbum
-; verum exstabat, id adhibitum est. Utile igitur, neque usus probatus; corrige
-; libere, nihil hic fonti nititur.
+; Manuale pro Nemoviz Book Reader.
+; Machina conversus ex docs/help/hr.txt, quod est originale Gordani.
 
 TITLE: Nemoviz Book Reader
 LANG: la
 TOC: Index
-BETA: Hoc in prima beta inclusum non est. Probationes et mutationes quae restant plus temporis poscunt quam haec editio habet, itaque in una sequentium redibit.
+BETA: Hoc in prima beta non continetur. Recognitiones et mutationes quae restant plus temporis requirunt quam haec versio habet, ergo haec facultas in una ex sequentibus editionibus redibit.
 
-Salve in Nemoviz Book Reader, lectore librorum electronicorum in plus quam quadraginta quinque formis et in tribus exitibus.
+Salve in Nemoviz Book Reader, lusor librorum electronicorum in plus quam quadraginta quinque formis et in tribus exitibus.
 
-# Quid systema poscat
+# Postulata systematis
 
-## Minima
+## Postulata minima
 
-- • Processorium duobus nucleis 1,5 GHz, 2 GB memoriae, 100 MB ad conservandum + spatium bibliothecae,
-- • MS Windows 7 SP1 64 bitorum aut posterius, .NET Framework 4.8 (in Windows 7 seorsum instituendum est). In hac ordinatione OCR et vocibus OneCore uti proh dolor non poteris; utrumque demum a Windows 10 praesto est.
+- CPU dual core 1,5 GHz, 2 GB RAM, 100 MB pro repositione + spatium pro bibliotheca,
+- MS Windows 7 SP1 64-bit vel superior, .NET Framework 4.8 (in Windows 7 separatim instituendum est). In hac configuratione proh dolor OCR et voces One Core uti non poteris, utrumque tantum ab Windows 10 praesto est.
 
-## Quid suadeamus
+## Postulata optima
 
-- • Processorium quattuor nucleis 2,0 GHz, 8 GB memoriae, 100 MB in disco SSD + spatium bibliothecae,
-- • MS Windows 10 64 bitorum 22H2 aut posterius, ubi .NET Framework 4.8 iam inest.
+- CPU quad core 2,0 GHz, 8 GB RAM, 100 MB spatii in SSD + spatium pro bibliotheca,
+- MS Windows 10 64-bit 22H2 vel superior, .NET Framework 4.8 insertum est.
 
-# In universum
+# Generalia
 
-Nemoviz Book Reader tibi permittit documenta electronica sonora et scripta eo modo legere, qui tibi maxime convenit. Formae quae legi possunt hae sunt:
+Nemoviz Book Reader sinit te legere documenta electronica sonora et textualia modo qui tibi maxime convenit. Formae sustentatae quas potes reproducere sunt:
 
 Formae sonorae: .mp3, .m4a, .m4b, .wav, .ogg, .oga, .opus, .spx, .flac, .aac, .wma, .ape, .mka, .dsf, .dff, .caf, .aiff, .aif, .ac3, .amr, .weba, .webm, .au et .voc.
 
-Formae scriptae: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw et .azw3.
+Formae textuales: .txt, .rtf, .doc, .docx, .odt, .htm, .html, .fb2, .epub, .pdf, .mobi, .azw et .azw3.
 
-Formae peculiares: Daisy 2.02 sonora, Daisy 3 sonora, Daisy 2.02 scripta, Daisy 3 scripta, Daisy 2.02 sonora + scripta, Daisy 3 sonora + scripta et epub 3 scripta + sonora.
+Formae speciales: Daisy 2.02 audio, Daisy 3 audio, Daisy 2.02 text, Daisy 3 text, Daisy 2.02 audio + text, Daisy 3 audio + text et epub 3 text + audio.
 
 Formae Braille: .brf, .brl, .bra, .dxb et .i55.
 
-Omnes formae dictae etiam recta ex arca .7z, .rar aut .zip aperiri possunt. Arcaequoque e pluribus partibusconstantes sustinentur, itemque arcae tessera munitae — si tesseram scilicet nosti.
+Omnes formas enumeratas potes directe aperire etiam ex archivis .7z, .rar et .zip. Sustinemus aperturam archivorum multipartitorum necnon archivorum tesseris protectorum, utique, si eam scis.
 
-Aperiri possunt etiam libri ex imaginibus facti, id est ii, quorum paginae imagines litterarum sunt neque verae litterae, ut PDF scansum aut EPUB ex imaginibus paginarum. Valent quoque imagines communes — .bmp, .jpg, .tif et cetera — itaque, si forte librum ut seriem imaginum recte numeratarum habes, Nemoviz Book Reader et id accipit. Litterae in imaginibus per Microsoft OCR sua sponte agnoscuntur, et post breve tempus in loculamento tuo titulus satis legibilis stabit.
+Possibile est aperire etiam formas imaginum – eas formas in quibus sunt imagines textus, non verus textus, sicut .pdf scanneatum vel .epub cum imaginibus paginarum. Etiam, possibile est aperire etiam imagines normales sicut .bmp, .jpg, .tif etc., ergo si forte habes librum cum talibus, rite numeratis, imaginibus potes etiam id aperire per Nemoviz Book Reader. Textus ex imaginibus automatice recognoscetur per Microsoft OCR et per aliquod breve tempus, obtinebis titulum rationabiliter legibilem in tua pluteo librorum.
 
-Cave! Omnes formae dictae earumque varietates in Nemoviz Book Reader imponuntur nisi licentia Digital Rights Management munitae sunt. NBR titulos DRM munitos aperire non potest, itaque, si tales habes, eos instrumento aut programmate ad id destinato lege. De singulis quaere ibi unde titulos illos accepisti.
+Monitio! Omnes formae enumeratae et earum variationes possunt onerari in Nemoviz Book Reader si non sunt protectae licentia Digital Rights Management. NBR non potest aperire titulos DRM Protected, ergo si habes tales, potes eos reproducere per lusorem hardware vel software ad hoc praevisum. Pro pluribus singulis adire ad eum a quo obtinuisti hos titulos.
 
-Omne genus documentorum, quae supra memoravimus, sono reddi, specie ostendi et Braille quoque legi potest, si instrumenta necessaria habes. Sufficiunt computatrum cum Windows congruens, monitorium et, si fieri potest, linea Braille cum lectore tuo scriptorum ordinata.
+Omnes formas datarum ex indice superiore potes reproducere sonore, visibiliter, et etiam legere in Braille, si habes ad hoc necessarium apparatum. Omne quod tibi opus est est computatrum Windows compatibile, monitor et, si fieri potest, institutus lineus Braille configuratus cum tuo lectore veli.
 
-Praeter omnia supra dicta, NBR etiam libros convertere potest, variis officiis exemplarium linguae adhibitis. Quaedam gradum gratuitum habent, quaedam solvenda sunt; sic illa officia operantur. Nemoviz Book Reader ad Windows omnino gratuitus est in usu, sed officia externa in nostra potestate non sunt. Nos per applicationem te cum eis coniungimus et facimus, ut translatio in ipso lectore fiat, sed apud officia profiteri, rationem solvendi constituere et cetera omnia tua sunt. His factis, ex paginis ipsius officii clavem API sume, eam in parametris lectoris in locum ei destinatum agglutina, et inde nos rem suscipimus.
+Praeter omnia hucusque enumerata NBR tibi permittit etiam machinalem translationem librorum cum usu diversorum servitiorum AI LLM. Quidam habent quotas gratuitas, quidam solvendi sunt, sed hic est modus quo haec servitia operantur. Nemoviz Book Reader pro Windows plene gratuitus est ad usum, sed servitia externa non sunt in nostra potestate. Nos te per applicationem coniungimus cum servitiis externis et damus facultatem ut processus translationis textus peragatur per lusorem, sed registratio in servitiis, positio modi solutionis et cetera omnia sunt in te. Postquam omnia haec feceris, necesse est ut in paginis servitiorum quibus uteris deponas Clavis API, affigas eum in Generalia lusoris in locum ad hoc praevisum et nos tunc inde assumimus.
 
-Nemoviz Book Reader cum lectoribus scriptorum Jaws for Windows et NVDA probatus et congruens repertus est, sed etiam cum aliis sine molestia operari videtur. Accessibilitas fundamentum est, cui haec applicatio superstruitur, itaque credimus nullam difficultatemfore, si alio lectore uteris.
+Nemoviz Book Reader probatus est et comprobatus compatibilis cum Jaws for Windows et NVDA lectoribus veli, sed deberet operari sine ullis difficultatibus etiam cum aliis. Accessibilitas est fundamentum in quo haec applicatio aedificata est et non deberent esse difficultates si uteris aliquo alio lectore.
 
-Omnes clavium compositiones in ipsam applicationem insertae sunt et sine ullo lectore scriptorum adhiberi possunt. Lector scriptorum ibi tantum est, ut renuntiet, quid in lectore illo momento fiat et, si Braille legis, ut litteras ad lineam Braille ferat. Ad cetera omnia NBR etiam sine lectore scriptorum sufficit.
+Omnes brevia claviaturae inserta sunt in ipsam applicationem et possunt adhiberi etiam sine praesentia lectoris veli. Lector veli ibi est tantum ut praebeat feedback de eo quod in praesenti accidit in ipso lusore et ut, si uteris Braille, transferat contentum textualem in lineum Braille. Pro omnibus aliis lusore potes uti etiam sine lectore veli.
 
-Cum formae Braille, quas supra diximus, importantur, scire refert NBR arte LibLouis cum tabulis eius uti. Spondere non possumus omnes litteras omnis linguae recte redditum iri, neque tabulas ad singulos libros corrigere possumus; multa ex eo pendent, quomodo ipsi libri facti sint. Si, quod importatione accipis, parum valet, in proprietatibus libri tabulam Braille mutare potes, ubi ad illam linguam plures sunt. Si succedit, optime; si non succedit, dolemus. Non omnia lectoris sunt — pars culpae penes eos est, qui libros faciunt, et penes auctores tabularum Braille.
+In importandis formis Braille enumeratis in indice superiore, interest scire quod NBR utitur technologia LibLouis cum tabulis pertinentibus. Non possumus praestare quod omnia operabuntur ut oportet pro unaquaque lingua, non possumus facere correctiones tabularum pro unoquoque libro separatim, multum dependet ex confectione et productione ipsorum librorum. Si eventus quem obtines importando in bibliothecam non est bonus, in proprietatibus libri potes mutare tabulam Braille si plures pro ea lingua praesto sunt. Si succedit optime, si non succedit dolemus. Non omnia pendent a lusore, est aliqua responsabilitas etiam in fabricatoribus librorum et auctoribus tabularum Braille.
 
-# Primus cursus
+# Prima exsecutio
 
-Cum primum incipitur, Nemoviz Book Reader rogabit utrum viam directorii bibliothecae tuae futurae servare an mutare velis. Memento locum principalem intra directorium usoris Windows esse, quod plerumque in parte C sedet et quod tempore satis impleri potest, spatium in disco systematis occupans. Si eam in aliam partem aut alium discum vertis, nihil magni mutatur, sed certo scies systemati spatium ad laborandum necessarium non defuturum. Praeterea, bibliothecam in alio disco aut parte tenere efficit, ut, si systema frangitur, collectio librorum tuorum incolumis maneat.
+In primo exordio, Nemoviz Book Reader rogabit utrum viam folderi pro bibliotheca tua futura servare an mutare velis. Memento locum praedeterminatum intra folderum usoris Windows esse, qui plerumque in partitione C invenitur et qui tempore procedente multum impleri spatiumque in disco systematis occupare potest. Si eum ad aliam partitionem vel discum diriges, nihil essentialiter mutabitur, et tu securior eris systema tuum spatio ad operandum necessario non cariturum esse. Etiam, bibliothecam in alio disco vel partitione tenendo, te curas ut in casu ruinae systematis collectio librorum tuorum in tuto maneat.
 
-Deinde una ex duabus fenestris applicationis aperitur, scilicet fenestra bibliothecae, quae nunc apparet, primo cursu post institutionem, et quotiens nullus liber impositus est aut bibliotheca vacua. Hac vice eam claudere possumus, quia post institutionem operae pretium est parametra primum percurrere et ibi quae opus sunt disponere.
+Postea una ex duabus fenestris applicationis aperitur, scilicet fenestra bibliothecae, quae nunc post instaurationem et quotiens nullus liber onustus est vel bibliotheca vacua est, aperitur. Hoc tempore eam claudere possumus, quia bonum esset post instaurationem primum Parametra transire et ibi quae opus sunt disponere.
 
-# Optiones
+# Parametra
 
-Haec fenestra ex aliquot tabulis constat; infra singularum conspectus est. Quod eam fortasse ab aliis fenestris parametrorum distinguit, id est, quod apud plerasque res parva clavis auxilii stat, quae dialogum cum descriptione illius muneris aperit. Auxilium ad omnem gradum accipis, neque documentum, quod nunc legis 250 paginas habere debet.
+Haec fenestra ex pluribus tabulis constat, infra summarium cuiusque invenies. Quod eam fortasse ab aliis fenestris parametrorum distinguit, est quod iuxta plerasque optiones quas ibi disponere potes, parvum puga Auxilium habes, quae dialogum additamentum cum descriptione illius functionis aperit. Auxilium in omni gradu accipis, et documentum quod nunc legis non necesse est 250 paginas habere.
 
 ## Generalia
 
-Primum, quod hic ponitur lingua est. Si applicatio linguam habet, in qua systema tuum est, ea iam electa erit et facies in ea apparebit; si non habet, NBR Anglice se ostendet. Si ne id quidem tibi placet, indicem linguarum aperi et aliam elige.
+Prima res quam hic disponimus est lingua. Si applicatio linguam habet qua systema tuum utitur, lingua iam electa erit, et interfacies in illa lingua erit. Si non habet, NBR Anglice ostendetur. Si ne id quidem tibi placet, indicem linguarum aperi et aliam linguam elige.
 
-Altera res locus bibliothecae est, quem post primum cursum iam percurrimus. Si tunc nondum statueras, nunc optima occasio est.
+Secunda optio est electio loci bibliothecae. Hoc iam post primum exordium transivimus. Si tunc nondum decreveras, nunc occasio optima est.
 
-Sequuntur duo quadratula ad claves mediorum claviaturae tuae accendendas aut exstinguendas, si eas habes. Valent etiam ad claves auricularium. Primum dicit utrum omnino adhibeantur, alterum utrum per totum systema operentur an tantum dum NBR ante ceteros est.
+Sequuntur duo cistae confirmationis ad functiones multimedia in claviatura includendas vel excludendas, si eas habes. Valent etiam pro globulis in auscultatoriis. Prima res est includere necne, secunda res utrum globaliter an tantum cum NBR in foco sit operabitur.
 
-Deinde quadratulum, quo eligis, utrum bibliotheca metadatis ex documentis utatur an auctorem et titulum ex nomine directorii aut documenti ostendat.
+Deinde cista confirmationis qua eligis utrum in Bibliotheca metadatis ex fasciculis utendum sit, an nomina auctorum et editionum ex nomine folderi vel fasciculi ostendantur.
 
-Sequitur quadratum Novas editiones sponte quaerere. Eo accenso, NBR semel in die quaerit num editio recentior emissa sit, et tantum tum nuntiat cum adest; de te et de libris tuis nihil mittit. Si id exstinguis, NBR sua sponte ad rete numquam exibit, et quaerere tamen quandocumque poteris — in Bibliotheca, in indice Auxilium, per Novam editionem quaerere. *Novas editiones sponte quaerere*. Eo accenso, NBR semel in die quaerit num editio recentior emissa sit, et tantum tum nuntiat cum adest; de te et de libris tuis nihil mittit. Si id exstinguis, NBR sua sponte ad rete numquam exibit, et quaerere tamen quandocumque poteris — in Bibliotheca, in indice Auxilium, per *Novam editionem quaerere*.
+Sequitur cista confirmationis *Novas editiones sponte quaerere*. Cum inclusa est, NBR semel in die rogat num editio recentior edita sit et te certiorem facit tantum si ita est; de te et de libris tuis nihil mittit. Si eam excludis, NBR sponte sua ad rete non exibit, et investigationem adhuc petere potes quotiens vis — in Bibliotheca, in tabula Auxilium, per rem *Novam editionem quaerere*.
 
-Omnes hi numeri scilicet ad singulis libris aliter poni possunt, sed id in proprietatibus illius libri fit; hic generales ponimus. *Colores systematis* Sequuntur quadratula ad exitum Braille et exitum in quadro accendendos et exstinguendos; utrumque, accensum, plures possibilitates praebet quarum auxilium ibidem invenies. In hac beta illa duo quadratula obscurata sunt et notam de eo ferunt; in una editionum sequentium redibunt. *Species NBR* Hic chartam sonoram eligis per quam libros audire vis. Si unam solam habes, nihil tangendum est, quia nihil eligendum. Iuxta stat quadratulum, quod chartam sonoram obdormiscere vetat. Si dum liber legitur — et praesertim in formis scriptis — concisum quiddam animadvertis, quasi sententiis aut paragraphis primum verbum vel duo praecisa essent, hoc parametrum accendere debes.
+Et denique, electio speciei in qua Nemoviz Book Reader tibi ostendetur. Duae optiones offeruntur. *Colores systematis* tibi praebent lusorem in specie classica et paletta colorum qua in systemate uteris; hoc est etiam id quod accipies si altum contrastum inclusum habes, quia NBR tunc nihil suum pingit sed sinit schema tuum totum transire. *Species NBR* praebet aspectum lusoris in specie paulo recentiore. Si non elegisti, NBR ipse decernit: altum contrastum accipit Colores systematis, cetera omnia Species NBR.
 
-## Si adhuc instrumentum opticum in computatro habes et fortasse collectionem editionum antiquiorum in usitatis discis compactis sonoris, libere accende Instrumento optico uti. Ita subsidium instrumenti accendis et libros tuos de disco audire incipere potes.
+## Vox et Braille
 
-Ulteriora
+Prima optio est series moderatorum electionis linguae et vocis pro libris textualibus. Linguam eligimus, deinde vocem pro illa lingua. Volumen, celeritatem et altitudinem disponimus et in puga Adhibere confirmamus. Aliam linguam, vocem et alia parametra eligimus et iterum Adhibere premimus. Hoc modo vocem praedeterminatam pro certa lingua eligimus et omnis novus liber qui aperitur, cum lingua qua scriptus est determinatur, praedeterminate etiam vocem quam elegimus accipit.
 
-In hac tabula linguam eligis, aut plures, quae ad libros ex imaginibus factos agnoscendos in importatione adhibebuntur. Nemoviz Book Reader instrumento Microsoft OCR utitur, quod in Windows 10 et 11 inest. Id nunc triginta quinque linguas sustinet, quarum indicem videbis si Linguam addere premis. Cum quas voles elegeris et Instituere presseris, linguae non statim instituentur. NBR eas ipse non instituit; per Windows Update veniunt et aliquantum temporis poscere possunt donec ad ordinem suum perveniant. Praeterea, pro parametris systematis tui fieri potest, ut dialogus Custodiae rationum usoris appareat, in quo institutionem confirmare debebis. *Post institutionem, cum librum ex imaginibus importas, in capsa eligere poteris linguam, qua litteras agnosci vis. Id quoque aliquantum durare potest, pro celeritate machinae et magnitudine libri, sed omnia in virga progressus sequi potes.*Praeter parametra agnoscendi hic etiam officia exemplarium linguae ad vertendum eligis. Cum haec scribuntur, ea sunt Google Gemini, DeepSeek, DeepSeek exemplari maiore, tres gradus OpenAI GPT et Microsoft Azure. Ut supra scriptum est, haec officia claves API aut aliud genus veniae poscunt, et plura in indice Auxilium, sub re Officia et rationes legere potes.
+Fortasse optio paulo occultata, sed meliorem ideam non habuimus. In cista combinata pro electione vocis, ultima optio est *Adde*. Activatione huius optionis fenestra aperietur in qua unam vel plures voces Microsoft One Core eligere potes et eas post confirmationem per servitium Windows Update instituere. Potest, sicut in casu addendi linguam pro OCR, diutius vel brevius durare, secundum occupationem servitoris pro renovationibus. Fieri potest ut, secundum tua parametra administrativa, etiam dialogum UAC accipias quem confirmare debes.
 
-Praeter translationem sunt etiam voces nubis; nunc Google Cloud Chirp 3 et Microsoft Azure Neural sustinemus. Eas accendere simile est ei, quod de officiis translationis valet, et etiam de eo plura in indice Auxilium, sub re Officia et rationes.
+Utique, omnia parametra allata aliter disponi possunt, et hoc pro quolibet libro separatim, sed id in proprietatibus illius libri fit, hic parametra generalia disponimus.
 
-Monemus etiam has voces pecunia solvendas esse. Google decies centena milia litterarum ad legendum gratis dat, quod fere duo libri mediocres D paginarum sunt. Microsoft dimidium eius, DM litterarum, id est fere unus liber mediocris. Gradu gratuito consumpto, charta tua oneratur, et pretium legendi inter octo et quindecim dollaria pro libro mediocri est, pro officio.
+Sequens optio est Lexicon pronuntiationis qualem certe iam vidisti. Facultatem habes correctionis pronuntiationis globaliter, per linguam et per vocem, et pro omnibus tribus electionibus optiones normas pro hoc genere lexici invenies.
 
-Ne quid perperam intellegatur neve casu invitus sumptus fiat, fines constituimus, intra quos voces nubis poni possint. In parametris vocis et Braille has voces non videbis neque eas principales facere poteris; tantum in proprietatibus libri electi apparent, et ne ibi quidem nisi eas in parametris ulterioribus prius permiseris. In proprietatibus libri unam ex his vocibus ad illum librumeligere potes, et haec vox ad illum solum valet.
+Sequuntur cistae confirmationis pro inclusione et exclusione aspectus Braille et visualis, quarum unaquaeque, cum inclusa est, certas parametra additamenta offert pro quibus auxilium in loco invenies. In hac beta, illae duae cistae cineraceae sunt et notationem ferunt se non inclusas esse; in una ex sequentibus editionibus revertentur.
 
 ## Instrumenta
 
-Bibliotheca
+Hic tabulam soni eligis per quam libros audire vis. Si unam tantum habes, nihil mutare debes quia electio nulla est. In continuatione est etiam capsula confirmationis ad impediendum somnum tabulae soni. Si in reproductione librorum, et praesertim apud formata textualia, intercisiones animadvertis, quasi sententiae vel paragraphi pro prima voce vel duabus abscissae sonent, hanc optionem necessario include.
 
-Haec fenestra non semper conspicitur: praeter primum cursum, cum opus est aperitur, et in ea collectionem editionum electronicarum tuarum disponis. Titulos singulos aut multos addis, deles, libros ut lectos, non lectos aut dilectos notas. Ordinem ostendendi pluribus rationibus disponere, titulos secundum statum (lectum, non lectum…) eligere et quaerere potes.
+Si adhuc Instrumento optico uti in computatro tuo habes, et fortasse collectionem veterum editionum sonorum in forma classica CD audio, libere potes includere optionem Instrumento optico uti. Hoc modo subsidium pro fabrica activas et libros in CD audire incipere potes.
 
-## Provectum
+## Ulteriora
 
-In hac tabula linguam unam vel plures eligis quae adhibebuntur ad recognitionem documentorum imaginum in importando. Nemoviz Book Reader utitur instrumento Microsoft OCR inserto, praesto in versionibus Windows 10 et 11 systematis operativi. In praesenti triginta quinque linguas sustinet, quarum indicem videre potes si premes clavem *Adde linguam*. Cum linguas desideratas elegeris et premes Instrue, linguae non statim installabuntur. NBR eas directe non installat, sed per servitium Windows Update installantur, ideoque tempus aliquod eis opus esse potest ut ad ordinem installationis perveniant. Etiam, secundum occasus systematis tui, fieri potest ut dialogus User Account Control appareat, in quo installationem linguae unius vel plurium confirmare debebis.
+In hac tabula linguam vel plures eligis quae ad agnoscenda documenta imaginum inter importandum adhibebuntur. Nemoviz Book Reader utitur instrumento Microsoft OCR incluso, praesto in versionibus systematis operandi Windows 10 et 11. In praesenti triginta quinque linguas sustinet quarum indicem videre potes si clavem *Adde* premes. Cum linguas desideratas elegeris et Instituere premes, linguae non statim instituentur. NBR eas non directe instituit sed per servitium Ažuriranje Windowsa instituuntur et tempus certum eis opus esse potest ut ad ordinem institutionis perveniant. Etiam, secundum occasus systematis tui, fieri potest ut tibi appareat dialogus Imperii rationis usoris in quo institutionem linguae vel plurium confirmare debebis.
 
-Post installationem, et in importando formati imaginis, in cista coniuncta (combo box) linguam eligere poteris qua textum in titulo quem aperis recognoscere vis. Hoc etiam breve tempus sumere potest, secundum velocitatem machinae et magnitudinem libri, sed omnia in vecte progressus (progress bar) observare potes.
+Post institutionem, et inter importandum formam imaginis, in capsula coniuncta eligere poteris linguam qua textum in titulo quem aperis agnoscere vis. Hoc etiam breve tempus durare potest, secundum celeritatem machinae et magnitudinem libri, sed omnia in taenia progressus sequi potes.
 
-Praeter occasus pro recognitione optica, hic etiam servitia LLM pro translatione eligere potes. Tempore scriptionis huius textus, adsunt Google Gemini, DeepSeek, DeepSeek cum exemplari maiore, tria gradus OpenAI GPT et Microsoft Azure. Sicut antea scripsimus, pro his servitiis claves API vel alia genera auctorizationis tibi necessaria sunt; plura legere potes in tabula Auxilium, deinde in item Servitia et rationes.
-In clave Regulae translationis fenestra aperietur cum instructionibus quae ad exemplaria translationis mittuntur, ut id quod vis quam optime vertatur. Exstat copia instructionum quae ad omnes linguas pertinet, et copiae instructionum pro linguis sustentatis singillatim. In hac fenestra regulas existentes emendare et novas addere potes. In emendando documenta cum regulis, aperientur in Notepad; in vertice textus explicatum est omne de emendando et addendo regulas.
+Praeter occasus pro agnitione optica hic eligere potes etiam servitia LLM pro translatione. Tempore scriptionis huius textus hic sunt Google Gemini, DeepSeek, DeepSeek cum exemplari maiore et aliquot gradus OpenAI GPT. Sicut ante scripsimus, pro his servitiis tibi opus sunt claves API vel alia genera auctorizationis, plura legere potes in tabula Auxilium deinde in articulo Servitia et rationes. In fundo illius seriei stat Google Translate ut ultima instantia. Eum non eligis: ipse intervenit si aliquam paragraphum omnia servitia ante eum recusant, utitur eadem ratione Google sicut Voces nubis, ergo clave speciali non eget. Talis paragraphus sine nostris Regulae et sine dictionario nominum vertitur, ideo in libro sententia in principio et in fine notatur ut scias quousque pertingat.
+In clave Regulae translationis aperietur fenestra cum instructionibus quae ad exemplaria pro translatione mittuntur ut id quod vis quam optime vertatur. Exstat copia instructionum quae ad omnes linguas pertinet atque copiae instructionum pro linguis sustentatis singillatim. In hac fenestra potes edere existentes et addere instructiones pro linguis novis. Inter edendum documenta cum Regulae aperietur in Bloku za pisanje, in vertice textus explicatum est omne de edendo et addendo Regulae.
 
-Praeter facultatem translationis, adsunt etiam voces nubis (Cloud voices) additae; in praesenti sustinemus Google Cloud Chirp 3 et Microsoft Azure Neural voces. Processus ad has voces activandas similis est illi pro servitiis translationis, et plura de hoc etiam in tabula Auxilium, deinde in item Servitia et rationes.
+Praeter facultatem translationis hic sunt etiam Voces nubis additae, in praesenti sustinemus voces Google Cloud Chirp 3. Processus pro facultate harum vocum similis est sicut pro servitiis pro translatione et plura de eo etiam in tabula Auxilium deinde in articulo Servitia et rationes.
 
-Notamus has voces etiam solvi debere; Google gratis dat decies centena milia characterum pro lectione, quod sunt circiter duo libri mediocres quingentarum paginarum. Microsoft dimidium minus dat, 500.000 characterum, quod est circiter unus liber mediocris. Post consumptam quotam gratuitam characterum, charta tua crediticia oneratur, et sumptus lectionis est alicubi inter $8,00 et $15,00 per librum mediocrem, secundum servitium.
+Notamus has voces etiam solvi, Google gratis dat decies centena milia characterum pro lectione, quod sunt circiter duo libri mediocres 500 paginarum. Post consumptam gratuitam quotam characterum oneratur tua charta creditaria, et sumptus lectionis est alicubi inter $8,00 et $15,00 per librum mediocre.
 
-Ne sint errores et consumptio fortuita invisa, limitavimus occasum vocum nubis. In occasibus vocis et Braille has voces non videbis et eas ut praedefinitas ponere non poteris; visibiles sunt tantum in proprietatibus libri electi, sed prius eas in occasibus provectis activare debes. In proprietatibus libri aliquam ex his vocibus ut praedefinitam pro libro determinato eligere potes, et hoc valet tantum pro illo libro.
+Ne sint confusiones et fortuita invisa consumptio limitavimus positionem Voces nubis. In occasibus vocis et braille has voces non videbis et eas ut praedefinitas ponere non poteris, visibiles sunt tantum in proprietatibus libri electi, sed prius eas in occasibus ulterioribus permittere debes. In proprietatibus libri potes eligere aliquam ex his vocibus ut praedefinitam pro libro certo, et hoc valet tantum pro illo libro.
 
-Quoniam characteres in utendo vocibus nubis consumuntur etiam cum revolvis, repetis partem determinatam libri, vel alio modo consumis characteres iam lectos, NBR habet activatam memoriam temporalem (cache) ubi servatur id quod legisti, ita ut revolutio et similes actiones non tractabuntur ut iterata consumptio characterum. Haec optio tibi etiam permittet ut post lectionem libri exportare possis in mp3 et sic librum sonorum classicum obtinere.
+Cum characteres inter usum Voces nubis consumantur etiam cum revolvis, repetis partem certam libri vel alio modo consumis characteres iam lectos, NBR habet permissam memoriam temporalem (cache) ubi servatur id quod legisti ita ut revolutio et similes actiones non tractentur ut iterata consumptio characterum. Haec optio tibi etiam permittet ut post lectionem libri facere possis exportationem in mp3 et ita obtinere librum sonorum classicum.
 
 # Bibliotheca
 
-Haec fenestra non semper conspicitur: praeter primum cursum, cum opus est aperitur, et in ea collectionem editionum electronicarum tuarum disponis. Titulos singulos aut multos addis, deles, libros ut lectos, non lectos aut dilectos notas. Ordinem ostendendi pluribus rationibus disponere, titulos secundum statum (lectum, non lectum…) eligere et quaerere potes.
+Haec fenestra non videtur semper, praeter in prima exsecutione aperitur tantum secundum necessitatem et in ea ordinas tuam collectionem publicationum electronicarum. Addis singillatim vel collective, delis, notas libros ut lectos, non lectos vel dilectos. Potes ordinare ordinem ostensionis secundum plura criteria, potes percolare titulos secundum statum (lectum, non lectum...), et potes etiam quaerere.
 
-Si nulla harum ostensionum tibi placet, librum electum ut vis nominare potes, ex indice contextus nominis libri aut simplicius clave F2. Nominans duos campos separatos ad nomen auctoris et titulum operis invenies; eos scribe et in bulla confirma aut simpliciter Enter preme.
+Pro singulis Titulus in bibliotheca, simplici pressione clavis Tab, singula de eo Titulus legere potes. Titulus et auctor, editor et forma, ubi substitisti, quantus centesimus pars libri lectus sit, quantum temporis supersit, et alia quaedam indicia. Si fieri potest, brevem descriptionem libri accipies.
 
-## Additio titulorum
+## Additio Titulus
 
-In tabula decurrens Datoteka invenire potes duo elementa: Aperire fasciculum (Ctrl + O) et Aperire indicem (Ctrl + Shift + O). Si in Optionibus subsidium pro unitate optica activasti, invenies etiam optionem Aperire Audio CD. Praeter hoc, adsunt etiam optio pro recognitione optica titulorum imaginum iteranda, optio pro libro sonoro creando, et optio pro translatione. Adest etiam elementum quod ne attingas nisi necesse est, *Vacuare bibliothecam*. Per se dicit quid agat, et post activationem accipies alteram admonitionem. Si omnia ad finem confirmaveris, bibliotheca tua deleta est, omnia data de notis librorum et ubi substitisti deleta sunt, deletae sunt etiam optiones linguae et celeritatis pro libris quos intus habes. Ideo potius hoc elementum praeteri nisi absolute certus es te velle bibliothecam vacuare.
-Optio Aperire indicem bibliothecae aperit situm collectionis tuae in Explorer fasciculorum.
+In tabula Documentum invenire potes duo elementa: Aperire documentum (Ctrl + O) et Aperire directorium (Ctrl + Shift + O). Si in Proprietates subsidium pro unitate optica activasti, invenies etiam optionem Discus sonorum aperire. Praeter hoc, adsunt etiam optio pro recognitione optica iterata Titulus imaginarii, optio pro creatione libri sonori, et optio pro Vertere. Adest etiam elementum quod ne tangas nisi necesse est, *Bibliothecam vacuare*. Per se dicit quid agat et post activationem alteram admonitionem accipies. Si omnia ad finem confirmaveris, bibliotheca tua deleta est, omnia data de signaculis et ubi substitisti deleta sunt, deleta sunt etiam proprietates linguae et celeritatis pro libris quos intus habes. Ergo melius est hoc elementum vitare nisi absolute certus es te bibliothecam vacuare velle.
+Optio Directorium bibliothecae aperire locum collectionis tuae in Explorer documentorum aperit.
 
-In prima optione aperire potes singulum fasciculum (librum MP3 in uno fasciculo, documentum EPUB vel fasciculum ncc.html pro titulo Daisy), et in aperiendo indicem aperire potes librum sonorum in pluribus fasciculis in unum indicem positum. Praeterea, si uteris aperiendo indicem, importare potes etiam maiorem copiam diversorum fasciculorum, id est collectionem plurium titulorum. Nemoviz Book Reader habet regulas quasdam de ordinando et faciet omnia ut talem indicem ordinet et disponat quam optime fieri potest.
+In prima optione singulare documentum aperire potes (librum MP3 in uno documento, documentum EPUB vel documentum ncc.html pro Titulus DAISY), et in apertura directorii librum sonorum in pluribus documentis in uno directorio positum aperire potes. Praeterea, si apertura directorii uteris, maiorem copiam diversorum documentorum, id est collectionem plurium Titulus, importare potes. Nemoviz Book Reader certas regulas de classificatione habet et omnem operam dabit ut tale directorium pro te digerat et disponat quantum fieri potest.
 
-Aperire Audio CD incipiet reproductionem libri ex unitate tua optica et reducet te ad fenestram lusoris. Usus classici CD non importat librum in bibliothecam, tantum tibi permittit reproductionem per Nemoviz Book Reader.
+Discus sonorum aperire reproductionem libri ex unitate optica tua incipiet et te ad fenestram lusoris reducet. Usus CD classici librum in bibliothecam non importat, tantum tibi reproductionem per Nemoviz Book Reader permittit.
 
-Praeter classicos fasciculos NBR potest, dissimiliter magnae parti applicationum huius generis, aperire etiam fasciculos compressos, sic dictas archivas. Ex formis archivorum sustinentur .zip, .rar et .7z, et praeter archivas unius partis aperiri possunt etiam archivae plurium partium necnon archivae tesseris protectae, sub condicione ut illam tesseram scias.
+Praeter documenta classica, NBR potest, secus ac magna pars applicationum huius generis, etiam documenta compressa, sic dicta archiva, aperire. Ex formis archivorum sustinentur .zip, .rar et .7z, et praeter archiva unius partis, aperiri possunt etiam archiva plurium partium necnon archiva tessera protecta, sub condicione ut illam tesseram scias.
 
-Aliis verbis, undecumque et quocumque modo accipias aliquem librum, in fasciculo normato vel pluribus, in archiva compressum vel non, potes eum sine ullis praeparationibus et ex situ in quo invenitur importare in bibliothecam. Nemoviz Book Reader copiat fasciculos quos aperuisti in indicem bibliothecae in locum ad hoc destinatum, despacit archivas et servat eas in bibliothecam in forma normata atque adnotat omnia data essentialia de titulis quos importasti. Fasciculi tui originales manent intacti in sitibus in quibus eos tenes, omne quod cum libris postea accidit, accidit in copiis NBR in indice bibliothecae.
+Aliis verbis, undecumque et quocumque modo librum aliquem accipias, in documento normato vel pluribus, in archivum sarcinato vel non, potes eum sine ullis praeparationibus et ex loco ubi invenitur in bibliothecam importare. Nemoviz Book Reader documenta quae aperuisti in directorium bibliothecae in locum ad hoc destinatum copiat, archiva despacit et ea in bibliothecam in forma normata servat, et omnia data essentialia de Titulus quos importasti notat. Documenta tua originalia intacta manent in locis ubi ea tenes, omne quod cum libris postea accidit in exemplaribus NBR in directorio bibliothecae accidit.
 
-Optio pro OCR iterato inservit ut repetas recognitionem opticam tituli imaginis cum aliqua alia lingua si non es contentus eventu recognitionis tempore aperiendi libri.
+Optio pro OCR iterato inservit ut recognitionem opticam Titulus imaginarii cum alia lingua repetas si eventu recognitionis in apertura libri non contentus es.
 
-Optio Transferre librum aperit dialogum in quo eligis linguam originalem, linguam in quam vis transferre librum, servitium vel servitia quibus vis uti, necnon campum in quo potes inscribere quasdam instructiones fundamentales quid et quomodo transferre.
+Optio Vertere librum dialogum aperit in quo linguam originalem, linguam in quam librum vertere vis, servitium vel servitia quibus uti vis, et campum in quo instructiones fundamentales de eo quid et quomodo vertere possis, eligis.
 
-Optio Exportare ut librum sonorum facit prorsus id quod nomen eius dicit. Sine respectu utrum uteris aliquo ex synthetizatoribus vocis installatis an vocibus nubis, potes ex libro textuali facere sonorum et exportare eum ad locum desideratum. Liber exportatur ut unus fasciculus .mp3, parametri sunt aequales parametris TTS quo uteris et qualitas recordationis erit aequalis qualitati auditionis vivae. Ante initium NBR te rogabit pro confirmatione et dicet quantum fabricatio durare debeat.
+Optio Exportare ut librum sonorum id ipsum facit quod nomen eius dicit. Sine respectu utrum uteris aliquo ex synthetizatoribus vocis installatis an vocibus cloud, potes ex libro textuali sonorum facere et eum ad locum desideratum exportare. Liber exportatur ut unum documentum .mp3, parametri aequales sunt parametris TTS quo uteris et qualitas recordationis aequalis erit qualitati auditionis vivae. Ante initium NBR te de confirmatione rogabit et dicet quantum fabricatio durare debeat.
 
-## Pluteus
+## Scrinium librorum
 
-spatium
+Dum in scrinio librorum, ut vocatur pars fenestrae bibliothecae in qua index Titulus tuorum invenitur, sagittis sursum vel deorsum moves, Titulus quos in bibliotheca habes audies. Quomodo Titulus documenti pronuntiabitur, a pluribus rebus pendet. NBR in importando conatur extrahere nomen auctoris, Titulus operis et alia quaedam data ex sic dictis metadatis documenti quod librum continet. Si haec data non existunt, NBR librum nominabit secundum nomen directorii vel documenti.
 
-Ante
+Si tibi non placet neuter horum aspectuum, in tabula contextus nominis libri vel simplicius clavi F2 librum electum nominare potes ut vis. In nominando invenies duo separata campos pro nomine auctoris et Titulus operis et cum ea scripseris, introitum in clavi confirmationis confirma vel simpliciter preme Enter.
 
-Maiusc + dextra *Nunc legitur*, *Legitur*, *Lectus* et *Nondum lectus*sagittae sinistra et dextra
+Praeter data fundamentalia de libro sicut nomen auctoris et Titulus operis, movendo sagittis per hunc indicem audire poteris etiam statum libri: *Nunc legitur*, *Legitur*, *Lectus* et *Nondum lecti*. Si Titulus ut dilectum notasti, id quoque audies. In tabula contextus, ubi invenitur iam dictum elementum pro renominando, adhuc invenire potes elementa Ut lectum notare, Ut nondum lectum notare, Ut dilectum notare, Delere et Proprietates, sed de his aliquanto post.
 
-• Sagittis sinistra et dextra quinis secundis „retro volvis“ aut, si liber scriptus est, una sententia ante aut retro.
+Postquam in aliquo titulo substitisti, clavi Tab ad partem pervenire potes ubi sagittis sursum et deorsum multas informationes de libro obtinere potes, cum umbilico in eo ubi substitisti, quantum libri Lectum et residuum sit in centesimis, temporaliter, ubi liber editus et productus sit, data technica de vestigio sonoro, etc… Haec data a forma pendent in qua liber est et a titulo ad titulum different.
 
-Maiusc + sagittae sursum et deorsum *Bibliotheca*.
+Procedendo per fenestram Bibliotheca, ad campum quaerendi pervenies qui simplici principio fungitur ut seriem characterum quos scripsisti in nominibus rerum in pluteo librorum quaerat. Si scripseris „ana“, certe auctores nomine Ana inveniet, sed etiam 7000 dierum in Sibiria inveniet.
 
-Parametra
+Post campum quaerendi est etiam arca coniuncta filter in qua determinare potes qui libri tibi ostendantur. Secundum Parametra ibi semper sunt omnes libri, sed filter mutare potes ad Qui leguntur, Nondum lecti, Lectum et Dilecti, et ostensio in pluteo librorum cum electione tua concordabit.
 
-## Ordinare
+## Dispositio
 
-Proprietates
+In hoc tabulario solum res usitatae quas nescio quoties hucusque iam vidisti. Ordinem eligere potes quo tituli in Bibliotheca ostenduntur, itaque habemus alphabetice, secundum diem additionis, secundum formam et secundum Secundum statum. Secundum statum significat Nondum lecti, Lectum, etc. Quamlibet hanc electionem insuper ostendere potes ascendenter vel descendenter.
 
-Alt + Enter
+Cum te cum contento et functionibus fenestrae Bibliotheca notum feceris, tempus est ut aliquem librum in pluteo eligas et ambules cum Tab ad clavem Imponere vel simpliciter, adhuc dum in titulo es, premas Enter. Liber quem ad legendum elegisti semper erit supra pluteum librorum in sectione separata Nunc legitur. Notandum est librum quem legis, id est librum activum in lectore impositum, non posse deleri aeque ac alios libros in pluteo. Librum activum per tabularium contextus signare debes ut Lectum ut ex modo Nunc legitur in modum Lectum transferatur et tantum tunc eum delere potes.
 
-Denique, cum in titulo libri Enter aut bullam Imponere premis, bibliotheca clauditur et ad fenestram principalem lectoris redis.
+Fere, cum premes Enter in titulo libri vel clavem Imponere, Bibliotheca clauditur et ad fenestram principalem lectoris redis.
 
 # Lector
 
-Haec fenestra semper in scrinio computatri tui apparet, interdum a fenestra bibliothecae, interdum a superficie legendi textus celatur, sed re vera est fenestra principalis in qua librum post onerationem regis. Per fenestram lectoris potes navigare per Tab sicut per quamlibet aliam fenestram et elementa quaedam per Enter movere, sed secus ac in aliis fenestris in ipsa applicatione, et in aliis applicationibus, claves sagittarum et spatium reservatae sunt aliis functionibus, ita ut si per Tab ad clavem notarum librorum perveneris, eam per spatium movere non poteris, solum clavis Enter adhibenda est.
+Haec fenestra semper visibilis est in scrinio computatri tui, interdum eam celat fenestra Bibliotheca, interdum eam celat etiam superficies ad legendum textum, sed re vera est fenestra principalis in qua librum post impositionem regis. Per fenestram lectoris moveri potes cum Tab sicut per quamlibet aliam fenestram et res certas activare cum clavi Enter, sed dissimiliter aliis fenestris in ipsa applicatione, et in aliis applicationibus, clavi sagittarum et spatium reservatae sunt aliis functionibus, ita ut si cum Tab pervenias exempli gratia ad clavem pro Signacula, eam non poteris activare cum spatio, solummodo utendum est clavi Enter.
 
-In linea Tab, non necessario hoc ordine, in fenestra principali lectoris sequentes claves et functiones inveniuntur:
+In linea Tab, non necessario hoc ordine, in fenestra principali lectoris sequentes clavi et functiones inveniuntur:
 
-| Reproductio/Pausa | spatium |
-| Deinceps | Shift + dextra |
+| Repetitio/Pausa | spatium |
+| Ante | Shift + dextra |
 | Retro | Shift + sinistra |
-| Volumen | F11 et F12 |
-| Velocitas | Ctrl + sinistra et Ctrl + dextra |
-| Progressus auditionis | sagittae sinistra et dextra |
+| Sonoritas | F11 et F12 |
+| Celeritas | Ctrl + sinistra et Ctrl + dextra |
+| Progressus | sagittae sinistra et dextra |
 | Gradus navigationis | Shift + sagittae sursum et deorsum |
 | Bibliotheca | F3 |
-| Optiones | F2 |
+| Parametra | F2 |
 | Proprietates | Alt + Enter |
-| Nota | F5 |
-| Notae | F6 |
-| Vade ad… | F4 |
+| Signaculum | F5 |
+| Signacula | F6 |
+| Ad locum ire… | F4 |
 | Auxilium | F1 |
-| Numerator | F7 |
+| Horologium somni | F7 |
 | Campus informationis | F8 |
 
-In campo informationis potes cognoscere notitias fundamentales de reproductione sicut auctorem, titulum, tempus elapsum, paginam et alia, utique, secundum formam libri quem legis. Uno pressu in F8 contentum scrinii cum informationibus tantum legetur, et duplici pressu in focum lectoris scrinii venit, ut per sagittas accuratius legere possis quid ibi scriptum sit.
-Clave F10 potes cognoscere tempus elapsum tituli quem legis et celeri duplici pressu in F10 audies tempus reliquum.
+In campo informationis scire potes data fundamentalia de repetitione sicut auctorem, titulum, tempus praeteritum, paginam et adhuc aliquid, utique, secundum formam libri quem legis. Una pressione in F8 contentum scrinii cum informationibus solum legetur, et duplici pressione in umbilicum lectoris scrinii venit, itaque sagittis accuratius legere potes quid ibi scriptum sit.
+Clavi F10 scire potes tempus praeteritum tituli quem legis et celeri duplici pressione in F10 audies tempus residuum.
 
-Omnes claves habent suos compendia claviaturae ut facile ad eas pervenire possis sine nimia ambulatione per fenestram, et ipsa administratio libri quem legis est plus quam simplex.
+Omnes clavi habent suos breves vias claviaturae ita ut facile ad eas pervenire possis sine eo quod nimis ambules per fenestram, et ipsa administratio libri quem legis plus quam simplex est.
 
-## Menu contextuale
+## Tabularium contextus
 
-Omnia quae lector offerre potest etiam in menu contextuali inveniuntur, itaque ad unamquamque functionem pervenire potes sine memoria clavium brevium. Illud aperis clavi Applications, combinatione Shift + F10 aut dextro clic muris. Elementa in sub-menus digesta sunt, et iuxta unumquodque scripta est eius clavis brevis, ita ut menu simul inserviat tamquam commonitorium clavium.
+Omne quod lector offerre potest invenitur etiam in tabulario contextus, itaque ad quamlibet functionem pervenire potes etiam sine memoria brevium viarum. Aperis eum clavi Applications, combinatione Shift + F10 vel dextro clicculo muris. Res dispositae sunt in subtabulariis, et iuxta quamlibet scripta est etiam eius brevis via, ita ut tabularium simul inserviat ut commonitorium de clavibus.
 
-- Reproductio: initium et pausa, progredi et regredi, volumen et celeritas.
-- Fasciculus: apertio fasciculi, apertio folder et, si unitatem opticam habes, apertio CD audio.
-- Liber: notatio lecti, nota favoritorum, translatio, exportatio in librum sonorum et proprietates.
-- Facultates: occasus, bibliotheca, apertio folder bibliothecae, vade ad, notae librorum et numeratrum.
+- Repetitio: initium et pausa, ante et retro, sonoritas et celeritas.
+- Documentum: apertio documenti, apertio folder et, si habes unitatem opticam, apertio CD soni.
+- Liber: signatio lecti, signaculum dilecti, translatio, exportatio in librum sonum et Proprietates.
+- Optiones: Parametra, Bibliotheca, apertio folder Bibliotheca, Ad locum ire, Signacula et Horologium somni.
 - Auxilium: manuale, nuntii, servitia et rationes, verificatio renovationis, exportatio relationis et data de programmate.
-- Exitus claudit programma, idem quod Alt + F4.
+- Exire claudit programma, idem quod Alt + F4.
 
-Menu easdem prorsus functiones vocat ac claves in tabula, ergo et se eodem modo gerit. Si aliqua actio eo momento fieri non potest, exempli gratia quia liber non est onustus, audies breve signum sonorum loco ut elementum sit cinereum. Unum quod in menu non est, est deletio totius bibliothecae, quia haec est sola actio irrevocabilis in programmate et manet ubi erat, in bibliotheca et post duas confirmationes.
+Menu easdem functiones vocat quas globuli in tabula, ergo similiter se gerit. Si actio aliqua eo momento fieri non potest, exempli gratia quia liber non est oneratus, breve signum sonorum audies pro item inumbrato. Sola res quae in menu deest est deletio totius bibliothecae, quia haec est sola actio inreparabilis in programmate et manet ubi erat, in bibliotheca et post duas confirmationes.
 
-## Reproductio
+## Repetitio
 
-- Spatio incipis vel sistis reproductionem.
-- Sagittis ad sinistram vel ad dextram "revolvis" per quinque secunda vel, si de libro textuali agitur, per sententiam progrediendo vel regrediendo.
-- Compositione clavium Ctrl + sagittae ad sinistram vel ad dextram celeritatem reproductionis regis.
-- Clavibus F11 et F12 volumen disponis, F12 auget, et F11 minuit.
-- Compositione clavium Shift + sursum vel deorsum gradum navigationis eligis (titulus, capitulum, charta textus, minutae definitae), electio mutatur secundum formam et structuram libri.
-- Compositione clavium Shift + sagittae ad sinistram vel ad dextram per gradum navigationis electum moveris.
+- Spatio Repetitionem incipis vel sistis.
+- Sagittis ad sinistram vel ad dextram "revolvis" per quinque secundas vel, si de libro textuali agitur, per sententiam progrediendo vel regrediendo.
+- Compositione clavium Ctrl + sagittae ad sinistram vel ad dextram celeritatem Repetitionis regis.
+- Clavibus F11 et F12 volumen soni disponis, F12 auget, et F11 minuit.
+- Compositione clavium Shift + sursum vel deorsum gradum ad navigationem eligis (titulus, capitulum, tabula textus, certae minutae), electio mutatur secundum formam et structuram libri.
+- Compositione clavium Shift + sagittae ad sinistram vel ad dextram electo gradu navigationis te moves.
 
-Summatim, incipis reproductionem libri electi spatio, tenens pressam clavem Ctrl sagittis ad sinistram et ad dextram celeritatem legendi regis.
+Summatim, Repetitionem electi libri spatio incipis, tenens pressam clavem Ctrl sagittis ad sinistram et ad dextram celeritatem lectionis regis.
 
-Si vis aliquid breviter revolvere progrediendo vel regrediendo, id potes sagittis ad sinistram vel ad dextram per quinque secunda vel per unam sententiam. Si vis maiores gradus navigationis, preme Shift, sagittis sursum et deorsum elige gradum optatum et adhuc tenens Shift sagittis ad sinistram et ad dextram perge progrediendo et regrediendo per librum gradu electo. Cum vis audire quomodo et quo progrediaris cum lectione libri, quolibet momento preme F8 et lector veli leget tibi totum contentum veli informationis. Si fusius vis legere campum informationis, datum per datum, bis celeriter preme F8. Cum finiveris, exi e campo informationis premendo iterum bis F8 vel simpliciter Escape ut sagittae iterum proprietates navigationis habeant. Si vis audire tempus elapsum vel reliquum preme F10 semel vel bis.
+Si vis aliquid breviter revolvere progrediendo vel regrediendo, id potes sagittis ad sinistram vel ad dextram per quinque secundas vel per unam sententiam. Si vis maiores gradus navigationis, preme Shift, sagittis sursum et deorsum elige gradum desideratum et adhuc tenens Shift sagittis ad sinistram et ad dextram per librum electo gradu te move. Cum vis audire quomodo et quo progrediaris cum lectione libri, quovis momento preme F8 et lector veli totum contentum scrinii informativi leget. Si fusius vis legere campum informativum, datum post datum, bis celeriter preme F8. Cum finieris, exi e campo informativo premendo iterum bis F8 vel simpliciter Escape ut sagittae iterum proprietates navigationis habeant. Si vis audire tempus elapsum vel residuum, preme F10 semel vel bis.
 
-Idea post hunc accessum ad navigationem erat ut usor non debeat discere et memoria tenere totam seriem compendiorum. Maxima pars navigationis disposita est in sagittis et in compositione cum clavibus modificatoribus Shift et Ctrl effectum est ut non debeas ambulare manu per claviaturae. Dextram manum pone in sagittas, sinistra manu pro necessitate premes aliquem ex modificatoribus, et haec est tota philosophia navigationis. Illi peritiores et sollertiores verisimiliter poterunt uti etiam pollice dextrae manus ut premant Ctrl vel Shift a dextra parte claviaturae, sed modus usus cuique ad electionem relictus est. Omnia alia compendia, excepta Alt + Enter pro Proprietates quia id est usitata Windows conventio, posita sunt in clavibus functionis omnia ad finem simplicissimae administrationis.
+Idea post hunc accessum ad navigationem fuit ut usor non debeat discere et memoria tenere totum ordinem compendiorum. Maxima pars navigationis posita est in sagittas et in compositione cum clavibus modificatoribus Shift et Ctrl effectum est ut non debeas manu per claviaturae spatium errare. Dextram manum pone in sagittas, sinistra pro necessitate preme aliquem modificatorem, et haec est tota philosophia navigationis. Peritiores et sollertiores verisimiliter poterunt uti etiam pollice dextrae manus ut premant Ctrl vel Shift a dextra parte claviaturae, sed modus usus cuique ad arbitrium relictus est. Omnia alia compendia, excepta Alt + Enter pro Proprietates quia id est usitata Windows conventio, posita sunt in claves functionales omnia eo consilio ut administratio quam simplicissima sit.
 
-## Proprietates textus
+## Ad locum ire
 
-Similiter atque in parametris vocis, hic electionem linguae, vocis, celeritatis, sonoritatis et altitudinis soniin libro electo ponis. In Parametris principem ad omnes eligis, hic ad certum titulum ponis. Si cur rogas, exemplum simplicissimum est: vox tua princeps in Parametris virilis est, tu autem romanum ex prospectu feminae scriptum voce feminea legere malles — id in proprietatibus textus illius libri mutas. Ceteri omnes libri in illa lingua voce virili aperiri pergent donec, et si, id mutaveris. Item, lectionem facilem sine molestia 1,5x legere potes, sed gravius aliquid, de quo interim cogitandum est, fortasse ad 1x aut tardius potius reduces.
+Haec moderatio, sicut ipsum nomen indicat, inservit ut paucis pressionibus vel ictibus ad certam partem in libro salias. Apud formas non structas sicut textus simplex, pleraeque formae sonorum in uno fasciculo vel male formatae structae libri non potest activari, quod confirmatur etiam signo sonoro. Apud libros cum aliqua decenti structura poteris transilire ad capitula, subcapitula et alia segmenta structuralia libri. Utique, omnia pendent a modo quo effectores structuram in ipsum librum posuerunt. Praeter dictum, hoc dialogum habet etiam specialem gregem ad saltum ad paginam, si liber eam habet. Post apertionem primum est index partium modo dictarum, una pressione in Tab venies ad saltum ad paginam, si adsunt. In campo qui ostendetur iam inscriptus est numerus paginae in qua es in praesenti. Inscribe numerum paginae desideratum et preme Enter ad saltum.
 
 ## Signacula
 
-NBR tabulam braillicam exeuntem non habet nec habebit. Quod in linea tua braillica stat, lector tuus tabulae vertit, tabula ex suis ipsius parametris, et is solus locus rectus est illius electionis — duae tabulae super una linea dissentire tantum possent. Sola tabula braillica in NBR est ineuntis: ea, qua fasciculus .brf in importatione lectus est. Eam in grege Fons braillicus mutas, qui apud librum solum apparet, qui ex tali fasciculo venit. Is grex etiam in hac beta operatur.
+Duae claves quae veniunt in pari – Signaculum ad ponendum signaculum et Signacula ubi potes administrare posita signacula. Per positionem signaculi audies etiam breve signum sonorum ita ut certus sis quod positum est. In administratione signaculorum potes te movere sagittis per ea et pressione in Enter salire ad situm signaculi. Praeter hoc potes delere ea quibus non indiges. Pro libris sonoris ibi est ad tempus tantum ostensum tempus, et apud libros textuales etiam initium sententiae ubi posuisti signaculum. Si non habes posita signacula, clavis Signacula non potest activari quod tibi dicet etiam signum sonorum.
 
-## Parametra speciei
+## Horologium somni
 
-Hoc in prima beta inclusum non est. Probationes et mutationes quae restant plus temporis poscunt quam haec editio habet, itaque in una sequentium redibit.
+Classicum horologium somni, nihil sapientis. Eligis tempus, offertur 15, 30, 45 et 60 min ut optiones, sequens optio est ad libitum et praefinitum est 90 min, sed id potes mutare ad quamcumque valorem vis. Sequitur electio quid accidit post expletum numerum ubi offertur: Lectionem sistere, Sistere et claudere applicationem et Sistere et exstinguere computatrum.
 
-Pro electione tua in Parametris aut Proprietatibus, in monitorio minores margines super faciem lectoris videbis, in quibus litterae mutabuntur ut subtituli pelliculae aut seriei peregrinae. Si alteram ex duabus reliquis possibilitatibus eligis, margines maiores erunt, et litterae aut per monitorium labentur ut tituli finales autmargines alteri alteros substituent. In his duabus ostensionibus versus, qui pronuntiatur, alio colore ostenditur.
+Praeter hoc, ibi est etiam arca confirmationis quae te rogat utrum vis ponere signaculum iuxta initium numerationis. Potest esse utile ut redeas ad tempus dum nondum dormiebas et inde facilius invenias locum ubi desisti legere.
 
-In imismarginibus formam litterarum, magnitudinem et aliquot alia parametra ostendendi mutare potes, et sunt etiam claves primariae ad lectionem regendam. Omnes clavium compositiones etiam in his marginibus operantur. *Incipere* Et haec fere omnia sunt, quae ad documentum auxilii attinent. Explicationes accuratiores apud regulos ibi invenies, ubi opus sunt — parva clavis cum signo interrogationis, aut F1 in grege, qui lucem habet. Gratias tibi ago, quod patiens fuisti et ad finem textus pervenisti. Ut parvum eius signum, nunc de duobus muneribus occultis legere licet.
+Horologium incipit premendo puga *Incipere*, dialogus clauditur, et loco nominis Horologium in fenestra lusoris nunc numerus activus videtur. Si iterum optionem Horologium activaveris, horologium aboletur et in dialogu novum tempus seligere potes aut omnia in puga ad hoc destinata delere.
 
-Ad pertinacissimos
+Reproducendi cursum duo dialogi sistunt: Signacula et Horologium. Cum in his quod voluisti perfeceris et reditu ad fenestram lusoris confirmaveris, reproductio continuatur. Parametra, Bibliotheca, Ad locum ire et Proprietates librum pergere sinunt — apud Proprietates hoc consulto fit, quia illic res componis quas audire vis dum id agis.
 
-Primum alia via est unum pluresve titulos bibliothecae addendi. In vicem utendi dialogis Documentum aperire et Directorium aperire, quos supra descripsimus, id, quod vis, in directorium bibliothecae per Windows aut File Explorer transscribe. Proximo cursu Nemoviz Book Reader bibliothecam renovabit et titulos novos ostendet. Si NBR iam currit, in fenestra bibliothecae clavem Renovare preme.
+Pauca verba etiam de moderaminibus pro celeritate et sonoritate. Sonoritas in pugis F11 et F12 est — F12 auget, F11 minuit — per gradus 5%, et cum ad finem perveneris, signum sonorum audis. Celeritas per gradus 0,1x movetur, ab 0,5x ad 3x, et hoc aequaliter pro libris sonoris et textualibus. Differentia tantum in eo est quod 1x apud librum sonorum celeritatem recordationis significat, apud textualem autem celeritatem qua vox selecta per se loquitur. Signum sonorum audies cum celeritatem normalem transieris, vel apud textum eam quae pro illa voce praefinita est.
 
-Alterum munus occultum ad movendum pertinet. Praeter omnia supra descripta, per librum, quem legis, etiam compositionibus a Ctrl + 1 usque ad Ctrl + 9 moveri potes, quae te ad 10, 20 et ita porro usque ad 90 centesimas libri ponunt.
+Id quod tibi ut usori maximi momenti est, Nemoviz Book Reader omnia ad reproductionem librorum quos audis pertinentia memoria tenet. Memoria tenentur positio, sonoritas, celeritas pro libris sonoris necnon genus, celeritas, lingua et color soni TTS pro textualibus, memoria tenentur parametra Curatio soni pro libris sonoris sicut et parametra representationis braille et visualis pro textualibus. Aliis verbis, memoria tenetur omne id quod secundum optata et necessitates tuas pro quolibet libro separatim constituisti.
 
-# Si paululum ante aut retro salire vis, id sagittae sinistra et dextra quinis secundis aut una sententia faciunt. Si maiores gradus vis, Maiusc preme, sagittis sursum et deorsum gradum, quem vis, elige, et Maiusc adhuc tenens sagittis sinistra et dextra per librum illo gradu ante et retro i. Cum audire vis, quomodo et quo lectio tua procedat, quovis momento F8 preme et lector scriptorum totum campum notitiarum tibi praeleget. Si campum notitiarum accuratius percurrere vis, rem post rem, bis celeriter F8 preme. Cum perfeceris, campum notitiarum relinque iterum bis F8 premens, aut simpliciter Escape, ut sagittae munera sua movendi recipiant.
+# Proprietates
 
-Iam pluries dictum est: optiones et numeri pro singulis libris in proprietatibus illius libri statuuntur. Libri sonori suas proprietates habent, scripti suas, et libri proprii ut Daisy sonora + scripta utrasque, in duabus tabulis separatis fenestrae proprietatum. Proprietates ex fenestra lectoris clave Proprietates aut compositione Alt + Enter aperis, ex fenestra bibliothecae autem, cum in titulo libri stas, ex indice contextus aut item Alt + Enter.
+Iam pluries dictum est, parametra pro quolibet libro separatim in Proprietates libri determinantur. Libri sonori suas proprietates habent, textuales suas, et libri speciales ut Daisy audio + text utrasque habent, in duabus tabulis separatis in fenestra proprietatum. Proprietates ex fenestra lusoris puga Proprietates vel compendio Alt + Enter excitas, ex fenestra bibliothecae cum in titulo libri es ex tabula contextuali, vel etiam compendio Alt + Enter.
 
 ## Proprietates soni
 
-Cum aperueris Proprietates, primum animadvertes capsam selectionis Curatio soni. Non necesse est eam movere si sonus libri quem audis tibi acceptabilis est, sed si non est, Curatio soni movendo fortasse sonum ad gradum audibilem perducere poteris. Signando capsam selectionis incipit analysis vestigii soni libri et potest, secundum celeritatem machinae, durare inter triginta secundas et aliquot minuta. Per taleam progressionis omni momento vides qualis sit status et quantum restet. Cum analysis finita sit, Nemoviz Book Reader infra nominatos colatores in statum quendam optimum ponet, itaque si sonus tibi convenit, tantum confirma omnia per OK, si putas te eum adhuc emendare posse, ecce brevis descriptio quid fieri possit.
+Cum aperueris Proprietates soni, primum animadvertes capsam confirmandi Curatio soni. Non necesse est eam includere si sonus libri quem audis acceptabilis est, sed si tamen non est, includendo Curatio soni fortasse sonum ad gradum audibilem perducere poteris. Signando capsam confirmandi incipit analysis recordationis sonae libri et potest, secundum celeritatem machinae, durare inter triginta secundas et pauca minuta. Secundum lineam progressionis omni momento vides qualis sit status et quantum restet. Cum analysis finita est, NBR infra nominatos colatoria in statum quendam optimum ponet, ergo si sonus tibi placet, tantum omnia per OK confirma, si putas te eum adhuc emendare posse, ecce etiam brevis descriptio quid omnino fieri possit.
 
-Sequuntur novem colatores qui te adiuvabunt vel non ut aliquatenus emendes sonum librorum audio in veteribus et/vel malis recordationibus. Quaelibet moderatio seorsim moveri vel amoveri potest ita ut non necesse sit eis omnibus simul uti. Cum moveris Curatio soni, primum invenies clavem Removere, ea omnes colatores ad praefinitas proprietates reducit. Sequitur capsa selectionis Transire cuius movendo et amovendo statim audis differentiam inter originale et tua accommodata. Compendium pro transitu est Ctrl + B ita ut non necesse sit te semper redire a moderationibus ad transitum et retro.
+Sequuntur novem colatoria quae te adiuvabunt vel non ut aliquatenus sonum librorum audio in recordationibus vetustis et/vel malis emendes. Quodlibet moderamen separatim includi vel excludi potest ut non necesse sit omnibus simul uti. Cum includis Curatio soni, primum invenies pugam Abolere, ea omnia colatoria ad parametra praefinita revocat. Sequitur capsa confirmandi Transire cuius inclusione et exclusione statim differentiam inter fontem et tua compositiones audis. Compendium pro transitu est Ctrl + B ut non necesse sit te semper redire a moderaminibus ad transitum et retro.
 
-Prima est grex Crepitus et murmur cum duabus moderationibus: Crepitus removere emendat crepitum et stridorem in veteribus recordationibus — non eum deprimit sed invenit laesa exemplaria et ea restaurat ex iis quae circa ea sunt — et Murmur tollere, sic dicta Hi Pass, tollit strepitus in spectro humili recordationis, ab electricis instrumentis ad fortuitum pulsum in microphonum vel mensam. Sequitur Strepitum minuere, praevisum pro strepitu taeniae, malorum microphonorum et similium strepituum in paulo altiore spectro frequentiarum. Sibilos mitigare minuit crepitum vocum sicut C, S, Š et similium quae distortae sunt in recordatione propter nimis propinquam recordationem vel eminentes tonos altos. Grex Oratio et locus habet etiam duas moderationes: Vocem aequare conatur aequare quietiores et clariores partes recordationis, et Locum temperare deprimit illum unum humilem tonum in quo recordatio ex parva dura camera resonat, et hoc tantum dum nimis clarus est. Deinde est Color soni, aequatrum quinque zonarum; zonae signatae sunt suis frequentiis — 200, 800, 1.8k, 3.5k et 5k+ — et ultima est pluteus, quod significat se tollere vel deprimere omnia supra se, non tantum unam aream. In fine est grex Sonoritas et morae cum duabus moderationibus: Sonoritas automata (normalizatio) tollit totam recordationem ad maximum gradum sine distortionibus, et Strepitus in moris (gate) tollit reliquos strepitus in spatiis inter sententias.
+Prima est grex *Crepitus et murmur* cum duobus moderaminibus: *Crepitus removere* crepitum in recordationibus vetustis emendat — non eum sedat sed laesa exemplaria invenit et ea ex iis quae circum sunt restaurat — et *Murmur tollere*, sic dictum Hi Pass, strepitus in spectro humili recordationis tollit, ab instrumentis electricis ad casum in microphonium vel mensam. Sequitur *Strepitum minuere*, destinatum pro strepitu taeniae, microphoniis malis et similibus strepitibus in spectro frequentiarum paulo altiore. *Sibilos mitigare* crepitum vocum ut C, S, Š et similium minuit quae in recordatione distortae sunt propter nimis propinquam recordationem vel tonos altos extollitos. Grex *Oratio et locus* etiam duo moderamina habet: *Vocem aequare* partes recordationis quietiores et clariores aequare conatur, et *Locum temperare* illum unum tonum humilem sedat in quo recordatio ex parva conclavi dura resonat, et hoc tantum dum nimis clarus est. Deinde est *Color soni*, aequilibrator quinque zonarum; zonae suis frequentiis signatae sunt — 200, 800, 1.8k, 3.5k et 5k+ — et ultima est pluteus, quod significat se omnia supra se tollere vel demittere, non tantum unam aream. Ad finem est grex *Sonoritas et morae* cum duobus moderaminibus: *Sonoritas automata* (normalizatio) totam recordationem ad gradum maximum sine distortionibus tollit, et *Strepitus in moris* (gate) reliquos strepitus in spatiis inter sententias tollit.
 
-Quilibet colator habet quinque gradus actionis, minimum, leve, medium, forte et maximum. Etiam, oportet repetere, quilibet seorsim moveri vel amoveri potest.
+Quodlibet colatorium quinque gradus actionis habet, minimum, leve, medium, forte et maximum. Etiam, iterandum est, quodlibet separatim includi vel excludi potest.
 
-Curatio soni etiam memoriae mandatur pro quolibet libro separatim.
+Curatio soni etiam memoria tenetur pro quolibet libro separatim.
 
-Necessario oportet notare hanc curationem soni non facturam esse miracula et non obtinebis ex mala recordatione ex sexagesimis annis saeculi praeteriti crystallinam puram et claram orationem quasi recordata esset in Abbey Road studiis Londinii, sed te, speremus, perducet aliquomodo ad finem libri, ne insanias propter malam qualitatem.
+Necesse est notare hanc soni tractationem miracula non effecturam esse, neque ex malis recordationibus saeculi vicensimi elici posse sermonem crystallinum et clarum quasi in studiis Abbey Road Londinii editum, sed speramus te ad finem libri perducturum esse, quin ob malam qualitatem insanias.
 
 ## Proprietates textus
 
-Similiter atque in optionibus vocis, hic electionem linguae, vocis, celeritatis, sonoritatis et altitudinis soni pro libro electo habes. In Optionibus principem pro omnibus eligis, hic pro certo titulo ponis. Si cur rogas, exemplum simplicissimum est: vox tua princeps in Optionibus virilis est, tu autem romanum ex prospectu feminae scriptum voce feminea legere malles — id in proprietatibus textus pro illo uno libro mutas. Ceteri omnes libri in illa lingua voce virili aperiri pergent donec, et si, id mutaveris. Item, lectionem facilem sine molestia 1,5x legere potes, sed gravius aliquid, de quo interim cogitandum est, fortasse ad 1x aut tardius potius reduces.
+Similiter ut in Parametra vocis, hic electionem linguae, vocis, celeritatis, voluminis et altitudinis pro libro selecto habes. In Parametra praefinitum pro omnibus eligis, hic pro titulo concreto disponis. Si quaeris cur, exemplum simplicissimum est: si vox praefinita in Parametra virilis est, et tu romanum ex prospectu femineo scriptum voce feminea legere vis, hoc in Proprietates textus pro illo libro concreto mutas. Omnes alii libri in illa lingua pergent praefinite voce virili aperiri, donec et si id mutaveris. Etiam, lectionem facilem sine problemate legere potes ad 1,5x, sed aliquid difficilius de quo inter legendum cogitare debes, fortasse ad 1x vel tardius reducere mavis.
 
-Lexicon pronuntiationis hic non est; sequuntur optiones braillicae et visivae. Si ostensionem visivam accendis, electionem accipis quo modo textus in tabula tua appareat. Si tantum braillice aut visive legere vis, sine voce, hanc optionem in indice vocum elige. In hac beta exitus braillicus et visivus obscurati sunt et notam ferunt se non accensos esse.
+Hic dictionarium pronuntiationis non est, sequuntur Parametra pro Braille et Parametra visualia. Si visum visualem activas, electionem accipis quomodo textus in scrinio tuo ostendetur. Si tantum Braille vel visualiter sine voce legere vis, in indice vocum illam optionem elige. In hac {beta} exitus Braille et visualis sunt grisei et notam ferunt se non inclusos esse.
 
-NBR tabulam braillicam exeuntem non habet nec habebit. Quod in linea tua braillica stat, lector tuus tabulae vertit, tabula ex suis ipsius optionibus, et is solus locus rectus est illius electionis — duae tabulae super una linea dissentire tantum possent. Sola tabula braillica in NBR est *ineuntis*: ea qua fasciculus .brf in importatione lectus est. Eam in grege Fons braillicus mutas, qui apud librum solum apparet qui ex tali fasciculo venit. Is grex etiam in hac beta operatur.
+Nemoviz Book Reader tabulam Braille exitus non habet nec habebit. Id quod in linea Braille stat, lector scrinii vertit, tabula ex suis propriis Parametra, et hic est locus solus rectus pro illa electione — duae tabulae super unam lineam solum discrepare possent. Sola tabula Braille in Nemoviz Book Reader est *introitus*: ea qua .brf fasciculus in importando lectus est, et eam mutas in grege Origo Braille, qui apparet solum apud librum qui ex tali fasciculo venit. Hic grex etiam in hac {beta} operatur.
 
-## Parametra speciei {beta}
+## Parametra visus visualis {beta}
 
-Pro electione tua in Optionibus aut Proprietatibus, in quadro cadrum minus super faciem lectoris videbis, in quo litterae mutabuntur ut subtituli pelliculae aut seriei peregrinae. Si alteram ex duabus reliquis eligis, cadrum maius erit et litterae aut per quadrum labentur ut tituli finales aut cadrum post cadrum mutabuntur. In his duabus ostensionibus versus qui pronuntiatur alio colore ostenditur.
+Secundum electionem in Parametra vel Proprietates in scrinio videbis capsam minorem super superficiem lusoris in qua textus mutabitur sicut subtituli in pelliculis vel seriebus externis. Si unam ex aliis duabus optionibus eligis, capsa maior erit, et textus per scrinium labetur sicut tituli exitus vel mutabitur capsa per capsam. In his duobus visibus linea dicta in colore diverso ostenditur.
 
-In imo cadri formam litterarum, magnitudinem et aliquot alios numeros ostendendi mutare potes, et sunt etiam claves primariae ad lectionem regendam. Omnes clavium compositiones etiam in hoc cadro operantur.
+In fundo capsae fontem, magnitudinem et alios parametros visus mutare potes, et habes etiam claves fundamentales ad regendam reproductionem. Omnes brevia claviaturae etiam in hac capsa operantur.
 
-Si Braille uti elegisti, cadrum parvum primo descriptum apparebit, quia Braille sine ostensione litterarum quae ad lectorem scriptorum feruntur operari non potest. Si solum exitum in quadro eligis, electionem generis ostendendi habes. Utroque casu ostensio post lectionem incohatam apparebit. Si neutram harum optionum elegisti et audire tantum vis, sed curiosus es quomodo hoc appareat, ostensionem ex fenestra lectoris quovis tempore clave F9 accendere et exstinguere potes.
+Si usum Braille elegisti, apparebit capsa parva quae prima descripta est, quia Braille operari non potest sine visu textus qui in lectorem scrinii transmittitur. Si solum visum visualem eligis, electionem generis visus habes. In utroque casu visus apparebit post initium reproductionis. Si nullam ex his optionibus elegisti et solum audire vis, si curiosus es quomodo hoc spectat, semper ex fenestra lusoris visum includere et excludere potes clavi F9.
 
-Et haec fere omnia sunt quod ad documentum auxilii attinet. Explicationes accuratiores apud regulos ibi invenies ubi opus sunt — parva clavis cum signo interrogationis, aut F1 in grege qui lucem habet. Gratias tibi ago quod patiens fuisti et ad finem textus pervenisti. Ut parvum eius signum, nunc de duobus muneribus occultis legere licet.
+Et hoc fere est quod ad documentum auxilii attinet. Explanationes accuratiores invenies apud imperia ubi necesse est, clavis parva cum signo interrogationis vel F1 in grege focali. Gratias tibi ago quod patiens fuisti et ad finem textus pervenisti. Ut parvum signum observantiae propter hoc, nunc occasionem habes duas functiones occultas legere.
 
-# Ad pertinacissimos
+# Pro pertinacissimis
 
-Primum alia via est unum pluresve titulos bibliothecae addendi. Pro dialogis Plicam aperire et Directorium aperire supra descriptis, simpliciter id quod vis in directorium bibliothecae per Windows aut File Explorer transcribe. Proximo cursu Nemoviz Book Reader bibliothecam renovabit et titulos novos ostendet. Si iam currit, in fenestra bibliothecae clavem Renovare preme.
+Prima functio est additio alternativa unius vel plurium titulorum in bibliothecam. Loco per descripta Aperire fasciculum et Aperire indicem dialogos, simpliciter per Windows vel File Explorer effice exemplum contenti desiderati in indicem bibliothecae. In proximo initio Nemoviz Book Reader bibliothecam Renovare faciet et novos titulos ostendet. Si iam currit solum in fenestra bibliothecae, preme clavem Renovare.
 
-Alterum munus occultum ad movendum pertinet. Praeter omnia supra descripta, per librum quem legis etiam compositionibus a Ctrl + 1 usque ad Ctrl + 9 moveri potes, quae te ad 10, 20 et ita porro usque ad 90 centesimas libri ponunt.
+Secunda functio occulta est navigationalis. Praeter omnia supra descripta, per librum quem legis moveri potes etiam brevibus claviaturae a Ctrl + 1 ad Ctrl + 9 et hi te ponunt ad 10, 20 usque ad 90% libri.

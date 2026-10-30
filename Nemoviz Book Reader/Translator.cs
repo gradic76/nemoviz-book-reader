@@ -19,7 +19,7 @@ namespace Nemoviz_Book_Reader
         /// carry <c>safetySettings</c>, and switching the content filters off is a
         /// decision this feature depends on.</summary>
         Gemini,
-        /// <summary>Azure Translator v3 — not a model you talk to, but a
+        /// <summary>Google Cloud Translation v2 — not a model you talk to, but a
         /// translator. Text in, text out, no prompt and no model name.
         ///
         /// <para><b>That is its whole value and its whole limitation, and the two
@@ -29,8 +29,29 @@ namespace Nemoviz_Book_Reader
         /// be TOLD anything: the standing prompt, the reader's notes, the narrator's
         /// gender, the level of address between two characters — none of it
         /// reaches it. A passage rescued here has those decided by nothing at
-        /// all.</para></summary>
-        AzureTranslator
+        /// all.</para>
+        ///
+        /// <para><b>It replaced Azure Translator on 2026-10-30, and Gordan asked
+        /// the question that had to be measured first</b> — Gemini is Google's too,
+        /// so would Google's translator refuse what Gemini refuses? No, and the
+        /// refusal is a property of the PRODUCT rather than the firm: a generative
+        /// model carries a safety classifier because it can be made to produce
+        /// anything, and <c>finishReason</c> is a field of the generative API. This
+        /// one's reply has no field in which a content refusal could be expressed —
+        /// its errors are quota, auth, an unknown language, too large a payload.
+        /// Measured on the exact passage: piece 82 of Capture or Kill, 5912
+        /// characters, comes back from Gemini as <c>PROHIBITED_CONTENT</c> with a
+        /// bare translate instruction and no rules at all, and from here as HTTP
+        /// 200 in 314 ms with all forty of its paragraphs. Azure split the same
+        /// way — Azure OpenAI filtered and Azure Translator did not — which is why
+        /// the Translator and never the LLM was the last resort.</para>
+        ///
+        /// <para><b>It authenticates with the SERVICE ACCOUNT the cloud voices
+        /// already use</b>, whose token carries the <c>cloud-platform</c> scope.
+        /// So the last resort costs the reader no second account, no second key
+        /// and no dialog of its own — and <c>KeyId</c> naming a credential with
+        /// "tts" in it is that sharing, not a mistake.</para></summary>
+        GoogleTranslate
     }
 
     /// <summary>One translation service, as far as the transport is concerned.</summary>
@@ -166,13 +187,20 @@ namespace Nemoviz_Book_Reader
         public const string OpenAiLuna6 = "openai-luna-6";
         public const string OpenAiSol6 = "openai-sol-6";
         public const string OpenAiSol61 = "openai-sol-61";
-        public const string Azure = "azure";
+        /// <summary>The last resort. <b>Its credential is the cloud voices'
+        /// service account</b>, so this id names the engine and never a key of its
+        /// own — see the entry's <c>KeyId</c>.</summary>
+        public const string GoogleTranslate = "google-translate";
 
-        /// <summary>Azure keeps a second value beside its key: the region a
-        /// regional resource was made in. A single-service GLOBAL resource needs
-        /// none, which is why the setup guidance says to choose Global — it makes
-        /// Azure look like every other service, one field and done.</summary>
-        public const string AzureRegion = "azure-region";
+        // Azure, "azure", and its "azure-region" companion were the last resort
+        // until 2026-10-30. The subscription behind them was not disabled but
+        // REMOVED, and with it the Speech resource and both keys -- measured, and
+        // the account has no subscription in any tenant. Gordan's call was that
+        // all of Azure goes rather than be renewed: a card for ~0.5 M characters
+        // a month against Google's two to nine, and Croatian voices he had
+        // already judged unremarkable. The ids are not kept for compatibility,
+        // because a stored chain naming a service with no credential simply drops
+        // out of Configured() -- see Chain().
 
         /// <summary><b>Model names are settings in waiting, never constants to rely
         /// on.</b> Gemini 2.5 Flash-Lite retires 2026-10-16 and Moonshot's old
@@ -464,16 +492,21 @@ namespace Nemoviz_Book_Reader
             // refuses roughly a sixth of an ordinary published novel — not for
             // its content but, by every sign, because it recognises the book —
             // and no setting prevents that. DeepSeek covered those passages, but
-            // it has filters of its own. Azure is the only one of the three that
+            // it has filters of its own. This is the only one of the three that
             // cannot refuse anything, so it belongs at the end of the chain.
             new TranslationEngine
             {
-                Id = Azure,
-                NameKey = "Settings.Translate.Engine.Azure",
-                Kind = EngineKind.AzureTranslator,
-                Endpoint = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0",
+                Id = GoogleTranslate,
+                NameKey = "Settings.Translate.Engine.GoogleTranslate",
+                Kind = EngineKind.GoogleTranslate,
+                Endpoint = "https://translation.googleapis.com/language/translate/v2",
                 Model = "",      // there is no model to choose
                 Attempts = 1,
+                // The cloud voices' service account, shared deliberately: its
+                // token carries cloud-platform, which covers Translation too. So
+                // HasKey is true exactly when the reader has set the voices up,
+                // and the last resort needs no credential dialog at all.
+                KeyId = GoogleCloudVoices.CredentialId,
                 LastResort = true
             }
         };
@@ -506,7 +539,7 @@ namespace Nemoviz_Book_Reader
             // The preference order among the rest: cheapest capable first, the
             // dearer model of the same family after it, and the one that cannot
             // refuse at the very end.
-            string[] order = { Gemini, GeminiLite35, DeepSeek, Azure };
+            string[] order = { Gemini, GeminiLite35, DeepSeek, GoogleTranslate };
             var chain = new List<TranslationEngine>();
             if (primary != null && primary.HasKey) chain.Add(primary);
             foreach (string id in order)
@@ -604,7 +637,7 @@ namespace Nemoviz_Book_Reader
 
         /// <summary>A short call used to prove a key works. Kept tiny on purpose:
         /// it costs a fraction of a cent and answers in about a second.</summary>
-        public static TranslationResult TestKey(TranslationEngine engine, string key, string azureRegion = null)
+        public static TranslationResult TestKey(TranslationEngine engine, string key)
         {
             if (engine == null) return Fail("Settings.Translate.Test.NoEngine");
             if (string.IsNullOrWhiteSpace(key)) return Fail("Settings.Translate.Test.NoKey");
@@ -613,7 +646,7 @@ namespace Nemoviz_Book_Reader
             // authenticates but is barred from the model would otherwise pass.
             return Send(engine, key,
                         "Translate from English into Croatian. Output only the translation.",
-                        "Good evening.", 64, "en", "hr", azureRegion);
+                        "Good evening.", 64, "en", "hr");
         }
 
         /// <summary>Sends one system instruction and one piece of text, and returns
@@ -621,9 +654,16 @@ namespace Nemoviz_Book_Reader
         public static TranslationResult Send(TranslationEngine engine, string key,
                                              string system, string user, int maxTokens,
                                              string sourceLang = null, string targetLang = null,
-                                             string azureRegion = null, bool flex = false)
+                                             bool flex = false)
         {
             if (engine == null) return Fail("Settings.Translate.Test.NoEngine");
+            // THE LAST RESORT'S CREDENTIAL IS NOT A KEY, so it is minted rather
+            // than read. TranslationKeys holds the service account's JSON under
+            // this engine's KeyName, which is what makes HasKey right; what the
+            // request needs is a bearer token signed from it, and
+            // GoogleCloudVoices already owns that machinery for the voices.
+            if (engine.Kind == EngineKind.GoogleTranslate && string.IsNullOrEmpty(key))
+                key = GoogleCloudVoices.Token();
             // KeyName, not Id: two stops can share one account, so the dearer
             // DeepSeek model authenticates with the key stored for the cheap one.
             if (string.IsNullOrEmpty(key)) key = TranslationKeys.Get(engine.KeyName);
@@ -632,23 +672,21 @@ namespace Nemoviz_Book_Reader
             string url, body;
             var headers = new Dictionary<string, string>();
 
-            if (engine.Kind == EngineKind.AzureTranslator)
+            if (engine.Kind == EngineKind.GoogleTranslate)
             {
-                // The languages are in the URL because there is no prompt to put
-                // them in. The caller's system instruction is DROPPED here, and
-                // that is not an oversight — see EngineKind.AzureTranslator.
-                url = engine.Endpoint
-                      + (string.IsNullOrEmpty(sourceLang) ? "" : "&from=" + Uri.EscapeDataString(sourceLang))
-                      + "&to=" + Uri.EscapeDataString(targetLang ?? "");
-                headers["Ocp-Apim-Subscription-Key"] = key;
-                // The CALLER's region wins over the stored one. Without this the
-                // Check button would test a freshly pasted key against whatever
-                // region was saved before it — the same shape of fault as a dialog
-                // rebuilding its settings from controls and losing the one value
-                // that has no control.
-                string region = azureRegion ?? TranslationKeys.Get(TranslationEngines.AzureRegion);
-                if (!string.IsNullOrEmpty(region)) headers["Ocp-Apim-Subscription-Region"] = region;
-                body = "[{\"Text\":" + Json.Str(user) + "}]";
+                // The languages are fields of the body because there is no prompt
+                // to put them in. The caller's system instruction is DROPPED here,
+                // and that is not an oversight — see EngineKind.GoogleTranslate.
+                url = engine.Endpoint;
+                headers["Authorization"] = "Bearer " + key;
+                // format=text, never html: with html the service returns the
+                // punctuation as entities — &#39; for an apostrophe — and those
+                // would go into the book and be read out as "ampersand hash".
+                // Verified on a real 5912-character passage: no entity came back.
+                body = "{\"q\":" + Json.Str(user)
+                     + (string.IsNullOrEmpty(sourceLang) ? "" : ",\"source\":" + Json.Str(sourceLang))
+                     + ",\"target\":" + Json.Str(targetLang ?? "")
+                     + ",\"format\":\"text\"}";
             }
             else if (engine.Kind == EngineKind.Gemini)
             {
@@ -740,8 +778,8 @@ namespace Nemoviz_Book_Reader
             }
 
             string text;
-            if (engine.Kind == EngineKind.AzureTranslator)
-                text = Json.PathString(json, "0", "translations", "0", "text");
+            if (engine.Kind == EngineKind.GoogleTranslate)
+                text = Json.PathString(json, "data", "translations", "0", "translatedText");
             else if (engine.Kind == EngineKind.Gemini)
                 text = Json.PathString(json, "candidates", "0", "content", "parts", "0", "text");
             else

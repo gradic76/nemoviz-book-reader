@@ -103,10 +103,6 @@ namespace Nemoviz_Book_Reader
                 foreach (var v in GoogleCloudVoices.Voices())
                     voices.Add((GoogleCloudVoices.DisplayName(v.Name, v.Language),
                                 GoogleCloudVoices.Vendor, v.Language));
-            if (AzureVoices.Have)
-                foreach (var v in AzureVoices.Voices())
-                    voices.Add((AzureVoices.DisplayName(v.Display, v.Language),
-                                AzureVoices.Vendor, v.Language));
             if (voices.Count > 0) SelectVoice(voices[0].Name);
         }
 

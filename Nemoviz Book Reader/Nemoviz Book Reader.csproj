@@ -165,7 +165,6 @@
     <Compile Include="UiTheme.cs" />
     <Compile Include="DialogSkin.cs" />
     <Compile Include="HintSystem.cs" />
-    <Compile Include="AzureProvision.cs" />
     <Compile Include="Json.cs" />
     <Compile Include="BookMatter.cs" />
     <Compile Include="TextChunker.cs" />
@@ -221,8 +220,6 @@
     <Compile Include="SpeechExport.cs" />
     <Compile Include="SpeechExportForm.cs" />
     <Compile Include="SpeechPrefill.cs" />
-    <Compile Include="AzureSpeechSetupForm.cs" />
-    <Compile Include="AzureVoices.cs" />
     <Compile Include="CloudUsage.cs" />
     <Compile Include="CloudVoices.cs" />
     <Compile Include="GoogleCloudVoices.cs" />

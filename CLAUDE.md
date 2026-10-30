@@ -7817,6 +7817,70 @@ biti skinned, ima vremena do sluzbenog releasea."* Note what this does NOT
 touch: 8k's rule that whatever the skin does classic does is about two LOOKS of
 one dialog, and is untouched by a dialog having no skinned look at all.
 
+### AZURE IS OUT, IN FULL, AND GOOGLE TRANSLATE IS THE LAST RESORT (2026-10-30)
+
+Gordan got an expiry mail and asked what our portal-free tooling could still
+do. Driven through NBR's own `AzureProvision`, reads only, two device-code
+sign-ins:
+
+| | |
+|---|---|
+| sign-in through ARM | **works** — the tool is fine |
+| tenants on the account | **one** |
+| subscriptions | **zero** |
+| Speech resource `nemoviz-speech-2d0de9f7` | **gone**, the host does not resolve |
+| Speech key, Translator key | **both 401** |
+
+The subscription was not disabled but REMOVED, and Azure reclaimed the resource
+with it. **`AzureProvision` cannot fix that and that is not a defect**: ARM
+creates resources INSIDE a subscription, and the subscription itself comes from
+Microsoft's sign-up, which wants a card. So the one step the portal-free path
+cannot replace is the only step now needed.
+
+**His call: all of Azure goes.** *"Niti je njihov translator nešto predobro…
+niti su glasovi, barem regionalni, bili nešto previše upotrebljivi."* Deleted:
+`AzureProvision.cs`, `AzureSpeechSetupForm.cs`, `AzureVoices.cs`, the Services
+entry, the Settings line, the key dialog's region branch, the `azure` /
+`azure-region` ids, 42 language keys in each of 21 files, and the manual's two
+sentences in all 21.
+
+**THE LAST RESORT IS NOW GOOGLE CLOUD TRANSLATION v2**, and Gordan asked the
+question that had to be measured before it could go in: Gemini is Google's
+too, so would Google's translator refuse what Gemini refuses?
+
+**No — measured on the exact passage.** Piece 82 of *Capture or Kill*, 5912
+characters, cut out of the book by its own `translation.cache` offsets. Through
+Gemini with a BARE translate instruction, no rules and no glossary:
+`finishReason PROHIBITED_CONTENT`, no text. Through Cloud Translation: **HTTP
+200 in 314 ms, all forty paragraphs, 1.00x the source.** The refusal is a
+property of the PRODUCT, not the firm — a generative model carries a safety
+classifier because it can be made to produce anything, and the translator's
+reply has no field in which a content refusal could be expressed. **Azure split
+the same way**, which is why its Translator and never its LLM was the last
+resort.
+
+**It needs no credential of its own.** `KeyId = GoogleCloudVoices.CredentialId`:
+the cloud voices' service account mints a `cloud-platform` token, which covers
+Translation, so `HasKey` is true exactly when the voices are set up and there is
+no dialog and no Services entry. The one thing it needed was the Cloud
+Translation API switched on for the project, which Gordan did.
+
+**The notice in the book now NAMES the engine** (`Translate.LastResort.Begin/End`
+take `{0}`). It had read "translated by Microsoft Azure" in twenty-one
+languages while Azure was being deleted; a notice that can name a service the
+program no longer has will be wrong again at the next change, so the name comes
+from the chain.
+
+**Three encoding faults in one pass, all mine, all the same one** (see
+`feedback_no_powershell_for_source`): Croatian written inside a Perl script
+with no `use utf8`, Croatian passed as a shell ARGUMENT, and then the damaged
+em dash PROPAGATING into nine languages because `translate-keys.cs` faithfully
+translated the mangled English. **A string with a diacritic in it goes through a
+file, never through a script literal and never through argv.** All repaired and
+verified by diffing against a pre-change copy — which is also the lesson about
+the repair: a mojibake COUNT is useless (Finnish Ä and Nordic Å read as hits),
+the diff against the previous version is what tells you.
+
 ### ASKED AGAIN, FOUR WEEKS ON (2026-10-04)
 
 `tools/model-list.cs` against all three services with Gordan's own keys.

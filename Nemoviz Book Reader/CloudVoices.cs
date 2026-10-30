@@ -43,7 +43,7 @@ namespace Nemoviz_Book_Reader
         public static bool IsOne(string displayName)
         {
             if (string.IsNullOrEmpty(displayName)) return false;
-            return GoogleCloudVoices.IsOne(displayName) || AzureVoices.IsOne(displayName);
+            return GoogleCloudVoices.IsOne(displayName);
         }
 
         /// <summary>One passage from whichever service owns this voice, or null.
@@ -55,9 +55,6 @@ namespace Nemoviz_Book_Reader
             if (GoogleCloudVoices.Split(displayName, out a, out b))
                 return Counted(GoogleCloudVoices.Vendor, text,
                                GoogleCloudVoices.Synthesize(text, a, b, 1.0, 0.0));
-            if (AzureVoices.Split(displayName, out a, out b))
-                return Counted(AzureVoices.Vendor, text,
-                               AzureVoices.Synthesize(text, AzureVoices.ShortNameFor(displayName), a, 1.0, 0.0));
             return null;
         }
 
@@ -84,18 +81,22 @@ namespace Nemoviz_Book_Reader
         }
 
         /// <summary>The largest request a vendor will take, for the chunker that
-        /// splits an over-long passage. The smaller of the two is safe for
-        /// either, and they are the same number today.</summary>
+        /// splits an over-long passage.
+        ///
+        /// <para>There is one vendor again since Azure went (2026-10-30), so the
+        /// name is not read. <b>The parameter stays</b>: this layer exists to let
+        /// the look-ahead and the export ask without knowing whose voice it is,
+        /// and a second service would be a line here rather than a new call at
+        /// every site.</para></summary>
         public static int MaxRequestBytes(string displayName)
         {
-            return AzureVoices.IsOne(displayName)
-                ? AzureVoices.MaxRequestBytes : GoogleCloudVoices.MaxRequestBytes;
+            return GoogleCloudVoices.MaxRequestBytes;
         }
 
         /// <summary>Is any cloud voice service set up at all? Used to decide
         /// whether there is anything to offer, not whether to offer a
         /// particular voice.</summary>
-        public static bool Any { get { return GoogleCloudVoices.Have || AzureVoices.Have; } }
+        public static bool Any { get { return GoogleCloudVoices.Have; } }
 
         /// <summary>Roughly what one passage costs to make, in seconds — a round
         /// trip for a cloud voice against a local render.

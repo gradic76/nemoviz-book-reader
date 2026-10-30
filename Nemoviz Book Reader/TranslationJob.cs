@@ -168,7 +168,7 @@ namespace Nemoviz_Book_Reader
         /// Neither tripped the 1.60 gate.</para></summary>
         private static string BuildUserMessage(TextChunk c, TranslationEngine engine)
         {
-            if (engine != null && engine.Kind == EngineKind.AzureTranslator) return c.Text;
+            if (engine != null && engine.Kind == EngineKind.GoogleTranslate) return c.Text;
             if (string.IsNullOrEmpty(c.Lead)) return "TRANSLATE:\n" + c.Text;
             return "CONTEXT (the end of the previous passage, for continuity — do NOT translate or repeat it):\n"
                    + c.Lead + "\n\nTRANSLATE:\n" + c.Text;
@@ -795,7 +795,7 @@ namespace Nemoviz_Book_Reader
                     asks++;
                     TranslationResult r = Translator.Send(engine, null, system, user,
                                                           opt.MaxOutputTokens, opt.SourceLang, opt.TargetLang,
-                                                          null, opt.Flex);
+                                                          opt.Flex);
                     List<TranslationIssue> issues = r.Ok
                         ? TranslationChecks.Chunk(c, r.Text, opt.TargetLang)
                         : new List<TranslationIssue>();
@@ -1024,8 +1024,20 @@ namespace Nemoviz_Book_Reader
         /// silence tells them nothing at all.</para></summary>
         private static void NoticePair(Options opt, out string open, out string close)
         {
-            open = Localization.T("Translate.LastResort.Begin");
-            close = Localization.T("Translate.LastResort.End");
+            // THE NOTICE NAMES THE ENGINE RATHER THAN SPELLING IT OUT, since
+            // 2026-10-30. It read "translated by Microsoft Azure" in all
+            // twenty-one languages, and Azure had just been removed -- a notice
+            // that can name a service the program no longer has is a notice that
+            // will be wrong again the next time the last resort changes. The name
+            // comes from the chain, so it cannot drift from what actually
+            // translated the passage.
+            string who = "";
+            if (opt.Chain != null)
+                foreach (var e in opt.Chain)
+                    if (e != null && e.LastResort) { who = e.DisplayName; break; }
+
+            open = Localization.T("Translate.LastResort.Begin", who);
+            close = Localization.T("Translate.LastResort.End", who);
             if (string.IsNullOrEmpty(opt.TargetLang) ||
                 opt.TargetLang.StartsWith("en", StringComparison.OrdinalIgnoreCase)) return;
 

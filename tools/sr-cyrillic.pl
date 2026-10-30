@@ -159,6 +159,7 @@ my @protectLangOnly = (
 );
 @protect = grep { my $r = "$_"; !grep { "$_" eq $r } @protectLangOnly } @protect if $textMode;
 my @names = qw(Nemoviz Book Reader Claude Anthropic Google Cloud Azure Speech
+               Translate Chirp
                Microsoft Windows Gemini DeepSeek OpenAI GPT Terra Luna Sol Astra Pro
                Text-to-Speech Compact Disc Digital Audio Andika Atkinson
                Hyperlegible Next Lexend OpenDyslexic Luciole SIL Open Font

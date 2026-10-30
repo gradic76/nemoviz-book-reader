@@ -54,28 +54,18 @@ namespace Nemoviz_Book_Reader
                 tb.AccessibleName = Localization.T("Dialog.TranslateKey.Field");
                 tb.Text = TranslationKeys.Get(engine.Id) ?? "";
 
-                // ONE FIELD FOR EVERY SERVICE, AZURE INCLUDED (Gordan, 2026-08-15).
-                // Azure is the only one that can want a second value — the region —
-                // but a single-service GLOBAL resource sends no region header AT
-                // ALL, so "global" is not a value to type, it is the absence of
-                // one. An empty box and "global" are the same request, and a box
-                // whose right answer is always empty is a box that should not be
-                // there.
+                // ONE FIELD FOR EVERY SERVICE (Gordan, 2026-08-15), and since
+                // 2026-10-30 that is the only shape there is. Azure was the one
+                // service that could want a second value — the region — and the
+                // box for it had been dead for months anyway, because a GLOBAL
+                // resource sends no region header at all, so the right answer was
+                // always to leave it empty. Azure is out entirely now, so the
+                // dialog asks for a key and nothing else, in every case.
                 //
-                // The setup guidance therefore says to make the resource Global,
-                // and this dialog asks for a key and nothing else.
-                //
-                // WHAT IS NOT COVERED YET, and it is written down rather than
-                // hidden: somebody who already has a REGIONAL resource has no way
-                // to enter its region. The right answer is not to put the box back
-                // for everyone but to let the Check button say so — Azure's own
-                // 401 names the missing region header — and reveal it only then.
-                // That path is unwritten because it cannot be tested without an
-                // Azure account, and untested branches on an error nobody has seen
-                // are how a dialog acquires a dead end.
-                bool needsRegion = false;
-                TextBox tbRegion = null;
-                int drop = 0;
+                // `drop` is kept because every control below is placed against
+                // it, and it reads better than deleting the term from six
+                // SetBounds calls that would then all carry a bare constant.
+                const int drop = 0;
 
                 // A read-only, TABBABLE line: the whole point is that the answer to
                 // "did that work" can be reached and read. A Label would never be
@@ -112,7 +102,6 @@ namespace Nemoviz_Book_Reader
                 test.Click += (s, e) =>
                 {
                     string key = tb.Text.Trim();
-                    string regionNow = needsRegion ? tbRegion.Text.Trim() : null;
                     if (key.Length == 0)
                     {
                         status.Text = Localization.T("Settings.Translate.Test.NoKey");
@@ -129,7 +118,7 @@ namespace Nemoviz_Book_Reader
                     // and the reader cannot tell a slow answer from a dead one.
                     Thread t = new Thread(() =>
                     {
-                        TranslationResult r = Translator.TestKey(engine, key, regionNow);
+                        TranslationResult r = Translator.TestKey(engine, key);
                         try
                         {
                             dlg.BeginInvoke((MethodInvoker)delegate
@@ -180,15 +169,6 @@ namespace Nemoviz_Book_Reader
                 {
                     string key = tb.Text.Trim();
                     string existing = TranslationKeys.Get(engine.Id) ?? "";
-                    if (needsRegion)
-                    {
-                        string reg = tbRegion.Text.Trim();
-                        if (reg != (TranslationKeys.Get(TranslationEngines.AzureRegion) ?? ""))
-                        {
-                            TranslationKeys.Set(TranslationEngines.AzureRegion, reg.Length == 0 ? null : reg);
-                            changed = true;
-                        }
-                    }
                     if (key != existing)
                     {
                         // An empty field on OK means "no key for this service",

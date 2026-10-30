@@ -131,15 +131,11 @@ namespace Nemoviz_Book_Reader
                 ForgetAskKey = "Settings.Cloud.ForgetAsk",
                 Forget = () => GoogleCloudVoices.Forget(),
             });
-            services.Add(new Service
-            {
-                NameKey = "Services.Item.AzureVoices",
-                GuideKey = "AzureVoices",
-                IsSet = () => AzureVoices.Have,
-                SetUp = o => { using (var d = new AzureSpeechSetupForm()) d.ShowDialog(o); },
-                ForgetAskKey = "Settings.Azure.ForgetAsk",
-                Forget = () => AzureVoices.Forget(),
-            });
+            // THE LAST RESORT HAS NO ENTRY HERE, and that is the point of it:
+            // Google Translate authenticates with the service account above, so
+            // setting the cloud voices up sets the translator up too. An entry
+            // would ask the reader to configure a thing that is already
+            // configured, and a Forget button on it would take their voices away.
             AddEngine("Services.Item.DeepSeek", "DeepSeek", TranslationEngines.DeepSeek);
             AddEngine("Services.Item.Gemini", "Gemini", TranslationEngines.Gemini);
             // One account and one key for all three tiers -- Luna and Sol carry

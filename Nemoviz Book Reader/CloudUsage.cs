@@ -72,7 +72,6 @@ namespace Nemoviz_Book_Reader
         {
             long stored = Read(KeyFor(vendor) + "FreeChars", -1);
             if (stored >= 0) return stored;
-            if (IsAzure(vendor)) return 500000;
             if (IsGoogle(vendor)) return 1000000;
             return -1;                       // a service we have no figure for
         }
@@ -132,7 +131,6 @@ namespace Nemoviz_Book_Reader
         {
             if (string.IsNullOrEmpty(displayName)) return null;
             if (GoogleCloudVoices.IsOne(displayName)) return GoogleCloudVoices.Vendor;
-            if (AzureVoices.IsOne(displayName)) return AzureVoices.Vendor;
             return null;
         }
 
@@ -154,14 +152,13 @@ namespace Nemoviz_Book_Reader
             return string.Equals(v, GoogleCloudVoices.Vendor, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool IsAzure(string v)
-        {
-            return string.Equals(v, AzureVoices.Vendor, StringComparison.OrdinalIgnoreCase);
-        }
+        private static bool Known(string v) { return IsGoogle(v); }
 
-        private static bool Known(string v) { return IsGoogle(v) || IsAzure(v); }
-
-        private static string KeyFor(string vendor) { return IsAzure(vendor) ? "Azure" : "Google"; }
+        // One service again since Azure went, but the counter stays KEYED BY
+        // VENDOR in CloudUsage.ini -- the file is a measurement and a reader's
+        // existing [Azure] section must still read back as theirs rather than be
+        // silently added to Google's.
+        private static string KeyFor(string vendor) { return "Google"; }
 
         private static IniFile File()
         {

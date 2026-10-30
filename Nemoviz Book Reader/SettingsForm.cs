@@ -650,7 +650,7 @@ namespace Nemoviz_Book_Reader
         }
 
         private CheckBox chkCloudVoices;
-        private TextBox tbCloudState, tbAzureState, tbCloudWhy, tbCloudWhere;
+        private TextBox tbCloudState, tbCloudWhy, tbCloudWhere;
 
         /// <summary>Cloud voices: the switch, and one line per service saying
         /// whether it is set up.
@@ -695,7 +695,6 @@ namespace Nemoviz_Book_Reader
 
             tbCloudWhy = MakeLine(1);
             tbCloudState = MakeLine(2);
-            tbAzureState = MakeLine(3);
 
             // THE LINE THE WHOLE SPLIT RESTS ON. Without it this page says two
             // services are not set up and gives no way to set them up — which is
@@ -707,13 +706,11 @@ namespace Nemoviz_Book_Reader
             box.Controls.Add(chkCloudVoices);
             box.Controls.Add(tbCloudWhy);
             box.Controls.Add(tbCloudState);
-            box.Controls.Add(tbAzureState);
             box.Controls.Add(tbCloudWhere);
 
             cloudBox = box;
             box.Resize += (s, e) => LayoutCloudGroup();
 
-            ShowAzureState();
             ShowCloudState();          // which lays the group out once it has text
             return box;
         }
@@ -752,7 +749,7 @@ namespace Nemoviz_Book_Reader
 
             chkCloudVoices.SetBounds(14, 24, w, 22);
             int yy = 52;
-            foreach (TextBox t in new[] { tbCloudWhy, tbCloudState, tbAzureState, tbCloudWhere })
+            foreach (TextBox t in new[] { tbCloudWhy, tbCloudState, tbCloudWhere })
             {
                 if (t == null) continue;
                 bool has = !string.IsNullOrEmpty(t.Text);
@@ -778,22 +775,6 @@ namespace Nemoviz_Book_Reader
             // the tolerance stops a one-unit rounding difference from looping.
             int want = yy + 12;
             if (Math.Abs(cloudBox.Height - want) > 1) cloudBox.Height = want;
-        }
-
-        private void ShowAzureState()
-        {
-            if (tbAzureState == null) return;
-            string text;
-            if (!AzureVoices.Have) text = Localization.T("Settings.Azure.State.None");
-            else
-            {
-                var langs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                int n = 0;
-                foreach (var v in AzureVoices.Voices()) { n++; langs.Add(v.Language); }
-                text = Localization.T("Settings.Azure.State.Have", n, langs.Count);
-            }
-            tbAzureState.Text = text;
-            tbAzureState.AccessibleName = text;
         }
 
         /// <summary>Puts the group's moving parts in agreement with what is actually
