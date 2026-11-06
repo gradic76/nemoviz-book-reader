@@ -416,7 +416,7 @@ it.
 "nothing inside the app can tell its Down from the user's", which was a guess.
 Microsoft documents `KBDLLHOOKSTRUCT.flags` bit 4, `LLKHF_INJECTED`, as
 "Specifies whether the event was injected", so a low-level hook can in
-principle separate a synthesised keystroke from a typed one. `D:\Player\JAWS
+principle separate a synthesised keystroke from a typed one. `D:\Claude\Nemoviz Book Reader\JAWS
 test\InjectProbe.exe <seconds>` logs every arrow with that flag, the Ctrl and
 Shift state, and the foreground process; it swallows nothing.
 
@@ -542,7 +542,7 @@ And it reverses section 2 -- *"When a behavior must be tuned for one reader,
 JAWS wins"* -- which is a founding decision and must be reversed explicitly if
 at all.
 
-**Auto-detection was measured and then dropped.** `D:\Player\JAWS
+**Auto-detection was measured and then dropped.** `D:\Claude\Nemoviz Book Reader\JAWS
 test\ReaderProbe.exe` watched three signals across 23 state changes:
 
 | signal | behaviour | cost |
@@ -3327,7 +3327,7 @@ moment the `TargetFramework` attribute is added — and
 shipped `.exe.config` and the blank survived.** A finding that is genuine,
 measurable and irrelevant is the most expensive kind there is.
 
-**The instruments are kept in `D:\Player\JAWS test\`**: `MsaaSpy.exe`
+**The instruments are kept in `D:\Claude\Nemoviz Book Reader\JAWS test\`**: `MsaaSpy.exe`
 (`<pid|exe>`, plus `--send "{TAB}|{DOWN}"`, `--for <seconds>`, `--drive N`),
 `UiaSpy.exe`, `Snimi.cmd` for a 120-second recording while a human drives, and
 the ComboTest programs. `MsaaSpy --send` doubles as a way to walk a window nobody
@@ -5255,7 +5255,7 @@ them; this is not a fine judgement. The page count is already in hand —
 
 ### THE PDF TEXT PATH NOW STRIPS FURNITURE AND HAS PARAGRAPHS (2026-08-28)
 
-Ten books off a sharing forum (`D:\Player\Blind test\pdf uzorci`) — the first
+Ten books off a sharing forum (`D:\Claude\Nemoviz Book Reader\Blind test\pdf uzorci`) — the first
 samples of that kind we have had, and Gordan's note was that the forum "svašta
 trpa u njih". Measured through the shipped classes, and two different faults came
 out, neither of them what the eye would guess.
@@ -6475,7 +6475,7 @@ byte-identical.
 - and the player starts on it.
 
 Rollback is one file and it is in git (`efba58f`), with a copy outside git in
-`D:\Player\_backup libmpv pre-arnndn 2026-09-10`.
+`D:\Claude\Nemoviz Book Reader\_backup libmpv pre-arnndn 2026-09-10`.
 
 ---
 
@@ -7241,7 +7241,7 @@ is outside the container and reads the real file.
 
 **Measured: the same path, two files.** 336 bytes for a probe, 1345 for the
 running player; the player's carried `Path=` and `AskedLocation=1`, and a `find`
-over all of `C:\Users\gorda` and `D:\Player` could not locate ANY file
+over all of `C:\Users\gorda` and `D:\Claude\Nemoviz Book Reader` could not locate ANY file
 containing `AskedLocation`, because every path it looked through resolved to the
 shadow.
 
@@ -7254,7 +7254,7 @@ table above. **The way to the truth is a UNC path**, which is not redirected:
 **NOT shadowed, verified rather than assumed:** the library. A `Book.ini` under
 `C:\Users\gorda\NBR Library` reads byte for byte identical direct and over UNC,
 so `[DaisyNav]`, `sync.map` and everything inside a book folder is real. Program
-Files and `D:\Player` are fine too.
+Files and `D:\Claude\Nemoviz Book Reader` are fine too.
 
 **It bites exactly where this project works**: I check by machine, he tests by
 hand, and those are the two views.
@@ -8358,7 +8358,7 @@ to. NBR's own shorter figure is the WPM estimate, not a measurement. See §8g′
     **Not verified: how it reads on a display** — that is the deep test below.
 - **JAWS AND BRAILLE: THE READING WINDOW BEING MODAL IS THE FAULT** (found by
   elimination on Gordan's FS Focus, 2026-08-10). Six throwaway programs, kept at
-  `D:\Player\Braille A-B test\` — extend them, do not rebuild them:
+  `D:\Claude\Nemoviz Book Reader\Braille A-B test\` — extend them, do not rebuild them:
 
   | | what it changed | result |
   |---|---|---|

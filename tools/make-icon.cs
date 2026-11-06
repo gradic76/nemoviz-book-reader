@@ -25,7 +25,7 @@
 //   48 and up   all three
 using System; using System.Drawing; using System.Drawing.Drawing2D; using System.Drawing.Imaging; using System.IO;
 class L {
-  const string Src=@"D:\Player\nemoviz\oko zabrana prozirna kvadratna.jpg";
+  const string Src=@"D:\Claude\Nemoviz Book Reader\nemoviz\oko zabrana prozirna kvadratna.jpg";
   static readonly Rectangle Art=new Rectangle(183,184,216,217);
   static readonly Color Red=Color.FromArgb(196,21,28);
   static readonly Color Ink=Color.FromArgb(255,26,26,28);
